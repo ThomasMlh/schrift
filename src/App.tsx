@@ -25,15 +25,6 @@ export function useGuildes() {
   return { guildes, loading, error };
 }
 
-function GuildesList() {
-  const { guildes, loading, error } = useGuildes();
-  if (loading) return <Flex minH="100%" w="100%" align="center" justify="center">Chargement...</Flex>;
-  if (error) return <Flex minH="100%" w="100%" align="center" justify="center">Erreur : {error.message}</Flex>;
-  if (!Array.isArray(guildes)) return <Flex minH="100%" w="100%" align="center" justify="center">Aucunes guildes</Flex>;
-  return <GuildTabsList guilds={guildes} membersByGuild={{}} />
- 
-}
-
 function App() {
   const [guilds, setGuilds] = useState<Guild[]>([]);
   const [membersByGuild, setMembersByGuild] = useState<Record<string, Member[]>>({});

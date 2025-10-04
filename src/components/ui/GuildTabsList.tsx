@@ -1,8 +1,7 @@
 import {
   Tabs, TabList, TabPanels, TabPanel, Tab,
   Box, VStack, Text, HStack, Select, IconButton,
-  useToast, useColorModeValue,
-  TabIndicator
+  useColorModeValue,
 } from "@chakra-ui/react";
 
 type Role = "chef" | "sous-chef" | "membre";
@@ -36,7 +35,6 @@ export function GuildTabsList({
   onMoveMember,
   allGuildsForMove
 }: GuildTabsListProps) {
-  const toast = useToast();
   const boxShadow = useColorModeValue('md', 'md');
   const bgColor = useColorModeValue('white', 'gray.800');
   return (
