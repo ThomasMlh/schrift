@@ -3,6 +3,7 @@ import {  useColorMode, Button, Box, Flex, IconButton, Drawer, DrawerOverlay, Dr
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import App from "./App";
 import AdminPage from "./pages/AdminPage";
+import DiscordCallback from "./pages/DiscordCallback";
 
 
 function ColorModeSwitcher() {
@@ -80,6 +81,7 @@ export default function MainRouter() {
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/discord-callback" element={<DiscordCallback />} />
         </Routes>
       </Box>
     </Router>

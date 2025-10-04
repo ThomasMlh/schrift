@@ -1,58 +1,45 @@
-import {
-  Box,
-  Button,
-  Container,
-  Heading,
-  Input,
-  Text,
-  IconButton,
-  FormControl,
-  FormLabel,
-  Select,
-  Stack,
-  VStack,
-  HStack,
-  Tabs,
-  TabList,
-  TabPanels,
-  TabPanel,
-  Tab,
-  useToast,
-  useColorModeValue,
-  Flex,
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogContent,
-  AlertDialogOverlay
-} from "@chakra-ui/react";
-import { useState, useRef } from "react";
-
-type Role = "chef" | "sous-chef" | "membre";
-type Member = {
-  id: string;
-  name: string;
-  role: Role;
-};
-
-type Guild = {
-  id: string;
-  name: string;
-  members: Member[];
-};
-
-const initialGuilds: Guild[] = [
-  { id: "A", name: "A", members: [] },
-  { id: "B", name: "B", members: [] },
-  { id: "C", name: "C", members: [] },
-  { id: "D", name: "D", members: [] },
-];
+import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Box, Button, Container, Flex, FormControl, FormLabel, Heading, Input, Select, Stack, Text, useColorModeValue, useToast, VStack } from "@chakra-ui/react";
+import { GuildTabsList, type Guild, type Member } from "../components/ui/GuildTabsList";
+import { useEffect, useRef, useState } from "react";
+import type { Role } from "@/interfaces";
 
 const ADMIN_PASSWORD = "schrift2025";
 
 export default function AdminPage() {
-  const [guilds, setGuilds] = useState<Guild[]>(initialGuilds);
+  // Création guilde UI state
+  const [newGuildName, setNewGuildName] = useState("");
+  // Suppression guilde UI state
+  const [deleteGuildId, setDeleteGuildId] = useState("");
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  // Supprimer une guilde (avec vérification)
+  const handleDeleteGuild = (guildId: string) => {
+    const members = membersByGuild[guildId] || [];
+    if (members.length > 0) {
+      toast({ title: "Impossible de supprimer une guilde non vide.", status: "error" });
+      return;
+    }
+    fetch(`${apiUrl}/api/guildes/${guildId}`, {
+      method: "DELETE"
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Erreur lors de la suppression");
+        return res.json();
+      })
+      .then(() => {
+        // Recharge la liste des guildes
+        fetch(`${apiUrl}/api/guildes`)
+          .then(res => res.json())
+          .then(data => {
+            setGuilds(Array.isArray(data) ? data : []);
+            toast({ title: "Guilde supprimée", status: "success" });
+          });
+      })
+      .catch(() => {
+        toast({ title: "Erreur lors de la suppression", status: "error" });
+      });
+  };
+  // TOUS les hooks en haut, aucun return avant
+  const [guilds, setGuilds] = useState<Guild[]>([]);
   const [newMemberName, setNewMemberName] = useState("");
   const [newMemberRole, setNewMemberRole] = useState<Role>("membre");
   const [selectedGuildId, setSelectedGuildId] = useState("A");
@@ -63,12 +50,43 @@ export default function AdminPage() {
   const [isRenameConfirmOpen, setIsRenameConfirmOpen] = useState(false);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
+  // TOUS les useColorModeValue ici
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const boxShadow = useColorModeValue('md', 'md');
+  // Ajoute d'autres useColorModeValue si besoin
+  const [membersByGuild, setMembersByGuild] = useState<Record<string, Member[]>>({});
 
-  // Authentification admin
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
+
+  useEffect(() => {
+    fetch(`${apiUrl}/api/guildes`)
+      .then(res => res.json())
+      .then(data => Array.isArray(data) ? setGuilds(data) : setGuilds([]))
+      .catch(() => setGuilds([]));
+  }, []);
+
+  // Fetch des membres pour chaque guilde après chargement des guildes
+  useEffect(() => {
+    if (guilds.length > 0) {
+      guilds.forEach(guild => {
+        fetch(`${apiUrl}/api/guildes/${guild._id}/membres`)
+          .then(res => res.json())
+          .then(data => {
+            setMembersByGuild(prev => ({ ...prev, [guild._id]: Array.isArray(data) ? data : [] }));
+          })
+          .catch(() => {
+            setMembersByGuild(prev => ({ ...prev, [guild._id]: [] }));
+          });
+      });
+    }
+  }, [guilds]);
+
+  // --- returns conditionnels APRÈS les hooks ---
   if (!isAdmin) {
     return (
       <Flex mx="2rem" align="center" justify="center" alignSelf={"center"}>
-        <Box  p={8} borderWidth={1} borderRadius="lg" boxShadow="md" bg={useColorModeValue('white', 'gray.800')}
+        <Box p={8} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}
           minW="320px">
           <Heading mb={4} size="md" textAlign="center">Connexion Admin</Heading>
           <form onSubmit={e => {
@@ -97,38 +115,16 @@ export default function AdminPage() {
     );
   }
 
-  // Ajouter un membre à une guilde
-  const handleAddMember = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMemberName.trim()) return;
-    const guild = guilds.find(g => g.id === selectedGuildId);
-    if (!guild || guild.members.length >= 20) return;
-    const chefCount = guild.members.filter(m => m.role === "chef").length;
-    const sousChefCount = guild.members.filter(m => m.role === "sous-chef").length;
-    if (newMemberRole === "chef" && chefCount >= 1) {
-      toast({ title: "Il y a déjà un chef dans cette guilde.", status: "error" });
-      return;
-    }
-    if (newMemberRole === "sous-chef" && sousChefCount >= 2) {
-      toast({ title: "Il y a déjà 2 sous-chefs dans cette guilde.", status: "error" });
-      return;
-    }
-    setGuilds((guilds: Guild[]) =>
-      guilds.map((g: Guild) =>
-        g.id === selectedGuildId
-          ? {
-            ...g,
-            members: [
-              ...g.members,
-              { id: Date.now().toString(), name: newMemberName.trim(), role: newMemberRole },
-            ],
-          }
-          : g
-      )
+  if (!Array.isArray(guilds)) {
+    return (
+  <Flex w="100%" h="100%" align="center" justify="center">
+        <Box p={8} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
+          <Heading mb={4} size="md" textAlign="center">Erreur de chargement des guildes</Heading>
+          <Text color="red.500">Impossible de charger les guildes depuis le serveur.</Text>
+        </Box>
+      </Flex>
     );
-    setNewMemberName("");
-    setNewMemberRole("membre");
-  };
+  }
 
   // Renommer une guilde
   const handleRenameGuild = (e: React.FormEvent) => {
@@ -137,28 +133,38 @@ export default function AdminPage() {
     setIsRenameConfirmOpen(true);
   };
   const confirmRenameGuild = () => {
-    setGuilds((guilds: Guild[]) =>
-      guilds.map((guild: Guild) =>
-        guild.id === renameGuildId
-          ? { ...guild, name: renameGuildName.trim() }
-          : guild
-      )
-    );
-    setRenameGuildId("");
-    setRenameGuildName("");
-    setIsRenameConfirmOpen(false);
-    toast({ title: "Guilde renommée", status: "success", duration: 1500 });
+  fetch(`${apiUrl}/api/guildes/${renameGuildId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: renameGuildName.trim() })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Erreur lors du renommage");
+        return res.json();
+      })
+      .then(() => {
+        // Recharge la liste des guildes
+  fetch(`${apiUrl}/api/guildes`)
+          .then(res => res.json())
+          .then(data => {
+            setGuilds(Array.isArray(data) ? data : []);
+            setRenameGuildId("");
+            setRenameGuildName("");
+            setIsRenameConfirmOpen(false);
+            toast({ title: "Guilde renommée", status: "success", duration: 1500 });
+          });
+      })
+      .catch(() => {
+        toast({ title: "Erreur lors du renommage", status: "error" });
+      });
   };
 
   // Supprimer un membre d'une guilde
   const handleRemoveMember = (guildId: string, memberId: string) => {
-    setGuilds((guilds: Guild[]) =>
-      guilds.map((guild: Guild) =>
-        guild.id === guildId
-          ? { ...guild, members: guild.members.filter((m: Member) => m.id !== memberId) }
-          : guild
-      )
-    );
+    setMembersByGuild(prev => ({
+      ...prev,
+      [guildId]: (prev[guildId] || []).filter((m: Member) => m._id !== memberId)
+    }));
     toast({ title: "Membre supprimé", status: "info", duration: 1500 });
   };
 
@@ -169,48 +175,132 @@ export default function AdminPage() {
     toGuildId: string
   ) => {
     if (fromGuildId === toGuildId) return;
-    setGuilds((guilds: Guild[]) =>
-      guilds.map((guild: Guild) => {
-        if (guild.id === fromGuildId) {
-          return {
-            ...guild,
-            members: guild.members.filter((m: Member) => m.id !== member.id),
-          };
-        }
-        if (guild.id === toGuildId && guild.members.length < 20) {
-          return { ...guild, members: [...guild.members, member] };
-        }
-        return guild;
-      })
-    );
+    setMembersByGuild(prev => {
+      const fromMembers = (prev[fromGuildId] || []).filter((m: Member) => m._id !== member._id);
+      const toMembers = prev[toGuildId] ? [...prev[toGuildId]] : [];
+      if (toMembers.length >= 20) return prev;
+      toMembers.push(member);
+      return {
+        ...prev,
+        [fromGuildId]: fromMembers,
+        [toGuildId]: toMembers
+      };
+    });
     toast({
-      title: `Membre déplacé vers ${guilds.find((g: Guild) => g.id === toGuildId)?.name || toGuildId
-        }`,
+      title: `Membre déplacé vers ${guilds.find((g: Guild) => g._id === toGuildId)?.name || toGuildId}`,
       status: "success",
       duration: 1500,
     });
   };
 
+  // Ajouter un membre à une guilde
+  const handleAddMember = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMemberName.trim()) return;
+    const members = membersByGuild[selectedGuildId] || [];
+    if (members.length >= 20) return;
+    const chefCount = members.filter(m => m.role === "chef").length;
+    const sousChefCount = members.filter(m => m.role === "sous-chef").length;
+    if (newMemberRole === "chef" && chefCount >= 1) {
+      toast({ title: "Il y a déjà un chef dans cette guilde.", status: "error" });
+      return;
+    }
+    if (newMemberRole === "sous-chef" && sousChefCount >= 2) {
+      toast({ title: "Il y a déjà 2 sous-chefs dans cette guilde.", status: "error" });
+      return;
+    }
+  fetch(`${apiUrl}/api/guildes/${selectedGuildId}/membres`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: newMemberName.trim(),
+        role: newMemberRole
+      })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Erreur lors de l'ajout");
+        return res.json();
+      })
+      .then(() => {
+        // Recharge les membres de la guilde
+  fetch(`${apiUrl}/api/guildes/${selectedGuildId}/membres`)
+          .then(res => res.json())
+          .then(data => {
+            setMembersByGuild(prev => ({ ...prev, [selectedGuildId]: Array.isArray(data) ? data : [] }));
+            setNewMemberName("");
+            setNewMemberRole("membre");
+            toast({ title: "Membre ajouté", status: "success" });
+          });
+      })
+      .catch(() => {
+        toast({ title: "Erreur lors de l'ajout du membre", status: "error" });
+      });
+  };
+
+  const sortedGuilds = [...guilds].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
   return (
-    <Flex w="100%" h="100%" align="center" justify="center">
-      <Container
-        w="100%"
-         h="100%"
-        maxWidth={"100%"}
-        px={0}
-        py={8}
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="flex-start"
-        bg={useColorModeValue('white', 'gray.800')}
-        boxShadow="none"
-        m="0"
-      >
-        <Heading mb={8} textAlign="center">Admin - Gestion des Guildes Schrift</Heading>
+      <Flex w="100%" h="100%" align="center" justify="center">
+        <Container
+          w="100%"
+          h="100%"
+          maxWidth={"100%"}
+          px={0}
+          py={8}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="flex-start"
+          bg={bgColor}
+          boxShadow="none"
+          m="0"
+        >
+          <Heading mb={8} textAlign="center">Admin - Gestion des Guildes Ṣčhrīft</Heading>
         <Stack direction={{ base: "column", md: "row" }} spacing={8} mb={8}>
-          <Box as="form" onSubmit={handleAddMember} p={4} borderWidth={1} borderRadius="lg" boxShadow="md" bg={useColorModeValue('white', 'gray.800')}>
-            <VStack spacing={4} align="stretch">
+        {/* Bloc création guilde */}
+        <Box as="form" onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
+          e.preventDefault();
+          if (!newGuildName.trim()) {
+            toast({ title: "Le nom de la guilde est requis.", status: "error" });
+            return;
+          }
+          fetch(`${apiUrl}/api/guildes`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: newGuildName.trim() })
+          })
+            .then(res => {
+              if (!res.ok) throw new Error("Erreur lors de la création");
+              return res.json();
+            })
+            .then(() => {
+              fetch(`${apiUrl}/api/guildes`)
+                .then(res => res.json())
+                .then(data => {
+                  setGuilds(Array.isArray(data) ? data : []);
+                  setNewGuildName("");
+                  toast({ title: "Guilde créée", status: "success" });
+                });
+            })
+            .catch(() => {
+              toast({ title: "Erreur lors de la création de la guilde", status: "error" });
+            });
+        }} p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
+          <VStack spacing={4} align="stretch">
+            <FormControl>
+              <FormLabel>Créer une guilde</FormLabel>
+              <Input
+                placeholder="Nom de la nouvelle guilde"
+                value={newGuildName}
+                onChange={e => setNewGuildName(e.target.value)}
+              />
+            </FormControl>
+            <Button colorScheme="green" type="submit">
+              Créer
+            </Button>
+          </VStack>
+        </Box>
+            <Box as="form" onSubmit={handleAddMember} p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
+              <VStack spacing={4} align="stretch">
               <FormControl>
                 <FormLabel>Ajouter un membre</FormLabel>
                 <Input
@@ -229,8 +319,8 @@ export default function AdminPage() {
               </FormControl>
               <FormControl>
                 <Select value={selectedGuildId} onChange={e => setSelectedGuildId((e.target as HTMLSelectElement).value)}>
-                  {guilds.map((g: Guild) => (
-                    <option key={g.id} value={g.id}>{g.name}</option>
+                  {sortedGuilds.map((g: Guild) => (
+                    <option key={g._id} value={g._id}>{g.name}</option>
                   ))}
                 </Select>
               </FormControl>
@@ -239,14 +329,31 @@ export default function AdminPage() {
               </Button>
             </VStack>
           </Box>
-          <Box as="form" onSubmit={handleRenameGuild} p={4} borderWidth={1} borderRadius="lg" boxShadow="md" bg={useColorModeValue('white', 'gray.800')}>
+          {/* Bloc suppression guilde */}
+          <Box as="form" onSubmit={(e: React.FormEvent<HTMLFormElement>) => { e.preventDefault(); if (deleteGuildId) setIsDeleteConfirmOpen(true); }} p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
+            <VStack spacing={4} align="stretch">
+              <FormControl>
+                <FormLabel>Supprimer une guilde</FormLabel>
+                <Select value={deleteGuildId} onChange={e => setDeleteGuildId((e.target as HTMLSelectElement).value)}>
+                  <option value="">Sélectionner une guilde</option>
+                  {sortedGuilds.map((g: Guild) => (
+                    <option key={g._id} value={g._id}>{g.name}</option>
+                  ))}
+                </Select>
+              </FormControl>
+              <Button colorScheme="red" type="submit" isDisabled={!deleteGuildId}>
+                Supprimer
+              </Button>
+            </VStack>
+          </Box>
+          <Box as="form" onSubmit={handleRenameGuild} p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
             <VStack spacing={4} align="stretch">
               <FormControl>
                 <FormLabel>Renommer une guilde</FormLabel>
                 <Select value={renameGuildId} onChange={e => setRenameGuildId((e.target as HTMLSelectElement).value)}>
                   <option value="">Sélectionner une guilde</option>
-                  {guilds.map((g: Guild) => (
-                    <option key={g.id} value={g.id}>{g.name}</option>
+                  {sortedGuilds.map((g: Guild) => (
+                    <option key={g._id} value={g._id}>{g.name}</option>
                   ))}
                 </Select>
               </FormControl>
@@ -263,126 +370,62 @@ export default function AdminPage() {
             </VStack>
           </Box>
         </Stack>
-        <Tabs variant="enclosed" colorScheme="blue" isFitted w="80%">
-          <TabList>
-            {guilds.map((guild: Guild) => (
-              <Tab key={guild.id}>Ṣčhrīft {guild.name}</Tab>
-            ))}
-          </TabList>
-          <TabPanels>
-            {guilds.map((guild: Guild) => (
-              <TabPanel key={guild.id} px={0}>
-                <Box
-                  borderWidth={1}
-                  borderRadius="lg"
-                  boxShadow="md"
-                  p={4}
-                  minW="260px"
-                  bg={useColorModeValue('white', 'gray.800')}
-                >
-                  <VStack align="stretch" spacing={2}>
-                    {guild.members.length === 0 ? (
-                      <Text color="gray.400" fontSize="sm">
-                        Aucun membre
-                        <Text as="span" fontSize="xs" color="gray.500" ml={2}>
-                          ({guild.members.length}/20)
-                        </Text>
-                      </Text>
-                    ) : (
-                      <>
-                        <Text as="span" fontSize="sm" color="gray.500" mb={2}>
-                          {guild.members.length} membre{guild.members.length > 1 ? 's' : ''} / 20
-                        </Text>
-                        {[...guild.members]
-                          .sort((a, b) => {
-                            const roleOrder: Record<Role, number> = { chef: 0, "sous-chef": 1, membre: 2 };
-                            if (roleOrder[a.role] !== roleOrder[b.role]) {
-                              return roleOrder[a.role] - roleOrder[b.role];
-                            }
-                            return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' });
-                          })
-                          .map((member: Member) => (
-                            <HStack key={member.id} spacing={2}>
-                              <Text flex={1}>
-                                {member.name}
-                                <Text as="span" fontSize="xs" color="gray.500" ml={2}>
-                                  [
-                                  {member.role === "chef"
-                                    ? "Chef"
-                                    : member.role === "sous-chef"
-                                      ? "Sous-Chef"
-                                      : "Membre"}
-                                  ]
-                                </Text>
-                              </Text>
-                              <Select
-                                size="sm"
-                                value={member.role}
-                                width="auto"
-                                onChange={e => {
-                                  const newRole = (e.target as HTMLSelectElement).value as Role;
-                                  const g = guilds.find(g => g.id === guild.id);
-                                  if (!g) return;
-                                  const chefCount = g.members.filter(m => m.role === "chef").length;
-                                  const sousChefCount = g.members.filter(m => m.role === "sous-chef").length;
-                                  if (newRole === "chef" && chefCount >= 1 && member.role !== "chef") {
-                                    toast({ title: "Il y a déjà un chef dans cette guilde.", status: "error" });
-                                    return;
-                                  }
-                                  if (newRole === "sous-chef" && sousChefCount >= 2 && member.role !== "sous-chef") {
-                                    toast({ title: "Il y a déjà 2 sous-chefs dans cette guilde.", status: "error" });
-                                    return;
-                                  }
-                                  setGuilds((guilds: Guild[]) =>
-                                    guilds.map((g: Guild) =>
-                                      g.id === guild.id
-                                        ? {
-                                          ...g,
-                                          members: g.members.map(m =>
-                                            m.id === member.id ? { ...m, role: newRole } : m
-                                          ),
-                                        }
-                                        : g
-                                    )
-                                  );
-                                }}
-                              >
-                                <option value="membre">Membre</option>
-                                <option value="sous-chef">Sous-Chef</option>
-                                <option value="chef">Chef</option>
-                              </Select>
-                              <IconButton
-                                aria-label="Supprimer"
-                                icon={<span>🗑️</span>}
-                                size="sm"
-                                colorScheme="red"
-                                onClick={() => handleRemoveMember(guild.id, member.id)}
-                              />
-                              <Select
-                                size="sm"
-                                value={guild.id}
-                                onChange={e => handleMoveMember(guild.id, member, (e.target as HTMLSelectElement).value)}
-                                width="auto"
-                              >
-                                <option value={guild.id}>Rester</option>
-                                {guilds
-                                  .filter((g: Guild) => g.id !== guild.id && g.members.length < 20)
-                                  .map((g2: Guild) => (
-                                    <option key={g2.id} value={g2.id}>
-                                      {g2.name}
-                                    </option>
-                                  ))}
-                              </Select>
-                            </HStack>
-                          ))}
-                      </>
-                    )}
-                  </VStack>
-                </Box>
-              </TabPanel>
-            ))}
-          </TabPanels>
-        </Tabs>
+        {guilds && guilds.length === 0 && (<Text>Aucune guilde disponible.</Text>)}
+
+        {/* Popup confirmation suppression */}
+        <AlertDialog
+          isOpen={isDeleteConfirmOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={() => setIsDeleteConfirmOpen(false)}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader>Confirmer la suppression</AlertDialogHeader>
+              <AlertDialogBody>
+                Supprimer la guilde « {guilds.find(g => g._id === deleteGuildId)?.name} » ? Cette action est irréversible.
+              </AlertDialogBody>
+              <AlertDialogFooter>
+                <Button ref={cancelRef} onClick={() => setIsDeleteConfirmOpen(false)}>
+                  Annuler
+                </Button>
+                <Button colorScheme="red" ml={3} onClick={() => {
+                  setIsDeleteConfirmOpen(false);
+                  if (deleteGuildId) handleDeleteGuild(deleteGuildId);
+                  setDeleteGuildId("");
+                }}>
+                  Confirmer
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
+        {guilds && <GuildTabsList
+          guilds={sortedGuilds}
+          membersByGuild={membersByGuild}
+          editable={true}
+          onRoleChange={(guildId, member, newRole) => {
+            const members = membersByGuild[guildId] || [];
+            const chefCount = members.filter((m: Member) => m.role === "chef").length;
+            const sousChefCount = members.filter((m: Member) => m.role === "sous-chef").length;
+            if (newRole === "chef" && chefCount >= 1 && member.role !== "chef") {
+              toast({ title: "Il y a déjà un chef dans cette guilde.", status: "error" });
+              return;
+            }
+            if (newRole === "sous-chef" && sousChefCount >= 2 && member.role !== "sous-chef") {
+              toast({ title: "Il y a déjà 2 sous-chefs dans cette guilde.", status: "error" });
+              return;
+            }
+            setMembersByGuild(prev => ({
+              ...prev,
+              [guildId]: members.map((m: Member) =>
+                m._id === member._id ? { ...m, role: newRole } : m
+              )
+            }));
+          }}
+          onRemoveMember={handleRemoveMember}
+          onMoveMember={handleMoveMember}
+          allGuildsForMove={sortedGuilds}
+        />}
         <AlertDialog
           isOpen={isRenameConfirmOpen}
           leastDestructiveRef={cancelRef}
@@ -392,7 +435,7 @@ export default function AdminPage() {
             <AlertDialogContent>
               <AlertDialogHeader>Confirmer le renommage</AlertDialogHeader>
               <AlertDialogBody>
-                Renommer la guilde "{guilds.find(g => g.id === renameGuildId)?.name}" en "{renameGuildName}" ?
+                Renommer la guilde "{guilds.find(g => g._id === renameGuildId)?.name}" en "{renameGuildName}" ?
               </AlertDialogBody>
               <AlertDialogFooter>
                 <Button ref={cancelRef} onClick={() => setIsRenameConfirmOpen(false)}>

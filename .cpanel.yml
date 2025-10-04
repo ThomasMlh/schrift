@@ -1,0 +1,27 @@
+---
+deployment:
+  tasks:
+    # 1) Réglages de chemins — adapte USERNAME et, si besoin, le répertoire du repo
+    - export APP=/home/ketu3725/schrift
+    - export DEPLOYPATH=/home/ketu3725/public_html
+
+    # 2) S’assurer qu’on a Node/Corepack/pnpm dans le PATH (plusieurs versions possibles sur cPanel)
+    - export PATH=/opt/cpanel/ea-nodejs22/bin:/opt/cpanel/ea-nodejs20/bin:/usr/local/bin:$PATH
+
+    # 3) Aller dans l’app
+    - cd $APP
+
+    # 4) Activer Corepack et pnpm (utilisera la version du champ "packageManager" si présent)
+    - corepack enable
+    - corepack prepare pnpm@latest --activate || true
+
+    # 5) Install prod (respecte le lockfile)
+    - if [ -f "pnpm-lock.yaml" ]; then pnpm install --frozen-lockfile; else pnpm install; fi
+
+    # 6) Build Vite (sortie: dist/)
+    - pnpm run build
+
+    # 7) Déploiement : synchro propre de dist/ vers le dossier web
+    - /usr/bin/rsync -av --delete \
+        --exclude=".git" --exclude=".cpanel.yml" \
+        dist/ $DEPLOYPATH/
