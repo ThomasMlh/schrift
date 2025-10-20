@@ -1,24 +1,99 @@
 import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Box, Button, Container, Flex, FormControl, FormLabel, Heading, Input, Select, Stack, Text, useColorModeValue, useToast, VStack } from "@chakra-ui/react";
-import { GuildTabsList, type Guild, type Member } from "../components/ui/GuildTabsList";
+import { GuildTabsList, type Guild } from "../components/GuildTabsList";
 import { useEffect, useRef, useState } from "react";
 import type { Role } from "@/interfaces";
-
-const ADMIN_PASSWORD = "schrift2025";
+import { jwtDecode } from "jwt-decode";
 
 export default function AdminPage() {
-  // Création guilde UI state
+  // === TOUS LES HOOKS EN PREMIER ===
   const [newGuildName, setNewGuildName] = useState("");
-  // Suppression guilde UI state
   const [deleteGuildId, setDeleteGuildId] = useState("");
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  // Supprimer une guilde (avec vérification)
-  const handleDeleteGuild = (guildId: string) => {
-    const members = membersByGuild[guildId] || [];
-    if (members.length > 0) {
-      toast({ title: "Impossible de supprimer une guilde non vide.", status: "error" });
-      return;
+  const [guilds, setGuilds] = useState<Guild[]>([]);
+  const [newMemberName, setNewMemberName] = useState("");
+  const [newMemberRole, setNewMemberRole] = useState<Role>("membre");
+  const [selectedGuildId, setSelectedGuildId] = useState("A");
+  const [renameGuildId, setRenameGuildId] = useState("");
+  const [renameGuildName, setRenameGuildName] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isRenameConfirmOpen, setIsRenameConfirmOpen] = useState(false);
+  
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const toast = useToast();
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const boxShadow = useColorModeValue('md', 'md');
+  const deleteButtonBg = useColorModeValue('red.500', 'red.600');
+  const deleteButtonHoverBg = useColorModeValue('red.600', 'red.700');
+  
+  // === VARIABLES ET CONSTANTES ===
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
+  // === FONCTIONS UTILITAIRES ===
+  // Fonction utilitaire pour vérifier la validité du token
+  const isTokenValid = (token: string | null): boolean => {
+    if (!token) return false;
+
+    try {
+      const decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000; // Temps actuel en secondes
+
+      // Vérifier si le token a une date d'expiration et s'il n'est pas expiré
+      if (decoded.exp && decoded.exp < currentTime) {
+        return false; // Token expiré
+      }
+
+      return true; // Token valide
+    } catch (error) {
+      // Erreur de décodage, token invalide
+      return false;
     }
-    fetch(`${apiUrl}/api/guildes/${guildId}`, {
+  };
+
+  // Fonction pour faire des requêtes authentifiées avec gestion de l'expiration
+  const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
+    const token = localStorage.getItem('adminToken');
+
+    if (!isTokenValid(token)) {
+      // Token manquant, invalide ou expiré
+      localStorage.removeItem('adminToken');
+      setIsAdmin(false);
+      toast({
+        title: "Session expirée",
+        description: "Veuillez vous reconnecter",
+        status: "warning",
+        duration: 3000,
+      });
+      throw new Error('Token invalide ou expiré');
+    }
+
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    // Vérifier si le serveur retourne 401 (au cas où)
+    if (response.status === 401) {
+      localStorage.removeItem('adminToken');
+      setIsAdmin(false);
+      toast({
+        title: "Session expirée",
+        description: "Veuillez vous reconnecter",
+        status: "warning",
+        duration: 3000,
+      });
+      throw new Error('Token rejeté par le serveur');
+    }
+
+    return response;
+  };
+
+  const handleDeleteGuild = (guildId: string) => {
+    authenticatedFetch(`${apiUrl}/api/guildes/${guildId}`, {
       method: "DELETE"
     })
       .then(res => {
@@ -38,27 +113,8 @@ export default function AdminPage() {
         toast({ title: "Erreur lors de la suppression", status: "error" });
       });
   };
-  // TOUS les hooks en haut, aucun return avant
-  const [guilds, setGuilds] = useState<Guild[]>([]);
-  const [newMemberName, setNewMemberName] = useState("");
-  const [newMemberRole, setNewMemberRole] = useState<Role>("membre");
-  const [selectedGuildId, setSelectedGuildId] = useState("A");
-  const [renameGuildId, setRenameGuildId] = useState("");
-  const [renameGuildName, setRenameGuildName] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [passwordInput, setPasswordInput] = useState("");
-  const [isRenameConfirmOpen, setIsRenameConfirmOpen] = useState(false);
-  const cancelRef = useRef<HTMLButtonElement>(null);
-  const toast = useToast();
-  // TOUS les useColorModeValue ici
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const boxShadow = useColorModeValue('md', 'md');
-  // Ajoute d'autres useColorModeValue si besoin
-  const [membersByGuild, setMembersByGuild] = useState<Record<string, Member[]>>({});
 
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
-
-
+  // === USE EFFECTS ===
   useEffect(() => {
     fetch(`${apiUrl}/api/guildes`)
       .then(res => res.json())
@@ -66,37 +122,84 @@ export default function AdminPage() {
       .catch(() => setGuilds([]));
   }, []);
 
-  // Fetch des membres pour chaque guilde après chargement des guildes
+  // Vérifier et valider le token admin au chargement
   useEffect(() => {
-    if (guilds.length > 0) {
-      guilds.forEach(guild => {
-        fetch(`${apiUrl}/api/guildes/${guild._id}/membres`)
-          .then(res => res.json())
-          .then(data => {
-            setMembersByGuild(prev => ({ ...prev, [guild._id]: Array.isArray(data) ? data : [] }));
-          })
-          .catch(() => {
-            setMembersByGuild(prev => ({ ...prev, [guild._id]: [] }));
-          });
+    const token = localStorage.getItem('adminToken');
+
+    if (isTokenValid(token)) {
+      setIsAdmin(true);
+    } else if (token) {
+      // Token existe mais est invalide/expiré
+      localStorage.removeItem('adminToken');
+      toast({
+        title: "Session expirée",
+        description: "Veuillez vous reconnecter",
+        status: "warning",
+        duration: 3000,
       });
     }
-  }, [guilds]);
+  }, [toast]);
 
-  // --- returns conditionnels APRÈS les hooks ---
+
+
+  // Vérifier le token quand l'utilisateur revient sur la page
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isAdmin) {
+        // La page est redevenue visible, vérifier le token côté client
+        const token = localStorage.getItem('adminToken');
+        if (!isTokenValid(token)) {
+          localStorage.removeItem('adminToken');
+          setIsAdmin(false);
+          toast({
+            title: "Session expirée",
+            description: "Veuillez vous reconnecter",
+            status: "warning",
+            duration: 3000,
+          });
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isAdmin, toast]);
+
+  // === RENDER CONDITIONNEL ===
   if (!isAdmin) {
     return (
       <Flex mx="2rem" align="center" justify="center" alignSelf={"center"}>
         <Box p={8} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}
           minW="320px">
           <Heading mb={4} size="md" textAlign="center">Connexion Admin</Heading>
-          <form onSubmit={e => {
+          <form onSubmit={async e => {
             e.preventDefault();
-            if (passwordInput === ADMIN_PASSWORD) {
-              setIsAdmin(true);
-              setPasswordInput("");
-              toast({ title: "Mode admin activé", status: "success" });
-            } else {
-              toast({ title: "Mot de passe incorrect", status: "error" });
+            setIsAuthenticating(true);
+            try {
+              // 1. L'utilisateur saisit son mot de passe
+              const userPassword = passwordInput;
+
+              // 3. Envoi au serveur
+              const response = await fetch(`${apiUrl}/api/admin/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: userPassword })
+              });
+
+              if (response.ok) {
+                const { token } = await response.json();
+                // Stocker le token
+                localStorage.setItem('adminToken', token);
+                setIsAdmin(true);
+                setPasswordInput("");
+                toast({ title: "Mode admin activé", status: "success" });
+              } else {
+                toast({ title: "Mot de passe incorrect", status: "error" });
+              }
+            } catch (error) {
+              toast({ title: "Erreur de connexion", status: "error" });
+            } finally {
+              setIsAuthenticating(false);
             }
           }}>
             <FormControl>
@@ -108,7 +211,16 @@ export default function AdminPage() {
                 autoFocus
               />
             </FormControl>
-            <Button mt={4} colorScheme="blue" type="submit" w="full">Se connecter</Button>
+            <Button
+              mt={4}
+              colorScheme="blue"
+              type="submit"
+              w="full"
+              isLoading={isAuthenticating}
+              loadingText="Connexion..."
+            >
+              Se connecter
+            </Button>
           </form>
         </Box>
       </Flex>
@@ -117,7 +229,7 @@ export default function AdminPage() {
 
   if (!Array.isArray(guilds)) {
     return (
-  <Flex w="100%" h="100%" align="center" justify="center">
+      <Flex w="100%" h="100%" align="center" justify="center">
         <Box p={8} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
           <Heading mb={4} size="md" textAlign="center">Erreur de chargement des guildes</Heading>
           <Text color="red.500">Impossible de charger les guildes depuis le serveur.</Text>
@@ -133,7 +245,7 @@ export default function AdminPage() {
     setIsRenameConfirmOpen(true);
   };
   const confirmRenameGuild = () => {
-  fetch(`${apiUrl}/api/guildes/${renameGuildId}`, {
+    authenticatedFetch(`${apiUrl}/api/guildes/${renameGuildId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: renameGuildName.trim() })
@@ -144,7 +256,7 @@ export default function AdminPage() {
       })
       .then(() => {
         // Recharge la liste des guildes
-  fetch(`${apiUrl}/api/guildes`)
+        fetch(`${apiUrl}/api/guildes`)
           .then(res => res.json())
           .then(data => {
             setGuilds(Array.isArray(data) ? data : []);
@@ -159,57 +271,13 @@ export default function AdminPage() {
       });
   };
 
-  // Supprimer un membre d'une guilde
-  const handleRemoveMember = (guildId: string, memberId: string) => {
-    setMembersByGuild(prev => ({
-      ...prev,
-      [guildId]: (prev[guildId] || []).filter((m: Member) => m._id !== memberId)
-    }));
-    toast({ title: "Membre supprimé", status: "info", duration: 1500 });
-  };
 
-  // Déplacer un membre vers une autre guilde
-  const handleMoveMember = (
-    fromGuildId: string,
-    member: Member,
-    toGuildId: string
-  ) => {
-    if (fromGuildId === toGuildId) return;
-    setMembersByGuild(prev => {
-      const fromMembers = (prev[fromGuildId] || []).filter((m: Member) => m._id !== member._id);
-      const toMembers = prev[toGuildId] ? [...prev[toGuildId]] : [];
-      if (toMembers.length >= 20) return prev;
-      toMembers.push(member);
-      return {
-        ...prev,
-        [fromGuildId]: fromMembers,
-        [toGuildId]: toMembers
-      };
-    });
-    toast({
-      title: `Membre déplacé vers ${guilds.find((g: Guild) => g._id === toGuildId)?.name || toGuildId}`,
-      status: "success",
-      duration: 1500,
-    });
-  };
 
   // Ajouter un membre à une guilde
   const handleAddMember = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMemberName.trim()) return;
-    const members = membersByGuild[selectedGuildId] || [];
-    if (members.length >= 20) return;
-    const chefCount = members.filter(m => m.role === "chef").length;
-    const sousChefCount = members.filter(m => m.role === "sous-chef").length;
-    if (newMemberRole === "chef" && chefCount >= 1) {
-      toast({ title: "Il y a déjà un chef dans cette guilde.", status: "error" });
-      return;
-    }
-    if (newMemberRole === "sous-chef" && sousChefCount >= 2) {
-      toast({ title: "Il y a déjà 2 sous-chefs dans cette guilde.", status: "error" });
-      return;
-    }
-  fetch(`${apiUrl}/api/guildes/${selectedGuildId}/membres`, {
+    authenticatedFetch(`${apiUrl}/api/guildes/${selectedGuildId}/membres`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -222,15 +290,9 @@ export default function AdminPage() {
         return res.json();
       })
       .then(() => {
-        // Recharge les membres de la guilde
-  fetch(`${apiUrl}/api/guildes/${selectedGuildId}/membres`)
-          .then(res => res.json())
-          .then(data => {
-            setMembersByGuild(prev => ({ ...prev, [selectedGuildId]: Array.isArray(data) ? data : [] }));
-            setNewMemberName("");
-            setNewMemberRole("membre");
-            toast({ title: "Membre ajouté", status: "success" });
-          });
+        setNewMemberName("");
+        setNewMemberRole("membre");
+        toast({ title: "Membre ajouté", status: "success" });
       })
       .catch(() => {
         toast({ title: "Erreur lors de l'ajout du membre", status: "error" });
@@ -239,68 +301,83 @@ export default function AdminPage() {
 
   const sortedGuilds = [...guilds].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
   return (
-      <Flex w="100%" h="100%" align="center" justify="center">
-        <Container
-          w="100%"
-          h="100%"
-          maxWidth={"100%"}
-          px={0}
-          py={8}
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="flex-start"
-          bg={bgColor}
-          boxShadow="none"
-          m="0"
+    <Flex w="100%" h="100%" align="center" justify="center">
+      <Container
+        w="100%"
+        h="100%"
+        maxWidth={"100%"}
+        px={0}
+        py={8}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="flex-start"
+        bg={bgColor}
+        boxShadow="none"
+        m="0"
+      >
+        <Heading mb={8} textAlign="center">Admin - Gestion des Guildes Ṣčhrīft</Heading>
+
+        {/* Bouton de déconnexion */}
+        <Button
+          mb={4}
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            localStorage.removeItem('adminToken');
+            setIsAdmin(false);
+            toast({ title: "Déconnexion réussie", status: "info" });
+          }}
         >
-          <Heading mb={8} textAlign="center">Admin - Gestion des Guildes Ṣčhrīft</Heading>
+          Se déconnecter
+        </Button>
+
         <Stack direction={{ base: "column", md: "row" }} spacing={8} mb={8}>
-        {/* Bloc création guilde */}
-        <Box as="form" onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
-          e.preventDefault();
-          if (!newGuildName.trim()) {
-            toast({ title: "Le nom de la guilde est requis.", status: "error" });
-            return;
-          }
-          fetch(`${apiUrl}/api/guildes`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: newGuildName.trim() })
-          })
-            .then(res => {
-              if (!res.ok) throw new Error("Erreur lors de la création");
-              return res.json();
+          {/* Bloc création guilde */}
+          <Box as="form" onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
+            if (!newGuildName.trim()) {
+              toast({ title: "Le nom de la guilde est requis.", status: "error" });
+              return;
+            }
+            authenticatedFetch(`${apiUrl}/api/guildes`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: newGuildName.trim() })
             })
-            .then(() => {
-              fetch(`${apiUrl}/api/guildes`)
-                .then(res => res.json())
-                .then(data => {
-                  setGuilds(Array.isArray(data) ? data : []);
-                  setNewGuildName("");
-                  toast({ title: "Guilde créée", status: "success" });
-                });
-            })
-            .catch(() => {
-              toast({ title: "Erreur lors de la création de la guilde", status: "error" });
-            });
-        }} p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
-          <VStack spacing={4} align="stretch">
-            <FormControl>
-              <FormLabel>Créer une guilde</FormLabel>
-              <Input
-                placeholder="Nom de la nouvelle guilde"
-                value={newGuildName}
-                onChange={e => setNewGuildName(e.target.value)}
-              />
-            </FormControl>
-            <Button colorScheme="green" type="submit">
-              Créer
-            </Button>
-          </VStack>
-        </Box>
-            <Box as="form" onSubmit={handleAddMember} p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
-              <VStack spacing={4} align="stretch">
+              .then(res => {
+                if (!res.ok) throw new Error("Erreur lors de la création");
+                return res.json();
+              })
+              .then(() => {
+                fetch(`${apiUrl}/api/guildes`)
+                  .then(res => res.json())
+                  .then(data => {
+                    setGuilds(Array.isArray(data) ? data : []);
+                    setNewGuildName("");
+                    toast({ title: "Guilde créée", status: "success" });
+                  });
+              })
+              .catch(() => {
+                toast({ title: "Erreur lors de la création de la guilde", status: "error" });
+              });
+          }} p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
+            <VStack spacing={4} align="stretch">
+              <FormControl>
+                <FormLabel>Créer une guilde</FormLabel>
+                <Input
+                  placeholder="Nom de la nouvelle guilde"
+                  value={newGuildName}
+                  onChange={e => setNewGuildName(e.target.value)}
+                />
+              </FormControl>
+              <Button colorScheme="green" type="submit">
+                Créer
+              </Button>
+            </VStack>
+          </Box>
+          <Box as="form" onSubmit={handleAddMember} p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
+            <VStack spacing={4} align="stretch">
               <FormControl>
                 <FormLabel>Ajouter un membre</FormLabel>
                 <Input
@@ -341,7 +418,15 @@ export default function AdminPage() {
                   ))}
                 </Select>
               </FormControl>
-              <Button colorScheme="red" type="submit" isDisabled={!deleteGuildId}>
+              <Button
+                bg={deleteButtonBg}
+                color="white"
+                _hover={{
+                  bg: deleteButtonHoverBg
+                }}
+                type="submit"
+                isDisabled={!deleteGuildId}
+              >
                 Supprimer
               </Button>
             </VStack>
@@ -388,44 +473,28 @@ export default function AdminPage() {
                 <Button ref={cancelRef} onClick={() => setIsDeleteConfirmOpen(false)}>
                   Annuler
                 </Button>
-                <Button colorScheme="red" ml={3} onClick={() => {
-                  setIsDeleteConfirmOpen(false);
-                  if (deleteGuildId) handleDeleteGuild(deleteGuildId);
-                  setDeleteGuildId("");
-                }}>
+                <Button
+                  bg={deleteButtonBg}
+                  color="white"
+                  _hover={{
+                    bg: deleteButtonHoverBg
+                  }}
+                  ml={3}
+                  onClick={() => {
+                    setIsDeleteConfirmOpen(false);
+                    if (deleteGuildId) handleDeleteGuild(deleteGuildId);
+                    setDeleteGuildId("");
+                  }}
+                >
                   Confirmer
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialogOverlay>
         </AlertDialog>
-        {guilds && <GuildTabsList
-          guilds={sortedGuilds}
-          membersByGuild={membersByGuild}
+        <GuildTabsList
           editable={true}
-          onRoleChange={(guildId, member, newRole) => {
-            const members = membersByGuild[guildId] || [];
-            const chefCount = members.filter((m: Member) => m.role === "chef").length;
-            const sousChefCount = members.filter((m: Member) => m.role === "sous-chef").length;
-            if (newRole === "chef" && chefCount >= 1 && member.role !== "chef") {
-              toast({ title: "Il y a déjà un chef dans cette guilde.", status: "error" });
-              return;
-            }
-            if (newRole === "sous-chef" && sousChefCount >= 2 && member.role !== "sous-chef") {
-              toast({ title: "Il y a déjà 2 sous-chefs dans cette guilde.", status: "error" });
-              return;
-            }
-            setMembersByGuild(prev => ({
-              ...prev,
-              [guildId]: members.map((m: Member) =>
-                m._id === member._id ? { ...m, role: newRole } : m
-              )
-            }));
-          }}
-          onRemoveMember={handleRemoveMember}
-          onMoveMember={handleMoveMember}
-          allGuildsForMove={sortedGuilds}
-        />}
+        />
         <AlertDialog
           isOpen={isRenameConfirmOpen}
           leastDestructiveRef={cancelRef}

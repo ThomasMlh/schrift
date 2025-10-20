@@ -17,6 +17,9 @@ dependencies:
   '@emotion/styled':
     specifier: 11.10.6
     version: 11.10.6(@emotion/react@11.10.6)(@types/react@19.1.16)(react@19.1.1)
+  bcryptjs:
+    specifier: ^3.0.2
+    version: 3.0.2
   cors:
     specifier: ^2.8.5
     version: 2.8.5
@@ -29,6 +32,9 @@ dependencies:
   framer-motion:
     specifier: 7.6.16
     version: 7.6.16(react-dom@19.1.1)(react@19.1.1)
+  jwt-decode:
+    specifier: ^4.0.0
+    version: 4.0.0
   mongodb:
     specifier: ^6.20.0
     version: 6.20.0
@@ -58,6 +64,9 @@ devDependencies:
   '@eslint/js':
     specifier: ^9.36.0
     version: 9.36.0
+  '@types/bcryptjs':
+    specifier: ^3.0.0
+    version: 3.0.0
   '@types/react':
     specifier: ^19.1.16
     version: 19.1.16
@@ -1147,6 +1156,13 @@ packages:
       '@babel/types': 7.28.4
     dev: true
 
+  /@types/bcryptjs@3.0.0:
+    resolution: {integrity: sha512-WRZOuCuaz8UcZZE4R5HXTco2goQSI2XxjGY3hbM/xDvwmqFWd4ivooImsMx65OKM6CtNKbnZ5YL+YwAwK7c1dg==}
+    deprecated: This is a stub types definition. bcryptjs provides its own type definitions, so you do not need this installed.
+    dependencies:
+      bcryptjs: 3.0.2
+    dev: true
+
   /@types/estree@1.0.8:
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
     dev: true
@@ -1436,6 +1452,10 @@ packages:
     resolution: {integrity: sha512-hY/u2lxLrbecMEWSB0IpGzGyDyeoMFQhCvZd2jGFSE5I17Fh01sYUBPCJtkWERw7zrac9+cIghxm/ytJa2X8iA==}
     hasBin: true
     dev: true
+
+  /bcryptjs@3.0.2:
+    resolution: {integrity: sha512-k38b3XOZKv60C4E2hVsXTolJWfkGRMbILBIe2IBITXciy5bOsTKot5kDrf3ZfufQtQOUN5mXceUEpU1rTl9Uog==}
+    hasBin: true
 
   /body-parser@2.2.0:
     resolution: {integrity: sha512-02qvAaxv8tp7fBa/mw1ga98OGm+eCbqzJOKoRt70sLmfEEi+jyBYVTDGfCL/k06/4EMk/z01gCe7HoCH/f2LTg==}
@@ -2284,6 +2304,11 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
     dev: true
+
+  /jwt-decode@4.0.0:
+    resolution: {integrity: sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==}
+    engines: {node: '>=18'}
+    dev: false
 
   /keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
