@@ -1,0 +1,95 @@
+name: Build & Deploy to cPanel
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Installe Node.js 20
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Active pnpm via corepack
+      - name: Setup pnpm
+        run: |
+          npm install -g corepack
+          corepack enable
+          corepack prepare pnpm@8 --activate
+          pnpm -v
+
+      # Installation des dépendances
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Build du projet
+      - name: Build project
+        run: pnpm run build
+
+      # Détecte le dossier de sortie
+      - name: Choose output dir (dist or build)
+        id: outdir
+        run: |
+          if [ -d dist ]; then echo "dir=dist" >> "$GITHUB_OUTPUT";
+          elif [ -d build ]; then echo "dir=build" >> "$GITHUB_OUTPUT";
+          else echo "No dist/ or build/"; exit 1; fi
+
+      # Prépare la connexion SSH
+      - name: Start ssh-agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # Ajoute le host distant
+      - name: Add known_hosts
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          set -e
+          install -m 700 -d "$HOME/.ssh"
+          ssh-keyscan -4 -p "${SSH_PORT:-22}" -H "${SSH_HOST}" 2>/dev/null >> "$HOME/.ssh/known_hosts" || true
+          chmod 600 "$HOME/.ssh/known_hosts"
+
+      # Déploie les fichiers via rsync
+      - name: Deploy via rsync
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_DEST: ${{ secrets.SSH_DEST }}
+          OUTDIR: ${{ steps.outdir.outputs.dir }}
+        run: |
+          set -euo pipefail
+
+          # Sanitize sans eval : retire d’éventuels guillemets, juste au cas où
+          SSH_HOST=${SSH_HOST//\"/}
+          SSH_USER=${SSH_USER//\"/}
+          SSH_DEST=${SSH_DEST//\"/}
+          SSH_PORT=${SSH_PORT//\"/}
+
+          echo "Deploying '${OUTDIR:-<unset>}' -> ${SSH_USER}@${SSH_HOST}:${SSH_DEST}"
+          test -d "${OUTDIR}" || { echo "ERREUR: dossier OUTDIR introuvable"; exit 1; }
+
+          # force IPv4 + timeouts raisonnables
+          RSYNC_RSH="ssh -4 -p ${SSH_PORT:-22} -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3"
+
+          # (optionnel) test de connexion
+          echo "== SSH test =="
+          ssh -4 -vv -p "${SSH_PORT:-22}" "${SSH_USER}@${SSH_HOST}" 'echo OK && exit' || true
+
+          echo "== RSYNC =="
+          rsync -az --delete --chmod=D755,F644 \
+            "${OUTDIR}/" "${SSH_USER}@${SSH_HOST}:${SSH_DEST}/" \
+            -e "$RSYNC_RSH"
+
