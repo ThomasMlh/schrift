@@ -1,8 +1,9 @@
 import {
   Tabs, TabList, TabPanels, TabPanel, Tab,
-  Box, VStack, Text, HStack, Select, IconButton,
+  Box, VStack, Text, HStack, Stack, Select, IconButton,
   useToast, AlertDialog, AlertDialogBody, AlertDialogContent, 
-  AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button
+  AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button,
+  useBreakpointValue
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -36,6 +37,7 @@ export function GuildTabsList({
   const [memberToDelete, setMemberToDelete] = useState<{ id: string; name: string } | null>(null);
   const toast = useToast();
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const orientation = useBreakpointValue<"vertical" | "horizontal">({ base: 'vertical', md: 'horizontal' }) || 'horizontal';
 
   // API URL depuis les variables d'environnement
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -291,6 +293,7 @@ export function GuildTabsList({
       borderTopRightRadius="md"
       borderBottomLeftRadius="0"
       borderBottomRightRadius="0"
+      orientation={orientation}
     >
       <TabList>
         {guilds.map((guild: Guild) => (
@@ -326,15 +329,17 @@ export function GuildTabsList({
               <VStack spacing={4} align="stretch">
                 {membersByGuild[guild._id]?.length > 0 ? (
                   sortMembers(membersByGuild[guild._id]).map((member: Member) => (
-                    <HStack
+                    <Stack
                       key={member._id}
+                      direction={{ base: "column", md: "row" }}
                       p={3}
                       borderWidth="1px"
                       borderRadius="md"
                       justify="space-between"
-                      align="center"
+                      align={{ base: "stretch", md: "center" }}
                       bg="gray.50"
                       _dark={{ bg: "gray.700" }}
+                      spacing={3}
                     >
                       <VStack align="start" spacing={1} flex={1}>
                         <Text fontWeight="medium" fontSize="md">
@@ -351,7 +356,7 @@ export function GuildTabsList({
                         </Text>
                       </VStack>
                       {editable && (
-                        <HStack spacing={2}>
+                        <Stack direction={{ base: "column", md: "row" }} spacing={2} w={{ base: "100%", md: "auto" }}>
                           <Select
                             size="sm"
                             value={member.role}
@@ -362,33 +367,36 @@ export function GuildTabsList({
                             <option value="sous-chef">Sous-Chef</option>
                             <option value="chef">Chef</option>
                           </Select>
-                          <IconButton
-                            aria-label="Supprimer"
-                            icon={<span>🗑️</span>}
-                            size="sm"
-                            bg="red.500"
-                            color="white"
-                            _hover={{ bg: "red.600" }}
-                            onClick={() => handleRemoveMember(member)}
-                          />
-                          <Select
-                            size="sm"
-                            value={guild._id}
-                            onChange={e => handleMoveMember(guild._id, member, e.target.value)}
-                            width="auto"
-                          >
-                            <option value={guild._id}>Rester</option>
-                            {guilds
-                              .filter((g: Guild) => g._id !== guild._id && (membersByGuild[g._id]?.length ?? 0) < 20)
-                              .map((g: Guild) => (
-                                <option key={g._id} value={g._id}>
-                                  → {g.name}
-                                </option>
-                              ))}
-                          </Select>
-                        </HStack>
+                          <HStack spacing={2} justify={{ base: "space-between", md: "flex-start" }}>
+                            <IconButton
+                              aria-label="Supprimer"
+                              icon={<span>🗑️</span>}
+                              size="sm"
+                              bg="red.500"
+                              color="white"
+                              _hover={{ bg: "red.600" }}
+                              onClick={() => handleRemoveMember(member)}
+                            />
+                            <Select
+                              size="sm"
+                              value={guild._id}
+                              onChange={e => handleMoveMember(guild._id, member, e.target.value)}
+                              width="auto"
+                              flex={1}
+                            >
+                              <option value={guild._id}>Rester</option>
+                              {guilds
+                                .filter((g: Guild) => g._id !== guild._id && (membersByGuild[g._id]?.length ?? 0) < 20)
+                                .map((g: Guild) => (
+                                  <option key={g._id} value={g._id}>
+                                    → {g.name}
+                                  </option>
+                                ))}
+                            </Select>
+                          </HStack>
+                        </Stack>
                       )}
-                    </HStack>
+                    </Stack>
                   ))
                 ) : (
                   <Text color="gray.500" textAlign="center" py={8}>

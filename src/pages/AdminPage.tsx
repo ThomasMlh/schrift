@@ -287,6 +287,7 @@ export default function AdminPage() {
         {/* Bouton de déconnexion */}
         <Button
           mb={4}
+          p={2}
           size="sm"
           variant="outline"
           onClick={() => {
