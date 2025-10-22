@@ -6,6 +6,53 @@ import { useState } from "react";
 import type { Guild } from "./GuildTabsList";
 import type { Role } from "@/interfaces";
 
+// Composant wrapper pour les formulaires mobiles (défini en dehors pour éviter les re-créations)
+const MobileFormWrapper = ({ 
+  title, 
+  formName, 
+  children, 
+  colorScheme = "blue",
+  isMobile,
+  openForm,
+  toggleForm,
+  bgColor,
+  boxShadow
+}: { 
+  title: string; 
+  formName: string; 
+  children: React.ReactNode;
+  colorScheme?: string;
+  isMobile?: boolean;
+  openForm: string | null;
+  toggleForm: (formName: string) => void;
+  bgColor: string;
+  boxShadow: string;
+}) => {
+  if (!isMobile) {
+    return <>{children}</>;
+  }
+
+  const isOpen = openForm === formName;
+  
+  return (
+    <VStack spacing={4} align="stretch" w="100%">
+      <Button
+        colorScheme={colorScheme}
+        onClick={() => toggleForm(formName)}
+        size="lg"
+        variant={isOpen ? "solid" : "outline"}
+      >
+        {title} {isOpen ? "▲" : "▼"}
+      </Button>
+      {isOpen && (
+        <Box p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
+          {children}
+        </Box>
+      )}
+    </VStack>
+  );
+};
+
 interface AdminFormsSectionProps {
   guilds: Guild[];
   apiUrl: string;
@@ -47,43 +94,6 @@ export function AdminFormsSection({
   // Fonction pour toggle les formulaires en mobile
   const toggleForm = (formName: string) => {
     setOpenForm(openForm === formName ? null : formName);
-  };
-
-  // Composant wrapper pour les formulaires mobiles
-  const MobileFormWrapper = ({ 
-    title, 
-    formName, 
-    children, 
-    colorScheme = "blue" 
-  }: { 
-    title: string; 
-    formName: string; 
-    children: React.ReactNode;
-    colorScheme?: string;
-  }) => {
-    if (!isMobile) {
-      return <>{children}</>;
-    }
-
-    const isOpen = openForm === formName;
-    
-    return (
-      <VStack spacing={4} align="stretch" w="100%">
-        <Button
-          colorScheme={colorScheme}
-          onClick={() => toggleForm(formName)}
-          size="lg"
-          variant={isOpen ? "solid" : "outline"}
-        >
-          {title} {isOpen ? "▲" : "▼"}
-        </Button>
-        {isOpen && (
-          <Box p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
-            {children}
-          </Box>
-        )}
-      </VStack>
-    );
   };
 
   // Handlers
@@ -130,6 +140,7 @@ export function AdminFormsSection({
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Erreur lors de l'ajout");
       
+      onDataChange();
       setNewMemberName("");
       setNewMemberRole("membre");
       if (isMobile) setOpenForm(null);
@@ -155,7 +166,16 @@ export function AdminFormsSection({
   return (
     <Stack direction={{ base: "column", md: "row" }} spacing={8} mb={8}>
       {/* Formulaire création guilde */}
-      <MobileFormWrapper title="Créer une guilde" formName="create" colorScheme="green">
+      <MobileFormWrapper 
+        title="Créer une guilde" 
+        formName="create" 
+        colorScheme="green"
+        isMobile={isMobile}
+        openForm={openForm}
+        toggleForm={toggleForm}
+        bgColor={bgColor}
+        boxShadow={boxShadow}
+      >
         <Box 
           as="form" 
           onSubmit={handleCreateGuild}
@@ -182,7 +202,16 @@ export function AdminFormsSection({
       </MobileFormWrapper>
 
       {/* Formulaire ajout membre */}
-      <MobileFormWrapper title="Ajouter un membre" formName="addMember" colorScheme="blue">
+      <MobileFormWrapper 
+        title="Ajouter un membre" 
+        formName="addMember" 
+        colorScheme="blue"
+        isMobile={isMobile}
+        openForm={openForm}
+        toggleForm={toggleForm}
+        bgColor={bgColor}
+        boxShadow={boxShadow}
+      >
         <Box 
           as="form" 
           onSubmit={handleAddMember}
@@ -211,6 +240,7 @@ export function AdminFormsSection({
             </FormControl>
             <FormControl>
               <Select value={selectedGuildId} onChange={e => setSelectedGuildId(e.target.value)}>
+                <option value="">Sélectionner une guilde</option>
                 {sortedGuilds.map((g: Guild) => (
                   <option key={g._id} value={g._id}>{g.name}</option>
                 ))}
@@ -224,7 +254,16 @@ export function AdminFormsSection({
       </MobileFormWrapper>
 
       {/* Formulaire suppression guilde */}
-      <MobileFormWrapper title="Supprimer une guilde" formName="delete" colorScheme="red">
+      <MobileFormWrapper 
+        title="Supprimer une guilde" 
+        formName="delete" 
+        colorScheme="red"
+        isMobile={isMobile}
+        openForm={openForm}
+        toggleForm={toggleForm}
+        bgColor={bgColor}
+        boxShadow={boxShadow}
+      >
         <Box 
           as="form" 
           onSubmit={handleDeleteGuild}
@@ -258,7 +297,16 @@ export function AdminFormsSection({
       </MobileFormWrapper>
 
       {/* Formulaire renommage guilde */}
-      <MobileFormWrapper title="Renommer une guilde" formName="rename" colorScheme="orange">
+      <MobileFormWrapper 
+        title="Renommer une guilde" 
+        formName="rename" 
+        colorScheme="orange"
+        isMobile={isMobile}
+        openForm={openForm}
+        toggleForm={toggleForm}
+        bgColor={bgColor}
+        boxShadow={boxShadow}
+      >
         <Box 
           as="form" 
           onSubmit={handleRenameGuild}
