@@ -1,24 +1,21 @@
-import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Box, Button, Container, Flex, FormControl, FormLabel, Heading, Input, Select, Stack, Text, useColorModeValue, useToast, VStack } from "@chakra-ui/react";
+import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Box, Button, Container, Flex, FormControl, FormLabel, Heading, Input, Text, useColorModeValue, useToast } from "@chakra-ui/react";
 import { GuildTabsList, type Guild } from "../components/GuildTabsList";
+import { AdminFormsSection } from "../components/AdminFormsSection";
+import { jwtDecode } from 'jwt-decode';
 import { useEffect, useRef, useState } from "react";
-import type { Role } from "@/interfaces";
-import { jwtDecode } from "jwt-decode";
 
 export default function AdminPage() {
   // === TOUS LES HOOKS EN PREMIER ===
-  const [newGuildName, setNewGuildName] = useState("");
   const [deleteGuildId, setDeleteGuildId] = useState("");
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [guilds, setGuilds] = useState<Guild[]>([]);
-  const [newMemberName, setNewMemberName] = useState("");
-  const [newMemberRole, setNewMemberRole] = useState<Role>("membre");
-  const [selectedGuildId, setSelectedGuildId] = useState("A");
   const [renameGuildId, setRenameGuildId] = useState("");
   const [renameGuildName, setRenameGuildName] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isRenameConfirmOpen, setIsRenameConfirmOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
@@ -29,6 +26,8 @@ export default function AdminPage() {
   
   // === VARIABLES ET CONSTANTES ===
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
+  // === FONCTIONS UTILITAIRES ===
 
   // === FONCTIONS UTILITAIRES ===
   // Fonction utilitaire pour vérifier la validité du token
@@ -92,25 +91,31 @@ export default function AdminPage() {
     return response;
   };
 
+  // Fonction helper pour rafraîchir les données après modification
+  const refreshData = () => {
+    // Recharger les guildes
+    fetch(`${apiUrl}/api/guildes`)
+      .then(res => res.json())
+      .then(data => {
+        setGuilds(Array.isArray(data) ? data : []);
+        // Déclencher le refresh du composant GuildTabsList
+        setRefreshTrigger(prev => prev + 1);
+      })
+      .catch(() => setGuilds([]));
+  };
+
   const handleDeleteGuild = (guildId: string) => {
     authenticatedFetch(`${apiUrl}/api/guildes/${guildId}`, {
       method: "DELETE"
     })
-      .then(res => {
-        if (!res.ok) throw new Error("Erreur lors de la suppression");
-        return res.json();
+      .then(res => res.json().then(data => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok) throw new Error(data.message || "Erreur lors de la suppression");
+        refreshData();
+        toast({ title: data.message || "Guilde supprimée", status: "success" });
       })
-      .then(() => {
-        // Recharge la liste des guildes
-        fetch(`${apiUrl}/api/guildes`)
-          .then(res => res.json())
-          .then(data => {
-            setGuilds(Array.isArray(data) ? data : []);
-            toast({ title: "Guilde supprimée", status: "success" });
-          });
-      })
-      .catch(() => {
-        toast({ title: "Erreur lors de la suppression", status: "error" });
+      .catch((error) => {
+        toast({ title: error.message || "Erreur lors de la suppression", status: "error" });
       });
   };
 
@@ -238,68 +243,29 @@ export default function AdminPage() {
     );
   }
 
-  // Renommer une guilde
-  const handleRenameGuild = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!renameGuildName.trim()) return;
-    setIsRenameConfirmOpen(true);
-  };
   const confirmRenameGuild = () => {
     authenticatedFetch(`${apiUrl}/api/guildes/${renameGuildId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: renameGuildName.trim() })
     })
-      .then(res => {
-        if (!res.ok) throw new Error("Erreur lors du renommage");
-        return res.json();
+      .then(res => res.json().then(data => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok) throw new Error(data.message || "Erreur lors du renommage");
+        refreshData();
+        setRenameGuildId("");
+        setRenameGuildName("");
+        setIsRenameConfirmOpen(false);
+        toast({ title: data.message || "Guilde renommée", status: "success", duration: 1500 });
       })
-      .then(() => {
-        // Recharge la liste des guildes
-        fetch(`${apiUrl}/api/guildes`)
-          .then(res => res.json())
-          .then(data => {
-            setGuilds(Array.isArray(data) ? data : []);
-            setRenameGuildId("");
-            setRenameGuildName("");
-            setIsRenameConfirmOpen(false);
-            toast({ title: "Guilde renommée", status: "success", duration: 1500 });
-          });
-      })
-      .catch(() => {
-        toast({ title: "Erreur lors du renommage", status: "error" });
+      .catch((error) => {
+        setIsRenameConfirmOpen(false);
+        setRenameGuildId("");
+        setRenameGuildName("");
+        toast({ title: error.message || "Erreur lors du renommage", status: "error" });
       });
   };
 
-
-
-  // Ajouter un membre à une guilde
-  const handleAddMember = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMemberName.trim()) return;
-    authenticatedFetch(`${apiUrl}/api/guildes/${selectedGuildId}/membres`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: newMemberName.trim(),
-        role: newMemberRole
-      })
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("Erreur lors de l'ajout");
-        return res.json();
-      })
-      .then(() => {
-        setNewMemberName("");
-        setNewMemberRole("membre");
-        toast({ title: "Membre ajouté", status: "success" });
-      })
-      .catch(() => {
-        toast({ title: "Erreur lors de l'ajout du membre", status: "error" });
-      });
-  };
-
-  const sortedGuilds = [...guilds].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
   return (
     <Flex w="100%" h="100%" align="center" justify="center">
       <Container
@@ -332,129 +298,21 @@ export default function AdminPage() {
           Se déconnecter
         </Button>
 
-        <Stack direction={{ base: "column", md: "row" }} spacing={8} mb={8}>
-          {/* Bloc création guilde */}
-          <Box as="form" onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
-            e.preventDefault();
-            if (!newGuildName.trim()) {
-              toast({ title: "Le nom de la guilde est requis.", status: "error" });
-              return;
-            }
-            authenticatedFetch(`${apiUrl}/api/guildes`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ name: newGuildName.trim() })
-            })
-              .then(res => {
-                if (!res.ok) throw new Error("Erreur lors de la création");
-                return res.json();
-              })
-              .then(() => {
-                fetch(`${apiUrl}/api/guildes`)
-                  .then(res => res.json())
-                  .then(data => {
-                    setGuilds(Array.isArray(data) ? data : []);
-                    setNewGuildName("");
-                    toast({ title: "Guilde créée", status: "success" });
-                  });
-              })
-              .catch(() => {
-                toast({ title: "Erreur lors de la création de la guilde", status: "error" });
-              });
-          }} p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
-            <VStack spacing={4} align="stretch">
-              <FormControl>
-                <FormLabel>Créer une guilde</FormLabel>
-                <Input
-                  placeholder="Nom de la nouvelle guilde"
-                  value={newGuildName}
-                  onChange={e => setNewGuildName(e.target.value)}
-                />
-              </FormControl>
-              <Button colorScheme="green" type="submit">
-                Créer
-              </Button>
-            </VStack>
-          </Box>
-          <Box as="form" onSubmit={handleAddMember} p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
-            <VStack spacing={4} align="stretch">
-              <FormControl>
-                <FormLabel>Ajouter un membre</FormLabel>
-                <Input
-                  placeholder="Nom du membre"
-                  value={newMemberName}
-                  onChange={e => setNewMemberName(e.target.value)}
-                />
-              </FormControl>
-              <FormControl>
-                <FormLabel>Rôle</FormLabel>
-                <Select value={newMemberRole} onChange={e => setNewMemberRole((e.target as HTMLSelectElement).value as Role)}>
-                  <option value="membre">Membre</option>
-                  <option value="sous-chef">Sous-Chef</option>
-                  <option value="chef">Chef</option>
-                </Select>
-              </FormControl>
-              <FormControl>
-                <Select value={selectedGuildId} onChange={e => setSelectedGuildId((e.target as HTMLSelectElement).value)}>
-                  {sortedGuilds.map((g: Guild) => (
-                    <option key={g._id} value={g._id}>{g.name}</option>
-                  ))}
-                </Select>
-              </FormControl>
-              <Button colorScheme="blue" type="submit">
-                Ajouter membre
-              </Button>
-            </VStack>
-          </Box>
-          {/* Bloc suppression guilde */}
-          <Box as="form" onSubmit={(e: React.FormEvent<HTMLFormElement>) => { e.preventDefault(); if (deleteGuildId) setIsDeleteConfirmOpen(true); }} p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
-            <VStack spacing={4} align="stretch">
-              <FormControl>
-                <FormLabel>Supprimer une guilde</FormLabel>
-                <Select value={deleteGuildId} onChange={e => setDeleteGuildId((e.target as HTMLSelectElement).value)}>
-                  <option value="">Sélectionner une guilde</option>
-                  {sortedGuilds.map((g: Guild) => (
-                    <option key={g._id} value={g._id}>{g.name}</option>
-                  ))}
-                </Select>
-              </FormControl>
-              <Button
-                bg={deleteButtonBg}
-                color="white"
-                _hover={{
-                  bg: deleteButtonHoverBg
-                }}
-                type="submit"
-                isDisabled={!deleteGuildId}
-              >
-                Supprimer
-              </Button>
-            </VStack>
-          </Box>
-          <Box as="form" onSubmit={handleRenameGuild} p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
-            <VStack spacing={4} align="stretch">
-              <FormControl>
-                <FormLabel>Renommer une guilde</FormLabel>
-                <Select value={renameGuildId} onChange={e => setRenameGuildId((e.target as HTMLSelectElement).value)}>
-                  <option value="">Sélectionner une guilde</option>
-                  {sortedGuilds.map((g: Guild) => (
-                    <option key={g._id} value={g._id}>{g.name}</option>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl>
-                <Input
-                  placeholder="Nouveau nom"
-                  value={renameGuildName}
-                  onChange={e => setRenameGuildName(e.target.value)}
-                />
-              </FormControl>
-              <Button colorScheme="orange" type="submit">
-                Renommer
-              </Button>
-            </VStack>
-          </Box>
-        </Stack>
+        <AdminFormsSection
+          guilds={guilds}
+          apiUrl={apiUrl}
+          authenticatedFetch={authenticatedFetch}
+          onDataChange={refreshData}
+          onDeleteRequest={(guildId) => {
+            setDeleteGuildId(guildId);
+            setIsDeleteConfirmOpen(true);
+          }}
+          onRenameRequest={(guildId, newName) => {
+            setRenameGuildId(guildId);
+            setRenameGuildName(newName);
+            setIsRenameConfirmOpen(true);
+          }}
+        />
         {guilds && guilds.length === 0 && (<Text>Aucune guilde disponible.</Text>)}
 
         {/* Popup confirmation suppression */}
@@ -494,6 +352,7 @@ export default function AdminPage() {
         </AlertDialog>
         <GuildTabsList
           editable={true}
+          refreshTrigger={refreshTrigger}
         />
         <AlertDialog
           isOpen={isRenameConfirmOpen}

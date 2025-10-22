@@ -10,6 +10,7 @@ type Role = "chef" | "sous-chef" | "membre";
 
 interface GuildTabsListProps {
   editable?: boolean;
+  refreshTrigger?: number;
 }
 
 export type Guild = {
@@ -25,7 +26,8 @@ export type Member = {
 };
 
 export function GuildTabsList({
-  editable = false
+  editable = false,
+  refreshTrigger = 0
 }: GuildTabsListProps) {
   // Seulement les hooks essentiels
   const [guilds, setGuilds] = useState<Guild[]>([]);
@@ -84,6 +86,28 @@ export function GuildTabsList({
         });
     });
   }, [apiUrl, guilds, toast]);
+
+  // Réagir aux changements externes (quand une guilde est modifiée depuis AdminPage)
+  useEffect(() => {
+    if (refreshTrigger > 0 && apiUrl) {
+      // Recharger les guildes
+      fetch(`${apiUrl}/api/guildes`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setGuilds(data);
+          }
+        })
+        .catch(() => {
+          toast({
+            title: "Erreur",
+            description: "Impossible de recharger les guildes",
+            status: "error",
+            duration: 3000,
+          });
+        });
+    }
+  }, [refreshTrigger, apiUrl, toast]);
 
   // Fonction pour recharger les membres
   const loadMembers = () => {

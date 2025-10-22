@@ -1,0 +1,296 @@
+import {
+  Box, Button, VStack, FormControl, FormLabel, Input, Select, Stack,
+  useBreakpointValue, useColorModeValue, useToast
+} from "@chakra-ui/react";
+import { useState } from "react";
+import type { Guild } from "./GuildTabsList";
+import type { Role } from "@/interfaces";
+
+interface AdminFormsSectionProps {
+  guilds: Guild[];
+  apiUrl: string;
+  authenticatedFetch: (url: string, options?: RequestInit) => Promise<Response>;
+  onDataChange: () => void;
+  onDeleteRequest: (guildId: string) => void;
+  onRenameRequest: (guildId: string, newName: string) => void;
+}
+
+export function AdminFormsSection({ 
+  guilds, 
+  apiUrl, 
+  authenticatedFetch, 
+  onDataChange,
+  onDeleteRequest,
+  onRenameRequest
+}: AdminFormsSectionProps) {
+  // États pour les formulaires
+  const [newGuildName, setNewGuildName] = useState("");
+  const [newMemberName, setNewMemberName] = useState("");
+  const [newMemberRole, setNewMemberRole] = useState<Role>("membre");
+  const [selectedGuildId, setSelectedGuildId] = useState("A");
+  const [deleteGuildId, setDeleteGuildId] = useState("");
+  const [renameGuildId, setRenameGuildId] = useState("");
+  const [renameGuildName, setRenameGuildName] = useState("");
+  const [openForm, setOpenForm] = useState<string | null>(null);
+
+  // Hooks UI
+  const toast = useToast();
+  const isMobile = useBreakpointValue({ base: true, md: false });
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const boxShadow = useColorModeValue('md', 'md');
+  const deleteButtonBg = useColorModeValue('red.500', 'red.600');
+  const deleteButtonHoverBg = useColorModeValue('red.600', 'red.700');
+
+  // Guildes triées
+  const sortedGuilds = [...guilds].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+
+  // Fonction pour toggle les formulaires en mobile
+  const toggleForm = (formName: string) => {
+    setOpenForm(openForm === formName ? null : formName);
+  };
+
+  // Composant wrapper pour les formulaires mobiles
+  const MobileFormWrapper = ({ 
+    title, 
+    formName, 
+    children, 
+    colorScheme = "blue" 
+  }: { 
+    title: string; 
+    formName: string; 
+    children: React.ReactNode;
+    colorScheme?: string;
+  }) => {
+    if (!isMobile) {
+      return <>{children}</>;
+    }
+
+    const isOpen = openForm === formName;
+    
+    return (
+      <VStack spacing={4} align="stretch" w="100%">
+        <Button
+          colorScheme={colorScheme}
+          onClick={() => toggleForm(formName)}
+          size="lg"
+          variant={isOpen ? "solid" : "outline"}
+        >
+          {title} {isOpen ? "▲" : "▼"}
+        </Button>
+        {isOpen && (
+          <Box p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
+            {children}
+          </Box>
+        )}
+      </VStack>
+    );
+  };
+
+  // Handlers
+  const handleCreateGuild = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!newGuildName.trim()) {
+      toast({ title: "Le nom de la guilde est requis.", status: "error" });
+      return;
+    }
+    
+    try {
+      const res = await authenticatedFetch(`${apiUrl}/api/guildes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newGuildName.trim() })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Erreur lors de la création");
+      
+      onDataChange();
+      setNewGuildName("");
+      if (isMobile) setOpenForm(null);
+      toast({ title: data.message || "Guilde créée", status: "success" });
+    } catch (error: any) {
+      toast({ title: error.message || "Erreur lors de la création de la guilde", status: "error" });
+    }
+  };
+
+  const handleAddMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMemberName.trim()) return;
+    
+    try {
+      const res = await authenticatedFetch(`${apiUrl}/api/guildes/${selectedGuildId}/membres`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newMemberName.trim(),
+          role: newMemberRole
+        })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Erreur lors de l'ajout");
+      
+      setNewMemberName("");
+      setNewMemberRole("membre");
+      if (isMobile) setOpenForm(null);
+      toast({ title: data.message || "Membre ajouté", status: "success" });
+    } catch (error: any) {
+      toast({ title: error.message || "Erreur lors de l'ajout du membre", status: "error" });
+    }
+  };
+
+  const handleDeleteGuild = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (deleteGuildId) {
+      onDeleteRequest(deleteGuildId);
+    }
+  };
+
+  const handleRenameGuild = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!renameGuildName.trim()) return;
+    onRenameRequest(renameGuildId, renameGuildName.trim());
+  };
+
+  return (
+    <Stack direction={{ base: "column", md: "row" }} spacing={8} mb={8}>
+      {/* Formulaire création guilde */}
+      <MobileFormWrapper title="Créer une guilde" formName="create" colorScheme="green">
+        <Box 
+          as="form" 
+          onSubmit={handleCreateGuild}
+          p={isMobile ? 0 : 4} 
+          borderWidth={isMobile ? 0 : 1} 
+          borderRadius="lg" 
+          boxShadow={isMobile ? "none" : boxShadow} 
+          bg={isMobile ? "transparent" : bgColor}
+        >
+          <VStack spacing={4} align="stretch">
+            <FormControl>
+              <FormLabel>Créer une guilde</FormLabel>
+              <Input
+                placeholder="Nom de la nouvelle guilde"
+                value={newGuildName}
+                onChange={e => setNewGuildName(e.target.value)}
+              />
+            </FormControl>
+            <Button colorScheme="green" type="submit">
+              Créer
+            </Button>
+          </VStack>
+        </Box>
+      </MobileFormWrapper>
+
+      {/* Formulaire ajout membre */}
+      <MobileFormWrapper title="Ajouter un membre" formName="addMember" colorScheme="blue">
+        <Box 
+          as="form" 
+          onSubmit={handleAddMember}
+          p={isMobile ? 0 : 4} 
+          borderWidth={isMobile ? 0 : 1} 
+          borderRadius="lg" 
+          boxShadow={isMobile ? "none" : boxShadow} 
+          bg={isMobile ? "transparent" : bgColor}
+        >
+          <VStack spacing={4} align="stretch">
+            <FormControl>
+              <FormLabel>Ajouter un membre</FormLabel>
+              <Input
+                placeholder="Nom du membre"
+                value={newMemberName}
+                onChange={e => setNewMemberName(e.target.value)}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Rôle</FormLabel>
+              <Select value={newMemberRole} onChange={e => setNewMemberRole(e.target.value as Role)}>
+                <option value="membre">Membre</option>
+                <option value="sous-chef">Sous-Chef</option>
+                <option value="chef">Chef</option>
+              </Select>
+            </FormControl>
+            <FormControl>
+              <Select value={selectedGuildId} onChange={e => setSelectedGuildId(e.target.value)}>
+                {sortedGuilds.map((g: Guild) => (
+                  <option key={g._id} value={g._id}>{g.name}</option>
+                ))}
+              </Select>
+            </FormControl>
+            <Button colorScheme="blue" type="submit">
+              Ajouter membre
+            </Button>
+          </VStack>
+        </Box>
+      </MobileFormWrapper>
+
+      {/* Formulaire suppression guilde */}
+      <MobileFormWrapper title="Supprimer une guilde" formName="delete" colorScheme="red">
+        <Box 
+          as="form" 
+          onSubmit={handleDeleteGuild}
+          p={isMobile ? 0 : 4} 
+          borderWidth={isMobile ? 0 : 1} 
+          borderRadius="lg" 
+          boxShadow={isMobile ? "none" : boxShadow} 
+          bg={isMobile ? "transparent" : bgColor}
+        >
+          <VStack spacing={4} align="stretch">
+            <FormControl>
+              <FormLabel>Supprimer une guilde</FormLabel>
+              <Select value={deleteGuildId} onChange={e => setDeleteGuildId(e.target.value)}>
+                <option value="">Sélectionner une guilde</option>
+                {sortedGuilds.map((g: Guild) => (
+                  <option key={g._id} value={g._id}>{g.name}</option>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              bg={deleteButtonBg}
+              color="white"
+              _hover={{ bg: deleteButtonHoverBg }}
+              type="submit"
+              isDisabled={!deleteGuildId}
+            >
+              Supprimer
+            </Button>
+          </VStack>
+        </Box>
+      </MobileFormWrapper>
+
+      {/* Formulaire renommage guilde */}
+      <MobileFormWrapper title="Renommer une guilde" formName="rename" colorScheme="orange">
+        <Box 
+          as="form" 
+          onSubmit={handleRenameGuild}
+          p={isMobile ? 0 : 4} 
+          borderWidth={isMobile ? 0 : 1} 
+          borderRadius="lg" 
+          boxShadow={isMobile ? "none" : boxShadow} 
+          bg={isMobile ? "transparent" : bgColor}
+        >
+          <VStack spacing={4} align="stretch">
+            <FormControl>
+              <FormLabel>Renommer une guilde</FormLabel>
+              <Select value={renameGuildId} onChange={e => setRenameGuildId(e.target.value)}>
+                <option value="">Sélectionner une guilde</option>
+                {sortedGuilds.map((g: Guild) => (
+                  <option key={g._id} value={g._id}>{g.name}</option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl>
+              <Input
+                placeholder="Nouveau nom"
+                value={renameGuildName}
+                onChange={e => setRenameGuildName(e.target.value)}
+              />
+            </FormControl>
+            <Button colorScheme="orange" type="submit">
+              Renommer
+            </Button>
+          </VStack>
+        </Box>
+      </MobileFormWrapper>
+    </Stack>
+  );
+}
