@@ -1,25 +1,33 @@
 import {
   Box, Button, VStack, FormControl, FormLabel, Input, Select, Stack,
-  useBreakpointValue, useColorModeValue, useToast
+  useBreakpointValue, useColorModeValue, useToast, Text
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Guild } from "./GuildTabsList";
 import type { Role } from "@/interfaces";
 
+// Type pour les utilisateurs
+interface User {
+  _id: string;
+  username: string;
+  discordId?: string;
+  [key: string]: any;
+}
+
 // Composant wrapper pour les formulaires mobiles (défini en dehors pour éviter les re-créations)
-const MobileFormWrapper = ({ 
-  title, 
-  formName, 
-  children, 
+const MobileFormWrapper = ({
+  title,
+  formName,
+  children,
   colorScheme = "blue",
   isMobile,
   openForm,
   toggleForm,
   bgColor,
   boxShadow
-}: { 
-  title: string; 
-  formName: string; 
+}: {
+  title: string;
+  formName: string;
   children: React.ReactNode;
   colorScheme?: string;
   isMobile?: boolean;
@@ -33,7 +41,7 @@ const MobileFormWrapper = ({
   }
 
   const isOpen = openForm === formName;
-  
+
   return (
     <VStack spacing={4} align="stretch" w="100%">
       <Button
@@ -62,22 +70,27 @@ interface AdminFormsSectionProps {
   onRenameRequest: (guildId: string, newName: string) => void;
 }
 
-export function AdminFormsSection({ 
-  guilds, 
-  apiUrl, 
-  authenticatedFetch, 
+export function AdminFormsSection({
+  guilds,
+  apiUrl,
+  authenticatedFetch,
   onDataChange,
   onDeleteRequest,
   onRenameRequest
 }: AdminFormsSectionProps) {
   // États pour les formulaires
   const [newGuildName, setNewGuildName] = useState("");
-  const [newMemberName, setNewMemberName] = useState("");
   const [newMemberRole, setNewMemberRole] = useState<Role>("membre");
   const [selectedGuildId, setSelectedGuildId] = useState("A");
   const [deleteGuildId, setDeleteGuildId] = useState("");
   const [renameGuildId, setRenameGuildId] = useState("");
   const [renameGuildName, setRenameGuildName] = useState("");
+
+  // États pour la gestion des utilisateurs
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [openForm, setOpenForm] = useState<string | null>(null);
 
   // Hooks UI
@@ -87,6 +100,59 @@ export function AdminFormsSection({
   const boxShadow = useColorModeValue('md', 'md');
   const deleteButtonBg = useColorModeValue('red.500', 'red.600');
   const deleteButtonHoverBg = useColorModeValue('red.600', 'red.700');
+
+  // Charger les utilisateurs depuis l'API
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const response = await authenticatedFetch(`${apiUrl}/api/users`);
+
+        if (response.ok) {
+          const userData = await response.json();
+
+          // L'API retourne { success: true, users: [...], count: number }
+          const usersList = userData.users || userData;
+          const users = Array.isArray(usersList) ? usersList : [];
+
+          setUsers(users);
+          setFilteredUsers(users);
+        } else {
+          const errorText = await response.text();
+          console.error('❌ Erreur API users:', response.status, errorText);
+          toast({
+            title: "Erreur",
+            description: `Erreur ${response.status}: ${errorText}`,
+            status: "error",
+            duration: 5000,
+          });
+        }
+      } catch (error) {
+        console.error('💥 Erreur lors du chargement des utilisateurs:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger la liste des utilisateurs",
+          status: "error",
+          duration: 3000,
+        });
+      }
+    };
+
+    if (apiUrl) {
+      loadUsers();
+    }
+  }, [apiUrl, authenticatedFetch, toast]);
+
+  // Filtrer les utilisateurs selon la recherche
+  useEffect(() => {
+    if (!userSearchQuery.trim()) {
+      setFilteredUsers(users);
+    } else {
+      const filtered = users.filter(user =>
+        user.username.toLowerCase().includes(userSearchQuery.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    }
+  }, [userSearchQuery, users]);
 
   // Guildes triées
   const sortedGuilds = [...guilds].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
@@ -103,17 +169,17 @@ export function AdminFormsSection({
       toast({ title: "Le nom de la guilde est requis.", status: "error" });
       return;
     }
-    
+
     try {
       const res = await authenticatedFetch(`${apiUrl}/api/guildes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newGuildName.trim() })
       });
-      
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Erreur lors de la création");
-      
+
       onDataChange();
       setNewGuildName("");
       if (isMobile) setOpenForm(null);
@@ -125,23 +191,34 @@ export function AdminFormsSection({
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMemberName.trim()) return;
-    
+    if (!selectedUserId) {
+      toast({ title: "Veuillez sélectionner un utilisateur", status: "error" });
+      return;
+    }
+
+    const selectedUser = users.find(user => user._id === selectedUserId);
+    if (!selectedUser) {
+      toast({ title: "Utilisateur introuvable", status: "error" });
+      return;
+    }
+
     try {
-      const res = await authenticatedFetch(`${apiUrl}/api/guildes/${selectedGuildId}/membres`, {
+      const res = await authenticatedFetch(`${apiUrl}/api/guildes/${selectedGuildId}/assign-member`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: newMemberName.trim(),
-          role: newMemberRole
+          name: selectedUser.username,
+          role: newMemberRole,
+          userId: selectedUserId
         })
       });
-      
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Erreur lors de l'ajout");
-      
+
       onDataChange();
-      setNewMemberName("");
+      setSelectedUserId("");
+      setUserSearchQuery("");
       setNewMemberRole("membre");
       if (isMobile) setOpenForm(null);
       toast({ title: data.message || "Membre ajouté", status: "success" });
@@ -166,9 +243,9 @@ export function AdminFormsSection({
   return (
     <Stack direction={{ base: "column", md: "row" }} spacing={8} mb={8}>
       {/* Formulaire création guilde */}
-      <MobileFormWrapper 
-        title="Créer une guilde" 
-        formName="create" 
+      <MobileFormWrapper
+        title="Créer une guilde"
+        formName="create"
         colorScheme="green"
         isMobile={isMobile}
         openForm={openForm}
@@ -176,13 +253,13 @@ export function AdminFormsSection({
         bgColor={bgColor}
         boxShadow={boxShadow}
       >
-        <Box 
-          as="form" 
+        <Box
+          as="form"
           onSubmit={handleCreateGuild}
-          p={isMobile ? 0 : 4} 
-          borderWidth={isMobile ? 0 : 1} 
-          borderRadius="lg" 
-          boxShadow={isMobile ? "none" : boxShadow} 
+          p={isMobile ? 0 : 4}
+          borderWidth={isMobile ? 0 : 1}
+          borderRadius="lg"
+          boxShadow={isMobile ? "none" : boxShadow}
           bg={isMobile ? "transparent" : bgColor}
         >
           <VStack spacing={4} align="stretch">
@@ -202,9 +279,9 @@ export function AdminFormsSection({
       </MobileFormWrapper>
 
       {/* Formulaire ajout membre */}
-      <MobileFormWrapper 
-        title="Ajouter un membre" 
-        formName="addMember" 
+      <MobileFormWrapper
+        title="Ajouter un membre"
+        formName="addMember"
         colorScheme="blue"
         isMobile={isMobile}
         openForm={openForm}
@@ -212,23 +289,51 @@ export function AdminFormsSection({
         bgColor={bgColor}
         boxShadow={boxShadow}
       >
-        <Box 
-          as="form" 
+        <Box
+          as="form"
           onSubmit={handleAddMember}
-          p={isMobile ? 0 : 4} 
-          borderWidth={isMobile ? 0 : 1} 
-          borderRadius="lg" 
-          boxShadow={isMobile ? "none" : boxShadow} 
+          p={isMobile ? 0 : 4}
+          borderWidth={isMobile ? 0 : 1}
+          borderRadius="lg"
+          boxShadow={isMobile ? "none" : boxShadow}
           bg={isMobile ? "transparent" : bgColor}
         >
           <VStack spacing={4} align="stretch">
             <FormControl>
-              <FormLabel>Ajouter un membre</FormLabel>
+              <FormLabel>Rechercher un utilisateur</FormLabel>
               <Input
-                placeholder="Nom du membre"
-                value={newMemberName}
-                onChange={e => setNewMemberName(e.target.value)}
+                placeholder="Tapez pour rechercher un utilisateur..."
+                value={userSearchQuery}
+                onChange={e => setUserSearchQuery(e.target.value)}
               />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Sélectionner un utilisateur</FormLabel>
+              <Select
+                value={selectedUserId}
+                onChange={e => setSelectedUserId(e.target.value)}
+                placeholder="Choisir un utilisateur"
+              >
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((user: User) => (
+                    <option key={user._id} value={user._id}>
+                      {user.username} {user.discordId ? `(Discord: ${user.discordId})` : ''}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>
+                    {userSearchQuery ? "Aucun utilisateur trouvé" : "Chargement..."}
+                  </option>
+                )}
+              </Select>
+              <Text fontSize="xs" color="gray.500" mt={1}>
+                Debug: {users.length} utilisateurs chargés, {filteredUsers.length} filtrés
+              </Text>
+              {filteredUsers.length > 10 && (
+                <Text fontSize="sm" color="gray.500" mt={1}>
+                  {filteredUsers.length} utilisateurs trouvés. Utilisez la recherche pour affiner.
+                </Text>
+              )}
             </FormControl>
             <FormControl>
               <FormLabel>Rôle</FormLabel>
@@ -254,9 +359,9 @@ export function AdminFormsSection({
       </MobileFormWrapper>
 
       {/* Formulaire suppression guilde */}
-      <MobileFormWrapper 
-        title="Supprimer une guilde" 
-        formName="delete" 
+      <MobileFormWrapper
+        title="Supprimer une guilde"
+        formName="delete"
         colorScheme="red"
         isMobile={isMobile}
         openForm={openForm}
@@ -264,13 +369,13 @@ export function AdminFormsSection({
         bgColor={bgColor}
         boxShadow={boxShadow}
       >
-        <Box 
-          as="form" 
+        <Box
+          as="form"
           onSubmit={handleDeleteGuild}
-          p={isMobile ? 0 : 4} 
-          borderWidth={isMobile ? 0 : 1} 
-          borderRadius="lg" 
-          boxShadow={isMobile ? "none" : boxShadow} 
+          p={isMobile ? 0 : 4}
+          borderWidth={isMobile ? 0 : 1}
+          borderRadius="lg"
+          boxShadow={isMobile ? "none" : boxShadow}
           bg={isMobile ? "transparent" : bgColor}
         >
           <VStack spacing={4} align="stretch">
@@ -297,9 +402,9 @@ export function AdminFormsSection({
       </MobileFormWrapper>
 
       {/* Formulaire renommage guilde */}
-      <MobileFormWrapper 
-        title="Renommer une guilde" 
-        formName="rename" 
+      <MobileFormWrapper
+        title="Renommer une guilde"
+        formName="rename"
         colorScheme="orange"
         isMobile={isMobile}
         openForm={openForm}
@@ -307,13 +412,13 @@ export function AdminFormsSection({
         bgColor={bgColor}
         boxShadow={boxShadow}
       >
-        <Box 
-          as="form" 
+        <Box
+          as="form"
           onSubmit={handleRenameGuild}
-          p={isMobile ? 0 : 4} 
-          borderWidth={isMobile ? 0 : 1} 
-          borderRadius="lg" 
-          boxShadow={isMobile ? "none" : boxShadow} 
+          p={isMobile ? 0 : 4}
+          borderWidth={isMobile ? 0 : 1}
+          borderRadius="lg"
+          boxShadow={isMobile ? "none" : boxShadow}
           bg={isMobile ? "transparent" : bgColor}
         >
           <VStack spacing={4} align="stretch">

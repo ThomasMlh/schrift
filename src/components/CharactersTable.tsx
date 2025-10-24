@@ -59,6 +59,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
   const badgeVariant = useColorModeValue('subtle', 'solid');
+  const filterBg = useColorModeValue('blue.50', 'blue.900');
 
   // Fonction pour obtenir la couleur d'une affinité
   const getAffinityColor = (affinity: string): string => {
@@ -197,14 +198,11 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
 
   // Fonction de recherche avec debounce
   useEffect(() => {
-    // Ne se déclenche que s'il y a vraiment une recherche ou un filtre
-    if (searchTerm !== "" || selectedAffinity !== "" || selectedCategory !== "" || selectedKiller !== "") {
-      const timeoutId = setTimeout(() => {
-        loadCharacters(1, searchTerm, selectedAffinity, selectedCategory, selectedKiller);
-      }, 500);
+    const timeoutId = setTimeout(() => {
+      loadCharacters(1, searchTerm, selectedAffinity, selectedCategory, selectedKiller);
+    }, 500);
 
-      return () => clearTimeout(timeoutId);
-    }
+    return () => clearTimeout(timeoutId);
   }, [searchTerm, selectedAffinity, selectedCategory, selectedKiller]);
 
     // Gestion du changement de page
@@ -403,7 +401,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
 
       {/* Affichage des filtres actifs */}
       {(searchTerm || selectedAffinity || selectedCategory || selectedKiller) && (
-        <Box p={3} bg={useColorModeValue('blue.50', 'blue.900')} borderRadius="md">
+        <Box p={3} bg={filterBg} borderRadius="md">
           <Text fontSize="sm" fontWeight="semibold" mb={2}>Filtres actifs :</Text>
           <HStack spacing={2} flexWrap="wrap">
             {searchTerm && (

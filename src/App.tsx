@@ -4,7 +4,7 @@ import { GuildTabsList } from "./components/GuildTabsList";
 import { CharactersTable } from "./components/CharactersTable";
 import { useState } from "react";
 
-type Page = "guilds" | "characters" | "admin";
+type Page = "guilds" | "characters";
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>("guilds");

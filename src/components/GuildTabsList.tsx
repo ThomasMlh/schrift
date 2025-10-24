@@ -21,7 +21,7 @@ export type Guild = {
 
 export type Member = {
   _id: string;
-  name: string;
+  username: string;
   role: Role;
   guilde_id: string;
 };
@@ -42,11 +42,24 @@ export function GuildTabsList({
   // API URL depuis les variables d'environnement
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
+  // Fonction utilitaire pour les requêtes authentifiées
+  const authenticatedFetch = (url: string, options: RequestInit = {}) => {
+    const token = localStorage.getItem('userToken');
+    return fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+        ...options.headers,
+      },
+    });
+  };
+
   // Charger les guildes au montage du composant
   useEffect(() => {
     if (!apiUrl) return;
 
-    fetch(`${apiUrl}/api/guildes`)
+    authenticatedFetch(`${apiUrl}/api/guildes`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -69,12 +82,16 @@ export function GuildTabsList({
     if (!apiUrl || guilds.length === 0) return;
 
     guilds.forEach(guild => {
-      fetch(`${apiUrl}/api/guildes/${guild._id}/membres`)
+      authenticatedFetch(`${apiUrl}/api/guildes/${guild._id}/membres`)
         .then(res => res.json())
         .then(data => {
+          // L'API retourne { success: true, membres: [...], count: number }
+          const membersList = data.membres || data;
+          const members = Array.isArray(membersList) ? membersList : [];
+          
           setMembersByGuild(prev => ({
             ...prev,
-            [guild._id]: Array.isArray(data) ? data : []
+            [guild._id]: members
           }));
         })
         .catch(() => {
@@ -93,7 +110,7 @@ export function GuildTabsList({
   useEffect(() => {
     if (refreshTrigger > 0 && apiUrl) {
       // Recharger les guildes
-      fetch(`${apiUrl}/api/guildes`)
+      authenticatedFetch(`${apiUrl}/api/guildes`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {
@@ -116,12 +133,16 @@ export function GuildTabsList({
     if (!apiUrl || guilds.length === 0) return;
 
     guilds.forEach(guild => {
-      fetch(`${apiUrl}/api/guildes/${guild._id}/membres`)
+      authenticatedFetch(`${apiUrl}/api/guildes/${guild._id}/membres`)
         .then(res => res.json())
         .then(data => {
+          // L'API retourne { success: true, membres: [...], count: number }
+          const membersList = data.membres || data;
+          const members = Array.isArray(membersList) ? membersList : [];
+          
           setMembersByGuild(prev => ({
             ...prev,
-            [guild._id]: Array.isArray(data) ? data : []
+            [guild._id]: members
           }));
         })
         .catch(() => {
@@ -138,7 +159,7 @@ export function GuildTabsList({
 
   // Ouvrir la popup de confirmation pour supprimer un membre
   const handleRemoveMember = (member: Member) => {
-    setMemberToDelete({ id: member._id, name: member.name });
+    setMemberToDelete({ id: member._id, name: member.username });
     setIsDeleteMemberOpen(true);
   };
 
@@ -147,7 +168,7 @@ export function GuildTabsList({
     if (!apiUrl || !memberToDelete) return;
 
     try {
-      const response = await fetch(`${apiUrl}/api/membres/${memberToDelete.id}`, {
+      const response = await authenticatedFetch(`${apiUrl}/api/membres/${memberToDelete.id}`, {
         method: 'DELETE'
       });
 
@@ -186,7 +207,7 @@ export function GuildTabsList({
     if (!apiUrl) return;
 
     try {
-      const response: any = await fetch(`${apiUrl}/api/membres/${member._id}/role`, {
+      const response: any = await authenticatedFetch(`${apiUrl}/api/users/${member._id}/role`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -200,7 +221,7 @@ export function GuildTabsList({
         loadMembers();
         toast({
           title: "Rôle modifié",
-          description: data.message || `${member.name} est maintenant ${newRole === "chef" ? "Chef" : newRole === "sous-chef" ? "Sous-Chef" : "Membre"}`,
+          description: data.message || `${member.username} est maintenant ${newRole === "chef" ? "Chef" : newRole === "sous-chef" ? "Sous-Chef" : "Membre"}`,
           status: "success",
           duration: 2000,
         });
@@ -228,12 +249,12 @@ export function GuildTabsList({
     const targetGuild = guilds.find(g => g._id === toGuildId);
 
     try {
-      const response = await fetch(`${apiUrl}/api/membres/${member._id}/guilde`, {
+      const response = await authenticatedFetch(`${apiUrl}/api/users/${member._id}/guild`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ guilde_id: toGuildId }),
+        body: JSON.stringify({ guildeId: toGuildId }),
       });
 
       const data = await response.json();
@@ -242,7 +263,7 @@ export function GuildTabsList({
         loadMembers();
         toast({
           title: "Membre déplacé",
-          description: data.message || `${member.name} a été déplacé vers ${targetGuild?.name || 'la nouvelle guilde'}`,
+          description: data.message || `${member.username} a été déplacé vers ${targetGuild?.name || 'la nouvelle guilde'}`,
           status: "success",
           duration: 2000,
         });
@@ -277,7 +298,7 @@ export function GuildTabsList({
       }
       
       // Si même rôle, trier par ordre alphabétique
-      return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' });
+      return a.username.localeCompare(b.username, 'fr', { sensitivity: 'base' });
     });
   };
 
@@ -343,7 +364,7 @@ export function GuildTabsList({
                     >
                       <VStack align="start" spacing={1} flex={1}>
                         <Text fontWeight="medium" fontSize="md">
-                          {member.name}
+                          {member.username}
                           <Text as="span" fontSize="xs" color="gray.500" ml={2}>
                             [
                             {member.role === "chef"

@@ -1,4 +1,4 @@
-import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Box, Button, Container, Flex, FormControl, FormLabel, Heading, Input, Text, useColorModeValue, useToast } from "@chakra-ui/react";
+import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Box, Button, Container, Flex, Heading, Text, useColorModeValue, useToast } from "@chakra-ui/react";
 import { GuildTabsList, type Guild } from "../components/GuildTabsList";
 import { AdminFormsSection } from "../components/AdminFormsSection";
 import { jwtDecode } from 'jwt-decode';
@@ -12,8 +12,8 @@ export default function AdminPage() {
   const [renameGuildId, setRenameGuildId] = useState("");
   const [renameGuildName, setRenameGuildName] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-  const [passwordInput, setPasswordInput] = useState("");
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userInfo, setUserInfo] = useState<{username: string, avatar?: string} | null>(null);
   const [isRenameConfirmOpen, setIsRenameConfirmOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   
@@ -52,12 +52,15 @@ export default function AdminPage() {
 
   // Fonction pour faire des requêtes authentifiées avec gestion de l'expiration
   const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('userToken') || localStorage.getItem('adminToken'); // Support des deux pour migration
 
     if (!isTokenValid(token)) {
       // Token manquant, invalide ou expiré
+      localStorage.removeItem('userToken');
       localStorage.removeItem('adminToken');
       setIsAdmin(false);
+      setIsLoggedIn(false);
+      setUserInfo(null);
       toast({
         title: "Session expirée",
         description: "Veuillez vous reconnecter",
@@ -77,8 +80,11 @@ export default function AdminPage() {
 
     // Vérifier si le serveur retourne 401 (au cas où)
     if (response.status === 401) {
+      localStorage.removeItem('userToken');
       localStorage.removeItem('adminToken');
       setIsAdmin(false);
+      setIsLoggedIn(false);
+      setUserInfo(null);
       toast({
         title: "Session expirée",
         description: "Veuillez vous reconnecter",
@@ -120,6 +126,7 @@ export default function AdminPage() {
   };
 
   // === USE EFFECTS ===
+
   useEffect(() => {
     fetch(`${apiUrl}/api/guildes`)
       .then(res => res.json())
@@ -127,14 +134,34 @@ export default function AdminPage() {
       .catch(() => setGuilds([]));
   }, []);
 
-  // Vérifier et valider le token admin au chargement
+  // Vérifier et valider le token au chargement
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('userToken') || localStorage.getItem('adminToken'); // Migration
 
-    if (isTokenValid(token)) {
-      setIsAdmin(true);
+    if (token && isTokenValid(token)) {
+      // Décoder le token pour récupérer les infos utilisateur
+      try {
+        const decoded = jwtDecode(token) as any;
+        setIsLoggedIn(true);
+        setIsAdmin(decoded.isAdmin || false);
+        setUserInfo({
+          username: decoded.username || decoded.name || 'Utilisateur',
+          avatar: decoded.avatar
+        });
+        
+        // Migrer l'ancien token admin vers userToken
+        if (localStorage.getItem('adminToken')) {
+          localStorage.setItem('userToken', token);
+          localStorage.removeItem('adminToken');
+        }
+      } catch (error) {
+        console.error('Erreur décodage token:', error);
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('adminToken');
+      }
     } else if (token) {
       // Token existe mais est invalide/expiré
+      localStorage.removeItem('userToken');
       localStorage.removeItem('adminToken');
       toast({
         title: "Session expirée",
@@ -150,12 +177,14 @@ export default function AdminPage() {
   // Vérifier le token quand l'utilisateur revient sur la page
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!document.hidden && isAdmin) {
+      if (!document.hidden && isLoggedIn) {
         // La page est redevenue visible, vérifier le token côté client
-        const token = localStorage.getItem('adminToken');
+        const token = localStorage.getItem('userToken');
         if (!isTokenValid(token)) {
-          localStorage.removeItem('adminToken');
+          localStorage.removeItem('userToken');
           setIsAdmin(false);
+          setIsLoggedIn(false);
+          setUserInfo(null);
           toast({
             title: "Session expirée",
             description: "Veuillez vous reconnecter",
@@ -168,70 +197,12 @@ export default function AdminPage() {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [isAdmin, toast]);
+  }, [isLoggedIn, toast]);
 
   // === RENDER CONDITIONNEL ===
-  if (!isAdmin) {
-    return (
-      <Flex mx="2rem" align="center" justify="center" alignSelf={"center"}>
-        <Box p={8} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}
-          minW="320px">
-          <Heading mb={4} size="md" textAlign="center">Connexion Admin</Heading>
-          <form onSubmit={async e => {
-            e.preventDefault();
-            setIsAuthenticating(true);
-            try {
-              // 1. L'utilisateur saisit son mot de passe
-              const userPassword = passwordInput;
-
-              // 3. Envoi au serveur
-              const response = await fetch(`${apiUrl}/api/admin/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password: userPassword })
-              });
-
-              if (response.ok) {
-                const { token } = await response.json();
-                // Stocker le token
-                localStorage.setItem('adminToken', token);
-                setIsAdmin(true);
-                setPasswordInput("");
-                toast({ title: "Mode admin activé", status: "success" });
-              } else {
-                toast({ title: "Mot de passe incorrect", status: "error" });
-              }
-            } catch (error) {
-              toast({ title: "Erreur de connexion", status: "error" });
-            } finally {
-              setIsAuthenticating(false);
-            }
-          }}>
-            <FormControl>
-              <FormLabel>Mot de passe admin</FormLabel>
-              <Input
-                type="password"
-                value={passwordInput}
-                onChange={e => setPasswordInput(e.target.value)}
-                autoFocus
-              />
-            </FormControl>
-            <Button
-              mt={4}
-              colorScheme="blue"
-              type="submit"
-              w="full"
-              isLoading={isAuthenticating}
-              loadingText="Connexion..."
-            >
-              Se connecter
-            </Button>
-          </form>
-        </Box>
-      </Flex>
-    );
-  }
-
+  // La page admin est maintenant accessible depuis le header
+  // L'authentification est gérée au niveau global
+  
   if (!Array.isArray(guilds)) {
     return (
       <Flex w="100%" h="100%" align="center" justify="center">
@@ -282,39 +253,42 @@ export default function AdminPage() {
         boxShadow="none"
         m="0"
       >
-        <Heading mb={8} textAlign="center">Admin - Gestion des Guildes Ṣčhrīft</Heading>
+        <Heading mb={8} textAlign="center">
+          {isAdmin ? "Admin - Gestion des Guildes Ṣčhrīft" : "Guildes Ṣčhrīft"}
+        </Heading>
 
-        {/* Bouton de déconnexion */}
-        <Button
-          mb={4}
-          p={2}
-          size="sm"
-          variant="outline"
-          onClick={() => {
-            localStorage.removeItem('adminToken');
-            setIsAdmin(false);
-            toast({ title: "Déconnexion réussie", status: "info" });
-          }}
-        >
-          Se déconnecter
-        </Button>
+        {/* Informations utilisateur et bouton de déconnexion */}
+        <Flex align="center" gap={4} mb={4}>
+          {userInfo && (
+            <Text fontSize="sm" color="gray.600">
+              Connecté en tant que <strong>{userInfo.username}</strong>
+              {isAdmin && <Text as="span" color="orange.500" ml={2}>(Admin)</Text>}
+            </Text>
+          )}
+        </Flex>
 
-        <AdminFormsSection
-          guilds={guilds}
-          apiUrl={apiUrl}
-          authenticatedFetch={authenticatedFetch}
-          onDataChange={refreshData}
-          onDeleteRequest={(guildId) => {
-            setDeleteGuildId(guildId);
-            setIsDeleteConfirmOpen(true);
-          }}
-          onRenameRequest={(guildId, newName) => {
-            setRenameGuildId(guildId);
-            setRenameGuildName(newName);
-            setIsRenameConfirmOpen(true);
-          }}
-        />
-        {guilds && guilds.length === 0 && (<Text>Aucune guilde disponible.</Text>)}
+        {/* Section admin (visible seulement pour les admins) */}
+        {isAdmin && (
+          <AdminFormsSection
+            guilds={guilds}
+            apiUrl={apiUrl}
+            authenticatedFetch={authenticatedFetch}
+            onDataChange={refreshData}
+            onDeleteRequest={(guildId) => {
+              setDeleteGuildId(guildId);
+              setIsDeleteConfirmOpen(true);
+            }}
+            onRenameRequest={(guildId, newName) => {
+              setRenameGuildId(guildId);
+              setRenameGuildName(newName);
+              setIsRenameConfirmOpen(true);
+            }}
+          />
+        )}
+        
+        {guilds && guilds.length === 0 && (
+          <Text>Aucune guilde disponible.</Text>
+        )}
 
         {/* Popup confirmation suppression */}
         <AlertDialog
