@@ -53,11 +53,11 @@ export function GuildTabsList({
           setGuilds(data);
         }
       })
-      .catch(() => {
+      .catch((error) => {
         setGuilds([]);
         toast({
           title: "Erreur",
-          description: "Impossible de charger les guildes",
+          description: error.message || "Impossible de charger les guildes",
           status: "error",
           duration: 3000,
         });
@@ -81,11 +81,11 @@ export function GuildTabsList({
             [guild._id]: members
           }));
         })
-        .catch(() => {
+        .catch((error) => {
           setMembersByGuild(prev => ({ ...prev, [guild._id]: [] }));
           toast({
             title: "Erreur",
-            description: `Impossible de charger les membres de ${guild.name}`,
+            description: error.message || `Impossible de recharger les membres de la guilde ${guild.name}`,
             status: "error",
             duration: 3000,
           });
@@ -104,10 +104,10 @@ export function GuildTabsList({
             setGuilds(data);
           }
         })
-        .catch(() => {
+        .catch(error => {
           toast({
             title: "Erreur",
-            description: "Impossible de recharger les guildes",
+            description: error.message || "Impossible de recharger les guildes",
             status: "error",
             duration: 3000,
           });
@@ -132,11 +132,11 @@ export function GuildTabsList({
             [guild._id]: members
           }));
         })
-        .catch(() => {
+        .catch(error => {
           setMembersByGuild(prev => ({ ...prev, [guild._id]: [] }));
           toast({
             title: "Erreur",
-            description: `Impossible de recharger les membres de la guilde ${guild.name}`,
+            description: error instanceof Error ? error.message : `Impossible de recharger les membres de la guilde ${guild.name}`,
             status: "error",
             duration: 3000,
           });
@@ -165,14 +165,14 @@ export function GuildTabsList({
         loadMembers();
         toast({
           title: "Membre supprimé",
-          description: data.message || "Le membre a été supprimé avec succès",
+          description: data.message,
           status: "success",
           duration: 2000,
         });
       } else {
         toast({
           title: "Erreur",
-          description: data.message || "Impossible de supprimer le membre",
+          description: data.message,
           status: "error",
           duration: 3000,
         });
@@ -180,7 +180,7 @@ export function GuildTabsList({
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Erreur lors de la suppression du membre",
+        description: error instanceof Error ? error.message : "Erreur lors de la suppression du membre",
         status: "error",
         duration: 3000,
       });
