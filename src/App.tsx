@@ -3,8 +3,7 @@ import { Container, Heading, Flex, useColorModeValue, Button, HStack } from "@ch
 import { GuildTabsList } from "./components/GuildTabsList";
 import { CharactersTable } from "./components/CharactersTable";
 import { useState } from "react";
-
-type Page = "guilds" | "characters";
+import type { Page } from "./interfaces";
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>("guilds");

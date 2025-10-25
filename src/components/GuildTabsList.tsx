@@ -6,25 +6,12 @@ import {
   useBreakpointValue
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-
-type Role = "chef" | "sous-chef" | "membre";
+import type { Role, Guild, User } from "../interfaces";
 
 interface GuildTabsListProps {
   editable?: boolean;
   refreshTrigger?: number;
 }
-
-export type Guild = {
-  _id: string;
-  name: string;
-};
-
-export type Member = {
-  _id: string;
-  username: string;
-  role: Role;
-  guilde_id: string;
-};
 
 export function GuildTabsList({
   editable = false,
@@ -32,9 +19,9 @@ export function GuildTabsList({
 }: GuildTabsListProps) {
   // Seulement les hooks essentiels
   const [guilds, setGuilds] = useState<Guild[]>([]);
-  const [membersByGuild, setMembersByGuild] = useState<Record<string, Member[]>>({});
+  const [membersByGuild, setMembersByGuild] = useState<Record<string, User[]>>({});
   const [isDeleteMemberOpen, setIsDeleteMemberOpen] = useState(false);
-  const [memberToDelete, setMemberToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [memberToDelete, setMemberToDelete] = useState<{ id: string; name: string; guildId: string } | null>(null);
   const toast = useToast();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const orientation = useBreakpointValue<"vertical" | "horizontal">({ base: 'vertical', md: 'horizontal' }) || 'horizontal';
@@ -158,8 +145,8 @@ export function GuildTabsList({
   };
 
   // Ouvrir la popup de confirmation pour supprimer un membre
-  const handleRemoveMember = (member: Member) => {
-    setMemberToDelete({ id: member._id, name: member.username });
+  const handleRemoveMember = (member: User, guildId: string) => {
+    setMemberToDelete({ id: member._id, name: member.global_name || member.username, guildId: guildId });
     setIsDeleteMemberOpen(true);
   };
 
@@ -168,7 +155,7 @@ export function GuildTabsList({
     if (!apiUrl || !memberToDelete) return;
 
     try {
-      const response = await authenticatedFetch(`${apiUrl}/api/membres/${memberToDelete.id}`, {
+      const response = await authenticatedFetch(`${apiUrl}/api/guildes/${memberToDelete.guildId}/membres/${memberToDelete.id}`, {
         method: 'DELETE'
       });
 
@@ -203,7 +190,7 @@ export function GuildTabsList({
     }
   };
 
-  const handleRoleChange = async (member: Member, newRole: Role) => {
+  const handleRoleChange = async (member: User, newRole: Role) => {
     if (!apiUrl) return;
 
     try {
@@ -243,7 +230,7 @@ export function GuildTabsList({
     }
   };
 
-  const handleMoveMember = async (fromGuildId: string, member: Member, toGuildId: string) => {
+  const handleMoveMember = async (fromGuildId: string, member: User, toGuildId: string) => {
     if (fromGuildId === toGuildId || !apiUrl) return;
 
     const targetGuild = guilds.find(g => g._id === toGuildId);
@@ -286,7 +273,7 @@ export function GuildTabsList({
   };
 
   // Fonction pour trier les membres : chef > sous-chefs > membres, puis alphabétique
-  const sortMembers = (members: Member[]): Member[] => {
+  const sortMembers = (members: User[]): User[] => {
     return [...members].sort((a, b) => {
       // Définir l'ordre de priorité des rôles
       const roleOrder = { chef: 1, "sous-chef": 2, membre: 3 };
@@ -349,7 +336,7 @@ export function GuildTabsList({
               </Box>
               <VStack spacing={4} align="stretch">
                 {membersByGuild[guild._id]?.length > 0 ? (
-                  sortMembers(membersByGuild[guild._id]).map((member: Member) => (
+                  sortMembers(membersByGuild[guild._id]).map((member: User) => (
                     <Stack
                       key={member._id}
                       direction={{ base: "column", md: "row" }}
@@ -364,7 +351,7 @@ export function GuildTabsList({
                     >
                       <VStack align="start" spacing={1} flex={1}>
                         <Text fontWeight="medium" fontSize="md">
-                          {member.username}
+                          {member.global_name || member.username}
                           <Text as="span" fontSize="xs" color="gray.500" ml={2}>
                             [
                             {member.role === "chef"
@@ -396,7 +383,7 @@ export function GuildTabsList({
                               bg="red.500"
                               color="white"
                               _hover={{ bg: "red.600" }}
-                              onClick={() => handleRemoveMember(member)}
+                              onClick={() => handleRemoveMember(member, guild._id)}
                             />
                             <Select
                               size="sm"

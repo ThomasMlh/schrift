@@ -1,8 +1,9 @@
 import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Box, Button, Container, Flex, Heading, Text, useColorModeValue, useToast } from "@chakra-ui/react";
-import { GuildTabsList, type Guild } from "../components/GuildTabsList";
+import { GuildTabsList } from "../components/GuildTabsList";
 import { AdminFormsSection } from "../components/AdminFormsSection";
 import { jwtDecode } from 'jwt-decode';
 import { useEffect, useRef, useState } from "react";
+import type { Guild } from "../interfaces";
 
 export default function AdminPage() {
   // === TOUS LES HOOKS EN PREMIER ===

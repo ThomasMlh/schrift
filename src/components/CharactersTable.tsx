@@ -5,36 +5,7 @@ import {
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { SearchIcon } from "@chakra-ui/icons";
-
-interface Character {
-  _id: string;
-  name: string;
-  search_name?: string;
-  affinity?: string;
-  categories?: string[];
-  killers?: string[];
-  link?: string; // URL de l'image
-  [key: string]: any; // Pour les autres propriétés
-}
-
-interface Pagination {
-  currentPage: number;
-  totalPages: number;
-  totalCount: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-  itemsPerPage: number;
-  itemsOnPage: number;
-}
-
-interface CharactersResponse {
-  characters: Character[];
-  pagination: Pagination;
-  searchTerm?: string;
-  affinity?: string;
-  category?: string;
-  killer?: string;
-}
+import type { Character, Pagination, CharactersResponse } from "../interfaces";
 
 interface CharactersTableProps {
   apiUrl: string;

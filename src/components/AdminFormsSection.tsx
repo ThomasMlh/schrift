@@ -3,16 +3,7 @@ import {
   useBreakpointValue, useColorModeValue, useToast, Text
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import type { Guild } from "./GuildTabsList";
-import type { Role } from "@/interfaces";
-
-// Type pour les utilisateurs
-interface User {
-  _id: string;
-  username: string;
-  discordId?: string;
-  [key: string]: any;
-}
+import type { Guild, Role, User } from "../interfaces";
 
 // Composant wrapper pour les formulaires mobiles (défini en dehors pour éviter les re-créations)
 const MobileFormWrapper = ({
@@ -317,7 +308,7 @@ export function AdminFormsSection({
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((user: User) => (
                     <option key={user._id} value={user._id}>
-                      {user.username} {user.discordId ? `(Discord: ${user.discordId})` : ''}
+                      {user.global_name} {user.discord_id ? `(Discord: ${user.discord_id})` : ''}
                     </option>
                   ))
                 ) : (

@@ -7,6 +7,7 @@ import { jwtDecode } from 'jwt-decode';
 import App from "./App";
 import AdminPage from "./pages/AdminPage";
 import DiscordCallback from "./pages/DiscordCallback";
+import type { User } from "./interfaces";
 
 
 function ColorModeSwitcher() {
@@ -48,7 +49,7 @@ function ProtectedRoute({
 export default function MainRouter() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userInfo, setUserInfo] = useState<{username: string, avatar?: string} | null>(null);
+  const [userInfo, setUserInfo] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true); // État de chargement
   const toast = useToast();
@@ -118,8 +119,8 @@ export default function MainRouter() {
           }
           
           setUserInfo({
-            username: decoded.username || decoded.name || 'Utilisateur',
-            avatar: avatarUrl || undefined
+            ...decoded,
+            avatar: avatarUrl || undefined,
           });
           
           if (localStorage.getItem('adminToken')) {
@@ -172,7 +173,7 @@ export default function MainRouter() {
             />
             <VStack spacing={0} align="start">
               <Text fontSize="sm" fontWeight="medium" lineHeight="short">
-                {userInfo?.username}
+                {userInfo?.global_name}
               </Text>
               {isAdmin && (
                 <Text fontSize="xs" color="orange.500" lineHeight="short">
@@ -272,7 +273,7 @@ export default function MainRouter() {
                       />
                       <VStack spacing={0} align="start">
                         <Text fontSize="sm" fontWeight="medium">
-                          {userInfo?.username}
+                          {userInfo?.global_name}
                         </Text>
                         {isAdmin && (
                           <Text fontSize="xs" color="orange.500">
