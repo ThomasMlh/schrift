@@ -4,6 +4,7 @@ import {
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import type { Guild, Role, User } from "../interfaces";
+import { UserSearchSelect } from "./ui/UserSearchSelect";
 
 // Composant wrapper pour les formulaires mobiles (défini en dehors pour éviter les re-créations)
 const MobileFormWrapper = ({
@@ -81,7 +82,6 @@ export function AdminFormsSection({
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [userSearchQuery, setUserSearchQuery] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [openForm, setOpenForm] = useState<string | null>(null);
 
   // Hooks UI
@@ -106,7 +106,6 @@ export function AdminFormsSection({
           const users = Array.isArray(usersList) ? usersList : [];
 
           setUsers(users);
-          setFilteredUsers(users);
         } else {
           const errorText = await response.text();
           console.error('❌ Erreur API users:', response.status, errorText);
@@ -132,18 +131,6 @@ export function AdminFormsSection({
       loadUsers();
     }
   }, [apiUrl, authenticatedFetch, toast]);
-
-  // Filtrer les utilisateurs selon la recherche
-  useEffect(() => {
-    if (!userSearchQuery.trim()) {
-      setFilteredUsers(users);
-    } else {
-      const filtered = users.filter(user =>
-        user.username.toLowerCase().includes(userSearchQuery.toLowerCase())
-      );
-      setFilteredUsers(filtered);
-    }
-  }, [userSearchQuery, users]);
 
   // Guildes triées
   const sortedGuilds = [...guilds].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
@@ -291,40 +278,18 @@ export function AdminFormsSection({
         >
           <VStack spacing={4} align="stretch">
             <FormControl>
-              <FormLabel>Rechercher un utilisateur</FormLabel>
-              <Input
-                placeholder="Tapez pour rechercher un utilisateur..."
-                value={userSearchQuery}
-                onChange={e => setUserSearchQuery(e.target.value)}
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Sélectionner un utilisateur</FormLabel>
-              <Select
-                value={selectedUserId}
-                onChange={e => setSelectedUserId(e.target.value)}
+              <FormLabel>Rechercher et sélectionner un utilisateur</FormLabel>
+              <UserSearchSelect
+                users={users}
+                selectedUserId={selectedUserId}
+                onUserSelect={setSelectedUserId}
+                searchQuery={userSearchQuery}
+                onSearchChange={setUserSearchQuery}
                 placeholder="Choisir un utilisateur"
-              >
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user: User) => (
-                    <option key={user._id} value={user._id}>
-                      {user.global_name} {user.discord_id ? `(Discord: ${user.discord_id})` : ''}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>
-                    {userSearchQuery ? "Aucun utilisateur trouvé" : "Chargement..."}
-                  </option>
-                )}
-              </Select>
+              />
               <Text fontSize="xs" color="gray.500" mt={1}>
-                Debug: {users.length} utilisateurs chargés, {filteredUsers.length} filtrés
+                {users.length} utilisateurs chargés
               </Text>
-              {filteredUsers.length > 10 && (
-                <Text fontSize="sm" color="gray.500" mt={1}>
-                  {filteredUsers.length} utilisateurs trouvés. Utilisez la recherche pour affiner.
-                </Text>
-              )}
             </FormControl>
             <FormControl>
               <FormLabel>Rôle</FormLabel>
