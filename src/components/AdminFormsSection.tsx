@@ -7,7 +7,20 @@ import type { Guild, Role, User } from "../interfaces";
 import { UserSearchSelect } from "./ui/UserSearchSelect";
 
 // Composant wrapper pour les formulaires mobiles (défini en dehors pour éviter les re-créations)
-const MobileFormWrapper = ({
+
+interface MobileFormWrapperProps {
+  title: string;
+  formName: string;
+  children: React.ReactNode;
+  colorScheme?: string; 
+  isMobile?: boolean;
+  openForm: string | null;
+  toggleForm: (formName: string) => void;
+  bgColor: string;
+  boxShadow: string;
+}
+
+const MobileFormWrapper: React.FC<MobileFormWrapperProps> = ({
   title,
   formName,
   children,
@@ -17,16 +30,6 @@ const MobileFormWrapper = ({
   toggleForm,
   bgColor,
   boxShadow
-}: {
-  title: string;
-  formName: string;
-  children: React.ReactNode;
-  colorScheme?: string;
-  isMobile?: boolean;
-  openForm: string | null;
-  toggleForm: (formName: string) => void;
-  bgColor: string;
-  boxShadow: string;
 }) => {
   if (!isMobile) {
     return <>{children}</>;
@@ -62,14 +65,14 @@ interface AdminFormsSectionProps {
   onRenameRequest: (guildId: string, newName: string) => void;
 }
 
-export function AdminFormsSection({
+const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
   guilds,
   apiUrl,
   authenticatedFetch,
   onDataChange,
   onDeleteRequest,
   onRenameRequest
-}: AdminFormsSectionProps) {
+}) => {
   // États pour les formulaires
   const [newGuildName, setNewGuildName] = useState("");
   const [newMemberRole, setNewMemberRole] = useState<Role>("membre");
@@ -219,7 +222,13 @@ export function AdminFormsSection({
   };
 
   return (
-    <Stack direction={{ base: "column", md: "row" }} spacing={8} mb={8}>
+    <Stack 
+      direction={{ base: "column", md: "row" }} 
+      spacing={8} 
+      mb={8}
+      justify="center"
+      w="100%"
+    >
       {/* Formulaire création guilde */}
       <MobileFormWrapper
         title="Créer une guilde"
@@ -403,3 +412,5 @@ export function AdminFormsSection({
     </Stack>
   );
 }
+
+export default AdminFormsSection;

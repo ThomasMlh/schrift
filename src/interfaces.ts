@@ -1,5 +1,6 @@
 // Types généraux
 export type Page = "guilds" | "characters";
+export type AdminPage = "guilds" | "cycles";
 export type Role = "chef" | "sous-chef" | "membre";
 
 // Interfaces Guildes

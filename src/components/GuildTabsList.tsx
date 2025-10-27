@@ -3,9 +3,11 @@ import {
   Box, VStack, Text, HStack, Stack, Select, IconButton,
   useToast, AlertDialog, AlertDialogBody, AlertDialogContent, 
   AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button,
-  useBreakpointValue
+  useBreakpointValue, Link,
+  useColorModeValue
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import type { Role, Guild, User } from "../interfaces";
 
 interface GuildTabsListProps {
@@ -25,6 +27,7 @@ export function GuildTabsList({
   const toast = useToast();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const orientation = useBreakpointValue<"vertical" | "horizontal">({ base: 'vertical', md: 'horizontal' }) || 'horizontal';
+  const linkColor = useColorModeValue('black', 'white');
 
   // API URL depuis les variables d'environnement
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -351,7 +354,22 @@ export function GuildTabsList({
                     >
                       <VStack align="start" spacing={1} flex={1}>
                         <Text fontWeight="medium" fontSize="md">
-                          {member.global_name || member.username}
+                          <Link 
+                            as={RouterLink}
+                            to={`/user/${member._id}`}
+                            color={linkColor}
+                            _hover={{ 
+                              textDecoration: "underline",
+                              color: linkColor
+                            }}
+                            _focus={{
+                              outline: "1px solid",
+                              outlineColor: linkColor,
+                              outlineOffset: "2px"
+                            }}
+                          >
+                            {member.global_name || member.username}
+                          </Link>
                           <Text as="span" fontSize="xs" color="gray.500" ml={2}>
                             [
                             {member.role === "chef"

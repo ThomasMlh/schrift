@@ -7,6 +7,7 @@ import { jwtDecode } from 'jwt-decode';
 import App from "./App";
 import AdminPage from "./pages/AdminPage";
 import DiscordCallback from "./pages/DiscordCallback";
+import UserPage from "./pages/UserPage";
 import type { User } from "./interfaces";
 
 
@@ -317,6 +318,7 @@ export default function MainRouter() {
             } 
           />
           <Route path="/discord-callback" element={<DiscordCallback />} />
+          <Route path="/user/:userId" element={<UserPage />} />
         </Routes>
       </Box>
     </Router>
