@@ -15,10 +15,10 @@ interface GuildTabsListProps {
   refreshTrigger?: number;
 }
 
-export function GuildTabsList({
+const GuildTabsList = ({
   editable = false,
   refreshTrigger = 0
-}: GuildTabsListProps) {
+}: GuildTabsListProps) => {
   // Seulement les hooks essentiels
   const [guilds, setGuilds] = useState<Guild[]>([]);
   const [membersByGuild, setMembersByGuild] = useState<Record<string, User[]>>({});
@@ -292,6 +292,14 @@ export function GuildTabsList({
     });
   };
 
+  if (guilds.length === 0 || !guilds) {
+    return (
+      <Text color="gray.500" textAlign="center" py={8}>
+        Aucune guilde disponible.
+      </Text>
+    );
+  }
+
   return (
     <Tabs
       isFitted
@@ -474,3 +482,5 @@ export function GuildTabsList({
     </Tabs>
   );
 }
+
+export { GuildTabsList };

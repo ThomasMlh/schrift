@@ -1,10 +1,13 @@
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
-import {  useColorMode, Button, Box, Flex, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerBody, useDisclosure, VStack, HStack, Text, useToast, Avatar } from "@chakra-ui/react";
+import {  useColorMode, Button, Box, Flex, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerBody, useDisclosure, VStack, HStack, Text, useToast, Avatar, useColorModeValue } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { FaDiscord } from 'react-icons/fa';
 import { useState, useEffect } from "react";
 import { jwtDecode } from 'jwt-decode';
-import App from "./App";
+import HomePage from "./pages/HomePage";
+import CharactersPage from "./pages/CharactersPage";
+import { CyclesPage } from "./pages/CyclesPage";
+import { CycleDetailPage } from "./pages/CycleDetailPage";
 import AdminPage from "./pages/AdminPage";
 import DiscordCallback from "./pages/DiscordCallback";
 import UserPage from "./pages/UserPage";
@@ -52,9 +55,20 @@ export default function MainRouter() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(true); // État de chargement
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const toast = useToast();
   const placement = "left";
+  
+  // Tous les hooks de couleur en haut
+  const linkColor = useColorModeValue('black.500', 'white.500');
+  const homeHoverBg = useColorModeValue('blue.50', 'blue.900');
+  const homeHoverColor = useColorModeValue('blue.600', 'blue.200');
+  const charactersHoverBg = useColorModeValue('green.50', 'green.900');
+  const charactersHoverColor = useColorModeValue('green.600', 'green.200');
+  const cyclesHoverBg = useColorModeValue('purple.50', 'purple.900');
+  const cyclesHoverColor = useColorModeValue('purple.600', 'purple.200');
+  const adminHoverBg = useColorModeValue('orange.50', 'orange.900');
+  const adminHoverColor = useColorModeValue('orange.600', 'orange.200');
 
   // Fonction pour construire l'URL de l'avatar Discord
   const getDiscordAvatarUrl = (userId: string, avatarHash: string, size: number = 128) => {
@@ -216,13 +230,95 @@ export default function MainRouter() {
         bg="inherit"
       >
         <Flex display={{ base: "none", md: "flex" }} justify="space-between" align="center" w="100%">
-          <Flex gap={4} align="center">
-            <Button as={Link} to="/" colorScheme="blue" variant="ghost">
-              Accueil
+          <Flex gap={2} align="center">
+            <Button 
+              as={Link} 
+              to="/" 
+              variant="ghost" 
+              color={linkColor}
+              borderRadius="md"
+              px={4}
+              py={2}
+              fontSize="sm"
+              fontWeight="medium"
+              transition="all 0.2s"
+              _hover={{
+                bg: homeHoverBg,
+                color: homeHoverColor,
+                transform: "translateY(-1px)"
+              }}
+              _active={{
+                transform: "translateY(0px)"
+              }}
+            >
+              🏠 Accueil
+            </Button>
+            <Button 
+              as={Link} 
+              to="/characters" 
+              variant="ghost" 
+              color={linkColor}
+              borderRadius="md"
+              px={4}
+              py={2}
+              fontSize="sm"
+              fontWeight="medium"
+              transition="all 0.2s"
+              _hover={{
+                bg: charactersHoverBg,
+                color: charactersHoverColor,
+                transform: "translateY(-1px)"
+              }}
+              _active={{
+                transform: "translateY(0px)"
+              }}
+            >
+              📖 Personnages
+            </Button>
+            <Button 
+              as={Link} 
+              to="/cycles" 
+              variant="ghost"
+              color={linkColor}
+              borderRadius="md"
+              px={4}
+              py={2}
+              fontSize="sm"
+              fontWeight="medium"
+              transition="all 0.2s"
+              _hover={{
+                bg: cyclesHoverBg,
+                color: cyclesHoverColor,
+                transform: "translateY(-1px)"
+              }}
+              _active={{
+                transform: "translateY(0px)"
+              }}
+            >
+              🔄 Cycles
             </Button>
             {isAdmin && (
-              <Button as={Link} to="/admin" colorScheme="orange" variant="ghost">
-                Admin
+              <Button 
+                as={Link} 
+                to="/admin" 
+                variant="ghost"
+                color="orange.500"
+                borderRadius="md"
+                px={4}
+                py={2}
+                fontSize="sm"
+                fontWeight="medium"
+                transition="all 0.2s"
+                _hover={{
+                  bg: adminHoverBg,
+                  color: adminHoverColor,
+                  transform: "translateY(-1px)"
+                }}
+                _active={{
+                  transform: "translateY(0px)"
+                }}
+              >
+                ⚙️ Admin
               </Button>
             )}
           </Flex>
@@ -255,12 +351,83 @@ export default function MainRouter() {
                   onClick={onClose}
                 />
               </Flex>
-              <VStack spacing={4} align="stretch" p={4}>
-                <Button as={Link} to="/" colorScheme="blue" variant="ghost" onClick={onClose}>
+              <VStack spacing={3} align="stretch" p={4}>
+                <Button 
+                  as={Link} 
+                  to="/" 
+                  variant="ghost" 
+                  onClick={onClose}
+                  leftIcon={<Text>🏠</Text>}
+                  justifyContent="flex-start"
+                  px={4}
+                  py={3}
+                  fontSize="md"
+                  fontWeight="medium"
+                  borderRadius="lg"
+                  _hover={{
+                    bg: homeHoverBg,
+                    color: homeHoverColor,
+                  }}
+                >
                   Accueil
                 </Button>
+                <Button 
+                  as={Link} 
+                  to="/characters" 
+                  variant="ghost" 
+                  onClick={onClose}
+                  leftIcon={<Text>📖</Text>}
+                  justifyContent="flex-start"
+                  px={4}
+                  py={3}
+                  fontSize="md"
+                  fontWeight="medium"
+                  borderRadius="lg"
+                  _hover={{
+                    bg: charactersHoverBg,
+                    color: charactersHoverColor,
+                  }}
+                >
+                  Personnages
+                </Button>
+                <Button 
+                  as={Link} 
+                  to="/cycles" 
+                  variant="ghost" 
+                  onClick={onClose}
+                  leftIcon={<Text>🔄</Text>}
+                  justifyContent="flex-start"
+                  px={4}
+                  py={3}
+                  fontSize="md"
+                  fontWeight="medium"
+                  borderRadius="lg"
+                  _hover={{
+                    bg: cyclesHoverBg,
+                    color: cyclesHoverColor,
+                  }}
+                >
+                  Cycles
+                </Button>
                 {isAdmin && (
-                  <Button as={Link} to="/admin" colorScheme="orange" variant="ghost" onClick={onClose}>
+                  <Button 
+                    as={Link} 
+                    to="/admin" 
+                    variant="ghost" 
+                    onClick={onClose}
+                    leftIcon={<Text>⚙️</Text>}
+                    justifyContent="flex-start"
+                    px={4}
+                    py={3}
+                    fontSize="md"
+                    fontWeight="medium"
+                    borderRadius="lg"
+                    color="orange.500"
+                    _hover={{
+                      bg: adminHoverBg,
+                      color: adminHoverColor,
+                    }}
+                  >
                     Admin
                   </Button>
                 )}
@@ -304,7 +471,10 @@ export default function MainRouter() {
       </Box>
       <Box h="calc(100dvh - var(--navbar-height, 60px))" px={4} py={2} overflow="auto">
         <Routes>
-          <Route path="/" element={<App />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/characters" element={<CharactersPage />} />
+          <Route path="/cycles" element={<CyclesPage />} />
+          <Route path="/cycles/:id" element={<CycleDetailPage />} />
           <Route 
             path="/admin" 
             element={

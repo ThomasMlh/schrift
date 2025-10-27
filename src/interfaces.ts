@@ -58,3 +58,32 @@ export interface CharactersResponse {
     category?: string;
     killer?: string;
 }
+
+// Interfaces Cycles et Rotations
+export interface RotationTemplate {
+    _id: string;
+    killer: string;
+    attack: string;
+    alteration: string;
+}
+
+export interface CycleRotation {
+    _id: string;
+    start_date: string; // Format DD/MM/YYYY
+    end_date: string;   // Format DD/MM/YYYY
+    period: "Mardi-Jeudi" | "Vendredi-Dimanche";
+    killer: string;
+    attack: string;
+    alteration: string;
+}
+
+export interface Cycle {
+    _id?: string;
+    name: string;
+    rotations: CycleRotation[]; // Exactement 20 rotations
+}
+
+export interface CycleFormData {
+    name: string;
+    rotations: CycleRotation[];
+}

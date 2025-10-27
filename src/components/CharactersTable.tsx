@@ -4,6 +4,7 @@ import {
   useColorModeValue, Badge, Flex, Avatar
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { SearchIcon } from "@chakra-ui/icons";
 import type { Character, Pagination, CharactersResponse } from "../interfaces";
 
@@ -12,14 +13,16 @@ interface CharactersTableProps {
 }
 
 export function CharactersTable({ apiUrl }: CharactersTableProps) {
-  // États
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // États - Initialiser avec les paramètres URL
   const [characters, setCharacters] = useState<Character[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedAffinity, setSelectedAffinity] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedKiller, setSelectedKiller] = useState("");
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
+  const [selectedAffinity, setSelectedAffinity] = useState(searchParams.get('affinity') || "");
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || "");
+  const [selectedKiller, setSelectedKiller] = useState(searchParams.get('killer') || "");
+  const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('limit') || '20'));
   const [isLoading, setIsLoading] = useState(false);
   const [affinities, setAffinities] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -31,6 +34,20 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
   const badgeVariant = useColorModeValue('subtle', 'solid');
   const filterBg = useColorModeValue('blue.50', 'blue.900');
+
+  // Fonction pour mettre à jour l'URL avec les filtres actuels
+  const updateURLParams = (search = "", affinity = "", category = "", killer = "", limit = itemsPerPage, page = 1) => {
+    const params = new URLSearchParams();
+    
+    if (search.trim()) params.set('search', search.trim());
+    if (affinity) params.set('affinity', affinity);
+    if (category) params.set('category', category);
+    if (killer) params.set('killer', killer);
+    if (limit !== 20) params.set('limit', limit.toString());
+    if (page !== 1) params.set('page', page.toString());
+    
+    setSearchParams(params);
+  };
 
   // Fonction pour obtenir la couleur d'une affinité
   const getAffinityColor = (affinity: string): string => {
@@ -73,6 +90,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
       }
 
       const response = await fetch(url);
+
       
       if (response.ok) {
         const data: CharactersResponse = await response.json();
@@ -161,24 +179,34 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
 
   // Effet pour charger les données initiales
   useEffect(() => {
-    loadCharacters();
+    // Charger avec les paramètres de l'URL au montage
+    const currentPage = parseInt(searchParams.get('page') || '1');
+    loadCharacters(currentPage, searchTerm, selectedAffinity, selectedCategory, selectedKiller);
     loadAffinities();
     loadCategories();
     loadKillers();
-  }, [apiUrl, itemsPerPage]);
+  }, [apiUrl]);
 
-  // Fonction de recherche avec debounce
+  // Fonction de recherche avec debounce et mise à jour URL
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      loadCharacters(1, searchTerm, selectedAffinity, selectedCategory, selectedKiller);
-    }, 500);
+    // Ne déclencher que si au moins un filtre a une vraie valeur OU si on est au montage avec des paramètres URL
+    const hasFilters = searchTerm.trim() || selectedAffinity || selectedCategory || selectedKiller;
+    const hasURLParams = searchParams.has('search') || searchParams.has('affinity') || searchParams.has('category') || searchParams.has('killer');
+    
+    if (hasFilters || hasURLParams) {
+      const timeoutId = setTimeout(() => {
+        updateURLParams(searchTerm, selectedAffinity, selectedCategory, selectedKiller, itemsPerPage);
+        loadCharacters(1, searchTerm, selectedAffinity, selectedCategory, selectedKiller);
+      }, 500);
 
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm, selectedAffinity, selectedCategory, selectedKiller]);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchTerm, selectedAffinity, selectedCategory, selectedKiller, itemsPerPage]);
 
     // Gestion du changement de page
   const handlePageChange = (page: number) => {
     if (pagination && page >= 1 && page <= pagination.totalPages) {
+      updateURLParams(searchTerm, selectedAffinity, selectedCategory, selectedKiller, itemsPerPage, page);
       loadCharacters(page, searchTerm, selectedAffinity, selectedCategory, selectedKiller);
     }
   };
@@ -189,7 +217,8 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
     setSelectedAffinity("");
     setSelectedCategory("");
     setSelectedKiller("");
-    loadCharacters(1); // Rechargement avec valeurs par défaut
+    setSearchParams({}); 
+    loadCharacters(1);
   };
 
   // Génération des boutons de pagination
@@ -333,18 +362,6 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
           ))}
         </Select>
 
-        {/* Bouton reset */}
-        {(searchTerm || selectedAffinity || selectedCategory || selectedKiller) && (
-          <Button
-            size="md"
-            colorScheme="red"
-            variant="outline"
-            onClick={resetFilters}
-          >
-            Effacer tous les filtres
-          </Button>
-        )}
-
         {/* Items par page */}
         <Select
           maxW="120px"
@@ -358,16 +375,16 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
         </Select>
 
         {/* Bouton reset */}
-        <Button
-          variant="outline"
-          onClick={() => {
-            setSearchTerm("");
-            setSelectedAffinity("");
-            loadCharacters(1);
-          }}
-        >
-          Reset
-        </Button>
+        {(searchTerm || selectedAffinity || selectedCategory || selectedKiller) && (
+          <Button
+            size="md"
+            colorScheme="red"
+            variant="outline"
+            onClick={resetFilters}
+          >
+            Reset
+          </Button>
+        )}
       </Flex>
 
       {/* Affichage des filtres actifs */}
