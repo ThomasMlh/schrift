@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import type { Cycle } from "../../interfaces";
+import { AlterationImage } from "../ui/AlterationImage";
 
 interface ExistingCyclesListProps {
   cycles: Cycle[];
@@ -106,11 +107,15 @@ const ExistingCyclesList = ({
                           </Text>
                           <VStack spacing={1} align="stretch" maxH="120px" overflowY="auto">
                             {cycle.rotations.slice(0, 5).map((rotation, index) => (
-                              <HStack key={index} justify="space-between" fontSize="xs">
+                              <HStack key={index} justify="space-between" fontSize="xs" spacing={2}>
                                 <Text>#{index + 1}</Text>
-                                <Text fontWeight="medium" flex={1} textAlign="center">
+                                <Text fontWeight="medium" flex={1}>
                                   {rotation.killer}
                                 </Text>
+                                <AlterationImage 
+                                  alteration={rotation.alteration} 
+                                  size="16px" 
+                                />
                                 <Badge size="sm" colorScheme="gray">
                                   {rotation.period}
                                 </Badge>

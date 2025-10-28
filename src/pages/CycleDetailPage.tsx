@@ -18,9 +18,10 @@ import {
   useColorModeValue,
   Flex
 } from "@chakra-ui/react";
-import { ArrowBackIcon } from "@chakra-ui/icons";
+import { ArrowBackIcon, CalendarIcon } from "@chakra-ui/icons";
 import type { Cycle } from "../interfaces";
 import { handleAttackType } from "../utils/attackTypes";
+import { AlterationImage } from "../components/ui/AlterationImage";
 
 export function CycleDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -42,7 +43,7 @@ export function CycleDetailPage() {
 
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch(`${apiUrl}/api/cycles/${id}`);
       if (response.ok) {
@@ -123,6 +124,7 @@ export function CycleDetailPage() {
                 <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
                   <Box>
                     <Text fontSize="sm" fontWeight="medium" color="gray.500" mb={1}>
+                      <CalendarIcon mb={1} mr={1} color="green.500" />
                       Date de début
                     </Text>
                     <Text fontSize="lg" fontWeight="bold">
@@ -131,6 +133,7 @@ export function CycleDetailPage() {
                   </Box>
                   <Box>
                     <Text fontSize="sm" fontWeight="medium" color="gray.500" mb={1}>
+                      <CalendarIcon mb={1} mr={1} color="red.500" />
                       Date de fin
                     </Text>
                     <Text fontSize="lg" fontWeight="bold">
@@ -170,33 +173,41 @@ export function CycleDetailPage() {
                               {rotation.period}
                             </Badge>
                           </HStack>
-                          
+
                           <VStack spacing={2} align="stretch">
                             <Box>
                               <Text fontSize="xs" color="gray.500" mb={1}>Killer</Text>
-                              <Text fontSize="sm" fontWeight="medium">{rotation.killer}</Text>
+                              <Badge colorScheme="green" fontSize="sm" fontWeight="medium">{rotation.killer}</Badge>
                             </Box>
                             <Box>
                               <Text fontSize="xs" color="gray.500" mb={1}>Type d'attaque</Text>
-                              <Badge colorScheme="orange" size="sm">
+                              <Badge
+                                colorScheme={rotation.attack === "R" ? "red" : rotation.attack === "B" ? "blue" : "orange"}
+                                size="sm"
+                              >
                                 {handleAttackType(rotation)}
                               </Badge>
                             </Box>
                             <Box>
                               <Text fontSize="xs" color="gray.500" mb={1}>Altération</Text>
-                              <Text fontSize="sm" fontWeight="medium">{rotation.alteration}</Text>
+                              <AlterationImage
+                                alteration={rotation.alteration}
+                                size="20px"
+                                showLabel={true}
+                              />
                             </Box>
                           </VStack>
 
                           <VStack spacing={1} align="stretch">
                             <HStack justify="space-between">
-                              <Text fontSize="xs" color="gray.500">Début:</Text>
+
+                              <Text fontSize="xs" color="gray.500"><CalendarIcon mb={1} mr={1} color="green.500" />Début:</Text>
                               <Text fontSize="xs" fontWeight="medium">
                                 {rotation.start_date || "Non définie"}
                               </Text>
                             </HStack>
                             <HStack justify="space-between">
-                              <Text fontSize="xs" color="gray.500">Fin:</Text>
+                              <Text fontSize="xs" color="gray.500"> <CalendarIcon mb={1} mr={1} color="red.500" />Fin:</Text>
                               <Text fontSize="xs" fontWeight="medium">
                                 {rotation.end_date || "Non définie"}
                               </Text>

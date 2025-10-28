@@ -7,6 +7,14 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SearchIcon } from "@chakra-ui/icons";
 import type { Character, Pagination, CharactersResponse } from "../interfaces";
+import { AffinityIcon } from "./ui/AffinityIcon";
+import { KillerIcon } from "./ui/KillerIcon";
+import { CategoryIcon } from "./ui/CategoryIcon";
+import { AttackTypeBadge } from "./ui/AttackTypeBadge";
+import { AffinityFilter } from "./ui/AffinityFilter";
+import { CategoryFilter } from "./ui/CategoryFilter";
+import { KillerFilter } from "./ui/KillerFilter";
+import { AttackTypeFilter } from "./ui/AttackTypeFilter";
 
 interface CharactersTableProps {
   apiUrl: string;
@@ -22,6 +30,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
   const [selectedAffinity, setSelectedAffinity] = useState(searchParams.get('affinity') || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || "");
   const [selectedKiller, setSelectedKiller] = useState(searchParams.get('killer') || "");
+  const [selectedAttackType, setSelectedAttackType] = useState(searchParams.get('attack_type') || "");
   const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('limit') || '20'));
   const [isLoading, setIsLoading] = useState(false);
   const [affinities, setAffinities] = useState<string[]>([]);
@@ -36,40 +45,22 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
   const filterBg = useColorModeValue('blue.50', 'blue.900');
 
   // Fonction pour mettre à jour l'URL avec les filtres actuels
-  const updateURLParams = (search = "", affinity = "", category = "", killer = "", limit = itemsPerPage, page = 1) => {
+  const updateURLParams = (search = "", affinity = "", category = "", killer = "", attackType = "", limit = itemsPerPage, page = 1) => {
     const params = new URLSearchParams();
     
     if (search.trim()) params.set('search', search.trim());
     if (affinity) params.set('affinity', affinity);
     if (category) params.set('category', category);
     if (killer) params.set('killer', killer);
+    if (attackType) params.set('attack_type', attackType);
     if (limit !== 20) params.set('limit', limit.toString());
     if (page !== 1) params.set('page', page.toString());
     
     setSearchParams(params);
   };
 
-  // Fonction pour obtenir la couleur d'une affinité
-  const getAffinityColor = (affinity: string): string => {
-    const affinityLower = affinity.toLowerCase();
-    switch (affinityLower) {
-      case 'instinct':
-        return 'purple';
-      case 'connaissance':
-        return 'orange';
-      case 'technique':
-        return 'green';
-      case 'vitesse':
-        return 'cyan'; // Plus vif que blue en mode sombre
-      case 'force':
-        return 'red';
-      default:
-        return 'gray';
-    }
-  };
-
   // Fonction principale pour charger les personnages
-  const loadCharacters = async (page = 1, search = "", affinity = "", category = "", killer = "") => {
+  const loadCharacters = async (page = 1, search = "", affinity = "", category = "", killer = "", attackType = "") => {
     setIsLoading(true);
     try {
       // Construction de l'URL avec tous les paramètres
@@ -87,6 +78,9 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
       }
       if (killer && killer.trim() !== "") {
         url += `&killer=${encodeURIComponent(killer.trim())}`;
+      }
+      if (attackType && attackType.trim() !== "") {
+        url += `&attack_type=${encodeURIComponent(attackType.trim())}`;
       }
 
       const response = await fetch(url);
@@ -181,7 +175,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
   useEffect(() => {
     // Charger avec les paramètres de l'URL au montage
     const currentPage = parseInt(searchParams.get('page') || '1');
-    loadCharacters(currentPage, searchTerm, selectedAffinity, selectedCategory, selectedKiller);
+    loadCharacters(currentPage, searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType);
     loadAffinities();
     loadCategories();
     loadKillers();
@@ -190,24 +184,24 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
   // Fonction de recherche avec debounce et mise à jour URL
   useEffect(() => {
     // Ne déclencher que si au moins un filtre a une vraie valeur OU si on est au montage avec des paramètres URL
-    const hasFilters = searchTerm.trim() || selectedAffinity || selectedCategory || selectedKiller;
-    const hasURLParams = searchParams.has('search') || searchParams.has('affinity') || searchParams.has('category') || searchParams.has('killer');
+    const hasFilters = searchTerm.trim() || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType;
+    const hasURLParams = searchParams.has('search') || searchParams.has('affinity') || searchParams.has('category') || searchParams.has('killer') || searchParams.has('attack_type');
     
     if (hasFilters || hasURLParams) {
       const timeoutId = setTimeout(() => {
-        updateURLParams(searchTerm, selectedAffinity, selectedCategory, selectedKiller, itemsPerPage);
-        loadCharacters(1, searchTerm, selectedAffinity, selectedCategory, selectedKiller);
+        updateURLParams(searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage);
+        loadCharacters(1, searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType);
       }, 500);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [searchTerm, selectedAffinity, selectedCategory, selectedKiller, itemsPerPage]);
+  }, [searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage]);
 
     // Gestion du changement de page
   const handlePageChange = (page: number) => {
     if (pagination && page >= 1 && page <= pagination.totalPages) {
-      updateURLParams(searchTerm, selectedAffinity, selectedCategory, selectedKiller, itemsPerPage, page);
-      loadCharacters(page, searchTerm, selectedAffinity, selectedCategory, selectedKiller);
+      updateURLParams(searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage, page);
+      loadCharacters(page, searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType);
     }
   };
 
@@ -217,6 +211,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
     setSelectedAffinity("");
     setSelectedCategory("");
     setSelectedKiller("");
+    setSelectedAttackType("");
     setSearchParams({}); 
     loadCharacters(1);
   };
@@ -313,82 +308,78 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
   return (
     <VStack spacing={6} align="stretch" w="100%">
       {/* Contrôles de filtrage */}
-      <Flex direction={{ base: "column", md: "row" }} gap={4} align="center">
-        {/* Recherche */}
-        <InputGroup maxW="400px">
-          <InputLeftElement pointerEvents="none">
-            <SearchIcon color="gray.300" />
-          </InputLeftElement>
-          <Input
-            placeholder="Rechercher un personnage..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+      <VStack spacing={4} align="stretch">
+        {/* Première ligne - Recherche */}
+        <Flex justify="center">
+          <InputGroup maxW="500px">
+            <InputLeftElement pointerEvents="none">
+              <SearchIcon color="gray.300" />
+            </InputLeftElement>
+            <Input
+              placeholder="Rechercher un personnage..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </InputGroup>
+        </Flex>
+
+        {/* Deuxième ligne - Filtres */}
+        <Flex direction={{ base: "column", md: "row" }} gap={3} align="center" justify="center" flexWrap="wrap">
+          {/* Filtre par affinité */}
+          <AffinityFilter
+            selectedAffinity={selectedAffinity}
+            affinities={affinities}
+            onAffinityChange={setSelectedAffinity}
           />
-        </InputGroup>
 
-        {/* Filtre par affinité */}
-        <Select
-          maxW="200px"
-          value={selectedAffinity}
-          onChange={(e) => setSelectedAffinity(e.target.value)}
-        >
-          <option value="">Toutes les affinités</option>
-          {affinities.map(affinity => (
-            <option key={affinity} value={affinity}>{affinity}</option>
-          ))}
-        </Select>
+          {/* Filtre par catégorie */}
+          <CategoryFilter
+            selectedCategory={selectedCategory}
+            categories={categories}
+            onCategoryChange={setSelectedCategory}
+          />
 
-        {/* Filtre par catégorie */}
-        <Select
-          maxW="200px"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <option value="">Toutes les catégories</option>
-          {categories.map(category => (
-            <option key={category} value={category}>{category}</option>
-          ))}
-        </Select>
+          {/* Filtre par tueur */}
+          <KillerFilter
+            selectedKiller={selectedKiller}
+            killers={killers}
+            onKillerChange={setSelectedKiller}
+          />
 
-        {/* Filtre par tueur */}
-        <Select
-          maxW="200px"
-          value={selectedKiller}
-          onChange={(e) => setSelectedKiller(e.target.value)}
-        >
-          <option value="">Tous les tueurs</option>
-          {killers.map(killer => (
-            <option key={killer} value={killer}>{killer}</option>
-          ))}
-        </Select>
+          {/* Filtre par type d'attaque */}
+          <AttackTypeFilter
+            selectedAttackType={selectedAttackType}
+            onAttackTypeChange={setSelectedAttackType}
+          />
 
-        {/* Items par page */}
-        <Select
-          maxW="120px"
-          value={itemsPerPage}
-          onChange={(e) => setItemsPerPage(Number(e.target.value))}
-        >
-          <option value={10}>10 / page</option>
-          <option value={20}>20 / page</option>
-          <option value={50}>50 / page</option>
-          <option value={100}>100 / page</option>
-        </Select>
-
-        {/* Bouton reset */}
-        {(searchTerm || selectedAffinity || selectedCategory || selectedKiller) && (
-          <Button
-            size="md"
-            colorScheme="red"
-            variant="outline"
-            onClick={resetFilters}
+          {/* Items par page */}
+          <Select
+            maxW="120px"
+            value={itemsPerPage}
+            onChange={(e) => setItemsPerPage(Number(e.target.value))}
           >
-            Reset
-          </Button>
-        )}
-      </Flex>
+            <option value={10}>10 / page</option>
+            <option value={20}>20 / page</option>
+            <option value={50}>50 / page</option>
+            <option value={100}>100 / page</option>
+          </Select>
+
+          {/* Bouton reset */}
+          {(searchTerm || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType) && (
+            <Button
+              size="md"
+              colorScheme="red"
+              variant="outline"
+              onClick={resetFilters}
+            >
+              Reset
+            </Button>
+          )}
+        </Flex>
+      </VStack>
 
       {/* Affichage des filtres actifs */}
-      {(searchTerm || selectedAffinity || selectedCategory || selectedKiller) && (
+      {(searchTerm || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType) && (
         <Box p={3} bg={filterBg} borderRadius="md">
           <Text fontSize="sm" fontWeight="semibold" mb={2}>Filtres actifs :</Text>
           <HStack spacing={2} flexWrap="wrap">
@@ -398,19 +389,36 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
               </Badge>
             )}
             {selectedAffinity && (
-              <Badge colorScheme="green" variant={badgeVariant}>
-                Affinité: {selectedAffinity}
-              </Badge>
+              <HStack spacing={1}>
+                <AffinityIcon affinity={selectedAffinity} size="20px" />
+                <Badge colorScheme="green" variant={badgeVariant}>
+                  Affinité: {selectedAffinity}
+                </Badge>
+              </HStack>
             )}
             {selectedCategory && (
-              <Badge colorScheme="purple" variant={badgeVariant}>
-                Catégorie: {selectedCategory}
-              </Badge>
+              <HStack spacing={1}>
+                <CategoryIcon category={selectedCategory} size="20px" />
+                <Badge colorScheme="purple" variant={badgeVariant}>
+                  Catégorie: {selectedCategory}
+                </Badge>
+              </HStack>
             )}
             {selectedKiller && (
-              <Badge colorScheme="orange" variant={badgeVariant}>
-                Tueur: {selectedKiller}
-              </Badge>
+              <HStack spacing={1}>
+                <KillerIcon killer={selectedKiller} size="20px" />
+                <Badge colorScheme="orange" variant={badgeVariant}>
+                  Tueur: {selectedKiller}
+                </Badge>
+              </HStack>
+            )}
+            {selectedAttackType && (
+              <HStack spacing={1}>
+                <AttackTypeBadge attackType={selectedAttackType} size="16px" />
+                <Badge colorScheme="cyan" variant={badgeVariant}>
+                  Type: {selectedAttackType === 'R' ? 'Rouge' : 'Bleu'}
+                </Badge>
+              </HStack>
             )}
           </HStack>
         </Box>
@@ -439,6 +447,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
                 <Th>Affinité</Th>
                 <Th>Catégories</Th>
                 <Th>Tueurs</Th>
+                <Th>Type d'attaque</Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -473,42 +482,53 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
                   </Td>
                   <Td>
                     {character.affinity && (
-                      <Badge colorScheme={getAffinityColor(character.affinity)} variant={badgeVariant}>
-                        {character.affinity}
-                      </Badge>
+                      <AffinityIcon 
+                        affinity={character.affinity} 
+                        size="20px" 
+                        showLabel={true} 
+                      />
                     )}
                   </Td>
                   <Td>
                     {character.categories && character.categories.length > 0 && (
-                      <HStack spacing={1} flexWrap="wrap">
+                      <VStack spacing={1} align="start">
                         {character.categories.slice(0, 3).map((category, index) => (
-                          <Badge key={index} size="sm" variant="outline">
-                            {category}
-                          </Badge>
+                          <CategoryIcon 
+                            key={index} 
+                            category={category} 
+                            size="20px"
+                            showLabel={true}
+                          />
                         ))}
                         {character.categories.length > 3 && (
                           <Text fontSize="xs" color="gray.500">
                             +{character.categories.length - 3}
                           </Text>
                         )}
-                      </HStack>
+                      </VStack>
                     )}
                   </Td>
                   <Td>
                     {character.killers && character.killers.length > 0 && (
-                      <HStack spacing={1} flexWrap="wrap">
+                      <VStack spacing={1} align="start">
                         {character.killers.slice(0, 3).map((killer, index) => (
-                          <Badge key={index} size="sm" variant="outline" colorScheme="red">
-                            {killer}
-                          </Badge>
+                          <KillerIcon 
+                            key={index} 
+                            killer={killer} 
+                            size="24px"
+                            showLabel={true}
+                          />
                         ))}
                         {character.killers.length > 3 && (
                           <Text fontSize="xs" color="gray.500">
                             +{character.killers.length - 3}
                           </Text>
                         )}
-                      </HStack>
+                      </VStack>
                     )}
+                  </Td>
+                  <Td>
+                    <AttackTypeBadge attackType={character.attack_type} size="20px" />
                   </Td>
                 </Tr>
               ))}

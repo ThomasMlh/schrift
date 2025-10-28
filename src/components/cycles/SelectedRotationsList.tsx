@@ -15,6 +15,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import type { CycleRotation } from "../../interfaces";
 import { handleAttackType } from "../../utils/attackTypes";
+import { AlterationImage } from "../ui/AlterationImage";
 
 interface SelectedRotationsListProps {
     rotations: CycleRotation[];
@@ -103,11 +104,20 @@ const SelectedRotationsList = ({
                                                                         </VStack>
                                                                         <VStack spacing={1} flex={1}>
                                                                             <Text fontSize="xs" color="gray.500">Attack</Text>
-                                                                            <Text fontSize="sm" fontWeight="medium">{handleAttackType(rotation)}</Text>
+                                                                            <Badge 
+                                                                                colorScheme={rotation.attack === "R" ? "red" : rotation.attack === "B" ? "blue" : "orange"} 
+                                                                                size="sm"
+                                                                            >
+                                                                                {handleAttackType(rotation)}
+                                                                            </Badge>
                                                                         </VStack>
                                                                         <VStack spacing={1} flex={1}>
                                                                             <Text fontSize="xs" color="gray.500">Alteration</Text>
-                                                                            <Text fontSize="sm" fontWeight="medium">{rotation.alteration}</Text>
+                                                                            <AlterationImage 
+                                                                                alteration={rotation.alteration} 
+                                                                                size="20px" 
+                                                                                showLabel={true} 
+                                                                            />
                                                                         </VStack>
                                                                     </HStack>
 

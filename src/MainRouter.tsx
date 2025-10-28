@@ -97,9 +97,28 @@ export default function MainRouter() {
   // Fonction pour initier l'authentification Discord
   const handleDiscordAuth = () => {
     const discordClientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
-    const redirectUri = encodeURIComponent(`${window.location.origin}/discord-callback`);
+    
+    // Utiliser l'URL de redirection depuis les variables d'environnement si disponible
+    let redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI;
+    
+    // Sinon, définir selon l'environnement
+    if (!redirectUri) {
+      if (window.location.hostname === 'localhost') {
+        redirectUri = 'http://localhost:5173/discord-callback';
+      } else if (window.location.hostname === 'www.bbs-schrift.fr') {
+        redirectUri = 'https://www.bbs-schrift.fr/discord-callback';
+      } else if (window.location.hostname === 'bbs-schrift.fr') {
+        redirectUri = 'https://bbs-schrift.fr/discord-callback';
+      } else {
+        // Fallback pour autres domaines
+        redirectUri = `${window.location.origin}/discord-callback`;
+      }
+    }
+    
+    const encodedRedirectUri = encodeURIComponent(redirectUri);
     const scope = encodeURIComponent('identify email guilds connections guilds.members.read');
-    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordClientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordClientId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=${scope}`;
+    
     window.location.href = discordAuthUrl;
   };
 

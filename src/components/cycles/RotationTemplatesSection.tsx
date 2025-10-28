@@ -13,6 +13,7 @@ import {
 import { AddIcon } from "@chakra-ui/icons";
 import type { RotationTemplate } from "../../interfaces";
 import { getAttackTypeName } from "../../utils/attackTypes";
+import { AlterationImage } from "../ui/AlterationImage";
 
 interface RotationTemplatesSectionProps {
   templates: RotationTemplate[];
@@ -20,10 +21,10 @@ interface RotationTemplatesSectionProps {
   selectedRotationsCount: number;
 }
 
-export function RotationTemplatesSection({ 
-  templates, 
-  onAddRotation, 
-  selectedRotationsCount 
+export function RotationTemplatesSection({
+  templates,
+  onAddRotation,
+  selectedRotationsCount
 }: RotationTemplatesSectionProps) {
   const cardBg = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -49,7 +50,7 @@ export function RotationTemplatesSection({
           <Text fontSize="lg" fontWeight="semibold">
             Templates de rotation disponibles
           </Text>
-          
+
           {templates.length === 0 ? (
             <Text color="gray.500" textAlign="center" py={4}>
               Aucun template disponible
@@ -63,18 +64,27 @@ export function RotationTemplatesSection({
                       <VStack spacing={1} align="stretch">
                         <HStack>
                           <Text fontSize="xs" color="gray.500">Killer:</Text>
-                          <Badge colorScheme="red" size="sm">{template.killer}</Badge>
+                          <Badge colorScheme="green" size="sm">{template.killer}</Badge>
                         </HStack>
                         <HStack>
                           <Text fontSize="xs" color="gray.500">Attack:</Text>
-                          <Badge colorScheme="orange" size="sm">{getAttackTypeName(template.attack)}</Badge>
+                          <Badge
+                            colorScheme={template.attack === "R" ? "red" : template.attack === "B" ? "blue" : "orange"}
+                            size="sm"
+                          >
+                            {getAttackTypeName(template.attack)}
+                          </Badge>
                         </HStack>
                         <HStack>
                           <Text fontSize="xs" color="gray.500">Alteration:</Text>
-                          <Badge colorScheme="purple" size="sm">{template.alteration}</Badge>
+                          <AlterationImage
+                            alteration={template.alteration}
+                            size="16px"
+                            showLabel={true}
+                          />
                         </HStack>
                       </VStack>
-                      
+
                       <Button
                         size="sm"
                         leftIcon={<AddIcon />}
