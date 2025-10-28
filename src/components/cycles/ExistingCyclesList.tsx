@@ -23,13 +23,15 @@ interface ExistingCyclesListProps {
   isLoading: boolean;
   onRefresh: () => void;
   onDownloadEvents: () => void;
+  onDownloadCycleEvents: (cycle: Cycle) => void;
 }
 
 const ExistingCyclesList = ({ 
   cycles, 
   isLoading, 
   onRefresh, 
-  onDownloadEvents 
+  onDownloadEvents,
+  onDownloadCycleEvents
 }: ExistingCyclesListProps) => {
   const cardBg = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -51,7 +53,7 @@ const ExistingCyclesList = ({
                 onClick={onDownloadEvents}
                 isDisabled={!Array.isArray(cycles) || cycles.length === 0}
               >
-                📥 Télécharger events.json
+                📥 Télécharger tous les cycles
               </Button>
               <Button
                 size="sm"
@@ -95,9 +97,20 @@ const ExistingCyclesList = ({
                         >
                           {cycle.name}
                         </Heading>
-                        <Badge colorScheme="blue">
-                          {cycle.rotations?.length || 0} rotations
-                        </Badge>
+                        <HStack spacing={2}>
+                          <Badge colorScheme="blue">
+                            {cycle.rotations?.length || 0} rotations
+                          </Badge>
+                          <Button
+                            size="xs"
+                            colorScheme="green"
+                            onClick={() => onDownloadCycleEvents(cycle)}
+                            isDisabled={!cycle.rotations || cycle.rotations.length === 0}
+                            title={`Télécharger events.json pour ${cycle.name}`}
+                          >
+                            📥
+                          </Button>
+                        </HStack>
                       </HStack>
                       
                       {cycle.rotations && cycle.rotations.length > 0 && (

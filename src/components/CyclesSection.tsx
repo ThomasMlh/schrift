@@ -262,7 +262,56 @@ const CyclesSection = () => {
     }
   };
 
-  // Fonction pour télécharger le fichier events.json
+  // Fonction pour télécharger le fichier events.json d'un cycle spécifique
+  const downloadCycleEventsJson = (cycle: Cycle) => {
+    if (!cycle.rotations || !Array.isArray(cycle.rotations) || cycle.rotations.length === 0) {
+      toast({
+        title: "Aucune rotation",
+        description: "Ce cycle ne contient aucune rotation à exporter",
+        status: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+
+    // Créer la structure des events pour ce cycle spécifique
+    const events: any[] = [];
+
+    cycle.rotations.forEach((rotation, index) => {
+      events.push({
+        cycleName: cycle.name,
+        rotationNumber: index + 1,
+        killer: rotation.killer,
+        attack: rotation.attack,
+        alteration: rotation.alteration,
+        start_date: rotation.start_date,
+        end_date: rotation.end_date,
+        period: rotation.period
+      });
+    });
+
+    // Créer le blob et télécharger
+    const dataStr = JSON.stringify(events, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `events_${cycle.name.replace(/[^a-zA-Z0-9]/g, '_')}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Export réussi",
+      description: `Fichier events_${cycle.name}.json téléchargé avec ${events.length} rotations`,
+      status: "success",
+      duration: 3000,
+    });
+  };
+
+  // Fonction pour télécharger le fichier events.json (tous les cycles)
   const downloadEventsJson = () => {
     if (!Array.isArray(cycles) || cycles.length === 0) {
       toast({
@@ -351,6 +400,7 @@ const CyclesSection = () => {
           isLoading={isLoadingCycles}
           onRefresh={loadCycles}
           onDownloadEvents={downloadEventsJson}
+          onDownloadCycleEvents={downloadCycleEventsJson}
         />
 
         {/* Modal de création de cycle */}
