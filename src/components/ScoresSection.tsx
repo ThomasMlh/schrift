@@ -86,7 +86,6 @@ const ScoresSection = () => {
 
             if (response.ok) {
                 const data: ScoresResponse = await response.json();
-                console.log("Scores chargés:", data);
                 setScores(data.data || []);
                 setPagination(data.pagination);
                 setCurrentPage(page);
