@@ -6,7 +6,7 @@ import {
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SearchIcon } from "@chakra-ui/icons";
-import type { Character, Pagination, CharactersResponse } from "../interfaces";
+import type { Character, Pagination as PaginationType, CharactersResponse } from "../interfaces";
 import { AffinityIcon } from "./ui/AffinityIcon";
 import { KillerIcon } from "./ui/KillerIcon";
 import { CategoryIcon } from "./ui/CategoryIcon";
@@ -15,6 +15,7 @@ import { AffinityFilter } from "./ui/AffinityFilter";
 import { CategoryFilter } from "./ui/CategoryFilter";
 import { KillerFilter } from "./ui/KillerFilter";
 import { AttackTypeFilter } from "./ui/AttackTypeFilter";
+import { Pagination as PaginationComponent } from "./ui/Pagination";
 
 interface CharactersTableProps {
   apiUrl: string;
@@ -25,7 +26,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
   
   // États - Initialiser avec les paramètres URL
   const [characters, setCharacters] = useState<Character[]>([]);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [pagination, setPagination] = useState<PaginationType | null>(null);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
   const [selectedAffinity, setSelectedAffinity] = useState(searchParams.get('affinity') || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || "");
@@ -88,7 +89,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
       
       if (response.ok) {
         const data: CharactersResponse = await response.json();
-        setCharacters(data.characters);
+        setCharacters(data.data);
         setPagination(data.pagination);
       } else {
         console.error('Erreur lors du chargement des personnages:', response.status);
@@ -110,9 +111,9 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
       const response = await fetch(`${apiUrl}/api/characters`);
       if (response.ok) {
         const data = await response.json();
-        // Extraire les affinités uniques depuis la première page
+        // Extraire les affinités uniques depuis la première page - utiliser 'data' au lieu de 'characters'
         const uniqueAffinities = [...new Set(
-          data.characters?.map((char: Character) => char.affinity)
+          data.data?.map((char: Character) => char.affinity)
             .filter((affinity: string) => affinity && affinity.trim()) || []
         )].sort() as string[];
         setAffinities(uniqueAffinities);
@@ -130,7 +131,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
       if (response.ok) {
         const data = await response.json();
         // Extraire toutes les catégories uniques
-        const allCategories = data.characters?.flatMap((char: Character) => {
+        const allCategories = data.data?.flatMap((char: Character) => {
           return char.categories || [];
         }) || [];
         const uniqueCategories = [...new Set(allCategories)]
@@ -151,7 +152,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
       if (response.ok) {
         const data = await response.json();
         // Extraire tous les tueurs uniques
-        const allKillers = data.characters?.flatMap((char: Character) => {
+        const allKillers = data.data?.flatMap((char: Character) => {
           return char.killers || [];
         }) || [];
         
@@ -214,95 +215,6 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
     setSelectedAttackType("");
     setSearchParams({}); 
     loadCharacters(1);
-  };
-
-  // Génération des boutons de pagination
-  const renderPaginationButtons = () => {
-    if (!pagination) return null;
-
-    const { currentPage, totalPages, hasPrevPage, hasNextPage } = pagination;
-    const buttons = [];
-
-    // Bouton précédent
-    buttons.push(
-      <Button
-        key="prev"
-        size="sm"
-        onClick={() => handlePageChange(currentPage - 1)}
-        isDisabled={!hasPrevPage}
-      >
-        ← Précédent
-      </Button>
-    );
-
-    // Calcul des pages à afficher
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, currentPage + 2);
-
-    // Ajuster si on est près du début ou de la fin
-    if (currentPage <= 3) {
-      endPage = Math.min(5, totalPages);
-    }
-    if (currentPage >= totalPages - 2) {
-      startPage = Math.max(1, totalPages - 4);
-    }
-
-    // Première page si pas visible
-    if (startPage > 1) {
-      buttons.push(
-        <Button key={1} size="sm" variant={1 === currentPage ? "solid" : "outline"} onClick={() => handlePageChange(1)}>
-          1
-        </Button>
-      );
-      if (startPage > 2) {
-        buttons.push(<Text key="ellipsis1">...</Text>);
-      }
-    }
-
-    // Pages du milieu
-    for (let page = startPage; page <= endPage; page++) {
-      buttons.push(
-        <Button
-          key={page}
-          size="sm"
-          variant={page === currentPage ? "solid" : "outline"}
-          onClick={() => handlePageChange(page)}
-        >
-          {page}
-        </Button>
-      );
-    }
-
-    // Dernière page si pas visible
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        buttons.push(<Text key="ellipsis2">...</Text>);
-      }
-      buttons.push(
-        <Button
-          key={totalPages}
-          size="sm"
-          variant={totalPages === currentPage ? "solid" : "outline"}
-          onClick={() => handlePageChange(totalPages)}
-        >
-          {totalPages}
-        </Button>
-      );
-    }
-
-    // Bouton suivant
-    buttons.push(
-      <Button
-        key="next"
-        size="sm"
-        onClick={() => handlePageChange(currentPage + 1)}
-        isDisabled={!hasNextPage}
-      >
-        Suivant →
-      </Button>
-    );
-
-    return buttons;
   };
 
   return (
@@ -538,10 +450,16 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
       </Box>
 
       {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
-        <HStack justify="center" spacing={2} flexWrap="wrap">
-          {renderPaginationButtons()}
-        </HStack>
+      {pagination && (
+        <PaginationComponent
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          hasPrevPage={pagination.hasPrevPage}
+          hasNextPage={pagination.hasNextPage}
+          onPageChange={handlePageChange}
+          totalCount={pagination.totalCount}
+          itemsOnPage={pagination.itemsOnPage}
+        />
       )}
 
       {/* Message si aucun résultat */}

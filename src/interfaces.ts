@@ -1,6 +1,6 @@
 // Types généraux
 export type Page = "guilds" | "characters";
-export type AdminPage = "guilds" | "cycles";
+export type AdminPage = "guilds" | "cycles" | "scores";
 export type Role = "chef" | "sous-chef" | "membre";
 
 // Interfaces Guildes
@@ -51,7 +51,7 @@ export interface Pagination {
 }
 
 export interface CharactersResponse {
-    characters: Character[];
+    data: Character[];
     pagination: Pagination;
     searchTerm?: string;
     affinity?: string;
@@ -86,4 +86,35 @@ export interface Cycle {
 export interface CycleFormData {
     name: string;
     rotations: CycleRotation[];
+}
+
+export interface CyclesResponse {
+    success: boolean;
+    data: Cycle[];
+    pagination: Pagination;
+}
+
+// Interfaces Scores
+export interface Score {
+    _id?: string;
+    user_id: string;
+    cycle_id: string;
+    rotation_id: string;
+    guild_id: string;
+    score: number;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface ScoreFormData {
+    user_id: string;
+    cycle_id: string;
+    rotation_id: string;
+    guild_id: string;
+    score: number;
+}
+
+export interface ScoresResponse {
+    data: Score[];
+    pagination: Pagination;
 }

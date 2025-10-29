@@ -1,6 +1,7 @@
 import { Container, Heading, Flex, useColorModeValue, Button, HStack } from "@chakra-ui/react";
 import { GuildsAdminSection } from "../components/GuildsAdminSection";
 import { CyclesSection } from "../components/CyclesSection";
+import { ScoresSection } from "../components/ScoresSection";
 import { useState } from "react";
 import type { AdminPage } from "../interfaces";
 
@@ -12,6 +13,8 @@ export default function AdminPage() {
     switch (currentPage) {
       case "cycles":
         return <CyclesSection />;
+      case "scores":
+        return <ScoresSection />;
       case "guilds":
       default:
         return <GuildsAdminSection />;
@@ -50,6 +53,13 @@ export default function AdminPage() {
             onClick={() => setCurrentPage("cycles")}
           >
             🔄 Cycles
+          </Button>
+          <Button
+            variant={currentPage === "scores" ? "solid" : "outline"}
+            colorScheme="orange"
+            onClick={() => setCurrentPage("scores")}
+          >
+            📊 Scores
           </Button>
         </HStack>
 

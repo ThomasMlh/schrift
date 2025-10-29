@@ -68,8 +68,8 @@ const CyclesSection = () => {
         // Vérifier si la réponse est un tableau ou un objet avec une propriété cycles
         if (Array.isArray(data)) {
           setCycles(data);
-        } else if (data && Array.isArray(data.cycles)) {
-          setCycles(data.cycles);
+        } else if (data && Array.isArray(data.data)) {
+          setCycles(data.data);
         } else {
           console.error("Format de données inattendu:", data);
           setCycles([]);

@@ -6,6 +6,7 @@ import {
     CardBody, Heading
 } from "@chakra-ui/react";
 import type { User } from "../interfaces";
+import { getUserAvatarUrl } from "../utils/discord";
 
 export default function UserPage() {
     const { userId } = useParams<{ userId: string }>();
@@ -26,13 +27,6 @@ export default function UserPage() {
                 ...options.headers,
             },
         });
-    };
-
-    // Fonction pour construire l'URL de l'avatar Discord
-    const getDiscordAvatarUrl = (userId: string, avatarHash: string, size: number = 128) => {
-        if (!avatarHash) return null;
-        const format = avatarHash.startsWith('a_') ? 'gif' : 'png';
-        return `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.${format}?size=${size}`;
     };
 
     useEffect(() => {
@@ -64,11 +58,8 @@ export default function UserPage() {
                     user.guild_name = guildData.name;
                 }
 
-                // Construire l'URL de l'avatar Discord si disponible
-                let avatarUrl = null;
-                if (user.avatar && user.discord_id) {
-                    avatarUrl = getDiscordAvatarUrl(user.discord_id, user.avatar);
-                }
+                                // Construire l'URL de l'avatar avec le nom d'utilisateur
+                const avatarUrl = getUserAvatarUrl(user);
 
                 setUser({
                     ...user,

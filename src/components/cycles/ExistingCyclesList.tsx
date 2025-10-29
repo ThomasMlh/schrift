@@ -26,10 +26,9 @@ interface ExistingCyclesListProps {
   onDownloadCycleEvents: (cycle: Cycle) => void;
 }
 
-const ExistingCyclesList = ({ 
-  cycles, 
-  isLoading, 
-  onRefresh, 
+const ExistingCyclesList = ({ cycles,
+  isLoading,
+  onRefresh,
   onDownloadEvents,
   onDownloadCycleEvents
 }: ExistingCyclesListProps) => {
@@ -87,7 +86,7 @@ const ExistingCyclesList = ({
                   <CardBody>
                     <VStack spacing={3} align="stretch">
                       <HStack justify="space-between">
-                        <Heading 
+                        <Heading
                           as={Link}
                           to={`/cycles/${cycle._id}`}
                           size="sm"
@@ -112,7 +111,7 @@ const ExistingCyclesList = ({
                           </Button>
                         </HStack>
                       </HStack>
-                      
+
                       {cycle.rotations && cycle.rotations.length > 0 && (
                         <Box>
                           <Text fontSize="sm" fontWeight="medium" mb={2}>
@@ -125,9 +124,9 @@ const ExistingCyclesList = ({
                                 <Text fontWeight="medium" flex={1}>
                                   {rotation.killer}
                                 </Text>
-                                <AlterationImage 
-                                  alteration={rotation.alteration} 
-                                  size="16px" 
+                                <AlterationImage
+                                  alteration={rotation.alteration}
+                                  size="16px"
                                 />
                                 <Badge size="sm" colorScheme="gray">
                                   {rotation.period}

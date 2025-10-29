@@ -16,48 +16,88 @@ import {
   AlertIcon,
   useColorModeValue,
   HStack,
-  Button
+  Button,
+  Select
 } from "@chakra-ui/react";
 import { ExternalLinkIcon, CalendarIcon, ViewIcon } from "@chakra-ui/icons";
-import type { Cycle } from "../interfaces";
+import type { Cycle, CyclesResponse, Pagination } from "../interfaces";
 import { handleAttackType } from "../utils/attackTypes";
 import { AlterationImage } from "../components/ui/AlterationImage";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
+import { Pagination as PaginationComponent } from "../components/ui/Pagination";
 
 export function CyclesPage() {
   const [cycles, setCycles] = useState<Cycle[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(6); // Bon nombre pour la grille
   const [isLoading, setIsLoading] = useState(true);
   
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
-  const loadCycles = async () => {
+  const loadCycles = async (page: number = 1) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/api/cycles`);
+      const response = await fetch(`${apiUrl}/api/cycles?page=${page}&limit=${itemsPerPage}`);
       if (response.ok) {
-        const data = await response.json();
+        const data: CyclesResponse = await response.json();
         
-        // Vérifier si la réponse est un tableau ou un objet avec une propriété cycles
-        if (Array.isArray(data)) {
-          setCycles(data);
-        } else if (data && Array.isArray(data.cycles)) {
-          setCycles(data.cycles);
+        if (data.success && Array.isArray(data.data)) {
+          setCycles(data.data);
+          if (data.pagination) {
+            setPagination(data.pagination);
+            setCurrentPage(data.pagination.currentPage);
+          }
         } else {
           console.error("Format de données inattendu:", data);
           setCycles([]);
+          setPagination(null);
         }
       }
     } catch (error) {
       console.error("Erreur lors du chargement des cycles:", error);
+      setCycles([]);
+      setPagination(null);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadCycles();
+    loadCycles(currentPage);
   }, []);
+
+  const handlePageChange = (page: number) => {
+    loadCycles(page);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+    // Recharger avec la nouvelle limite
+    const loadWithNewLimit = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${apiUrl}/api/cycles?page=1&limit=${newItemsPerPage}`);
+        if (response.ok) {
+          const data: CyclesResponse = await response.json();
+          if (data.success && Array.isArray(data.data)) {
+            setCycles(data.data);
+            if (data.pagination) {
+              setPagination(data.pagination);
+              setCurrentPage(data.pagination.currentPage);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des cycles:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadWithNewLimit();
+  };
 
   return (
     <Container maxW="container.xl" py={8}>
@@ -81,23 +121,36 @@ export function CyclesPage() {
         <Flex justify="space-between" align="center" bg={cardBg} p={6} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
           <VStack align="start" spacing={1}>
             <Text fontSize="2xl" fontWeight="bold" color="blue.500">
-              {isLoading ? "..." : cycles.length}
+              {isLoading ? "..." : (pagination?.totalCount ?? cycles.length)}
             </Text>
             <Text fontSize="sm" color="gray.500">
-              cycle{cycles.length > 1 ? 's' : ''} disponible{cycles.length > 1 ? 's' : ''}
+              cycle{(pagination?.totalCount ?? cycles.length) > 1 ? 's' : ''} disponible{(pagination?.totalCount ?? cycles.length) > 1 ? 's' : ''}
             </Text>
           </VStack>
-          <Button
-            leftIcon={<ViewIcon />}
-            size="md"
-            colorScheme="blue"
-            variant="outline"
-            onClick={loadCycles}
-            isLoading={isLoading}
-            loadingText="Actualisation..."
-          >
-            Actualiser
-          </Button>
+          <HStack spacing={4}>
+            <Select
+              value={itemsPerPage}
+              onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
+              w="auto"
+              size="md"
+            >
+              <option value={3}>3 par page</option>
+              <option value={6}>6 par page</option>
+              <option value={9}>9 par page</option>
+              <option value={12}>12 par page</option>
+            </Select>
+            <Button
+              leftIcon={<ViewIcon />}
+              size="md"
+              colorScheme="blue"
+              variant="outline"
+              onClick={() => loadCycles(currentPage)}
+              isLoading={isLoading}
+              loadingText="Actualisation..."
+            >
+              Actualiser
+            </Button>
+          </HStack>
         </Flex>
 
         {isLoading ? (
@@ -113,8 +166,9 @@ export function CyclesPage() {
             {!Array.isArray(cycles) ? "Erreur lors du chargement des cycles." : "Aucun cycle disponible pour le moment."}
           </Alert>
         ) : (
-          <SimpleGrid columns={{ base: 1, lg: 2, xl: 3 }} spacing={8}>
-            {cycles.map((cycle) => (
+          <VStack spacing={8}>
+            <SimpleGrid columns={{ base: 1, lg: 2, xl: 3 }} spacing={8}>
+              {cycles.map((cycle) => (
               <Card
                 key={cycle._id}
                 bg={cardBg}
@@ -268,7 +322,21 @@ export function CyclesPage() {
                 </CardBody>
               </Card>
             ))}
-          </SimpleGrid>
+            </SimpleGrid>
+            
+            {/* Pagination */}
+            {pagination && (
+              <PaginationComponent
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                hasPrevPage={pagination.hasPrevPage}
+                hasNextPage={pagination.hasNextPage}
+                onPageChange={handlePageChange}
+                totalCount={pagination.totalCount}
+                itemsOnPage={pagination.itemsOnPage}
+              />
+            )}
+          </VStack>
         )}
       </VStack>
     </Container>
