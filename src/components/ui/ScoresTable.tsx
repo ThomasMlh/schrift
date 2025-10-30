@@ -30,14 +30,14 @@ interface ScoresTableProps {
     onDeleteScore: (score: Score) => void;
 }
 
-export const ScoresTable = ({
+const ScoresTable: React.FC<ScoresTableProps> = ({
     scores,
     users,
     cycles,
     isAdmin,
     onEditScore,
     onDeleteScore
-}: ScoresTableProps) => {
+}) => {
     const linkColor = useColorModeValue('black', 'white');
     // Obtenir les informations d'un utilisateur
     const getUserInfo = (userId: string) => {
@@ -84,9 +84,9 @@ export const ScoresTable = ({
                                             name={user?.global_name || user?.username || "Utilisateur inconnu"}
                                         />
                                         <VStack spacing={0} align="start">
-                                            <Link 
-                                                as={RouterLink} 
-                                                to={`/user/${user?._id}`} 
+                                            <Link
+                                                as={RouterLink}
+                                                to={`/user/${user?._id}`}
                                                 color={linkColor}
                                                 _hover={{
                                                     textDecoration: "underline",
@@ -96,7 +96,7 @@ export const ScoresTable = ({
                                                     outline: "1px solid",
                                                     outlineColor: linkColor,
                                                     outlineOffset: "2px"
-                                                }} 
+                                                }}
                                                 fontWeight="medium"
                                             >
                                                 {user?.global_name || user?.username || "Utilisateur inconnu"}
@@ -108,9 +108,18 @@ export const ScoresTable = ({
                                     </HStack>
                                 </Td>
                                 <Td>
-                                    <Text fontWeight="medium">
+                                    <Link as={RouterLink} to={`/cycle/${cycle?._id}`} _hover={{
+                                        textDecoration: "underline",
+                                        color: linkColor
+                                    }}
+                                        _focus={{
+                                            outline: "1px solid",
+                                            outlineColor: linkColor,
+                                            outlineOffset: "2px"
+                                        }}
+                                        fontWeight="medium">
                                         {cycle?.name || "Cycle inconnu"}
-                                    </Text>
+                                    </Link>
                                 </Td>
                                 <Td>
                                     {rotation ? (
@@ -174,3 +183,5 @@ export const ScoresTable = ({
         </TableContainer>
     );
 };
+
+export default ScoresTable;

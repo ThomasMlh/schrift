@@ -88,7 +88,7 @@ const ExistingCyclesList = ({ cycles,
                       <HStack justify="space-between">
                         <Heading
                           as={Link}
-                          to={`/cycles/${cycle._id}`}
+                          to={`/cycle/${cycle._id}`}
                           size="sm"
                           color={linkColor}
                           _hover={{ color: linkColor, textDecoration: "underline" }}

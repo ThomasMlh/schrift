@@ -16,16 +16,18 @@ import {
     AlertIcon
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
-import type { Score, Cycle, User, ScoreFormData, Pagination as PaginationType, ScoresResponse } from "../interfaces";
+import type { Score, Cycle, User, ScoreFormData, Pagination as PaginationType, ScoresResponse, Guild } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
-import { ScoresTable } from "./ui/ScoresTable";
+import ScoresTable from "./ui/ScoresTable";
 import { ScoreModal } from "./ui/ScoreModal";
 import { DeleteConfirmationModal } from "./ui/DeleteConfirmationModal";
+import BulkScoreModal from "./ui/BulkScoreModal";
 
 const ScoresSection = () => {
     const [scores, setScores] = useState<Score[]>([]);
     const [cycles, setCycles] = useState<Cycle[]>([]);
     const [users, setUsers] = useState<User[]>([]);
+    const [guilds, setGuilds] = useState<Guild[]>([]);
     const [pagination, setPagination] = useState<PaginationType | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoadingScores, setIsLoadingScores] = useState(false);
@@ -46,6 +48,8 @@ const ScoresSection = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+    const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
 
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -72,6 +76,7 @@ const ScoresSection = () => {
         loadScores(1);
         loadCycles();
         loadUsers();
+        loadGuilds();
     }, []);
 
     const loadScores = async (page: number = 1) => {
@@ -153,6 +158,24 @@ const ScoresSection = () => {
             }
         } catch (error) {
             console.error("Erreur lors du chargement des utilisateurs:", error);
+        }
+    };
+
+    const loadGuilds = async () => {
+        try {
+            const token = localStorage.getItem('userToken');
+            const response = await fetch(`${apiUrl}/api/guildes`, {
+                headers: {
+                    ...(token && { 'Authorization': `Bearer ${token}` }),
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setGuilds(Array.isArray(data) ? data : data.guilds || []);
+            }
+        } catch (error) {
+            console.error("Erreur lors du chargement des guildes:", error);
         }
     };
 
@@ -309,6 +332,53 @@ const ScoresSection = () => {
         }
     };
 
+    // Fonction pour la saisie groupée des scores
+    const handleBulkScoreSubmit = async (scoresData: ScoreFormData[]) => {
+        setIsBulkSubmitting(true);
+        try {
+            const token = localStorage.getItem('userToken');
+            const response = await fetch(`${apiUrl}/api/scores/bulk`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` }),
+                },
+                body: JSON.stringify(scoresData),
+            });
+
+            if (response.ok) {
+                toast({
+                    title: "Scores enregistrés",
+                    description: `${scoresData.length} scores ont été enregistrés avec succès`,
+                    status: "success",
+                    duration: 3000,
+                });
+
+                // Recharger les scores et fermer le modal
+                loadScores(currentPage);
+                setIsBulkModalOpen(false);
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                toast({
+                    title: "Erreur",
+                    description: errorData.message || "Erreur lors de l'enregistrement des scores",
+                    status: "error",
+                    duration: 3000,
+                });
+            }
+        } catch (error) {
+            console.error("Erreur lors de l'enregistrement des scores:", error);
+            toast({
+                title: "Erreur",
+                description: "Erreur de connexion lors de l'enregistrement des scores",
+                status: "error",
+                duration: 3000,
+            });
+        } finally {
+            setIsBulkSubmitting(false);
+        }
+    };
+
     // Fonction pour ouvrir le modal d'édition
     const handleEditScore = (score: Score) => {
         setEditingScore(score);
@@ -438,14 +508,25 @@ const ScoresSection = () => {
                     <Text fontSize="2xl" fontWeight="bold">
                         Gestion des Scores
                     </Text>
-                    <Button
-                        leftIcon={<AddIcon />}
-                        colorScheme="blue"
-                        onClick={onOpen}
-                        isDisabled={!currentUser}
-                    >
-                        Ajouter un score
-                    </Button>
+                    <HStack spacing={3}>
+                        <Button
+                            leftIcon={<AddIcon />}
+                            colorScheme="blue"
+                            onClick={onOpen}
+                            isDisabled={!currentUser}
+                        >
+                            Ajouter un score
+                        </Button>
+                        {isAdmin && (
+                            <Button
+                                colorScheme="green"
+                                onClick={() => setIsBulkModalOpen(true)}
+                                isDisabled={!currentUser}
+                            >
+                                Saisie groupée
+                            </Button>
+                        )}
+                    </HStack>
                 </HStack>
 
                 {/* Liste des scores */}
@@ -489,7 +570,7 @@ const ScoresSection = () => {
                                     cycles={cycles}
                                     isAdmin={isAdmin}
                                     onEditScore={handleEditScore}
-                                    onDeleteScore={(score) => {
+                                    onDeleteScore={(score: Score) => {
                                         setScoreToDelete(score);
                                         setIsDeleteModalOpen(true);
                                     }}
@@ -583,6 +664,17 @@ const ScoresSection = () => {
                             </Text>
                         ) : undefined
                     }
+                />
+
+                {/* Modal de saisie groupée */}
+                <BulkScoreModal
+                    isOpen={isBulkModalOpen}
+                    onClose={() => setIsBulkModalOpen(false)}
+                    cycles={cycles}
+                    guilds={guilds}
+                    onSubmit={handleBulkScoreSubmit}
+                    isSubmitting={isBulkSubmitting}
+                    apiUrl={apiUrl}
                 />
             </VStack>
         </Container>

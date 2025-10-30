@@ -75,14 +75,17 @@ const GuildTabsList = ({
       authenticatedFetch(`${apiUrl}/api/guildes/${guild._id}/membres`)
         .then(res => res.json())
         .then(data => {
-          // L'API retourne { success: true, membres: [...], count: number }
-          const membersList = data.membres || data;
+          // L'API retourne { success: true, membres: [...], count: number } ou { success: true, data: [...], count: number }
+          const membersList = data.data || data;
           const members = Array.isArray(membersList) ? membersList : [];
           
-          setMembersByGuild(prev => ({
-            ...prev,
-            [guild._id]: members
-          }));
+          setMembersByGuild(prev => {
+            const updated = {
+              ...prev,
+              [guild._id]: members
+            };
+            return updated;
+          });
         })
         .catch((error) => {
           setMembersByGuild(prev => ({ ...prev, [guild._id]: [] }));
@@ -126,8 +129,8 @@ const GuildTabsList = ({
       authenticatedFetch(`${apiUrl}/api/guildes/${guild._id}/membres`)
         .then(res => res.json())
         .then(data => {
-          // L'API retourne { success: true, membres: [...], count: number }
-          const membersList = data.membres || data;
+          // L'API retourne { success: true, membres: [...], count: number } ou { success: true, data: [...], count: number }
+          const membersList = data.data || data;
           const members = Array.isArray(membersList) ? membersList : [];
           
           setMembersByGuild(prev => ({

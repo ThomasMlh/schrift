@@ -53,10 +53,17 @@ export interface Pagination {
 export interface CharactersResponse {
     data: Character[];
     pagination: Pagination;
-    searchTerm?: string;
-    affinity?: string;
-    category?: string;
-    killer?: string;
+}
+
+export interface UsersResponse {
+    success: boolean;
+    users: User[];
+    pagination: Pagination;
+    activeFilters?: {
+        guilde_id?: string | null;
+        role?: string | null;
+        search?: string | null;
+    };
 }
 
 // Interfaces Cycles et Rotations

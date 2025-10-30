@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
-import {  useColorMode, Button, Box, Flex, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerBody, useDisclosure, VStack, HStack, Text, useToast, Avatar, useColorModeValue } from "@chakra-ui/react";
+import { useColorMode, Button, Box, Flex, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerBody, useDisclosure, VStack, HStack, Text, useToast, Avatar, useColorModeValue } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { FaDiscord } from 'react-icons/fa';
 import { useState, useEffect } from "react";
@@ -7,11 +7,12 @@ import { jwtDecode } from 'jwt-decode';
 import HomePage from "./pages/HomePage";
 import CharactersPage from "./pages/CharactersPage";
 import { CyclesPage } from "./pages/CyclesPage";
-import { CycleDetailPage } from "./pages/CycleDetailPage";
-import AdminPage from "./pages/AdminPage";
+import CycleDetailPage from "./pages/CycleDetailPage";
 import DiscordCallback from "./pages/DiscordCallback";
 import UserPage from "./pages/UserPage";
 import type { User } from "./interfaces";
+import UsersPage from "./pages/UsersPage";
+import AdminPage from "./pages/AdminPage";
 
 
 function ColorModeSwitcher() {
@@ -24,16 +25,16 @@ function ColorModeSwitcher() {
 }
 
 // Composant pour protéger les routes admin
-function ProtectedRoute({ 
-  isAuthenticated, 
-  isAdmin, 
+function ProtectedRoute({
+  isAuthenticated,
+  isAdmin,
   isLoading,
-  children 
-}: { 
-  isAuthenticated: boolean; 
-  isAdmin: boolean; 
+  children
+}: {
+  isAuthenticated: boolean;
+  isAdmin: boolean;
   isLoading: boolean;
-  children: React.ReactNode; 
+  children: React.ReactNode;
 }) {
   // Pendant le chargement, ne pas rediriger
   if (isLoading) {
@@ -43,7 +44,7 @@ function ProtectedRoute({
       </Flex>
     );
   }
-  
+
   if (!isAuthenticated || !isAdmin) {
     return <Navigate to="/" replace />;
   }
@@ -58,7 +59,7 @@ export default function MainRouter() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const toast = useToast();
   const placement = "left";
-  
+
   // Tous les hooks de couleur en haut
   const linkColor = useColorModeValue('black.500', 'white.500');
   const homeHoverBg = useColorModeValue('blue.50', 'blue.900');
@@ -69,6 +70,8 @@ export default function MainRouter() {
   const cyclesHoverColor = useColorModeValue('purple.600', 'purple.200');
   const adminHoverBg = useColorModeValue('orange.50', 'orange.900');
   const adminHoverColor = useColorModeValue('orange.600', 'orange.200');
+  const usersHoverBg = useColorModeValue('teal.50', 'teal.900');
+  const usersHoverColor = useColorModeValue('teal.600', 'teal.200');
 
   // Fonction pour construire l'URL de l'avatar Discord
   const getDiscordAvatarUrl = (userId: string, avatarHash: string, size: number = 128) => {
@@ -97,10 +100,10 @@ export default function MainRouter() {
   // Fonction pour initier l'authentification Discord
   const handleDiscordAuth = () => {
     const discordClientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
-    
+
     // Utiliser l'URL de redirection depuis les variables d'environnement si disponible
     let redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI;
-    
+
     // Sinon, définir selon l'environnement
     if (!redirectUri) {
       if (window.location.hostname === 'localhost') {
@@ -114,11 +117,11 @@ export default function MainRouter() {
         redirectUri = `${window.location.origin}/discord-callback`;
       }
     }
-    
+
     const encodedRedirectUri = encodeURIComponent(redirectUri);
     const scope = encodeURIComponent('identify email guilds connections guilds.members.read');
     const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordClientId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=${scope}`;
-    
+
     window.location.href = discordAuthUrl;
   };
 
@@ -129,10 +132,10 @@ export default function MainRouter() {
     setIsAdmin(false);
     setIsLoggedIn(false);
     setUserInfo(null);
-    
+
     // Déclencher l'événement de changement d'état
     window.dispatchEvent(new Event('authStateChange'));
-    
+
     toast({ title: "Déconnexion réussie", status: "info" });
   };
 
@@ -145,18 +148,18 @@ export default function MainRouter() {
           const decoded = jwtDecode(token) as any;
           setIsLoggedIn(true);
           setIsAdmin(decoded.isAdmin || false);
-          
+
           // Construire l'URL de l'avatar Discord si disponible
           let avatarUrl = null;
           if (decoded.avatar && decoded.discord_id) {
             avatarUrl = getDiscordAvatarUrl(decoded.discord_id, decoded.avatar);
           }
-          
+
           setUserInfo({
             ...decoded,
             avatar: avatarUrl || undefined,
           });
-          
+
           if (localStorage.getItem('adminToken')) {
             localStorage.setItem('userToken', token);
             localStorage.removeItem('adminToken');
@@ -200,9 +203,9 @@ export default function MainRouter() {
       return (
         <HStack spacing={3}>
           <HStack spacing={2}>
-            <Avatar 
-              size="sm" 
-              src={userInfo?.avatar} 
+            <Avatar
+              size="sm"
+              src={userInfo?.avatar}
               name={userInfo?.username}
             />
             <VStack spacing={0} align="start">
@@ -250,10 +253,10 @@ export default function MainRouter() {
       >
         <Flex display={{ base: "none", md: "flex" }} justify="space-between" align="center" w="100%">
           <Flex gap={2} align="center">
-            <Button 
-              as={Link} 
-              to="/" 
-              variant="ghost" 
+            <Button
+              as={Link}
+              to="/"
+              variant="ghost"
               color={linkColor}
               borderRadius="md"
               px={4}
@@ -272,10 +275,10 @@ export default function MainRouter() {
             >
               🏠 Accueil
             </Button>
-            <Button 
-              as={Link} 
-              to="/characters" 
-              variant="ghost" 
+            <Button
+              as={Link}
+              to="/personnages"
+              variant="ghost"
               color={linkColor}
               borderRadius="md"
               px={4}
@@ -294,9 +297,9 @@ export default function MainRouter() {
             >
               📖 Personnages
             </Button>
-            <Button 
-              as={Link} 
-              to="/cycles" 
+            <Button
+              as={Link}
+              to="/cycles"
               variant="ghost"
               color={linkColor}
               borderRadius="md"
@@ -316,10 +319,32 @@ export default function MainRouter() {
             >
               🔄 Cycles
             </Button>
+            <Button
+              as={Link}
+              to="/users"
+              variant="ghost"
+              color={linkColor}
+              borderRadius="md"
+              px={4}
+              py={2}
+              fontSize="sm"
+              fontWeight="medium"
+              transition="all 0.2s"
+              _hover={{
+                bg: usersHoverBg,
+                color: usersHoverColor,
+                transform: "translateY(-1px)"
+              }}
+              _active={{
+                transform: "translateY(0px)"
+              }}
+            >
+              👥 Joueurs
+            </Button>
             {isAdmin && (
-              <Button 
-                as={Link} 
-                to="/admin" 
+              <Button
+                as={Link}
+                to="/admin"
                 variant="ghost"
                 color="orange.500"
                 borderRadius="md"
@@ -371,10 +396,10 @@ export default function MainRouter() {
                 />
               </Flex>
               <VStack spacing={3} align="stretch" p={4}>
-                <Button 
-                  as={Link} 
-                  to="/" 
-                  variant="ghost" 
+                <Button
+                  as={Link}
+                  to="/"
+                  variant="ghost"
                   onClick={onClose}
                   leftIcon={<Text>🏠</Text>}
                   justifyContent="flex-start"
@@ -390,10 +415,10 @@ export default function MainRouter() {
                 >
                   Accueil
                 </Button>
-                <Button 
-                  as={Link} 
-                  to="/characters" 
-                  variant="ghost" 
+                <Button
+                  as={Link}
+                  to="/personnages"
+                  variant="ghost"
                   onClick={onClose}
                   leftIcon={<Text>📖</Text>}
                   justifyContent="flex-start"
@@ -409,10 +434,10 @@ export default function MainRouter() {
                 >
                   Personnages
                 </Button>
-                <Button 
-                  as={Link} 
-                  to="/cycles" 
-                  variant="ghost" 
+                <Button
+                  as={Link}
+                  to="/cycles"
+                  variant="ghost"
                   onClick={onClose}
                   leftIcon={<Text>🔄</Text>}
                   justifyContent="flex-start"
@@ -428,11 +453,30 @@ export default function MainRouter() {
                 >
                   Cycles
                 </Button>
+                <Button
+                  as={Link}
+                  to="/users"
+                  variant="ghost"
+                  onClick={onClose}
+                  leftIcon={<Text>👥</Text>}
+                  justifyContent="flex-start"
+                  px={4}
+                  py={3}
+                  fontSize="md"
+                  fontWeight="medium"
+                  borderRadius="lg"
+                  _hover={{
+                    bg: usersHoverBg,
+                    color: usersHoverColor,
+                  }}
+                >
+                  Joueurs
+                </Button>
                 {isAdmin && (
-                  <Button 
-                    as={Link} 
-                    to="/admin" 
-                    variant="ghost" 
+                  <Button
+                    as={Link}
+                    to="/admin"
+                    variant="ghost"
                     onClick={onClose}
                     leftIcon={<Text>⚙️</Text>}
                     justifyContent="flex-start"
@@ -453,9 +497,9 @@ export default function MainRouter() {
                 {isLoggedIn ? (
                   <VStack spacing={3}>
                     <HStack spacing={2}>
-                      <Avatar 
-                        size="sm" 
-                        src={userInfo?.avatar} 
+                      <Avatar
+                        size="sm"
+                        src={userInfo?.avatar}
                         name={userInfo?.username}
                       />
                       <VStack spacing={0} align="start">
@@ -491,22 +535,23 @@ export default function MainRouter() {
       <Box h="calc(100dvh - var(--navbar-height, 60px))" px={4} py={2} overflow="auto">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/characters" element={<CharactersPage />} />
+          <Route path="/personnages" element={<CharactersPage />} />
           <Route path="/cycles" element={<CyclesPage />} />
-          <Route path="/cycles/:id" element={<CycleDetailPage />} />
-          <Route 
-            path="/admin" 
+          <Route path="/cycle/:id" element={<CycleDetailPage />} />
+          <Route
+            path="/admin"
             element={
-              <ProtectedRoute 
-                isAuthenticated={isLoggedIn} 
+              <ProtectedRoute
+                isAuthenticated={isLoggedIn}
                 isAdmin={isAdmin}
                 isLoading={isAuthLoading}
               >
                 <AdminPage />
               </ProtectedRoute>
-            } 
+            }
           />
           <Route path="/discord-callback" element={<DiscordCallback />} />
+          <Route path="/users" element={<UsersPage />} />
           <Route path="/user/:userId" element={<UserPage />} />
         </Routes>
       </Box>

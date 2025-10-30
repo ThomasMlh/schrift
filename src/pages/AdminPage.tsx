@@ -3,10 +3,10 @@ import { GuildsAdminSection } from "../components/GuildsAdminSection";
 import { CyclesSection } from "../components/CyclesSection";
 import { ScoresSection } from "../components/ScoresSection";
 import { useState } from "react";
-import type { AdminPage } from "../interfaces";
+import type { AdminPage as IAdminPage } from "../interfaces";
 
-export default function AdminPage() {
-  const [currentPage, setCurrentPage] = useState<AdminPage>("guilds");
+const AdminPage = () => {
+  const [currentPage, setCurrentPage] = useState<IAdminPage>("guilds");
   const bgColor = useColorModeValue('white', 'gray.800');
 
   const renderPage = () => {
@@ -68,3 +68,5 @@ export default function AdminPage() {
     </Flex>
   );
 }
+
+export default AdminPage;

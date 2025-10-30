@@ -189,7 +189,7 @@ export function CyclesPage() {
                     <HStack justify="space-between" align="start" mb={3}>
                       <Heading 
                         as={Link}
-                        to={`/cycles/${cycle._id}`}
+                        to={`/cycle/${cycle._id}`}
                         size="lg" 
                         flex={1}
                         color="black.600"
@@ -306,7 +306,7 @@ export function CyclesPage() {
                         {/* Bouton voir plus */}
                         <Button
                           as={Link}
-                          to={`/cycles/${cycle._id}`}
+                          to={`/cycle/${cycle._id}`}
                           rightIcon={<ExternalLinkIcon />}
                           colorScheme="blue"
                           variant="outline"

@@ -23,7 +23,7 @@ import type { Cycle } from "../interfaces";
 import { handleAttackType } from "../utils/attackTypes";
 import { AlterationImage } from "../components/ui/AlterationImage";
 
-export function CycleDetailPage() {
+const CycleDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [cycle, setCycle] = useState<Cycle | null>(null);
@@ -226,3 +226,5 @@ export function CycleDetailPage() {
     </Container>
   );
 }
+
+export default CycleDetailPage;
