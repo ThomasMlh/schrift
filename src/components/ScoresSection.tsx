@@ -103,7 +103,6 @@ const ScoresSection = () => {
                 });
             }
         } catch (error) {
-            console.error("Erreur lors du chargement des scores:", error);
             toast({
                 title: "Erreur",
                 description: "Erreur de connexion lors du chargement des scores",
@@ -131,7 +130,6 @@ const ScoresSection = () => {
                 });
             }
         } catch (error) {
-            console.error("Erreur lors du chargement des cycles:", error);
             toast({
                 title: "Erreur",
                 description: "Erreur de connexion lors du chargement des cycles",
@@ -272,10 +270,9 @@ const ScoresSection = () => {
                 });
             }
         } catch (error) {
-            console.error("Erreur lors de l'ajout du score:", error);
             toast({
                 title: "Erreur",
-                description: "Erreur de connexion lors de l'ajout du score",
+                description: "Erreur lors de l'ajout du score",
                 status: "error",
                 duration: 3000,
             });
@@ -320,7 +317,6 @@ const ScoresSection = () => {
                 });
             }
         } catch (error) {
-            console.error("Erreur lors de la suppression du score:", error);
             toast({
                 title: "Erreur",
                 description: "Erreur de connexion lors de la suppression du score",
@@ -367,7 +363,6 @@ const ScoresSection = () => {
                 });
             }
         } catch (error) {
-            console.error("Erreur lors de l'enregistrement des scores:", error);
             toast({
                 title: "Erreur",
                 description: "Erreur de connexion lors de l'enregistrement des scores",
@@ -474,7 +469,6 @@ const ScoresSection = () => {
                 });
             }
         } catch (error) {
-            console.error("Erreur lors de la modification du score:", error);
             toast({
                 title: "Erreur",
                 description: "Erreur de connexion lors de la modification du score",

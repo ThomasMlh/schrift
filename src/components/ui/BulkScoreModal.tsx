@@ -11,7 +11,6 @@ import {
     Text,
     FormControl,
     FormLabel,
-    Select,
     NumberInput,
     NumberInputField,
     NumberInputStepper,
@@ -34,7 +33,8 @@ import {
 import { useState, useEffect } from "react";
 import type { User, Cycle, Guild, ScoreFormData } from "../../interfaces";
 import { getDiscordAvatarUrl } from "../../utils/discord";
-import { getAttackTypeName } from "@/utils/attackTypes";
+import { AttackTypeBadge } from "./AttackTypeBadge";
+import { CustomSelect } from "./CustomSelect";
 
 interface BulkScoreModalProps {
   isOpen: boolean;
@@ -91,7 +91,6 @@ export default function BulkScoreModal({
                     throw new Error(data.message || 'Erreur lors du chargement des membres');
                 }
             } catch (error: any) {
-                console.error('Erreur lors du chargement des membres:', error);
                 toast({
                     title: "Erreur",
                     description: error.message,
@@ -157,64 +156,83 @@ export default function BulkScoreModal({
     return (
         <Modal isOpen={isOpen} onClose={handleClose} size="6xl" scrollBehavior="inside">
             <ModalOverlay />
-            <ModalContent>
+            <ModalContent  minH="400px">
                 <ModalHeader>Saisie groupée des scores</ModalHeader>
                 <ModalBody>
                     <VStack spacing={6} align="stretch">
                         {/* Sélection de la guilde */}
                         <FormControl>
                             <FormLabel>Guilde</FormLabel>
-                            <Select
+                            <CustomSelect
                                 placeholder="Sélectionnez une guilde"
                                 value={selectedGuildId}
-                                onChange={(e) => setSelectedGuildId(e.target.value)}
+                                onChange={setSelectedGuildId}
                                 isDisabled={isSubmitting}
-                            >
-                                {guilds.map((guild: Guild) => (
-                                    <option key={guild._id} value={guild._id}>
-                                        {guild.name}
-                                    </option>
-                                ))}
-                            </Select>
+                                options={guilds.map((guild: Guild) => ({
+                                    value: guild._id,
+                                    label: guild.name
+                                }))}
+                                allowDeselect={false}
+                            />
                         </FormControl>
 
                         {/* Sélection du cycle */}
                         <FormControl>
                             <FormLabel>Cycle</FormLabel>
-                            <Select
+                            <CustomSelect
                                 placeholder="Sélectionnez un cycle"
                                 value={selectedCycleId}
-                                onChange={(e) => setSelectedCycleId(e.target.value)}
+                                onChange={setSelectedCycleId}
                                 isDisabled={isSubmitting}
-                            >
-                                {cycles.map((cycle: Cycle) => (
-                                    <option key={cycle._id} value={cycle._id}>
-                                        {cycle.name}
-                                    </option>
-                                ))}
-                            </Select>
+                                options={cycles.map((cycle: Cycle) => ({
+                                    value: cycle._id || '',
+                                    label: cycle.name
+                                }))}
+                                allowDeselect={false}
+                            />
                         </FormControl>
 
                         {/* Sélection de la rotation */}
                         {selectedCycle && (
                             <FormControl>
                                 <FormLabel>Rotation</FormLabel>
-                                <Select
+                                <CustomSelect
                                     placeholder="Sélectionnez une rotation"
                                     value={selectedRotationId}
-                                    onChange={(e) => setSelectedRotationId(e.target.value)}
+                                    onChange={setSelectedRotationId}
                                     isDisabled={isSubmitting}
-                                >
-                                    {selectedCycle.rotations.map((rotation: any, index: number) => (
-                                        <option key={rotation._id} value={rotation._id}>
-                                            <Box>Rotation #{index + 1} - {rotation.killer} - {getAttackTypeName(rotation.attack)} - ({rotation.start_date} - {rotation.end_date})</Box>
-                                        </option>
-                                    ))}
-                                </Select>
+                                    options={selectedCycle.rotations.map((rotation: any, index: number) => ({
+                                        value: rotation._id,
+                                        label: `Rotation #${index + 1} - ${rotation.killer}`,
+                                        content: (
+                                            <VStack align="start" spacing={1} w="100%">
+                                                <HStack spacing={2} w="100%">
+                                                    <Text fontWeight="medium">
+                                                        Rotation #{index + 1} - {rotation.killer}
+                                                    </Text>
+                                                    <AttackTypeBadge attackType={rotation.attack} />
+                                                </HStack>
+                                                <Text fontSize="sm" color="gray.500">
+                                                    {rotation.start_date} - {rotation.end_date} • {rotation.period}
+                                                </Text>
+                                            </VStack>
+                                        )
+                                    }))}
+                                    renderSelected={(option) => {
+                                        const rotation = selectedCycle.rotations.find((r: any) => r._id === option.value);
+                                        const index = selectedCycle.rotations.findIndex((r: any) => r._id === option.value);
+                                        return rotation ? (
+                                            <HStack spacing={2} w="100%">
+                                                <Text>Rotation #{index + 1} - {rotation.killer}</Text>
+                                                <AttackTypeBadge attackType={rotation.attack} />
+                                                <Text>({rotation.start_date} - {rotation.end_date})</Text>
+                                            </HStack>
+                                        ) : <Text>{option.label}</Text>;
+                                    }}
+                                    allowDeselect={false}
+                                />
                             </FormControl>
-                        )}
-
-                        {/* Informations de la sélection */}
+                        )}                        {/* Informations de la sélection */}
                         {selectedGuild && selectedCycle && selectedRotationId && (
                             <Alert status="info">
                                 <AlertIcon />

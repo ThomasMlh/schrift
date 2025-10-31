@@ -84,7 +84,6 @@ export default function DiscordCallback() {
         navigate('/');
         
       } catch (error: any) {
-        console.error('Erreur lors de l\'authentification Discord:', error);
         toast({
           title: "Erreur de connexion",
           description: error.message,

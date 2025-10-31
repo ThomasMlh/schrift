@@ -13,6 +13,7 @@ import UserPage from "./pages/UserPage";
 import type { User } from "./interfaces";
 import UsersPage from "./pages/UsersPage";
 import AdminPage from "./pages/AdminPage";
+import ScoresPage from "./pages/ScoresPage";
 
 
 function ColorModeSwitcher() {
@@ -72,6 +73,8 @@ export default function MainRouter() {
   const adminHoverColor = useColorModeValue('orange.600', 'orange.200');
   const usersHoverBg = useColorModeValue('teal.50', 'teal.900');
   const usersHoverColor = useColorModeValue('teal.600', 'teal.200');
+  const scoresHoverBg = useColorModeValue('pink.50', 'pink.900');
+  const scoresHoverColor = useColorModeValue('pink.600', 'pink.200');
 
   // Fonction pour construire l'URL de l'avatar Discord
   const getDiscordAvatarUrl = (userId: string, avatarHash: string, size: number = 128) => {
@@ -341,6 +344,29 @@ export default function MainRouter() {
             >
               👥 Joueurs
             </Button>
+            <Button
+              as={Link}
+              to="/scores"
+              variant="ghost"
+              color={linkColor}
+              borderRadius="md"
+              px={4}
+              py={2}
+              fontSize="sm"
+              fontWeight="medium"
+              transition="all 0.2s"
+              _hover={{
+                bg: scoresHoverBg,
+                color: scoresHoverColor,
+                transform: "translateY(-1px)"
+              }}
+              _active={{
+                transform: "translateY(0px)"
+              }}
+              isDisabled={true}
+            >
+              📊 Scores
+            </Button>
             {isAdmin && (
               <Button
                 as={Link}
@@ -472,6 +498,26 @@ export default function MainRouter() {
                 >
                   Joueurs
                 </Button>
+                <Button
+                  as={Link}
+                  to="/scores"
+                  variant="ghost"
+                  onClick={onClose}
+                  leftIcon={<Text>📊</Text>}
+                  justifyContent="flex-start"
+                  px={4}
+                  py={3}
+                  fontSize="md"
+                  fontWeight="medium"
+                  borderRadius="lg"
+                  _hover={{
+                    bg: scoresHoverBg,
+                    color: scoresHoverColor,
+                  }}
+                  isDisabled={true}
+                >
+                  Scores
+                </Button>
                 {isAdmin && (
                   <Button
                     as={Link}
@@ -553,6 +599,7 @@ export default function MainRouter() {
           <Route path="/discord-callback" element={<DiscordCallback />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/user/:userId" element={<UserPage />} />
+          <Route path="/scores" element={<ScoresPage />} />
         </Routes>
       </Box>
     </Router>

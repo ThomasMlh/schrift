@@ -1,4 +1,4 @@
-import { Container, Heading, Flex, useColorModeValue, Button, HStack } from "@chakra-ui/react";
+import { Container, Heading, Flex, useColorModeValue, Button, HStack, useToast } from "@chakra-ui/react";
 import { GuildsAdminSection } from "../components/GuildsAdminSection";
 import { CyclesSection } from "../components/CyclesSection";
 import { ScoresSection } from "../components/ScoresSection";
@@ -7,7 +7,33 @@ import type { AdminPage as IAdminPage } from "../interfaces";
 
 const AdminPage = () => {
   const [currentPage, setCurrentPage] = useState<IAdminPage>("guilds");
+  const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
   const bgColor = useColorModeValue('white', 'gray.800');
+  const toast = useToast();
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const handleUpdateCharacters = () => {
+    const token = localStorage.getItem('userToken');
+    // En utilisant Toast pour les notifications
+    setIsUpdatingCharacters(true);
+
+    fetch(`${apiUrl}/api/characters/update`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+      },
+    })
+    .then(res => res.json().then(data => ({ ok: res.ok, data })))
+    .then(({ ok, data }) => {
+      if (!ok) throw new Error(data.message || "Erreur lors de la mise à jour des personnages");
+      toast({ title: data.message || "Personnages mis à jour", status: "success" });
+    })
+    .catch((error) => {
+      toast({ title: error.message || "Erreur lors de la mise à jour des personnages", status: "error" });
+    })
+    .finally(() => setIsUpdatingCharacters(false));
+  }
 
   const renderPage = () => {
     switch (currentPage) {
@@ -60,6 +86,16 @@ const AdminPage = () => {
             onClick={() => setCurrentPage("scores")}
           >
             📊 Scores
+          </Button>
+          {/* // Un bouton qui fait un call post vers /api/characters/update */}
+          <Button
+            variant="outline"
+            colorScheme="orange"
+            onClick={handleUpdateCharacters}
+            isLoading={isUpdatingCharacters}
+            loadingText="Mise à jour..."
+          >
+            🔄 Mettre à jour les personnages
           </Button>
         </HStack>
 

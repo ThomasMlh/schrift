@@ -71,7 +71,6 @@ const CyclesSection = () => {
         } else if (data && Array.isArray(data.data)) {
           setCycles(data.data);
         } else {
-          console.error("Format de données inattendu:", data);
           setCycles([]);
           toast({
             title: "Erreur",
@@ -89,7 +88,6 @@ const CyclesSection = () => {
         });
       }
     } catch (error) {
-      console.error("Erreur lors du chargement des cycles:", error);
       toast({
         title: "Erreur",
         description: "Erreur de connexion lors du chargement des cycles",

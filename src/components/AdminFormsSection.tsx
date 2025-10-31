@@ -111,7 +111,6 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
           setUsers(users);
         } else {
           const errorText = await response.text();
-          console.error('❌ Erreur API users:', response.status, errorText);
           toast({
             title: "Erreur",
             description: `Erreur ${response.status}: ${errorText}`,
@@ -120,7 +119,6 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
           });
         }
       } catch (error) {
-        console.error('💥 Erreur lors du chargement des utilisateurs:', error);
         toast({
           title: "Erreur",
           description: "Impossible de charger la liste des utilisateurs",

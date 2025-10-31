@@ -74,9 +74,11 @@ export const UserSearchSelect = ({
         onSearchChange(''); // Reset search
     };
 
-    const bgColor = useColorModeValue('white', 'gray.800');
+    const bgColor = useColorModeValue('white', 'gray.700');
     const borderColor = useColorModeValue('gray.200', 'gray.600');
-    const hoverBg = useColorModeValue('gray.50', 'gray.700');
+    const hoverBg = useColorModeValue('gray.50', 'gray.600');
+    const menuBg = useColorModeValue('white', 'gray.800');
+    const textColor = useColorModeValue('gray.900', 'white');
 
     return (
         <Box position="relative" ref={menuRef}>
@@ -91,6 +93,7 @@ export const UserSearchSelect = ({
                     bg={bgColor}
                     align="center"
                     justify="space-between"
+                    color={textColor}
                 >
                     <Box flex={1} cursor="pointer" onClick={() => setIsOpen(!isOpen)}>
                         <Text fontWeight="medium">
@@ -136,6 +139,8 @@ export const UserSearchSelect = ({
                     py={2}
                     h="auto"
                     minH="40px"
+                    color={textColor}
+                    _hover={{ borderColor: "gray.300", bg: hoverBg }}
                 >
                     <Text>{placeholder}</Text>
                 </Button>
@@ -148,7 +153,7 @@ export const UserSearchSelect = ({
                     left={0}
                     right={0}
                     zIndex={1000}
-                    bg={bgColor}
+                    bg={menuBg}
                     border="1px solid"
                     borderColor={borderColor}
                     borderRadius="md"
@@ -214,7 +219,7 @@ export const UserSearchSelect = ({
                                     _last={{ borderBottom: "none" }}
                                 >
                                     <Box flex={1}>
-                                        <Text fontWeight="medium">
+                                        <Text fontWeight="medium" color={textColor}>
                                             {user.global_name || user.username}
                                         </Text>
                                         {user.discord_id && (

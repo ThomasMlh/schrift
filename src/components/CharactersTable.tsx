@@ -92,12 +92,10 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
         setCharacters(data.data);
         setPagination(data.pagination);
       } else {
-        console.error('Erreur lors du chargement des personnages:', response.status);
         setCharacters([]);
         setPagination(null);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des personnages:', error);
       setCharacters([]);
       setPagination(null);
     } finally {

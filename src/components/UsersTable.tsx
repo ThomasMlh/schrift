@@ -75,17 +75,14 @@ export function UsersTable({ apiUrl }: UsersTableProps) {
                     setUsers(data.users);
                     setPagination(data.pagination);
                 } else {
-                    console.error('Erreur dans la réponse:', data);
                     setUsers([]);
                     setPagination(null);
                 }
             } else {
-                console.error('Erreur lors du chargement des utilisateurs:', response.status);
                 setUsers([]);
                 setPagination(null);
             }
         } catch (error) {
-            console.error('Erreur lors du chargement des utilisateurs:', error);
             setUsers([]);
             setPagination(null);
         } finally {
