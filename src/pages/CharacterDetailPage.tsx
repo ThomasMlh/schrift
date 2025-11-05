@@ -370,7 +370,15 @@ const CharacterDetailPage = () => {
                                             <HStack justify="space-between">
                                                 <Text fontWeight="medium">Créé le:</Text>
                                                 <Text fontSize="sm" color="gray.500">
-                                                    {new Date(character.created_at).toLocaleDateString('fr-FR')}
+                                                    {(character.release_date)}
+                                                </Text>
+                                            </HStack>
+                                        )}
+                                        {character.resurrection_release && (
+                                            <HStack justify="space-between">
+                                                <Text fontWeight="medium">Résurrection:</Text>
+                                                <Text fontSize="sm" color="gray.500">
+                                                    {(character.resurrection_release)}
                                                 </Text>
                                             </HStack>
                                         )}
