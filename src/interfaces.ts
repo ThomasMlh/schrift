@@ -77,7 +77,7 @@ export interface RotationTemplate {
 }
 
 export interface CycleRotation {
-    _id: string;
+    _id?: string;
     start_date: string; // Format DD/MM/YYYY
     end_date: string;   // Format DD/MM/YYYY
     period: "Mardi-Jeudi" | "Vendredi-Dimanche";
@@ -85,6 +85,7 @@ export interface CycleRotation {
     attack: string;
     alteration: string;
     position: number;
+    rotation_id: string;
 }
 
 export interface Cycle {

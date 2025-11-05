@@ -1,15 +1,15 @@
 import {
     Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
     Text, Input, InputGroup, InputLeftElement, Select, Spinner,
-    useColorModeValue, Badge, Flex, Avatar, Link, IconButton, useDisclosure
+    useColorModeValue, Badge, Flex, IconButton, useDisclosure
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import { Link as RouterLink, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { SearchIcon, EditIcon } from "@chakra-ui/icons";
 import type { User, Pagination, UsersResponse, Guild } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
-import { getUserAvatarUrl } from "../utils/discord";
 import EditUserModal from "./EditUserModal";
+import { UserDisplay } from "./ui/UserDisplay";
 
 interface UsersTableProps {
     isAdminMode?: boolean;
@@ -36,7 +36,6 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const hoverBg = useColorModeValue('gray.50', 'gray.700');
     const badgeVariant = useColorModeValue('subtle', 'solid');
     const filterBg = useColorModeValue('blue.50', 'blue.900');
-    const linkColor = useColorModeValue('black', 'white');
     const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure();
 
     // Fonction pour mettre à jour l'URL avec les filtres actuels
@@ -327,27 +326,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                                 <Tr key={user._id} _hover={{ bg: hoverBg }}>
                                     <Td>
                                         <HStack spacing={3}>
-                                            <Avatar
-                                                size="sm"
-                                                src={getUserAvatarUrl(user) || undefined}
-                                                name={user.global_name || user.username}
-                                            />
-                                            <VStack spacing={0} align="start">
-                                                <Link as={RouterLink} to={`/user/${user._id}`} color={linkColor} _hover={{
-                                                    textDecoration: "underline",
-                                                    color: linkColor
-                                                }}
-                                                    _focus={{
-                                                        outline: "1px solid",
-                                                        outlineColor: linkColor,
-                                                        outlineOffset: "2px"
-                                                    }} fontWeight="medium">
-                                                    {user.global_name || user.username}
-                                                </Link>
-                                                <Text fontSize="xs" color="gray.500">
-                                                    @{user.username}
-                                                </Text>
-                                            </VStack>
+                                            <UserDisplay user={user} />
                                         </HStack>
                                     </Td>
                                     <Td>

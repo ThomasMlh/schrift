@@ -19,7 +19,6 @@ import {
     useToast,
     Divider,
     Box,
-    Avatar,
     Grid,
     GridItem,
     Card,
@@ -32,18 +31,18 @@ import {
 
 import { useState, useEffect } from "react";
 import type { User, Cycle, Guild, ScoreFormData } from "../../interfaces";
-import { getDiscordAvatarUrl } from "../../utils/discord";
 import { AttackTypeBadge } from "./AttackTypeBadge";
 import { CustomSelect } from "./CustomSelect";
+import { UserDisplay } from "./UserDisplay";
 
 interface BulkScoreModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  cycles: Cycle[];
-  guilds: Guild[];
-  onSubmit: (scores: ScoreFormData[]) => void;
-  isSubmitting?: boolean;
-  apiUrl?: string;
+    isOpen: boolean;
+    onClose: () => void;
+    cycles: Cycle[];
+    guilds: Guild[];
+    onSubmit: (scores: ScoreFormData[]) => void;
+    isSubmitting?: boolean;
+    apiUrl?: string;
 }
 
 export default function BulkScoreModal({
@@ -56,7 +55,7 @@ export default function BulkScoreModal({
     apiUrl = '/api'
 }: BulkScoreModalProps) {
     const toast = useToast();
-    
+
     const [selectedGuildId, setSelectedGuildId] = useState<string>("");
     const [selectedCycleId, setSelectedCycleId] = useState<string>("");
     const [selectedRotationId, setSelectedRotationId] = useState<string>("");
@@ -78,7 +77,7 @@ export default function BulkScoreModal({
                 const response = await fetch(`${apiUrl}/api/guildes/${selectedGuildId}/membres`);
 
                 const data = await response.json();
-                
+
                 if (data.success) {
                     setGuildMembers(data.data);
                     // Initialiser les scores à 0 pour tous les membres
@@ -156,7 +155,7 @@ export default function BulkScoreModal({
     return (
         <Modal isOpen={isOpen} onClose={handleClose} size="6xl" scrollBehavior="inside">
             <ModalOverlay />
-            <ModalContent  minH="400px">
+            <ModalContent minH="400px">
                 <ModalHeader>Saisie groupée des scores</ModalHeader>
                 <ModalBody>
                     <VStack spacing={6} align="stretch">
@@ -266,25 +265,10 @@ export default function BulkScoreModal({
                                                 <CardBody p={3}>
                                                     <VStack spacing={3} h="full">
                                                         <HStack spacing={3} w="full">
-                                                            <Avatar
-                                                                size="sm"
-                                                                src={getDiscordAvatarUrl(member.discordId || member.discord_id || '', member.avatar || '') || undefined}
-                                                                name={member.global_name || member.username}
-                                                            />
-                                                            <VStack align="start" spacing={1} flex={1}>
-                                                                <Text 
-                                                                    fontWeight="medium" 
-                                                                    fontSize="sm"
-                                                                    noOfLines={1}
-                                                                    title={member.global_name || member.username}
-                                                                    w="full"
-                                                                >
-                                                                    {member.global_name || member.username}
-                                                                </Text>
-                                                                <Text fontSize="xs" color="gray.500" textTransform="capitalize">
-                                                                    {member.role}
-                                                                </Text>
-                                                            </VStack>
+                                                            <UserDisplay user={member} />
+                                                            <Text fontSize="xs" color="gray.500" textTransform="capitalize">
+                                                                {member.role}
+                                                            </Text>
                                                         </HStack>
                                                         <Box w="full">
                                                             <NumberInput

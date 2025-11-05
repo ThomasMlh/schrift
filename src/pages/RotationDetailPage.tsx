@@ -1,12 +1,14 @@
 import {
     Container, VStack, HStack, Heading, Text, Box, Badge, Spinner,
     useColorModeValue, Button, Flex, Table, Thead, Tbody, Tr, Th, Td,
-    TableContainer, Avatar, useToast, Select, IconButton
+    TableContainer, useToast, Select, IconButton
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowBackIcon, ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { getUserAvatarUrl } from "@/utils/discord";
+import type { RotationTemplate } from "@/interfaces";
+import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
+import { UserDisplay } from "@/components/ui/UserDisplay";
 
 interface Score {
     _id: string;
@@ -29,6 +31,7 @@ interface ApiResponse {
     success: boolean;
     data: Score[];
     cycle: string;
+    rotation: RotationTemplate | null;
     pagination: {
         currentPage: number;
         totalPages: number;
@@ -52,6 +55,7 @@ const RotationDetailPage = () => {
 
     const [scores, setScores] = useState<Score[]>([]);
     const [cycle, setCycle] = useState<string | null>(null);
+    const [rotation, setRotation] = useState<RotationTemplate | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -149,7 +153,8 @@ const RotationDetailPage = () => {
             if (response.ok) {
                 const data: ApiResponse = await response.json();
                 setScores(data.data);
-                setCycle(data.cycle)
+                setCycle(data.cycle);
+                setRotation(data.rotation);
                 setCurrentPage(data.pagination?.currentPage || 1);
                 setTotalPages(data.pagination?.totalPages || 1);
                 setTotalItems(data.pagination?.totalItems || data.data?.length || 0);
@@ -260,7 +265,11 @@ const RotationDetailPage = () => {
                             Retour
                         </Button>
                         <Heading size="lg">
-                          {cycle} - Rotation #{position} - Classement
+                            <HStack spacing={2} align="center">
+                                <Text as="span">{cycle} - Rotation #{position} - {rotation?.killer}</Text>
+                                {rotation?.attack && <AttackTypeBadge attackType={rotation.attack} size="24px"/>}
+                                <Text as="span"> - Classement</Text>
+                            </HStack>
                         </Heading>
                         <Text color="gray.500" fontSize="sm">
                             {totalItems} score{totalItems > 1 ? 's' : ''} total{totalItems > 1 ? 'aux' : ''}
@@ -298,12 +307,6 @@ const RotationDetailPage = () => {
                                     <Tbody>
                                         {scores.map((score) => {
                                             const rankInfo = ranksMap.get(score._id)!;
-                                            const avatarUrl = score.user.avatar && score.user.discord_id 
-                                                ? getUserAvatarUrl({ 
-                                                    discord_id: score.user.discord_id, 
-                                                    avatar: score.user.avatar 
-                                                }) || undefined
-                                                : undefined;
                                             
                                             return (
                                                 <Tr 
@@ -315,23 +318,7 @@ const RotationDetailPage = () => {
                                                         {renderRankBadge(rankInfo)}
                                                     </Td>
                                                     <Td>
-                                                        <HStack spacing={3}>
-                                                            <Avatar
-                                                                size="sm"
-                                                                src={avatarUrl}
-                                                                name={score.user.global_name || score.user.username}
-                                                            />
-                                                            <VStack spacing={0} align="start">
-                                                                <Text fontWeight="medium" fontSize="sm">
-                                                                    {score.user.global_name || score.user.username}
-                                                                </Text>
-                                                                {score.user.global_name && (
-                                                                    <Text fontSize="xs" color="gray.500">
-                                                                        @{score.user.username}
-                                                                    </Text>
-                                                                )}
-                                                            </VStack>
-                                                        </HStack>
+                                                        <UserDisplay user={score.user} />
                                                     </Td>
                                                     <Td isNumeric>
                                                         <Badge colorScheme={score.score >= 490000000 ? "green" : score.score >= 250000000 ? "orange" : "red"} fontWeight="bold" fontSize={"medium"}>

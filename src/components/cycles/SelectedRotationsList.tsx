@@ -65,8 +65,8 @@ const SelectedRotationsList = ({
                                     >
                                         {rotations.map((rotation, index) => (
                                             <Draggable
-                                                key={rotation._id}
-                                                draggableId={rotation._id}
+                                                key={rotation.rotation_id}
+                                                draggableId={rotation.rotation_id}
                                                 index={index}
                                             >
                                                 {(provided, snapshot) => (

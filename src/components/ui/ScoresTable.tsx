@@ -7,7 +7,6 @@ import {
     Td,
     TableContainer,
     HStack,
-    Avatar,
     VStack,
     Link,
     Text,
@@ -18,8 +17,8 @@ import {
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
 import { Link as RouterLink } from "react-router-dom";
 import type { Score, User, Cycle } from "../../interfaces";
-import { getUserAvatarUrl } from "../../utils/discord";
 import { AttackTypeBadge } from "./AttackTypeBadge";
+import { UserDisplay } from "./UserDisplay";
 
 interface ScoresTableProps {
     scores: Score[];
@@ -78,33 +77,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                             <Tr key={score._id}>
                                 <Td>
                                     <HStack spacing={3}>
-                                        <Avatar
-                                            size="sm"
-                                            src={user ? getUserAvatarUrl(user) || undefined : undefined}
-                                            name={user?.global_name || user?.username || "Utilisateur inconnu"}
-                                        />
-                                        <VStack spacing={0} align="start">
-                                            <Link
-                                                as={RouterLink}
-                                                to={`/user/${user?._id}`}
-                                                color={linkColor}
-                                                _hover={{
-                                                    textDecoration: "underline",
-                                                    color: linkColor
-                                                }}
-                                                _focus={{
-                                                    outline: "1px solid",
-                                                    outlineColor: linkColor,
-                                                    outlineOffset: "2px"
-                                                }}
-                                                fontWeight="medium"
-                                            >
-                                                {user?.global_name || user?.username || "Utilisateur inconnu"}
-                                            </Link>
-                                            <Text fontSize="xs" color="gray.500">
-                                                {user?.username}
-                                            </Text>
-                                        </VStack>
+                                        {user && <UserDisplay user={user} />}
                                     </HStack>
                                 </Td>
                                 <Td>
