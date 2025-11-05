@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { jwtDecode } from 'jwt-decode';
 import HomePage from "./pages/HomePage";
 import CharactersPage from "./pages/CharactersPage";
+import CharacterDetailPage from "./pages/CharacterDetailPage";
 import { CyclesPage } from "./pages/CyclesPage";
 import CycleDetailPage from "./pages/CycleDetailPage";
 import DiscordCallback from "./pages/DiscordCallback";
@@ -580,6 +581,7 @@ const MainRouter = () => {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/personnages" element={<CharactersPage />} />
+          <Route path="/personnage/:id" element={<CharacterDetailPage />} />
           <Route path="/cycles" element={<CyclesPage />} />
           <Route path="/cycle/:id" element={<CycleDetailPage />} />
           <Route

@@ -8,6 +8,15 @@ const affinityIcons = {
   "Goton": "https://i.ibb.co/WtBTMKw/goton.png"
 };
 
+// Mapping des statistiques avec leurs icônes
+const statIcons = {
+  "atk": "https://i.ibb.co/DcHQ9mY/atk.png",
+  "def": "https://i.ibb.co/xKbShNPc/def.png",
+  "cct": "https://i.ibb.co/N6Jwz0fB/cct.png",
+  "pre": "https://i.ibb.co/v6FShNNV/spe.png",
+  "end": "https://i.ibb.co/zWbCn4Dz/end.png",
+};
+
 // Mapping des tueurs avec leurs icônes
 const killerIcons = {
   "Shinigami": "https://i.ibb.co/tC1NZcN/killer-shini.png",
@@ -96,4 +105,13 @@ export const getAllKillers = () => {
  */
 export const getAllCategories = () => {
   return categoryIcons;
+};
+
+/**
+ * Récupère l'URL de l'icône d'une statistique
+ * @param stat - Le nom de la statistique
+ * @returns L'URL de l'icône ou null si non trouvée
+ */
+export const getStatIcon = (stat: string): string | null => {
+  return statIcons[stat as keyof typeof statIcons] || null;
 };
