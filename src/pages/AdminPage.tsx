@@ -1,4 +1,4 @@
-import { Container, Heading, Flex, useColorModeValue, Button, HStack, useToast } from "@chakra-ui/react";
+import { Container, Heading, Flex, useColorModeValue, Button, useToast, SimpleGrid, VStack } from "@chakra-ui/react";
 import GuildsAdminSection from "../components/GuildsAdminSection";
 import CyclesSection from "../components/CyclesSection";
 import ScoresSection from "../components/ScoresSection";
@@ -68,46 +68,56 @@ const AdminPage = () => {
         <Heading mb={6} textAlign="center">Administration Ṣčhrīft</Heading>
         
         {/* Navigation */}
-        <HStack spacing={4} mb={6}>
-          <Button
-            variant={currentPage === "guilds" ? "solid" : "outline"}
-            colorScheme="orange"
-            onClick={() => setCurrentPage("guilds")}
-          >
-            🏰 Guildes
-          </Button>
-          <Button
-            variant={currentPage === "cycles" ? "solid" : "outline"}
-            colorScheme="orange"
-            onClick={() => setCurrentPage("cycles")}
-          >
-            🔄 Cycles
-          </Button>
-          <Button
-            variant={currentPage === "scores" ? "solid" : "outline"}
-            colorScheme="orange"
-            onClick={() => setCurrentPage("scores")}
-          >
-            📊 Scores
-          </Button>
-          <Button
-            variant={currentPage === "users" ? "solid" : "outline"}
-            colorScheme="orange"
-            onClick={() => setCurrentPage("users")}
-          >
-            👥 Joueurs
-          </Button>
-          {/* // Un bouton qui fait un call post vers /api/characters/update */}
+        <VStack spacing={4} mb={6} w="100%" maxW="800px" px={4}>
+          {/* Première ligne - Navigation principale */}
+          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={3} w="100%">
+            <Button
+              variant={currentPage === "guilds" ? "solid" : "outline"}
+              colorScheme="orange"
+              onClick={() => setCurrentPage("guilds")}
+              size={{ base: "sm", md: "md" }}
+            >
+              🏰 Guildes
+            </Button>
+            <Button
+              variant={currentPage === "cycles" ? "solid" : "outline"}
+              colorScheme="orange"
+              onClick={() => setCurrentPage("cycles")}
+              size={{ base: "sm", md: "md" }}
+            >
+              🔄 Cycles
+            </Button>
+            <Button
+              variant={currentPage === "scores" ? "solid" : "outline"}
+              colorScheme="orange"
+              onClick={() => setCurrentPage("scores")}
+              size={{ base: "sm", md: "md" }}
+            >
+              📊 Scores
+            </Button>
+            <Button
+              variant={currentPage === "users" ? "solid" : "outline"}
+              colorScheme="orange"
+              onClick={() => setCurrentPage("users")}
+              size={{ base: "sm", md: "md" }}
+            >
+              👥 Joueurs
+            </Button>
+          </SimpleGrid>
+          
+          {/* Deuxième ligne - Actions admin */}
           <Button
             variant="outline"
             colorScheme="orange"
             onClick={handleUpdateCharacters}
             isLoading={isUpdatingCharacters}
             loadingText="Mise à jour..."
+            size={{ base: "sm", md: "md" }}
+            w={{ base: "100%", md: "auto" }}
           >
             🔄 Mettre à jour les personnages
           </Button>
-        </HStack>
+        </VStack>
 
         {renderPage()}
       </Container>

@@ -170,7 +170,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     // Obtenir le nom de la guilde
     const getGuildName = (guildId: string) => {
         const guild = guilds.find(g => g._id === guildId);
-        return guild?.name || "Guilde inconnue";
+        return guild?.name || "Pas de guilde";
     };
 
     // Obtenir la couleur du badge selon le rôle

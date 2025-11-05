@@ -9,6 +9,7 @@ import CharactersPage from "./pages/CharactersPage";
 import CharacterDetailPage from "./pages/CharacterDetailPage";
 import { CyclesPage } from "./pages/CyclesPage";
 import CycleDetailPage from "./pages/CycleDetailPage";
+import RotationDetailPage from "./pages/RotationDetailPage";
 import DiscordCallback from "./pages/DiscordCallback";
 import UserPage from "./pages/UserPage";
 import type { User } from "./interfaces";
@@ -584,6 +585,7 @@ const MainRouter = () => {
           <Route path="/personnage/:id" element={<CharacterDetailPage />} />
           <Route path="/cycles" element={<CyclesPage />} />
           <Route path="/cycle/:id" element={<CycleDetailPage />} />
+          <Route path="/cycle/:cycleId/rotation/:position" element={<RotationDetailPage />} />
           <Route
             path="/admin"
             element={
@@ -600,6 +602,7 @@ const MainRouter = () => {
           <Route path="/users" element={<UsersPage />} />
           <Route path="/user/:userId" element={<UserPage />} />
           <Route path="/scores" element={<ScoresPage />} />
+
         </Routes>
       </Box>
     </Router>
