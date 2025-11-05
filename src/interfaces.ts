@@ -1,6 +1,6 @@
 // Types généraux
 export type Page = "guilds" | "characters";
-export type AdminPage = "guilds" | "cycles" | "scores";
+export type AdminPage = "guilds" | "cycles" | "scores" | "users";
 export type Role = "chef" | "sous-chef" | "membre";
 
 // Interfaces Guildes
@@ -25,6 +25,8 @@ export interface User {
     guilde_id: string;
     role: Role;
     isAdmin?: boolean;
+    bbs_id?: string;
+    bbs_name?: string;
     [key: string]: any;
 }
 
@@ -82,6 +84,7 @@ export interface CycleRotation {
     killer: string;
     attack: string;
     alteration: string;
+    position: number;
 }
 
 export interface Cycle {

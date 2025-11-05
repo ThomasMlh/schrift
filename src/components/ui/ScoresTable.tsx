@@ -69,7 +69,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                     </Tr>
                 </Thead>
                 <Tbody>
-                    {scores.map((score, index) => {
+                    {scores.map((score) => {
                         const user = getUserInfo(score.user_id);
                         const cycle = getCycleInfo(score.cycle_id);
                         const rotation = getRotationInfo(score.cycle_id, score.rotation_id);
@@ -124,7 +124,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                                 <Td>
                                     {rotation ? (
                                         <VStack spacing={1} align="start">
-                                            <Text>Rotation #{index + 1}</Text>
+                                            <Text>Rotation #{rotation.position}</Text>
                                             <HStack spacing={2}>
                                                 <Text fontSize="sm" fontWeight="medium" display={"flex"}>
                                                     {rotation.killer}

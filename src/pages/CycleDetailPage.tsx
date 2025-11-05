@@ -167,7 +167,7 @@ const CycleDetailPage = () => {
                         <VStack spacing={3} align="stretch">
                           <HStack justify="space-between">
                             <Text fontWeight="bold" fontSize="lg">
-                              Rotation #{index + 1}
+                              Rotation #{rotation.position}
                             </Text>
                             <Badge colorScheme="purple" size="sm">
                               {rotation.period}

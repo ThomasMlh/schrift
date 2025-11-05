@@ -99,6 +99,30 @@ const CyclesSection = () => {
     }
   };
 
+  // Supprimer un cycle
+  const handleDeleteCycle = async (cycleId: string): Promise<void> => {
+    try {
+      const token = localStorage.getItem('userToken');
+      const response = await fetch(`${apiUrl}/api/cycles/${cycleId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Erreur lors de la suppression du cycle');
+      }
+
+      // Recharger la liste des cycles après suppression
+      await loadCycles();
+    } catch (error) {
+      throw error; // Renvoyer l'erreur pour qu'elle soit gérée par le composant appelant
+    }
+  };
+
   // Ajouter une rotation sélectionnée
   const addRotation = (template: RotationTemplate) => {
     const newRotation: CycleRotation = {
@@ -108,7 +132,8 @@ const CyclesSection = () => {
       period: "Mardi-Jeudi",
       killer: template.killer,
       attack: template.attack,
-      alteration: template.alteration
+      alteration: template.alteration,
+      position: selectedRotations.length + 1 // Position = index futur + 1
     };
     setSelectedRotations([...selectedRotations, newRotation]);
   };
@@ -116,7 +141,12 @@ const CyclesSection = () => {
   // Supprimer une rotation
   const removeRotation = (index: number) => {
     const newRotations = selectedRotations.filter((_, i) => i !== index);
-    setSelectedRotations(newRotations);
+    // Mettre à jour les positions après suppression
+    const rotationsWithUpdatedPositions = newRotations.map((rotation, i) => ({
+      ...rotation,
+      position: i + 1
+    }));
+    setSelectedRotations(rotationsWithUpdatedPositions);
   };
 
   // Gestion du drag and drop
@@ -127,7 +157,13 @@ const CyclesSection = () => {
     const [reorderedItem] = newRotations.splice(result.source.index, 1);
     newRotations.splice(result.destination.index, 0, reorderedItem);
 
-    setSelectedRotations(newRotations);
+    // Mettre à jour toutes les positions après le drag & drop
+    const rotationsWithUpdatedPositions = newRotations.map((rotation, index) => ({
+      ...rotation,
+      position: index + 1
+    }));
+
+    setSelectedRotations(rotationsWithUpdatedPositions);
   };
 
   // Mettre à jour une rotation
@@ -174,6 +210,14 @@ const CyclesSection = () => {
     }
   };
 
+  // Fonction utilitaire pour s'assurer que toutes les positions sont correctes
+  const ensureCorrectPositions = (rotations: CycleRotation[]): CycleRotation[] => {
+    return rotations.map((rotation, index) => ({
+      ...rotation,
+      position: index + 1
+    }));
+  };
+
   // Soumettre le cycle
   const submitCycle = async () => {
     if (!cycleName.trim()) {
@@ -210,9 +254,12 @@ const CyclesSection = () => {
 
     setIsSubmitting(true);
     try {
+      // S'assurer que toutes les positions sont correctes avant la soumission
+      const rotationsWithCorrectPositions = ensureCorrectPositions(selectedRotations);
+      
       const cycleData: CycleFormData = {
         name: cycleName.trim(),
-        rotations: selectedRotations
+        rotations: rotationsWithCorrectPositions
       };
 
       const token = localStorage.getItem('userToken');
@@ -399,6 +446,7 @@ const CyclesSection = () => {
           onRefresh={loadCycles}
           onDownloadEvents={downloadEventsJson}
           onDownloadCycleEvents={downloadCycleEventsJson}
+          onDeleteCycle={handleDeleteCycle}
         />
 
         {/* Modal de création de cycle */}
@@ -421,4 +469,4 @@ const CyclesSection = () => {
   );
 }
 
-export { CyclesSection };
+export default CyclesSection;

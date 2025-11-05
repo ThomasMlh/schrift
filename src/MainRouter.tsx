@@ -52,7 +52,7 @@ function ProtectedRoute({
   return <>{children}</>;
 }
 
-export default function MainRouter() {
+const MainRouter = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState<User | null>(null);
@@ -363,7 +363,6 @@ export default function MainRouter() {
               _active={{
                 transform: "translateY(0px)"
               }}
-              isDisabled={true}
             >
               📊 Scores
             </Button>
@@ -514,7 +513,6 @@ export default function MainRouter() {
                     bg: scoresHoverBg,
                     color: scoresHoverColor,
                   }}
-                  isDisabled={true}
                 >
                   Scores
                 </Button>
@@ -605,3 +603,5 @@ export default function MainRouter() {
     </Router>
   );
 }
+
+export default MainRouter;

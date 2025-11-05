@@ -12,8 +12,19 @@ import {
   Badge,
   Heading,
   Box,
-  useColorModeValue
+  useColorModeValue,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  useDisclosure,
+  IconButton,
+  useToast
 } from "@chakra-ui/react";
+import { DeleteIcon } from "@chakra-ui/icons";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import type { Cycle } from "../../interfaces";
 import { AlterationImage } from "../ui/AlterationImage";
@@ -24,18 +35,59 @@ interface ExistingCyclesListProps {
   onRefresh: () => void;
   onDownloadEvents: () => void;
   onDownloadCycleEvents: (cycle: Cycle) => void;
+  onDeleteCycle: (cycleId: string) => Promise<void>;
 }
 
 const ExistingCyclesList = ({ cycles,
   isLoading,
   onRefresh,
   onDownloadEvents,
-  onDownloadCycleEvents
+  onDownloadCycleEvents,
+  onDeleteCycle
 }: ExistingCyclesListProps) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [cycleToDelete, setCycleToDelete] = useState<Cycle | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const toast = useToast();
+  
   const cardBg = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   const cycleBg = useColorModeValue('gray.50', 'gray.800');
   const linkColor = useColorModeValue('black', 'white');
+
+  const handleDeleteClick = (cycle: Cycle) => {
+    setCycleToDelete(cycle);
+    onOpen();
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!cycleToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await onDeleteCycle(cycleToDelete._id || '');
+      toast({
+        title: "Cycle supprimé",
+        description: `Le cycle "${cycleToDelete.name}" a été supprimé avec succès`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      onClose();
+      setCycleToDelete(null);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Impossible de supprimer le cycle",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <Card bg={cardBg} borderColor={borderColor}>
@@ -109,6 +161,14 @@ const ExistingCyclesList = ({ cycles,
                           >
                             📥
                           </Button>
+                          <IconButton
+                            size="xs"
+                            colorScheme="red"
+                            aria-label="Supprimer le cycle"
+                            icon={<DeleteIcon />}
+                            onClick={() => handleDeleteClick(cycle)}
+                            title={`Supprimer le cycle ${cycle.name}`}
+                          />
                         </HStack>
                       </HStack>
 
@@ -149,6 +209,47 @@ const ExistingCyclesList = ({ cycles,
           )}
         </VStack>
       </CardBody>
+
+      {/* Modal de confirmation de suppression */}
+      <AlertDialog
+        isOpen={isOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Supprimer le cycle
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Êtes-vous sûr de vouloir supprimer le cycle <strong>"{cycleToDelete?.name}"</strong> ?
+              <br />
+              <br />
+              Cette action est <strong>irréversible</strong> et supprimera également :
+              <br />
+              • Toutes les rotations du cycle ({cycleToDelete?.rotations?.length || 0} rotations)
+              <br />
+              • Tous les scores associés à ce cycle
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose} isDisabled={isDeleting}>
+                Annuler
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={handleConfirmDelete}
+                ml={3}
+                isLoading={isDeleting}
+                loadingText="Suppression..."
+              >
+                Supprimer définitivement
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Card>
   );
 }

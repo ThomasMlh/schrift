@@ -1,22 +1,23 @@
 import {
     Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
     Text, Input, InputGroup, InputLeftElement, Select, Spinner,
-    useColorModeValue, Badge, Flex, Avatar,
-    Link
+    useColorModeValue, Badge, Flex, Avatar, Link, IconButton, useDisclosure
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
-import { SearchIcon } from "@chakra-ui/icons";
+import { SearchIcon, EditIcon } from "@chakra-ui/icons";
 import type { User, Pagination, UsersResponse, Guild } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import { getUserAvatarUrl } from "../utils/discord";
+import EditUserModal from "./EditUserModal";
 
 interface UsersTableProps {
-    apiUrl: string;
+    isAdminMode?: boolean;
 }
 
-export function UsersTable({ apiUrl }: UsersTableProps) {
+const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const [searchParams, setSearchParams] = useSearchParams();
+    const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
     // États - Initialiser avec les paramètres URL
     const [users, setUsers] = useState<User[]>([]);
@@ -27,6 +28,7 @@ export function UsersTable({ apiUrl }: UsersTableProps) {
     const [selectedRole, setSelectedRole] = useState(searchParams.get('role') || "");
     const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('limit') || '20'));
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
     // Hooks UI
     const bgColor = useColorModeValue('white', 'gray.800');
@@ -35,6 +37,7 @@ export function UsersTable({ apiUrl }: UsersTableProps) {
     const badgeVariant = useColorModeValue('subtle', 'solid');
     const filterBg = useColorModeValue('blue.50', 'blue.900');
     const linkColor = useColorModeValue('black', 'white');
+    const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure();
 
     // Fonction pour mettre à jour l'URL avec les filtres actuels
     const updateURLParams = (search = "", guildId = "", role = "", limit = itemsPerPage, page = 1) => {
@@ -180,6 +183,19 @@ export function UsersTable({ apiUrl }: UsersTableProps) {
         }
     };
 
+    // Gestionnaire pour ouvrir le modal d'édition
+    const handleEditUser = (user: User) => {
+        setSelectedUser(user);
+        onEditModalOpen();
+    };
+
+    // Gestionnaire pour la mise à jour d'un utilisateur
+    const handleUserUpdated = () => {
+        // Recharger les utilisateurs après modification
+        const currentPage = parseInt(searchParams.get('page') || '1');
+        loadUsers(currentPage, searchTerm, selectedGuildId, selectedRole);
+    };
+
     return (
         <VStack spacing={6} align="stretch" w="100%">
             {/* Contrôles de filtrage */}
@@ -300,7 +316,10 @@ export function UsersTable({ apiUrl }: UsersTableProps) {
                                 <Th>Utilisateur</Th>
                                 <Th>Guilde</Th>
                                 <Th>Rôle</Th>
+                                {isAdminMode && <Th>BBS ID</Th>}
+                                {isAdminMode && <Th>BBS Name</Th>}
                                 <Th>Dernière connexion</Th>
+                                {isAdminMode && <Th>Actions</Th>}
                             </Tr>
                         </Thead>
                         <Tbody>
@@ -343,6 +362,20 @@ export function UsersTable({ apiUrl }: UsersTableProps) {
                                             {user.role}
                                         </Badge>
                                     </Td>
+                                    {isAdminMode && (
+                                        <Td>
+                                            <Text fontSize="sm">
+                                                {user.bbs_id || "-"}
+                                            </Text>
+                                        </Td>
+                                    )}
+                                    {isAdminMode && (
+                                        <Td>
+                                            <Text fontSize="sm">
+                                                {user.bbs_name || "-"}
+                                            </Text>
+                                        </Td>
+                                    )}
                                     <Td>
                                         <Text fontSize="sm">
                                             {user.last_login
@@ -357,6 +390,18 @@ export function UsersTable({ apiUrl }: UsersTableProps) {
                                             }
                                         </Text>
                                     </Td>
+                                    {isAdminMode && (
+                                        <Td>
+                                            <IconButton
+                                                aria-label="Modifier l'utilisateur"
+                                                icon={<EditIcon />}
+                                                size="sm"
+                                                colorScheme="blue"
+                                                variant="outline"
+                                                onClick={() => handleEditUser(user)}
+                                            />
+                                        </Td>
+                                    )}
                                 </Tr>
                             ))}
                         </Tbody>
@@ -383,6 +428,19 @@ export function UsersTable({ apiUrl }: UsersTableProps) {
                     Aucun utilisateur trouvé
                 </Text>
             )}
+
+            {/* Modal d'édition d'utilisateur */}
+            {isAdminMode && (
+                <EditUserModal
+                    isOpen={isEditModalOpen}
+                    onClose={onEditModalClose}
+                    user={selectedUser}
+                    guilds={guilds}
+                    onUserUpdated={handleUserUpdated}
+                />
+            )}
         </VStack>
     );
 }
+
+export default UsersTable;

@@ -675,4 +675,4 @@ const ScoresSection = () => {
     );
 };
 
-export { ScoresSection };
+export default ScoresSection;

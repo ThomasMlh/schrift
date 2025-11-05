@@ -4,8 +4,7 @@ import AdminFormsSection from "./AdminFormsSection";
 import { useEffect, useRef, useState } from "react";
 import type { Guild } from "../interfaces";
 
-export function GuildsAdminSection() {
-  // États pour la gestion des guildes
+const GuildsAdminSection = () => {
   const [deleteGuildId, setDeleteGuildId] = useState("");
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [guilds, setGuilds] = useState<Guild[]>([]);
@@ -21,7 +20,6 @@ export function GuildsAdminSection() {
   
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-  // Fonction utilitaire pour les requêtes authentifiées
   const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem('userToken');
     return fetch(url, {
@@ -34,7 +32,6 @@ export function GuildsAdminSection() {
     });
   };
 
-  // Fonction helper pour rafraîchir les données après modification
   const refreshData = () => {
     fetch(`${apiUrl}/api/guildes`)
       .then(res => res.json())
@@ -206,3 +203,5 @@ export function GuildsAdminSection() {
     </Container>
   );
 }
+
+export default GuildsAdminSection;

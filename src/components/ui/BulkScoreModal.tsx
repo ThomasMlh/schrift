@@ -201,14 +201,14 @@ export default function BulkScoreModal({
                                     value={selectedRotationId}
                                     onChange={setSelectedRotationId}
                                     isDisabled={isSubmitting}
-                                    options={selectedCycle.rotations.map((rotation: any, index: number) => ({
+                                    options={selectedCycle.rotations.map((rotation: any) => ({
                                         value: rotation._id,
-                                        label: `Rotation #${index + 1} - ${rotation.killer}`,
+                                        label: `Rotation #${rotation.position} - ${rotation.killer}`,
                                         content: (
                                             <VStack align="start" spacing={1} w="100%">
                                                 <HStack spacing={2} w="100%">
                                                     <Text fontWeight="medium">
-                                                        Rotation #{index + 1} - {rotation.killer}
+                                                        Rotation #{rotation.position} - {rotation.killer}
                                                     </Text>
                                                     <AttackTypeBadge attackType={rotation.attack} />
                                                 </HStack>

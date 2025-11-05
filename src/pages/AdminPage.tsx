@@ -1,7 +1,8 @@
 import { Container, Heading, Flex, useColorModeValue, Button, HStack, useToast } from "@chakra-ui/react";
-import { GuildsAdminSection } from "../components/GuildsAdminSection";
-import { CyclesSection } from "../components/CyclesSection";
-import { ScoresSection } from "../components/ScoresSection";
+import GuildsAdminSection from "../components/GuildsAdminSection";
+import CyclesSection from "../components/CyclesSection";
+import ScoresSection from "../components/ScoresSection";
+import UsersTable from "../components/UsersTable";
 import { useState } from "react";
 import type { AdminPage as IAdminPage } from "../interfaces";
 
@@ -41,6 +42,8 @@ const AdminPage = () => {
         return <CyclesSection />;
       case "scores":
         return <ScoresSection />;
+      case "users":
+        return <UsersTable isAdminMode={true} />;
       case "guilds":
       default:
         return <GuildsAdminSection />;
@@ -86,6 +89,13 @@ const AdminPage = () => {
             onClick={() => setCurrentPage("scores")}
           >
             📊 Scores
+          </Button>
+          <Button
+            variant={currentPage === "users" ? "solid" : "outline"}
+            colorScheme="orange"
+            onClick={() => setCurrentPage("users")}
+          >
+            👥 Joueurs
           </Button>
           {/* // Un bouton qui fait un call post vers /api/characters/update */}
           <Button
