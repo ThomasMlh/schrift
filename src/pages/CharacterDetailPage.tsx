@@ -26,6 +26,7 @@ const CharacterDetailPage = () => {
     const bgColor = useColorModeValue('white', 'gray.800');
     const borderColor = useColorModeValue('gray.200', 'gray.600');
     const shadowColor = useColorModeValue('lg', 'dark-lg');
+    const buttonColor = useColorModeValue('black', 'white');
 
     useEffect(() => {
         if (id) {
@@ -485,14 +486,17 @@ const CharacterDetailPage = () => {
                         )}
                     </VStack>
                 </Box>
-
-                {/* Actions */}
                 <Flex justify="center" gap={4}>
                     <Button
                         as={RouterLink}
                         to="/personnages"
-                        colorScheme="blue"
+                        colorScheme={buttonColor}
                         variant="outline"
+                        border={"1px"}
+                        _hover={{
+                            color: buttonColor === 'black' ? 'white' : 'gray.300',
+                            bgColor: 'gray.700',
+                        }}
                     >
                         Voir tous les personnages
                     </Button>

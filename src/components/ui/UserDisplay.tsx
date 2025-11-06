@@ -1,8 +1,7 @@
-import { HStack, VStack, Text, Avatar, useColorModeValue } from "@chakra-ui/react";
+import { HStack, VStack, Text, Avatar } from "@chakra-ui/react";
 import { getUserAvatarUrl } from "@/utils/discord";
-import { Link } from "@chakra-ui/react";
-import { Link as RouterLink } from "react-router-dom";
 import type { User } from "@/interfaces";
+import CustomLink from "./CustomLink";
 
 // Interface flexible pour l'affichage utilisateur (peut être un User complet ou partiel)
 interface UserDisplayData {
@@ -28,7 +27,6 @@ export const UserDisplay = ({
     avatarSize = "sm",
     spacing = 3,
     showUsername = true,
-    textSize = "sm"
 }: UserDisplayProps) => {
     const avatarUrl = user.avatar && user.discord_id
         ? getUserAvatarUrl({
@@ -37,7 +35,6 @@ export const UserDisplay = ({
         }) || undefined
         : undefined;
 
-    const linkColor = useColorModeValue("black", "white");
 
     return (
         <HStack spacing={spacing}>
@@ -47,17 +44,7 @@ export const UserDisplay = ({
                 name={user.global_name || user.username}
             />
             <VStack spacing={0} align="start">
-                <Link as={RouterLink} to={`/user/${user._id}`} color={linkColor} _hover={{
-                    textDecoration: "underline",
-                    color: linkColor
-                }}
-                    _focus={{
-                        outline: "1px solid",
-                        outlineColor: linkColor,
-                        outlineOffset: "2px"
-                    }} fontWeight="medium" fontSize={textSize}>
-                    {user.global_name || user.username}
-                </Link>
+                <CustomLink to={`/joueur/${user._id}`} text={user.global_name || user.username} />
                 {showUsername && user.global_name && (
                     <Text fontSize="xs" color="gray.500">
                         @{user.username}

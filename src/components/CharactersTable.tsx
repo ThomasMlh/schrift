@@ -1,10 +1,10 @@
 import {
   Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
   Text, Input, InputGroup, InputLeftElement, Select, Spinner,
-  useColorModeValue, Badge, Flex, Avatar, Link
+  useColorModeValue, Badge, Flex, Avatar
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import { useSearchParams, Link as RouterLink } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { SearchIcon } from "@chakra-ui/icons";
 import type { Character, Pagination as PaginationType, CharactersResponse } from "../interfaces";
 import { AffinityIcon } from "./ui/AffinityIcon";
@@ -16,6 +16,7 @@ import { CategoryFilter } from "./ui/CategoryFilter";
 import { KillerFilter } from "./ui/KillerFilter";
 import { AttackTypeFilter } from "./ui/AttackTypeFilter";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
+import CustomLink from "./ui/CustomLink";
 
 interface CharactersTableProps {
   apiUrl: string;
@@ -44,7 +45,6 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
   const badgeVariant = useColorModeValue('subtle', 'solid');
   const filterBg = useColorModeValue('blue.50', 'blue.900');
-  const linkColor = useColorModeValue('black', 'white');
 
   // Fonction pour mettre à jour l'URL avec les filtres actuels
   const updateURLParams = (search = "", affinity = "", category = "", killer = "", attackType = "", limit = itemsPerPage, page = 1) => {
@@ -388,23 +388,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
                           ?
                         </Box>
                       )}
-                      <Link 
-                        as={RouterLink} 
-                        to={`/personnage/${character._id}`}
-                        color={linkColor}
-                        fontWeight="medium"
-                        _hover={{
-                          textDecoration: "underline",
-                          color: linkColor
-                        }}
-                        _focus={{
-                          outline: "1px solid",
-                          outlineColor: linkColor,
-                          outlineOffset: "2px"
-                        }}
-                      >
-                        {character.name}
-                      </Link>
+                      <CustomLink to={`/personnage/${character._id}`} text={character.name} />
                     </HStack>
                   </Td>
                   <Td>

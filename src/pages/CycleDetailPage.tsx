@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Container,
   VStack,
@@ -17,12 +17,12 @@ import {
   SimpleGrid,
   useColorModeValue,
   Flex,
-  Link,
 } from "@chakra-ui/react";
 import { ArrowBackIcon, CalendarIcon } from "@chakra-ui/icons";
 import type { Cycle } from "../interfaces";
 import { handleAttackType } from "../utils/attackTypes";
 import { AlterationImage } from "../components/ui/AlterationImage";
+import CustomLink from "@/components/ui/CustomLink";
 
 const CycleDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,9 +34,7 @@ const CycleDetailPage = () => {
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const cardBg = useColorModeValue("white", "gray.700");
   const borderColor = useColorModeValue("gray.200", "gray.600");
-  const linkColor = useColorModeValue("black.500", "white.500");
   // const rotationHoverBg = useColorModeValue("gray.100", "gray.600");
-  const rotationHoverColor = useColorModeValue("black", "white");
 
   const loadCycle = async () => {
     if (!id) {
@@ -199,24 +197,7 @@ const CycleDetailPage = () => {
                       <CardBody>
                         <VStack spacing={3} align="stretch">
                           <HStack justify="space-between">
-                            <Link
-                              as={RouterLink}
-                              to={`/cycle/${id}/rotation/${rotation.position}`}
-                              color={linkColor}
-                              _hover={{
-                                // bg: rotationHoverBg,
-                                color: rotationHoverColor,
-                                transform: "translateY(-1px)",
-                                textDecoration: "underline",
-                              }}
-                              _active={{
-                                transform: "translateY(0px)",
-                              }}
-                              fontWeight="bold"
-                              fontSize="lg"
-                            >
-                              Rotation #{rotation.position}
-                            </Link>
+                            <CustomLink to={`/cycle/${id}/rotation/${rotation.position}`} text={`Rotation #${rotation.position}`} />
                             <Badge colorScheme="purple" size="sm">
                               {rotation.period}
                             </Badge>

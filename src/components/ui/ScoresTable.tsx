@@ -8,17 +8,15 @@ import {
     TableContainer,
     HStack,
     VStack,
-    Link,
     Text,
     Badge,
     IconButton,
-    useColorModeValue
 } from "@chakra-ui/react";
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
-import { Link as RouterLink } from "react-router-dom";
 import type { Score, User, Cycle } from "../../interfaces";
 import { AttackTypeBadge } from "./AttackTypeBadge";
 import { UserDisplay } from "./UserDisplay";
+import CustomLink from "./CustomLink";
 
 interface ScoresTableProps {
     scores: Score[];
@@ -37,7 +35,6 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
     onEditScore,
     onDeleteScore
 }) => {
-    const linkColor = useColorModeValue('black', 'white');
     // Obtenir les informations d'un utilisateur
     const getUserInfo = (userId: string) => {
         return users.find(user => user._id === userId || user.discordId === userId);
@@ -81,23 +78,12 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                                     </HStack>
                                 </Td>
                                 <Td>
-                                    <Link as={RouterLink} to={`/cycle/${cycle?._id}`} _hover={{
-                                        textDecoration: "underline",
-                                        color: linkColor
-                                    }}
-                                        _focus={{
-                                            outline: "1px solid",
-                                            outlineColor: linkColor,
-                                            outlineOffset: "2px"
-                                        }}
-                                        fontWeight="medium">
-                                        {cycle?.name || "Cycle inconnu"}
-                                    </Link>
+                                    <CustomLink to={`/cycle/${cycle?._id}`} text={cycle?.name || "Cycle inconnu"} textSize="md" />
                                 </Td>
                                 <Td>
                                     {rotation ? (
                                         <VStack spacing={1} align="start">
-                                            <Text>Rotation #{rotation.position}</Text>
+                                            <CustomLink to={`/cycle/${cycle?._id}/rotation/${rotation.position}`} text={`Rotation #${rotation.position}`} />
                                             <HStack spacing={2}>
                                                 <Text fontSize="sm" fontWeight="medium" display={"flex"}>
                                                     {rotation.killer}

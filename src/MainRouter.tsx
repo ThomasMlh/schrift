@@ -326,7 +326,7 @@ const MainRouter = () => {
             </Button>
             <Button
               as={Link}
-              to="/users"
+              to="/joueurs"
               variant="ghost"
               color={linkColor}
               borderRadius="md"
@@ -482,7 +482,7 @@ const MainRouter = () => {
                 </Button>
                 <Button
                   as={Link}
-                  to="/users"
+                  to="/joueurs"
                   variant="ghost"
                   onClick={onClose}
                   leftIcon={<Text>👥</Text>}
@@ -599,8 +599,8 @@ const MainRouter = () => {
             }
           />
           <Route path="/discord-callback" element={<DiscordCallback />} />
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/user/:userId" element={<UserPage />} />
+          <Route path="/joueurs" element={<UsersPage />} />
+          <Route path="/joueur/:userId" element={<UserPage />} />
           <Route path="/scores" element={<ScoresPage />} />
 
         </Routes>
