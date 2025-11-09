@@ -166,7 +166,7 @@ export const ScoreModal = ({
                                     color={isEdit ? "yellow.700" : "blue.600"} 
                                     _dark={{ color: isEdit ? "yellow.200" : "blue.200" }}
                                 >
-                                    <strong>{isEdit ? "Modification pour:" : "Score pour:"}</strong> {selectedUser.global_name || selectedUser.username}
+                                    <strong>{isEdit ? "Modification pour:" : "Score pour:"}</strong> {selectedUser.bbs_name || selectedUser.global_name}
                                 </Text>
                             </Box>
                         )}

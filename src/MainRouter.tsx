@@ -1,13 +1,36 @@
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
-import { useColorMode, Button, Box, Flex, IconButton, Drawer, DrawerOverlay, DrawerContent, DrawerBody, useDisclosure, VStack, HStack, Text, useToast, Avatar, useColorModeValue } from "@chakra-ui/react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  Navigate
+} from "react-router-dom";
+import {
+  useColorMode,
+  Button,
+  Box,
+  Flex,
+  IconButton,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerBody,
+  useDisclosure,
+  VStack,
+  HStack,
+  Text,
+  useToast,
+  Avatar,
+  useColorModeValue
+} from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
-import { FaDiscord } from 'react-icons/fa';
+import { FaDiscord } from "react-icons/fa";
 import { useState, useEffect } from "react";
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 import HomePage from "./pages/HomePage";
 import CharactersPage from "./pages/CharactersPage";
 import CharacterDetailPage from "./pages/CharacterDetailPage";
-import { CyclesPage } from "./pages/CyclesPage";
+import CyclesPage from "./pages/CyclesPage";
 import CycleDetailPage from "./pages/CycleDetailPage";
 import RotationDetailPage from "./pages/RotationDetailPage";
 import DiscordCallback from "./pages/DiscordCallback";
@@ -16,7 +39,6 @@ import type { User } from "./interfaces";
 import UsersPage from "./pages/UsersPage";
 import AdminPage from "./pages/AdminPage";
 import ScoresPage from "./pages/ScoresPage";
-
 
 function ColorModeSwitcher() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -28,7 +50,7 @@ function ColorModeSwitcher() {
 }
 
 // Composant pour protéger les routes admin
-function ProtectedRoute({
+const ProtectedRoute = ({
   isAuthenticated,
   isAdmin,
   isLoading,
@@ -38,7 +60,7 @@ function ProtectedRoute({
   isAdmin: boolean;
   isLoading: boolean;
   children: React.ReactNode;
-}) {
+}) => {
   // Pendant le chargement, ne pas rediriger
   if (isLoading) {
     return (
@@ -64,26 +86,75 @@ const MainRouter = () => {
   const placement = "left";
 
   // Tous les hooks de couleur en haut
-  const linkColor = useColorModeValue('black.500', 'white.500');
-  const homeHoverBg = useColorModeValue('blue.50', 'blue.900');
-  const homeHoverColor = useColorModeValue('blue.600', 'blue.200');
-  const charactersHoverBg = useColorModeValue('green.50', 'green.900');
-  const charactersHoverColor = useColorModeValue('green.600', 'green.200');
-  const cyclesHoverBg = useColorModeValue('purple.50', 'purple.900');
-  const cyclesHoverColor = useColorModeValue('purple.600', 'purple.200');
-  const adminHoverBg = useColorModeValue('orange.50', 'orange.900');
-  const adminHoverColor = useColorModeValue('orange.600', 'orange.200');
-  const usersHoverBg = useColorModeValue('teal.50', 'teal.900');
-  const usersHoverColor = useColorModeValue('teal.600', 'teal.200');
-  const scoresHoverBg = useColorModeValue('pink.50', 'pink.900');
-  const scoresHoverColor = useColorModeValue('pink.600', 'pink.200');
+  const homeHoverBg = useColorModeValue("blue.50", "blue.900");
+  const homeHoverColor = useColorModeValue("blue.600", "blue.200");
+  const charactersHoverBg = useColorModeValue("green.50", "green.900");
+  const charactersHoverColor = useColorModeValue("green.600", "green.200");
+  const cyclesHoverBg = useColorModeValue("purple.50", "purple.900");
+  const cyclesHoverColor = useColorModeValue("purple.600", "purple.200");
+  const adminHoverBg = useColorModeValue("orange.50", "orange.900");
+  const adminHoverColor = useColorModeValue("orange.600", "orange.200");
+  const usersHoverBg = useColorModeValue("teal.50", "teal.900");
+  const usersHoverColor = useColorModeValue("teal.600", "teal.200");
+  const scoresHoverBg = useColorModeValue("pink.50", "pink.900");
+  const scoresHoverColor = useColorModeValue("pink.600", "pink.200");
+
+  const menuItems = [
+    {
+      name: "Accueil",
+      path: "/",
+      icon: "🏠",
+      hoverBg: homeHoverBg,
+      hoverColor: homeHoverColor
+    },
+    {
+      name: "Personnages",
+      path: "/personnages",
+      icon: "📖",
+      hoverBg: charactersHoverBg,
+      hoverColor: charactersHoverColor
+    },
+    {
+      name: "Cycles",
+      path: "/cycles",
+      icon: "🔄",
+      hoverBg: cyclesHoverBg,
+      hoverColor: cyclesHoverColor
+    },
+    {
+      name: "Joueurs",
+      path: "/joueurs",
+      icon: "👥",
+      hoverBg: usersHoverBg,
+      hoverColor: usersHoverColor
+    },
+    {
+      name: "Scores",
+      path: "/scores",
+      icon: "📊",
+      hoverBg: scoresHoverBg,
+      hoverColor: scoresHoverColor
+    },
+    {
+      name: "Admin",
+      path: "/admin",
+      icon: "⚙️",
+      hoverBg: adminHoverBg,
+      hoverColor: adminHoverColor,
+      adminOnly: true
+    }
+  ];
 
   // Fonction pour construire l'URL de l'avatar Discord
-  const getDiscordAvatarUrl = (userId: string, avatarHash: string, size: number = 128) => {
+  const getDiscordAvatarUrl = (
+    userId: string,
+    avatarHash: string,
+    size: number = 128
+  ) => {
     if (!avatarHash) return null;
     // Format: https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.{format}
     // Les avatars animés ont un hash qui commence par "a_"
-    const format = avatarHash.startsWith('a_') ? 'gif' : 'png';
+    const format = avatarHash.startsWith("a_") ? "gif" : "png";
     return `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.${format}?size=${size}`;
   };
 
@@ -111,12 +182,12 @@ const MainRouter = () => {
 
     // Sinon, définir selon l'environnement
     if (!redirectUri) {
-      if (window.location.hostname === 'localhost') {
-        redirectUri = 'http://localhost:5173/discord-callback';
-      } else if (window.location.hostname === 'www.bbs-schrift.fr') {
-        redirectUri = 'https://www.bbs-schrift.fr/discord-callback';
-      } else if (window.location.hostname === 'bbs-schrift.fr') {
-        redirectUri = 'https://bbs-schrift.fr/discord-callback';
+      if (window.location.hostname === "localhost") {
+        redirectUri = "http://localhost:5173/discord-callback";
+      } else if (window.location.hostname === "www.bbs-schrift.fr") {
+        redirectUri = "https://www.bbs-schrift.fr/discord-callback";
+      } else if (window.location.hostname === "bbs-schrift.fr") {
+        redirectUri = "https://bbs-schrift.fr/discord-callback";
       } else {
         // Fallback pour autres domaines
         redirectUri = `${window.location.origin}/discord-callback`;
@@ -124,7 +195,9 @@ const MainRouter = () => {
     }
 
     const encodedRedirectUri = encodeURIComponent(redirectUri);
-    const scope = encodeURIComponent('identify email guilds connections guilds.members.read');
+    const scope = encodeURIComponent(
+      "identify email guilds connections guilds.members.read"
+    );
     const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordClientId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=${scope}`;
 
     window.location.href = discordAuthUrl;
@@ -132,14 +205,14 @@ const MainRouter = () => {
 
   // Fonction de déconnexion
   const handleLogout = () => {
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('adminToken');
+    localStorage.removeItem("userToken");
+    localStorage.removeItem("adminToken");
     setIsAdmin(false);
     setIsLoggedIn(false);
     setUserInfo(null);
 
     // Déclencher l'événement de changement d'état
-    window.dispatchEvent(new Event('authStateChange'));
+    window.dispatchEvent(new Event("authStateChange"));
 
     toast({ title: "Déconnexion réussie", status: "info" });
   };
@@ -147,7 +220,8 @@ const MainRouter = () => {
   // Vérifier le token au chargement
   useEffect(() => {
     const checkAuthState = () => {
-      const token = localStorage.getItem('userToken') || localStorage.getItem('adminToken');
+      const token =
+        localStorage.getItem("userToken") || localStorage.getItem("adminToken");
       if (token && isTokenValid(token)) {
         try {
           const decoded = jwtDecode(token) as any;
@@ -162,17 +236,17 @@ const MainRouter = () => {
 
           setUserInfo({
             ...decoded,
-            avatar: avatarUrl || undefined,
+            avatar: avatarUrl || undefined
           });
 
-          if (localStorage.getItem('adminToken')) {
-            localStorage.setItem('userToken', token);
-            localStorage.removeItem('adminToken');
+          if (localStorage.getItem("adminToken")) {
+            localStorage.setItem("userToken", token);
+            localStorage.removeItem("adminToken");
           }
         } catch (error) {
-          console.error('Erreur décodage token:', error);
-          localStorage.removeItem('userToken');
-          localStorage.removeItem('adminToken');
+          console.error("Erreur décodage token:", error);
+          localStorage.removeItem("userToken");
+          localStorage.removeItem("adminToken");
           setIsLoggedIn(false);
           setIsAdmin(false);
           setUserInfo(null);
@@ -194,12 +268,12 @@ const MainRouter = () => {
       checkAuthState();
     };
 
-    window.addEventListener('authStateChange', handleAuthStateChange);
-    window.addEventListener('storage', handleAuthStateChange);
+    window.addEventListener("authStateChange", handleAuthStateChange);
+    window.addEventListener("storage", handleAuthStateChange);
 
     return () => {
-      window.removeEventListener('authStateChange', handleAuthStateChange);
-      window.removeEventListener('storage', handleAuthStateChange);
+      window.removeEventListener("authStateChange", handleAuthStateChange);
+      window.removeEventListener("storage", handleAuthStateChange);
     };
   }, []);
 
@@ -250,155 +324,55 @@ const MainRouter = () => {
         px={4}
         py={2}
         id="main-navbar"
-        boxShadow={{ base: "none", md: "lg" }}
+        boxShadow={"lg"}
         zIndex={10}
         position="sticky"
         top={0}
         bg="inherit"
       >
-        <Flex display={{ base: "none", md: "flex" }} justify="space-between" align="center" w="100%">
+        <Flex
+          display={{ base: "none", xl: "flex" }}
+          justify="space-between"
+          align="center"
+          w="100%"
+        >
           <Flex gap={2} align="center">
-            <Button
-              as={Link}
-              to="/"
-              variant="ghost"
-              color={linkColor}
-              borderRadius="md"
-              px={4}
-              py={2}
-              fontSize="sm"
-              fontWeight="medium"
-              transition="all 0.2s"
-              _hover={{
-                bg: homeHoverBg,
-                color: homeHoverColor,
-                transform: "translateY(-1px)"
-              }}
-              _active={{
-                transform: "translateY(0px)"
-              }}
-            >
-              🏠 Accueil
-            </Button>
-            <Button
-              as={Link}
-              to="/personnages"
-              variant="ghost"
-              color={linkColor}
-              borderRadius="md"
-              px={4}
-              py={2}
-              fontSize="sm"
-              fontWeight="medium"
-              transition="all 0.2s"
-              _hover={{
-                bg: charactersHoverBg,
-                color: charactersHoverColor,
-                transform: "translateY(-1px)"
-              }}
-              _active={{
-                transform: "translateY(0px)"
-              }}
-            >
-              📖 Personnages
-            </Button>
-            <Button
-              as={Link}
-              to="/cycles"
-              variant="ghost"
-              color={linkColor}
-              borderRadius="md"
-              px={4}
-              py={2}
-              fontSize="sm"
-              fontWeight="medium"
-              transition="all 0.2s"
-              _hover={{
-                bg: cyclesHoverBg,
-                color: cyclesHoverColor,
-                transform: "translateY(-1px)"
-              }}
-              _active={{
-                transform: "translateY(0px)"
-              }}
-            >
-              🔄 Cycles
-            </Button>
-            <Button
-              as={Link}
-              to="/joueurs"
-              variant="ghost"
-              color={linkColor}
-              borderRadius="md"
-              px={4}
-              py={2}
-              fontSize="sm"
-              fontWeight="medium"
-              transition="all 0.2s"
-              _hover={{
-                bg: usersHoverBg,
-                color: usersHoverColor,
-                transform: "translateY(-1px)"
-              }}
-              _active={{
-                transform: "translateY(0px)"
-              }}
-            >
-              👥 Joueurs
-            </Button>
-            <Button
-              as={Link}
-              to="/scores"
-              variant="ghost"
-              color={linkColor}
-              borderRadius="md"
-              px={4}
-              py={2}
-              fontSize="sm"
-              fontWeight="medium"
-              transition="all 0.2s"
-              _hover={{
-                bg: scoresHoverBg,
-                color: scoresHoverColor,
-                transform: "translateY(-1px)"
-              }}
-              _active={{
-                transform: "translateY(0px)"
-              }}
-            >
-              📊 Scores
-            </Button>
-            {isAdmin && (
-              <Button
-                as={Link}
-                to="/admin"
-                variant="ghost"
-                color="orange.500"
-                borderRadius="md"
-                px={4}
-                py={2}
-                fontSize="sm"
-                fontWeight="medium"
-                transition="all 0.2s"
-                _hover={{
-                  bg: adminHoverBg,
-                  color: adminHoverColor,
-                  transform: "translateY(-1px)"
-                }}
-                _active={{
-                  transform: "translateY(0px)"
-                }}
-              >
-                ⚙️ Admin
-              </Button>
-            )}
+            {menuItems.map((item) => {
+              if (item.adminOnly && !isAdmin) return null;
+              return (
+                <Button
+                  key={item.name}
+                  as={Link}
+                  to={item.path}
+                  variant="ghost"
+                  onClick={onClose}
+                  justifyContent="flex-start"
+                  px={4}
+                  py={3}
+                  fontSize="sm"
+                  fontWeight="medium"
+                  borderRadius="lg"
+                  leftIcon={item.icon ? <Text>{item.icon}</Text> : undefined}
+                  _hover={{
+                    bg: item.hoverBg,
+                    color: item.hoverColor
+                  }}
+                >
+                  {item.name}
+                </Button>
+              );
+            })}
           </Flex>
           <Flex gap={2} align="center">
             {renderAuthButton()}
             <ColorModeSwitcher />
           </Flex>
         </Flex>
-        <Flex display={{ base: "flex", md: "none" }} align="center" justify="space-between">
+        <Flex
+          display={{ base: "flex", xl: "none" }}
+          align="center"
+          justify="space-between"
+        >
           <Box fontWeight="bold">Schrift</Box>
           <HStack>
             <ColorModeSwitcher />
@@ -423,123 +397,34 @@ const MainRouter = () => {
                 />
               </Flex>
               <VStack spacing={3} align="stretch" p={4}>
-                <Button
-                  as={Link}
-                  to="/"
-                  variant="ghost"
-                  onClick={onClose}
-                  leftIcon={<Text>🏠</Text>}
-                  justifyContent="flex-start"
-                  px={4}
-                  py={3}
-                  fontSize="md"
-                  fontWeight="medium"
-                  borderRadius="lg"
-                  _hover={{
-                    bg: homeHoverBg,
-                    color: homeHoverColor,
-                  }}
-                >
-                  Accueil
-                </Button>
-                <Button
-                  as={Link}
-                  to="/personnages"
-                  variant="ghost"
-                  onClick={onClose}
-                  leftIcon={<Text>📖</Text>}
-                  justifyContent="flex-start"
-                  px={4}
-                  py={3}
-                  fontSize="md"
-                  fontWeight="medium"
-                  borderRadius="lg"
-                  _hover={{
-                    bg: charactersHoverBg,
-                    color: charactersHoverColor,
-                  }}
-                >
-                  Personnages
-                </Button>
-                <Button
-                  as={Link}
-                  to="/cycles"
-                  variant="ghost"
-                  onClick={onClose}
-                  leftIcon={<Text>🔄</Text>}
-                  justifyContent="flex-start"
-                  px={4}
-                  py={3}
-                  fontSize="md"
-                  fontWeight="medium"
-                  borderRadius="lg"
-                  _hover={{
-                    bg: cyclesHoverBg,
-                    color: cyclesHoverColor,
-                  }}
-                >
-                  Cycles
-                </Button>
-                <Button
-                  as={Link}
-                  to="/joueurs"
-                  variant="ghost"
-                  onClick={onClose}
-                  leftIcon={<Text>👥</Text>}
-                  justifyContent="flex-start"
-                  px={4}
-                  py={3}
-                  fontSize="md"
-                  fontWeight="medium"
-                  borderRadius="lg"
-                  _hover={{
-                    bg: usersHoverBg,
-                    color: usersHoverColor,
-                  }}
-                >
-                  Joueurs
-                </Button>
-                <Button
-                  as={Link}
-                  to="/scores"
-                  variant="ghost"
-                  onClick={onClose}
-                  leftIcon={<Text>📊</Text>}
-                  justifyContent="flex-start"
-                  px={4}
-                  py={3}
-                  fontSize="md"
-                  fontWeight="medium"
-                  borderRadius="lg"
-                  _hover={{
-                    bg: scoresHoverBg,
-                    color: scoresHoverColor,
-                  }}
-                >
-                  Scores
-                </Button>
-                {isAdmin && (
-                  <Button
-                    as={Link}
-                    to="/admin"
-                    variant="ghost"
-                    onClick={onClose}
-                    leftIcon={<Text>⚙️</Text>}
-                    justifyContent="flex-start"
-                    px={4}
-                    py={3}
-                    fontSize="md"
-                    fontWeight="medium"
-                    borderRadius="lg"
-                    color="orange.500"
-                    _hover={{
-                      bg: adminHoverBg,
-                      color: adminHoverColor,
-                    }}
-                  >
-                    Admin
-                  </Button>
-                )}
+                {
+                  /* Menu items pour mobile */
+                  menuItems.map((item) => {
+                    if (item.adminOnly && !isAdmin) return null;
+                    return (
+                      <Button
+                        key={item.name}
+                        as={Link}
+                        to={item.path}
+                        variant="ghost"
+                        onClick={onClose}
+                        leftIcon={item.icon ? <Text>{item.icon}</Text> : undefined}
+                        justifyContent="flex-start"
+                        px={4}
+                        py={3}
+                        fontSize="sm"
+                        fontWeight="medium"
+                        borderRadius="lg"
+                        _hover={{
+                          bg: item.hoverBg,
+                          color: item.hoverColor
+                        }}
+                      >
+                        {item.name}
+                      </Button>
+                    );
+                  })
+                }
                 {isLoggedIn ? (
                   <VStack spacing={3}>
                     <HStack spacing={2}>
@@ -559,7 +444,13 @@ const MainRouter = () => {
                         )}
                       </VStack>
                     </HStack>
-                    <Button variant="outline" onClick={() => { handleLogout(); onClose(); }}>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        handleLogout();
+                        onClose();
+                      }}
+                    >
                       Déconnexion
                     </Button>
                   </VStack>
@@ -568,7 +459,10 @@ const MainRouter = () => {
                     leftIcon={<FaDiscord />}
                     colorScheme="purple"
                     variant="ghost"
-                    onClick={() => { handleDiscordAuth(); onClose(); }}
+                    onClick={() => {
+                      handleDiscordAuth();
+                      onClose();
+                    }}
                   >
                     Se connecter
                   </Button>
@@ -578,14 +472,22 @@ const MainRouter = () => {
           </DrawerContent>
         </Drawer>
       </Box>
-      <Box h="calc(100dvh - var(--navbar-height, 60px))" px={4} py={2} overflow="auto">
+      <Box
+        h="calc(100dvh - var(--navbar-height, 60px))"
+        px={4}
+        py={2}
+        overflow="auto"
+      >
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/personnages" element={<CharactersPage />} />
           <Route path="/personnage/:id" element={<CharacterDetailPage />} />
           <Route path="/cycles" element={<CyclesPage />} />
           <Route path="/cycle/:id" element={<CycleDetailPage />} />
-          <Route path="/cycle/:cycleId/rotation/:position" element={<RotationDetailPage />} />
+          <Route
+            path="/cycle/:cycleId/rotation/:position"
+            element={<RotationDetailPage />}
+          />
           <Route
             path="/admin"
             element={
@@ -602,11 +504,10 @@ const MainRouter = () => {
           <Route path="/joueurs" element={<UsersPage />} />
           <Route path="/joueur/:userId" element={<UserPage />} />
           <Route path="/scores" element={<ScoresPage />} />
-
         </Routes>
       </Box>
     </Router>
   );
-}
+};
 
 export default MainRouter;

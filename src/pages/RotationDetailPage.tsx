@@ -9,6 +9,7 @@ import { ArrowBackIcon, ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/ico
 import type { RotationTemplate } from "@/interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { UserDisplay } from "@/components/ui/UserDisplay";
+import { getScoreDisplayValue } from "@/utils/scores";
 
 interface Score {
     _id: string;
@@ -22,6 +23,7 @@ interface Score {
         bbs_name: string;
         avatar: string | null;
         discord_id: string;
+        role: string;
     };
     created_at: string;
     updated_at: string;
@@ -272,7 +274,7 @@ const RotationDetailPage = () => {
                             </HStack>
                         </Heading>
                         <Text color="gray.500" fontSize="sm">
-                            {totalItems} score{totalItems > 1 ? 's' : ''} total{totalItems > 1 ? 'aux' : ''}
+                            {totalItems} score{totalItems > 1 ? 's' : ''} au total
                         </Text>
                     </VStack>
                 </HStack>
@@ -321,7 +323,7 @@ const RotationDetailPage = () => {
                                                         <UserDisplay user={score.user} />
                                                     </Td>
                                                     <Td isNumeric>
-                                                        <Badge colorScheme={score.score >= 490000000 ? "green" : score.score >= 250000000 ? "orange" : "red"} fontWeight="bold" fontSize={"medium"}>
+                                                        <Badge colorScheme={getScoreDisplayValue(score.score)} fontWeight="bold" fontSize={"medium"}>
                                                             {score.score.toLocaleString()}
                                                         </Badge>
                                                     </Td>

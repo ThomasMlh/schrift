@@ -17,6 +17,7 @@ import type { Score, User, Cycle } from "../../interfaces";
 import { AttackTypeBadge } from "./AttackTypeBadge";
 import { UserDisplay } from "./UserDisplay";
 import CustomLink from "./CustomLink";
+import { getScoreDisplayValue } from "@/utils/scores";
 
 interface ScoresTableProps {
     scores: Score[];
@@ -103,7 +104,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                                 </Td>
                                 <Td>
                                     <Badge
-                                        colorScheme={score.score >= 490000000 ? "green" : score.score >= 250000000 ? "orange" : "red"}
+                                        colorScheme={getScoreDisplayValue(score.score)}
                                         fontSize="md"
                                         px={3}
                                         py={1}

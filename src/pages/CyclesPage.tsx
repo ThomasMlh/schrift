@@ -26,7 +26,7 @@ import { AlterationImage } from "../components/ui/AlterationImage";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
 import { Pagination as PaginationComponent } from "../components/ui/Pagination";
 
-export function CyclesPage() {
+const CyclesPage = () => {
   const [cycles, setCycles] = useState<Cycle[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -342,3 +342,5 @@ export function CyclesPage() {
     </Container>
   );
 }
+
+export default CyclesPage;

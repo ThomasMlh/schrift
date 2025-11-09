@@ -62,6 +62,8 @@ export default function BulkScoreModal({
     const [guildMembers, setGuildMembers] = useState<User[]>([]);
     const [scores, setScores] = useState<{ [userId: string]: number }>({});
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingScores, setIsLoadingScores] = useState(false);
+    const [hasExistingScores, setHasExistingScores] = useState(false);
 
     // Charger les membres de la guilde sélectionnée
     useEffect(() => {
@@ -107,6 +109,57 @@ export default function BulkScoreModal({
         loadGuildMembers();
     }, [selectedGuildId, apiUrl, toast]);
 
+    // Charger les scores existants pour la rotation sélectionnée
+    useEffect(() => {
+        const loadExistingScores = async () => {
+            if (!selectedGuildId || !selectedCycleId || !selectedRotationId || guildMembers.length === 0) {
+                setHasExistingScores(false);
+                return;
+            }
+
+            setIsLoadingScores(true);
+            try {
+                const response = await fetch(`${apiUrl}/api/scores?guild_id=${selectedGuildId}&cycle_id=${selectedCycleId}&rotation_id=${selectedRotationId}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.success && data.data) {
+                        // Créer un objet de scores existants
+                        const existingScores: { [userId: string]: number } = {};
+                        
+                        // Initialiser avec 0 pour tous les membres
+                        guildMembers.forEach((user: User) => {
+                            existingScores[user._id] = 0;
+                        });
+                        
+                        // Remplacer par les scores existants si disponibles
+                        let foundExistingScores = false;
+                        data.data.forEach((score: any) => {
+                            if (score.raw_score !== undefined) {
+                                existingScores[score.user_id] = score.raw_score;
+                                if (score.raw_score > 0) {
+                                    foundExistingScores = true;
+                                }
+                            }
+                        });
+                        
+                        setScores(existingScores);
+                        setHasExistingScores(foundExistingScores);
+                    }
+                } 
+            } catch (error: any) {
+                console.log('Erreur lors du chargement des scores existants:', error.message);
+                // En cas d'erreur, garder les scores à 0
+                setHasExistingScores(false);
+            } finally {
+                setIsLoadingScores(false);
+            }
+        };
+
+        loadExistingScores();
+    }, [selectedGuildId, selectedCycleId, selectedRotationId, guildMembers, apiUrl]);
+
     const selectedCycle = cycles.find(cycle => cycle._id === selectedCycleId);
     const selectedGuild = guilds.find(guild => guild._id === selectedGuildId);
 
@@ -135,7 +188,7 @@ export default function BulkScoreModal({
             cycle_id: selectedCycleId,
             rotation_id: selectedRotationId,
             guild_id: selectedGuildId,
-            score: scores[member._id] || 0
+            raw_score: scores[member._id] || 0
         }));
 
         onSubmit(scoresData);
@@ -147,6 +200,7 @@ export default function BulkScoreModal({
         setSelectedRotationId("");
         setGuildMembers([]);
         setScores({});
+        setHasExistingScores(false);
         onClose();
     };
 
@@ -253,11 +307,25 @@ export default function BulkScoreModal({
                                     <Text>Chargement des membres...</Text>
                                 </VStack>
                             </Center>
+                        ) : isLoadingScores ? (
+                            <Center p={8}>
+                                <VStack>
+                                    <Spinner size="lg" />
+                                    <Text>Chargement des scores existants...</Text>
+                                </VStack>
+                            </Center>
                         ) : guildMembers.length > 0 ? (
                             <Box>
-                                <Text fontSize="lg" fontWeight="bold" mb={4}>
-                                    Saisie des scores ({guildMembers.length} membres)
-                                </Text>
+                                <HStack justify="space-between" align="center" mb={4}>
+                                    <Text fontSize="lg" fontWeight="bold">
+                                        Saisie des scores ({guildMembers.length} membres)
+                                    </Text>
+                                    {hasExistingScores && (
+                                        <Text fontSize="sm" color="green.500" fontStyle="italic">
+                                            ✓ Scores existants chargés automatiquement
+                                        </Text>
+                                    )}
+                                </HStack>
                                 <Grid templateColumns="repeat(auto-fill, 320px)" gap={4} justifyContent="center">
                                     {guildMembers.map((member: User) => (
                                         <GridItem key={member._id}>
@@ -277,7 +345,7 @@ export default function BulkScoreModal({
                                                                 max={9999999999}
                                                                 value={scores[member._id] || 0}
                                                                 onChange={(_, value) => handleScoreChange(member._id, value)}
-                                                                isDisabled={isSubmitting}
+                                                                isDisabled={isSubmitting || isLoadingScores}
                                                             >
                                                                 <NumberInputField />
                                                                 <NumberInputStepper>

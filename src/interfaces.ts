@@ -113,6 +113,7 @@ export interface Score {
     rotation_id: string;
     guild_id: string;
     score: number;
+    raw_score: number;
     created_at?: string;
     updated_at?: string;
 }
@@ -122,7 +123,7 @@ export interface ScoreFormData {
     cycle_id: string;
     rotation_id: string;
     guild_id: string;
-    score: number;
+    raw_score: number;
 }
 
 export interface ScoresResponse {

@@ -228,7 +228,7 @@ const ScoresSection = () => {
                 cycle_id: selectedCycleId,
                 rotation_id: selectedRotationId,
                 guild_id: guildId,
-                score: scoreValue
+                raw_score: scoreValue
             };
 
 
@@ -380,7 +380,7 @@ const ScoresSection = () => {
         setSelectedUserId(score.user_id);
         setSelectedCycleId(score.cycle_id);
         setSelectedRotationId(score.rotation_id);
-        setScoreValue(score.score);
+        setScoreValue(score.raw_score);
         setIsEditModalOpen(true);
     };
 
@@ -427,7 +427,7 @@ const ScoresSection = () => {
                 cycle_id: selectedCycleId,
                 rotation_id: selectedRotationId,
                 guild_id: guildId,
-                score: scoreValue
+                raw_score: scoreValue
             };
 
             const token = localStorage.getItem('userToken');

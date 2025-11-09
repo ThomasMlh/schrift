@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import type { Role, Guild, User } from "../interfaces";
-import CustomLink from "./ui/CustomLink";
+import { UserDisplay } from "./ui/UserDisplay";
 
 interface GuildTabsListProps {
   editable?: boolean;
@@ -362,18 +362,7 @@ const GuildTabsList = ({
                       spacing={3}
                     >
                       <VStack align="start" spacing={1} flex={1}>
-                        <Text fontWeight="medium" fontSize="md">
-                          <CustomLink to={`/joueur/${member._id}`} text={member.global_name || member.username} />
-                          <Text as="span" fontSize="xs" color="gray.500" ml={2}>
-                            [
-                            {member.role === "chef"
-                              ? "Chef"
-                              : member.role === "sous-chef"
-                                ? "Sous-Chef"
-                                : "Membre"}
-                            ]
-                          </Text>
-                        </Text>
+                          <UserDisplay user={member} roleBadge/>
                       </VStack>
                       {editable && (
                         <Stack direction={{ base: "column", md: "row" }} spacing={2} w={{ base: "100%", md: "auto" }}>
