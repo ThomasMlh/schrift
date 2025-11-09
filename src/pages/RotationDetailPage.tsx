@@ -256,8 +256,8 @@ const RotationDetailPage = () => {
         <Container maxW="container.xl" py={8}>
             <VStack spacing={6} align="stretch">
                 {/* Header */}
-                <HStack justify="space-between" align="center" flexWrap="wrap">
-                    <VStack align="start" spacing={1}>
+                <VStack spacing={4} align="stretch">
+                    <HStack justify="space-between" align="center">
                         <Button
                             leftIcon={<ArrowBackIcon />}
                             variant="outline"
@@ -266,18 +266,27 @@ const RotationDetailPage = () => {
                         >
                             Retour
                         </Button>
-                        <Heading size="lg">
-                            <HStack spacing={2} align="center">
-                                <Text as="span">{cycle} - Rotation #{position} - {rotation?.killer}</Text>
-                                {rotation?.attack && <AttackTypeBadge attackType={rotation.attack} size="24px"/>}
-                                <Text as="span"> - Classement</Text>
-                            </HStack>
+                    </HStack>
+                    
+                    <VStack align="start" spacing={2}>
+                        <Heading size={{ base: "md", md: "lg" }}>
+                            <VStack spacing={2} align="start">
+                                <HStack spacing={2} align="center" flexWrap="wrap">
+                                    <Text as="span">{cycle}</Text>
+                                    <Text as="span" color="gray.500">-</Text>
+                                    <Text as="span">Rotation #{position}</Text>
+                                </HStack>
+                                <HStack spacing={2} align="center" flexWrap="wrap">
+                                    <Text as="span">{rotation?.killer}</Text>
+                                    {rotation?.attack && <AttackTypeBadge attackType={rotation.attack} size="24px"/>}
+                                </HStack>
+                            </VStack>
                         </Heading>
                         <Text color="gray.500" fontSize="sm">
                             {totalItems} score{totalItems > 1 ? 's' : ''} au total
                         </Text>
                     </VStack>
-                </HStack>
+                </VStack>
 
                 {/* Scores Table */}
                 <Box
@@ -297,13 +306,13 @@ const RotationDetailPage = () => {
                     ) : (
                         <>
                             <TableContainer>
-                                <Table variant="simple">
+                                <Table variant="simple" size={{ base: "sm", md: "md" }}>
                                     <Thead>
                                         <Tr>
                                             <Th>Rang</Th>
                                             <Th>Joueur</Th>
                                             <Th isNumeric>Score</Th>
-                                            <Th>Date</Th>
+                                            <Th display={{ base: "none", sm: "table-cell" }}>Date</Th>
                                         </Tr>
                                     </Thead>
                                     <Tbody>
@@ -323,11 +332,11 @@ const RotationDetailPage = () => {
                                                         <UserDisplay user={score.user} />
                                                     </Td>
                                                     <Td isNumeric>
-                                                        <Badge colorScheme={getScoreDisplayValue(score.score)} fontWeight="bold" fontSize={"medium"}>
+                                                        <Badge colorScheme={getScoreDisplayValue(score.score)} fontWeight="bold" fontSize={{ base: "xs", md: "medium" }}>
                                                             {score.score.toLocaleString()}
                                                         </Badge>
                                                     </Td>
-                                                    <Td>
+                                                    <Td display={{ base: "none", sm: "table-cell" }}>
                                                         <Text fontSize="sm" color="gray.500">
                                                             {new Date(score.created_at).toLocaleDateString('fr-FR')}
                                                         </Text>
@@ -340,61 +349,68 @@ const RotationDetailPage = () => {
                             </TableContainer>
 
                             {/* Pagination */}
-                            <Flex
-                                justify="space-between"
-                                align="center"
+                            <VStack
+                                spacing={4}
                                 p={4}
                                 borderTop="1px solid"
                                 borderTopColor={borderColor}
-                                flexWrap="wrap"
-                                gap={4}
                             >
-                                <HStack spacing={2}>
-                                    <Text fontSize="sm" color="gray.500">
-                                        Afficher
-                                    </Text>
-                                    <Select
-                                        size="sm"
-                                        value={itemsPerPage}
-                                        onChange={handleItemsPerPageChange}
-                                        w="auto"
-                                    >
-                                        <option value={10}>10</option>
-                                        <option value={20}>20</option>
-                                        <option value={50}>50</option>
-                                        <option value={100}>100</option>
-                                    </Select>
-                                    <Text fontSize="sm" color="gray.500">
-                                        par page
-                                    </Text>
-                                </HStack>
+                                {/* Controls row */}
+                                <Flex
+                                    justify="space-between"
+                                    align="center"
+                                    w="100%"
+                                    flexWrap="wrap"
+                                    gap={4}
+                                >
+                                    <HStack spacing={2}>
+                                        <Text fontSize="sm" color="gray.500">
+                                            Afficher
+                                        </Text>
+                                        <Select
+                                            size="sm"
+                                            value={itemsPerPage}
+                                            onChange={handleItemsPerPageChange}
+                                            w="auto"
+                                        >
+                                            <option value={10}>10</option>
+                                            <option value={20}>20</option>
+                                            <option value={50}>50</option>
+                                            <option value={100}>100</option>
+                                        </Select>
+                                        <Text fontSize="sm" color="gray.500" display={{ base: "none", sm: "block" }}>
+                                            par page
+                                        </Text>
+                                    </HStack>
 
-                                <HStack spacing={2}>
-                                    <IconButton
-                                        aria-label="Page précédente"
-                                        icon={<ChevronLeftIcon />}
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handlePageChange(currentPage - 1)}
-                                        isDisabled={currentPage <= 1}
-                                    />
-                                    <Text fontSize="sm" color="gray.500">
-                                        Page {currentPage} sur {totalPages}
-                                    </Text>
-                                    <IconButton
-                                        aria-label="Page suivante"
-                                        icon={<ChevronRightIcon />}
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handlePageChange(currentPage + 1)}
-                                        isDisabled={currentPage >= totalPages}
-                                    />
-                                </HStack>
+                                    <HStack spacing={2}>
+                                        <IconButton
+                                            aria-label="Page précédente"
+                                            icon={<ChevronLeftIcon />}
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handlePageChange(currentPage - 1)}
+                                            isDisabled={currentPage <= 1}
+                                        />
+                                        <Text fontSize="sm" color="gray.500" whiteSpace="nowrap">
+                                            {currentPage}/{totalPages}
+                                        </Text>
+                                        <IconButton
+                                            aria-label="Page suivante"
+                                            icon={<ChevronRightIcon />}
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handlePageChange(currentPage + 1)}
+                                            isDisabled={currentPage >= totalPages}
+                                        />
+                                    </HStack>
+                                </Flex>
 
-                                <Text fontSize="sm" color="gray.500">
+                                {/* Info row - hidden on very small screens */}
+                                <Text fontSize="sm" color="gray.500" textAlign="center" display={{ base: "none", md: "block" }}>
                                     {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} sur {totalItems}
                                 </Text>
-                            </Flex>
+                            </VStack>
                         </>
                     )}
                 </Box>

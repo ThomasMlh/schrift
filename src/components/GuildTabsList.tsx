@@ -342,7 +342,7 @@ const GuildTabsList = ({
               overflowY="auto"
             >
               <Box p={4}>
-                <Text>
+                <Text fontSize="xs" color="gray.500">
                   {membersByGuild[guild._id]?.length || 0} / 20 membres
                 </Text>
               </Box>

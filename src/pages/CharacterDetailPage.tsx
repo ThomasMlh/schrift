@@ -160,44 +160,82 @@ const CharacterDetailPage = () => {
 
                                 {/* Grille des informations principales */}
                                 <Box w="100%">
-                                    <VStack spacing={3} align="stretch">
+                                    <VStack spacing={4} align={{ base: "center", md: "stretch" }}>
                                         {/* Affinité */}
                                         {character.affinity && (
-                                            <HStack spacing={3} justify={{ base: "center", md: "flex-start" }}>
-                                                <Text fontWeight="semibold" color="gray.600" minW="100px">
-                                                    Affinité:
+                                            <Flex
+                                                direction={{ base: "column", md: "row" }}
+                                                justify={{ base: "center", md: "flex-start" }}
+                                                align="center"
+                                                gap={{ base: 2, md: 3 }}
+                                            >
+                                                <Text 
+                                                    fontWeight="semibold" 
+                                                    color="gray.600" 
+                                                    fontSize={{ base: "sm", md: "md" }}
+                                                    minW={{ base: "auto", md: "100px" }}
+                                                >
+                                                    Affinité{/* Ajout des deux points uniquement sur desktop */}
+                                                    <Text as="span" display={{ base: "none", md: "inline" }}>:</Text>
                                                 </Text>
                                                 <AffinityIcon
                                                     affinity={character.affinity}
                                                     size="24px"
                                                     showLabel={true}
                                                 />
-                                            </HStack>
+                                            </Flex>
                                         )}
 
                                         {/* Type d'attaque */}
                                         {character.attack_type && (
-                                            <HStack spacing={3} justify={{ base: "center", md: "flex-start" }}>
-                                                <Text fontWeight="semibold" color="gray.600" minW="100px">
-                                                    Type:
+                                            <Flex
+                                                direction={{ base: "column", md: "row" }}
+                                                justify={{ base: "center", md: "flex-start" }}
+                                                align="center"
+                                                gap={{ base: 2, md: 3 }}
+                                            >
+                                                <Text 
+                                                    fontWeight="semibold" 
+                                                    color="gray.600" 
+                                                    fontSize={{ base: "sm", md: "md" }}
+                                                    minW={{ base: "auto", md: "100px" }}
+                                                >
+                                                    Type
+                                                    <Text as="span" display={{ base: "none", md: "inline" }}>:</Text>
                                                 </Text>
                                                 <AttackTypeBadge
                                                     attackType={character.attack_type}
                                                     size="24px"
                                                 />
-                                            </HStack>
+                                            </Flex>
                                         )}
 
                                         {/* Nom de recherche */}
                                         {character.search_name && (
-                                            <HStack spacing={3} justify={{ base: "center", md: "flex-start" }}>
-                                                <Text fontWeight="semibold" color="gray.600" minW="100px">
-                                                    Recherche:
+                                            <Flex
+                                                direction={{ base: "column", md: "row" }}
+                                                justify={{ base: "center", md: "flex-start" }}
+                                                align="center"
+                                                gap={{ base: 2, md: 3 }}
+                                            >
+                                                <Text 
+                                                    fontWeight="semibold" 
+                                                    color="gray.600" 
+                                                    fontSize={{ base: "sm", md: "md" }}
+                                                    minW={{ base: "auto", md: "100px" }}
+                                                >
+                                                    Recherche
+                                                    <Text as="span" display={{ base: "none", md: "inline" }}>:</Text>
                                                 </Text>
-                                                <Text fontFamily="mono" fontSize="sm" color="gray.500">
+                                                <Text 
+                                                    fontFamily="mono" 
+                                                    fontSize="sm" 
+                                                    color="gray.500" 
+                                                    textAlign={{ base: "center", md: "left" }}
+                                                >
                                                     {character.search_name}
                                                 </Text>
-                                            </HStack>
+                                            </Flex>
                                         )}
                                     </VStack>
                                 </Box>
@@ -220,20 +258,22 @@ const CharacterDetailPage = () => {
                                         <Heading size="md" color="purple.500" mb={4}>
                                             Catégories ({character.categories.length})
                                         </Heading>
-                                        <Flex wrap="wrap" gap={3}>
+                                        <VStack spacing={1} align="left">
                                             {character.categories.map((category, index) => (
-                                                <HStack key={index} spacing={2}>
-                                                    <CategoryIcon
-                                                        category={category}
-                                                        size="20px"
-                                                        showLabel={false}
-                                                    />
-                                                    <Badge colorScheme="purple" variant="subtle">
-                                                        {category}
-                                                    </Badge>
-                                                </HStack>
+                                                <Box>
+                                                    <HStack key={index} spacing={2}>
+                                                        <CategoryIcon
+                                                            category={category}
+                                                            size="20px"
+                                                            showLabel={false}
+                                                        />
+                                                        <Badge colorScheme="purple" variant="subtle">
+                                                            {category}
+                                                        </Badge>
+                                                    </HStack>
+                                                </Box>
                                             ))}
-                                        </Flex>
+                                        </VStack>
                                     </Box>
                                 )}
 
@@ -243,7 +283,7 @@ const CharacterDetailPage = () => {
                                         <Heading size="md" color="orange.500" mb={4}>
                                             Tueurs ({character.killers.length})
                                         </Heading>
-                                        <Flex wrap="wrap" gap={3}>
+                                        <VStack spacing={1} align="left">
                                             {character.killers.map((killer, index) => (
                                                 <HStack key={index} spacing={2}>
                                                     <KillerIcon
@@ -256,7 +296,7 @@ const CharacterDetailPage = () => {
                                                     </Badge>
                                                 </HStack>
                                             ))}
-                                        </Flex>
+                                        </VStack>
                                     </Box>
                                 )}
 
@@ -266,13 +306,13 @@ const CharacterDetailPage = () => {
                                         <Heading size="md" color="pink.500" mb={4}>
                                             Traits d'âme ({character.soul_traits.length})
                                         </Heading>
-                                        <Flex wrap="wrap" gap={3}>
+                                        <VStack spacing={1} align="left">
                                             {character.soul_traits.map((trait: string, index: number) => (
-                                                <Badge key={index} colorScheme="pink" variant="subtle" fontSize="sm" px={3} py={1}>
+                                                <Badge key={index} colorScheme="pink" variant="subtle" fontSize="sm" px={3} py={1} width="fit-content">
                                                     {trait}
                                                 </Badge>
                                             ))}
-                                        </Flex>
+                                        </VStack>
                                     </Box>
                                 )}
                             </VStack>
