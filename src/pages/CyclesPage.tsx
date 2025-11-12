@@ -25,6 +25,7 @@ import { handleAttackType } from "../utils/attackTypes";
 import { AlterationImage } from "../components/ui/AlterationImage";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
 import { Pagination as PaginationComponent } from "../components/ui/Pagination";
+import { SEOHead } from "../components/SEOHead";
 
 const CyclesPage = () => {
   const [cycles, setCycles] = useState<Cycle[]>([]);
@@ -99,8 +100,25 @@ const CyclesPage = () => {
     loadWithNewLimit();
   };
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Cycles de Rotation Bleach Brave Souls",
+    "description": "Cycles de rotation et événements pour Bleach Brave Souls avec détails des rotations et classements",
+    "url": "https://bbs-schrift.fr/cycles",
+    "numberOfItems": pagination?.totalCount || cycles.length
+  };
+
   return (
-    <Container maxW="container.xl" py={8}>
+    <>
+      <SEOHead
+        title="Cycles de Rotation - Bleach Brave Souls | Schrift BBS"
+        description="Découvrez tous les cycles de rotation de Bleach Brave Souls. Consultez les rotations, événements et classements de guilde détaillés."
+        keywords="Bleach Brave Souls, BBS, cycles, rotation, événements, classements, guildes"
+        url="https://bbs-schrift.fr/cycles"
+        structuredData={structuredData}
+      />
+      <Container maxW="container.xl" py={8}>
       <VStack spacing={8} align="stretch">
         {/* En-tête avec gradient */}
         <Box 
@@ -340,6 +358,7 @@ const CyclesPage = () => {
         )}
       </VStack>
     </Container>
+    </>
   );
 }
 

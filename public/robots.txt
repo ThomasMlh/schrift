@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://bbs-schrift.fr/sitemap.xml
+
+# Disallow admin pages
+Disallow: /admin
+
+# Allow important pages
+Allow: /
+Allow: /personnages
+Allow: /cycles
+Allow: /joueurs
+Allow: /scores
+
+# Crawl delay (optional)
+Crawl-delay: 1

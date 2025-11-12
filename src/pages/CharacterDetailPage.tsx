@@ -11,6 +11,7 @@ import { KillerIcon } from "../components/ui/KillerIcon";
 import { CategoryIcon } from "../components/ui/CategoryIcon";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
 import { getStatIcon } from "@/utils/characterIcons";
+import { SEOHead } from "../components/SEOHead";
 
 const CharacterDetailPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -93,8 +94,72 @@ const CharacterDetailPage = () => {
         );
     }
 
+    // Génération des métadonnées SEO dynamiques
+    const generateSEOData = () => {
+        const title = `${character.name} - Détails et Statistiques | Schrift BBS`;
+        const description = `Découvrez ${character.name} de Bleach Brave Souls : statistiques, affinité ${character.affinity || ''}, type d'attaque ${character.attack_type || ''}, catégories et informations complètes.`;
+        const keywords = `${character.name}, Bleach Brave Souls, BBS, personnage, ${character.affinity || ''}, ${character.attack_type || ''}, statistiques${character.categories ? ', ' + character.categories.join(', ') : ''}${character.killers ? ', ' + character.killers.join(', ') : ''}, ${character.search_name || ''}`;
+        
+        const structuredData = {
+            "@context": "https://schema.org",
+            "@type": "Thing",
+            "name": character.name,
+            "description": description,
+            "url": `https://bbs-schrift.fr/personnage/${character._id}`,
+            "image": character.link || character.artwork || "https://bbs-schrift.fr/logo.png",
+            "additionalProperty": [
+                ...(character.affinity ? [{
+                    "@type": "PropertyValue",
+                    "name": "Affinité",
+                    "value": character.affinity
+                }] : []),
+                ...(character.attack_type ? [{
+                    "@type": "PropertyValue",
+                    "name": "Type d'attaque",
+                    "value": character.attack_type
+                }] : []),
+                ...(character.stats ? [
+                    ...(character.stats.atk ? [{
+                        "@type": "PropertyValue",
+                        "name": "Attaque",
+                        "value": character.stats.atk
+                    }] : []),
+                    ...(character.stats.def ? [{
+                        "@type": "PropertyValue",
+                        "name": "Défense",
+                        "value": character.stats.def
+                    }] : []),
+                    ...(character.stats.end ? [{
+                        "@type": "PropertyValue",
+                        "name": "Endurance",
+                        "value": character.stats.end
+                    }] : [])
+                ] : [])
+            ],
+            "isPartOf": {
+                "@type": "WebPage",
+                "name": "Base de données des personnages Bleach Brave Souls",
+                "url": "https://bbs-schrift.fr/personnages"
+            }
+        };
+
+        return { title, description, keywords, structuredData };
+    };
+
+    const { title, description, keywords, structuredData } = generateSEOData();
+
     return (
-        <Container maxW="container.lg" py={8}>
+        <>
+            <SEOHead
+                title={title}
+                description={description}
+                keywords={keywords}
+                image={character.link || character.artwork || "https://bbs-schrift.fr/logo.png"}
+                url={`https://bbs-schrift.fr/personnage/${character._id}`}
+                type="article"
+                structuredData={structuredData}
+            />
+            <Container maxW="container.lg" py={8}>
             <VStack spacing={6} align="stretch">
                 {/* Bouton de retour */}
                 <Button
@@ -543,6 +608,7 @@ const CharacterDetailPage = () => {
                 </Flex>
             </VStack>
         </Container>
+        </>
     );
 };
 

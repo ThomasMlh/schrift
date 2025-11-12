@@ -1,0 +1,12 @@
+{
+  "name": "Schrift BBS - Guildes Bleach Brave Souls",
+  "short_name": "Schrift BBS",
+  "description": "Plateforme de gestion des guildes et scores pour Bleach Brave Souls",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a202c",
+  "theme_color": "#1a202c",
+  "orientation": "portrait-primary",
+  "categories": ["games", "entertainment"],
+  "lang": "fr"
+}
