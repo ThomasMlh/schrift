@@ -97,7 +97,7 @@ export const UserSearchSelect = ({
                 >
                     <Box flex={1} cursor="pointer" onClick={() => setIsOpen(!isOpen)}>
                         <Text fontWeight="medium">
-                            {selectedUser.global_name || selectedUser.username}
+                            {selectedUser.bbs_name || selectedUser.global_name}
                         </Text>
                         {selectedUser.discord_id && (
                             <Text fontSize="xs" color="gray.500">
@@ -220,7 +220,7 @@ export const UserSearchSelect = ({
                                 >
                                     <Box flex={1}>
                                         <Text fontWeight="medium" color={textColor}>
-                                            {user.global_name || user.username}
+                                            {user.bbs_name || user.global_name}
                                         </Text>
                                         {user.discord_id && (
                                             <Text fontSize="xs" color="gray.500">

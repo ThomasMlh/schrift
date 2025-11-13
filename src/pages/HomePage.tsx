@@ -1,5 +1,6 @@
 import { Container, Heading, Flex, useColorModeValue } from "@chakra-ui/react";
 import { GuildTabsList } from "../components/GuildTabsList";
+import { PodiumSection } from "../components/PodiumSection";
 import { SEOHead } from "../components/SEOHead";
 // const imageSchrift = new URL('../assets/logo.png', import.meta.url).href;
 
@@ -49,9 +50,13 @@ export default function HomePage() {
           justifyContent="flex-start"
           bg={bgColor}
           boxShadow="none"
+          gap={8}
         >
           <Heading mb={8} textAlign="center">Guildes Ṣčhrīft</Heading>
           <GuildTabsList />
+          
+          {/* Section Podium */}
+          <PodiumSection />
         </Container>
       </Flex>
     </>
