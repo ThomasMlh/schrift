@@ -227,14 +227,9 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
 
     const renderPlayerCard = (player: PodiumPlayer, isMobile = false) => (
         <Card key={player.user_id} variant="outline">
-            <CardBody p={isMobile ? 2 : 4}>
-                <Flex 
-                    justify="space-between" 
-                    align="center"
-                    flexDirection={isMobile ? { base: "column", sm: "row" } : "row"}
-                    gap={isMobile ? { base: 2, sm: 0 } : 0}
-                >
-                    <HStack spacing={isMobile ? 2 : 4} flex={1}>
+            <CardBody p={{ base: 3, md: 4 }}>
+                <VStack spacing={3} align="stretch">
+                    <HStack spacing={3} justify="center">
                         {getRankDisplay(player.rank)}
                         <UserDisplay 
                             user={{
@@ -251,12 +246,12 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
                             textSize={isMobile ? "xs" : "sm"}
                         />
                     </HStack>
-                    <VStack spacing={1} align={isMobile ? { base: "center", sm: "end" } : "end"}>
+                    <VStack spacing={1} align="center">
                         <Badge 
                             colorScheme="blue" 
                             variant="solid"
-                            fontSize={isMobile ? "xs" : "md"}
-                            px={isMobile ? 2 : 3}
+                            fontSize={{ base: "sm", md: "md" }}
+                            px={3}
                             py={1}
                         >
                             {player.averageScore.toLocaleString()} pts
@@ -265,7 +260,7 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
                             {player.totalScores} score{player.totalScores > 1 ? 's' : ''}
                         </Text>
                     </VStack>
-                </Flex>
+                </VStack>
             </CardBody>
         </Card>
     );
@@ -281,7 +276,7 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
             borderColor={borderColor}
             boxShadow={shadowColor}
             p={{ base: 4, md: 6 }}
-            w="100%"
+            w={{ base: "100%", md: "80%" }}
             mx="auto"
         >
             <VStack spacing={6} align="stretch">
@@ -316,10 +311,9 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
                         </Select>
                     </VStack>
 
-                    {/* Sélection du scope */}
                     <VStack align="start" spacing={1} flex={1} minW="200px">
                         <Text fontSize="sm" fontWeight="medium" color="gray.600">
-                            Scope
+                            Guilde
                         </Text>
                         <Select
                             value={selectedGuildId}
@@ -345,7 +339,7 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
                                 <strong>Cycle:</strong> {selectedCycle.name}
                             </Text>
                             <Text>
-                                <strong>Scope:</strong> {selectedGuildId === "global" ? "Global" : selectedGuild?.name}
+                                <strong>Guilde:</strong> {selectedGuildId === "global" ? "Global" : selectedGuild?.name}
                             </Text>
                         </VStack>
                     </Alert>
@@ -379,7 +373,7 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
                         </Box>
 
                         {/* Affichage desktop */}
-                        <Box display={{ base: "none", lg: "block" }}>
+                        <Box display={{ base: "none", md: "block" }}>
                             {podiumData.podium.length === 10 ? (
                                 // 2 colonnes pour 10 joueurs
                                 <HStack spacing={4} align="start">
