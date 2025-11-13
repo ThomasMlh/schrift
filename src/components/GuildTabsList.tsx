@@ -306,7 +306,7 @@ const GuildTabsList = ({
       isFitted
       variant='enclosed'
       colorScheme="white"
-      w="80%"
+      w="100%"
       borderWidth="1px"
       p={2}
       borderTopLeftRadius="md"

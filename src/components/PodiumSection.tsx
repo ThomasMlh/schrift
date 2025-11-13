@@ -225,6 +225,51 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
         );
     };
 
+    const renderPlayerCard = (player: PodiumPlayer, isMobile = false) => (
+        <Card key={player.user_id} variant="outline">
+            <CardBody p={isMobile ? 2 : 4}>
+                <Flex 
+                    justify="space-between" 
+                    align="center"
+                    flexDirection={isMobile ? { base: "column", sm: "row" } : "row"}
+                    gap={isMobile ? { base: 2, sm: 0 } : 0}
+                >
+                    <HStack spacing={isMobile ? 2 : 4} flex={1}>
+                        {getRankDisplay(player.rank)}
+                        <UserDisplay 
+                            user={{
+                                _id: player.user_id,
+                                username: player.global_name,
+                                global_name: player.global_name,
+                                discord_id: player.discord_id,
+                                bbs_name: player.bbs_name,
+                                avatar: player.avatar,
+                                guilde_id: '',
+                                role: 'membre'
+                            }}
+                            avatarSize={isMobile ? "xs" : "sm"}
+                            textSize={isMobile ? "xs" : "sm"}
+                        />
+                    </HStack>
+                    <VStack spacing={1} align={isMobile ? { base: "center", sm: "end" } : "end"}>
+                        <Badge 
+                            colorScheme="blue" 
+                            variant="solid"
+                            fontSize={isMobile ? "xs" : "md"}
+                            px={isMobile ? 2 : 3}
+                            py={1}
+                        >
+                            {player.averageScore.toLocaleString()} pts
+                        </Badge>
+                        <Text fontSize="xs" color="gray.500">
+                            {player.totalScores} score{player.totalScores > 1 ? 's' : ''}
+                        </Text>
+                    </VStack>
+                </Flex>
+            </CardBody>
+        </Card>
+    );
+
     const selectedCycle = cycles.find(cycle => cycle._id === selectedCycleId);
     const selectedGuild = guilds.find(guild => guild._id === selectedGuildId);
 
@@ -235,9 +280,8 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
             borderWidth="1px"
             borderColor={borderColor}
             boxShadow={shadowColor}
-            p={6}
+            p={{ base: 4, md: 6 }}
             w="100%"
-            maxW="80%"
             mx="auto"
         >
             <VStack spacing={6} align="stretch">
@@ -326,137 +370,34 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
                         </VStack>
                     </Flex>
                 ) : podiumData && podiumData.podium.length > 0 ? (
-                    podiumData.podium.length === 10 ? (
-                        // Affichage 2 colonnes pour 10 joueurs en desktop
-                        <HStack 
-                            spacing={4} 
-                            align="start" 
-                            flexDirection={{ base: "column", lg: "row" }}
-                        >
-                            {/* Première colonne (Top 5) */}
-                            <VStack spacing={3} align="stretch" flex={1}>
-                                {podiumData.podium.slice(0, 5).map((player) => (
-                                    <Card key={player.user_id} variant="outline">
-                                        <CardBody p={4}>
-                                            <Flex justify="space-between" align="center">
-                                                <HStack spacing={4}>
-                                                    {getRankDisplay(player.rank)}
-                                                    <UserDisplay 
-                                                        user={{
-                                                            _id: player.user_id,
-                                                            username: player.global_name,
-                                                            global_name: player.global_name,
-                                                            discord_id: player.discord_id,
-                                                            bbs_name: player.bbs_name,
-                                                            avatar: player.avatar,
-                                                            guilde_id: '',
-                                                            role: 'membre'
-                                                        }}
-                                                    />
-                                                </HStack>
-                                                <VStack spacing={1} align="end">
-                                                    <Badge 
-                                                        colorScheme="blue" 
-                                                        variant="solid"
-                                                        fontSize="md"
-                                                        px={3}
-                                                        py={1}
-                                                    >
-                                                        {player.averageScore.toLocaleString()} pts
-                                                    </Badge>
-                                                    <Text fontSize="xs" color="gray.500">
-                                                        {player.totalScores} score{player.totalScores > 1 ? 's' : ''}
-                                                    </Text>
-                                                </VStack>
-                                            </Flex>
-                                        </CardBody>
-                                    </Card>
-                                ))}
+                    <>
+                        {/* Affichage mobile : toujours en colonne unique */}
+                        <Box display={{ base: "block", lg: "none" }}>
+                            <VStack spacing={3} align="stretch">
+                                {podiumData.podium.map((player) => renderPlayerCard(player, true))}
                             </VStack>
+                        </Box>
 
-                            {/* Deuxième colonne (Places 6-10) */}
-                            <VStack spacing={3} align="stretch" flex={1}>
-                                {podiumData.podium.slice(5, 10).map((player) => (
-                                    <Card key={player.user_id} variant="outline">
-                                        <CardBody p={4}>
-                                            <Flex justify="space-between" align="center">
-                                                <HStack spacing={4}>
-                                                    {getRankDisplay(player.rank)}
-                                                    <UserDisplay 
-                                                        user={{
-                                                            _id: player.user_id,
-                                                            username: player.global_name,
-                                                            global_name: player.global_name,
-                                                            discord_id: player.discord_id,
-                                                            bbs_name: player.bbs_name,
-                                                            avatar: player.avatar,
-                                                            guilde_id: '',
-                                                            role: 'membre'
-                                                        }}
-                                                    />
-                                                </HStack>
-                                                <VStack spacing={1} align="end">
-                                                    <Badge 
-                                                        colorScheme="blue" 
-                                                        variant="solid"
-                                                        fontSize="md"
-                                                        px={3}
-                                                        py={1}
-                                                    >
-                                                        {player.averageScore.toLocaleString()} pts
-                                                    </Badge>
-                                                    <Text fontSize="xs" color="gray.500">
-                                                        {player.totalScores} score{player.totalScores > 1 ? 's' : ''}
-                                                    </Text>
-                                                </VStack>
-                                            </Flex>
-                                        </CardBody>
-                                    </Card>
-                                ))}
-                            </VStack>
-                        </HStack>
-                    ) : (
-                        // Affichage colonne unique pour moins de 10 joueurs
-                        <VStack spacing={3} align="stretch">
-                            {podiumData.podium.map((player) => (
-                                <Card key={player.user_id} variant="outline">
-                                    <CardBody p={4}>
-                                        <Flex justify="space-between" align="center">
-                                            <HStack spacing={4}>
-                                                {getRankDisplay(player.rank)}
-                                                <UserDisplay 
-                                                    user={{
-                                                        _id: player.user_id,
-                                                        username: player.global_name,
-                                                        global_name: player.global_name,
-                                                        discord_id: player.discord_id,
-                                                        bbs_name: player.bbs_name,
-                                                        avatar: player.avatar,
-                                                        guilde_id: '',
-                                                        role: 'membre'
-                                                    }}
-                                                />
-                                            </HStack>
-                                            <VStack spacing={1} align="end">
-                                                <Badge 
-                                                    colorScheme="blue" 
-                                                    variant="solid"
-                                                    fontSize="md"
-                                                    px={3}
-                                                    py={1}
-                                                >
-                                                    {player.averageScore.toLocaleString()} pts
-                                                </Badge>
-                                                <Text fontSize="xs" color="gray.500">
-                                                    {player.totalScores} score{player.totalScores > 1 ? 's' : ''}
-                                                </Text>
-                                            </VStack>
-                                        </Flex>
-                                    </CardBody>
-                                </Card>
-                            ))}
-                        </VStack>
-                    )
+                        {/* Affichage desktop */}
+                        <Box display={{ base: "none", lg: "block" }}>
+                            {podiumData.podium.length === 10 ? (
+                                // 2 colonnes pour 10 joueurs
+                                <HStack spacing={4} align="start">
+                                    <VStack spacing={3} align="stretch" flex={1}>
+                                        {podiumData.podium.slice(0, 5).map((player) => renderPlayerCard(player, false))}
+                                    </VStack>
+                                    <VStack spacing={3} align="stretch" flex={1}>
+                                        {podiumData.podium.slice(5, 10).map((player) => renderPlayerCard(player, false))}
+                                    </VStack>
+                                </HStack>
+                            ) : (
+                                // Colonne unique pour moins de 10 joueurs
+                                <VStack spacing={3} align="stretch">
+                                    {podiumData.podium.map((player) => renderPlayerCard(player, false))}
+                                </VStack>
+                            )}
+                        </Box>
+                    </>
                 ) : (
                     <Alert status="warning" borderRadius="md">
                         <AlertIcon />
