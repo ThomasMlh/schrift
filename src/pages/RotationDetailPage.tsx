@@ -6,48 +6,10 @@ import {
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowBackIcon, ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import type { RotationTemplate } from "@/interfaces";
+import type { RotationTemplate, ScoreWithUser, ScoreDetailApiResponse, RankInfo, Guild } from "@/interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { UserDisplay } from "@/components/ui/UserDisplay";
 import { getScoreDisplayValue } from "@/utils/scores";
-
-interface Score {
-    _id: string;
-    user_id: string;
-    score: number;
-    user: {
-        _id: string;
-        username: string;
-        global_name: string;
-        bbs_id: string;
-        bbs_name: string;
-        avatar: string | null;
-        discord_id: string;
-        role: string;
-    };
-    created_at: string;
-    updated_at: string;
-}
-
-interface ApiResponse {
-    success: boolean;
-    data: Score[];
-    cycle: string;
-    rotation: RotationTemplate | null;
-    pagination: {
-        currentPage: number;
-        totalPages: number;
-        totalItems: number;
-        itemsPerPage: number;
-    };
-}
-
-interface RankInfo {
-    rank: number;
-    color: string;
-    bgColor: string;
-    borderColor: string;
-}
 
 const RotationDetailPage = () => {
     const { cycleId, position } = useParams<{ cycleId: string; position: string }>();
@@ -55,7 +17,7 @@ const RotationDetailPage = () => {
     const toast = useToast();
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-    const [scores, setScores] = useState<Score[]>([]);
+    const [scores, setScores] = useState<ScoreWithUser[]>([]);
     const [cycle, setCycle] = useState<string | null>(null);
     const [rotation, setRotation] = useState<RotationTemplate | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -64,96 +26,112 @@ const RotationDetailPage = () => {
     const [itemsPerPage, setItemsPerPage] = useState(20);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+    
+    // États pour le filtre des guildes
+    const [guilds, setGuilds] = useState<Guild[]>([]);
+    const [selectedGuild, setSelectedGuild] = useState<string>(''); // ID de la guilde ou vide pour "toutes"
+    const [isLoadingGuilds, setIsLoadingGuilds] = useState(false);
 
     // Hooks UI
     const bgColor = useColorModeValue('white', 'gray.800');
     const borderColor = useColorModeValue('gray.200', 'gray.600');
     const shadowColor = useColorModeValue('lg', 'dark-lg');
 
-    // Fonction pour calculer le rang avec gestion des égalités
-    const calculateRanks = (scores: Score[]): Map<string, RankInfo> => {
-        const rankMap = new Map<string, RankInfo>();
-        
-        // Grouper les scores par valeur
-        const scoreGroups = new Map<number, Score[]>();
-        scores.forEach(score => {
-            if (!scoreGroups.has(score.score)) {
-                scoreGroups.set(score.score, []);
-            }
-            scoreGroups.get(score.score)!.push(score);
-        });
-
-        // Trier les scores de manière décroissante
-        const sortedScores = Array.from(scoreGroups.keys()).sort((a, b) => b - a);
-        
-        let currentRank = 1;
-        sortedScores.forEach((scoreValue, index) => {
-            const scoresWithThisValue = scoreGroups.get(scoreValue)!;
-            
-            let rankInfo: RankInfo;
-            if (currentRank === 1) {
-                // Or pour le #1
-                rankInfo = {
-                    rank: 1,
-                    color: "yellow.600",
-                    bgColor: "yellow.50",
-                    borderColor: "yellow.300"
-                };
-            } else if (currentRank === 2 || (currentRank > 2 && index === 1)) {
-                // Argent pour le #2 (ou le 2e meilleur score unique)
-                rankInfo = {
-                    rank: 2,
-                    color: "gray.600",
-                    bgColor: "gray.50",
-                    borderColor: "gray.300"
-                };
-            } else if (currentRank === 3 || (currentRank > 3 && index === 2)) {
-                // Bronze pour le #3 (ou le 3e meilleur score unique)
-                rankInfo = {
-                    rank: 3,
-                    color: "orange.600",
-                    bgColor: "orange.50",
-                    borderColor: "orange.300"
-                };
-            } else {
-                // Pas de podium
-                rankInfo = {
-                    rank: currentRank,
-                    color: "gray.500",
-                    bgColor: "transparent",
-                    borderColor: "transparent"
-                };
-            }
-
-            scoresWithThisValue.forEach(score => {
-                rankMap.set(score._id, rankInfo);
-            });
-
-            currentRank += scoresWithThisValue.length;
-        });
-
-        return rankMap;
+    // Fonction pour créer les informations de rang basées sur le rang du serveur
+    const getRankInfo = (rank: number): RankInfo => {
+        if (rank === 1) {
+            // Or pour le #1
+            return {
+                rank: 1,
+                color: "yellow.600",
+                bgColor: "yellow.50",
+                borderColor: "yellow.300"
+            };
+        } else if (rank === 2) {
+            // Argent pour le #2
+            return {
+                rank: 2,
+                color: "gray.600",
+                bgColor: "gray.50",
+                borderColor: "gray.300"
+            };
+        } else if (rank === 3) {
+            // Bronze pour le #3
+            return {
+                rank: 3,
+                color: "orange.600",
+                bgColor: "orange.50",
+                borderColor: "orange.300"
+            };
+        } else {
+            // Pas de podium
+            return {
+                rank: rank,
+                color: "gray.500",
+                bgColor: "transparent",
+                borderColor: "transparent"
+            };
+        }
     };
 
     useEffect(() => {
         if (cycleId && position) {
-            loadScores();
+            loadScores(selectedGuild || undefined);
         }
-    }, [cycleId, position, currentPage, itemsPerPage]);
+    }, [cycleId, position, currentPage, itemsPerPage]); // Sans selectedGuild pour éviter la double requête
 
-    const loadScores = async () => {
+    // Charger les guildes au montage du composant
+    useEffect(() => {
+        loadGuilds();
+    }, []);
+
+    const loadGuilds = async () => {
+        setIsLoadingGuilds(true);
+        try {
+            const response = await fetch(`${apiUrl}/api/guildes`);
+            if (response.ok) {
+                const data = await response.json();
+                // La réponse peut être un tableau directement ou un objet avec success
+                if (Array.isArray(data)) {
+                    setGuilds(data);
+                } else if (data.success && Array.isArray(data.data)) {
+                    setGuilds(data.data);
+                }
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement des guildes:', error);
+        } finally {
+            setIsLoadingGuilds(false);
+        }
+    };
+
+    const loadScores = async (guildFilter?: string) => {
         if (!cycleId || !position) return;
 
         setIsLoading(true);
         setError(null);
 
         try {
+            // Construire l'URL avec les paramètres
+            const params = new URLSearchParams({
+                page: currentPage.toString(),
+                limit: itemsPerPage.toString()
+            });
+            
+            // Ajouter le filtre de guilde si fourni
+            if (guildFilter) {
+                const selectedGuildData = guilds.find(guild => guild._id === guildFilter);
+                if (selectedGuildData) {
+                    params.append('guild', selectedGuildData.name);
+                }
+            }
+
             const response = await fetch(
-                `${apiUrl}/api/cycles/${cycleId}/rotations/${position}/scores?page=${currentPage}&limit=${itemsPerPage}`
+                `${apiUrl}/api/cycles/${cycleId}/rotations/${position}/scores?${params.toString()}`
             );
             
             if (response.ok) {
-                const data: ApiResponse = await response.json();
+                const data: ScoreDetailApiResponse = await response.json();
                 setScores(data.data);
                 setCycle(data.cycle);
                 setRotation(data.rotation);
@@ -188,6 +166,15 @@ const RotationDetailPage = () => {
         const newItemsPerPage = parseInt(event.target.value);
         setItemsPerPage(newItemsPerPage);
         setCurrentPage(1); // Reset à la première page
+    };
+
+    const handleGuildChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const newGuildId = event.target.value;
+        setSelectedGuild(newGuildId);
+        setCurrentPage(1); // Reset à la première page quand on change le filtre
+        
+        // Faire la requête API avec le nouveau filtre sans rafraîchir la page
+        await loadScores(newGuildId);
     };
 
     const renderRankBadge = (rankInfo: RankInfo) => {
@@ -250,7 +237,24 @@ const RotationDetailPage = () => {
         );
     }
 
-    const ranksMap = calculateRanks(scores);
+    if (error) {
+        return (
+            <Container maxW="container.xl" py={8}>
+                <VStack spacing={6} align="center">
+                    <Text fontSize="xl" color="red.500">
+                        {error}
+                    </Text>
+                    <Button
+                        leftIcon={<ArrowBackIcon />}
+                        colorScheme="blue"
+                        onClick={() => navigate(-1)}
+                    >
+                        Retour
+                    </Button>
+                </VStack>
+            </Container>
+        );
+    }
 
     return (
         <Container maxW="container.xl" py={8}>
@@ -284,9 +288,43 @@ const RotationDetailPage = () => {
                         </Heading>
                         <Text color="gray.500" fontSize="sm">
                             {totalItems} score{totalItems > 1 ? 's' : ''} au total
+                            {selectedGuild && (
+                                <Text as="span" ml={2} fontSize="xs" color="blue.500">
+                                    (filtré sur {guilds.find(g => g._id === selectedGuild)?.name})
+                                </Text>
+                            )}
                         </Text>
                     </VStack>
                 </VStack>
+
+                {/* Filtre des guildes */}
+                <Box
+                    bg={bgColor}
+                    borderRadius="lg"
+                    borderWidth="1px"
+                    borderColor={borderColor}
+                    p={4}
+                >
+                    <HStack spacing={4} align="center">
+                        <Text fontSize="sm" fontWeight="medium" minW="max-content">
+                            Filtrer par guilde :
+                        </Text>
+                        <Select
+                            value={selectedGuild}
+                            onChange={handleGuildChange}
+                            placeholder="Toutes les guildes"
+                            size="sm"
+                            maxW="300px"
+                            isDisabled={isLoadingGuilds}
+                        >
+                            {guilds.map((guild) => (
+                                <option key={guild._id} value={guild._id}>
+                                    {guild.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </HStack>
+                </Box>
 
                 {/* Scores Table */}
                 <Box
@@ -300,7 +338,10 @@ const RotationDetailPage = () => {
                     {scores.length === 0 ? (
                         <Flex justify="center" align="center" py={12}>
                             <Text fontSize="lg" color="gray.500">
-                                Aucun score trouvé pour cette rotation
+                                {selectedGuild ? 
+                                    `Aucun score trouvé pour la guilde ${guilds.find(g => g._id === selectedGuild)?.name}` :
+                                    "Aucun score trouvé pour cette rotation"
+                                }
                             </Text>
                         </Flex>
                     ) : (
@@ -317,7 +358,7 @@ const RotationDetailPage = () => {
                                     </Thead>
                                     <Tbody>
                                         {scores.map((score) => {
-                                            const rankInfo = ranksMap.get(score._id)!;
+                                            const rankInfo = getRankInfo(score.rank);
                                             
                                             return (
                                                 <Tr 
@@ -408,7 +449,11 @@ const RotationDetailPage = () => {
 
                                 {/* Info row - hidden on very small screens */}
                                 <Text fontSize="sm" color="gray.500" textAlign="center" display={{ base: "none", md: "block" }}>
-                                    {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} sur {totalItems}
+                                    {selectedGuild ? (
+                                        `Affichage de ${totalItems} résultat${totalItems > 1 ? 's' : ''} pour ${guilds.find(g => g._id === selectedGuild)?.name}`
+                                    ) : (
+                                        `${((currentPage - 1) * itemsPerPage) + 1} - ${Math.min(currentPage * itemsPerPage, totalItems)} sur ${totalItems}`
+                                    )}
                                 </Text>
                             </VStack>
                         </>

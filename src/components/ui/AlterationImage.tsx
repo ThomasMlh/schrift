@@ -5,12 +5,14 @@ interface AlterationImageProps {
   alteration: string;
   size?: string;
   showLabel?: boolean;
+  fontWeight?: string;
 }
 
 export const AlterationImage = ({ 
   alteration, 
   size = "24px", 
-  showLabel = false 
+  showLabel = false,
+  fontWeight = "normal"
 }: AlterationImageProps) => {
   const imageUrl = getAlterationImage(alteration);
 
@@ -30,9 +32,9 @@ export const AlterationImage = ({
           alt={alteration}
           width={size}
           height={size}
-          fallback={<Text fontSize="sm">{alteration}</Text>}
+          fallback={<Text fontSize="sm" fontWeight={fontWeight}>{alteration}</Text>}
         />
-        <Text fontSize="sm">
+        <Text fontSize="sm" fontWeight={fontWeight}>
           {alteration}
         </Text>
       </Box>
@@ -45,7 +47,7 @@ export const AlterationImage = ({
       alt={alteration}
       width={size}
       height={size}
-      fallback={<Text fontSize="sm">{alteration}</Text>}
+      fallback={<Text fontSize="sm" fontWeight={fontWeight}>{alteration}</Text>}
     />
   );
 };

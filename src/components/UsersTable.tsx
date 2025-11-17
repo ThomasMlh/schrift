@@ -330,7 +330,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                                         </HStack>
                                     </Td>
                                     <Td>
-                                        <Text>{getGuildName(user.guilde_id)}</Text>
+                                        <Text>{user.guilde_id ? getGuildName(user.guilde_id) : 'Aucune guilde'}</Text>
                                     </Td>
                                     <Td>
                                         <Badge

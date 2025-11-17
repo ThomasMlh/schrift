@@ -3,17 +3,11 @@ export type Page = "guilds" | "characters";
 export type AdminPage = "guilds" | "cycles" | "scores" | "users";
 export type Role = "chef" | "sous-chef" | "membre";
 
-// Interfaces Guildes
 export interface Guild {
     _id: string;
     name: string;
 }
 
-export interface GuildAPI extends Guild {
-    members: User[];
-}
-
-// Interfaces Utilisateurs
 export interface User {
     _id: string;
     userId?: string;
@@ -22,7 +16,7 @@ export interface User {
     global_name: string;
     avatar?: string;
     discord_id?: string;
-    guilde_id: string;
+    guilde_id?: string;
     role: Role;
     isAdmin?: boolean;
     bbs_id?: string;
@@ -30,7 +24,6 @@ export interface User {
     [key: string]: any;
 }
 
-// Interfaces Personnages
 export interface Character {
     _id: string;
     name: string;
@@ -38,8 +31,8 @@ export interface Character {
     affinity?: string;
     categories?: string[];
     killers?: string[];
-    link?: string; // URL de l'image
-    [key: string]: any; // Pour les autres propriétés
+    link?: string;
+    [key: string]: any; 
 }
 
 export interface Pagination {
@@ -68,7 +61,6 @@ export interface UsersResponse {
     };
 }
 
-// Interfaces Cycles et Rotations
 export interface RotationTemplate {
     _id: string;
     killer: string;
@@ -91,7 +83,10 @@ export interface CycleRotation {
 export interface Cycle {
     _id?: string;
     name: string;
-    rotations: CycleRotation[]; // Exactement 20 rotations
+    created_at?: string;
+    updated_at?: string;
+    isActive?: boolean;
+    rotations: CycleRotation[];
 }
 
 export interface CycleFormData {
@@ -105,7 +100,6 @@ export interface CyclesResponse {
     pagination: Pagination;
 }
 
-// Interfaces Scores
 export interface Score {
     _id?: string;
     user_id: string;
@@ -114,8 +108,16 @@ export interface Score {
     guild_id: string;
     score: number;
     raw_score: number;
+    rank?: number;
     created_at?: string;
     updated_at?: string;
+}
+
+export interface ScoreWithUser extends Omit<Score, 'cycle_id' | 'rotation_id' | 'guild_id' | 'raw_score'> {
+    _id: string; 
+    user: User;
+    created_at: string; 
+    rank: number;
 }
 
 export interface ScoreFormData {
@@ -129,4 +131,49 @@ export interface ScoreFormData {
 export interface ScoresResponse {
     data: Score[];
     pagination: Pagination;
+}
+
+export interface ScoreDetailApiResponse {
+    success: boolean;
+    data: ScoreWithUser[];
+    cycle: string;
+    rotation: RotationTemplate | null;
+    pagination: {
+        currentPage: number;
+        totalPages: number;
+        totalItems: number;
+        itemsPerPage: number;
+    };
+}
+
+export interface RankInfo {
+    rank: number;
+    color: string;
+    bgColor: string;
+    borderColor: string;
+}
+
+export interface PodiumPlayer {
+    rank: number;
+    user_id: string;
+    bbs_name: string;
+    discord_id: string;
+    global_name: string;
+    averageScore: number;
+    totalScores: number;
+    avatar: string;
+}
+
+export interface PodiumData {
+    success: boolean;
+    podium: PodiumPlayer[];
+    filters: {
+        cycle_id: string;
+        guild_id: string | null;
+    };
+    meta: {
+        totalPlayers: number;
+        cycleId: string;
+        guildSpecific: boolean;
+    };
 }

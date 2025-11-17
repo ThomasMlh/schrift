@@ -4,20 +4,8 @@ import type { User } from "@/interfaces";
 import CustomLink from "./CustomLink";
 import { formatRoleName } from "@/utils/user";
 
-// Interface flexible pour l'affichage utilisateur (peut être un User complet ou partiel)
-interface UserDisplayData {
-  _id: string;
-  username: string;
-  global_name: string;
-  avatar?: string | null;
-  discord_id?: string;
-  bbs_id?: string;
-  bbs_name?: string;
-  role: string;
-}
-
 interface UserDisplayProps {
-  user: User | UserDisplayData;
+  user: User;
   avatarSize?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
   spacing?: number;
   showUsername?: boolean;
