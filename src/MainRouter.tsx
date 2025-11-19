@@ -196,7 +196,7 @@ const MainRouter = () => {
 
     const encodedRedirectUri = encodeURIComponent(redirectUri);
     const scope = encodeURIComponent(
-      "identify email guilds connections guilds.members.read"
+      "identify guilds guilds.members.read"
     );
     const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordClientId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=${scope}`;
 
