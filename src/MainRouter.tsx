@@ -35,10 +35,11 @@ import CycleDetailPage from "./pages/CycleDetailPage";
 import RotationDetailPage from "./pages/RotationDetailPage";
 import DiscordCallback from "./pages/DiscordCallback";
 import UserPage from "./pages/UserPage";
-import type { User } from "./interfaces";
+import type { IProtectedRoute, IUser } from "./interfaces";
 import UsersPage from "./pages/UsersPage";
 import AdminPage from "./pages/AdminPage";
 import ScoresPage from "./pages/ScoresPage";
+import { getDiscordAvatarUrl } from "./utils/discord";
 
 function ColorModeSwitcher() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -49,17 +50,13 @@ function ColorModeSwitcher() {
   );
 }
 
-// Composant pour protéger les routes admin
-const ProtectedRoute = ({
+// Composant pour protéger les routes admin (admins OU chefs/sous-chefs)
+const ProtectedRoute: React.FC<IProtectedRoute> = ({
   isAuthenticated,
   isAdmin,
+  isGuildManager,
   isLoading,
   children
-}: {
-  isAuthenticated: boolean;
-  isAdmin: boolean;
-  isLoading: boolean;
-  children: React.ReactNode;
 }) => {
   // Pendant le chargement, ne pas rediriger
   if (isLoading) {
@@ -70,17 +67,18 @@ const ProtectedRoute = ({
     );
   }
 
-  if (!isAuthenticated || !isAdmin) {
+  if (!isAuthenticated || (!isAdmin && !isGuildManager)) {
     return <Navigate to="/" replace />;
   }
   return <>{children}</>;
-}
+};
 
 const MainRouter = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userInfo, setUserInfo] = useState<User | null>(null);
+  const [userInfo, setUserInfo] = useState<IUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isGuildManager, setIsGuildManager] = useState(false); // chef ou sous-chef
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const toast = useToast();
   const placement = "left";
@@ -141,22 +139,9 @@ const MainRouter = () => {
       icon: "⚙️",
       hoverBg: adminHoverBg,
       hoverColor: adminHoverColor,
-      adminOnly: true
+      adminOrGuildManagerOnly: true
     }
   ];
-
-  // Fonction pour construire l'URL de l'avatar Discord
-  const getDiscordAvatarUrl = (
-    userId: string,
-    avatarHash: string,
-    size: number = 128
-  ) => {
-    if (!avatarHash) return null;
-    // Format: https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.{format}
-    // Les avatars animés ont un hash qui commence par "a_"
-    const format = avatarHash.startsWith("a_") ? "gif" : "png";
-    return `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.${format}?size=${size}`;
-  };
 
   // Fonction utilitaire pour vérifier la validité du token
   const isTokenValid = (token: string | null): boolean => {
@@ -208,6 +193,7 @@ const MainRouter = () => {
     localStorage.removeItem("userToken");
     localStorage.removeItem("adminToken");
     setIsAdmin(false);
+    setIsGuildManager(false);
     setIsLoggedIn(false);
     setUserInfo(null);
 
@@ -227,6 +213,7 @@ const MainRouter = () => {
           const decoded = jwtDecode(token) as any;
           setIsLoggedIn(true);
           setIsAdmin(decoded.isAdmin || false);
+          setIsGuildManager(decoded.role === 'chef' || decoded.role === 'sous-chef');
 
           // Construire l'URL de l'avatar Discord si disponible
           let avatarUrl = null;
@@ -249,11 +236,13 @@ const MainRouter = () => {
           localStorage.removeItem("adminToken");
           setIsLoggedIn(false);
           setIsAdmin(false);
+          setIsGuildManager(false);
           setUserInfo(null);
         }
       } else {
         setIsLoggedIn(false);
         setIsAdmin(false);
+        setIsGuildManager(false);
         setUserInfo(null);
       }
       // Marquer le chargement comme terminé
@@ -338,7 +327,7 @@ const MainRouter = () => {
         >
           <Flex gap={2} align="center">
             {menuItems.map((item) => {
-              if (item.adminOnly && !isAdmin) return null;
+              if (item.adminOrGuildManagerOnly && !isAdmin && !isGuildManager) return null;
               return (
                 <Button
                   key={item.name}
@@ -400,7 +389,7 @@ const MainRouter = () => {
                 {
                   /* Menu items pour mobile */
                   menuItems.map((item) => {
-                    if (item.adminOnly && !isAdmin) return null;
+                    if (item.adminOrGuildManagerOnly && !isAdmin && !isGuildManager) return null;
                     return (
                       <Button
                         key={item.name}
@@ -494,6 +483,7 @@ const MainRouter = () => {
               <ProtectedRoute
                 isAuthenticated={isLoggedIn}
                 isAdmin={isAdmin}
+                isGuildManager={isGuildManager}
                 isLoading={isAuthLoading}
               >
                 <AdminPage />

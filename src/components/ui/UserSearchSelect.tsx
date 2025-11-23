@@ -222,9 +222,9 @@ export const UserSearchSelect = ({
                                         <Text fontWeight="medium" color={textColor}>
                                             {user.bbs_name || user.global_name}
                                         </Text>
-                                        {user.discord_id && (
+                                        {user.global_name && (
                                             <Text fontSize="xs" color="gray.500">
-                                                Discord: {user.discord_id}
+                                                Discord: {user.global_name}
                                             </Text>
                                         )}
                                     </Box>

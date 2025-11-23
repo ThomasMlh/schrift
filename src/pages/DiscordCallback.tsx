@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flex, Spinner, Text, useToast } from "@chakra-ui/react";
 
-export default function DiscordCallback() {
+const DiscordCallback = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -76,7 +76,7 @@ export default function DiscordCallback() {
         
         toast({
           title: "Connexion réussie",
-          description: `Bienvenue ${data.user.username}!`,
+          description: `Bienvenue ${data.user.global_name}!`,
           status: "success"
         });
         
@@ -103,3 +103,5 @@ export default function DiscordCallback() {
     </Flex>
   );
 }
+
+export default DiscordCallback;

@@ -1,4 +1,4 @@
-import type { CycleRotation, Cycle } from "@/interfaces";
+import type { ICycleRotation, ICycle } from "@/interfaces";
 import {
   Box,
   VStack,
@@ -22,10 +22,10 @@ interface CurrentInfoSectionProps {
 }
 
 export const CurrentInfoSection = ({}: CurrentInfoSectionProps = {}) => {
-  const [currentCycle, setCurrentCycle] = useState<Cycle | null>(null);
-  const [nextCycle, setNextCycle] = useState<Cycle | null>(null);
+  const [currentCycle, setCurrentCycle] = useState<ICycle | null>(null);
+  const [nextCycle, setNextCycle] = useState<ICycle | null>(null);
   const [isCycleActive, setIsCycleActive] = useState(false);
-  const [currentRotation, setCurrentRotation] = useState<CycleRotation | null>(
+  const [currentRotation, setCurrentRotation] = useState<ICycleRotation | null>(
     null
   );
   const [isRotationActive, setIsRotationActive] = useState(false);

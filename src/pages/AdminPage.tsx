@@ -1,13 +1,41 @@
 import { Container, Heading, Flex, useColorModeValue, Button, useToast, SimpleGrid, VStack } from "@chakra-ui/react";
+import { jwtDecode } from 'jwt-decode';
 import GuildsAdminSection from "../components/GuildsAdminSection";
 import CyclesSection from "../components/CyclesSection";
 import ScoresSection from "../components/ScoresSection";
 import UsersTable from "../components/UsersTable";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { AdminPage as IAdminPage } from "../interfaces";
 
 const AdminPage = () => {
-  const [currentPage, setCurrentPage] = useState<IAdminPage>("guilds");
+  // Détection des permissions utilisateur
+  const getCurrentUser = () => {
+    try {
+      const token = localStorage.getItem('userToken');
+      if (!token) return null;
+      return jwtDecode(token) as any;
+    } catch {
+      return null;
+    }
+  };
+
+  const currentUser = getCurrentUser();
+  const isFullAdmin = currentUser?.isAdmin || false;
+  const isGuildManager = currentUser?.role === 'chef' || currentUser?.role === 'sous-chef';
+  
+  // Pages autorisées selon le rôle
+  const allowedPages = useMemo(() => {
+    if (isFullAdmin) {
+      return ['guilds', 'cycles', 'scores', 'users'] as IAdminPage[];
+    } else if (isGuildManager) {
+      return ['scores'] as IAdminPage[];
+    }
+    return [] as IAdminPage[];
+  }, [isFullAdmin, isGuildManager]);
+
+  const [currentPage, setCurrentPage] = useState<IAdminPage>(
+    allowedPages.includes('scores') ? 'scores' : allowedPages[0] || 'scores'
+  );
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
   const bgColor = useColorModeValue('white', 'gray.800');
   const toast = useToast();
@@ -65,58 +93,74 @@ const AdminPage = () => {
         boxShadow="none"
       >
         {/* En-tête */}
-        <Heading mb={6} textAlign="center">Administration Ṣčhrīft</Heading>
+        <Heading mb={6} textAlign="center">
+          {isFullAdmin ? "Administration Ṣčhrīft" : "Gestion des Scores"}
+        </Heading>
         
         {/* Navigation */}
         <VStack spacing={4} mb={6} w="100%" maxW="800px" px={4}>
-          {/* Première ligne - Navigation principale */}
-          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={3} w="100%">
-            <Button
-              variant={currentPage === "guilds" ? "solid" : "outline"}
-              colorScheme="orange"
-              onClick={() => setCurrentPage("guilds")}
-              size={{ base: "sm", md: "md" }}
-            >
-              🏰 Guildes
-            </Button>
-            <Button
-              variant={currentPage === "cycles" ? "solid" : "outline"}
-              colorScheme="orange"
-              onClick={() => setCurrentPage("cycles")}
-              size={{ base: "sm", md: "md" }}
-            >
-              🔄 Cycles
-            </Button>
-            <Button
-              variant={currentPage === "scores" ? "solid" : "outline"}
-              colorScheme="orange"
-              onClick={() => setCurrentPage("scores")}
-              size={{ base: "sm", md: "md" }}
-            >
-              📊 Scores
-            </Button>
-            <Button
-              variant={currentPage === "users" ? "solid" : "outline"}
-              colorScheme="orange"
-              onClick={() => setCurrentPage("users")}
-              size={{ base: "sm", md: "md" }}
-            >
-              👥 Joueurs
-            </Button>
+          {/* Navigation principale - seulement les sections autorisées */}
+          <SimpleGrid 
+            columns={{ base: Math.min(allowedPages.length, 2), md: Math.min(allowedPages.length, 4) }} 
+            spacing={3} 
+            w="100%"
+          >
+            {allowedPages.includes('guilds') && (
+              <Button
+                variant={currentPage === "guilds" ? "solid" : "outline"}
+                colorScheme="orange"
+                onClick={() => setCurrentPage("guilds")}
+                size={{ base: "sm", md: "md" }}
+              >
+                🏰 Guildes
+              </Button>
+            )}
+            {allowedPages.includes('cycles') && (
+              <Button
+                variant={currentPage === "cycles" ? "solid" : "outline"}
+                colorScheme="orange"
+                onClick={() => setCurrentPage("cycles")}
+                size={{ base: "sm", md: "md" }}
+              >
+                🔄 Cycles
+              </Button>
+            )}
+            {allowedPages.includes('scores') && (
+              <Button
+                variant={currentPage === "scores" ? "solid" : "outline"}
+                colorScheme="orange"
+                onClick={() => setCurrentPage("scores")}
+                size={{ base: "sm", md: "md" }}
+              >
+                📊 Scores
+              </Button>
+            )}
+            {allowedPages.includes('users') && (
+              <Button
+                variant={currentPage === "users" ? "solid" : "outline"}
+                colorScheme="orange"
+                onClick={() => setCurrentPage("users")}
+                size={{ base: "sm", md: "md" }}
+              >
+                👥 Joueurs
+              </Button>
+            )}
           </SimpleGrid>
           
-          {/* Deuxième ligne - Actions admin */}
-          <Button
-            variant="outline"
-            colorScheme="orange"
-            onClick={handleUpdateCharacters}
-            isLoading={isUpdatingCharacters}
-            loadingText="Mise à jour..."
-            size={{ base: "sm", md: "md" }}
-            w={{ base: "100%", md: "auto" }}
-          >
-            🔄 Mettre à jour les personnages
-          </Button>
+          {/* Actions admin - seulement pour les vrais admins */}
+          {isFullAdmin && (
+            <Button
+              variant="outline"
+              colorScheme="orange"
+              onClick={handleUpdateCharacters}
+              isLoading={isUpdatingCharacters}
+              loadingText="Mise à jour..."
+              size={{ base: "sm", md: "md" }}
+              w={{ base: "100%", md: "auto" }}
+            >
+              🔄 Mettre à jour les personnages
+            </Button>
+          )}
         </VStack>
 
         {renderPage()}

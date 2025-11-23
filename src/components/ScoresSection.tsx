@@ -16,7 +16,7 @@ import {
     AlertIcon
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
-import type { Score, Cycle, User, ScoreFormData, Pagination as PaginationType, ScoresResponse, Guild } from "../interfaces";
+import type { IScore, ICycle, IUser, IScoreFormData, IPagination as PaginationType, IScoresResponse, IGuild } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import ScoresTable from "./ui/ScoresTable";
 import { ScoreModal } from "./ui/ScoreModal";
@@ -24,10 +24,10 @@ import { DeleteConfirmationModal } from "./ui/DeleteConfirmationModal";
 import BulkScoreModal from "./ui/BulkScoreModal";
 
 const ScoresSection = () => {
-    const [scores, setScores] = useState<Score[]>([]);
-    const [cycles, setCycles] = useState<Cycle[]>([]);
-    const [users, setUsers] = useState<User[]>([]);
-    const [guilds, setGuilds] = useState<Guild[]>([]);
+    const [scores, setScores] = useState<IScore[]>([]);
+    const [cycles, setCycles] = useState<ICycle[]>([]);
+    const [users, setUsers] = useState<IUser[]>([]);
+    const [guilds, setGuilds] = useState<IGuild[]>([]);
     const [pagination, setPagination] = useState<PaginationType | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoadingScores, setIsLoadingScores] = useState(false);
@@ -42,8 +42,8 @@ const ScoresSection = () => {
     const [scoreValue, setScoreValue] = useState<number>(0);
 
     // États pour l'édition et suppression
-    const [editingScore, setEditingScore] = useState<Score | null>(null);
-    const [scoreToDelete, setScoreToDelete] = useState<Score | null>(null);
+    const [editingScore, setEditingScore] = useState<IScore | null>(null);
+    const [scoreToDelete, setScoreToDelete] = useState<IScore | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -71,6 +71,8 @@ const ScoresSection = () => {
 
     const currentUser = getCurrentUser();
     const isAdmin = currentUser?.isAdmin || false;
+    const isGuildManager = currentUser?.role === 'chef' || currentUser?.role === 'sous-chef';
+    const userGuildId = currentUser?.guilde_id;
 
     useEffect(() => {
         loadScores(1);
@@ -90,7 +92,7 @@ const ScoresSection = () => {
             });
 
             if (response.ok) {
-                const data: ScoresResponse = await response.json();
+                const data: IScoresResponse = await response.json();
                 setScores(data.data || []);
                 setPagination(data.pagination);
                 setCurrentPage(page);
@@ -223,7 +225,7 @@ const ScoresSection = () => {
 
         setIsSubmitting(true);
         try {
-            const scoreData: ScoreFormData = {
+            const scoreData: IScoreFormData = {
                 user_id: selectedUserId,
                 cycle_id: selectedCycleId,
                 rotation_id: selectedRotationId,
@@ -329,7 +331,7 @@ const ScoresSection = () => {
     };
 
     // Fonction pour la saisie groupée des scores
-    const handleBulkScoreSubmit = async (scoresData: ScoreFormData[]) => {
+    const handleBulkScoreSubmit = async (scoresData: IScoreFormData[]) => {
         setIsBulkSubmitting(true);
         try {
             const token = localStorage.getItem('userToken');
@@ -375,7 +377,7 @@ const ScoresSection = () => {
     };
 
     // Fonction pour ouvrir le modal d'édition
-    const handleEditScore = (score: Score) => {
+    const handleEditScore = (score: IScore) => {
         setEditingScore(score);
         setSelectedUserId(score.user_id);
         setSelectedCycleId(score.cycle_id);
@@ -422,7 +424,7 @@ const ScoresSection = () => {
 
         setIsUpdating(true);
         try {
-            const scoreData: ScoreFormData = {
+            const scoreData: IScoreFormData = {
                 user_id: selectedUserId,
                 cycle_id: selectedCycleId,
                 rotation_id: selectedRotationId,
@@ -511,7 +513,7 @@ const ScoresSection = () => {
                         >
                             Ajouter un score
                         </Button>
-                        {isAdmin && (
+                        {(isAdmin || isGuildManager) && (
                             <Button
                                 colorScheme="green"
                                 onClick={() => setIsBulkModalOpen(true)}
@@ -564,7 +566,7 @@ const ScoresSection = () => {
                                     cycles={cycles}
                                     isAdmin={isAdmin}
                                     onEditScore={handleEditScore}
-                                    onDeleteScore={(score: Score) => {
+                                    onDeleteScore={(score: IScore) => {
                                         setScoreToDelete(score);
                                         setIsDeleteModalOpen(true);
                                     }}
@@ -669,6 +671,8 @@ const ScoresSection = () => {
                     onSubmit={handleBulkScoreSubmit}
                     isSubmitting={isBulkSubmitting}
                     apiUrl={apiUrl}
+                    isGuildRestricted={isGuildManager}
+                    userGuildId={userGuildId}
                 />
             </VStack>
         </Container>

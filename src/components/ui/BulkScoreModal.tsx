@@ -26,11 +26,12 @@ import {
     Spinner,
     Center,
     Alert,
-    AlertIcon
+    AlertIcon,
+    useColorModeValue
 } from "@chakra-ui/react";
 
 import { useState, useEffect } from "react";
-import type { User, Cycle, Guild, ScoreFormData } from "../../interfaces";
+import type { IUser, ICycle, IGuild, IScoreFormData } from "../../interfaces";
 import { AttackTypeBadge } from "./AttackTypeBadge";
 import { CustomSelect } from "./CustomSelect";
 import { UserDisplay } from "./UserDisplay";
@@ -38,11 +39,13 @@ import { UserDisplay } from "./UserDisplay";
 interface BulkScoreModalProps {
     isOpen: boolean;
     onClose: () => void;
-    cycles: Cycle[];
-    guilds: Guild[];
-    onSubmit: (scores: ScoreFormData[]) => void;
+    cycles: ICycle[];
+    guilds: IGuild[];
+    onSubmit: (scores: IScoreFormData[]) => void;
     isSubmitting?: boolean;
     apiUrl?: string;
+    isGuildRestricted?: boolean;
+    userGuildId?: string;
 }
 
 export default function BulkScoreModal({
@@ -52,14 +55,20 @@ export default function BulkScoreModal({
     guilds,
     onSubmit,
     isSubmitting = false,
-    apiUrl = '/api'
+    apiUrl,
+    isGuildRestricted = false,
+    userGuildId
 }: BulkScoreModalProps) {
     const toast = useToast();
+    
+    // Déplacer useColorModeValue au niveau du composant pour éviter les appels conditionnels
+    const guildBoxBg = useColorModeValue("blue.50", "blue.900");
+    const guildTextColor = useColorModeValue("blue.700", "blue.200");
 
-    const [selectedGuildId, setSelectedGuildId] = useState<string>("");
+    const [selectedGuildId, setSelectedGuildId] = useState<string>(isGuildRestricted ? userGuildId || "" : "");
     const [selectedCycleId, setSelectedCycleId] = useState<string>("");
     const [selectedRotationId, setSelectedRotationId] = useState<string>("");
-    const [guildMembers, setGuildMembers] = useState<User[]>([]);
+    const [guildMembers, setGuildMembers] = useState<IUser[]>([]);
     const [scores, setScores] = useState<{ [userId: string]: number }>({});
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingScores, setIsLoadingScores] = useState(false);
@@ -84,7 +93,7 @@ export default function BulkScoreModal({
                     setGuildMembers(data.data);
                     // Initialiser les scores à 0 pour tous les membres
                     const initialScores: { [userId: string]: number } = {};
-                    data.data.forEach((user: User) => {
+                    data.data.forEach((user: IUser) => {
                         initialScores[user._id] = 0;
                     });
                     setScores(initialScores);
@@ -129,7 +138,7 @@ export default function BulkScoreModal({
                         const existingScores: { [userId: string]: number } = {};
                         
                         // Initialiser avec 0 pour tous les membres
-                        guildMembers.forEach((user: User) => {
+                        guildMembers.forEach((user: IUser) => {
                             existingScores[user._id] = 0;
                         });
                         
@@ -183,7 +192,7 @@ export default function BulkScoreModal({
         }
 
         // Créer les données de scores pour tous les membres
-        const scoresData: ScoreFormData[] = guildMembers.map(member => ({
+        const scoresData: IScoreFormData[] = guildMembers.map(member => ({
             user_id: member._id,
             cycle_id: selectedCycleId,
             rotation_id: selectedRotationId,
@@ -195,7 +204,9 @@ export default function BulkScoreModal({
     };
 
     const handleClose = () => {
-        setSelectedGuildId("");
+        if (!isGuildRestricted) {
+            setSelectedGuildId("");
+        }
         setSelectedCycleId("");
         setSelectedRotationId("");
         setGuildMembers([]);
@@ -214,20 +225,34 @@ export default function BulkScoreModal({
                 <ModalBody>
                     <VStack spacing={6} align="stretch">
                         {/* Sélection de la guilde */}
-                        <FormControl>
-                            <FormLabel>Guilde</FormLabel>
-                            <CustomSelect
-                                placeholder="Sélectionnez une guilde"
-                                value={selectedGuildId}
-                                onChange={setSelectedGuildId}
-                                isDisabled={isSubmitting}
-                                options={guilds.map((guild: Guild) => ({
-                                    value: guild._id,
-                                    label: guild.name
-                                }))}
-                                allowDeselect={false}
-                            />
-                        </FormControl>
+                        {!isGuildRestricted && (
+                            <FormControl>
+                                <FormLabel>Guilde</FormLabel>
+                                <CustomSelect
+                                    placeholder="Sélectionnez une guilde"
+                                    value={selectedGuildId}
+                                    onChange={setSelectedGuildId}
+                                    isDisabled={isSubmitting}
+                                    options={guilds.map((guild: IGuild) => ({
+                                        value: guild._id,
+                                        label: guild.name
+                                    }))}
+                                    allowDeselect={false}
+                                />
+                            </FormControl>
+                        )}
+
+                        {/* Affichage de la guilde pour les utilisateurs restreints */}
+                        {isGuildRestricted && selectedGuild && (
+                            <Box p={4} bg={guildBoxBg} borderRadius="md">
+                                <Text fontSize="sm" color={guildTextColor} mb={1}>
+                                    Guilde assignée
+                                </Text>
+                                <Text fontSize="lg" fontWeight="bold">
+                                    {selectedGuild.name}
+                                </Text>
+                            </Box>
+                        )}
 
                         {/* Sélection du cycle */}
                         <FormControl>
@@ -237,7 +262,7 @@ export default function BulkScoreModal({
                                 value={selectedCycleId}
                                 onChange={setSelectedCycleId}
                                 isDisabled={isSubmitting}
-                                options={cycles.map((cycle: Cycle) => ({
+                                options={cycles.map((cycle: ICycle) => ({
                                     value: cycle._id || '',
                                     label: cycle.name
                                 }))}
@@ -327,7 +352,7 @@ export default function BulkScoreModal({
                                     )}
                                 </HStack>
                                 <Grid templateColumns="repeat(auto-fill, 320px)" gap={4} justifyContent="center">
-                                    {guildMembers.map((member: User) => (
+                                    {guildMembers.map((member: IUser) => (
                                         <GridItem key={member._id}>
                                             <Card h="120px">
                                                 <CardBody p={3}>

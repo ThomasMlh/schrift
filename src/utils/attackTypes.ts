@@ -1,11 +1,11 @@
-import type { CycleRotation } from "../interfaces";
+import type { ICycleRotation } from "../interfaces";
 
 /**
  * Convertit le code d'attaque en nom complet
  * @param rotation - La rotation contenant le code d'attaque
  * @returns Le nom complet de l'attaque
  */
-export const handleAttackType = (rotation: CycleRotation): string => {
+export const handleAttackType = (rotation: ICycleRotation): string => {
   switch (rotation.attack) {
     case 'R':
       return 'Rouge';
