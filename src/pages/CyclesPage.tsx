@@ -20,7 +20,7 @@ import {
   Select
 } from "@chakra-ui/react";
 import { ExternalLinkIcon, CalendarIcon, ViewIcon } from "@chakra-ui/icons";
-import type { Cycle, CyclesResponse, Pagination } from "../interfaces";
+import type { ICycle, ICyclesResponse, IPagination } from "../interfaces";
 import { handleAttackType } from "../utils/attackTypes";
 import { AlterationImage } from "../components/ui/AlterationImage";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
@@ -28,8 +28,8 @@ import { Pagination as PaginationComponent } from "../components/ui/Pagination";
 import { SEOHead } from "../components/SEOHead";
 
 const CyclesPage = () => {
-  const [cycles, setCycles] = useState<Cycle[]>([]);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [cycles, setCycles] = useState<ICycle[]>([]);
+  const [pagination, setPagination] = useState<IPagination | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(6); // Bon nombre pour la grille
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +42,7 @@ const CyclesPage = () => {
     try {
       const response = await fetch(`${apiUrl}/api/cycles?page=${page}&limit=${itemsPerPage}`);
       if (response.ok) {
-        const data: CyclesResponse = await response.json();
+        const data: ICyclesResponse = await response.json();
         
         if (data.success && Array.isArray(data.data)) {
           setCycles(data.data);
@@ -82,7 +82,7 @@ const CyclesPage = () => {
       try {
         const response = await fetch(`${apiUrl}/api/cycles?page=1&limit=${newItemsPerPage}`);
         if (response.ok) {
-          const data: CyclesResponse = await response.json();
+          const data: ICyclesResponse = await response.json();
           if (data.success && Array.isArray(data.data)) {
             setCycles(data.data);
             if (data.pagination) {

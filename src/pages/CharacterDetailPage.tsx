@@ -5,7 +5,7 @@ import {
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import { ArrowBackIcon } from "@chakra-ui/icons";
-import type { Character } from "../interfaces";
+import type { ICharacter } from "../interfaces";
 import { AffinityIcon } from "../components/ui/AffinityIcon";
 import { KillerIcon } from "../components/ui/KillerIcon";
 import { CategoryIcon } from "../components/ui/CategoryIcon";
@@ -19,7 +19,7 @@ const CharacterDetailPage = () => {
     const toast = useToast();
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-    const [character, setCharacter] = useState<Character | null>(null);
+    const [character, setCharacter] = useState<ICharacter | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 

@@ -3,14 +3,14 @@ import {
     Button, FormControl, FormLabel, Input, Select, VStack, useToast, HStack, Avatar, Text
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import type { User, Guild, Role } from "../interfaces";
+import type { IUser, IGuild, Role } from "../interfaces";
 import { getUserAvatarUrl } from "../utils/discord";
 
 interface EditUserModalProps {
     isOpen: boolean;
     onClose: () => void;
-    user: User | null;
-    guilds: Guild[];
+    user: IUser | null;
+    guilds: IGuild[];
     onUserUpdated: () => void;
 }
 

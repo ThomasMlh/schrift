@@ -13,14 +13,14 @@ import {
 import { DeleteIcon, DragHandleIcon } from "@chakra-ui/icons";
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import type { CycleRotation } from "../../interfaces";
+import type { ICycleRotation } from "../../interfaces";
 import { handleAttackType } from "../../utils/attackTypes";
 import { AlterationImage } from "../ui/AlterationImage";
 
 interface SelectedRotationsListProps {
-    rotations: CycleRotation[];
+    rotations: ICycleRotation[];
     onDragEnd: (result: DropResult) => void;
-    onUpdateRotation: (index: number, field: keyof CycleRotation, value: string) => void;
+    onUpdateRotation: (index: number, field: keyof ICycleRotation, value: string) => void;
     onRemoveRotation: (index: number) => void;
 }
 

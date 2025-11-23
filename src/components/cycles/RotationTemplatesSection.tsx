@@ -11,13 +11,13 @@ import {
   useToast
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
-import type { RotationTemplate } from "../../interfaces";
+import type { IRotationTemplate } from "../../interfaces";
 import { getAttackTypeName } from "../../utils/attackTypes";
 import { AlterationImage } from "../ui/AlterationImage";
 
 interface RotationTemplatesSectionProps {
-  templates: RotationTemplate[];
-  onAddRotation: (template: RotationTemplate) => void;
+  templates: IRotationTemplate[];
+  onAddRotation: (template: IRotationTemplate) => void;
   selectedRotationsCount: number;
 }
 
@@ -30,7 +30,7 @@ export function RotationTemplatesSection({
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   const toast = useToast();
 
-  const handleAddRotation = (template: RotationTemplate) => {
+  const handleAddRotation = (template: IRotationTemplate) => {
     if (selectedRotationsCount >= 20) {
       toast({
         title: "Limite atteinte",

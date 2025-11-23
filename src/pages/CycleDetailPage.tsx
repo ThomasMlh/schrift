@@ -19,7 +19,7 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import { ArrowBackIcon, CalendarIcon } from "@chakra-ui/icons";
-import type { Cycle } from "../interfaces";
+import type { ICycle } from "../interfaces";
 import { handleAttackType } from "../utils/attackTypes";
 import { AlterationImage } from "../components/ui/AlterationImage";
 import CustomLink from "@/components/ui/CustomLink";
@@ -27,7 +27,7 @@ import CustomLink from "@/components/ui/CustomLink";
 const CycleDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [cycle, setCycle] = useState<Cycle | null>(null);
+  const [cycle, setCycle] = useState<ICycle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

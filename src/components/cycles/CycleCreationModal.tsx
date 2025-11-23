@@ -13,7 +13,7 @@ import {
   HStack,
   useToast
 } from "@chakra-ui/react";
-import type { CycleRotation } from "../../interfaces";
+import type { ICycleRotation } from "../../interfaces";
 import { RotationTemplatesSection } from "./RotationTemplatesSection";
 import { SelectedRotationsList } from "./SelectedRotationsList";
 
@@ -22,13 +22,13 @@ interface CycleCreationModalProps {
   onClose: () => void;
   cycleName: string;
   onCycleNameChange: (name: string) => void;
-  selectedRotations: CycleRotation[];
+  selectedRotations: ICycleRotation[];
   onSubmit: () => void;
   isSubmitting: boolean;
   rotationTemplates: any[];
   onAddRotation: (template: any) => void;
   onDragEnd: (result: any) => void;
-  onUpdateRotation: (index: number, field: keyof CycleRotation, value: string) => void;
+  onUpdateRotation: (index: number, field: keyof ICycleRotation, value: string) => void;
   onRemoveRotation: (index: number) => void;
 }
 

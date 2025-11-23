@@ -6,7 +6,7 @@ import {
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SearchIcon } from "@chakra-ui/icons";
-import type { Character, Pagination as PaginationType, CharactersResponse } from "../interfaces";
+import type { ICharacter, IPagination as PaginationType, ICharactersResponse } from "../interfaces";
 import { AffinityIcon } from "./ui/AffinityIcon";
 import { KillerIcon } from "./ui/KillerIcon";
 import { CategoryIcon } from "./ui/CategoryIcon";
@@ -26,7 +26,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   
   // États - Initialiser avec les paramètres URL
-  const [characters, setCharacters] = useState<Character[]>([]);
+  const [characters, setCharacters] = useState<ICharacter[]>([]);
   const [pagination, setPagination] = useState<PaginationType | null>(null);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
   const [selectedAffinity, setSelectedAffinity] = useState(searchParams.get('affinity') || "");
@@ -89,7 +89,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
 
       
       if (response.ok) {
-        const data: CharactersResponse = await response.json();
+        const data: ICharactersResponse = await response.json();
         setCharacters(data.data);
         setPagination(data.pagination);
       } else {
@@ -112,7 +112,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
         const data = await response.json();
         // Extraire les affinités uniques depuis la première page - utiliser 'data' au lieu de 'characters'
         const uniqueAffinities = [...new Set(
-          data.data?.map((char: Character) => char.affinity)
+          data.data?.map((char: ICharacter) => char.affinity)
             .filter((affinity: string) => affinity && affinity.trim()) || []
         )].sort() as string[];
         setAffinities(uniqueAffinities);
@@ -130,7 +130,7 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
       if (response.ok) {
         const data = await response.json();
         // Extraire toutes les catégories uniques
-        const allCategories = data.data?.flatMap((char: Character) => {
+        const allCategories = data.data?.flatMap((char: ICharacter) => {
           return char.categories || [];
         }) || [];
         const uniqueCategories = [...new Set(allCategories)]
@@ -149,9 +149,9 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
       // Charger tous les personnages sans pagination pour avoir tous les tueurs
       const response = await fetch(`${apiUrl}/api/characters?limit=10000`); // Limite élevée pour tout récupérer
       if (response.ok) {
-        const data = await response.json();
+        const data: ICharactersResponse = await response.json();
         // Extraire tous les tueurs uniques
-        const allKillers = data.data?.flatMap((char: Character) => {
+        const allKillers = data.data?.flatMap((char: ICharacter) => {
           return char.killers || [];
         }) || [];
         

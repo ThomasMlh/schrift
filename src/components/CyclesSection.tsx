@@ -9,15 +9,15 @@ import {
   HStack
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
-import type { RotationTemplate, CycleRotation, CycleFormData, Cycle } from "../interfaces";
+import type { IRotationTemplate, ICycleRotation, ICycleFormData, ICycle } from "../interfaces";
 import type { DropResult } from '@hello-pangea/dnd';
 import { ExistingCyclesList } from "./cycles/ExistingCyclesList";
 import { CycleCreationModal } from "./cycles/CycleCreationModal";
 
 const CyclesSection = () => {
-  const [rotationTemplates, setRotationTemplates] = useState<RotationTemplate[]>([]);
-  const [selectedRotations, setSelectedRotations] = useState<CycleRotation[]>([]);
-  const [cycles, setCycles] = useState<Cycle[]>([]);
+  const [rotationTemplates, setRotationTemplates] = useState<IRotationTemplate[]>([]);
+  const [selectedRotations, setSelectedRotations] = useState<ICycleRotation[]>([]);
+  const [cycles, setCycles] = useState<ICycle[]>([]);
   const [cycleName, setCycleName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingCycles, setIsLoadingCycles] = useState(false);
@@ -124,12 +124,12 @@ const CyclesSection = () => {
   };
 
   // Ajouter une rotation sélectionnée
-  const addRotation = (template: RotationTemplate) => {
+  const addRotation = (template: IRotationTemplate) => {
     // Calculer automatiquement la période selon la position
     const position = selectedRotations.length + 1;
     const period = position % 2 === 1 ? "Mardi-Jeudi" : "Vendredi-Dimanche";
 
-    const newRotation: CycleRotation = {
+    const newRotation: ICycleRotation = {
       start_date: "",
       end_date: "",
       period: period,
@@ -182,7 +182,7 @@ const CyclesSection = () => {
   };
 
   // Mettre à jour une rotation
-  const updateRotation = (index: number, field: keyof CycleRotation, value: string) => {
+  const updateRotation = (index: number, field: keyof ICycleRotation, value: string) => {
     const newRotations = [...selectedRotations];
     newRotations[index] = { ...newRotations[index], [field]: value };
 
@@ -202,7 +202,7 @@ const CyclesSection = () => {
   };
 
   // Fonction pour calculer automatiquement toutes les dates à partir de la première
-  const calculateAllDates = (rotations: CycleRotation[], firstStartDate: string) => {
+  const calculateAllDates = (rotations: ICycleRotation[], firstStartDate: string) => {
     try {
       const [day, month, year] = firstStartDate.split('/');
       let currentDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
@@ -287,20 +287,20 @@ const CyclesSection = () => {
 
       // Mardi = 2, Jeudi = 4, Vendredi = 5, Dimanche = 0
       if (startDayOfWeek === 2 && endDayOfWeek === 4) {
-        return "Mardi-Jeudi";
+        return "Mardi-Jeudi" as const;
       } else if (startDayOfWeek === 5 && endDayOfWeek === 0) {
-        return "Vendredi-Dimanche";
+        return "Vendredi-Dimanche" as const;
       }
 
       // Par défaut, retourner Mardi-Jeudi
-      return "Mardi-Jeudi";
+      return "Mardi-Jeudi" as const;
     } catch {
-      return "Mardi-Jeudi";
+      return "Mardi-Jeudi" as const;
     }
   };
 
   // Fonction utilitaire pour s'assurer que toutes les positions et périodes sont correctes
-  const ensureCorrectPositions = (rotations: CycleRotation[]): CycleRotation[] => {
+  const ensureCorrectPositions = (rotations: ICycleRotation[]): ICycleRotation[] => {
     return rotations.map((rotation, index) => ({
       ...rotation,
       position: index + 1,
@@ -347,7 +347,7 @@ const CyclesSection = () => {
       // S'assurer que toutes les positions sont correctes avant la soumission
       const rotationsWithCorrectPositions = ensureCorrectPositions(selectedRotations);
       
-      const cycleData: CycleFormData = {
+      const cycleData: ICycleFormData = {
         name: cycleName.trim(),
         rotations: rotationsWithCorrectPositions
       };
@@ -398,7 +398,7 @@ const CyclesSection = () => {
   };
 
   // Fonction pour télécharger le fichier events.json d'un cycle spécifique
-  const downloadCycleEventsJson = (cycle: Cycle) => {
+  const downloadCycleEventsJson = (cycle: ICycle) => {
     if (!cycle.rotations || !Array.isArray(cycle.rotations) || cycle.rotations.length === 0) {
       toast({
         title: "Aucune rotation",

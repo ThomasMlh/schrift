@@ -16,13 +16,13 @@ import {
   CardBody,
   Heading
 } from "@chakra-ui/react";
-import type { User } from "../interfaces";
+import type { IUser } from "../interfaces";
 import { getUserAvatarUrl } from "../utils/discord";
 import { formatRoleName } from "@/utils/user";
 
 export default function UserPage() {
   const { userId } = useParams<{ userId: string }>();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const toast = useToast();

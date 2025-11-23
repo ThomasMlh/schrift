@@ -2,12 +2,12 @@ import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, Al
 import { GuildTabsList } from "./GuildTabsList";
 import AdminFormsSection from "./AdminFormsSection";
 import { useEffect, useRef, useState } from "react";
-import type { Guild } from "../interfaces";
+import type { IGuild } from "../interfaces";
 
 const GuildsAdminSection = () => {
   const [deleteGuildId, setDeleteGuildId] = useState("");
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [guilds, setGuilds] = useState<Guild[]>([]);
+  const [guilds, setGuilds] = useState<IGuild[]>([]);
   const [renameGuildId, setRenameGuildId] = useState("");
   const [renameGuildName, setRenameGuildName] = useState("");
   const [isRenameConfirmOpen, setIsRenameConfirmOpen] = useState(false);

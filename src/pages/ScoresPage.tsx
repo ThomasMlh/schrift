@@ -7,7 +7,7 @@ import { useSearchParams } from "react-router-dom";
 import { SearchIcon } from "@chakra-ui/icons";
 import ScoresTable from "../components/ui/ScoresTable";
 import { Pagination as PaginationComponent } from "../components/ui/Pagination";
-import type { Score, User, Cycle, Guild, Pagination, ScoresResponse } from "../interfaces";
+import type { IScore, IUser, ICycle, IGuild, IPagination, IScoresResponse } from "../interfaces";
 
 const ScoresPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -15,11 +15,11 @@ const ScoresPage = () => {
     const toast = useToast();
 
     // États
-    const [scores, setScores] = useState<Score[]>([]);
-    const [users, setUsers] = useState<User[]>([]);
-    const [cycles, setCycles] = useState<Cycle[]>([]);
-    const [guilds, setGuilds] = useState<Guild[]>([]);
-    const [pagination, setPagination] = useState<Pagination | null>(null);
+    const [scores, setScores] = useState<IScore[]>([]);
+    const [users, setUsers] = useState<IUser[]>([]);
+    const [cycles, setCycles] = useState<ICycle[]>([]);
+    const [guilds, setGuilds] = useState<IGuild[]>([]);
+    const [pagination, setPagination] = useState<IPagination | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     // Filtres
@@ -65,7 +65,7 @@ const ScoresPage = () => {
             const response = await fetch(url);
 
             if (response.ok) {
-                const data: ScoresResponse = await response.json();
+                const data: IScoresResponse = await response.json();
                 setScores(data.data || []);
                 setPagination(data.pagination);
             } else {

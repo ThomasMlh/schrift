@@ -3,7 +3,7 @@ import {
   useBreakpointValue, useColorModeValue, useToast, Text
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import type { Guild, Role, User } from "../interfaces";
+import type { IGuild, Role, IUser } from "../interfaces";
 import { UserSearchSelect } from "./ui/UserSearchSelect";
 
 // Composant wrapper pour les formulaires mobiles (défini en dehors pour éviter les re-créations)
@@ -57,7 +57,7 @@ const MobileFormWrapper: React.FC<MobileFormWrapperProps> = ({
 };
 
 interface AdminFormsSectionProps {
-  guilds: Guild[];
+  guilds: IGuild[];
   apiUrl: string;
   authenticatedFetch: (url: string, options?: RequestInit) => Promise<Response>;
   onDataChange: () => void;
@@ -82,7 +82,7 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
   const [renameGuildName, setRenameGuildName] = useState("");
 
   // États pour la gestion des utilisateurs
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<IUser[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [openForm, setOpenForm] = useState<string | null>(null);
@@ -309,7 +309,7 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
             <FormControl>
               <Select value={selectedGuildId} onChange={e => setSelectedGuildId(e.target.value)}>
                 <option value="">Sélectionner une guilde</option>
-                {sortedGuilds.map((g: Guild) => (
+                {sortedGuilds.map((g: IGuild) => (
                   <option key={g._id} value={g._id}>{g.name}</option>
                 ))}
               </Select>
@@ -346,7 +346,7 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
               <FormLabel>Supprimer une guilde</FormLabel>
               <Select value={deleteGuildId} onChange={e => setDeleteGuildId(e.target.value)}>
                 <option value="">Sélectionner une guilde</option>
-                {sortedGuilds.map((g: Guild) => (
+                {sortedGuilds.map((g: IGuild) => (
                   <option key={g._id} value={g._id}>{g.name}</option>
                 ))}
               </Select>
@@ -389,7 +389,7 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
               <FormLabel>Renommer une guilde</FormLabel>
               <Select value={renameGuildId} onChange={e => setRenameGuildId(e.target.value)}>
                 <option value="">Sélectionner une guilde</option>
-                {sortedGuilds.map((g: Guild) => (
+                {sortedGuilds.map((g: IGuild) => (
                   <option key={g._id} value={g._id}>{g.name}</option>
                 ))}
               </Select>

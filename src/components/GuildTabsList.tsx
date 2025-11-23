@@ -6,7 +6,7 @@ import {
   useBreakpointValue
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-import type { Role, Guild, User } from "../interfaces";
+import type { Role, IGuild, IUser } from "../interfaces";
 import { UserDisplay } from "./ui/UserDisplay";
 
 interface GuildTabsListProps {
@@ -19,8 +19,8 @@ const GuildTabsList = ({
   refreshTrigger = 0
 }: GuildTabsListProps) => {
   // Seulement les hooks essentiels
-  const [guilds, setGuilds] = useState<Guild[]>([]);
-  const [membersByGuild, setMembersByGuild] = useState<Record<string, User[]>>({});
+  const [guilds, setGuilds] = useState<IGuild[]>([]);
+  const [membersByGuild, setMembersByGuild] = useState<Record<string, IUser[]>>({});
   const [isDeleteMemberOpen, setIsDeleteMemberOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<{ id: string; name: string; guildId: string } | null>(null);
   const toast = useToast();
@@ -149,7 +149,7 @@ const GuildTabsList = ({
   };
 
   // Ouvrir la popup de confirmation pour supprimer un membre
-  const handleRemoveMember = (member: User, guildId: string) => {
+  const handleRemoveMember = (member: IUser, guildId: string) => {
     setMemberToDelete({ id: member._id, name: member.global_name || member.username, guildId: guildId });
     setIsDeleteMemberOpen(true);
   };
@@ -194,7 +194,7 @@ const GuildTabsList = ({
     }
   };
 
-  const handleRoleChange = async (member: User, newRole: Role) => {
+  const handleRoleChange = async (member: IUser, newRole: Role) => {
     if (!apiUrl) return;
 
     try {
@@ -234,7 +234,7 @@ const GuildTabsList = ({
     }
   };
 
-  const handleMoveMember = async (fromGuildId: string, member: User, toGuildId: string) => {
+  const handleMoveMember = async (fromGuildId: string, member: IUser, toGuildId: string) => {
     if (fromGuildId === toGuildId || !apiUrl) return;
 
     const targetGuild = guilds.find(g => g._id === toGuildId);
@@ -277,7 +277,7 @@ const GuildTabsList = ({
   };
 
   // Fonction pour trier les membres : chef > sous-chefs > membres, puis alphabétique
-  const sortMembers = (members: User[]): User[] => {
+  const sortMembers = (members: IUser[]): IUser[] => {
     return [...members].sort((a, b) => {
       // Définir l'ordre de priorité des rôles
       const roleOrder = { chef: 1, "sous-chef": 2, membre: 3 };
@@ -316,7 +316,7 @@ const GuildTabsList = ({
       orientation={orientation}
     >
       <TabList>
-        {guilds.map((guild: Guild) => (
+        {guilds.map((guild: IGuild) => (
           <Tab
             key={guild._id}
           // _focus={{ boxShadow: 'none' }}
@@ -330,7 +330,7 @@ const GuildTabsList = ({
       </TabList>
       <TabPanels>
 
-        {guilds.map((guild: Guild) => (
+        {guilds.map((guild: IGuild) => (
           <TabPanel key={guild._id} px={0}>
             <Box
               borderRadius="md"
@@ -348,7 +348,7 @@ const GuildTabsList = ({
               </Box>
               <VStack spacing={4} align="stretch">
                 {membersByGuild[guild._id]?.length > 0 ? (
-                  sortMembers(membersByGuild[guild._id]).map((member: User) => (
+                  sortMembers(membersByGuild[guild._id]).map((member: IUser) => (
                     <Stack
                       key={member._id}
                       direction={{ base: "column", md: "row" }}
@@ -395,8 +395,8 @@ const GuildTabsList = ({
                             >
                               <option value={guild._id}>Rester</option>
                               {guilds
-                                .filter((g: Guild) => g._id !== guild._id && (membersByGuild[g._id]?.length ?? 0) < 20)
-                                .map((g: Guild) => (
+                                .filter((g: IGuild) => g._id !== guild._id && (membersByGuild[g._id]?.length ?? 0) < 20)
+                                .map((g: IGuild) => (
                                   <option key={g._id} value={g._id}>
                                     → {g.name}
                                   </option>

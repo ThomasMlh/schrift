@@ -13,19 +13,19 @@ import {
     IconButton,
 } from "@chakra-ui/react";
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
-import type { Score, User, Cycle } from "../../interfaces";
+import type { IScore, IUser, ICycle } from "../../interfaces";
 import { AttackTypeBadge } from "./AttackTypeBadge";
 import { UserDisplay } from "./UserDisplay";
 import CustomLink from "./CustomLink";
 import { getScoreDisplayValue } from "@/utils/scores";
 
 interface ScoresTableProps {
-    scores: Score[];
-    users: User[];
-    cycles: Cycle[];
+    scores: IScore[];
+    users: IUser[];
+    cycles: ICycle[];
     isAdmin: boolean;
-    onEditScore: (score: Score) => void;
-    onDeleteScore: (score: Score) => void;
+    onEditScore: (score: IScore) => void;
+    onDeleteScore: (score: IScore) => void;
 }
 
 const ScoresTable: React.FC<ScoresTableProps> = ({

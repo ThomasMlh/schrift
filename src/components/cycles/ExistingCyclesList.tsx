@@ -26,15 +26,15 @@ import {
 import { DeleteIcon } from "@chakra-ui/icons";
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import type { Cycle } from "../../interfaces";
+import type { ICycle } from "../../interfaces";
 import { AlterationImage } from "../ui/AlterationImage";
 
 interface ExistingCyclesListProps {
-  cycles: Cycle[];
+  cycles: ICycle[];
   isLoading: boolean;
   onRefresh: () => void;
   onDownloadEvents: () => void;
-  onDownloadCycleEvents: (cycle: Cycle) => void;
+  onDownloadCycleEvents: (cycle: ICycle) => void;
   onDeleteCycle: (cycleId: string) => Promise<void>;
 }
 
@@ -46,7 +46,7 @@ const ExistingCyclesList = ({ cycles,
   onDeleteCycle
 }: ExistingCyclesListProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [cycleToDelete, setCycleToDelete] = useState<Cycle | null>(null);
+  const [cycleToDelete, setCycleToDelete] = useState<ICycle | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
@@ -56,7 +56,7 @@ const ExistingCyclesList = ({ cycles,
   const cycleBg = useColorModeValue('gray.50', 'gray.800');
   const linkColor = useColorModeValue('black', 'white');
 
-  const handleDeleteClick = (cycle: Cycle) => {
+  const handleDeleteClick = (cycle: ICycle) => {
     setCycleToDelete(cycle);
     onOpen();
   };

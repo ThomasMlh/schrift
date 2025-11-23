@@ -1,11 +1,11 @@
 import { HStack, VStack, Text, Avatar } from "@chakra-ui/react";
 import { getUserAvatarUrl } from "@/utils/discord";
-import type { User } from "@/interfaces";
+import type { IUser } from "@/interfaces";
 import CustomLink from "./CustomLink";
 import { formatRoleName } from "@/utils/user";
 
 interface UserDisplayProps {
-  user: User;
+  user: IUser;
   avatarSize?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
   spacing?: number;
   showUsername?: boolean;

@@ -19,14 +19,14 @@ import {
     Box,
     Text
 } from "@chakra-ui/react";
-import type { User, Cycle } from "../../interfaces";
+import type { IUser, ICycle } from "../../interfaces";
 import { UserSearchSelect } from "./UserSearchSelect";
 
 interface ScoreModalProps {
     isOpen: boolean;
     onClose: () => void;
-    users: User[];
-    cycles: Cycle[];
+    users: IUser[];
+    cycles: ICycle[];
     selectedUserId: string;
     setSelectedUserId: (id: string) => void;
     selectedCycleId: string;

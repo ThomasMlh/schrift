@@ -6,7 +6,7 @@ import {
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowBackIcon, ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import type { RotationTemplate, ScoreWithUser, ScoreDetailApiResponse, RankInfo, Guild } from "@/interfaces";
+import type { IRotationTemplate, IScoreWithUser, IScoreDetailApiResponse, IRankInfo, IGuild } from "@/interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { UserDisplay } from "@/components/ui/UserDisplay";
 import { getScoreDisplayValue } from "@/utils/scores";
@@ -17,9 +17,9 @@ const RotationDetailPage = () => {
     const toast = useToast();
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-    const [scores, setScores] = useState<ScoreWithUser[]>([]);
+    const [scores, setScores] = useState<IScoreWithUser[]>([]);
     const [cycle, setCycle] = useState<string | null>(null);
-    const [rotation, setRotation] = useState<RotationTemplate | null>(null);
+    const [rotation, setRotation] = useState<IRotationTemplate | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -28,7 +28,7 @@ const RotationDetailPage = () => {
     const [totalItems, setTotalItems] = useState(0);
     
     // États pour le filtre des guildes
-    const [guilds, setGuilds] = useState<Guild[]>([]);
+    const [guilds, setGuilds] = useState<IGuild[]>([]);
     const [selectedGuild, setSelectedGuild] = useState<string>(''); // ID de la guilde ou vide pour "toutes"
     const [isLoadingGuilds, setIsLoadingGuilds] = useState(false);
 
@@ -38,7 +38,7 @@ const RotationDetailPage = () => {
     const shadowColor = useColorModeValue('lg', 'dark-lg');
 
     // Fonction pour créer les informations de rang basées sur le rang du serveur
-    const getRankInfo = (rank: number): RankInfo => {
+    const getRankInfo = (rank: number): IRankInfo => {
         if (rank === 1) {
             // Or pour le #1
             return {
@@ -131,7 +131,7 @@ const RotationDetailPage = () => {
             );
             
             if (response.ok) {
-                const data: ScoreDetailApiResponse = await response.json();
+                const data: IScoreDetailApiResponse = await response.json();
                 setScores(data.data);
                 setCycle(data.cycle);
                 setRotation(data.rotation);
@@ -177,7 +177,7 @@ const RotationDetailPage = () => {
         await loadScores(newGuildId);
     };
 
-    const renderRankBadge = (rankInfo: RankInfo) => {
+    const renderRankBadge = (rankInfo: IRankInfo) => {
         if (rankInfo.rank <= 3) {
             const symbols = { 1: "🥇", 2: "🥈", 3: "🥉" };
             return (

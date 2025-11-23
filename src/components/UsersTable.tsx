@@ -6,7 +6,7 @@ import {
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SearchIcon, EditIcon } from "@chakra-ui/icons";
-import type { User, Pagination, UsersResponse, Guild } from "../interfaces";
+import type { IUser, IPagination, IUsersResponse, IGuild } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import EditUserModal from "./EditUserModal";
 import { UserDisplay } from "./ui/UserDisplay";
@@ -20,15 +20,15 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
     // États - Initialiser avec les paramètres URL
-    const [users, setUsers] = useState<User[]>([]);
-    const [guilds, setGuilds] = useState<Guild[]>([]);
-    const [pagination, setPagination] = useState<Pagination | null>(null);
+    const [users, setUsers] = useState<IUser[]>([]);
+    const [guilds, setGuilds] = useState<IGuild[]>([]);
+    const [pagination, setPagination] = useState<IPagination | null>(null);
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
     const [selectedGuildId, setSelectedGuildId] = useState(searchParams.get('guilde_id') || "");
     const [selectedRole, setSelectedRole] = useState(searchParams.get('role') || "");
     const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('limit') || '20'));
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
 
     // Hooks UI
     const bgColor = useColorModeValue('white', 'gray.800');
@@ -72,7 +72,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
             const response = await fetch(url);
 
             if (response.ok) {
-                const data: UsersResponse = await response.json();
+                const data: IUsersResponse = await response.json();
                 if (data.success) {
                     setUsers(data.users);
                     setPagination(data.pagination);
@@ -183,7 +183,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     };
 
     // Gestionnaire pour ouvrir le modal d'édition
-    const handleEditUser = (user: User) => {
+    const handleEditUser = (user: IUser) => {
         setSelectedUser(user);
         onEditModalOpen();
     };

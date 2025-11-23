@@ -16,16 +16,16 @@ import {
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { UserDisplay } from "./ui/UserDisplay";
-import type { Guild, Cycle, PodiumPlayer, PodiumData } from "@/interfaces";
+import type { IGuild, ICycle, IPodiumPlayer, IPodiumData } from "@/interfaces";
 
 interface PodiumSectionProps {
   // Props optionnelles pour les tests
 }
 
 export const PodiumSection = ({}: PodiumSectionProps = {}) => {
-  const [podiumData, setPodiumData] = useState<PodiumData | null>(null);
-  const [cycles, setCycles] = useState<Cycle[]>([]);
-  const [guilds, setGuilds] = useState<Guild[]>([]);
+  const [podiumData, setPodiumData] = useState<IPodiumData | null>(null);
+  const [cycles, setCycles] = useState<ICycle[]>([]);
+  const [guilds, setGuilds] = useState<IGuild[]>([]);
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
   const [selectedGuildId, setSelectedGuildId] = useState<string>("global");
   const [isLoading, setIsLoading] = useState(true);
@@ -78,7 +78,7 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
 
         if (cyclesToProcess.length > 0) {
           // Trier par date de création décroissante pour avoir le plus récent en premier
-          const sortedCycles = cyclesToProcess.sort((a: Cycle, b: Cycle) => {
+          const sortedCycles = cyclesToProcess.sort((a: ICycle, b: ICycle) => {
             if (a.created_at && b.created_at) {
               return (
                 new Date(b.created_at).getTime() -
@@ -203,7 +203,7 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
   };
 
   const renderPlayerCard = (
-    player: PodiumPlayer,
+    player: IPodiumPlayer,
     isMobile = false,
     useHorizontalLayout = false
   ) => {

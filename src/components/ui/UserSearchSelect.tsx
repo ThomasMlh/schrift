@@ -4,10 +4,10 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDownIcon, SearchIcon, CloseIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
-import type { User } from "../../interfaces";
+import type { IUser } from "../../interfaces";
 
 interface UserSearchSelectProps {
-    users: User[];
+    users: IUser[];
     selectedUserId: string;
     onUserSelect: (userId: string) => void;
     searchQuery: string;
@@ -24,7 +24,7 @@ export const UserSearchSelect = ({
     placeholder = "Choisir un utilisateur"
 }: UserSearchSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
+    const [filteredUsers, setFilteredUsers] = useState<IUser[]>(users);
     const menuRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -62,7 +62,7 @@ export const UserSearchSelect = ({
         };
     }, [isOpen]);
 
-    const handleUserSelect = (user: User) => {
+    const handleUserSelect = (user: IUser) => {
         onUserSelect(user._id || '');
         setIsOpen(false);
         onSearchChange(''); // Reset search
@@ -206,7 +206,7 @@ export const UserSearchSelect = ({
                         </Flex>
                         
                         {filteredUsers.length > 0 ? (
-                            filteredUsers.map((user: User) => (
+                            filteredUsers.map((user: IUser) => (
                                 <Flex
                                     key={user._id}
                                     p={3}
