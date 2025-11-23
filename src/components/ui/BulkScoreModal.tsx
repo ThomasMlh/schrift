@@ -74,6 +74,13 @@ export default function BulkScoreModal({
     const [isLoadingScores, setIsLoadingScores] = useState(false);
     const [hasExistingScores, setHasExistingScores] = useState(false);
 
+    // Réinitialiser la guilde sélectionnée quand le modal s'ouvre
+    useEffect(() => {
+        if (isOpen) {
+            setSelectedGuildId(isGuildRestricted ? userGuildId || "" : "");
+        }
+    }, [isOpen, isGuildRestricted, userGuildId]);
+
     // Charger les membres de la guilde sélectionnée
     useEffect(() => {
         const loadGuildMembers = async () => {

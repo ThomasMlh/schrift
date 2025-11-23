@@ -38,7 +38,7 @@ import UserPage from "./pages/UserPage";
 import type { IProtectedRoute, IUser } from "./interfaces";
 import UsersPage from "./pages/UsersPage";
 import AdminPage from "./pages/AdminPage";
-import ScoresPage from "./pages/ScoresPage";
+import PodiumPage from "./pages/PodiumPage";
 import { getDiscordAvatarUrl } from "./utils/discord";
 
 function ColorModeSwitcher() {
@@ -94,8 +94,8 @@ const MainRouter = () => {
   const adminHoverColor = useColorModeValue("orange.600", "orange.200");
   const usersHoverBg = useColorModeValue("teal.50", "teal.900");
   const usersHoverColor = useColorModeValue("teal.600", "teal.200");
-  const scoresHoverBg = useColorModeValue("pink.50", "pink.900");
-  const scoresHoverColor = useColorModeValue("pink.600", "pink.200");
+  const podiumHoverBg = useColorModeValue("pink.50", "pink.900");
+  const podiumHoverColor = useColorModeValue("pink.600", "pink.200");
 
   const menuItems = [
     {
@@ -127,11 +127,11 @@ const MainRouter = () => {
       hoverColor: usersHoverColor
     },
     {
-      name: "Scores",
-      path: "/scores",
-      icon: "📊",
-      hoverBg: scoresHoverBg,
-      hoverColor: scoresHoverColor
+      name: "Podium",
+      path: "/podium",
+      icon: "🏆",
+      hoverBg: podiumHoverBg,
+      hoverColor: podiumHoverColor
     },
     {
       name: "Admin",
@@ -493,7 +493,7 @@ const MainRouter = () => {
           <Route path="/discord-callback" element={<DiscordCallback />} />
           <Route path="/joueurs" element={<UsersPage />} />
           <Route path="/joueur/:userId" element={<UserPage />} />
-          <Route path="/scores" element={<ScoresPage />} />
+          <Route path="/podium" element={<PodiumPage />} />
         </Routes>
       </Box>
     </Router>

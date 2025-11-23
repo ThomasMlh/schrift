@@ -218,7 +218,7 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
                 <UserDisplay
                   user={{
                     _id: player.user_id,
-                    username: player.global_name,
+                    username: player.username,
                     global_name: player.global_name,
                     discord_id: player.discord_id,
                     bbs_name: player.bbs_name,

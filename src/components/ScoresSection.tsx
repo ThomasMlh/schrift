@@ -671,7 +671,7 @@ const ScoresSection = () => {
                     onSubmit={handleBulkScoreSubmit}
                     isSubmitting={isBulkSubmitting}
                     apiUrl={apiUrl}
-                    isGuildRestricted={isGuildManager}
+                    isGuildRestricted={!isAdmin && isGuildManager}
                     userGuildId={userGuildId}
                 />
             </VStack>
