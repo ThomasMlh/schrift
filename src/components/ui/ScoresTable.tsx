@@ -24,6 +24,7 @@ interface ScoresTableProps {
     users: IUser[];
     cycles: ICycle[];
     isAdmin: boolean;
+    isGuildManager: boolean;
     onEditScore: (score: IScore) => void;
     onDeleteScore: (score: IScore) => void;
 }
@@ -33,6 +34,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
     users,
     cycles,
     isAdmin,
+    isGuildManager,
     onEditScore,
     onDeleteScore
 }) => {
@@ -62,7 +64,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                         <Th>Rotation</Th>
                         <Th>Score</Th>
                         <Th>Date</Th>
-                        {isAdmin && <Th>Actions</Th>}
+                        {(isAdmin || isGuildManager) && <Th>Actions</Th>}
                     </Tr>
                 </Thead>
                 <Tbody>
@@ -117,7 +119,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                                         {score.created_at ? new Date(score.created_at).toLocaleDateString('fr-FR') : "-"}
                                     </Text>
                                 </Td>
-                                {isAdmin && (
+                                {(isAdmin || isGuildManager) && (
                                     <Td>
                                         <HStack spacing={2}>
                                             <IconButton

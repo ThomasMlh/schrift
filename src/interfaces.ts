@@ -126,7 +126,8 @@ export interface IScoreFormData {
   cycle_id: string;
   rotation_id: string;
   guild_id: string;
-  raw_score: number;
+  raw_score?: number;
+  score?: number;
 }
 
 export interface IScoresResponse {

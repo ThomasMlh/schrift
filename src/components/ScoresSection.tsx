@@ -15,7 +15,7 @@ import {
     Alert,
     AlertIcon
 } from "@chakra-ui/react";
-import { AddIcon } from "@chakra-ui/icons";
+// import { AddIcon } from "@chakra-ui/icons";
 import type { IScore, ICycle, IUser, IScoreFormData, IPagination as PaginationType, IScoresResponse, IGuild } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import ScoresTable from "./ui/ScoresTable";
@@ -52,7 +52,7 @@ const ScoresSection = () => {
     const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
 
     const toast = useToast();
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const { isOpen, onClose } = useDisclosure();
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
 
@@ -230,7 +230,7 @@ const ScoresSection = () => {
                 cycle_id: selectedCycleId,
                 rotation_id: selectedRotationId,
                 guild_id: guildId,
-                raw_score: scoreValue
+                score: scoreValue
             };
 
 
@@ -382,7 +382,7 @@ const ScoresSection = () => {
         setSelectedUserId(score.user_id);
         setSelectedCycleId(score.cycle_id);
         setSelectedRotationId(score.rotation_id);
-        setScoreValue(score.raw_score);
+        setScoreValue(score.score);
         setIsEditModalOpen(true);
     };
 
@@ -429,7 +429,7 @@ const ScoresSection = () => {
                 cycle_id: selectedCycleId,
                 rotation_id: selectedRotationId,
                 guild_id: guildId,
-                raw_score: scoreValue
+                score: scoreValue
             };
 
             const token = localStorage.getItem('userToken');
@@ -505,14 +505,14 @@ const ScoresSection = () => {
                         Gestion des Scores
                     </Text>
                     <HStack spacing={3}>
-                        <Button
+                        {/* <Button
                             leftIcon={<AddIcon />}
                             colorScheme="blue"
                             onClick={onOpen}
                             isDisabled={!currentUser}
                         >
                             Ajouter un score
-                        </Button>
+                        </Button> */}
                         {(isAdmin || isGuildManager) && (
                             <Button
                                 colorScheme="green"
@@ -565,6 +565,7 @@ const ScoresSection = () => {
                                     users={users}
                                     cycles={cycles}
                                     isAdmin={isAdmin}
+                                    isGuildManager={isGuildManager}
                                     onEditScore={handleEditScore}
                                     onDeleteScore={(score: IScore) => {
                                         setScoreToDelete(score);
