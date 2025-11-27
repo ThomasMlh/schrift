@@ -5,7 +5,7 @@ import CustomLink from "./CustomLink";
 import { formatRoleName } from "@/utils/user";
 
 interface UserDisplayProps {
-  user: IUser;
+  user?: IUser;
   avatarSize?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
   spacing?: number;
   showUsername?: boolean;
@@ -20,6 +20,16 @@ export const UserDisplay = ({
   showUsername = true,
   roleBadge = false
 }: UserDisplayProps) => {
+  // Si pas d'utilisateur, afficher un fallback
+  if (!user) {
+    return (
+      <HStack spacing={spacing}>
+        <Avatar size={avatarSize} />
+        <Text color="gray.500">Utilisateur inconnu</Text>
+      </HStack>
+    );
+  }
+
   const avatarUrl =
     user.avatar && user.discord_id
       ? getUserAvatarUrl({
@@ -46,7 +56,7 @@ export const UserDisplay = ({
           </Text>
         )}
       </VStack>
-      {roleBadge && (
+      {roleBadge && user.role && (
         <Text as="span" fontSize="xs" color="gray.500" ml={2}>
           [{formatRoleName(user.role)}]
         </Text>

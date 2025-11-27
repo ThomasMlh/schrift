@@ -325,8 +325,8 @@ const CharacterDetailPage = () => {
                                         </Heading>
                                         <VStack spacing={1} align="left">
                                             {character.categories.map((category, index) => (
-                                                <Box>
-                                                    <HStack key={index} spacing={2}>
+                                                <Box key={index} >
+                                                    <HStack spacing={2}>
                                                         <CategoryIcon
                                                             category={category}
                                                             size="20px"

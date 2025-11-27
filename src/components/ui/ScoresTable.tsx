@@ -40,7 +40,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
 }) => {
     // Obtenir les informations d'un utilisateur
     const getUserInfo = (userId: string) => {
-        return users.find(user => user._id === userId || user.discordId === userId);
+        return users.find(user => user._id === userId);
     };
 
     // Obtenir les informations d'un cycle
@@ -51,7 +51,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
     // Obtenir les informations d'une rotation
     const getRotationInfo = (cycleId: string, rotationId: string) => {
         const cycle = getCycleInfo(cycleId);
-        return cycle?.rotations.find(rotation => rotation._id === rotationId);
+        return cycle?.rotations.find(rotation => rotation.rotation_id === rotationId);
     };
 
     return (
@@ -77,7 +77,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                             <Tr key={score._id}>
                                 <Td>
                                     <HStack spacing={3}>
-                                        {user && <UserDisplay user={user} />}
+                                        <UserDisplay user={user} />
                                     </HStack>
                                 </Td>
                                 <Td>

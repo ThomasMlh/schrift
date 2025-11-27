@@ -351,7 +351,7 @@ const PodiumPage = () => {
                                 maxW="300px"
                             >
                                 {selectedCycle.rotations.map((rotation: any) => (
-                                    <option key={rotation._id} value={rotation._id}>
+                                    <option key={rotation.rotation_id} value={rotation.rotation_id}>
                                         #{rotation.position} - {rotation.killer} ({rotation.attack})
                                     </option>
                                 ))}

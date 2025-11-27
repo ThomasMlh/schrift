@@ -39,6 +39,7 @@ import type { IProtectedRoute, IUser } from "./interfaces";
 import UsersPage from "./pages/UsersPage";
 import AdminPage from "./pages/AdminPage";
 import PodiumPage from "./pages/PodiumPage";
+import ComparatorPage from "./pages/ComparatorPage";
 import { getDiscordAvatarUrl } from "./utils/discord";
 
 function ColorModeSwitcher() {
@@ -96,6 +97,8 @@ const MainRouter = () => {
   const usersHoverColor = useColorModeValue("teal.600", "teal.200");
   const podiumHoverBg = useColorModeValue("pink.50", "pink.900");
   const podiumHoverColor = useColorModeValue("pink.600", "pink.200");
+  const comparatorHoverBg = useColorModeValue("cyan.50", "cyan.900");
+  const comparatorHoverColor = useColorModeValue("cyan.600", "cyan.200");
 
   const menuItems = [
     {
@@ -132,6 +135,13 @@ const MainRouter = () => {
       icon: "🏆",
       hoverBg: podiumHoverBg,
       hoverColor: podiumHoverColor
+    },
+    {
+      name: "Comparateur",
+      path: "/comparateur",
+      icon: "⚔️",
+      hoverBg: comparatorHoverBg,
+      hoverColor: comparatorHoverColor
     },
     {
       name: "Admin",
@@ -494,6 +504,7 @@ const MainRouter = () => {
           <Route path="/joueurs" element={<UsersPage />} />
           <Route path="/joueur/:userId" element={<UserPage />} />
           <Route path="/podium" element={<PodiumPage />} />
+          <Route path="/comparateur" element={<ComparatorPage />} />
         </Routes>
       </Box>
     </Router>

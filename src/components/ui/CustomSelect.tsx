@@ -68,6 +68,7 @@ export const CustomSelect = ({
     const hoverBg = useColorModeValue('gray.50', 'gray.600');
     const menuBg = useColorModeValue('white', 'gray.800');
     const textColor = useColorModeValue('gray.900', 'white');
+    const placeholderColor = useColorModeValue('gray.500', 'gray.400');
 
     return (
         <Box position="relative" ref={menuRef}>
@@ -86,6 +87,7 @@ export const CustomSelect = ({
                     opacity={isDisabled ? 0.6 : 1}
                     _hover={!isDisabled ? { borderColor: "gray.300" } : {}}
                     color={textColor}
+                    minH="56px"
                 >
                     <Box 
                         flex={1} 
@@ -133,14 +135,14 @@ export const CustomSelect = ({
                     textAlign="left"
                     fontWeight="normal"
                     px={3}
-                    py={2}
+                    py={4}
                     h="auto"
-                    minH="40px"
+                    minH="56px"
                     isDisabled={isDisabled}
                     color={textColor}
                     _hover={!isDisabled ? { borderColor: "gray.300", bg: hoverBg } : {}}
                 >
-                    <Text color={useColorModeValue('gray.500', 'gray.400')}>{placeholder}</Text>
+                    <Text color={placeholderColor}>{placeholder}</Text>
                 </Button>
             )}
 
@@ -163,6 +165,7 @@ export const CustomSelect = ({
                     {/* Option de déselection */}
                     {allowDeselect && (
                         <Flex
+                            key="deselect-option"
                             p={3}
                             cursor="pointer"
                             _hover={{ bg: hoverBg }}
@@ -171,7 +174,7 @@ export const CustomSelect = ({
                             borderBottom="1px solid"
                             borderColor={borderColor}
                             fontStyle="italic"
-                            color={useColorModeValue('gray.500', 'gray.400')}
+                            color={placeholderColor}
                         >
                             <Text>Aucune sélection</Text>
                         </Flex>
@@ -203,7 +206,7 @@ export const CustomSelect = ({
                             </Flex>
                         ))
                     ) : (
-                        <Text p={3} color={useColorModeValue('gray.500', 'gray.400')} textAlign="center">
+                        <Text p={3} color={placeholderColor} textAlign="center">
                             Aucune option disponible
                         </Text>
                     )}

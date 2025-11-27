@@ -13,8 +13,12 @@ import {
     Spinner,
     Flex,
     Alert,
-    AlertIcon
+    AlertIcon,
+    Input,
+    InputGroup,
+    InputLeftElement
 } from "@chakra-ui/react";
+import { SearchIcon } from "@chakra-ui/icons";
 // import { AddIcon } from "@chakra-ui/icons";
 import type { IScore, ICycle, IUser, IScoreFormData, IPagination as PaginationType, IScoresResponse, IGuild } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
@@ -39,6 +43,7 @@ const ScoresSection = () => {
     const [selectedRotationId, setSelectedRotationId] = useState("");
     const [selectedUserId, setSelectedUserId] = useState("");
     const [userSearchQuery, setUserSearchQuery] = useState("");
+    const [scoreSearchQuery, setScoreSearchQuery] = useState("");
     const [scoreValue, setScoreValue] = useState<number>(0);
 
     // États pour l'édition et suppression
@@ -81,11 +86,12 @@ const ScoresSection = () => {
         loadGuilds();
     }, []);
 
-    const loadScores = async (page: number = 1) => {
+    const loadScores = async (page: number = 1, search: string = scoreSearchQuery) => {
         setIsLoadingScores(true);
         try {
             const token = localStorage.getItem('userToken');
-            const response = await fetch(`${apiUrl}/api/scores?page=${page}&limit=20`, {
+            const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
+            const response = await fetch(`${apiUrl}/api/scores?page=${page}&limit=20${searchParam}`, {
                 headers: {
                     ...(token && { 'Authorization': `Bearer ${token}` }),
                 },
@@ -146,7 +152,7 @@ const ScoresSection = () => {
     const loadUsers = async () => {
         try {
             const token = localStorage.getItem('userToken');
-            const response = await fetch(`${apiUrl}/api/users`, {
+            const response = await fetch(`${apiUrl}/api/users?limit=999999`, {
                 headers: {
                     ...(token && { 'Authorization': `Bearer ${token}` }),
                 },
@@ -164,7 +170,7 @@ const ScoresSection = () => {
     const loadGuilds = async () => {
         try {
             const token = localStorage.getItem('userToken');
-            const response = await fetch(`${apiUrl}/api/guildes`, {
+            const response = await fetch(`${apiUrl}/api/guilds`, {
                 headers: {
                     ...(token && { 'Authorization': `Bearer ${token}` }),
                 },
@@ -178,6 +184,15 @@ const ScoresSection = () => {
             console.error("Erreur lors du chargement des guildes:", error);
         }
     };
+
+    // Fonction de recherche avec debouncing
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            loadScores(1, scoreSearchQuery);
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [scoreSearchQuery]);
 
     const handleSubmitScore = async () => {
         if (!currentUser) {
@@ -494,7 +509,7 @@ const ScoresSection = () => {
 
     // Gestion du changement de page
     const handlePageChange = (page: number) => {
-        loadScores(page);
+        loadScores(page, scoreSearchQuery);
     };
 
     return (
@@ -540,9 +555,19 @@ const ScoresSection = () => {
                                         </Text>
                                     )}
                                 </VStack>
+                                <InputGroup maxW="300px">
+                                    <InputLeftElement pointerEvents="none">
+                                        <SearchIcon color="gray.300" />
+                                    </InputLeftElement>
+                                    <Input
+                                        placeholder="Rechercher dans les scores..."
+                                        value={scoreSearchQuery}
+                                        onChange={(e) => setScoreSearchQuery(e.target.value)}
+                                    />
+                                </InputGroup>
                                 <Button
                                     size="sm"
-                                    onClick={() => loadScores(currentPage)}
+                                    onClick={() => loadScores(currentPage, scoreSearchQuery)}
                                     isLoading={isLoadingScores}
                                     loadingText="Chargement..."
                                 >
