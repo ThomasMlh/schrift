@@ -170,7 +170,7 @@ const ScoresSection = () => {
     const loadGuilds = async () => {
         try {
             const token = localStorage.getItem('userToken');
-            const response = await fetch(`${apiUrl}/api/guilds`, {
+            const response = await fetch(`${apiUrl}/api/guildes`, {
                 headers: {
                     ...(token && { 'Authorization': `Bearer ${token}` }),
                 },
