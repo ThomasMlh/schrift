@@ -287,7 +287,7 @@ export default function BulkScoreModal({
                                     onChange={setSelectedRotationId}
                                     isDisabled={isSubmitting}
                                     options={selectedCycle.rotations.map((rotation: any) => ({
-                                        value: rotation._id,
+                                        value: rotation.rotation_id,
                                         label: `Rotation #${rotation.position} - ${rotation.killer}`,
                                         content: (
                                             <VStack align="start" spacing={1} w="100%">
