@@ -324,7 +324,7 @@ export default function BulkScoreModal({
                                 <VStack align="start" spacing={1}>
                                     <Text><strong>Guilde:</strong> {selectedGuild.name}</Text>
                                     <Text><strong>Cycle:</strong> {selectedCycle.name}</Text>
-                                    <Text><strong>Rotation:</strong> #{selectedCycle.rotations.findIndex((r: any) => r._id === selectedRotationId) + 1}</Text>
+                                    <Text><strong>Rotation:</strong> #{selectedCycle.rotations.find((r: any) => r.rotation_id === selectedRotationId)?.position}</Text>
                                 </VStack>
                             </Alert>
                         )}
