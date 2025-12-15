@@ -1,11 +1,12 @@
 import {
-    Container, VStack, Heading, Text, Flex, Select, Button, Box, Badge, HStack, 
+    Container, VStack, Text, Flex, Select, Button, Box, Badge, HStack, 
     Spinner, useColorModeValue, useToast, Card, CardBody, Alert, AlertIcon
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Pagination as PaginationComponent } from "../components/ui/Pagination";
 import { UserDisplay } from "../components/ui/UserDisplay";
+import { HeroSection } from "../components/HeroSection";
 import type { ICycle, IGuild, IPodiumPlayer, IPodiumResponse, IUser } from "../interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 
@@ -296,7 +297,17 @@ const PodiumPage = () => {
     };
 
     return (
-        <Container maxW="container.xl" py={8}>
+        <Box w="100%">
+            <HeroSection
+                title="Podium des Joueurs"
+                description={selectedRotationId 
+                    ? "Classement des scores individuels pour une rotation"
+                    : "Classement des moyennes par cycle"
+                }
+                badge={{ text: "Classement", icon: "🏆" }}
+            />
+            
+            <Container maxW="container.xl" py={8}>
             <Box
                 bg={bgColor}
                 borderRadius="lg"
@@ -308,16 +319,6 @@ const PodiumPage = () => {
                 mx="auto"
             >
                 <VStack spacing={6} align="stretch">
-                    {/* En-tête */}
-                    <VStack spacing={2} textAlign="center">
-                        <Heading size="lg">🏆 Podium des Joueurs</Heading>
-                        <Text color="gray.600" fontSize="sm">
-                            {selectedRotationId 
-                                ? "Classement des scores individuels pour une rotation"
-                                : "Classement des moyennes par cycle"
-                            }
-                        </Text>
-                    </VStack>
 
                 {/* Contrôles de filtrage */}
                 <VStack spacing={4} align="stretch">
@@ -516,6 +517,7 @@ const PodiumPage = () => {
             </VStack>
         </Box>
     </Container>
+    </Box>
     );
 };
 

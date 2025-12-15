@@ -1,7 +1,6 @@
 import {
   Container,
   VStack,
-  Heading,
   Text,
   Box,
   Card,
@@ -31,6 +30,7 @@ import { useSearchParams } from "react-router-dom";
 import { CustomSelect } from "../components/ui/CustomSelect";
 import { UserDisplay } from "../components/ui/UserDisplay";
 import { UserSearchSelect } from "../components/ui/UserSearchSelect";
+import { HeroSection } from "../components/HeroSection";
 import type {
   IComparisonResponse,
   IUser,
@@ -371,7 +371,14 @@ const ComparatorPage = () => {
   }
 
   return (
-    <Container maxW="container.xl" py={8}>
+    <Box w="100%">
+      <HeroSection
+        title="Comparateur"
+        description="Comparez les performances entre joueurs ou guildes"
+        badge={{ text: "Analyse", icon: "⚔️" }}
+      />
+      
+      <Container maxW="container.xl" py={8}>
       <Box
         bg={bgColor}
         borderRadius="lg"
@@ -383,13 +390,6 @@ const ComparatorPage = () => {
         mx="auto"
       >
         <VStack spacing={6} align="stretch">
-          {/* En-tête */}
-          <VStack spacing={2} textAlign="center">
-            <Heading size="lg">⚔️ Comparateur</Heading>
-            <Text color="gray.600" fontSize="sm">
-              Comparez les performances entre joueurs ou guildes
-            </Text>
-          </VStack>
 
           {/* Contrôles de configuration */}
           <Card>
@@ -766,6 +766,7 @@ const ComparatorPage = () => {
         </VStack>
       </Box>
     </Container>
+    </Box>
   );
 };
 

@@ -1,12 +1,12 @@
-import { Container, Heading, Flex, useColorModeValue } from "@chakra-ui/react";
+import { Container, Flex, Box, VStack } from "@chakra-ui/react";
 import { GuildTabsList } from "../components/GuildTabsList";
 import { PodiumSection } from "../components/PodiumSection";
 import { CurrentInfoSection } from "../components/CurrentInfoSection";
+import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "../components/SEOHead";
 // const imageSchrift = new URL('../assets/logo.png', import.meta.url).href;
 
 export default function HomePage() {
-  const bgColor = useColorModeValue('white', 'gray.800');
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -31,37 +31,31 @@ export default function HomePage() {
         url="https://bbs-schrift.fr"
         structuredData={structuredData}
       />
-      <Flex w="100%" align="center" justify="center" flexDir={"column"} bg={useColorModeValue('gray.50', 'gray.900')}>
-        {/* <Image 
-          src={imageSchrift} 
-          alt="Logo de Ṣčhrīft" 
-          w="100%" 
-          h="auto" 
-          objectFit="cover" 
-          background="unset"
-        /> */}
+      <Flex w="100%" align="center" justify="center" flexDir="column">
+        <HeroSection
+          title="Guildes Ṣčhrīft"
+          description="Rejoignez notre communauté Bleach Brave Souls et dominez les classements avec les meilleures guildes"
+        />
+
         <Container
-          maxW="100vw"
-          w="100%"
-          px={0}
+          maxW="container.xl"
+          px={{ base: 4, md: 6 }}
           py={8}
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="flex-start"
-          bg={bgColor}
-          boxShadow="none"
-          gap={8}
         >
-          <Heading mb={2} textAlign="center">Guildes Ṣčhrīft</Heading>
-          
-          {/* Section Informations Actuelles */}
-          <CurrentInfoSection />
-          
-          <GuildTabsList />
-          
-          {/* Section Podium */}
-          <PodiumSection />
+          <VStack spacing={8} w="100%">
+            <Box w="100%">
+              <CurrentInfoSection />
+            </Box>
+            
+            <Box w="100%">
+              <GuildTabsList />
+            </Box>
+            
+            {/* Section Podium */}
+            <Box w="100%">
+              <PodiumSection />
+            </Box>
+          </VStack>
         </Container>
       </Flex>
     </>

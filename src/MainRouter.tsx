@@ -41,6 +41,7 @@ import AdminPage from "./pages/AdminPage";
 import PodiumPage from "./pages/PodiumPage";
 import ComparatorPage from "./pages/ComparatorPage";
 import { getDiscordAvatarUrl } from "./utils/discord";
+import NotFound from "./pages/NotFound";
 
 function ColorModeSwitcher() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -505,6 +506,7 @@ const MainRouter = () => {
           <Route path="/joueur/:userId" element={<UserPage />} />
           <Route path="/podium" element={<PodiumPage />} />
           <Route path="/comparateur" element={<ComparatorPage />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Box>
     </Router>

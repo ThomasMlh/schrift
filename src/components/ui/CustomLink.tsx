@@ -5,7 +5,7 @@ import { Link, useColorModeValue } from '@chakra-ui/react';
 interface CustomLinkProps {
     to: string;
     text: string;
-    textSize?: "xs" | "sm" | "md" | "lg";
+    textSize?: "xs" | "sm" | "md" | "lg" | "xl";
 }
 
 const CustomLink: React.FC<CustomLinkProps> = ({ to, text, textSize = "sm" }) => {

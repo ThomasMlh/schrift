@@ -297,7 +297,7 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
       borderColor={borderColor}
       boxShadow={shadowColor}
       p={{ base: 4, md: 6 }}
-      w={{ base: "100%", md: "80%" }}
+      w="100%"
       mx="auto"
     >
       <VStack spacing={6} align="stretch">
