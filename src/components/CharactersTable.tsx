@@ -17,6 +17,7 @@ import { KillerFilter } from "./ui/KillerFilter";
 import { AttackTypeFilter } from "./ui/AttackTypeFilter";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import CustomLink from "./ui/CustomLink";
+import { CharactersKillers, CharactersCategories, CharactersAffinities } from "../utils/chractersData";
 
 interface CharactersTableProps {
   apiUrl: string;
@@ -35,9 +36,9 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
   const [selectedAttackType, setSelectedAttackType] = useState(searchParams.get('attack_type') || "");
   const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('limit') || '20'));
   const [isLoading, setIsLoading] = useState(false);
-  const [affinities, setAffinities] = useState<string[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [killers, setKillers] = useState<string[]>([]);
+  const [affinities] = useState<string[]>(CharactersAffinities);
+  const [categories] = useState<string[]>(CharactersCategories);
+  const [killers] = useState<string[]>(CharactersKillers);
 
   // Hooks UI
   const bgColor = useColorModeValue('white', 'gray.800');
@@ -104,81 +105,11 @@ export function CharactersTable({ apiUrl }: CharactersTableProps) {
     }
   };
 
-  // Fonction pour charger les affinités disponibles
-  const loadAffinities = async () => {
-    try {
-      const response = await fetch(`${apiUrl}/api/characters`);
-      if (response.ok) {
-        const data = await response.json();
-        // Extraire les affinités uniques depuis la première page - utiliser 'data' au lieu de 'characters'
-        const uniqueAffinities = [...new Set(
-          data.data?.map((char: ICharacter) => char.affinity)
-            .filter((affinity: string) => affinity && affinity.trim()) || []
-        )].sort() as string[];
-        setAffinities(uniqueAffinities);
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement des affinités:', error);
-    }
-  };
-
-  // Fonction pour charger les catégories disponibles - Charge TOUTES les pages
-  const loadCategories = async () => {
-    try {
-      // Charger tous les personnages sans pagination pour avoir toutes les catégories
-      const response = await fetch(`${apiUrl}/api/characters?limit=10000`);
-      if (response.ok) {
-        const data = await response.json();
-        // Extraire toutes les catégories uniques
-        const allCategories = data.data?.flatMap((char: ICharacter) => {
-          return char.categories || [];
-        }) || [];
-        const uniqueCategories = [...new Set(allCategories)]
-          .filter((category: any) => category && typeof category === 'string' && category.trim())
-          .sort() as string[];
-        setCategories(uniqueCategories);
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement des catégories:', error);
-    }
-  };
-
-  // Fonction pour charger les tueurs disponibles - Charge TOUTES les pages
-  const loadKillers = async () => {
-    try {
-      // Charger tous les personnages sans pagination pour avoir tous les tueurs
-      const response = await fetch(`${apiUrl}/api/characters?limit=10000`); // Limite élevée pour tout récupérer
-      if (response.ok) {
-        const data: ICharactersResponse = await response.json();
-        // Extraire tous les tueurs uniques
-        const allKillers = data.data?.flatMap((char: ICharacter) => {
-          return char.killers || [];
-        }) || [];
-        
-        const filteredKillers = [...new Set(allKillers)]
-          .filter((killer: any) => killer && typeof killer === 'string' && killer.trim()) as string[];
-        
-        const uniqueKillers = filteredKillers.sort((a, b) => {
-          // Tri personnalisé pour que "Aucun" vienne avant "Aucun +"
-          if (a === "Aucun" && b === "Aucun +") return -1;
-          if (a === "Aucun +" && b === "Aucun") return 1;
-          return a.localeCompare(b);
-        });
-        setKillers(uniqueKillers);
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement des tueurs:', error);
-    }
-  };
-
   // Effet pour charger les données initiales
   useEffect(() => {
     // Charger avec les paramètres de l'URL au montage
     const currentPage = parseInt(searchParams.get('page') || '1');
     loadCharacters(currentPage, searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType);
-    loadAffinities();
-    loadCategories();
-    loadKillers();
   }, [apiUrl]);
 
   // Fonction de recherche avec debounce et mise à jour URL

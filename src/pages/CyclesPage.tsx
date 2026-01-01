@@ -125,7 +125,7 @@ const CyclesPage = () => {
       <SEOHead
         title="Cycles de Rotation - Bleach Brave Souls | Schrift BBS"
         description="Découvrez tous les cycles de rotation de Bleach Brave Souls. Consultez les rotations, événements et classements de guilde détaillés."
-        keywords="Bleach Brave Souls, BBS, cycles, rotation, événements, classements, guildes"
+        keywords="cycles, rotation, événements, classements"
         url="https://bbs-schrift.fr/cycles"
         structuredData={structuredData}
       />

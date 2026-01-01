@@ -1,5 +1,5 @@
 import { ArrowBackIcon } from "@chakra-ui/icons";
-import { Box, Button, Container, Image } from "@chakra-ui/react";
+import { Box, Button, Container } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
 const NotFound = () => {
@@ -8,7 +8,7 @@ const NotFound = () => {
         <Box w="100%">
             <Container maxW="container.xl" py={8}>
                 <Box textAlign="center" py={10} px={6}>
-                    <Image justifySelf={"center"} src="https://i.ibb.co/My0N1yHG/rangiku.gif" width={"50%"} alt="Page not found" />
+                    {/* <Image justifySelf={"center"} src="https://i.ibb.co/My0N1yHG/rangiku.gif" width={"50%"} alt="Page not found" /> */}
                     <Box fontSize="6xl" fontWeight="bold">
                         404
                     </Box>

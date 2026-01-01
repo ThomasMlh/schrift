@@ -27,8 +27,8 @@ export const KillerFilter = ({
         as={Button} 
         rightIcon={<ChevronDownIcon />}
         variant="outline"
-        maxW="180px"
-        w="180px"
+        maxW="300px"
+        w="auto"
         h="40px"
         justifyContent="space-between"
         bg="white"
@@ -53,13 +53,19 @@ export const KillerFilter = ({
               <Text fontSize="sm">{selectedKiller}</Text>
             </>
           ) : (
-            <Text fontSize="sm">Tous les tueurs</Text>
+            <>
+              <KillerIcon killer={"Toutes"} size="24px" />
+              <Text fontSize="sm">Tous les tueurs</Text>
+            </>
           )}
         </HStack>
       </MenuButton>
       <MenuList maxH="200px" overflowY="auto">
         <MenuItem onClick={() => onKillerChange("")}>
+        <HStack spacing={2}>
+          <KillerIcon killer={"Toutes"} size="20px" />
           <Text fontSize="sm">Tous les tueurs</Text>
+          </HStack>
         </MenuItem>
         {killers.map(killer => (
           <MenuItem key={killer} onClick={() => onKillerChange(killer)}>

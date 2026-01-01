@@ -20,9 +20,6 @@ import {
     Divider,
     Box,
     Grid,
-    GridItem,
-    Card,
-    CardBody,
     Spinner,
     Center,
     Alert,
@@ -358,38 +355,32 @@ export default function BulkScoreModal({
                                         </Text>
                                     )}
                                 </HStack>
-                                <Grid templateColumns="repeat(auto-fill, 320px)" gap={4} justifyContent="center">
+                                <Grid templateColumns="repeat(auto-fill, minmax(240px, 1fr))" gap={2}>
                                     {guildMembers.map((member: IUser) => (
-                                        <GridItem key={member._id}>
-                                            <Card h="120px">
-                                                <CardBody p={3}>
-                                                    <VStack spacing={3} h="full">
-                                                        <HStack spacing={3} w="full">
-                                                            <UserDisplay user={member} />
-                                                            <Text fontSize="xs" color="gray.500" textTransform="capitalize">
-                                                                {member.role}
-                                                            </Text>
-                                                        </HStack>
-                                                        <Box w="full">
-                                                            <NumberInput
-                                                                size="sm"
-                                                                min={0}
-                                                                max={9999999999}
-                                                                value={scores[member._id] || 0}
-                                                                onChange={(_, value) => handleScoreChange(member._id, value)}
-                                                                isDisabled={isSubmitting || isLoadingScores}
-                                                            >
-                                                                <NumberInputField />
-                                                                <NumberInputStepper>
-                                                                    <NumberIncrementStepper />
-                                                                    <NumberDecrementStepper />
-                                                                </NumberInputStepper>
-                                                            </NumberInput>
-                                                        </Box>
-                                                    </VStack>
-                                                </CardBody>
-                                            </Card>
-                                        </GridItem>
+                                        <VStack 
+                                            key={member._id}
+                                            p={2}
+                                            borderWidth="1px"
+                                            borderRadius="md"
+                                            spacing={2}
+                                        >
+                                            <UserDisplay user={member} avatarSize="xs" showUsername={false} />
+                                            <NumberInput
+                                                size="sm"
+                                                min={0}
+                                                max={9999999999}
+                                                value={scores[member._id] || 0}
+                                                onChange={(_, value) => handleScoreChange(member._id, value)}
+                                                isDisabled={isSubmitting || isLoadingScores}
+                                                flex={1}
+                                            >
+                                                <NumberInputField />
+                                                <NumberInputStepper>
+                                                    <NumberIncrementStepper />
+                                                    <NumberDecrementStepper />
+                                                </NumberInputStepper>
+                                            </NumberInput>
+                                        </VStack>
                                     ))}
                                 </Grid>
                             </Box>

@@ -42,6 +42,7 @@ import PodiumPage from "./pages/PodiumPage";
 import ComparatorPage from "./pages/ComparatorPage";
 import { getDiscordAvatarUrl } from "./utils/discord";
 import NotFound from "./pages/NotFound";
+import CustomLink from "./components/ui/CustomLink";
 
 function ColorModeSwitcher() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -191,9 +192,7 @@ const MainRouter = () => {
     }
 
     const encodedRedirectUri = encodeURIComponent(redirectUri);
-    const scope = encodeURIComponent(
-      "identify guilds guilds.members.read"
-    );
+    const scope = encodeURIComponent("identify guilds guilds.members.read");
     const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordClientId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=${scope}`;
 
     window.location.href = discordAuthUrl;
@@ -224,7 +223,9 @@ const MainRouter = () => {
           const decoded = jwtDecode(token) as any;
           setIsLoggedIn(true);
           setIsAdmin(decoded.isAdmin || false);
-          setIsGuildManager(decoded.role === 'chef' || decoded.role === 'sous-chef');
+          setIsGuildManager(
+            decoded.role === "chef" || decoded.role === "sous-chef"
+          );
 
           // Construire l'URL de l'avatar Discord si disponible
           let avatarUrl = null;
@@ -288,9 +289,11 @@ const MainRouter = () => {
               name={userInfo?.username}
             />
             <VStack spacing={0} align="start">
-              <Text fontSize="sm" fontWeight="medium" lineHeight="short">
-                {userInfo?.global_name}
-              </Text>
+              <CustomLink
+                to={`/joueur/${userInfo?.id}`}
+                text={`${userInfo?.global_name}`}
+                textSize="sm"
+              />
               {isAdmin && (
                 <Text fontSize="xs" color="orange.500" lineHeight="short">
                   Admin
@@ -338,7 +341,8 @@ const MainRouter = () => {
         >
           <Flex gap={2} align="center">
             {menuItems.map((item) => {
-              if (item.adminOrGuildManagerOnly && !isAdmin && !isGuildManager) return null;
+              if (item.adminOrGuildManagerOnly && !isAdmin && !isGuildManager)
+                return null;
               return (
                 <Button
                   key={item.name}
@@ -400,7 +404,12 @@ const MainRouter = () => {
                 {
                   /* Menu items pour mobile */
                   menuItems.map((item) => {
-                    if (item.adminOrGuildManagerOnly && !isAdmin && !isGuildManager) return null;
+                    if (
+                      item.adminOrGuildManagerOnly &&
+                      !isAdmin &&
+                      !isGuildManager
+                    )
+                      return null;
                     return (
                       <Button
                         key={item.name}
@@ -408,7 +417,9 @@ const MainRouter = () => {
                         to={item.path}
                         variant="ghost"
                         onClick={onClose}
-                        leftIcon={item.icon ? <Text>{item.icon}</Text> : undefined}
+                        leftIcon={
+                          item.icon ? <Text>{item.icon}</Text> : undefined
+                        }
                         justifyContent="flex-start"
                         px={4}
                         py={3}
@@ -434,9 +445,11 @@ const MainRouter = () => {
                         name={userInfo?.username}
                       />
                       <VStack spacing={0} align="start">
-                        <Text fontSize="sm" fontWeight="medium">
-                          {userInfo?.global_name}
-                        </Text>
+                        <CustomLink
+                          to={`/joueur/${userInfo?.id}`}
+                          text={`${userInfo?.global_name}`}
+                          textSize="sm"
+                        />
                         {isAdmin && (
                           <Text fontSize="xs" color="orange.500">
                             Admin

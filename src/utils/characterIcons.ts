@@ -38,7 +38,8 @@ const killerIcons = {
   "Stern Ritter": "https://i.ibb.co/RS3Xg1b/killer-stern.png",
   "Stern Ritter +": "https://i.ibb.co/yc9ssfnK/stern.png",
   "Aucun": "https://i.ibb.co/6F5bqFw/killer-aucun.png",
-  "Aucun +": "https://i.ibb.co/r2cJ4Zb9/aucun.png"
+  "Aucun +": "https://i.ibb.co/r2cJ4Zb9/aucun.png",
+  "Toutes": "https://i.ibb.co/LZbZNx5/cat-tous.png"
 };
 
 // Mapping des catégories avec leurs icônes
@@ -80,7 +81,7 @@ export const getKillerIcon = (killer: string): string | null => {
  * @returns L'URL de l'icône ou null si non trouvée
  */
 export const getCategoryIcon = (category: string): string | null => {
-  return categoryIcons[category as keyof typeof categoryIcons] || null;
+  return categoryIcons[category as keyof typeof categoryIcons] || categoryIcons["Toutes"];
 };
 
 /**

@@ -4,45 +4,51 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   
-  <!-- Page d'accueil -->
+  <!-- Pages principales -->
   <url>
     <loc>https://bbs-schrift.fr/</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
-  
-  <!-- Pages principales -->
   <url>
     <loc>https://bbs-schrift.fr/personnages</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  
   <url>
     <loc>https://bbs-schrift.fr/cycles</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  
   <url>
     <loc>https://bbs-schrift.fr/joueurs</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
-  
   <url>
     <loc>https://bbs-schrift.fr/scores</loc>
-    <lastmod>2025-11-12</lastmod>
+    <lastmod>2025-12-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
+  <url>
+    <loc>https://bbs-schrift.fr/podium</loc>
+    <lastmod>2025-12-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bbs-schrift.fr/comparateur</loc>
+    <lastmod>2025-12-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
   
   <!-- Note: Les URL dynamiques (personnages individuels, cycles, rotations) 
-       doivent être générées automatiquement par un script ou au build time.
-       Pour le moment, on inclut les pages statiques principales. -->
+       peuvent être ajoutées ici si nécessaire -->
 
 </urlset>

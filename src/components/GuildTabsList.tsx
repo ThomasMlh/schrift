@@ -404,9 +404,9 @@ const GuildTabsList = ({
               borderTopRadius="0"
               bg="white"
               _dark={{ bg: "gray.800" }}
-              boxShadow="md"
               maxH="60vh"
               overflowY="auto"
+              p={3}
             >
               <Box p={4}>
                 <Text fontSize="xs" color="gray.500">

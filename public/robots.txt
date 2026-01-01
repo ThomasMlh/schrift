@@ -13,6 +13,5 @@ Allow: /personnages
 Allow: /cycles
 Allow: /joueurs
 Allow: /scores
-
-# Crawl delay (optional)
-Crawl-delay: 1
+Allow: /podium
+Allow: /comparateur

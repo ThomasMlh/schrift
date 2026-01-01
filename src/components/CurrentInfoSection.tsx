@@ -31,6 +31,8 @@ export const CurrentInfoSection = ({}: CurrentInfoSectionProps = {}) => {
   const [isRotationActive, setIsRotationActive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const shadowColor = useColorModeValue("lg", "dark-lg");
+
 
   // API URL depuis les variables d'environnement
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -238,7 +240,7 @@ export const CurrentInfoSection = ({}: CurrentInfoSectionProps = {}) => {
           borderRadius="xl"
           borderWidth="1px"
           borderColor={borderColor}
-          boxShadow="lg"
+          boxShadow={shadowColor}
           overflow="hidden"
         >
           {error ? (

@@ -6,24 +6,41 @@ interface AttackTypeBadgeProps {
 }
 
 export const AttackTypeBadge = ({ attackType, size = "16px" }: AttackTypeBadgeProps) => {
-  const getColor = () => {
-    switch (attackType?.toUpperCase()) {
-      case 'R':
-        return 'red.500';
-      case 'B':
-        return 'blue.500';
-      default:
-        return 'gray.400';
-    }
-  };
-
+  const type = attackType?.toUpperCase();
+  
+  if (type === 'R') {
+    return (
+      <Box
+        width={size}
+        height={size}
+        borderRadius="50%"
+        backgroundColor="red.500"
+        title="Rouge"
+      />
+    );
+  }
+  
+  if (type === 'B') {
+    return (
+      <Box
+        width={size}
+        height={size}
+        borderRadius="50%"
+        backgroundColor="blue.500"
+        title="Bleu"
+      />
+    );
+  }
+  
+  // Cercle avec les 2 couleurs (rouge et bleu)
   return (
     <Box
       width={size}
       height={size}
       borderRadius="50%"
-      backgroundColor={getColor()}
-      title={attackType === 'R' ? 'Rouge' : attackType === 'B' ? 'Bleu' : 'Inconnu'}
+      background="linear-gradient(90deg, red.500 50%, blue.500 50%)"
+      bgGradient="linear(to-r, red.500 50%, blue.500 50%)"
+      title="Rouge et Bleu"
     />
   );
 };

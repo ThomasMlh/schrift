@@ -27,6 +27,9 @@ const RotationDetailPage = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     
+    // Constante : chaque cycle a toujours 20 rotations
+    const totalRotations = 20;
+    
     // États pour le filtre des guildes
     const [guilds, setGuilds] = useState<IGuild[]>([]);
     const [selectedGuild, setSelectedGuild] = useState<string>(''); // ID de la guilde ou vide pour "toutes"
@@ -173,8 +176,22 @@ const RotationDetailPage = () => {
         setSelectedGuild(newGuildId);
         setCurrentPage(1); // Reset à la première page quand on change le filtre
         
-        // Faire la requête API avec le nouveau filtre sans rafraîchir la page
+        // Faire la requête API avec le nouveau filtre
         await loadScores(newGuildId);
+    };
+
+    const handlePreviousRotation = () => {
+        const currentPosition = parseInt(position || '1');
+        if (currentPosition > 1) {
+            navigate(`/cycle/${cycleId}/rotation/${currentPosition - 1}`);
+        }
+    };
+
+    const handleNextRotation = () => {
+        const currentPosition = parseInt(position || '1');
+        if (currentPosition < totalRotations) {
+            navigate(`/cycle/${cycleId}/rotation/${currentPosition + 1}`);
+        }
     };
 
     const renderRankBadge = (rankInfo: IRankInfo) => {
@@ -237,31 +254,12 @@ const RotationDetailPage = () => {
         );
     }
 
-    if (error) {
-        return (
-            <Container maxW="container.xl" py={8}>
-                <VStack spacing={6} align="center">
-                    <Text fontSize="xl" color="red.500">
-                        {error}
-                    </Text>
-                    <Button
-                        leftIcon={<ArrowBackIcon />}
-                        colorScheme="blue"
-                        onClick={() => navigate(-1)}
-                    >
-                        Retour
-                    </Button>
-                </VStack>
-            </Container>
-        );
-    }
-
     return (
         <Container maxW="container.xl" py={8}>
             <VStack spacing={6} align="stretch">
                 {/* Header */}
                 <VStack spacing={4} align="stretch">
-                    <HStack justify="space-between" align="center">
+                    <HStack justify="space-between" align="center" flexWrap="wrap" gap={2}>
                         <Button
                             leftIcon={<ArrowBackIcon />}
                             variant="outline"
@@ -270,6 +268,27 @@ const RotationDetailPage = () => {
                         >
                             Retour
                         </Button>
+                        
+                        <HStack spacing={2}>
+                            <Button
+                                leftIcon={<ChevronLeftIcon />}
+                                variant="outline"
+                                size="sm"
+                                onClick={handlePreviousRotation}
+                                isDisabled={parseInt(position || '1') <= 1}
+                            >
+                                Précédente
+                            </Button>
+                            <Button
+                                rightIcon={<ChevronRightIcon />}
+                                variant="outline"
+                                size="sm"
+                                onClick={handleNextRotation}
+                                isDisabled={parseInt(position || '1') >= totalRotations}
+                            >
+                                Suivante
+                            </Button>
+                        </HStack>
                     </HStack>
                     
                     <VStack align="start" spacing={2}>
