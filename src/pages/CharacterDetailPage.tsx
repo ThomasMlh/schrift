@@ -188,7 +188,7 @@ const CharacterDetailPage = () => {
                             align={{ base: "center", md: "flex-start" }}
                         >
                             {/* Image du personnage */}
-                            <Box flexShrink={0}>
+                            <VStack flexShrink={0}>
                                 {character.link ? (
                                     <Avatar
                                         size="2xl"
@@ -215,7 +215,21 @@ const CharacterDetailPage = () => {
                                         ?
                                     </Box>
                                 )}
-                            </Box>
+                                <Badge
+                                    mt={2}
+                                    colorScheme="purple"
+                                    fontSize="xs"
+                                    fontWeight="bold"
+                                    px={3}
+                                    py={1}
+                                    borderRadius="full"
+                                    textAlign="center"
+                                    variant="solid"
+                                    boxShadow="sm"
+                                >
+                                    {character.rarity}
+                                </Badge>
+                            </VStack>
 
                             {/* Informations principales */}
                             <VStack spacing={4} align={{ base: "center", md: "flex-start" }} flex={1}>
