@@ -9,7 +9,7 @@ import { ArrowBackIcon, ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/ico
 import type { IRotationTemplate, IScoreWithUser, IScoreDetailApiResponse, IRankInfo, IGuild } from "@/interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { UserDisplay } from "@/components/ui/UserDisplay";
-import { getScoreDisplayValue } from "@/utils/scores";
+import { ScoreBadge } from "@/components/ui/ScoreBadge";
 
 const RotationDetailPage = () => {
     const { cycleId, position } = useParams<{ cycleId: string; position: string }>();
@@ -392,9 +392,7 @@ const RotationDetailPage = () => {
                                                         <UserDisplay user={score.user} />
                                                     </Td>
                                                     <Td isNumeric>
-                                                        <Badge colorScheme={getScoreDisplayValue(score.score)} fontWeight="bold" fontSize={{ base: "xs", md: "medium" }}>
-                                                            {score.score.toLocaleString()}
-                                                        </Badge>
+                                                        <ScoreBadge score={score.score} fontSize={{ base: "xs", md: "medium" }} />
                                                     </Td>
                                                     <Td display={{ base: "none", sm: "table-cell" }}>
                                                         <Text fontSize="sm" color="gray.500">

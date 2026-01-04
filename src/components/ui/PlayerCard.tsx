@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { UserDisplay } from "./UserDisplay";
 import type { IPodiumPlayer, IUser } from "@/interfaces";
+import { ScoreBadge } from "./ScoreBadge";
 
 // Fonction pour obtenir l'affichage du rang (comme dans PodiumSection)
 const getRankDisplay = (rank: number) => {
@@ -75,18 +76,10 @@ const PlayerCard = (
               />
             </HStack>
             <VStack spacing={1} align="end">
-              <Badge
-                colorScheme="blue"
-                variant="solid"
-                fontSize="md"
-                px={3}
-                py={1}
-              >
-                {player.score !== undefined
-                  ? player.score.toLocaleString()
-                  : player.averageScore?.toLocaleString() || "0"}{" "}
-                pts
-              </Badge>
+              <ScoreBadge
+                score={player.score ? player.score : player.averageScore}
+                fontSize={{ base: "xs", md: "medium" }}
+              />
             </VStack>
           </Flex>
         ) : (
@@ -113,18 +106,10 @@ const PlayerCard = (
               />
             </HStack>
             <VStack spacing={1} align="center">
-              <Badge
-                colorScheme="blue"
-                variant="solid"
-                fontSize={{ base: "sm", md: "md" }}
-                px={3}
-                py={1}
-              >
-                {player.score !== undefined
-                  ? player.score.toLocaleString()
-                  : player.averageScore?.toLocaleString() || "0"}{" "}
-                pts
-              </Badge>
+              <ScoreBadge
+                score={player.score ? player.score : player.averageScore}
+                fontSize={{ base: "xs", md: "medium" }}
+              />
               <Text fontSize="xs" color="gray.500">
                 {player.score !== undefined
                   ? `Raw: ${player.raw_score?.toLocaleString() || 0}`
