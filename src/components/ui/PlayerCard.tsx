@@ -2,9 +2,9 @@ import {
   Badge,
   Card,
   CardBody,
+  Center,
   Flex,
   HStack,
-  Text,
   VStack
 } from "@chakra-ui/react";
 import { UserDisplay } from "./UserDisplay";
@@ -32,12 +32,11 @@ const getRankDisplay = (rank: number) => {
       colorScheme={colorScheme}
       variant="solid"
       fontSize="sm"
-      px={2}
+      px={3}
       py={1}
       borderRadius="full"
-      display="flex"
-      alignItems="center"
-      gap={1}
+      minW={{ base: "55px", md: "auto" }}
+      textAlign="center"
     >
       {emoji}#{rank}
     </Badge>
@@ -73,6 +72,7 @@ const PlayerCard = (
                 }
                 avatarSize="sm"
                 textSize="sm"
+                rainbowText={player.rank === 1}
               />
             </HStack>
             <VStack spacing={1} align="end">
@@ -85,8 +85,8 @@ const PlayerCard = (
         ) : (
           // Layout vertical pour mobile ou mode compact
           <VStack spacing={3} align="stretch">
-            <HStack spacing={3} justify="center">
-              {getRankDisplay(player.rank)}
+            <Center>{getRankDisplay(player.rank)}</Center>
+            <VStack spacing={1} align="center">
               <UserDisplay
                 user={
                   {
@@ -103,20 +103,19 @@ const PlayerCard = (
                 }
                 avatarSize={isMobile ? "xs" : "sm"}
                 textSize={isMobile ? "xs" : "sm"}
+                rainbowText={player.rank === 1}
               />
-            </HStack>
-            <VStack spacing={1} align="center">
               <ScoreBadge
                 score={player.score ? player.score : player.averageScore}
                 fontSize={{ base: "xs", md: "medium" }}
               />
-              <Text fontSize="xs" color="gray.500">
+              {/* <Text fontSize="xs" color="gray.500">
                 {player.score !== undefined
                   ? `Raw: ${player.raw_score?.toLocaleString() || 0}`
                   : `${player.totalScores || 0} rotation${
                       (player.totalScores || 0) > 1 ? "s" : ""
                     }`}
-              </Text>
+              </Text> */}
               {/* {player.is_differential && (
                                     <Badge colorScheme="purple" size="sm">Différentiel</Badge>
                                 )} */}

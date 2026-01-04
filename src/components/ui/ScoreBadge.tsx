@@ -12,7 +12,8 @@ export const ScoreBadge = ({ score, fontSize = { base: "xs", md: "medium" } }: S
     }
 
     const getScoreStyle = (value: number) => {
-        if (value > 605000000) {
+        if (value >= 600000000) {
+            // Arc-en-ciel (buff QG)
             return {
                 textGradient: "linear-gradient(90deg, #ff6b6b, #ffa07a, #ffd966, #90ee90, #87ceeb, #9370db)",
                 bgSize: "300% 300%",
@@ -20,34 +21,53 @@ export const ScoreBadge = ({ score, fontSize = { base: "xs", md: "medium" } }: S
                 fontWeight: "bold",
                 isRainbow: true
             };
-        } else if (value >= 501000000) {
+        } else if (value >= 566000000) {
+            // Bleu (avant buff)
+            return {
+                colorScheme: "blue",
+                variant: "solid",
+                isRainbow: false
+            };
+        } else if (value >= 400000000) {
+            // Violet (Clear Vague Extra 3 et 4)
+            return {
+                colorScheme: "purple",
+                variant: "solid",
+                isRainbow: false
+            };
+        } else if (value >= 300000000) {
+            // Vert (Clear Vague Extra 1 et 2)
             return {
                 colorScheme: "green",
                 variant: "solid",
                 isRainbow: false
             };
-        } else if (value >= 401000000) {
+        } else if (value >= 210000000) {
+            // Jaune (clear très diff à non clear cauchemar)
             return {
-                colorScheme: "teal",
+                colorScheme: "yellow",
                 variant: "solid",
                 isRainbow: false
             };
-        } else if (value >= 251000000) {
+        } else if (value >= 72000000) {
+            // Orange (clear diff à non clear très diff)
+            return {
+                colorScheme: "orange",
+                variant: "solid",
+                isRainbow: false
+            };
+        } else if (value >= 22500000) {
+            // Rouge (clear normal à non clear diff)
             return {
                 colorScheme: "red",
                 variant: "solid",
                 isRainbow: false
             };
-        } else if (value >= 151000000) {
+        } else {
+            // Marron (non clear normal)
             return {
                 bg: "#8B4513",
                 color: "white",
-                variant: "solid",
-                isRainbow: false
-            };
-        } else {
-            return {
-                colorScheme: "blackAlpha",
                 variant: "solid",
                 isRainbow: false
             };

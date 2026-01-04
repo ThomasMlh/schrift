@@ -1,4 +1,4 @@
-import { HStack, VStack, Text, Avatar } from "@chakra-ui/react";
+import { HStack, VStack, Text, Avatar, Box } from "@chakra-ui/react";
 import { getUserAvatarUrl } from "@/utils/discord";
 import type { IUser } from "@/interfaces";
 import CustomLink from "./CustomLink";
@@ -11,6 +11,7 @@ interface UserDisplayProps {
   showUsername?: boolean;
   textSize?: "xs" | "sm" | "md" | "lg";
   roleBadge?: boolean;
+  rainbowText?: boolean;
 }
 
 export const UserDisplay = ({
@@ -18,7 +19,8 @@ export const UserDisplay = ({
   avatarSize = "sm",
   spacing = 3,
   showUsername = true,
-  roleBadge = false
+  roleBadge = false,
+  rainbowText = false
 }: UserDisplayProps) => {
   // Si pas d'utilisateur, afficher un fallback
   if (!user) {
@@ -46,10 +48,32 @@ export const UserDisplay = ({
         name={user.bbs_name || user.global_name}
       />
       <VStack spacing={0} align="start">
-        <CustomLink
-          to={`/joueur/${user._id}`}
-          text={user.bbs_name || user.global_name}
-        />
+        {rainbowText ? (
+          <Box
+            as="span"
+            bgGradient="linear-gradient(90deg, #ff6b6b, #ffa07a, #ffd966, #90ee90, #87ceeb, #9370db)"
+            backgroundSize="300% 300%"
+            backgroundClip="text"
+            animation="rainbow 6s ease infinite"
+            fontWeight="medium"
+            sx={{
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              "@keyframes rainbow": {
+                "0%": { backgroundPosition: "0% 50%" },
+                "50%": { backgroundPosition: "100% 50%" },
+                "100%": { backgroundPosition: "0% 50%" }
+              }
+            }}
+          >
+            {user.bbs_name || user.global_name}
+          </Box>
+        ) : (
+          <CustomLink
+            to={`/joueur/${user._id}`}
+            text={user.bbs_name || user.global_name}
+          />
+        )}
         {showUsername && user.global_name && (
           <Text as="span" fontSize="xs" color="gray.500">
             {user.global_name}
