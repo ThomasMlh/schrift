@@ -214,34 +214,6 @@ function generatePrerenderedHTML(route) {
     '  <meta name="prerender-status-code" content="200">\n  </head>'
   );
 
-  // IMPORTANT: Injecter du contenu statique dans le body pour Google
-  // Ce contenu sera remplacé par React, mais Google le verra lors du crawl initial
-  if (route.content) {
-    // D'abord, remplacer tout le contenu du div root (au cas où il y en a déjà)
-    html = html.replace(
-      /<div id="root">[\s\S]*?<\/div>\s*<\/body>/,
-      `<div id="root">
-      <noscript>
-        <style>
-          .prerender-content { font-family: system-ui; max-width: 800px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
-          .prerender-content h1 { color: #2D3748; font-size: 2rem; margin-bottom: 1rem; }
-          .prerender-content h2 { color: #4A5568; font-size: 1.5rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
-          .prerender-content h3 { color: #718096; font-size: 1.25rem; margin-top: 1rem; margin-bottom: 0.5rem; }
-          .prerender-content ul { margin-left: 1.5rem; }
-          .prerender-content li { margin-bottom: 0.5rem; }
-          .prerender-content a { color: #3182CE; text-decoration: none; }
-          .prerender-content a:hover { text-decoration: underline; }
-        </style>
-        <div class="prerender-content">${route.content}</div>
-      </noscript>
-      <div class="prerender-content" style="font-family: system-ui; max-width: 800px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6;">
-        ${route.content}
-      </div>
-    </div>
-  </body>`
-    );
-  }
-
   return html;
 }
 
