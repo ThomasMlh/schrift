@@ -4,8 +4,9 @@ Allow: /
 # Sitemap
 Sitemap: https://bbs-schrift.fr/sitemap.xml
 
-# Disallow admin pages
+# Disallow admin pages and private user profiles
 Disallow: /admin
+Disallow: /joueur/
 
 # Allow important pages
 Allow: /

@@ -16,7 +16,7 @@ export default function CharactersPage() {
   return (
     <>
       <SEOHead
-        title="Personnages Bleach Brave Souls - Base de données complète | Schrift BBS"
+        title="Schrift BBS - Base de données complète"
         description="Découvrez tous les personnages de Bleach Brave Souls avec leurs statistiques, affinités, types d'attaque et informations détaillées. Base de données mise à jour régulièrement."
         keywords="Bleach Brave Souls, BBS, personnages, statistiques, affinités, base de données, characters"
         url="https://bbs-schrift.fr/personnages"

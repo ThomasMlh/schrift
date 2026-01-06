@@ -261,7 +261,7 @@ const PodiumPage = () => {
   return (
     <>
       <SEOHead
-        title="Podium des Joueurs - Bleach Brave Souls | Schrift BBS"
+        title="Schrift BBS - Podium des Joueurs - Bleach Brave Souls"
         description="Découvrez tous les joueurs de Bleach Brave Souls. Consultez leurs statistiques, classements et informations de guilde."
         keywords="joueurs, classements, statistiques"
         url="https://bbs-schrift.fr/joueurs"

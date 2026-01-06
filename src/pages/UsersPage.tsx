@@ -16,7 +16,7 @@ const UsersPage = () => {
   return (
     <>
       <SEOHead
-        title="Liste des joueurs - Bleach Brave Souls | Schrift BBS"
+        title="Schrift BBS - Liste des joueurs"
         description="Découvrez tous les joueurs de Bleach Brave Souls. Consultez leurs statistiques, classements et informations de guilde."
         keywords="joueurs, classements, statistiques"
         url="https://bbs-schrift.fr/joueurs"

@@ -19,6 +19,7 @@ import {
 import type { IUser } from "../interfaces";
 import { getUserAvatarUrl } from "../utils/discord";
 import { formatRoleName } from "@/utils/user";
+import { SEOHead } from "@/components/SEOHead";
 
 export default function UserPage() {
   const { userId } = useParams<{ userId: string }>();
@@ -144,10 +145,17 @@ export default function UserPage() {
   };
 
   return (
-    <Container maxW="container.md" py={8}>
-      <Card>
-        <CardBody>
-          <VStack spacing={6} align="center">
+    <>
+      <SEOHead
+        title={`${user.bbs_name || user.global_name} - Profil Joueur`}
+        description={`Profil de ${user.bbs_name || user.global_name}${user.guild_name ? ` - Guilde ${user.guild_name}` : ''}`}
+        url={`https://bbs-schrift.fr/joueur/${userId}`}
+        noIndex={true}
+      />
+      <Container maxW="container.md" py={8}>
+        <Card>
+          <CardBody>
+            <VStack spacing={6} align="center">
             <Avatar
               size="2xl"
               src={user.avatar}
@@ -187,5 +195,6 @@ export default function UserPage() {
 
       <Center mt={5}>Stats à venir...</Center>
     </Container>
+    </>
   );
 }

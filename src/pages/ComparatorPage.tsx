@@ -295,7 +295,7 @@ const ComparatorPage: React.FC = () => {
   return (
     <>
       <SEOHead
-        title="Comparateur - Bleach Brave Souls | Schrift BBS"
+        title="Schrift BBS - Comparateur"
         description="Comparez les performances entre joueurs ou guildes dans Bleach Brave Souls. Analysez les scores moyens, totaux et plus encore."
         keywords="comparateur, comparaison, joueurs, guildes, scores, statistiques"
         url="https://bbs-schrift.fr/comparateur"

@@ -9,16 +9,18 @@ interface SEOHeadProps {
   url?: string;
   type?: 'website' | 'article';
   structuredData?: object;
+  noIndex?: boolean;
 }
 
 export const SEOHead = ({
   title = "Schrift - Guildes et Scores Bleach Brave Souls",
   description = "Plateforme de gestion des guildes et scores pour Bleach Brave Souls. Suivez vos rotations, cycles et classements de guilde.",
   keywords = "",
-  image = "https://bbs-schrift.fr/logo.png",
+  image = "https://bbs-schrift.fr/android-chrome-512x512.png",
   url = "https://bbs-schrift.fr",
   type = "website",
-  structuredData
+  structuredData,
+  noIndex = false
 }: SEOHeadProps) => {
   // Keywords génériques appliqués à toutes les pages
   const baseKeywords = "Bleach Brave Souls, BBS, Schrift, guildes, scores, BBS-Schrift, BBS Schrift";
@@ -43,6 +45,9 @@ export const SEOHead = ({
       {/* Basic meta tags */}
       <meta name="description" content={description} />
       <meta name="keywords" content={allKeywords} />
+      
+      {/* Robots meta - noindex pour pages privées */}
+      {noIndex && <meta name="robots" content="noindex, nofollow" />}
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
