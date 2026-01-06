@@ -5,10 +5,10 @@ interface ScoreBadgeProps {
     fontSize?: string | { base?: string; md?: string };
 }
 
-export const ScoreBadge = ({ score, fontSize = { base: "xs", md: "medium" } }: ScoreBadgeProps) => {
+export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" } }: ScoreBadgeProps) => {
     // Vérification de sécurité
-    if (score === undefined || score === null) {
-        return <Badge colorScheme="gray">N/A</Badge>;
+    if (score === undefined || score === null || score === 0) {
+        return <Badge colorScheme="gray">Miss</Badge>;
     }
 
     const getScoreStyle = (value: number) => {

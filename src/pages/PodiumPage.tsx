@@ -18,15 +18,12 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Pagination as PaginationComponent } from "../components/ui/Pagination";
 import { HeroSection } from "../components/HeroSection";
-import type {
-  ICycle,
-  IGuild,
-  IPodiumResponse
-} from "../interfaces";
+import type { ICycle, IGuild, IPodiumResponse } from "../interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { SEOHead } from "@/components/SEOHead";
 import PlayerCard from "@/components/ui/PlayerCard";
 import CustomLink from "@/components/ui/CustomLink";
+import { ScoreLegend } from "@/components/ui/ScoreLegend";
 
 const PodiumPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -141,13 +138,45 @@ const PodiumPage = () => {
   };
 
   // Fonction pour charger les données de référence
-  const loadReferenceData = async () => {
+  const loadReferenceData = async (
+    shouldSelectDefaultCycle: boolean = false
+  ) => {
     try {
       // Charger les cycles
       const cyclesResponse = await fetch(`${apiUrl}/api/cycles`);
       if (cyclesResponse.ok) {
         const cyclesData = await cyclesResponse.json();
-        setCycles(cyclesData.data || []);
+        const cyclesList = cyclesData.data || [];
+        setCycles(cyclesList);
+
+        // Sélectionner le cycle approprié si aucun cycle n'est sélectionné
+        if (shouldSelectDefaultCycle && cyclesList.length > 0) {
+          const now = new Date();
+          let cycleToSelect = cyclesList[0]; // Par défaut, le premier cycle de l'API
+
+          // Chercher le cycle en cours (celui dont les rotations incluent la date actuelle)
+          for (const cycle of cyclesList) {
+            if (cycle.rotations && cycle.rotations.length > 0) {
+              const firstRotation = cycle.rotations[0];
+              const lastRotation = cycle.rotations[cycle.rotations.length - 1];
+
+              if (firstRotation.start_date && lastRotation.end_date) {
+                const startDate = new Date(firstRotation.start_date);
+                const endDate = new Date(lastRotation.end_date);
+
+                // Vérifier si la date actuelle est comprise entre start_date et end_date
+                if (now >= startDate && now <= endDate) {
+                  cycleToSelect = cycle;
+                  break;
+                }
+              }
+            }
+          }
+
+          setSelectedCycleName(cycleToSelect.name);
+          loadPodium(1, cycleToSelect.name, "", "");
+          updateURLParams(cycleToSelect.name, "", "", itemsPerPage, 1);
+        }
       }
 
       // Charger les guildes
@@ -177,13 +206,19 @@ const PodiumPage = () => {
     setSelectedRotationId(currentRotationId);
     setSelectedGuildName(currentGuildName);
 
-    loadPodium(
-      currentPage,
-      currentCycleName,
-      currentRotationId,
-      currentGuildName
-    );
-    loadReferenceData();
+    if (currentCycleName) {
+      // Si un cycle est dans l'URL, charger le podium avec ces paramètres
+      loadPodium(
+        currentPage,
+        currentCycleName,
+        currentRotationId,
+        currentGuildName
+      );
+      loadReferenceData(false);
+    } else {
+      // Sinon, charger les données et sélectionner le cycle par défaut
+      loadReferenceData(true);
+    }
   }, []);
 
   // Gestionnaires d'événements
@@ -295,70 +330,84 @@ const PodiumPage = () => {
                 <Flex
                   direction={{ base: "column", md: "row" }}
                   gap={4}
-                  justify="center"
+                  justify="space-between"
                   align="center"
                   wrap="wrap"
                 >
-                  {/* Filtre par cycle */}
-                  <Select
-                    placeholder="Sélectionner un cycle"
-                    value={selectedCycleName}
-                    onChange={(e) => handleCycleChange(e.target.value)}
-                    maxW="200px"
+                  <Flex
+                    direction={{ base: "column", md: "row" }}
+                    gap={4}
+                    justify="center"
+                    align="center"
+                    wrap="wrap"
+                    flex={1}
                   >
-                    {cycles.map((cycle) => (
-                      <option key={cycle._id} value={cycle.name}>
-                        {cycle.name}
-                      </option>
-                    ))}
-                  </Select>
-                  {/* Filtre par rotation */}
-                  {selectedCycle && (
+                    {/* Filtre par cycle */}
                     <Select
-                      placeholder="Sélectionner une rotation"
-                      value={selectedRotationId}
-                      onChange={(e) => handleRotationChange(e.target.value)}
-                      maxW="300px"
+                      placeholder="Sélectionner un cycle"
+                      value={selectedCycleName}
+                      onChange={(e) => handleCycleChange(e.target.value)}
+                      maxW="200px"
                     >
-                      {selectedCycle.rotations.map((rotation: any) => (
-                        <option
-                          key={rotation.rotation_id}
-                          value={rotation.rotation_id}
-                        >
-                          #{rotation.position} - {rotation.killer} (
-                          {rotation.attack})
+                      {cycles.map((cycle) => (
+                        <option key={cycle._id} value={cycle.name}>
+                          {cycle.name}
                         </option>
                       ))}
                     </Select>
-                  )}
-                  {/* Filtre par guilde */}
-                  <Select
-                    placeholder="Toutes les guildes"
-                    value={selectedGuildName}
-                    onChange={(e) => handleGuildChange(e.target.value)}
-                    maxW="200px"
-                  >
-                    {guilds.map((guild) => (
-                      <option key={guild._id} value={guild.name}>
-                        {guild.name}
-                      </option>
-                    ))}
-                  </Select>
-                  {/* Éléments par page */}
-                  <Select
-                    value={itemsPerPage}
-                    onChange={(e) =>
-                      handleItemsPerPageChange(parseInt(e.target.value))
-                    }
-                    maxW="120px"
-                  >
-                    <option value={25}>25 / page</option>
-                    <option value={50}>50 / page</option>
-                    <option value={100}>100 / page</option>
-                  </Select>
-                  <Button onClick={resetFilters} variant="outline" minW="120px">
-                    Réinitialiser
-                  </Button>
+                    {/* Filtre par rotation */}
+                    {selectedCycle && (
+                      <Select
+                        placeholder="Sélectionner une rotation"
+                        value={selectedRotationId}
+                        onChange={(e) => handleRotationChange(e.target.value)}
+                        maxW="300px"
+                      >
+                        {selectedCycle.rotations.map((rotation: any) => (
+                          <option
+                            key={rotation.rotation_id}
+                            value={rotation.rotation_id}
+                          >
+                            #{rotation.position} - {rotation.killer} (
+                            {rotation.attack})
+                          </option>
+                        ))}
+                      </Select>
+                    )}
+                    {/* Filtre par guilde */}
+                    <Select
+                      placeholder="Toutes les guildes"
+                      value={selectedGuildName}
+                      onChange={(e) => handleGuildChange(e.target.value)}
+                      maxW="200px"
+                    >
+                      {guilds.map((guild) => (
+                        <option key={guild._id} value={guild.name}>
+                          {guild.name}
+                        </option>
+                      ))}
+                    </Select>
+                    {/* Éléments par page */}
+                    <Select
+                      value={itemsPerPage}
+                      onChange={(e) =>
+                        handleItemsPerPageChange(parseInt(e.target.value))
+                      }
+                      maxW="120px"
+                    >
+                      <option value={25}>25 / page</option>
+                      <option value={50}>50 / page</option>
+                      <option value={100}>100 / page</option>
+                    </Select>
+                    <Button
+                      onClick={resetFilters}
+                      variant="outline"
+                      minW="120px"
+                    >
+                      Réinitialiser
+                    </Button>
+                    <ScoreLegend />
+                  </Flex>
                 </Flex>
               </VStack>
               {/* Filtres actifs */}
@@ -393,7 +442,11 @@ const PodiumPage = () => {
                       alignItems="center"
                       gap={2}
                     >
-                      <CustomLink to={`/cycle/${selectedCycle?._id}/rotation/${podiumData.meta.rotationInfo.position}`} text={podiumData.meta.rotationInfo.killer} textSize="md" />
+                      <CustomLink
+                        to={`/cycle/${selectedCycle?._id}/rotation/${podiumData.meta.rotationInfo.position}`}
+                        text={podiumData.meta.rotationInfo.killer}
+                        textSize="md"
+                      />
                       <AttackTypeBadge
                         attackType={podiumData.meta.rotationInfo.attack}
                       />
@@ -446,16 +499,12 @@ const PodiumPage = () => {
                         <VStack spacing={3} align="stretch" flex={1}>
                           {podiumData.data
                             .slice(0, Math.ceil(podiumData.data.length / 2))
-                            .map((player) =>
-                              PlayerCard(player, false, true)
-                            )}
+                            .map((player) => PlayerCard(player, false, true))}
                         </VStack>
                         <VStack spacing={3} align="stretch" flex={1}>
                           {podiumData.data
                             .slice(Math.ceil(podiumData.data.length / 2))
-                            .map((player) =>
-                              PlayerCard(player, false, true)
-                            )}
+                            .map((player) => PlayerCard(player, false, true))}
                         </VStack>
                       </HStack>
                     ) : (

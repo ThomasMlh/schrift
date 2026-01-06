@@ -10,6 +10,7 @@ import type { IRotationTemplate, IScoreWithUser, IScoreDetailApiResponse, IRankI
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { UserDisplay } from "@/components/ui/UserDisplay";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
+import { ScoreLegend } from "@/components/ui/ScoreLegend";
 
 const RotationDetailPage = () => {
     const { cycleId, position } = useParams<{ cycleId: string; position: string }>();
@@ -324,25 +325,35 @@ const RotationDetailPage = () => {
                     borderColor={borderColor}
                     p={4}
                 >
-                    <HStack spacing={4} align="center">
-                        <Text fontSize="sm" fontWeight="medium" minW="max-content">
-                            Filtrer par guilde :
-                        </Text>
-                        <Select
-                            value={selectedGuild}
-                            onChange={handleGuildChange}
-                            placeholder="Toutes les guildes"
-                            size="sm"
-                            maxW="300px"
-                            isDisabled={isLoadingGuilds}
-                        >
-                            {guilds.map((guild) => (
-                                <option key={guild._id} value={guild._id}>
-                                    {guild.name}
-                                </option>
-                            ))}
-                        </Select>
-                    </HStack>
+                    <Flex
+                        direction={{ base: "column", md: "row" }}
+                        gap={4}
+                        align="center"
+                        justify="space-between"
+                    >
+                        <HStack spacing={4} align="center" flex={1}>
+                            <Text fontSize="sm" fontWeight="medium" minW="max-content">
+                                Filtrer par guilde :
+                            </Text>
+                            <Select
+                                value={selectedGuild}
+                                onChange={handleGuildChange}
+                                placeholder="Toutes les guildes"
+                                size="sm"
+                                maxW="300px"
+                                isDisabled={isLoadingGuilds}
+                            >
+                                {guilds.map((guild) => (
+                                    <option key={guild._id} value={guild._id}>
+                                        {guild.name}
+                                    </option>
+                                ))}
+                            </Select>
+                        </HStack>
+                        <Box>
+                            <ScoreLegend />
+                        </Box>
+                    </Flex>
                 </Box>
 
                 {/* Scores Table */}
@@ -392,7 +403,7 @@ const RotationDetailPage = () => {
                                                         <UserDisplay user={score.user} />
                                                     </Td>
                                                     <Td isNumeric>
-                                                        <ScoreBadge score={score.score} fontSize={{ base: "xs", md: "medium" }} />
+                                                        <ScoreBadge score={score.score} />
                                                     </Td>
                                                     <Td display={{ base: "none", sm: "table-cell" }}>
                                                         <Text fontSize="sm" color="gray.500">

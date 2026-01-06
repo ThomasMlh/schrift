@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { UserDisplay } from "./ui/UserDisplay";
+import { ScoreBadge } from "./ui/ScoreBadge";
 import type { IGuild, ICycle, IPodiumPlayer, IPodiumData } from "@/interfaces";
 
 interface PodiumSectionProps {
@@ -204,83 +205,36 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
 
   const renderPlayerCard = (
     player: IPodiumPlayer,
-    isMobile = false,
-    useHorizontalLayout = false
   ) => {
     return (
       <Card key={player.user_id} variant="outline">
         <CardBody p={{ base: 3, md: 4 }}>
-          {useHorizontalLayout && !isMobile ? (
-            // Layout horizontal pour les guildes spécifiques en desktop
-            <Flex justify="space-between" align="center">
-              <HStack spacing={4} flex={1}>
-                {getRankDisplay(player.rank)}
-                <UserDisplay
-                  user={{
-                    _id: player.user_id,
-                    username: player.username,
-                    global_name: player.global_name,
-                    discord_id: player.discord_id,
-                    bbs_name: player.bbs_name,
-                    avatar: player.avatar,
-                    guilde_id: "",
-                    role: "membre"
-                  }}
-                  avatarSize="sm"
-                  textSize="sm"
-                />
-              </HStack>
-              <VStack spacing={1} align="end">
-                <Badge
-                  colorScheme="blue"
-                  variant="solid"
-                  fontSize="md"
-                  px={3}
-                  py={1}
-                >
-                  {player.averageScore.toLocaleString()} pts
-                </Badge>
-                <Text fontSize="xs" color="gray.500">
-                  {player.totalScores} score{player.totalScores > 1 ? "s" : ""}
-                </Text>
-              </VStack>
-            </Flex>
-          ) : (
-            // Layout vertical pour Global ou mobile
-            <VStack spacing={3} align="stretch">
-              <HStack spacing={3} justify="center">
-                {getRankDisplay(player.rank)}
-                <UserDisplay
-                  user={{
-                    _id: player.user_id,
-                    username: player.global_name,
-                    global_name: player.global_name,
-                    discord_id: player.discord_id,
-                    bbs_name: player.bbs_name,
-                    avatar: player.avatar,
-                    guilde_id: "",
-                    role: "membre"
-                  }}
-                  avatarSize={isMobile ? "xs" : "sm"}
-                  textSize={isMobile ? "xs" : "sm"}
-                />
-              </HStack>
-              <VStack spacing={1} align="center">
-                <Badge
-                  colorScheme="blue"
-                  variant="solid"
-                  fontSize={{ base: "sm", md: "md" }}
-                  px={3}
-                  py={1}
-                >
-                  {player.averageScore.toLocaleString()} pts
-                </Badge>
-                <Text fontSize="xs" color="gray.500">
-                  {player.totalScores} score{player.totalScores > 1 ? "s" : ""}
-                </Text>
-              </VStack>
+            <VStack align="center">
+              {getRankDisplay(player.rank)}
+              <UserDisplay
+                user={{
+                  _id: player.user_id,
+                  username: player.username,
+                  global_name: player.global_name,
+                  discord_id: player.discord_id,
+                  bbs_name: player.bbs_name,
+                  avatar: player.avatar,
+                  guilde_id: "",
+                  role: "membre"
+                }}
+                avatarSize="sm"
+                textSize="sm"
+                rainbowText={player.rank === 1}
+              />
+
+              <ScoreBadge
+                score={player.averageScore}
+              />
+              <Text fontSize="sm" color="gray.500">
+                {player.totalScores} score
+                {player.totalScores > 1 ? "s" : ""}
+              </Text>
             </VStack>
-          )}
         </CardBody>
       </Card>
     );
@@ -389,7 +343,7 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
             <Box display={{ base: "block", lg: "none" }}>
               <VStack spacing={3} align="stretch">
                 {podiumData.podium.map((player) =>
-                  renderPlayerCard(player, true, false)
+                  renderPlayerCard(player)
                 )}
               </VStack>
             </Box>
@@ -403,23 +357,19 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
                   <VStack spacing={3} align="stretch" flex={1}>
                     {podiumData.podium
                       .slice(0, 5)
-                      .map((player) => renderPlayerCard(player, false, false))}
+                      .map((player) => renderPlayerCard(player))}
                   </VStack>
                   <VStack spacing={3} align="stretch" flex={1}>
                     {podiumData.podium
                       .slice(5, 10)
-                      .map((player) => renderPlayerCard(player, false, false))}
+                      .map((player) => renderPlayerCard(player))}
                   </VStack>
                 </HStack>
               ) : (
                 // Colonne unique
                 <VStack spacing={3} align="stretch">
                   {podiumData.podium.map((player) =>
-                    renderPlayerCard(
-                      player,
-                      false,
-                      selectedGuildId !== "global"
-                    )
+                    renderPlayerCard(player)
                   )}
                 </VStack>
               )}

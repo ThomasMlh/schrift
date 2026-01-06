@@ -78,7 +78,6 @@ const PlayerCard = (
             <VStack spacing={1} align="end">
               <ScoreBadge
                 score={player.score ? player.score : player.averageScore}
-                fontSize={{ base: "xs", md: "medium" }}
               />
             </VStack>
           </Flex>
@@ -107,7 +106,6 @@ const PlayerCard = (
               />
               <ScoreBadge
                 score={player.score ? player.score : player.averageScore}
-                fontSize={{ base: "xs", md: "medium" }}
               />
               {/* <Text fontSize="xs" color="gray.500">
                 {player.score !== undefined
