@@ -40,6 +40,7 @@ import UsersPage from "./pages/UsersPage";
 import AdminPage from "./pages/AdminPage";
 import PodiumPage from "./pages/PodiumPage";
 import ComparatorPage from "./pages/ComparatorPage";
+import GuidesPage from "./pages/GuidesPage";
 import { getDiscordAvatarUrl } from "./utils/discord";
 import NotFound from "./pages/NotFound";
 import CustomLink from "./components/ui/CustomLink";
@@ -101,6 +102,8 @@ const MainRouter = () => {
   const podiumHoverColor = useColorModeValue("pink.600", "pink.200");
   const comparatorHoverBg = useColorModeValue("cyan.50", "cyan.900");
   const comparatorHoverColor = useColorModeValue("cyan.600", "cyan.200");
+  const guidesHoverBg = useColorModeValue("orange.50", "orange.900");
+  const guidesHoverColor = useColorModeValue("orange.600", "orange.200");
 
   const menuItems = [
     {
@@ -144,6 +147,13 @@ const MainRouter = () => {
       icon: "⚔️",
       hoverBg: comparatorHoverBg,
       hoverColor: comparatorHoverColor
+    },
+    {
+      name: "Guides",
+      path: "/guides",
+      icon: "📚",
+      hoverBg: guidesHoverBg,
+      hoverColor: guidesHoverColor
     },
     {
       name: "Admin",
@@ -324,7 +334,7 @@ const MainRouter = () => {
       <Box
         as="nav"
         w="100%"
-        px={4}
+        px={{ base: 2, md: 4 }}
         py={2}
         id="main-navbar"
         boxShadow={"lg"}
@@ -338,8 +348,9 @@ const MainRouter = () => {
           justify="space-between"
           align="center"
           w="100%"
+          maxW="100%"
         >
-          <Flex gap={2} align="center">
+          <Flex gap={1} align="center" flexWrap="wrap" flex={1}>
             {menuItems.map((item) => {
               if (item.adminOrGuildManagerOnly && !isAdmin && !isGuildManager)
                 return null;
@@ -351,8 +362,8 @@ const MainRouter = () => {
                   variant="ghost"
                   onClick={onClose}
                   justifyContent="flex-start"
-                  px={4}
-                  py={3}
+                  px={3}
+                  py={2}
                   fontSize="sm"
                   fontWeight="medium"
                   borderRadius="lg"
@@ -367,7 +378,7 @@ const MainRouter = () => {
               );
             })}
           </Flex>
-          <Flex gap={2} align="center">
+          <Flex gap={1} align="center" flexShrink={0}>
             {renderAuthButton()}
             <ColorModeSwitcher />
           </Flex>
@@ -490,6 +501,7 @@ const MainRouter = () => {
         px={4}
         py={2}
         overflow="auto"
+        overflowX="hidden"
       >
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -519,6 +531,7 @@ const MainRouter = () => {
           <Route path="/joueur/:userId" element={<UserPage />} />
           <Route path="/podium" element={<PodiumPage />} />
           <Route path="/comparateur" element={<ComparatorPage />} />
+          <Route path="/guides" element={<GuidesPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Box>
