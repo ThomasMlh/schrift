@@ -1,6 +1,6 @@
 // Types généraux
 export type Page = "guilds" | "characters";
-export type AdminPage = "guilds" | "cycles" | "scores" | "users";
+export type AdminPage = "guilds" | "cycles" | "scores" | "users" | "guides";
 export type Role = "chef" | "sous-chef" | "membre";
 
 export interface IGuild {

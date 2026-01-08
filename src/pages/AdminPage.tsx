@@ -4,6 +4,7 @@ import GuildsAdminSection from "../components/GuildsAdminSection";
 import CyclesSection from "../components/CyclesSection";
 import ScoresSection from "../components/ScoresSection";
 import UsersTable from "../components/UsersTable";
+import GuidesAdminSection from "../components/GuidesAdminSection";
 import { useState, useMemo } from "react";
 import type { AdminPage as IAdminPage } from "../interfaces";
 
@@ -26,7 +27,7 @@ const AdminPage = () => {
   // Pages autorisées selon le rôle
   const allowedPages = useMemo(() => {
     if (isFullAdmin) {
-      return ['guilds', 'cycles', 'scores', 'users'] as IAdminPage[];
+      return ['guilds', 'cycles', 'scores', 'users', 'guides'] as IAdminPage[];
     } else if (isGuildManager) {
       return ['scores'] as IAdminPage[];
     }
@@ -72,6 +73,8 @@ const AdminPage = () => {
         return <ScoresSection />;
       case "users":
         return <UsersTable isAdminMode={true} />;
+      case "guides":
+        return <GuidesAdminSection />;
       case "guilds":
       default:
         return <GuildsAdminSection />;
@@ -101,7 +104,7 @@ const AdminPage = () => {
         <VStack spacing={4} mb={6} w="100%" maxW="800px" px={4}>
           {/* Navigation principale - seulement les sections autorisées */}
           <SimpleGrid 
-            columns={{ base: Math.min(allowedPages.length, 2), md: Math.min(allowedPages.length, 4) }} 
+            columns={{ base: Math.min(allowedPages.length, 2), md: Math.min(allowedPages.length, 5) }} 
             spacing={3} 
             w="100%"
           >
@@ -143,6 +146,16 @@ const AdminPage = () => {
                 size={{ base: "sm", md: "md" }}
               >
                 👥 Joueurs
+              </Button>
+            )}
+            {allowedPages.includes('guides') && (
+              <Button
+                variant={currentPage === "guides" ? "solid" : "outline"}
+                colorScheme="orange"
+                onClick={() => setCurrentPage("guides")}
+                size={{ base: "sm", md: "md" }}
+              >
+                📚 Guides
               </Button>
             )}
           </SimpleGrid>
