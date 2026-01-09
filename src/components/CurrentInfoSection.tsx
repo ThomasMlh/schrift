@@ -17,6 +17,7 @@ import { FaClock, FaCalendarAlt } from "react-icons/fa";
 import { AttackTypeBadge } from "./ui/AttackTypeBadge";
 import { AlterationImage } from "./ui/AlterationImage";
 import CustomLink from "./ui/CustomLink";
+import { useCycles } from "@/hooks/useAPI";
 
 interface CurrentInfoSectionProps {
 }
@@ -29,147 +30,102 @@ export const CurrentInfoSection = ({}: CurrentInfoSectionProps = {}) => {
     null
   );
   const [isRotationActive, setIsRotationActive] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const shadowColor = useColorModeValue("lg", "dark-lg");
 
-
-  // API URL depuis les variables d'environnement
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
-
-  // Fonction utilitaire pour les requêtes authentifiées
-  const authenticatedFetch = (url: string, options: RequestInit = {}) => {
-    const token = localStorage.getItem("userToken");
-    return fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers
-      }
-    });
-  };
+  // Utilisation de useSWR pour les cycles (cache automatique + déduplication)
+  const { cycles: allCycles, isLoading, error: cyclesError } = useCycles({ limit: 5, authenticated: true });
 
   // Hooks UI
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
-  // Charger les informations actuelles
+  // Traiter les cycles quand ils sont chargés
   useEffect(() => {
-    const loadCurrentInfo = async () => {
-      if (!apiUrl) {
-        setError("Configuration API manquante");
-        return;
-      }
+    if (!isLoading && allCycles.length > 0) {
+      const now = new Date();
+      let activeCycle = null;
+      let activeRotation = null;
+      let upcomingRotation = null;
+      let isRotationCurrentlyActive = false;
+      let isCycleCurrentlyActive = false;
 
-      try {
-        // Charger plusieurs cycles pour pouvoir identifier le prochain
-        const cyclesResponse = await authenticatedFetch(
-          `${apiUrl}/api/cycles?limit=5`
-        );
-        const cyclesData = await cyclesResponse.json();
+      // Chercher un cycle avec au moins une rotation active
+      for (const cycle of allCycles) {
+        if (cycle.rotations && cycle.rotations.length > 0) {
+          // Vérifier s'il y a une rotation active dans ce cycle
+          for (const rotation of cycle.rotations) {
+            if (rotation.start_date && rotation.end_date) {
+              const { realStartDate, realEndDate } = getRotationRealDates(
+                rotation.start_date,
+                rotation.end_date
+              );
 
-        let allCycles = [];
-
-        // La réponse peut être un tableau directement ou un objet avec success
-        if (Array.isArray(cyclesData)) {
-          allCycles = cyclesData;
-        } else if (cyclesData.success && cyclesData.data) {
-          allCycles = cyclesData.data;
-        }
-
-        if (allCycles.length > 0) {
-          const now = new Date();
-          let activeCycle = null;
-          let activeRotation = null;
-          let upcomingRotation = null;
-          let isRotationCurrentlyActive = false;
-          let isCycleCurrentlyActive = false;
-
-          // Chercher un cycle avec au moins une rotation active
-          for (const cycle of allCycles) {
-            if (cycle.rotations && cycle.rotations.length > 0) {
-              // Vérifier s'il y a une rotation active dans ce cycle
-              for (const rotation of cycle.rotations) {
-                if (rotation.start_date && rotation.end_date) {
-                  const { realStartDate, realEndDate } = getRotationRealDates(
-                    rotation.start_date,
-                    rotation.end_date
-                  );
-
-                  // Rotation actuellement active
-                  if (now >= realStartDate && now <= realEndDate) {
-                    activeCycle = cycle;
-                    activeRotation = rotation;
-                    isRotationCurrentlyActive = true;
-                    isCycleCurrentlyActive = true;
-                    break;
-                  }
-                }
+              // Rotation actuellement active
+              if (now >= realStartDate && now <= realEndDate) {
+                activeCycle = cycle;
+                activeRotation = rotation;
+                isRotationCurrentlyActive = true;
+                isCycleCurrentlyActive = true;
+                break;
               }
-              if (isRotationCurrentlyActive) break;
+            }
+          }
+          if (isRotationCurrentlyActive) break;
 
-              // Si pas de rotation active, chercher s'il y a au moins une rotation future dans ce cycle
-              if (!activeCycle) {
-                for (const rotation of cycle.rotations) {
-                  if (rotation.start_date && rotation.end_date) {
-                    const { realStartDate } = getRotationRealDates(
-                      rotation.start_date,
-                      rotation.end_date
-                    );
+          // Si pas de rotation active, chercher s'il y a au moins une rotation future dans ce cycle
+          if (!activeCycle) {
+            for (const rotation of cycle.rotations) {
+              if (rotation.start_date && rotation.end_date) {
+                const { realStartDate } = getRotationRealDates(
+                  rotation.start_date,
+                  rotation.end_date
+                );
 
-                    if (now < realStartDate) {
-                      activeCycle = cycle;
-                      upcomingRotation = rotation;
-                      isCycleCurrentlyActive = true;
-                      break;
-                    }
-                  }
+                if (now < realStartDate) {
+                  activeCycle = cycle;
+                  upcomingRotation = rotation;
+                  isCycleCurrentlyActive = true;
+                  break;
                 }
               }
             }
           }
-
-          // Si on a trouvé un cycle actif
-          if (activeCycle && isCycleCurrentlyActive) {
-            setCurrentCycle(activeCycle);
-            setIsCycleActive(true);
-            setNextCycle(null);
-
-            if (activeRotation && isRotationCurrentlyActive) {
-              setCurrentRotation(activeRotation);
-              setIsRotationActive(true);
-            } else if (upcomingRotation) {
-              setCurrentRotation(upcomingRotation);
-              setIsRotationActive(false);
-            } else {
-              setCurrentRotation(null);
-              setIsRotationActive(false);
-            }
-          } 
-          // Sinon, chercher le prochain cycle
-          else if (allCycles.length > 0) {
-            const nextCycleData = allCycles[0]; // Le plus récent
-            setCurrentCycle(null);
-            setNextCycle(nextCycleData);
-            setIsCycleActive(false);
-            setCurrentRotation(null);
-            setIsRotationActive(false);
-          }
         }
-      } catch (error) {
-        console.error(
-          "Erreur lors du chargement des informations actuelles:",
-          error
-        );
-        setError("Erreur lors du chargement des données");
-      } finally {
-        setIsLoading(false);
       }
-    };
 
-    loadCurrentInfo();
-  }, [apiUrl]);
+      // Si on a trouvé un cycle actif
+      if (activeCycle && isCycleCurrentlyActive) {
+        setCurrentCycle(activeCycle);
+        setIsCycleActive(true);
+        setNextCycle(null);
+
+        if (activeRotation && isRotationCurrentlyActive) {
+          setCurrentRotation(activeRotation);
+          setIsRotationActive(true);
+        } else if (upcomingRotation) {
+          setCurrentRotation(upcomingRotation);
+          setIsRotationActive(false);
+        } else {
+          setCurrentRotation(null);
+          setIsRotationActive(false);
+        }
+      } 
+      // Sinon, chercher le prochain cycle
+      else if (allCycles.length > 0) {
+        const nextCycleData = allCycles[0]; // Le plus récent
+        setCurrentCycle(null);
+        setNextCycle(nextCycleData);
+        setIsCycleActive(false);
+        setCurrentRotation(null);
+        setIsRotationActive(false);
+      }
+    }
+    
+    if (cyclesError) {
+      setError("Erreur lors du chargement des données");
+    }
+  }, [allCycles, isLoading, cyclesError]);
 
   const parseDate = (dateString: string) => {
     // Les dates semblent être au format DD/MM/YYYY

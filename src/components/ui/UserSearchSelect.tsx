@@ -24,14 +24,18 @@ export const UserSearchSelect = ({
     placeholder = "Choisir un utilisateur"
 }: UserSearchSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [filteredUsers, setFilteredUsers] = useState<IUser[]>(users);
+    const [filteredUsers, setFilteredUsers] = useState<IUser[]>(users || []);
     const menuRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const selectedUser = users.find(user => user._id === selectedUserId);
+    const selectedUser = users?.find(user => user._id === selectedUserId);
 
     // Filtrer les utilisateurs selon la recherche
     useEffect(() => {
+        if (!users) {
+            setFilteredUsers([]);
+            return;
+        }
         if (!searchQuery.trim()) {
             setFilteredUsers(users);
         } else {

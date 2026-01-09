@@ -8,7 +8,7 @@ import {
   Divider,
 } from "@chakra-ui/react";
 
-export function RotationsBuildsGuide() {
+const RotationsBuildsGuide = () => {
   return (
     <VStack spacing={6} align="stretch">
       <Box
@@ -34,3 +34,5 @@ export function RotationsBuildsGuide() {
     </VStack>
   );
 }
+
+export { RotationsBuildsGuide };

@@ -30,9 +30,10 @@ import { useSearchParams } from "react-router-dom";
 import { CustomSelect } from "../components/ui/CustomSelect";
 import { UserSearchSelect } from "../components/ui/UserSearchSelect";
 import { HeroSection } from "../components/HeroSection";
-import type { IComparisonResponse, IUser, ICycle, IGuild } from "../interfaces";
+import type { IComparisonResponse } from "../interfaces";
 import { SEOHead } from "@/components/SEOHead";
 import ComparisonEntity from "@/components/ui/ComparisonEntity";
+import { useUsers, useGuilds, useCycles, useRotations } from "@/hooks/useAPI";
 
 const ComparatorPage: React.FC = () => {
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -58,17 +59,16 @@ const ComparatorPage: React.FC = () => {
   const [entity1SearchQuery, setEntity1SearchQuery] = useState<string>("");
   const [entity2SearchQuery, setEntity2SearchQuery] = useState<string>("");
 
-  // Données
-  const [users, setUsers] = useState<IUser[]>([]);
-  const [guilds, setGuilds] = useState<IGuild[]>([]);
-  const [cycles, setCycles] = useState<ICycle[]>([]);
-  const [allRotations, setAllRotations] = useState<any[]>([]);
+  // Utiliser useSWR pour les données (cache automatique)
+  const { users = [] } = useUsers(false);
+  const { guilds = [] } = useGuilds(false);
+  const { cycles = [] } = useCycles();
+  const { rotations: allRotations = [] } = useRotations();
   const [comparisonResult, setComparisonResult] =
     useState<IComparisonResponse | null>(null);
 
   // États de chargement
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingData, setIsLoadingData] = useState(true);
 
   // Hooks UI
   const bgColor = useColorModeValue("white", "gray.800");
@@ -76,67 +76,12 @@ const ComparatorPage: React.FC = () => {
   const filterBg = useColorModeValue("blue.50", "blue.900");
   const rotationInfoBg = useColorModeValue("blue.50", "blue.900");
 
-  // Chargement des données initiales
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
   // Effet pour déclencher automatiquement la comparaison si les paramètres URL sont présents
   useEffect(() => {
-    if (entity1 && entity2 && !isLoadingData) {
+    if (entity1 && entity2) {
       performComparison();
     }
-  }, [entity1, entity2, isLoadingData]);
-
-  const loadInitialData = async () => {
-    setIsLoadingData(true);
-    try {
-      const [usersResponse, guildsResponse, cyclesResponse, rotationsResponse] =
-        await Promise.all([
-          fetch(`${apiUrl}/api/users?limit=1000`),
-          fetch(`${apiUrl}/api/guildes`),
-          fetch(`${apiUrl}/api/cycles`),
-          fetch(`${apiUrl}/api/rotations`)
-        ]);
-
-      if (usersResponse.ok) {
-        const usersData = await usersResponse.json();
-        setUsers(Array.isArray(usersData) ? usersData : usersData.users || []);
-      }
-
-      if (guildsResponse.ok) {
-        const guildsData = await guildsResponse.json();
-        setGuilds(
-          Array.isArray(guildsData) ? guildsData : guildsData.guilds || []
-        );
-      }
-
-      if (cyclesResponse.ok) {
-        const cyclesData = await cyclesResponse.json();
-        setCycles(
-          Array.isArray(cyclesData) ? cyclesData : cyclesData.data || []
-        );
-      }
-
-      if (rotationsResponse.ok) {
-        const rotationsData = await rotationsResponse.json();
-        setAllRotations(
-          Array.isArray(rotationsData)
-            ? rotationsData
-            : rotationsData.data || []
-        );
-      }
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Erreur lors du chargement des données",
-        status: "error",
-        duration: 3000
-      });
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
+  }, [entity1, entity2]);
 
   // Fonction pour mettre à jour les paramètres URL
   const updateURLParams = (
@@ -272,7 +217,7 @@ const ComparatorPage: React.FC = () => {
     return allRotations.find((r: any) => r._id === selectedRotationId);
   };
 
-  if (isLoadingData) {
+  if (isLoading) {
     return (
       <Container maxW="container.xl" py={8}>
         <VStack spacing={4}>
@@ -588,17 +533,19 @@ const ComparatorPage: React.FC = () => {
                             <Box p={3} bg={rotationInfoBg} borderRadius="md">
                               <VStack spacing={2} align="start">
                                 <Text fontSize="md" fontWeight="bold">
-                                  #{rotationInfo.position} -{" "}
+                                  {'position' in rotationInfo && rotationInfo.position && `#${rotationInfo.position} - `}
                                   {rotationInfo.killer} ({rotationInfo.attack})
                                 </Text>
-                                {rotationInfo.start_date &&
+                                {'start_date' in rotationInfo &&
+                                  'end_date' in rotationInfo &&
+                                  rotationInfo.start_date &&
                                   rotationInfo.end_date && (
                                     <Text fontSize="sm" color="gray.600">
                                       {rotationInfo.start_date} →{" "}
                                       {rotationInfo.end_date}
                                     </Text>
                                   )}
-                                {rotationInfo.period && (
+                                {'period' in rotationInfo && rotationInfo.period && (
                                   <Text fontSize="sm" color="gray.500">
                                     Période: {rotationInfo.period}
                                   </Text>

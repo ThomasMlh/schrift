@@ -76,7 +76,7 @@ interface UserStats {
   };
 }
 
-export default function UserPage() {
+const UserPage = () => {
   const { userId } = useParams<{ userId: string }>();
   const [user, setUser] = useState<IUser | null>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -439,3 +439,5 @@ export default function UserPage() {
     </>
   );
 }
+
+export default UserPage;

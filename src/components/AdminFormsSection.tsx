@@ -1,10 +1,11 @@
 import {
-  Box, Button, VStack, FormControl, FormLabel, Input, Select, Stack,
-  useBreakpointValue, useColorModeValue, useToast, Text
+  Box, Button, VStack, FormControl, FormLabel, Input, Select, Stack, Text,
+  useBreakpointValue, useColorModeValue, useToast
 } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
-import type { IGuild, Role, IUser } from "../interfaces";
+import { useState } from "react";
+import type { IGuild, Role } from "../interfaces";
 import { UserSearchSelect } from "./ui/UserSearchSelect";
+import { useUsers } from "@/hooks/useAPI";
 
 // Composant wrapper pour les formulaires mobiles (défini en dehors pour éviter les re-créations)
 
@@ -73,6 +74,9 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
   onDeleteRequest,
   onRenameRequest
 }) => {
+  // Utiliser useSWR pour les utilisateurs (cache automatique)
+  const { users } = useUsers(true);
+  
   // États pour les formulaires
   const [newGuildName, setNewGuildName] = useState("");
   const [newMemberRole, setNewMemberRole] = useState<Role>("membre");
@@ -82,7 +86,6 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
   const [renameGuildName, setRenameGuildName] = useState("");
 
   // États pour la gestion des utilisateurs
-  const [users, setUsers] = useState<IUser[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [openForm, setOpenForm] = useState<string | null>(null);
@@ -94,44 +97,6 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
   const boxShadow = useColorModeValue('md', 'md');
   const deleteButtonBg = useColorModeValue('red.500', 'red.600');
   const deleteButtonHoverBg = useColorModeValue('red.600', 'red.700');
-
-  // Charger les utilisateurs depuis l'API
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const response = await authenticatedFetch(`${apiUrl}/api/users`);
-
-        if (response.ok) {
-          const userData = await response.json();
-
-          // L'API retourne { success: true, users: [...], count: number }
-          const usersList = userData.users || userData;
-          const users = Array.isArray(usersList) ? usersList : [];
-
-          setUsers(users);
-        } else {
-          const errorText = await response.text();
-          toast({
-            title: "Erreur",
-            description: `Erreur ${response.status}: ${errorText}`,
-            status: "error",
-            duration: 5000,
-          });
-        }
-      } catch (error) {
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger la liste des utilisateurs",
-          status: "error",
-          duration: 3000,
-        });
-      }
-    };
-
-    if (apiUrl) {
-      loadUsers();
-    }
-  }, [apiUrl, authenticatedFetch, toast]);
 
   // Guildes triées
   const sortedGuilds = [...guilds].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));

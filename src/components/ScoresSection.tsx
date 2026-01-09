@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { jwtDecode } from 'jwt-decode';
 import {
     Container,
@@ -20,22 +20,30 @@ import {
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 // import { AddIcon } from "@chakra-ui/icons";
-import type { IScore, ICycle, IUser, IScoreFormData, IPagination as PaginationType, IScoresResponse, IGuild } from "../interfaces";
+import type { IScore, IScoreFormData } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import ScoresTable from "./ui/ScoresTable";
 import { ScoreModal } from "./ui/ScoreModal";
 import { DeleteConfirmationModal } from "./ui/DeleteConfirmationModal";
 import BulkScoreModal from "./ui/BulkScoreModal";
+import { useCycles, useUsers, useGuilds, useScores } from "@/hooks/useAPI";
+import { createScore, updateScore, deleteScore, createBulkScores } from "@/hooks/useAPIMutations";
 
 const ScoresSection = () => {
-    const [scores, setScores] = useState<IScore[]>([]);
-    const [cycles, setCycles] = useState<ICycle[]>([]);
-    const [users, setUsers] = useState<IUser[]>([]);
-    const [guilds, setGuilds] = useState<IGuild[]>([]);
-    const [pagination, setPagination] = useState<PaginationType | null>(null);
+    const [scoreSearchQuery, setScoreSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [isLoadingScores, setIsLoadingScores] = useState(false);
-    const [isLoadingCycles, setIsLoadingCycles] = useState(false);
+    
+    // Utiliser useSWR pour les données (cache automatique + déduplication)
+    const { cycles, isLoading: isLoadingCycles } = useCycles({ authenticated: true });
+    const { users } = useUsers(true);
+    const { guilds } = useGuilds(true);
+    const { scores, pagination, isLoading: isLoadingScores, mutate: mutateScores } = useScores({
+        page: currentPage,
+        limit: 20,
+        search: scoreSearchQuery,
+        authenticated: true
+    });
+    
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Formulaire
@@ -43,7 +51,6 @@ const ScoresSection = () => {
     const [selectedRotationId, setSelectedRotationId] = useState("");
     const [selectedUserId, setSelectedUserId] = useState("");
     const [userSearchQuery, setUserSearchQuery] = useState("");
-    const [scoreSearchQuery, setScoreSearchQuery] = useState("");
     const [scoreValue, setScoreValue] = useState<number>(0);
 
     // États pour l'édition et suppression
@@ -58,8 +65,6 @@ const ScoresSection = () => {
 
     const toast = useToast();
     const { isOpen, onClose } = useDisclosure();
-    const apiUrl = import.meta.env.VITE_API_BASE_URL;
-
 
     // Récupérer les informations utilisateur depuis le token JWT
     const getCurrentUser = () => {
@@ -78,121 +83,6 @@ const ScoresSection = () => {
     const isAdmin = currentUser?.isAdmin || false;
     const isGuildManager = currentUser?.role === 'chef' || currentUser?.role === 'sous-chef';
     const userGuildId = currentUser?.guilde_id;
-
-    useEffect(() => {
-        loadScores(1);
-        loadCycles();
-        loadUsers();
-        loadGuilds();
-    }, []);
-
-    const loadScores = async (page: number = 1, search: string = scoreSearchQuery) => {
-        setIsLoadingScores(true);
-        try {
-            const token = localStorage.getItem('userToken');
-            const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
-            const response = await fetch(`${apiUrl}/api/scores?page=${page}&limit=20${searchParam}`, {
-                headers: {
-                    ...(token && { 'Authorization': `Bearer ${token}` }),
-                },
-            });
-
-            if (response.ok) {
-                const data: IScoresResponse = await response.json();
-                setScores(data.data || []);
-                setPagination(data.pagination);
-                setCurrentPage(page);
-            } else {
-                toast({
-                    title: "Erreur",
-                    description: "Impossible de charger les scores",
-                    status: "error",
-                    duration: 3000,
-                });
-            }
-        } catch (error) {
-            toast({
-                title: "Erreur",
-                description: "Erreur de connexion lors du chargement des scores",
-                status: "error",
-                duration: 3000,
-            });
-        } finally {
-            setIsLoadingScores(false);
-        }
-    };
-
-    const loadCycles = async () => {
-        setIsLoadingCycles(true);
-        try {
-            const response = await fetch(`${apiUrl}/api/cycles`);
-            if (response.ok) {
-                const data = await response.json();
-                setCycles(Array.isArray(data) ? data : data.data || []);
-            } else {
-                toast({
-                    title: "Erreur",
-                    description: "Impossible de charger les cycles",
-                    status: "error",
-                    duration: 3000,
-                });
-            }
-        } catch (error) {
-            toast({
-                title: "Erreur",
-                description: "Erreur de connexion lors du chargement des cycles",
-                status: "error",
-                duration: 3000,
-            });
-        } finally {
-            setIsLoadingCycles(false);
-        }
-    };
-
-    const loadUsers = async () => {
-        try {
-            const token = localStorage.getItem('userToken');
-            const response = await fetch(`${apiUrl}/api/users?limit=999999`, {
-                headers: {
-                    ...(token && { 'Authorization': `Bearer ${token}` }),
-                },
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setUsers(Array.isArray(data) ? data : data.users || []);
-            }
-        } catch (error) {
-            console.error("Erreur lors du chargement des utilisateurs:", error);
-        }
-    };
-
-    const loadGuilds = async () => {
-        try {
-            const token = localStorage.getItem('userToken');
-            const response = await fetch(`${apiUrl}/api/guildes`, {
-                headers: {
-                    ...(token && { 'Authorization': `Bearer ${token}` }),
-                },
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setGuilds(Array.isArray(data) ? data : data.guilds || []);
-            }
-        } catch (error) {
-            console.error("Erreur lors du chargement des guildes:", error);
-        }
-    };
-
-    // Fonction de recherche avec debouncing
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            loadScores(1, scoreSearchQuery);
-        }, 500);
-
-        return () => clearTimeout(timeoutId);
-    }, [scoreSearchQuery]);
 
     const handleSubmitScore = async () => {
         if (!currentUser) {
@@ -248,48 +138,28 @@ const ScoresSection = () => {
                 score: scoreValue
             };
 
-
-            const token = localStorage.getItem('userToken');
-            const response = await fetch(`${apiUrl}/api/scores`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token && { 'Authorization': `Bearer ${token}` }),
-                },
-                body: JSON.stringify(scoreData)
+            await createScore(scoreData);
+            
+            toast({
+                title: "Score ajouté",
+                description: "Le score a été ajouté avec succès",
+                status: "success",
+                duration: 3000,
             });
 
-            if (response.ok) {
-                toast({
-                    title: "Score ajouté",
-                    description: "Le score a été ajouté avec succès",
-                    status: "success",
-                    duration: 3000,
-                });
+            // Réinitialiser le formulaire
+            setSelectedCycleId("");
+            setSelectedRotationId("");
+            setSelectedUserId("");
+            setUserSearchQuery("");
+            setScoreValue(0);
+            onClose();
 
-                // Réinitialiser le formulaire
-                setSelectedCycleId("");
-                setSelectedRotationId("");
-                setSelectedUserId("");
-                setUserSearchQuery("");
-                setScoreValue(0);
-                onClose();
-
-                // Recharger les scores
-                loadScores(currentPage);
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                toast({
-                    title: "Erreur",
-                    description: errorData.message || "Erreur lors de l'ajout du score",
-                    status: "error",
-                    duration: 3000,
-                });
-            }
-        } catch (error) {
+            // Le cache est automatiquement invalidé par createScore
+        } catch (error: any) {
             toast({
                 title: "Erreur",
-                description: "Erreur lors de l'ajout du score",
+                description: error.message || "Erreur lors de l'ajout du score",
                 status: "error",
                 duration: 3000,
             });
@@ -304,39 +174,22 @@ const ScoresSection = () => {
 
         setIsDeleting(true);
         try {
-            const token = localStorage.getItem('userToken');
-            const response = await fetch(`${apiUrl}/api/scores/${scoreToDelete._id}`, {
-                method: 'DELETE',
-                headers: {
-                    ...(token && { 'Authorization': `Bearer ${token}` }),
-                },
+            await deleteScore(scoreToDelete._id!);
+            
+            toast({
+                title: "Score supprimé",
+                description: "Le score a été supprimé avec succès",
+                status: "success",
+                duration: 3000,
             });
 
-            if (response.ok) {
-                toast({
-                    title: "Score supprimé",
-                    description: "Le score a été supprimé avec succès",
-                    status: "success",
-                    duration: 3000,
-                });
-
-                // Recharger les scores
-                loadScores(currentPage);
-                setIsDeleteModalOpen(false);
-                setScoreToDelete(null);
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                toast({
-                    title: "Erreur",
-                    description: errorData.message || "Erreur lors de la suppression du score",
-                    status: "error",
-                    duration: 3000,
-                });
-            }
-        } catch (error) {
+            setIsDeleteModalOpen(false);
+            setScoreToDelete(null);
+            // Le cache est automatiquement invalidé par deleteScore
+        } catch (error: any) {
             toast({
                 title: "Erreur",
-                description: "Erreur de connexion lors de la suppression du score",
+                description: error.message || "Erreur lors de la suppression du score",
                 status: "error",
                 duration: 3000,
             });
@@ -349,40 +202,21 @@ const ScoresSection = () => {
     const handleBulkScoreSubmit = async (scoresData: IScoreFormData[]) => {
         setIsBulkSubmitting(true);
         try {
-            const token = localStorage.getItem('userToken');
-            const response = await fetch(`${apiUrl}/api/scores/bulk`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token && { 'Authorization': `Bearer ${token}` }),
-                },
-                body: JSON.stringify(scoresData),
+            await createBulkScores(scoresData);
+            
+            toast({
+                title: "Scores enregistrés",
+                description: `${scoresData.length} scores ont été enregistrés avec succès`,
+                status: "success",
+                duration: 3000,
             });
 
-            if (response.ok) {
-                toast({
-                    title: "Scores enregistrés",
-                    description: `${scoresData.length} scores ont été enregistrés avec succès`,
-                    status: "success",
-                    duration: 3000,
-                });
-
-                // Recharger les scores et fermer le modal
-                loadScores(currentPage);
-                setIsBulkModalOpen(false);
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                toast({
-                    title: "Erreur",
-                    description: errorData.message || "Erreur lors de l'enregistrement des scores",
-                    status: "error",
-                    duration: 3000,
-                });
-            }
-        } catch (error) {
+            setIsBulkModalOpen(false);
+            // Le cache est automatiquement invalidé par createBulkScores
+        } catch (error: any) {
             toast({
                 title: "Erreur",
-                description: "Erreur de connexion lors de l'enregistrement des scores",
+                description: error.message || "Erreur lors de l'enregistrement des scores",
                 status: "error",
                 duration: 3000,
             });
@@ -447,48 +281,28 @@ const ScoresSection = () => {
                 score: scoreValue
             };
 
-            const token = localStorage.getItem('userToken');
-            const response = await fetch(`${apiUrl}/api/scores/${editingScore._id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token && { 'Authorization': `Bearer ${token}` }),
-                },
-                body: JSON.stringify(scoreData)
+            await updateScore(editingScore._id!, scoreData);
+            
+            toast({
+                title: "Score modifié",
+                description: "Le score a été modifié avec succès",
+                status: "success",
+                duration: 3000,
             });
 
-            if (response.ok) {
-                toast({
-                    title: "Score modifié",
-                    description: "Le score a été modifié avec succès",
-                    status: "success",
-                    duration: 3000,
-                });
-
-                // Réinitialiser le formulaire
-                setSelectedCycleId("");
-                setSelectedRotationId("");
-                setSelectedUserId("");
-                setUserSearchQuery("");
-                setScoreValue(0);
-                setIsEditModalOpen(false);
-                setEditingScore(null);
-
-                // Recharger les scores
-                loadScores(currentPage);
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                toast({
-                    title: "Erreur",
-                    description: errorData.message || "Erreur lors de la modification du score",
-                    status: "error",
-                    duration: 3000,
-                });
-            }
-        } catch (error) {
+            // Réinitialiser le formulaire
+            setSelectedCycleId("");
+            setSelectedRotationId("");
+            setSelectedUserId("");
+            setUserSearchQuery("");
+            setScoreValue(0);
+            setIsEditModalOpen(false);
+            setEditingScore(null);
+            // Le cache est automatiquement invalidé par updateScore
+        } catch (error: any) {
             toast({
                 title: "Erreur",
-                description: "Erreur de connexion lors de la modification du score",
+                description: error.message || "Erreur lors de la modification du score",
                 status: "error",
                 duration: 3000,
             });
@@ -509,7 +323,7 @@ const ScoresSection = () => {
 
     // Gestion du changement de page
     const handlePageChange = (page: number) => {
-        loadScores(page, scoreSearchQuery);
+        setCurrentPage(page);
     };
 
     return (
@@ -567,7 +381,7 @@ const ScoresSection = () => {
                                 </InputGroup>
                                 <Button
                                     size="sm"
-                                    onClick={() => loadScores(currentPage, scoreSearchQuery)}
+                                    onClick={() => mutateScores()}
                                     isLoading={isLoadingScores}
                                     loadingText="Chargement..."
                                 >
@@ -696,7 +510,6 @@ const ScoresSection = () => {
                     guilds={guilds}
                     onSubmit={handleBulkScoreSubmit}
                     isSubmitting={isBulkSubmitting}
-                    apiUrl={apiUrl}
                     isGuildRestricted={!isAdmin && isGuildManager}
                     userGuildId={userGuildId}
                 />

@@ -17,13 +17,13 @@ interface CycleCreationFormProps {
   selectedRotationsCount: number;
 }
 
-export function CycleCreationForm({ 
+export const CycleCreationForm = ({ 
   cycleName, 
   onCycleNameChange, 
   onSubmit, 
   isSubmitting,
   selectedRotationsCount
-}: CycleCreationFormProps) {
+}: CycleCreationFormProps) => {
   const cardBg = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
 

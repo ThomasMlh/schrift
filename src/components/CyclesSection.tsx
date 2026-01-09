@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Container,
   VStack,
@@ -13,91 +13,20 @@ import type { IRotationTemplate, ICycleRotation, ICycleFormData, ICycle } from "
 import type { DropResult } from '@hello-pangea/dnd';
 import { ExistingCyclesList } from "./cycles/ExistingCyclesList";
 import { CycleCreationModal } from "./cycles/CycleCreationModal";
+import { useCycles, useRotations } from "@/hooks/useAPI";
 
 const CyclesSection = () => {
-  const [rotationTemplates, setRotationTemplates] = useState<IRotationTemplate[]>([]);
+  // Utiliser useSWR pour les cycles et rotations (cache automatique + déduplication)
+  const { cycles, mutate: mutateCycles, isLoading: isLoadingCycles } = useCycles({ authenticated: true });
+  const { rotations: rotationTemplates = [] } = useRotations();
+  
   const [selectedRotations, setSelectedRotations] = useState<ICycleRotation[]>([]);
-  const [cycles, setCycles] = useState<ICycle[]>([]);
   const [cycleName, setCycleName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoadingCycles, setIsLoadingCycles] = useState(false);
 
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
-
-
-
-  // Charger les templates de rotation et les cycles
-  useEffect(() => {
-    loadRotationTemplates();
-    loadCycles();
-  }, []);
-
-  const loadRotationTemplates = async () => {
-    try {
-      const response = await fetch(`${apiUrl}/api/rotations`);
-      if (response.ok) {
-        const data = await response.json();
-        setRotationTemplates(data);
-      } else {
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les templates de rotation",
-          status: "error",
-          duration: 3000,
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Erreur de connexion lors du chargement des templates",
-        status: "error",
-        duration: 3000,
-      });
-    }
-  };
-
-  const loadCycles = async () => {
-    setIsLoadingCycles(true);
-    try {
-      const response = await fetch(`${apiUrl}/api/cycles`);
-      if (response.ok) {
-        const data = await response.json();
-
-        // Vérifier si la réponse est un tableau ou un objet avec une propriété cycles
-        if (Array.isArray(data)) {
-          setCycles(data);
-        } else if (data && Array.isArray(data.data)) {
-          setCycles(data.data);
-        } else {
-          setCycles([]);
-          toast({
-            title: "Erreur",
-            description: "Format de données inattendu lors du chargement des cycles",
-            status: "error",
-            duration: 3000,
-          });
-        }
-      } else {
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les cycles",
-          status: "error",
-          duration: 3000,
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Erreur de connexion lors du chargement des cycles",
-        status: "error",
-        duration: 3000,
-      });
-    } finally {
-      setIsLoadingCycles(false);
-    }
-  };
 
   // Supprimer un cycle
   const handleDeleteCycle = async (cycleId: string): Promise<void> => {
@@ -117,7 +46,7 @@ const CyclesSection = () => {
       }
 
       // Recharger la liste des cycles après suppression
-      await loadCycles();
+      await mutateCycles();
     } catch (error) {
       throw error; // Renvoyer l'erreur pour qu'elle soit gérée par le composant appelant
     }
@@ -375,7 +304,7 @@ const CyclesSection = () => {
         setSelectedRotations([]);
 
         // Recharger la liste des cycles
-        loadCycles();
+        mutateCycles();
       } else {
         const errorData = await response.json().catch(() => ({}));
         toast({
@@ -533,7 +462,7 @@ const CyclesSection = () => {
         <ExistingCyclesList
           cycles={cycles}
           isLoading={isLoadingCycles}
-          onRefresh={loadCycles}
+          onRefresh={mutateCycles}
           onDownloadEvents={downloadEventsJson}
           onDownloadCycleEvents={downloadCycleEventsJson}
           onDeleteCycle={handleDeleteCycle}

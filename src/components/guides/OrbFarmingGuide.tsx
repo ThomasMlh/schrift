@@ -16,17 +16,12 @@ import {
   AlertTitle,
   AlertDescription
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useOrbGuide } from "@/hooks/useAPI";
 
 interface OrbSource {
   title: string;
   description: string;
   amount: number;
-}
-
-interface OrbGuideResponse {
-  totalOrbes: number;
-  data: OrbSource[];
 }
 
 const OrbFarmingGuide = () => {
@@ -38,31 +33,7 @@ const OrbFarmingGuide = () => {
   const totalBoxBorder = useColorModeValue("purple.200", "purple.600");
   const totalTextColor = useColorModeValue("gray.600", "gray.300");
 
-  const [orbData, setOrbData] = useState<OrbGuideResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // API URL depuis les variables d'environnement
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
-
-  useEffect(() => {
-    const fetchOrbGuide = async () => {
-      try {
-        const response = await fetch(`${apiUrl}/api/guides/orbes`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch orb guide");
-        }
-        const data = await response.json();
-        setOrbData(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrbGuide();
-  }, []);
+  const { orbData, isLoading: loading, error } = useOrbGuide();
 
   const colorSchemes = [
     "purple",
@@ -133,7 +104,7 @@ const OrbFarmingGuide = () => {
       </Flex>
 
       <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-        {orbData.data.map((source, index) => (
+        {orbData.data.map((source: OrbSource, index: number) => (
           <Card
             key={index}
             bg={cardBg}

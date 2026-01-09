@@ -13,7 +13,7 @@ import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
 import { OrbFarmingGuide, RotationsBuildsGuide } from "../components/guides";
 
-export default function GuidesPage() {
+const GuidesPage = () => {
   return (
     <>
       <SEOHead
@@ -73,3 +73,5 @@ export default function GuidesPage() {
     </>
   );
 }
+
+export default GuidesPage;

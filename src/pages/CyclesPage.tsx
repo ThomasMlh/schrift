@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Box,
@@ -20,22 +20,22 @@ import {
   Select
 } from "@chakra-ui/react";
 import { ExternalLinkIcon, CalendarIcon, ViewIcon } from "@chakra-ui/icons";
-import type { ICycle, ICyclesResponse, IPagination } from "../interfaces";
+
 import { handleAttackType } from "../utils/attackTypes";
 import { AlterationImage } from "../components/ui/AlterationImage";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
 import { Pagination as PaginationComponent } from "../components/ui/Pagination";
 import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "../components/SEOHead";
+import { useCycles } from "@/hooks/useAPI";
 
 const CyclesPage = () => {
-  const [cycles, setCycles] = useState<ICycle[]>([]);
-  const [pagination, setPagination] = useState<IPagination | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(6); // Bon nombre pour la grille
-  const [isLoading, setIsLoading] = useState(true);
   
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+  // Utiliser useSWR pour les cycles avec pagination
+  const { cycles = [], pagination, isLoading, mutate: mutateCycles } = useCycles({ page: currentPage, limit: itemsPerPage });
+  
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const cardHeaderBg = useColorModeValue(
@@ -47,68 +47,14 @@ const CyclesPage = () => {
   const rotationItemHoverBg = useColorModeValue('blue.50', 'gray.700');
   const numberBoxBg = useColorModeValue('blue.100', 'blue.800');
   const moreRotationsBg = useColorModeValue('purple.50', 'purple.900');
-  
-  const loadCycles = async (page: number = 1) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`${apiUrl}/api/cycles?page=${page}&limit=${itemsPerPage}`);
-      if (response.ok) {
-        const data: ICyclesResponse = await response.json();
-        
-        if (data.success && Array.isArray(data.data)) {
-          setCycles(data.data);
-          if (data.pagination) {
-            setPagination(data.pagination);
-            setCurrentPage(data.pagination.currentPage);
-          }
-        } else {
-          console.error("Format de données inattendu:", data);
-          setCycles([]);
-          setPagination(null);
-        }
-      }
-    } catch (error) {
-      console.error("Erreur lors du chargement des cycles:", error);
-      setCycles([]);
-      setPagination(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadCycles(currentPage);
-  }, []);
 
   const handlePageChange = (page: number) => {
-    loadCycles(page);
+    setCurrentPage(page);
   };
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
     setCurrentPage(1);
-    // Recharger avec la nouvelle limite
-    const loadWithNewLimit = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`${apiUrl}/api/cycles?page=1&limit=${newItemsPerPage}`);
-        if (response.ok) {
-          const data: ICyclesResponse = await response.json();
-          if (data.success && Array.isArray(data.data)) {
-            setCycles(data.data);
-            if (data.pagination) {
-              setPagination(data.pagination);
-              setCurrentPage(data.pagination.currentPage);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Erreur lors du chargement des cycles:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadWithNewLimit();
   };
 
   const structuredData = {
@@ -201,7 +147,7 @@ const CyclesPage = () => {
                 size="md"
                 colorScheme="blue"
                 variant="solid"
-                onClick={() => loadCycles(currentPage)}
+                onClick={() => mutateCycles()}
                 isLoading={isLoading}
                 loadingText="..."
                 borderRadius="lg"

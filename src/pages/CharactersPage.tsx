@@ -2,7 +2,7 @@ import { Container, Heading, VStack } from "@chakra-ui/react";
 import { CharactersTable } from "../components/CharactersTable";
 import { SEOHead } from "../components/SEOHead";
 
-export default function CharactersPage() {
+const CharactersPage = () => {
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
   const structuredData = {
@@ -34,3 +34,5 @@ export default function CharactersPage() {
     </>
   );
 }
+
+export default CharactersPage;

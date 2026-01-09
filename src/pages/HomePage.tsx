@@ -6,7 +6,7 @@ import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "../components/SEOHead";
 // const imageSchrift = new URL('../assets/logo.png', import.meta.url).href;
 
-export default function HomePage() {
+const HomePage = () => {
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -61,3 +61,5 @@ export default function HomePage() {
     </>
   );
 }
+
+export default HomePage;

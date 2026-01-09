@@ -29,6 +29,7 @@ import {
 
 import { useState, useEffect } from "react";
 import type { IUser, ICycle, IGuild, IScoreFormData } from "../../interfaces";
+import { useGuildMembers, useScores } from "@/hooks/useAPI";
 import { AttackTypeBadge } from "./AttackTypeBadge";
 import { CustomSelect } from "./CustomSelect";
 import { UserDisplay } from "./UserDisplay";
@@ -40,22 +41,21 @@ interface BulkScoreModalProps {
     guilds: IGuild[];
     onSubmit: (scores: IScoreFormData[]) => void;
     isSubmitting?: boolean;
-    apiUrl?: string;
     isGuildRestricted?: boolean;
     userGuildId?: string;
 }
 
-export default function BulkScoreModal({
+const BulkScoreModal = ({
     isOpen,
     onClose,
     cycles,
     guilds,
     onSubmit,
     isSubmitting = false,
-    apiUrl,
+
     isGuildRestricted = false,
     userGuildId
-}: BulkScoreModalProps) {
+}: BulkScoreModalProps) => {
     const toast = useToast();
     
     // Déplacer useColorModeValue au niveau du composant pour éviter les appels conditionnels
@@ -65,11 +65,22 @@ export default function BulkScoreModal({
     const [selectedGuildId, setSelectedGuildId] = useState<string>(isGuildRestricted ? userGuildId || "" : "");
     const [selectedCycleId, setSelectedCycleId] = useState<string>("");
     const [selectedRotationId, setSelectedRotationId] = useState<string>("");
-    const [guildMembers, setGuildMembers] = useState<IUser[]>([]);
     const [scores, setScores] = useState<{ [userId: string]: number }>({});
-    const [isLoading, setIsLoading] = useState(false);
-    const [isLoadingScores, setIsLoadingScores] = useState(false);
     const [hasExistingScores, setHasExistingScores] = useState(false);
+    
+    // Charger les membres avec le hook
+    const { members: guildMembers = [], isLoading } = useGuildMembers(
+        selectedGuildId || undefined,
+        true
+    );
+    
+    // Charger les scores existants avec le hook
+    const { scores: existingScoresData = [], isLoading: isLoadingScores } = useScores({
+        guild_id: selectedGuildId,
+        cycle_id: selectedCycleId,
+        rotation_id: selectedRotationId,
+        authenticated: true
+    });
 
     // Réinitialiser la guilde sélectionnée quand le modal s'ouvre
     useEffect(() => {
@@ -78,100 +89,50 @@ export default function BulkScoreModal({
         }
     }, [isOpen, isGuildRestricted, userGuildId]);
 
-    // Charger les membres de la guilde sélectionnée
+    // Initialiser les scores quand les membres changent
     useEffect(() => {
-        const loadGuildMembers = async () => {
-            if (!selectedGuildId) {
-                setGuildMembers([]);
-                setScores({});
-                return;
-            }
-
-            setIsLoading(true);
-            try {
-                const response = await fetch(`${apiUrl}/api/guildes/${selectedGuildId}/membres`);
-
-                const data = await response.json();
-
-                if (data.success) {
-                    setGuildMembers(data.data);
-                    // Initialiser les scores à 0 pour tous les membres
-                    const initialScores: { [userId: string]: number } = {};
-                    data.data.forEach((user: IUser) => {
-                        initialScores[user._id] = 0;
-                    });
-                    setScores(initialScores);
-                } else {
-                    throw new Error(data.message || 'Erreur lors du chargement des membres');
-                }
-            } catch (error: any) {
-                toast({
-                    title: "Erreur",
-                    description: error.message,
-                    status: "error",
-                    duration: 3000,
-                    isClosable: true,
-                });
-                setGuildMembers([]);
-                setScores({});
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        loadGuildMembers();
-    }, [selectedGuildId, apiUrl, toast]);
+        if (guildMembers.length > 0) {
+            const initialScores: { [userId: string]: number } = {};
+            guildMembers.forEach((user: IUser) => {
+                initialScores[user._id] = 0;
+            });
+            setScores(initialScores);
+        }
+    }, [guildMembers]);
 
     // Charger les scores existants pour la rotation sélectionnée
     useEffect(() => {
-        const loadExistingScores = async () => {
-            if (!selectedGuildId || !selectedCycleId || !selectedRotationId || guildMembers.length === 0) {
-                setHasExistingScores(false);
-                return;
-            }
+        if (!selectedGuildId || !selectedCycleId || !selectedRotationId || guildMembers.length === 0) {
+            setHasExistingScores(false);
+            return;
+        }
 
-            setIsLoadingScores(true);
-            try {
-                const response = await fetch(`${apiUrl}/api/scores?guild_id=${selectedGuildId}&cycle_id=${selectedCycleId}&rotation_id=${selectedRotationId}`);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    if (data.success && data.data) {
-                        // Créer un objet de scores existants
-                        const existingScores: { [userId: string]: number } = {};
-                        
-                        // Initialiser avec 0 pour tous les membres
-                        guildMembers.forEach((user: IUser) => {
-                            existingScores[user._id] = 0;
-                        });
-                        
-                        // Remplacer par les scores existants si disponibles
-                        let foundExistingScores = false;
-                        data.data.forEach((score: any) => {
-                            if (score.raw_score !== undefined) {
-                                existingScores[score.user_id] = score.raw_score;
-                                if (score.raw_score > 0) {
-                                    foundExistingScores = true;
-                                }
-                            }
-                        });
-                        
-                        setScores(existingScores);
-                        setHasExistingScores(foundExistingScores);
+        if (existingScoresData.length > 0) {
+            // Créer un objet de scores existants
+            const existingScores: { [userId: string]: number } = {};
+            
+            // Initialiser avec 0 pour tous les membres
+            guildMembers.forEach((user: IUser) => {
+                existingScores[user._id] = 0;
+            });
+            
+            // Remplacer par les scores existants si disponibles
+            let foundExistingScores = false;
+            existingScoresData.forEach((score: any) => {
+                if (score.raw_score !== undefined) {
+                    existingScores[score.user_id] = score.raw_score;
+                    if (score.raw_score > 0) {
+                        foundExistingScores = true;
                     }
-                } 
-            } catch (error: any) {
-                console.log('Erreur lors du chargement des scores existants:', error.message);
-                // En cas d'erreur, garder les scores à 0
-                setHasExistingScores(false);
-            } finally {
-                setIsLoadingScores(false);
-            }
-        };
-
-        loadExistingScores();
-    }, [selectedGuildId, selectedCycleId, selectedRotationId, guildMembers, apiUrl]);
+                }
+            });
+            
+            setScores(existingScores);
+            setHasExistingScores(foundExistingScores);
+        } else {
+            setHasExistingScores(false);
+        }
+    }, [selectedGuildId, selectedCycleId, selectedRotationId, guildMembers, existingScoresData]);
 
     const selectedCycle = cycles.find(cycle => cycle._id === selectedCycleId);
     const selectedGuild = guilds.find(guild => guild._id === selectedGuildId);
@@ -196,7 +157,7 @@ export default function BulkScoreModal({
         }
 
         // Créer les données de scores pour tous les membres
-        const scoresData: IScoreFormData[] = guildMembers.map(member => ({
+        const scoresData: IScoreFormData[] = guildMembers.map((member: IUser) => ({
             user_id: member._id,
             cycle_id: selectedCycleId,
             rotation_id: selectedRotationId,
@@ -213,7 +174,6 @@ export default function BulkScoreModal({
         }
         setSelectedCycleId("");
         setSelectedRotationId("");
-        setGuildMembers([]);
         setScores({});
         setHasExistingScores(false);
         onClose();
@@ -412,3 +372,5 @@ export default function BulkScoreModal({
         </Modal>
     );
 }
+
+export default BulkScoreModal;

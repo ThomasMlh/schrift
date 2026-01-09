@@ -21,11 +21,11 @@ interface RotationTemplatesSectionProps {
   selectedRotationsCount: number;
 }
 
-export function RotationTemplatesSection({
+export const RotationTemplatesSection = ({
   templates,
   onAddRotation,
   selectedRotationsCount
-}: RotationTemplatesSectionProps) {
+}: RotationTemplatesSectionProps) => {
   const cardBg = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   const toast = useToast();

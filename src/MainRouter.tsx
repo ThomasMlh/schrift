@@ -45,7 +45,7 @@ import { getDiscordAvatarUrl } from "./utils/discord";
 import NotFound from "./pages/NotFound";
 import CustomLink from "./components/ui/CustomLink";
 
-function ColorModeSwitcher() {
+const ColorModeSwitcher = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   return (
     <Button onClick={toggleColorMode} variant="ghost" ml={2}>

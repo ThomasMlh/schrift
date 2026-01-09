@@ -6,10 +6,11 @@ import {
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SearchIcon, EditIcon } from "@chakra-ui/icons";
-import type { IUser, IPagination, IUsersResponse, IGuild } from "../interfaces";
+import type { IUser, IPagination, IUsersResponse } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import EditUserModal from "./EditUserModal";
 import { UserDisplay } from "./ui/UserDisplay";
+import { useGuilds } from "@/hooks/useAPI";
 
 interface UsersTableProps {
     isAdminMode?: boolean;
@@ -21,7 +22,6 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
 
     // États - Initialiser avec les paramètres URL
     const [users, setUsers] = useState<IUser[]>([]);
-    const [guilds, setGuilds] = useState<IGuild[]>([]);
     const [pagination, setPagination] = useState<IPagination | null>(null);
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
     const [selectedGuildId, setSelectedGuildId] = useState(searchParams.get('guilde_id') || "");
@@ -29,6 +29,9 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('limit') || '20'));
     const [isLoading, setIsLoading] = useState(false);
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
+
+    // Utiliser useSWR pour les guildes (cache automatique)
+    const { guilds } = useGuilds();
 
     // Hooks UI
     const bgColor = useColorModeValue('white', 'gray.800');
@@ -92,19 +95,6 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
         }
     };
 
-    // Fonction pour charger les guildes disponibles
-    const loadGuilds = async () => {
-        try {
-            const response = await fetch(`${apiUrl}/api/guildes`);
-            if (response.ok) {
-                const data = await response.json();
-                setGuilds(Array.isArray(data) ? data : data.guilds || []);
-            }
-        } catch (error) {
-            console.error('Erreur lors du chargement des guildes:', error);
-        }
-    };
-
     // Chargement initial
     useEffect(() => {
         const currentPage = parseInt(searchParams.get('page') || '1');
@@ -117,7 +107,6 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
         setSelectedRole(currentRole);
 
         loadUsers(currentPage, currentSearch, currentGuildId, currentRole);
-        loadGuilds();
     }, []);
 
     // Effet pour la recherche automatique avec debounce

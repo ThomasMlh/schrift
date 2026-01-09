@@ -23,7 +23,7 @@ interface CharactersTableProps {
   apiUrl: string;
 }
 
-export function CharactersTable({ apiUrl }: CharactersTableProps) {
+export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   
   // États - Initialiser avec les paramètres URL

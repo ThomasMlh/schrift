@@ -32,7 +32,7 @@ interface CycleCreationModalProps {
   onRemoveRotation: (index: number) => void;
 }
 
-export function CycleCreationModal({
+export const CycleCreationModal = ({
   isOpen,
   onClose,
   cycleName,
@@ -45,7 +45,7 @@ export function CycleCreationModal({
   onDragEnd,
   onUpdateRotation,
   onRemoveRotation
-}: CycleCreationModalProps) {
+}: CycleCreationModalProps) => {
   const toast = useToast();
   const canSubmit = cycleName.trim() && selectedRotations.length === 20;
 

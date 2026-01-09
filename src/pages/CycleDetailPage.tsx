@@ -19,54 +19,32 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import { ArrowBackIcon, CalendarIcon } from "@chakra-ui/icons";
-import type { ICycle } from "../interfaces";
+
 import { handleAttackType } from "../utils/attackTypes";
 import { AlterationImage } from "../components/ui/AlterationImage";
 import CustomLink from "@/components/ui/CustomLink";
+import { useCycle } from "@/hooks/useAPI";
 
 const CycleDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [cycle, setCycle] = useState<ICycle | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  // Utiliser useSWR pour le cycle (cache automatique)
+  const { cycle, isLoading, error: fetchError } = useCycle(id);
   const [error, setError] = useState<string | null>(null);
 
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const cardBg = useColorModeValue("white", "gray.700");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   // const rotationHoverBg = useColorModeValue("gray.100", "gray.600");
 
-  const loadCycle = async () => {
+  useEffect(() => {
+    if (fetchError) {
+      setError("Erreur lors du chargement du cycle");
+    }
     if (!id) {
       setError("ID du cycle manquant");
-      setIsLoading(false);
-      return;
     }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(`${apiUrl}/api/cycles/${id}`);
-      if (response.ok) {
-        const { cycle } = await response.json();
-        setCycle(cycle);
-      } else if (response.status === 404) {
-        setError("Cycle non trouvé");
-      } else {
-        setError("Erreur lors du chargement du cycle");
-      }
-    } catch (error) {
-      console.error("Erreur lors du chargement du cycle:", error);
-      setError("Erreur de connexion");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadCycle();
-  }, [id]);
+  }, [fetchError, id]);
 
   if (isLoading) {
     return (

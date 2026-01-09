@@ -17,7 +17,8 @@ import {
 import { useState, useEffect } from "react";
 import { UserDisplay } from "./ui/UserDisplay";
 import { ScoreBadge } from "./ui/ScoreBadge";
-import type { IGuild, ICycle, IPodiumPlayer, IPodiumData } from "@/interfaces";
+import type { ICycle, IPodiumPlayer, IPodiumData } from "@/interfaces";
+import { useCycles, useGuilds } from "@/hooks/useAPI";
 
 interface PodiumSectionProps {
   // Props optionnelles pour les tests
@@ -25,12 +26,14 @@ interface PodiumSectionProps {
 
 export const PodiumSection = ({}: PodiumSectionProps = {}) => {
   const [podiumData, setPodiumData] = useState<IPodiumData | null>(null);
-  const [cycles, setCycles] = useState<ICycle[]>([]);
-  const [guilds, setGuilds] = useState<IGuild[]>([]);
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
   const [selectedGuildId, setSelectedGuildId] = useState<string>("global");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Utilisation de useSWR pour les cycles et guildes (cache automatique + déduplication)
+  const { cycles, isLoading: cyclesLoading } = useCycles({ limit: 50, authenticated: true });
+  const { guilds } = useGuilds(true);
 
   // API URL depuis les variables d'environnement
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -53,73 +56,25 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const shadowColor = useColorModeValue("lg", "dark-lg");
 
-  // Charger les cycles et guildes au montage
+  // Sélectionner le cycle le plus récent par défaut quand les cycles sont chargés
   useEffect(() => {
-    const loadInitialData = async () => {
-      if (!apiUrl) {
-        setError("Configuration API manquante");
-        return;
+    if (!cyclesLoading && cycles.length > 0 && !selectedCycleId) {
+      // Trier par date de création décroissante pour avoir le plus récent en premier
+      const sortedCycles = [...cycles].sort((a: ICycle, b: ICycle) => {
+        if (a.created_at && b.created_at) {
+          return (
+            new Date(b.created_at).getTime() -
+            new Date(a.created_at).getTime()
+          );
+        }
+        return 0;
+      });
+      
+      if (sortedCycles.length > 0) {
+        setSelectedCycleId(sortedCycles[0]._id || '');
       }
-
-      try {
-        // Charger les cycles
-        const cyclesResponse = await authenticatedFetch(
-          `${apiUrl}/api/cycles?limit=50`
-        );
-        const cyclesData = await cyclesResponse.json();
-
-        let cyclesToProcess = [];
-
-        // La réponse peut être un tableau directement ou un objet avec success
-        if (Array.isArray(cyclesData)) {
-          cyclesToProcess = cyclesData;
-        } else if (cyclesData.success && cyclesData.data) {
-          cyclesToProcess = cyclesData.data;
-        }
-
-        if (cyclesToProcess.length > 0) {
-          // Trier par date de création décroissante pour avoir le plus récent en premier
-          const sortedCycles = cyclesToProcess.sort((a: ICycle, b: ICycle) => {
-            if (a.created_at && b.created_at) {
-              return (
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime()
-              );
-            }
-            return 0;
-          });
-          setCycles(sortedCycles);
-
-          // Sélectionner le cycle le plus récent par défaut
-          if (sortedCycles.length > 0) {
-            setSelectedCycleId(sortedCycles[0]._id);
-          }
-        }
-
-        // Charger les guildes
-        const guildsResponse = await authenticatedFetch(
-          `${apiUrl}/api/guildes`
-        );
-        const guildsData = await guildsResponse.json();
-
-        // La réponse peut être un tableau directement ou un objet avec success
-        if (Array.isArray(guildsData)) {
-          setGuilds(guildsData);
-        } else if (guildsData.success) {
-          const guildsArray = guildsData.data || guildsData.guilds || [];
-          setGuilds(guildsArray);
-        }
-      } catch (error) {
-        console.error(
-          "Erreur lors du chargement des données initiales:",
-          error
-        );
-        setError("Erreur lors du chargement des données");
-      }
-    };
-
-    loadInitialData();
-  }, [apiUrl]);
+    }
+  }, [cycles, cyclesLoading]);
 
   const loadPodium = async () => {
     if (!selectedCycleId || !apiUrl) return;

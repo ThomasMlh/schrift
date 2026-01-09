@@ -18,12 +18,13 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Pagination as PaginationComponent } from "../components/ui/Pagination";
 import { HeroSection } from "../components/HeroSection";
-import type { ICycle, IGuild, IPodiumResponse } from "../interfaces";
+import type { IPodiumResponse } from "../interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { SEOHead } from "@/components/SEOHead";
 import PlayerCard from "@/components/ui/PlayerCard";
 import CustomLink from "@/components/ui/CustomLink";
 import { ScoreLegend } from "@/components/ui/ScoreLegend";
+import { useCycles, useGuilds } from "@/hooks/useAPI";
 
 const PodiumPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -32,9 +33,11 @@ const PodiumPage = () => {
 
   // États
   const [podiumData, setPodiumData] = useState<IPodiumResponse | null>(null);
-  const [cycles, setCycles] = useState<ICycle[]>([]);
-  const [guilds, setGuilds] = useState<IGuild[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Utilisation de useSWR pour les cycles et guildes (cache automatique)
+  const { cycles, isLoading: cyclesLoading } = useCycles();
+  const { guilds } = useGuilds();
 
   // Filtres
   const [selectedCycleName, setSelectedCycleName] = useState(
@@ -49,7 +52,6 @@ const PodiumPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(
     parseInt(searchParams.get("limit") || "50")
   );
-
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -137,61 +139,34 @@ const PodiumPage = () => {
     }
   };
 
-  // Fonction pour charger les données de référence
-  const loadReferenceData = async (
-    shouldSelectDefaultCycle: boolean = false
-  ) => {
-    try {
-      // Charger les cycles
-      const cyclesResponse = await fetch(`${apiUrl}/api/cycles`);
-      if (cyclesResponse.ok) {
-        const cyclesData = await cyclesResponse.json();
-        const cyclesList = cyclesData.data || [];
-        setCycles(cyclesList);
+  // Fonction pour charger les données de référence et sélectionner le cycle par défaut
+  const selectDefaultCycle = () => {
+    if (cycles.length > 0) {
+      const now = new Date();
+      let cycleToSelect = cycles[0]; // Par défaut, le premier cycle de l'API
 
-        // Sélectionner le cycle approprié si aucun cycle n'est sélectionné
-        if (shouldSelectDefaultCycle && cyclesList.length > 0) {
-          const now = new Date();
-          let cycleToSelect = cyclesList[0]; // Par défaut, le premier cycle de l'API
+      // Chercher le cycle en cours (celui dont les rotations incluent la date actuelle)
+      for (const cycle of cycles) {
+        if (cycle.rotations && cycle.rotations.length > 0) {
+          const firstRotation = cycle.rotations[0];
+          const lastRotation = cycle.rotations[cycle.rotations.length - 1];
 
-          // Chercher le cycle en cours (celui dont les rotations incluent la date actuelle)
-          for (const cycle of cyclesList) {
-            if (cycle.rotations && cycle.rotations.length > 0) {
-              const firstRotation = cycle.rotations[0];
-              const lastRotation = cycle.rotations[cycle.rotations.length - 1];
+          if (firstRotation.start_date && lastRotation.end_date) {
+            const startDate = new Date(firstRotation.start_date);
+            const endDate = new Date(lastRotation.end_date);
 
-              if (firstRotation.start_date && lastRotation.end_date) {
-                const startDate = new Date(firstRotation.start_date);
-                const endDate = new Date(lastRotation.end_date);
-
-                // Vérifier si la date actuelle est comprise entre start_date et end_date
-                if (now >= startDate && now <= endDate) {
-                  cycleToSelect = cycle;
-                  break;
-                }
-              }
+            // Vérifier si la date actuelle est comprise entre start_date et end_date
+            if (now >= startDate && now <= endDate) {
+              cycleToSelect = cycle;
+              break;
             }
           }
-
-          setSelectedCycleName(cycleToSelect.name);
-          loadPodium(1, cycleToSelect.name, "", "");
-          updateURLParams(cycleToSelect.name, "", "", itemsPerPage, 1);
         }
       }
 
-      // Charger les guildes
-      const guildsResponse = await fetch(`${apiUrl}/api/guildes`);
-      if (guildsResponse.ok) {
-        const guildsData = await guildsResponse.json();
-        setGuilds(
-          Array.isArray(guildsData) ? guildsData : guildsData.guilds || []
-        );
-      }
-    } catch (error) {
-      console.error(
-        "Erreur lors du chargement des données de référence:",
-        error
-      );
+      setSelectedCycleName(cycleToSelect.name);
+      loadPodium(1, cycleToSelect.name, "", "");
+      updateURLParams(cycleToSelect.name, "", "", itemsPerPage, 1);
     }
   };
 
@@ -214,12 +189,15 @@ const PodiumPage = () => {
         currentRotationId,
         currentGuildName
       );
-      loadReferenceData(false);
-    } else {
-      // Sinon, charger les données et sélectionner le cycle par défaut
-      loadReferenceData(true);
     }
   }, []);
+
+  // Sélectionner le cycle par défaut lorsque les cycles sont chargés
+  useEffect(() => {
+    if (!cyclesLoading && cycles.length > 0 && !selectedCycleName) {
+      selectDefaultCycle();
+    }
+  }, [cycles, cyclesLoading]);
 
   // Gestionnaires d'événements
   const handleCycleChange = (cycleName: string) => {

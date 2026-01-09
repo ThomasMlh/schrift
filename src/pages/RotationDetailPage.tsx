@@ -6,11 +6,12 @@ import {
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowBackIcon, ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import type { IRotationTemplate, IScoreWithUser, IScoreDetailApiResponse, IRankInfo, IGuild } from "@/interfaces";
+import type { IRotationTemplate, IScoreWithUser, IScoreDetailApiResponse, IRankInfo } from "@/interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { UserDisplay } from "@/components/ui/UserDisplay";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { ScoreLegend } from "@/components/ui/ScoreLegend";
+import { useGuilds } from "@/hooks/useAPI";
 
 const RotationDetailPage = () => {
     const { cycleId, position } = useParams<{ cycleId: string; position: string }>();
@@ -31,10 +32,9 @@ const RotationDetailPage = () => {
     // Constante : chaque cycle a toujours 20 rotations
     const totalRotations = 20;
     
-    // États pour le filtre des guildes
-    const [guilds, setGuilds] = useState<IGuild[]>([]);
+    // Utiliser useSWR pour les guildes (cache automatique)
+    const { guilds, isLoading: isLoadingGuilds } = useGuilds();
     const [selectedGuild, setSelectedGuild] = useState<string>(''); // ID de la guilde ou vide pour "toutes"
-    const [isLoadingGuilds, setIsLoadingGuilds] = useState(false);
 
     // Hooks UI
     const bgColor = useColorModeValue('white', 'gray.800');
@@ -83,31 +83,6 @@ const RotationDetailPage = () => {
             loadScores(selectedGuild || undefined);
         }
     }, [cycleId, position, currentPage, itemsPerPage]); // Sans selectedGuild pour éviter la double requête
-
-    // Charger les guildes au montage du composant
-    useEffect(() => {
-        loadGuilds();
-    }, []);
-
-    const loadGuilds = async () => {
-        setIsLoadingGuilds(true);
-        try {
-            const response = await fetch(`${apiUrl}/api/guildes`);
-            if (response.ok) {
-                const data = await response.json();
-                // La réponse peut être un tableau directement ou un objet avec success
-                if (Array.isArray(data)) {
-                    setGuilds(data);
-                } else if (data.success && Array.isArray(data.data)) {
-                    setGuilds(data.data);
-                }
-            }
-        } catch (error) {
-            console.error('Erreur lors du chargement des guildes:', error);
-        } finally {
-            setIsLoadingGuilds(false);
-        }
-    };
 
     const loadScores = async (guildFilter?: string) => {
         if (!cycleId || !position) return;

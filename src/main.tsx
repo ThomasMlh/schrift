@@ -4,6 +4,7 @@ import './index.css'
 import MainRouter from './MainRouter'
 import { ChakraProvider, ColorModeScript, extendTheme } from '@chakra-ui/react'
 import { HelmetProvider } from 'react-helmet-async'
+import { APIProvider } from './providers/APIProvider'
 
 // Configuration du thème avec mode sombre par défaut
 const config = {
@@ -27,7 +28,9 @@ createRoot(document.getElementById('root')!).render(
     <HelmetProvider>
       <ColorModeScript initialColorMode={theme.config.initialColorMode} />
       <ChakraProvider theme={theme}>
-        <MainRouter />
+        <APIProvider>
+          <MainRouter />
+        </APIProvider>
       </ChakraProvider>
     </HelmetProvider>
   </StrictMode>,

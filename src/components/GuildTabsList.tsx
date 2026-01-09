@@ -25,6 +25,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import type { Role, IGuild, IUser } from "../interfaces";
 import { UserDisplay } from "./ui/UserDisplay";
+import { useGuilds } from "@/hooks/useAPI";
 
 interface GuildTabsListProps {
   editable?: boolean;
@@ -35,8 +36,10 @@ const GuildTabsList = ({
   editable = false,
   refreshTrigger = 0
 }: GuildTabsListProps) => {
-  // Seulement les hooks essentiels
-  const [guilds, setGuilds] = useState<IGuild[]>([]);
+  // Utiliser useSWR pour les guildes (cache automatique + déduplication)
+  const { guilds, mutate: mutateGuilds } = useGuilds(true);
+  
+  // États
   const [membersByGuild, setMembersByGuild] = useState<Record<string, IUser[]>>(
     {}
   );
@@ -71,28 +74,6 @@ const GuildTabsList = ({
       }
     });
   };
-
-  // Charger les guildes au montage du composant
-  useEffect(() => {
-    if (!apiUrl) return;
-
-    authenticatedFetch(`${apiUrl}/api/guildes`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setGuilds(data);
-        }
-      })
-      .catch((error) => {
-        setGuilds([]);
-        toast({
-          title: "Erreur",
-          description: error.message || "Impossible de charger les guildes",
-          status: "error",
-          duration: 3000
-        });
-      });
-  }, [apiUrl, toast]);
 
   // Charger les membres quand les guildes changent
   useEffect(() => {
@@ -130,25 +111,11 @@ const GuildTabsList = ({
 
   // Réagir aux changements externes (quand une guilde est modifiée depuis AdminPage)
   useEffect(() => {
-    if (refreshTrigger > 0 && apiUrl) {
-      // Recharger les guildes
-      authenticatedFetch(`${apiUrl}/api/guildes`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            setGuilds(data);
-          }
-        })
-        .catch((error) => {
-          toast({
-            title: "Erreur",
-            description: error.message || "Impossible de recharger les guildes",
-            status: "error",
-            duration: 3000
-          });
-        });
+    if (refreshTrigger > 0) {
+      // Recharger les guildes avec mutate
+      mutateGuilds();
     }
-  }, [refreshTrigger, apiUrl, toast]);
+  }, [refreshTrigger, mutateGuilds]);
 
   // Fonction pour recharger les membres
   const loadMembers = () => {

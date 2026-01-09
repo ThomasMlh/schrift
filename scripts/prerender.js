@@ -148,6 +148,35 @@ const routes = [
       <a href="/">Retour à l'accueil</a> | <a href="/personnages">Voir tous les personnages</a>
     `
   },
+  {
+    path: 'guides/index.html',
+    title: 'Guides BBS - Schrift',
+    description: 'Guides et astuces pour Bleach Brave Souls : farming d\'orbes, rotations, builds et stratégies.',
+    keywords: 'Bleach Brave Souls, guides, orbes, farming, rotation, builds, astuces',
+    content: `
+      <h1>Guides Bleach Brave Souls</h1>
+      <p>Découvrez nos guides complets pour optimiser votre expérience sur Bleach Brave Souls.</p>
+      <h2>Guides disponibles</h2>
+      <ul>
+        <li><strong>Guide des Orbes</strong> - Comment farmer efficacement les orbes spirituels</li>
+        <li><strong>Guide des Rotations</strong> - Stratégies et compositions d'équipe pour Guild Quest</li>
+        <li><strong>Guide des Builds</strong> - Optimisation des personnages et accessoires</li>
+      </ul>
+      <h3>Sources d'orbes</h3>
+      <p>Maximisez vos gains d'orbes grâce à nos conseils sur :</p>
+      <ul>
+        <li>Guild Quest et classements</li>
+        <li>Tour Senkaimon</li>
+        <li>Epic Raid (EAP)</li>
+        <li>Résurrections</li>
+        <li>Brave Bonus</li>
+        <li>Arène PvP</li>
+        <li>Raids et événements quotidiens</li>
+      </ul>
+      <p>Rejoignez les guildes Schrift et améliorez vos performances dans Bleach Brave Souls !</p>
+      <a href="/">Retour à l'accueil</a> | <a href="/cycles">Voir les cycles</a>
+    `
+  },
 ];
 
 function generatePrerenderedHTML(route) {

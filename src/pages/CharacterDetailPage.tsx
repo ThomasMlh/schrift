@@ -5,22 +5,22 @@ import {
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import { ArrowBackIcon } from "@chakra-ui/icons";
-import type { ICharacter } from "../interfaces";
+
 import { AffinityIcon } from "../components/ui/AffinityIcon";
 import { KillerIcon } from "../components/ui/KillerIcon";
 import { CategoryIcon } from "../components/ui/CategoryIcon";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
 import { getStatIcon } from "@/utils/characterIcons";
 import { SEOHead } from "../components/SEOHead";
+import { useCharacter } from "@/hooks/useAPI";
 
 const CharacterDetailPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const toast = useToast();
-    const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-    const [character, setCharacter] = useState<ICharacter | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    // Utiliser useSWR pour le personnage (cache automatique)
+    const { character, isLoading, error: fetchError } = useCharacter(id);
     const [error, setError] = useState<string | null>(null);
 
     // Hooks UI
@@ -30,40 +30,16 @@ const CharacterDetailPage = () => {
     const buttonColor = useColorModeValue('black', 'white');
 
     useEffect(() => {
-        if (id) {
-            loadCharacter();
-        }
-    }, [id]);
-
-    const loadCharacter = async () => {
-        if (!id) return;
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const response = await fetch(`${apiUrl}/api/characters/${id}`);
-
-            if (response.ok) {
-                const { data } = await response.json();
-                setCharacter(data);
-            } else if (response.status === 404) {
-                setError("Personnage introuvable");
-            } else {
-                setError("Erreur lors du chargement du personnage");
-            }
-        } catch (error) {
-            setError("Erreur de connexion");
+        if (fetchError) {
+            setError("Erreur lors du chargement du personnage");
             toast({
                 title: "Erreur",
                 description: "Impossible de charger les informations du personnage",
                 status: "error",
                 duration: 5000
             });
-        } finally {
-            setIsLoading(false);
         }
-    };
+    }, [fetchError, toast]);
 
     if (isLoading) {
         return (
