@@ -213,7 +213,7 @@ export const useCharacters = (options?: {
 export const useCharacter = (characterId?: string) => {
   const url = characterId ? `${apiUrl}/api/characters/${characterId}` : null;
   
-  const { data, error, isLoading, mutate } = useSWR<ICharacter>(
+  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: ICharacter }>(
     url,
     fetcher,
     {
@@ -222,7 +222,7 @@ export const useCharacter = (characterId?: string) => {
   );
 
   return {
-    character: data,
+    character: data?.data,
     isLoading,
     error,
     mutate,
@@ -353,4 +353,55 @@ export const useOrbGuide = () => {
   };
 }
 
+// Hook pour récupérer les builds avec pagination et filtres
+export const useBuilds = (options?: {
+  page?: number;
+  limit?: number;
+  rotation_id?: string;
+  isValid?: boolean;
+  authenticated?: boolean;
+}) => {
+  const { page = 1, limit = 20, rotation_id, isValid, authenticated = false } = options || {};
+  
+  let url = `${apiUrl}/api/builds?page=${page}&limit=${limit}`;
+  if (rotation_id) url += `&rotation_id=${encodeURIComponent(rotation_id)}`;
+  if (isValid !== undefined) url += `&isValid=${isValid}`;
 
+  const { data, error, isLoading, mutate } = useSWR<import('../interfaces').IBuildsResponse>(
+    url,
+    authenticated ? authenticatedFetcher : fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 10000, // Cache de 10 secondes
+    }
+  );
+
+  return {
+    builds: data?.data || [],
+    pagination: data?.pagination,
+    filters: data?.filters,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+// Hook pour récupérer un build spécifique
+export const useBuild = (buildId?: string, authenticated: boolean = false) => {
+  const url = buildId ? `${apiUrl}/api/builds/${buildId}` : null;
+  
+  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: import('../interfaces').IBuild }>(
+    url,
+    authenticated ? authenticatedFetcher : fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
+
+  return {
+    build: data?.data,
+    isLoading,
+    error,
+    mutate,
+  };
+}

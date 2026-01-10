@@ -253,6 +253,118 @@ export const createBulkScores = async (scoresData: IScoreFormData[]) => {
   return result;
 }
 
+// Fonction pour créer un build
+export const createBuild = async (buildData: {
+  rotation_id: string;
+  description?: string;
+  team: Array<{
+    id_character: string;
+    position: number;
+    links?: Array<{ id_character: string }>;
+  }>;
+}) => {
+  const token = localStorage.getItem('userToken');
+  const response = await fetch(`${apiUrl}/api/builds`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : '',
+    },
+    body: JSON.stringify(buildData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Erreur lors de la création du build');
+  }
+
+  const newBuild = await response.json();
+
+  // Invalider le cache des builds
+  await mutate((key) => typeof key === 'string' && key.startsWith(`${apiUrl}/api/builds`));
+  
+  return newBuild;
+}
+
+// Fonction pour mettre à jour un build
+export const updateBuild = async (buildId: string, buildData: {
+  rotation_id?: string;
+  description?: string;
+  team?: Array<{
+    id_character: string;
+    position: number;
+    links?: Array<{ id_character: string }>;
+  }>;
+}) => {
+  const token = localStorage.getItem('userToken');
+  const response = await fetch(`${apiUrl}/api/builds/${buildId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : '',
+    },
+    body: JSON.stringify(buildData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Erreur lors de la mise à jour du build');
+  }
+
+  const updatedBuild = await response.json();
+
+  // Invalider le cache des builds
+  await mutate((key) => typeof key === 'string' && key.startsWith(`${apiUrl}/api/builds`));
+  
+  return updatedBuild;
+}
+
+// Fonction pour valider/invalider un build (admin only)
+export const validateBuild = async (buildId: string, isValid: boolean) => {
+  const token = localStorage.getItem('userToken');
+  const response = await fetch(`${apiUrl}/api/builds/${buildId}/validate`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : '',
+    },
+    body: JSON.stringify({ isValid }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Erreur lors de la validation du build');
+  }
+
+  const result = await response.json();
+
+  // Invalider le cache des builds
+  await mutate((key) => typeof key === 'string' && key.startsWith(`${apiUrl}/api/builds`));
+  
+  return result;
+}
+
+// Fonction pour supprimer un build
+export const deleteBuild = async (buildId: string) => {
+  const token = localStorage.getItem('userToken');
+  const response = await fetch(`${apiUrl}/api/builds/${buildId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': token ? `Bearer ${token}` : '',
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Erreur lors de la suppression du build');
+  }
+
+  // Invalider le cache des builds
+  await mutate((key) => typeof key === 'string' && key.startsWith(`${apiUrl}/api/builds`));
+  
+  return true;
+}
+
 /**
  * Exemple d'utilisation dans un composant :
  * 

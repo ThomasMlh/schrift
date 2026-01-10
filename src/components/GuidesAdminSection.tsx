@@ -8,6 +8,7 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import OrbGuideAdminSection from "./OrbGuideAdminSection";
+import BuildsAdminSection from "./BuildsAdminSection";
 
 // Composant wrapper pour les sections de guides pliables
 interface GuideFormWrapperProps {
@@ -82,7 +83,7 @@ const GuidesAdminSection = () => {
           <OrbGuideAdminSection />
         </GuideFormWrapper>
 
-        {/* Futur: Guide des Rotations & Builds */}
+        {/* Guide des Rotations & Builds */}
         <GuideFormWrapper
           title="🔄 Guide des Rotations & Builds"
           formName="rotationGuide"
@@ -92,9 +93,7 @@ const GuidesAdminSection = () => {
           bgColor={bgColor}
           boxShadow={boxShadow}
         >
-          <Box p={4} textAlign="center" color="gray.500">
-            Section à venir prochainement...
-          </Box>
+          <BuildsAdminSection />
         </GuideFormWrapper>
 
         {/* Futur: Autres guides */}

@@ -305,3 +305,65 @@ export interface IComparisonResponse {
   comparison: IComparisonResult;
   filters: IComparisonFilters;
 }
+
+// Interfaces pour les builds/teams
+export interface IBuildLink {
+  id_character: string;
+  character?: {
+    _id: string;
+    name: string;
+    image?: string;
+    link?: string;
+    rarity?: string;
+    element?: string;
+    affinity?: string;
+  };
+}
+
+export interface IBuildTeamMember {
+  id_character: string;
+  position: number; // 1, 2 ou 3
+  links?: IBuildLink[];
+  character?: {
+    _id: string;
+    name: string;
+    image?: string;
+    link?: string;
+    rarity?: string;
+    element?: string;
+    affinity?: string;
+  };
+}
+
+export interface IBuild {
+  _id?: string;
+  rotation_id: string;
+  rotation?: {
+    _id: string;
+    killer: string;
+    attack: string;
+    alteration: string;
+    start_date?: string;
+    end_date?: string;
+    cycle_id?: string;
+  };
+  description?: string;
+  isValid: boolean;
+  user_id?: string;
+  user?: IUser;
+  team: IBuildTeamMember[];
+  validated_at?: string;
+  validated_by?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface IBuildsResponse {
+  success: boolean;
+  data: IBuild[];
+  pagination: IPagination;
+  filters: {
+    rotation_id?: string | null;
+    isValid?: boolean | null;
+  };
+}

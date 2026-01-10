@@ -532,6 +532,7 @@ const MainRouter = () => {
           <Route path="/podium" element={<PodiumPage />} />
           <Route path="/comparateur" element={<ComparatorPage />} />
           <Route path="/guides" element={<GuidesPage />} />
+          <Route path="/guides/:section" element={<GuidesPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Box>
