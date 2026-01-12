@@ -83,10 +83,11 @@ const DiscordCallback = () => {
         // Rediriger vers l'accueil
         navigate('/');
         
-      } catch (error: any) {
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
         toast({
           title: "Erreur de connexion",
-          description: error.message,
+          description: errorMessage,
           status: "error"
         });
         navigate('/');
@@ -94,6 +95,7 @@ const DiscordCallback = () => {
     };
 
     processDiscordCallback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

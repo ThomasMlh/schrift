@@ -98,7 +98,7 @@ const CycleDetailPage = () => {
           <Heading size="xl" mb={2}>
             {cycle.name}
           </Heading>
-          <Text color={useColorModeValue("gray.700", "gray.300")}>Détail du cycle de rotation</Text>
+          <Text color={textSecondary}>Détail du cycle de rotation</Text>
         </Box>
 
         {/* Informations générales */}

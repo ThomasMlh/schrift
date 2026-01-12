@@ -10,18 +10,17 @@ export interface IGuild {
 
 export interface IUser {
   _id: string;
-  userId?: string;
   username: string;
-  discordId?: string;
   global_name: string;
   avatar?: string;
   discord_id?: string;
   guilde_id?: string;
   role: Role;
-  isAdmin?: boolean;
+  is_admin?: boolean;
   bbs_id?: string;
   bbs_name?: string;
-  [key: string]: any;
+  last_login?: string;
+  exp?: number;
 }
 
 export interface ICharacter {
@@ -32,7 +31,7 @@ export interface ICharacter {
   categories?: string[];
   killers?: string[];
   link?: string;
-  [key: string]: any;
+  attack_type: string;
 }
 
 export interface IPagination {
@@ -395,4 +394,11 @@ export interface IBuildsResponse {
     rotation_id?: string | null;
     isValid?: boolean | null;
   };
+}
+
+export interface IGuideOrb {
+  _id: string;
+  name: string;
+  description: string;
+  amount: number;
 }

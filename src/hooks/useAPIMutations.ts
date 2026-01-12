@@ -1,5 +1,5 @@
 import { mutate } from 'swr';
-import type { ICycle, IGuild, IScoreFormData } from '../interfaces';
+import type { ICycle, IGuild, IScoreFormData, Role } from '../interfaces';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -153,6 +153,88 @@ export const assignUserToGuild = async (guildId: string, userId: string) => {
   // Invalider les caches concernés
   await mutate(membersKey);
   await mutate(`${apiUrl}/api/users`);
+  
+  return result;
+}
+
+// Fonction pour changer le rôle d'un utilisateur
+export const updateUserRole = async (userId: string, newRole: Role) => {
+  const token = localStorage.getItem('userToken');
+  const response = await fetch(`${apiUrl}/api/users/${userId}/role`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : '',
+    },
+    body: JSON.stringify({ role: newRole }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Erreur lors de la modification du rôle');
+  }
+
+  const result = await response.json();
+
+  // Invalider les caches pour les utilisateurs et les guildes
+  await mutate((key) => typeof key === 'string' && (
+    key.startsWith(`${apiUrl}/api/users`) || 
+    key.startsWith(`${apiUrl}/api/guildes`)
+  ));
+  
+  return result;
+}
+
+// Fonction pour déplacer un utilisateur vers une autre guilde
+export const moveUserToGuild = async (userId: string, newGuildId: string) => {
+  const token = localStorage.getItem('userToken');
+  const response = await fetch(`${apiUrl}/api/users/${userId}/guild`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : '',
+    },
+    body: JSON.stringify({ guildeId: newGuildId }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Erreur lors du déplacement du membre');
+  }
+
+  const result = await response.json();
+
+  // Invalider les caches pour les utilisateurs et les guildes
+  await mutate((key) => typeof key === 'string' && (
+    key.startsWith(`${apiUrl}/api/users`) || 
+    key.startsWith(`${apiUrl}/api/guildes`)
+  ));
+  
+  return result;
+}
+
+// Fonction pour supprimer un membre d'une guilde
+export const removeGuildMember = async (guildId: string, userId: string) => {
+  const token = localStorage.getItem('userToken');
+  const response = await fetch(`${apiUrl}/api/guildes/${guildId}/membres/${userId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': token ? `Bearer ${token}` : '',
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Erreur lors de la suppression du membre');
+  }
+
+  const result = await response.json();
+
+  // Invalider les caches pour les utilisateurs et les guildes
+  await mutate((key) => typeof key === 'string' && (
+    key.startsWith(`${apiUrl}/api/users`) || 
+    key.startsWith(`${apiUrl}/api/guildes`)
+  ));
   
   return result;
 }

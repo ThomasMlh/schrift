@@ -314,7 +314,7 @@ const CyclesSection = () => {
           duration: 3000,
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Erreur",
         description: "Erreur de connexion lors de la création du cycle",

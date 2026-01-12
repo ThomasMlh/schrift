@@ -6,7 +6,7 @@ import ScoresSection from "../components/ScoresSection";
 import UsersTable from "../components/UsersTable";
 import GuidesAdminSection from "../components/GuidesAdminSection";
 import { useState, useMemo } from "react";
-import type { AdminPage as IAdminPage } from "../interfaces";
+import type { AdminPage as IAdminPage, IUser } from "../interfaces";
 
 const AdminPage = () => {
   // Détection des permissions utilisateur
@@ -14,14 +14,14 @@ const AdminPage = () => {
     try {
       const token = localStorage.getItem('userToken');
       if (!token) return null;
-      return jwtDecode(token) as any;
+      return jwtDecode<IUser>(token);
     } catch {
       return null;
     }
   };
 
   const currentUser = getCurrentUser();
-  const isFullAdmin = currentUser?.isAdmin || false;
+  const isFullAdmin = currentUser?.is_admin || false;
   const isGuildManager = currentUser?.role === 'chef' || currentUser?.role === 'sous-chef';
   
   // Pages autorisées selon le rôle

@@ -15,7 +15,7 @@ import CycleDetailPage from "./pages/CycleDetailPage";
 import RotationDetailPage from "./pages/RotationDetailPage";
 import DiscordCallback from "./pages/DiscordCallback";
 import UserPage from "./pages/UserPage";
-import type { IProtectedRoute } from "./interfaces";
+import type { IProtectedRoute, IUser } from "./interfaces";
 import UsersPage from "./pages/UsersPage";
 import AdminPage from "./pages/AdminPage";
 import PodiumPage from "./pages/PodiumPage";
@@ -58,13 +58,13 @@ const MainRouter = () => {
   const isTokenValid = (token: string | null): boolean => {
     if (!token) return false;
     try {
-      const decoded = jwtDecode(token);
+      const decoded = jwtDecode<IUser>(token);
       const currentTime = Date.now() / 1000;
       if (decoded.exp && decoded.exp < currentTime) {
         return false;
       }
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   };
@@ -76,9 +76,9 @@ const MainRouter = () => {
         localStorage.getItem("userToken") || localStorage.getItem("adminToken");
       if (token && isTokenValid(token)) {
         try {
-          const decoded = jwtDecode(token) as any;
+          const decoded = jwtDecode<IUser>(token);
           setIsLoggedIn(true);
-          setIsAdmin(decoded.isAdmin || false);
+          setIsAdmin(decoded.is_admin || false);
           setIsGuildManager(
             decoded.role === "chef" || decoded.role === "sous-chef"
           );

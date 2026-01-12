@@ -29,7 +29,7 @@ import { UserDisplay } from "../ui/UserDisplay";
 import { CustomSelect } from "../ui/CustomSelect";
 import { AttackTypeBadge } from "../ui/AttackTypeBadge";
 import { AlterationImage } from "../ui/AlterationImage";
-import type { IBuild } from "../../interfaces";
+import type { IBuild, IUser } from "../../interfaces";
 
 const RotationsBuildsGuide = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,7 +46,7 @@ const RotationsBuildsGuide = () => {
     try {
       const token = localStorage.getItem("userToken");
       if (!token) return null;
-      return jwtDecode(token) as any;
+      return jwtDecode<IUser>(token);
     } catch {
       return null;
     }

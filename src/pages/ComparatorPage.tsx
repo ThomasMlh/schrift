@@ -30,7 +30,7 @@ import { useSearchParams } from "react-router-dom";
 import { CustomSelect } from "../components/ui/CustomSelect";
 import { UserSearchSelect } from "../components/ui/UserSearchSelect";
 import { HeroSection } from "../components/HeroSection";
-import type { IComparisonResponse } from "../interfaces";
+import type { IComparisonResponse, ICycleRotation, IRotationTemplate } from "../interfaces";
 import { SEOHead } from "@/components/SEOHead";
 import ComparisonEntity from "@/components/ui/ComparisonEntity";
 import { useUsers, useGuilds, useCycles, useRotations } from "@/hooks/useAPI";
@@ -81,6 +81,7 @@ const ComparatorPage: React.FC = () => {
     if (entity1 && entity2) {
       performComparison();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entity1, entity2]);
 
   // Fonction pour mettre à jour les paramètres URL
@@ -152,7 +153,7 @@ const ComparatorPage: React.FC = () => {
           duration: 3000
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Erreur",
         description: "Erreur de connexion lors de la comparaison",
@@ -208,13 +209,13 @@ const ComparatorPage: React.FC = () => {
     // Chercher d'abord dans les rotations du cycle sélectionné
     if (selectedCycle && selectedCycle.rotations) {
       const rotation = selectedCycle.rotations.find(
-        (r: any) => r._id === selectedRotationId
+        (r: ICycleRotation) => r._id === selectedRotationId
       );
       if (rotation) return rotation;
     }
 
     // Sinon chercher dans toutes les rotations
-    return allRotations.find((r: any) => r._id === selectedRotationId);
+    return allRotations.find((r: IRotationTemplate) => r._id === selectedRotationId);
   };
 
   if (isLoading) {
@@ -353,11 +354,11 @@ const ComparatorPage: React.FC = () => {
                             );
                           }}
                           options={getAvailableRotations()
-                            .filter((rotation: any) => rotation._id) // Filtrer les rotations sans _id
-                            .map((rotation: any) => ({
-                              value: rotation.rotation_id,
+                            .filter((rotation) => rotation._id) // Filtrer les rotations sans _id
+                            .map((rotation) => ({
+                              value: ('rotation_id' in rotation && rotation.rotation_id) ? rotation.rotation_id : (rotation._id || ''),
                               label: `${
-                                rotation.position
+                                'position' in rotation && rotation.position
                                   ? `#${rotation.position} - `
                                   : ""
                               }${rotation.killer} (${rotation.attack})`

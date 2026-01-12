@@ -303,10 +303,11 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess }: BuildCre
 
       onSuccess();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       toast({
         title: "Erreur",
-        description: error.message || "Impossible de créer le build",
+        description: err.message || "Impossible de créer le build",
         status: "error",
         duration: 5000,
       });

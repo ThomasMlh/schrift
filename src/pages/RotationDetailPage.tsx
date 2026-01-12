@@ -42,6 +42,57 @@ const RotationDetailPage = () => {
     const textSecondary = useColorModeValue('gray.700', 'gray.300');
     const shadowColor = useColorModeValue('lg', 'dark-lg');
 
+        const loadScores = async (guildFilter?: string) => {
+        if (!cycleId || !position) return;
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            // Construire l'URL avec les paramètres
+            const params = new URLSearchParams({
+                page: currentPage.toString(),
+                limit: itemsPerPage.toString()
+            });
+            
+            // Ajouter le filtre de guilde si fourni
+            if (guildFilter) {
+                const selectedGuildData = guilds.find(guild => guild._id === guildFilter);
+                if (selectedGuildData) {
+                    params.append('guild', selectedGuildData.name);
+                }
+            }
+
+            const response = await fetch(
+                `${apiUrl}/api/cycles/${cycleId}/rotations/${position}/scores?${params.toString()}`
+            );
+            
+            if (response.ok) {
+                const data: IScoreDetailApiResponse = await response.json();
+                setScores(data.data);
+                setCycle(data.cycle);
+                setRotation(data.rotation);
+                setCurrentPage(data.pagination?.currentPage || 1);
+                setTotalPages(data.pagination?.totalPages || 1);
+                setTotalItems(data.pagination?.totalItems || data.data?.length || 0);
+            } else if (response.status === 404) {
+                setError("Rotation introuvable");
+            } else {
+                setError("Erreur lors du chargement des scores");
+            }
+        } catch {
+            setError("Erreur de connexion");
+            toast({
+                title: "Erreur",
+                description: "Impossible de charger les scores de la rotation",
+                status: "error",
+                duration: 5000
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     // Fonction pour créer les informations de rang basées sur le rang du serveur
     const getRankInfo = (rank: number): IRankInfo => {
         if (rank === 1) {
@@ -83,58 +134,8 @@ const RotationDetailPage = () => {
         if (cycleId && position) {
             loadScores(selectedGuild || undefined);
         }
-    }, [cycleId, position, currentPage, itemsPerPage]); // Sans selectedGuild pour éviter la double requête
-
-    const loadScores = async (guildFilter?: string) => {
-        if (!cycleId || !position) return;
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            // Construire l'URL avec les paramètres
-            const params = new URLSearchParams({
-                page: currentPage.toString(),
-                limit: itemsPerPage.toString()
-            });
-            
-            // Ajouter le filtre de guilde si fourni
-            if (guildFilter) {
-                const selectedGuildData = guilds.find(guild => guild._id === guildFilter);
-                if (selectedGuildData) {
-                    params.append('guild', selectedGuildData.name);
-                }
-            }
-
-            const response = await fetch(
-                `${apiUrl}/api/cycles/${cycleId}/rotations/${position}/scores?${params.toString()}`
-            );
-            
-            if (response.ok) {
-                const data: IScoreDetailApiResponse = await response.json();
-                setScores(data.data);
-                setCycle(data.cycle);
-                setRotation(data.rotation);
-                setCurrentPage(data.pagination?.currentPage || 1);
-                setTotalPages(data.pagination?.totalPages || 1);
-                setTotalItems(data.pagination?.totalItems || data.data?.length || 0);
-            } else if (response.status === 404) {
-                setError("Rotation introuvable");
-            } else {
-                setError("Erreur lors du chargement des scores");
-            }
-        } catch (error) {
-            setError("Erreur de connexion");
-            toast({
-                title: "Erreur",
-                description: "Impossible de charger les scores de la rotation",
-                status: "error",
-                duration: 5000
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [cycleId, position, currentPage, itemsPerPage, selectedGuild]);
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= totalPages) {

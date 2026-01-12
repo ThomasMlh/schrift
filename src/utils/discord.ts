@@ -22,8 +22,8 @@ export const getDiscordAvatarUrl = (userId: string, avatarHash: string, size: nu
  * @param size - La taille souhaitée de l'avatar (par défaut: 128)
  * @returns L'URL de l'avatar ou null
  */
-export const getUserAvatarUrl = (user: { discord_id?: string; discordId?: string; avatar?: string }, size: number = 128): string | null => {
-  const discordId = user.discord_id || user.discordId;
+export const getUserAvatarUrl = (user: { discord_id?: string; avatar?: string }, size: number = 128): string | null => {
+  const discordId = user.discord_id;
   const avatarHash = user.avatar;
   
   if (!discordId || !avatarHash) return null;

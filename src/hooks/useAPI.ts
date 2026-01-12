@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import type { ICycle, IGuild, IUser, ICharactersResponse, ICharacter, IRotationTemplate, IScoresResponse, IPodiumResponse } from '../interfaces';
+import type { ICycle, IGuild, IUser, ICharactersResponse, ICharacter, IRotationTemplate, IScoresResponse, IPodiumResponse, IGuideOrb, IPagination } from '../interfaces';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -37,7 +37,7 @@ export const useCycles = (options?: { limit?: number; page?: number; authenticat
   if (page) params.append('page', page.toString());
   if (params.toString()) url += `?${params.toString()}`;
 
-  const { data, error, isLoading, mutate } = useSWR<{ data: ICycle[]; success?: boolean; pagination?: any }>(
+  const { data, error, isLoading, mutate } = useSWR<{ data: ICycle[]; success?: boolean; pagination?: IPagination }>(
     url,
     authenticated ? authenticatedFetcher : fetcher,
     {
@@ -349,7 +349,7 @@ export const usePodium = (options?: {
 export const useOrbGuide = () => {
   const url = `${apiUrl}/api/guides/orbes`;
   
-  const { data, error, isLoading, mutate } = useSWR<any>(
+  const { data, error, isLoading, mutate } = useSWR<IGuideOrb>(
     url,
     fetcher,
     {

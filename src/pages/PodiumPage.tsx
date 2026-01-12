@@ -18,7 +18,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Pagination as PaginationComponent } from "../components/ui/Pagination";
 import { HeroSection } from "../components/HeroSection";
-import type { IPodiumResponse } from "../interfaces";
+import type { ICycleRotation, IPodiumResponse } from "../interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { SEOHead } from "@/components/SEOHead";
 import PlayerCard from "@/components/ui/PlayerCard";
@@ -126,7 +126,7 @@ const PodiumPage = () => {
           duration: 3000
         });
       }
-    } catch (error) {
+    } catch {
       setPodiumData(null);
       toast({
         title: "Erreur",
@@ -190,6 +190,7 @@ const PodiumPage = () => {
         currentGuildName
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sélectionner le cycle par défaut lorsque les cycles sont chargés
@@ -197,6 +198,7 @@ const PodiumPage = () => {
     if (!cyclesLoading && cycles.length > 0 && !selectedCycleName) {
       selectDefaultCycle();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cycles, cyclesLoading]);
 
   // Gestionnaires d'événements
@@ -341,7 +343,7 @@ const PodiumPage = () => {
                         onChange={(e) => handleRotationChange(e.target.value)}
                         maxW="300px"
                       >
-                        {selectedCycle.rotations.map((rotation: any) => (
+                        {selectedCycle.rotations.map((rotation: ICycleRotation) => (
                           <option
                             key={rotation.rotation_id}
                             value={rotation.rotation_id}

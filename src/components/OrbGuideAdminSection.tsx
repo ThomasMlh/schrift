@@ -64,7 +64,9 @@ const OrbGuideAdminSection = () => {
 
   // Fetch initial data
   useEffect(() => {
+    
     fetchOrbGuide();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchOrbGuide = async () => {
@@ -156,7 +158,7 @@ const OrbGuideAdminSection = () => {
 
       handleCloseModal();
       fetchOrbGuide();
-    } catch (err) {
+    } catch {
       toast({
         title: "Erreur",
         description: "Impossible d'enregistrer les modifications",
@@ -193,7 +195,7 @@ const OrbGuideAdminSection = () => {
       });
 
       fetchOrbGuide();
-    } catch (err) {
+    } catch {
       toast({
         title: "Erreur",
         description: "Impossible de supprimer l'entrée",

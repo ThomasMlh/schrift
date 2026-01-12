@@ -19,10 +19,7 @@ import { AlterationImage } from "./ui/AlterationImage";
 import CustomLink from "./ui/CustomLink";
 import { useCycles } from "@/hooks/useAPI";
 
-interface CurrentInfoSectionProps {
-}
-
-export const CurrentInfoSection = ({}: CurrentInfoSectionProps = {}) => {
+export const CurrentInfoSection = () => {
   const [currentCycle, setCurrentCycle] = useState<ICycle | null>(null);
   const [nextCycle, setNextCycle] = useState<ICycle | null>(null);
   const [isCycleActive, setIsCycleActive] = useState(false);

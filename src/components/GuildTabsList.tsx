@@ -26,16 +26,17 @@ import { useEffect, useRef, useState } from "react";
 import type { Role, IGuild, IUser } from "../interfaces";
 import { UserDisplay } from "./ui/UserDisplay";
 import { useGuilds } from "@/hooks/useAPI";
+import { updateUserRole, moveUserToGuild, removeGuildMember } from "@/hooks/useAPIMutations";
 
 interface GuildTabsListProps {
   editable?: boolean;
   refreshTrigger?: number;
 }
 
-const GuildTabsList = ({
+const GuildTabsList: React.FC<GuildTabsListProps> = ({
   editable = false,
   refreshTrigger = 0
-}: GuildTabsListProps) => {
+}) => {
   // Utiliser useSWR pour les guildes (cache automatique + déduplication)
   const { guilds, mutate: mutateGuilds } = useGuilds(true);
   
@@ -161,34 +162,18 @@ const GuildTabsList = ({
 
   // Confirmer la suppression du membre
   const confirmDeleteMember = async () => {
-    if (!apiUrl || !memberToDelete) return;
+    if (!memberToDelete) return;
 
     try {
-      const response = await authenticatedFetch(
-        `${apiUrl}/api/guildes/${memberToDelete.guildId}/membres/${memberToDelete.id}`,
-        {
-          method: "DELETE"
-        }
-      );
+      await removeGuildMember(memberToDelete.guildId, memberToDelete.id);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        loadMembers();
-        toast({
-          title: "Membre supprimé",
-          description: data.message,
-          status: "success",
-          duration: 2000
-        });
-      } else {
-        toast({
-          title: "Erreur",
-          description: data.message,
-          status: "error",
-          duration: 3000
-        });
-      }
+      loadMembers();
+      toast({
+        title: "Membre supprimé",
+        description: "Le membre a été supprimé avec succès",
+        status: "success",
+        duration: 2000
+      });
     } catch (error) {
       toast({
         title: "Erreur",
@@ -206,50 +191,27 @@ const GuildTabsList = ({
   };
 
   const handleRoleChange = async (member: IUser, newRole: Role) => {
-    if (!apiUrl) return;
-
     try {
-      const response: any = await authenticatedFetch(
-        `${apiUrl}/api/users/${member._id}/role`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ role: newRole })
-        }
-      );
+      await updateUserRole(member._id, newRole);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        loadMembers();
-        toast({
-          title: "Rôle modifié",
-          description:
-            data.message ||
-            `${member.username} est maintenant ${
-              newRole === "chef"
-                ? "Chef"
-                : newRole === "sous-chef"
-                ? "Sous-Chef"
-                : "Membre"
-            }`,
-          status: "success",
-          duration: 2000
-        });
-      } else {
-        toast({
-          title: "Erreur",
-          description: data.message || "Impossible de modifier le rôle",
-          status: "error",
-          duration: 3000
-        });
-      }
+      loadMembers();
+      toast({
+        title: "Rôle modifié",
+        description: `${member.username} est maintenant ${
+          newRole === "chef"
+            ? "Chef"
+            : newRole === "sous-chef"
+            ? "Sous-Chef"
+            : "Membre"
+        }`,
+        status: "success",
+        duration: 2000
+      });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Erreur lors de la modification du rôle";
       toast({
         title: "Erreur",
-        description: "Erreur lors de la modification du rôle",
+        description: errorMessage,
         status: "error",
         duration: 3000
       });
@@ -266,43 +228,22 @@ const GuildTabsList = ({
     const targetGuild = guilds.find((g) => g._id === toGuildId);
 
     try {
-      const response = await authenticatedFetch(
-        `${apiUrl}/api/users/${member._id}/guild`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ guildeId: toGuildId })
-        }
-      );
+      await moveUserToGuild(member._id, toGuildId);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        loadMembers();
-        toast({
-          title: "Membre déplacé",
-          description:
-            data.message ||
-            `${member.username} a été déplacé vers ${
-              targetGuild?.name || "la nouvelle guilde"
-            }`,
-          status: "success",
-          duration: 2000
-        });
-      } else {
-        toast({
-          title: "Erreur",
-          description: data.message || "Impossible de déplacer le membre",
-          status: "error",
-          duration: 3000
-        });
-      }
+      loadMembers();
+      toast({
+        title: "Membre déplacé",
+        description: `${member.username} a été déplacé vers ${
+          targetGuild?.name || "la nouvelle guilde"
+        }`,
+        status: "success",
+        duration: 2000
+      });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Erreur lors du déplacement du membre";
       toast({
         title: "Erreur",
-        description: "Erreur lors du déplacement du membre",
+        description: errorMessage,
         status: "error",
         duration: 3000
       });

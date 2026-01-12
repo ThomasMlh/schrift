@@ -87,7 +87,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                 setUsers([]);
                 setPagination(null);
             }
-        } catch (error) {
+        } catch {
             setUsers([]);
             setPagination(null);
         } finally {
@@ -107,6 +107,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
         setSelectedRole(currentRole);
 
         loadUsers(currentPage, currentSearch, currentGuildId, currentRole);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Effet pour la recherche automatique avec debounce
@@ -121,6 +122,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
         }, 500); // Délai de 500ms
 
         return () => clearTimeout(timeoutId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm]); // Se déclenche quand searchTerm change
 
     // Gestionnaires d'événements
@@ -311,7 +313,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                             </Tr>
                         </Thead>
                         <Tbody>
-                            {users.map((user) => (
+                            {users.map((user: IUser) => (
                                 <Tr key={user._id} _hover={{ bg: hoverBg }}>
                                     <Td>
                                         <HStack spacing={3}>

@@ -131,7 +131,7 @@ export const Header = () => {
         return false;
       }
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   };
@@ -182,9 +182,9 @@ export const Header = () => {
         localStorage.getItem("userToken") || localStorage.getItem("adminToken");
       if (token && isTokenValid(token)) {
         try {
-          const decoded = jwtDecode(token) as any;
+          const decoded = jwtDecode<IUser>(token);
           setIsLoggedIn(true);
-          setIsAdmin(decoded.isAdmin || false);
+          setIsAdmin(decoded.is_admin || false);
           setIsGuildManager(
             decoded.role === "chef" || decoded.role === "sous-chef"
           );
@@ -247,7 +247,7 @@ export const Header = () => {
             />
             <VStack spacing={0} align="start">
               <CustomLink
-                to={`/joueur/${userInfo?.id}`}
+                to={`/joueur/${userInfo?._id}`}
                 text={`${userInfo?.global_name}`}
                 textSize="sm"
               />
@@ -403,7 +403,7 @@ export const Header = () => {
                     />
                     <VStack spacing={0} align="start">
                       <CustomLink
-                        to={`/joueur/${userInfo?.id}`}
+                        to={`/joueur/${userInfo?._id}`}
                         text={`${userInfo?.global_name}`}
                         textSize="sm"
                       />

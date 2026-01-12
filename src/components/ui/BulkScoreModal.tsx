@@ -28,7 +28,7 @@ import {
 } from "@chakra-ui/react";
 
 import { useState, useEffect } from "react";
-import type { IUser, ICycle, IGuild, IScoreFormData } from "../../interfaces";
+import type { IUser, ICycle, IGuild, IScoreFormData, ICycleRotation } from "../../interfaces";
 import { useGuildMembers, useScores } from "@/hooks/useAPI";
 import { AttackTypeBadge } from "./AttackTypeBadge";
 import { CustomSelect } from "./CustomSelect";
@@ -119,7 +119,7 @@ const BulkScoreModal = ({
         if (existingScoresData.length > 0) {
             // Remplacer par les scores existants si disponibles
             let foundExistingScores = false;
-            existingScoresData.forEach((score: any) => {
+            existingScoresData.forEach((score: IScoreFormData) => {
                 if (score.raw_score !== undefined) {
                     newScores[score.user_id] = score.raw_score;
                     if (score.raw_score > 0) {
@@ -198,7 +198,7 @@ const BulkScoreModal = ({
     return (
         <Modal isOpen={isOpen} onClose={handleClose} size="6xl" scrollBehavior="inside">
             <ModalOverlay />
-            <ModalContent minH="400px">
+            <ModalContent minH="60vh" bg={modalBg}>
                 <ModalHeader>Saisie groupée des scores</ModalHeader>
                 <ModalBody>
                     <VStack spacing={6} align="stretch">
@@ -260,7 +260,7 @@ const BulkScoreModal = ({
                                     onChange={setSelectedRotationId}
                                     isDisabled={isSubmitting}
                                     bg={modalBg}
-                                    options={selectedCycle.rotations.map((rotation: any) => ({
+                                    options={selectedCycle.rotations.map((rotation: ICycleRotation) => ({
                                         value: rotation.rotation_id,
                                         label: `Rotation #${rotation.position} - ${rotation.killer}`,
                                         content: (
@@ -278,8 +278,8 @@ const BulkScoreModal = ({
                                         )
                                     }))}
                                     renderSelected={(option) => {
-                                        const rotation = selectedCycle.rotations.find((r: any) => r._id === option.value);
-                                        const index = selectedCycle.rotations.findIndex((r: any) => r._id === option.value);
+                                        const rotation = selectedCycle.rotations.find((r: ICycleRotation) => r._id === option.value);
+                                        const index = selectedCycle.rotations.findIndex((r: ICycleRotation) => r._id === option.value);
                                         return rotation ? (
                                             <HStack spacing={2} w="100%">
                                                 <Text>Rotation #{index + 1} - {rotation.killer}</Text>
@@ -298,7 +298,7 @@ const BulkScoreModal = ({
                                 <VStack align="start" spacing={1}>
                                     <Text><strong>Guilde:</strong> {selectedGuild.name}</Text>
                                     <Text><strong>Cycle:</strong> {selectedCycle.name}</Text>
-                                    <Text><strong>Rotation:</strong> #{selectedCycle.rotations.find((r: any) => r.rotation_id === selectedRotationId)?.position}</Text>
+                                    <Text><strong>Rotation:</strong> #{selectedCycle.rotations.find((r: ICycleRotation) => r.rotation_id === selectedRotationId)?.position}</Text>
                                 </VStack>
                             </Alert>
                         )}

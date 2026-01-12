@@ -20,11 +20,7 @@ import { ScoreBadge } from "./ui/ScoreBadge";
 import type { ICycle, IPodiumPlayer, IPodiumData } from "@/interfaces";
 import { useCycles, useGuilds } from "@/hooks/useAPI";
 
-interface PodiumSectionProps {
-  // Props optionnelles pour les tests
-}
-
-export const PodiumSection = ({}: PodiumSectionProps = {}) => {
+export const PodiumSection: React.FC = () => {
   const [podiumData, setPodiumData] = useState<IPodiumData | null>(null);
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
   const [selectedGuildId, setSelectedGuildId] = useState<string>("global");
@@ -74,6 +70,7 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
         setSelectedCycleId(sortedCycles[0]._id || '');
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cycles, cyclesLoading]);
 
   const loadPodium = async () => {
@@ -115,6 +112,7 @@ export const PodiumSection = ({}: PodiumSectionProps = {}) => {
     if (selectedCycleId) {
       loadPodium();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCycleId, selectedGuildId]);
 
   const getRankDisplay = (rank: number) => {

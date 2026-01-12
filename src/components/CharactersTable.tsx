@@ -97,7 +97,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
         setCharacters([]);
         setPagination(null);
       }
-    } catch (error) {
+    } catch {
       setCharacters([]);
       setPagination(null);
     } finally {

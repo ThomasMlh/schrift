@@ -32,6 +32,8 @@ const SelectedRotationsList = ({
 }: SelectedRotationsListProps) => {
     const cardBg = useColorModeValue('white', 'gray.700');
     const borderColor = useColorModeValue('gray.200', 'gray.600');
+    const draggingBg = useColorModeValue('blue.50', 'blue.900');
+    const normalBg = useColorModeValue('gray.50', 'gray.800');
 
     return (
         <Card bg={cardBg} borderColor={borderColor}>
@@ -75,7 +77,7 @@ const SelectedRotationsList = ({
                                                         {...provided.draggableProps}
                                                         variant="outline"
                                                         size="sm"
-                                                        bg={snapshot.isDragging ? useColorModeValue('blue.50', 'blue.900') : useColorModeValue('gray.50', 'gray.800')}
+                                                    bg={snapshot.isDragging ? draggingBg : normalBg}
                                                         shadow={snapshot.isDragging ? 'lg' : 'sm'}
                                                         transform={snapshot.isDragging ? 'rotate(2deg)' : 'none'}
                                                         transition="all 0.2s"

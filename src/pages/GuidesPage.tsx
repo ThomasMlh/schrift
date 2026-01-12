@@ -44,6 +44,7 @@ const GuidesPage = () => {
     if (section && sectionToIndex[section] !== undefined) {
       setTabIndex(sectionToIndex[section]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section]);
   
   // Gérer le changement de tab

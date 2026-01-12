@@ -13,9 +13,10 @@ import {
   HStack,
   useToast
 } from "@chakra-ui/react";
-import type { ICycleRotation } from "../../interfaces";
+import type { ICycleRotation, IRotationTemplate } from "../../interfaces";
 import { RotationTemplatesSection } from "./RotationTemplatesSection";
 import { SelectedRotationsList } from "./SelectedRotationsList";
+import type { DropResult } from "@hello-pangea/dnd";
 
 interface CycleCreationModalProps {
   isOpen: boolean;
@@ -25,9 +26,9 @@ interface CycleCreationModalProps {
   selectedRotations: ICycleRotation[];
   onSubmit: () => void;
   isSubmitting: boolean;
-  rotationTemplates: any[];
-  onAddRotation: (template: any) => void;
-  onDragEnd: (result: any) => void;
+  rotationTemplates: IRotationTemplate[];
+  onAddRotation: (template: IRotationTemplate) => void;
+  onDragEnd: (result: DropResult) => void;
   onUpdateRotation: (index: number, field: keyof ICycleRotation, value: string) => void;
   onRemoveRotation: (index: number) => void;
 }

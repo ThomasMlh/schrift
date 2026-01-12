@@ -20,7 +20,7 @@ import {
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 // import { AddIcon } from "@chakra-ui/icons";
-import type { IScore, IScoreFormData } from "../interfaces";
+import type { IScore, IScoreFormData, IUser } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import ScoresTable from "./ui/ScoresTable";
 import { ScoreModal } from "./ui/ScoreModal";
@@ -72,7 +72,7 @@ const ScoresSection = () => {
             const token = localStorage.getItem('userToken');
             if (!token) return null;
 
-            const decoded = jwtDecode(token) as any;
+            const decoded = jwtDecode<IUser>(token);
             return decoded;
         } catch {
             return null;
@@ -80,7 +80,7 @@ const ScoresSection = () => {
     };
 
     const currentUser = getCurrentUser();
-    const isAdmin = currentUser?.isAdmin || false;
+    const isAdmin = currentUser?.is_admin || false;
     const isGuildManager = currentUser?.role === 'chef' || currentUser?.role === 'sous-chef';
     const userGuildId = currentUser?.guilde_id;
 
@@ -117,7 +117,7 @@ const ScoresSection = () => {
             return;
         }
 
-        const guildId = selectedUser.guilde_id || selectedUser.guild_id;
+        const guildId = selectedUser.guilde_id;
         if (!guildId) {
             toast({
                 title: "Guilde manquante",
@@ -156,10 +156,11 @@ const ScoresSection = () => {
             onClose();
 
             // Le cache est automatiquement invalidé par createScore
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const err = error as Error;
             toast({
                 title: "Erreur",
-                description: error.message || "Erreur lors de l'ajout du score",
+                description: err.message || "Erreur lors de l'ajout du score",
                 status: "error",
                 duration: 3000,
             });
@@ -186,10 +187,11 @@ const ScoresSection = () => {
             setIsDeleteModalOpen(false);
             setScoreToDelete(null);
             // Le cache est automatiquement invalidé par deleteScore
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const err = error as Error;
             toast({
                 title: "Erreur",
-                description: error.message || "Erreur lors de la suppression du score",
+                description: err.message || "Erreur lors de la suppression du score",
                 status: "error",
                 duration: 3000,
             });
@@ -213,10 +215,11 @@ const ScoresSection = () => {
 
             setIsBulkModalOpen(false);
             // Le cache est automatiquement invalidé par createBulkScores
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : "Erreur lors de l'enregistrement des scores";
             toast({
                 title: "Erreur",
-                description: error.message || "Erreur lors de l'enregistrement des scores",
+                description: errorMessage,
                 status: "error",
                 duration: 3000,
             });
@@ -260,7 +263,7 @@ const ScoresSection = () => {
             return;
         }
 
-        const guildId = selectedUser.guilde_id || selectedUser.guild_id;
+        const guildId = selectedUser.guilde_id;
         if (!guildId) {
             toast({
                 title: "Guilde manquante",
@@ -299,10 +302,11 @@ const ScoresSection = () => {
             setIsEditModalOpen(false);
             setEditingScore(null);
             // Le cache est automatiquement invalidé par updateScore
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const err = error as Error;
             toast({
                 title: "Erreur",
-                description: error.message || "Erreur lors de la modification du score",
+                description: err.message || "Erreur lors de la modification du score",
                 status: "error",
                 duration: 3000,
             });
@@ -313,7 +317,7 @@ const ScoresSection = () => {
 
     // Obtenir les informations d'un utilisateur
     const getUserInfo = (userId: string) => {
-        return users.find(user => user._id === userId || user.discordId === userId);
+        return users.find(user => user._id === userId);
     };
 
     // Obtenir les informations d'un cycle
