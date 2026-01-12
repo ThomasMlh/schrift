@@ -21,6 +21,7 @@ export interface IUser {
   bbs_name?: string;
   last_login?: string;
   exp?: number;
+  guild_name?: string;
 }
 
 export interface ICharacter {
@@ -32,6 +33,28 @@ export interface ICharacter {
   killers?: string[];
   link?: string;
   attack_type: string;
+  phrase_url?: string;
+  image?: string;
+  rarity?: string;
+  element?: string;
+  soul_traits?: string[];
+  artwork?: string;
+  stats?: ICharacterStats;
+  immunities?: string[];
+  release_date?: string;
+  resurrection_release?: string;
+  banner_url?: string;
+  attack_url?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ICharacterStats {
+  end: string;
+  atk: string;
+  def: string;
+  cct: string;
+  pre: string;
 }
 
 export interface IPagination {
@@ -398,7 +421,13 @@ export interface IBuildsResponse {
 
 export interface IGuideOrb {
   _id: string;
-  name: string;
+  title: string;
   description: string;
   amount: number;
+}
+
+export interface IOrbGuideResponse {
+  success: boolean;
+  data: IGuideOrb[];
+  totalOrbes: number;
 }

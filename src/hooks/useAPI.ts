@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import type { ICycle, IGuild, IUser, ICharactersResponse, ICharacter, IRotationTemplate, IScoresResponse, IPodiumResponse, IGuideOrb, IPagination } from '../interfaces';
+import type { ICycle, IGuild, IUser, ICharactersResponse, ICharacter, IRotationTemplate, IScoresResponse, IPodiumResponse, IOrbGuideResponse, IPagination } from '../interfaces';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -349,7 +349,7 @@ export const usePodium = (options?: {
 export const useOrbGuide = () => {
   const url = `${apiUrl}/api/guides/orbes`;
   
-  const { data, error, isLoading, mutate } = useSWR<IGuideOrb>(
+  const { data, error, isLoading, mutate } = useSWR<IOrbGuideResponse>(
     url,
     fetcher,
     {
