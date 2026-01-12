@@ -237,7 +237,7 @@ export const createBulkScores = async (scoresData: IScoreFormData[]) => {
       'Content-Type': 'application/json',
       'Authorization': token ? `Bearer ${token}` : '',
     },
-    body: JSON.stringify({ scores: scoresData }),
+    body: JSON.stringify(scoresData),
   });
 
   if (!response.ok) {

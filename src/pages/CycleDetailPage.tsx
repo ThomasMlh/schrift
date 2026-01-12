@@ -35,6 +35,7 @@ const CycleDetailPage = () => {
 
   const cardBg = useColorModeValue("white", "gray.700");
   const borderColor = useColorModeValue("gray.200", "gray.600");
+  const textSecondary = useColorModeValue("gray.700", "gray.300");
   // const rotationHoverBg = useColorModeValue("gray.100", "gray.600");
 
   useEffect(() => {
@@ -97,7 +98,7 @@ const CycleDetailPage = () => {
           <Heading size="xl" mb={2}>
             {cycle.name}
           </Heading>
-          <Text color="gray.500">Détail du cycle de rotation</Text>
+          <Text color={useColorModeValue("gray.700", "gray.300")}>Détail du cycle de rotation</Text>
         </Box>
 
         {/* Informations générales */}
@@ -111,7 +112,7 @@ const CycleDetailPage = () => {
                     <Text
                       fontSize="sm"
                       fontWeight="medium"
-                      color="gray.500"
+                      color={textSecondary}
                       mb={1}
                     >
                       <CalendarIcon mb={1} mr={1} color="green.500" />
@@ -125,7 +126,7 @@ const CycleDetailPage = () => {
                     <Text
                       fontSize="sm"
                       fontWeight="medium"
-                      color="gray.500"
+                      color={textSecondary}
                       mb={1}
                     >
                       <CalendarIcon mb={1} mr={1} color="red.500" />
@@ -140,7 +141,7 @@ const CycleDetailPage = () => {
                     <Text
                       fontSize="sm"
                       fontWeight="medium"
-                      color="gray.500"
+                      color={textSecondary}
                       mb={1}
                     >
                       Nombre de rotations
@@ -183,7 +184,7 @@ const CycleDetailPage = () => {
 
                           <VStack spacing={2} align="stretch">
                             <Box>
-                              <Text fontSize="xs" color="gray.500" mb={1}>
+                              <Text fontSize="xs" color={textSecondary} mb={1}>
                                 Killer
                               </Text>
                               <Badge
@@ -195,7 +196,7 @@ const CycleDetailPage = () => {
                               </Badge>
                             </Box>
                             <Box>
-                              <Text fontSize="xs" color="gray.500" mb={1}>
+                              <Text fontSize="xs" color={textSecondary} mb={1}>
                                 Type d'attaque
                               </Text>
                               <Badge
@@ -212,7 +213,7 @@ const CycleDetailPage = () => {
                               </Badge>
                             </Box>
                             <Box>
-                              <Text fontSize="xs" color="gray.500" mb={1}>
+                              <Text fontSize="xs" color={textSecondary} mb={1}>
                                 Altération
                               </Text>
                               <AlterationImage
@@ -225,7 +226,7 @@ const CycleDetailPage = () => {
 
                           <VStack spacing={1} align="stretch">
                             <HStack justify="space-between">
-                              <Text fontSize="xs" color="gray.500">
+                              <Text fontSize="xs" color={textSecondary}>
                                 <CalendarIcon mb={1} mr={1} color="green.500" />
                                 Début:
                               </Text>
@@ -234,7 +235,7 @@ const CycleDetailPage = () => {
                               </Text>
                             </HStack>
                             <HStack justify="space-between">
-                              <Text fontSize="xs" color="gray.500">
+                              <Text fontSize="xs" color={textSecondary}>
                                 {" "}
                                 <CalendarIcon mb={1} mr={1} color="red.500" />
                                 Fin:

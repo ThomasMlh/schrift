@@ -39,6 +39,7 @@ const RotationDetailPage = () => {
     // Hooks UI
     const bgColor = useColorModeValue('white', 'gray.800');
     const borderColor = useColorModeValue('gray.200', 'gray.600');
+    const textSecondary = useColorModeValue('gray.700', 'gray.300');
     const shadowColor = useColorModeValue('lg', 'dark-lg');
 
     // Fonction pour créer les informations de rang basées sur le rang du serveur
@@ -272,7 +273,7 @@ const RotationDetailPage = () => {
                             <VStack spacing={2} align="start">
                                 <HStack spacing={2} align="center" flexWrap="wrap">
                                     <Text as="span">{cycle}</Text>
-                                    <Text as="span" color="gray.500">-</Text>
+                                    <Text as="span" color={textSecondary}>-</Text>
                                     <Text as="span">Rotation #{position}</Text>
                                 </HStack>
                                 <HStack spacing={2} align="center" flexWrap="wrap">
@@ -281,7 +282,7 @@ const RotationDetailPage = () => {
                                 </HStack>
                             </VStack>
                         </Heading>
-                        <Text color="gray.500" fontSize="sm">
+                        <Text color={textSecondary} fontSize="sm">
                             {totalItems} score{totalItems > 1 ? 's' : ''} au total
                             {selectedGuild && (
                                 <Text as="span" ml={2} fontSize="xs" color="blue.500">
@@ -342,7 +343,7 @@ const RotationDetailPage = () => {
                 >
                     {scores.length === 0 ? (
                         <Flex justify="center" align="center" py={12}>
-                            <Text fontSize="lg" color="gray.500">
+                            <Text fontSize="lg" color={textSecondary}>
                                 {selectedGuild ? 
                                     `Aucun score trouvé pour la guilde ${guilds.find(g => g._id === selectedGuild)?.name}` :
                                     "Aucun score trouvé pour cette rotation"
@@ -381,7 +382,7 @@ const RotationDetailPage = () => {
                                                         <ScoreBadge score={score.score} />
                                                     </Td>
                                                     <Td display={{ base: "none", sm: "table-cell" }}>
-                                                        <Text fontSize="sm" color="gray.500">
+                                                        <Text fontSize="sm" color={textSecondary}>
                                                             {new Date(score.created_at).toLocaleDateString('fr-FR')}
                                                         </Text>
                                                     </Td>
@@ -408,7 +409,7 @@ const RotationDetailPage = () => {
                                     gap={4}
                                 >
                                     <HStack spacing={2}>
-                                        <Text fontSize="sm" color="gray.500">
+                                        <Text fontSize="sm" color={textSecondary}>
                                             Afficher
                                         </Text>
                                         <Select
@@ -422,7 +423,7 @@ const RotationDetailPage = () => {
                                             <option value={50}>50</option>
                                             <option value={100}>100</option>
                                         </Select>
-                                        <Text fontSize="sm" color="gray.500" display={{ base: "none", sm: "block" }}>
+                                        <Text fontSize="sm" color={textSecondary} display={{ base: "none", sm: "block" }}>
                                             par page
                                         </Text>
                                     </HStack>
@@ -436,7 +437,7 @@ const RotationDetailPage = () => {
                                             onClick={() => handlePageChange(currentPage - 1)}
                                             isDisabled={currentPage <= 1}
                                         />
-                                        <Text fontSize="sm" color="gray.500" whiteSpace="nowrap">
+                                        <Text fontSize="sm" color={textSecondary} whiteSpace="nowrap">
                                             {currentPage}/{totalPages}
                                         </Text>
                                         <IconButton
@@ -451,7 +452,7 @@ const RotationDetailPage = () => {
                                 </Flex>
 
                                 {/* Info row - hidden on very small screens */}
-                                <Text fontSize="sm" color="gray.500" textAlign="center" display={{ base: "none", md: "block" }}>
+                                <Text fontSize="sm" color={textSecondary} textAlign="center" display={{ base: "none", md: "block" }}>
                                     {selectedGuild ? (
                                         `Affichage de ${totalItems} résultat${totalItems > 1 ? 's' : ''} pour ${guilds.find(g => g._id === selectedGuild)?.name}`
                                     ) : (

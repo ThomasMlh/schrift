@@ -28,10 +28,10 @@ const OrbFarmingGuide = () => {
   const cardBg = useColorModeValue("white", "gray.800");
   const cardBorder = useColorModeValue("gray.200", "gray.700");
   const accentColor = useColorModeValue("purple.500", "purple.300");
-  const textColor = useColorModeValue("gray.600", "gray.400");
+  const textColor = useColorModeValue("gray.700", "gray.300");
   const totalBoxBg = useColorModeValue("purple.50", "purple.900");
   const totalBoxBorder = useColorModeValue("purple.200", "purple.600");
-  const totalTextColor = useColorModeValue("gray.600", "gray.300");
+  const totalTextColor = useColorModeValue("gray.700", "gray.200");
 
   const { orbData, isLoading: loading, error } = useOrbGuide();
 

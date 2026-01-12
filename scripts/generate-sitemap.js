@@ -11,6 +11,8 @@ const staticRoutes = [
   { path: '/podium', priority: '0.8', changefreq: 'daily' },
   { path: '/comparateur', priority: '0.6', changefreq: 'weekly' },
   { path: '/guides', priority: '0.7', changefreq: 'weekly' },
+  { path: '/guides/rotations-builds', priority: '0.7', changefreq: 'weekly' },
+  { path: '/guides/orbs', priority: '0.7', changefreq: 'weekly' },
 ];
 
 const baseUrl = 'https://bbs-schrift.fr';

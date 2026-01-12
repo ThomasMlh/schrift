@@ -15,13 +15,6 @@ import {
   Badge,
   IconButton,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCloseButton,
   VStack,
   HStack,
   Select,
@@ -44,6 +37,7 @@ import type { IBuild } from "../interfaces";
 import { Pagination } from "./ui/Pagination";
 import { AffinityIcon } from "./ui/AffinityIcon";
 import { UserDisplay } from "./ui/UserDisplay";
+import { BuildDetailModal } from "./ui/BuildDetailModal";
 
 const BuildsAdminSection = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -313,148 +307,11 @@ const BuildsAdminSection = () => {
       </VStack>
 
       {/* Modal de visualisation */}
-      <Modal isOpen={isViewOpen} onClose={onViewClose} size="xl">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Détails du Build</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            {selectedBuild && (
-              <VStack align="stretch" spacing={4}>
-                {/* Utilisateur */}
-                <Box>
-                  <Text fontWeight="bold" mb={2}>
-                    Créé par :
-                  </Text>
-                  {selectedBuild.user ? (
-                    <UserDisplay user={selectedBuild.user} />
-                  ) : (
-                    <Text color="gray.500">Utilisateur anonyme</Text>
-                  )}
-                </Box>
-
-                {/* Rotation */}
-                {selectedBuild.rotation && (
-                  <Box>
-                    <Text fontWeight="bold" mb={2}>
-                      Rotation :
-                    </Text>
-                    <HStack spacing={2}>
-                      <Badge colorScheme="blue">{selectedBuild.rotation.killer}</Badge>
-                      <Badge colorScheme="green">{selectedBuild.rotation.attack}</Badge>
-                      <Badge colorScheme="orange">{selectedBuild.rotation.alteration}</Badge>
-                    </HStack>
-                  </Box>
-                )}
-
-                {/* Description */}
-                <Box>
-                  <Text fontWeight="bold" mb={2}>
-                    Description :
-                  </Text>
-                  <Text>{selectedBuild.description || "Aucune description"}</Text>
-                </Box>
-
-                {/* Statut */}
-                <Box>
-                  <Text fontWeight="bold" mb={2}>
-                    Statut :
-                  </Text>
-                  <Badge colorScheme={selectedBuild.isValid ? "green" : "gray"} fontSize="md" p={2}>
-                    {selectedBuild.isValid ? "✓ Validé" : "⏱ En attente de validation"}
-                  </Badge>
-                </Box>
-
-                {/* Team */}
-                <Box>
-                  <Text fontWeight="bold" mb={2}>
-                    Composition de la team :
-                  </Text>
-                  <VStack align="stretch" spacing={3}>
-                    {selectedBuild.team?.map((member, index) => (
-                      <Box
-                        key={index}
-                        p={3}
-                        borderWidth="1px"
-                        borderRadius="md"
-                        borderColor={borderColor}
-                      >
-                        <HStack spacing={3} mb={2} justify="space-between">
-                          <HStack spacing={3}>
-                            <Badge colorScheme="purple">Position {member.position}</Badge>
-                            <Avatar
-                              size="sm"
-                              src={member.character?.link || member.character?.image}
-                              name={member.character?.name || "?"}
-                              bg="gray.200"
-                            />
-                            <Text fontWeight="medium">
-                              {member.character?.name || `Personnage ${member.id_character}`}
-                            </Text>
-                          </HStack>
-                          {member.character?.affinity && (
-                            <AffinityIcon affinity={member.character.affinity} size="20px" />
-                          )}
-                        </HStack>
-                        {member.links && member.links.length > 0 && (
-                          <Box ml={4} mt={2}>
-                            <Text fontSize="sm" fontWeight="medium" mb={1}>
-                              Links :
-                            </Text>
-                            <VStack align="stretch" spacing={2}>
-                              {member.links.map((link, linkIndex) => (
-                                <HStack key={linkIndex} spacing={2}>
-                                  <Avatar
-                                    size="xs"
-                                    src={link.character?.link || link.character?.image}
-                                    name={link.character?.name || "?"}
-                                    bg="gray.200"
-                                  />
-                                  <Text fontSize="sm" color="gray.600">
-                                    {link.character?.name || `Personnage ${link.id_character}`}
-                                  </Text>
-                                  {link.character?.affinity && (
-                                    <AffinityIcon affinity={link.character.affinity} size="14px" />
-                                  )}
-                                </HStack>
-                              ))}
-                            </VStack>
-                          </Box>
-                        )}
-                      </Box>
-                    ))}
-                  </VStack>
-                </Box>
-
-                {/* Dates */}
-                <Box>
-                  <Text fontWeight="bold" mb={2}>
-                    Dates :
-                  </Text>
-                  <VStack align="start" spacing={1}>
-                    <Text fontSize="sm">
-                      <strong>Créé :</strong> {formatDate(selectedBuild.created_at)}
-                    </Text>
-                    {selectedBuild.updated_at && (
-                      <Text fontSize="sm">
-                        <strong>Modifié :</strong> {formatDate(selectedBuild.updated_at)}
-                      </Text>
-                    )}
-                    {selectedBuild.validated_at && (
-                      <Text fontSize="sm">
-                        <strong>Validé :</strong> {formatDate(selectedBuild.validated_at)}
-                      </Text>
-                    )}
-                  </VStack>
-                </Box>
-              </VStack>
-            )}
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={onViewClose}>Fermer</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <BuildDetailModal 
+        isOpen={isViewOpen}
+        onClose={onViewClose}
+        build={selectedBuild}
+      />
 
       {/* Dialog de confirmation de suppression */}
       <AlertDialog isOpen={isDeleteOpen} leastDestructiveRef={cancelRef} onClose={onDeleteClose}>

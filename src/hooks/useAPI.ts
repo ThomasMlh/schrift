@@ -124,7 +124,7 @@ export const useGuilds = (authenticated: boolean = false) => {
 export const useGuildMembers = (guildId?: string, authenticated: boolean = true) => {
   const url = guildId ? `${apiUrl}/api/guildes/${guildId}/membres` : null;
   
-  const { data, error, isLoading, mutate } = useSWR<IUser[]>(
+  const { data, error, isLoading, mutate } = useSWR<IUser[] | { data?: IUser[]; success?: boolean }>(
     url,
     authenticated ? authenticatedFetcher : fetcher,
     {
@@ -132,8 +132,18 @@ export const useGuildMembers = (guildId?: string, authenticated: boolean = true)
     }
   );
 
+  // Normaliser la réponse
+  let members: IUser[] = [];
+  if (data) {
+    if (Array.isArray(data)) {
+      members = data;
+    } else if (data.data) {
+      members = data.data;
+    }
+  }
+
   return {
-    members: data || [],
+    members,
     isLoading,
     error,
     mutate,
@@ -141,8 +151,11 @@ export const useGuildMembers = (guildId?: string, authenticated: boolean = true)
 }
 
 // Hook pour récupérer les utilisateurs
-export const useUsers = (authenticated: boolean = true) => {
-  const url = `${apiUrl}/api/users`;
+export const useUsers = (authenticated: boolean = true, limit?: number) => {
+  let url = `${apiUrl}/api/users`;
+  if (limit) {
+    url += `?limit=${limit}`;
+  }
   
   const { data, error, isLoading, mutate } = useSWR<IUser[] | { users?: IUser[]; data?: IUser[]; success?: boolean }>(
     url,
@@ -400,6 +413,78 @@ export const useBuild = (buildId?: string, authenticated: boolean = false) => {
 
   return {
     build: data?.data,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+// Hook pour récupérer les skills avec recherche optionnelle
+export const useSkills = (search?: string) => {
+  let url = `${apiUrl}/api/skills`;
+  if (search && search.trim() !== '') {
+    url += `?search=${encodeURIComponent(search.trim())}`;
+  }
+
+  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: import('../interfaces').ISkill[] }>(
+    url,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000, // Cache de 60 secondes
+    }
+  );
+
+  return {
+    skills: data?.data || [],
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+// Hook pour récupérer les accessories avec recherche optionnelle
+export const useAccessories = (search?: string) => {
+  let url = `${apiUrl}/api/accessories`;
+  if (search && search.trim() !== '') {
+    url += `?search=${encodeURIComponent(search.trim())}`;
+  }
+
+  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: import('../interfaces').IAccessory[] }>(
+    url,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000, // Cache de 60 secondes
+    }
+  );
+
+  return {
+    accessories: data?.data || [],
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+// Hook pour récupérer les accessories subeffects avec recherche optionnelle
+export const useAccessoriesSubeffects = (search?: string) => {
+  let url = `${apiUrl}/api/accessories-subeffect`;
+  if (search && search.trim() !== '') {
+    url += `?search=${encodeURIComponent(search.trim())}`;
+  }
+
+  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: import('../interfaces').IAccessorySubeffect[] }>(
+    url,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000, // Cache de 60 secondes
+    }
+  );
+
+  return {
+    subeffects: data?.data || [],
     isLoading,
     error,
     mutate,

@@ -5,7 +5,6 @@ import {
   TabPanels,
   Tab,
   TabPanel,
-  Badge,
   Flex,
   Image
 } from "@chakra-ui/react";
@@ -72,6 +71,7 @@ const GuidesPage = () => {
           <Tabs variant="soft-rounded" colorScheme="purple" isLazy index={tabIndex} onChange={handleTabChange}>
             <TabList
               mb={4}
+              p={2}
               gap={2}
               overflowX="auto"
               overflowY="hidden"
@@ -80,9 +80,6 @@ const GuidesPage = () => {
               <Tab whiteSpace="nowrap">
                 <Flex align="center" gap={2}>
                   🔄 Rotations & Builds
-                  <Badge colorScheme="orange" fontSize="xs">
-                    WIP
-                  </Badge>
                 </Flex>
               </Tab>
               <Tab whiteSpace="nowrap" gap={2}>

@@ -61,6 +61,7 @@ const BulkScoreModal = ({
     // Déplacer useColorModeValue au niveau du composant pour éviter les appels conditionnels
     const guildBoxBg = useColorModeValue("blue.50", "blue.900");
     const guildTextColor = useColorModeValue("blue.700", "blue.200");
+    const modalBg = useColorModeValue("white", "gray.700");
 
     const [selectedGuildId, setSelectedGuildId] = useState<string>(isGuildRestricted ? userGuildId || "" : "");
     const [selectedCycleId, setSelectedCycleId] = useState<string>("");
@@ -91,7 +92,7 @@ const BulkScoreModal = ({
 
     // Initialiser les scores quand les membres changent
     useEffect(() => {
-        if (guildMembers.length > 0) {
+        if (Array.isArray(guildMembers) && guildMembers.length > 0) {
             const initialScores: { [userId: string]: number } = {};
             guildMembers.forEach((user: IUser) => {
                 initialScores[user._id] = 0;
@@ -102,36 +103,38 @@ const BulkScoreModal = ({
 
     // Charger les scores existants pour la rotation sélectionnée
     useEffect(() => {
-        if (!selectedGuildId || !selectedCycleId || !selectedRotationId || guildMembers.length === 0) {
+        if (!selectedGuildId || !selectedCycleId || !selectedRotationId || !Array.isArray(guildMembers) || guildMembers.length === 0) {
             setHasExistingScores(false);
             return;
         }
 
+        // Créer un objet de scores
+        const newScores: { [userId: string]: number } = {};
+        
+        // Initialiser avec 0 pour tous les membres
+        guildMembers.forEach((user: IUser) => {
+            newScores[user._id] = 0;
+        });
+
         if (existingScoresData.length > 0) {
-            // Créer un objet de scores existants
-            const existingScores: { [userId: string]: number } = {};
-            
-            // Initialiser avec 0 pour tous les membres
-            guildMembers.forEach((user: IUser) => {
-                existingScores[user._id] = 0;
-            });
-            
             // Remplacer par les scores existants si disponibles
             let foundExistingScores = false;
             existingScoresData.forEach((score: any) => {
                 if (score.raw_score !== undefined) {
-                    existingScores[score.user_id] = score.raw_score;
+                    newScores[score.user_id] = score.raw_score;
                     if (score.raw_score > 0) {
                         foundExistingScores = true;
                     }
                 }
             });
             
-            setScores(existingScores);
             setHasExistingScores(foundExistingScores);
         } else {
             setHasExistingScores(false);
         }
+
+        // Toujours mettre à jour les scores (soit avec les scores existants, soit avec des 0)
+        setScores(newScores);
     }, [selectedGuildId, selectedCycleId, selectedRotationId, guildMembers, existingScoresData]);
 
     const selectedCycle = cycles.find(cycle => cycle._id === selectedCycleId);
@@ -165,6 +168,17 @@ const BulkScoreModal = ({
             raw_score: scores[member._id] || 0
         }));
 
+        if (scoresData.length === 0) {
+            toast({
+                title: "Attention",
+                description: "Aucun membre trouvé",
+                status: "warning",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+
         onSubmit(scoresData);
     };
 
@@ -197,6 +211,7 @@ const BulkScoreModal = ({
                                     value={selectedGuildId}
                                     onChange={setSelectedGuildId}
                                     isDisabled={isSubmitting}
+                                    bg={modalBg}
                                     options={guilds.map((guild: IGuild) => ({
                                         value: guild._id,
                                         label: guild.name
@@ -226,6 +241,7 @@ const BulkScoreModal = ({
                                 value={selectedCycleId}
                                 onChange={setSelectedCycleId}
                                 isDisabled={isSubmitting}
+                                bg={modalBg}
                                 options={cycles.map((cycle: ICycle) => ({
                                     value: cycle._id || '',
                                     label: cycle.name
@@ -243,6 +259,7 @@ const BulkScoreModal = ({
                                     value={selectedRotationId}
                                     onChange={setSelectedRotationId}
                                     isDisabled={isSubmitting}
+                                    bg={modalBg}
                                     options={selectedCycle.rotations.map((rotation: any) => ({
                                         value: rotation.rotation_id,
                                         label: `Rotation #${rotation.position} - ${rotation.killer}`,

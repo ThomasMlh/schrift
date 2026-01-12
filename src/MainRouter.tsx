@@ -2,29 +2,9 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link,
   Navigate
 } from "react-router-dom";
-import {
-  useColorMode,
-  Button,
-  Box,
-  Flex,
-  IconButton,
-  Drawer,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerBody,
-  useDisclosure,
-  VStack,
-  HStack,
-  Text,
-  useToast,
-  Avatar,
-  useColorModeValue
-} from "@chakra-ui/react";
-import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
-import { FaDiscord } from "react-icons/fa";
+import { Box, Flex, Text } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import HomePage from "./pages/HomePage";
@@ -35,24 +15,15 @@ import CycleDetailPage from "./pages/CycleDetailPage";
 import RotationDetailPage from "./pages/RotationDetailPage";
 import DiscordCallback from "./pages/DiscordCallback";
 import UserPage from "./pages/UserPage";
-import type { IProtectedRoute, IUser } from "./interfaces";
+import type { IProtectedRoute } from "./interfaces";
 import UsersPage from "./pages/UsersPage";
 import AdminPage from "./pages/AdminPage";
 import PodiumPage from "./pages/PodiumPage";
 import ComparatorPage from "./pages/ComparatorPage";
 import GuidesPage from "./pages/GuidesPage";
-import { getDiscordAvatarUrl } from "./utils/discord";
 import NotFound from "./pages/NotFound";
-import CustomLink from "./components/ui/CustomLink";
-
-const ColorModeSwitcher = () => {
-  const { colorMode, toggleColorMode } = useColorMode();
-  return (
-    <Button onClick={toggleColorMode} variant="ghost" ml={2}>
-      {colorMode === "light" ? "🌙" : "☀️"}
-    </Button>
-  );
-}
+import { Header } from "./components/Header";
+import { Footer } from "./components/Footer";
 
 // Composant pour protéger les routes admin (admins OU chefs/sous-chefs)
 const ProtectedRoute: React.FC<IProtectedRoute> = ({
@@ -78,92 +49,10 @@ const ProtectedRoute: React.FC<IProtectedRoute> = ({
 };
 
 const MainRouter = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userInfo, setUserInfo] = useState<IUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isGuildManager, setIsGuildManager] = useState(false); // chef ou sous-chef
+  const [isGuildManager, setIsGuildManager] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const toast = useToast();
-  const placement = "left";
-
-  // Tous les hooks de couleur en haut
-  const homeHoverBg = useColorModeValue("blue.50", "blue.900");
-  const homeHoverColor = useColorModeValue("blue.600", "blue.200");
-  const charactersHoverBg = useColorModeValue("green.50", "green.900");
-  const charactersHoverColor = useColorModeValue("green.600", "green.200");
-  const cyclesHoverBg = useColorModeValue("purple.50", "purple.900");
-  const cyclesHoverColor = useColorModeValue("purple.600", "purple.200");
-  const adminHoverBg = useColorModeValue("orange.50", "orange.900");
-  const adminHoverColor = useColorModeValue("orange.600", "orange.200");
-  const usersHoverBg = useColorModeValue("teal.50", "teal.900");
-  const usersHoverColor = useColorModeValue("teal.600", "teal.200");
-  const podiumHoverBg = useColorModeValue("pink.50", "pink.900");
-  const podiumHoverColor = useColorModeValue("pink.600", "pink.200");
-  const comparatorHoverBg = useColorModeValue("cyan.50", "cyan.900");
-  const comparatorHoverColor = useColorModeValue("cyan.600", "cyan.200");
-  const guidesHoverBg = useColorModeValue("orange.50", "orange.900");
-  const guidesHoverColor = useColorModeValue("orange.600", "orange.200");
-
-  const menuItems = [
-    {
-      name: "Accueil",
-      path: "/",
-      icon: "🏠",
-      hoverBg: homeHoverBg,
-      hoverColor: homeHoverColor
-    },
-    {
-      name: "Personnages",
-      path: "/personnages",
-      icon: "📖",
-      hoverBg: charactersHoverBg,
-      hoverColor: charactersHoverColor
-    },
-    {
-      name: "Cycles",
-      path: "/cycles",
-      icon: "🔄",
-      hoverBg: cyclesHoverBg,
-      hoverColor: cyclesHoverColor
-    },
-    {
-      name: "Joueurs",
-      path: "/joueurs",
-      icon: "👥",
-      hoverBg: usersHoverBg,
-      hoverColor: usersHoverColor
-    },
-    {
-      name: "Podium",
-      path: "/podium",
-      icon: "🏆",
-      hoverBg: podiumHoverBg,
-      hoverColor: podiumHoverColor
-    },
-    {
-      name: "Comparateur",
-      path: "/comparateur",
-      icon: "⚔️",
-      hoverBg: comparatorHoverBg,
-      hoverColor: comparatorHoverColor
-    },
-    {
-      name: "Guides",
-      path: "/guides",
-      icon: "📚",
-      hoverBg: guidesHoverBg,
-      hoverColor: guidesHoverColor
-    },
-    {
-      name: "Admin",
-      path: "/admin",
-      icon: "⚙️",
-      hoverBg: adminHoverBg,
-      hoverColor: adminHoverColor,
-      adminOrGuildManagerOnly: true
-    }
-  ];
 
   // Fonction utilitaire pour vérifier la validité du token
   const isTokenValid = (token: string | null): boolean => {
@@ -180,49 +69,6 @@ const MainRouter = () => {
     }
   };
 
-  // Fonction pour initier l'authentification Discord
-  const handleDiscordAuth = () => {
-    const discordClientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
-
-    // Utiliser l'URL de redirection depuis les variables d'environnement si disponible
-    let redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI;
-
-    // Sinon, définir selon l'environnement
-    if (!redirectUri) {
-      if (window.location.hostname === "localhost") {
-        redirectUri = "http://localhost:5173/discord-callback";
-      } else if (window.location.hostname === "www.bbs-schrift.fr") {
-        redirectUri = "https://www.bbs-schrift.fr/discord-callback";
-      } else if (window.location.hostname === "bbs-schrift.fr") {
-        redirectUri = "https://bbs-schrift.fr/discord-callback";
-      } else {
-        // Fallback pour autres domaines
-        redirectUri = `${window.location.origin}/discord-callback`;
-      }
-    }
-
-    const encodedRedirectUri = encodeURIComponent(redirectUri);
-    const scope = encodeURIComponent("identify guilds guilds.members.read");
-    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordClientId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=${scope}`;
-
-    window.location.href = discordAuthUrl;
-  };
-
-  // Fonction de déconnexion
-  const handleLogout = () => {
-    localStorage.removeItem("userToken");
-    localStorage.removeItem("adminToken");
-    setIsAdmin(false);
-    setIsGuildManager(false);
-    setIsLoggedIn(false);
-    setUserInfo(null);
-
-    // Déclencher l'événement de changement d'état
-    window.dispatchEvent(new Event("authStateChange"));
-
-    toast({ title: "Déconnexion réussie", status: "info" });
-  };
-
   // Vérifier le token au chargement
   useEffect(() => {
     const checkAuthState = () => {
@@ -236,22 +82,6 @@ const MainRouter = () => {
           setIsGuildManager(
             decoded.role === "chef" || decoded.role === "sous-chef"
           );
-
-          // Construire l'URL de l'avatar Discord si disponible
-          let avatarUrl = null;
-          if (decoded.avatar && decoded.discord_id) {
-            avatarUrl = getDiscordAvatarUrl(decoded.discord_id, decoded.avatar);
-          }
-
-          setUserInfo({
-            ...decoded,
-            avatar: avatarUrl || undefined
-          });
-
-          if (localStorage.getItem("adminToken")) {
-            localStorage.setItem("userToken", token);
-            localStorage.removeItem("adminToken");
-          }
         } catch (error) {
           console.error("Erreur décodage token:", error);
           localStorage.removeItem("userToken");
@@ -259,22 +89,17 @@ const MainRouter = () => {
           setIsLoggedIn(false);
           setIsAdmin(false);
           setIsGuildManager(false);
-          setUserInfo(null);
         }
       } else {
         setIsLoggedIn(false);
         setIsAdmin(false);
         setIsGuildManager(false);
-        setUserInfo(null);
       }
-      // Marquer le chargement comme terminé
       setIsAuthLoading(false);
     };
 
-    // Vérifier l'état au chargement
     checkAuthState();
 
-    // Écouter les changements d'état d'authentification
     const handleAuthStateChange = () => {
       checkAuthState();
     };
@@ -288,222 +113,19 @@ const MainRouter = () => {
     };
   }, []);
 
-  const renderAuthButton = () => {
-    if (isLoggedIn) {
-      return (
-        <HStack spacing={3}>
-          <HStack spacing={2}>
-            <Avatar
-              size="sm"
-              src={userInfo?.avatar}
-              name={userInfo?.username}
-            />
-            <VStack spacing={0} align="start">
-              <CustomLink
-                to={`/joueur/${userInfo?.id}`}
-                text={`${userInfo?.global_name}`}
-                textSize="sm"
-              />
-              {isAdmin && (
-                <Text fontSize="xs" color="orange.500" lineHeight="short">
-                  Admin
-                </Text>
-              )}
-            </VStack>
-          </HStack>
-          <Button size="sm" variant="outline" onClick={handleLogout}>
-            Déconnexion
-          </Button>
-        </HStack>
-      );
-    } else {
-      return (
-        <Button
-          leftIcon={<FaDiscord />}
-          colorScheme="purple"
-          variant="ghost"
-          onClick={handleDiscordAuth}
-        >
-          Se connecter
-        </Button>
-      );
-    }
-  };
   return (
     <Router>
-      <Box
-        as="nav"
-        w="100%"
-        px={{ base: 2, md: 4 }}
-        py={2}
-        id="main-navbar"
-        boxShadow={"lg"}
-        zIndex={10}
-        position="sticky"
-        top={0}
-        bg="inherit"
-      >
-        <Flex
-          display={{ base: "none", xl: "flex" }}
-          justify="space-between"
-          align="center"
-          w="100%"
-          maxW="100%"
+      <Flex direction="column" minH="100vh">
+        <Header />
+        <Box
+          as="main"
+          flex="1"
+          px={4}
+          py={2}
+          overflow="auto"
+          overflowX="hidden"
         >
-          <Flex gap={1} align="center" flexWrap="wrap" flex={1}>
-            {menuItems.map((item) => {
-              if (item.adminOrGuildManagerOnly && !isAdmin && !isGuildManager)
-                return null;
-              return (
-                <Button
-                  key={item.name}
-                  as={Link}
-                  to={item.path}
-                  variant="ghost"
-                  onClick={onClose}
-                  justifyContent="flex-start"
-                  px={3}
-                  py={2}
-                  fontSize="sm"
-                  fontWeight="medium"
-                  borderRadius="lg"
-                  leftIcon={item.icon ? <Text>{item.icon}</Text> : undefined}
-                  _hover={{
-                    bg: item.hoverBg,
-                    color: item.hoverColor
-                  }}
-                >
-                  {item.name}
-                </Button>
-              );
-            })}
-          </Flex>
-          <Flex gap={1} align="center" flexShrink={0}>
-            {renderAuthButton()}
-            <ColorModeSwitcher />
-          </Flex>
-        </Flex>
-        <Flex
-          display={{ base: "flex", xl: "none" }}
-          align="center"
-          justify="space-between"
-        >
-          <Box fontWeight="bold">Schrift</Box>
-          <HStack>
-            <ColorModeSwitcher />
-            <IconButton
-              aria-label="Ouvrir le menu"
-              icon={<HamburgerIcon />}
-              variant="outline"
-              onClick={onOpen}
-            />
-          </HStack>
-        </Flex>
-        <Drawer placement={placement} onClose={onClose} isOpen={isOpen}>
-          <DrawerOverlay />
-          <DrawerContent>
-            <DrawerBody p={0}>
-              <Flex justify="flex-end" p={2}>
-                <IconButton
-                  aria-label="Fermer le menu"
-                  icon={<CloseIcon />}
-                  variant="ghost"
-                  onClick={onClose}
-                />
-              </Flex>
-              <VStack spacing={3} align="stretch" p={4}>
-                {
-                  /* Menu items pour mobile */
-                  menuItems.map((item) => {
-                    if (
-                      item.adminOrGuildManagerOnly &&
-                      !isAdmin &&
-                      !isGuildManager
-                    )
-                      return null;
-                    return (
-                      <Button
-                        key={item.name}
-                        as={Link}
-                        to={item.path}
-                        variant="ghost"
-                        onClick={onClose}
-                        leftIcon={
-                          item.icon ? <Text>{item.icon}</Text> : undefined
-                        }
-                        justifyContent="flex-start"
-                        px={4}
-                        py={3}
-                        fontSize="sm"
-                        fontWeight="medium"
-                        borderRadius="lg"
-                        _hover={{
-                          bg: item.hoverBg,
-                          color: item.hoverColor
-                        }}
-                      >
-                        {item.name}
-                      </Button>
-                    );
-                  })
-                }
-                {isLoggedIn ? (
-                  <VStack spacing={3}>
-                    <HStack spacing={2}>
-                      <Avatar
-                        size="sm"
-                        src={userInfo?.avatar}
-                        name={userInfo?.username}
-                      />
-                      <VStack spacing={0} align="start">
-                        <CustomLink
-                          to={`/joueur/${userInfo?.id}`}
-                          text={`${userInfo?.global_name}`}
-                          textSize="sm"
-                        />
-                        {isAdmin && (
-                          <Text fontSize="xs" color="orange.500">
-                            Admin
-                          </Text>
-                        )}
-                      </VStack>
-                    </HStack>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        handleLogout();
-                        onClose();
-                      }}
-                    >
-                      Déconnexion
-                    </Button>
-                  </VStack>
-                ) : (
-                  <Button
-                    leftIcon={<FaDiscord />}
-                    colorScheme="purple"
-                    variant="ghost"
-                    onClick={() => {
-                      handleDiscordAuth();
-                      onClose();
-                    }}
-                  >
-                    Se connecter
-                  </Button>
-                )}
-              </VStack>
-            </DrawerBody>
-          </DrawerContent>
-        </Drawer>
-      </Box>
-      <Box
-        h="calc(100dvh - var(--navbar-height, 60px))"
-        px={4}
-        py={2}
-        overflow="auto"
-        overflowX="hidden"
-      >
-        <Routes>
+          <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/personnages" element={<CharactersPage />} />
           <Route path="/personnage/:id" element={<CharacterDetailPage />} />
@@ -535,7 +157,9 @@ const MainRouter = () => {
           <Route path="/guides/:section" element={<GuidesPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </Box>
+        </Box>
+        <Footer />
+      </Flex>
     </Router>
   );
 };

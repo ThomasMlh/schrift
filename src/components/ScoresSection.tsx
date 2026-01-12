@@ -35,7 +35,7 @@ const ScoresSection = () => {
     
     // Utiliser useSWR pour les données (cache automatique + déduplication)
     const { cycles, isLoading: isLoadingCycles } = useCycles({ authenticated: true });
-    const { users } = useUsers(true);
+    const { users } = useUsers(true, 1000);
     const { guilds } = useGuilds(true);
     const { scores, pagination, isLoading: isLoadingScores, mutate: mutateScores } = useScores({
         page: currentPage,

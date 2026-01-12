@@ -1,6 +1,6 @@
 import {
     Box, Button, Text, Flex,
-    useColorModeValue, IconButton
+    useColorModeValue, IconButton, Input
 } from "@chakra-ui/react";
 import { ChevronDownIcon, CloseIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
@@ -20,6 +20,10 @@ interface CustomSelectProps {
     allowDeselect?: boolean;
     isDisabled?: boolean;
     renderSelected?: (option: SelectOption) => ReactNode; // Pour personnaliser l'affichage de l'option sélectionnée
+    bg?: string; // Couleur de fond personnalisée
+    enableSearch?: boolean; // Activer la recherche
+    onSearchChange?: (search: string) => void; // Callback pour la recherche (pour API)
+    isLoading?: boolean; // État de chargement
 }
 
 export const CustomSelect = ({
@@ -29,10 +33,16 @@ export const CustomSelect = ({
     placeholder = "Sélectionnez une option",
     allowDeselect = true,
     isDisabled = false,
-    renderSelected
+    renderSelected,
+    bg,
+    enableSearch = false,
+    onSearchChange,
+    isLoading = false
 }: CustomSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
     const menuRef = useRef<HTMLDivElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     const selectedOption = options.find(option => option.value === value);
 
@@ -53,6 +63,23 @@ export const CustomSelect = ({
         };
     }, [isOpen]);
 
+    // Focus sur l'input de recherche quand le menu s'ouvre
+    useEffect(() => {
+        if (isOpen && enableSearch && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [isOpen, enableSearch]);
+
+    // Réinitialiser la recherche quand on ferme le menu
+    useEffect(() => {
+        if (!isOpen) {
+            setSearchTerm("");
+            if (onSearchChange) {
+                onSearchChange("");
+            }
+        }
+    }, [isOpen, onSearchChange]);
+
     const handleSelect = (optionValue: string) => {
         onChange(optionValue);
         setIsOpen(false);
@@ -63,12 +90,28 @@ export const CustomSelect = ({
         onChange('');
     };
 
-    const bgColor = useColorModeValue('white', 'gray.700');
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newSearchTerm = e.target.value;
+        setSearchTerm(newSearchTerm);
+        if (onSearchChange) {
+            onSearchChange(newSearchTerm);
+        }
+    };
+
+    // Filtrer les options localement si pas de callback API
+    const filteredOptions = enableSearch && !onSearchChange
+        ? options.filter(option => 
+            option.label.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        : options;
+
+    const defaultBgColor = useColorModeValue('white', 'gray.800');
+    const bgColor = bg || defaultBgColor;
     const borderColor = useColorModeValue('gray.200', 'gray.600');
     const hoverBg = useColorModeValue('gray.50', 'gray.600');
     const menuBg = useColorModeValue('white', 'gray.800');
     const textColor = useColorModeValue('gray.900', 'white');
-    const placeholderColor = useColorModeValue('gray.500', 'gray.400');
+    const placeholderColor = useColorModeValue('gray.600', 'gray.400');
 
     return (
         <Box position="relative" ref={menuRef}>
@@ -162,53 +205,83 @@ export const CustomSelect = ({
                     overflowY="auto"
                     mt={1}
                 >
-                    {/* Option de déselection */}
-                    {allowDeselect && (
-                        <Flex
-                            key="deselect-option"
-                            p={3}
-                            cursor="pointer"
-                            _hover={{ bg: hoverBg }}
-                            onClick={() => handleSelect('')}
-                            align="center"
-                            borderBottom="1px solid"
+                    {/* Champ de recherche */}
+                    {enableSearch && (
+                        <Box 
+                            p={2} 
+                            borderBottom="1px solid" 
                             borderColor={borderColor}
-                            fontStyle="italic"
-                            color={placeholderColor}
+                            bg={menuBg}
+                            position="sticky"
+                            top={0}
+                            zIndex={1}
                         >
-                            <Text>Aucune sélection</Text>
-                        </Flex>
+                            <Input
+                                ref={searchInputRef}
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                placeholder="Rechercher..."
+                                size="sm"
+                                autoComplete="off"
+                            />
+                        </Box>
                     )}
-                    
-                    {/* Liste des options */}
-                    {options.length > 0 ? (
-                        options.map((option) => (
-                            <Flex
-                                key={option.value}
-                                p={3}
-                                cursor="pointer"
-                                _hover={{ bg: hoverBg }}
-                                onClick={() => handleSelect(option.value)}
-                                align="center"
-                                borderBottom="1px solid"
-                                borderColor={borderColor}
-                                _last={{ borderBottom: "none" }}
-                                color={textColor}
-                                bg={bgColor}
-                            >
-                                <Box flex={1}>
-                                    {option.content || (
-                                        <Text fontWeight="medium">
-                                            {option.label}
-                                        </Text>
-                                    )}
-                                </Box>
-                            </Flex>
-                        ))
-                    ) : (
+
+                    {isLoading ? (
                         <Text p={3} color={placeholderColor} textAlign="center">
-                            Aucune option disponible
+                            Chargement...
                         </Text>
+                    ) : (
+                        <>
+                            {/* Option de déselection */}
+                            {allowDeselect && (
+                                <Flex
+                                    key="deselect-option"
+                                    p={3}
+                                    cursor="pointer"
+                                    _hover={{ bg: hoverBg }}
+                                    onClick={() => handleSelect('')}
+                                    align="center"
+                                    borderBottom="1px solid"
+                                    borderColor={borderColor}
+                                    fontStyle="italic"
+                                    color={placeholderColor}
+                                >
+                                    <Text>Aucune sélection</Text>
+                                </Flex>
+                            )}
+                            
+                            {/* Liste des options */}
+                            {filteredOptions.length > 0 ? (
+                                filteredOptions.map((option) => (
+                                    <Flex
+                                        key={option.value}
+                                        p={3}
+                                        cursor="pointer"
+                                        _hover={{ bg: hoverBg }}
+                                        onClick={() => handleSelect(option.value)}
+                                        align="center"
+                                        borderBottom="1px solid"
+                                        borderColor={borderColor}
+                                        _last={{ borderBottom: "none" }}
+                                        color={textColor}
+                                        bg={bgColor}
+                                    >
+                                        <Box flex={1}>
+                                            {option.content || (
+                                                <Text fontWeight="medium">
+                                                    {option.label}
+                                                </Text>
+                                            )}
+                                        </Box>
+                                    </Flex>
+                                ))
+                            ) : (
+                                <Text p={3} color={placeholderColor} textAlign="center">
+                                    {searchTerm ? "Aucun résultat" : "Aucune option disponible"}
+                                </Text>
+                            )}
+                        </>
                     )}
                 </Box>
             )}

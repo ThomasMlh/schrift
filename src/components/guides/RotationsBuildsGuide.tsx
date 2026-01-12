@@ -10,29 +10,33 @@ import {
   HStack,
   Spinner,
   Avatar,
-  Select,
   useDisclosure,
   Alert,
   AlertIcon,
   Icon,
   SimpleGrid,
   Card,
-  CardBody
+  CardBody,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { AddIcon, InfoIcon } from "@chakra-ui/icons";
 import { useBuilds, useRotations } from "../../hooks/useAPI";
 import BuildCreationModal from "../ui/BuildCreationModal";
+import { BuildDetailModal } from "../ui/BuildDetailModal";
 import { Pagination } from "../ui/Pagination";
 import { jwtDecode } from "jwt-decode";
 import { UserDisplay } from "../ui/UserDisplay";
-import CustomLink from "../ui/CustomLink";
-import { Link as RouterLink } from "react-router-dom";
+import { CustomSelect } from "../ui/CustomSelect";
+import { AttackTypeBadge } from "../ui/AttackTypeBadge";
+import { AlterationImage } from "../ui/AlterationImage";
+import type { IBuild } from "../../interfaces";
 
 const RotationsBuildsGuide = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRotation, setSelectedRotation] = useState<string>("");
+  const [selectedBuild, setSelectedBuild] = useState<IBuild | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isDetailOpen, onOpen: onDetailOpen, onClose: onDetailClose } = useDisclosure();
 
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
@@ -116,23 +120,40 @@ const RotationsBuildsGuide = () => {
             <Text fontSize="sm" fontWeight="medium" mb={2}>
               Filtrer par rotation
             </Text>
-            <Select
+            <CustomSelect
+              placeholder="Toutes les rotations"
               value={selectedRotation}
-              onChange={(e) => {
-                setSelectedRotation(e.target.value);
+              onChange={(value) => {
+                setSelectedRotation(value);
                 setCurrentPage(1);
               }}
-              placeholder="Toutes les rotations"
-              size="sm"
-              w={{ base: "full", md: "350px" }}
               isDisabled={isLoadingRotations}
-            >
-              {rotations.map((rotation) => (
-                <option key={rotation._id} value={rotation._id}>
-                  {rotation.killer} / {rotation.attack} / {rotation.alteration}
-                </option>
-              ))}
-            </Select>
+              bg={bgColor}
+              options={rotations.map((rotation) => ({
+                value: rotation._id || '',
+                label: `${rotation.killer} - ${rotation.attack}`,
+                content: (
+                  <HStack spacing={2} w="100%">
+                    <Text fontWeight="medium">
+                      {rotation.killer}
+                    </Text>
+                    <AttackTypeBadge attackType={rotation.attack} />
+                    <AlterationImage alteration={rotation.alteration} size="16px" />
+                  </HStack>
+                )
+              }))}
+              renderSelected={(option) => {
+                const rotation = rotations.find((r) => r._id === option.value);
+                return rotation ? (
+                  <HStack spacing={2}>
+                    <Text>{rotation.killer}</Text>
+                    <AttackTypeBadge attackType={rotation.attack} />
+                    <AlterationImage alteration={rotation.alteration} size="16px" />
+                  </HStack>
+                ) : <Text>{option.label}</Text>;
+              }}
+              allowDeselect={true}
+            />
           </Box>
 
           {isAuthenticated && (
@@ -155,6 +176,34 @@ const RotationsBuildsGuide = () => {
               Sélectionnez une rotation pour créer un build
             </Text>
           </Flex>
+        )}
+      </Box>
+
+      {/* Titre de la section */}
+      <Box
+        bg={bgColor}
+        p={4}
+        borderRadius="md"
+        borderWidth="1px"
+        borderColor={borderColor}
+      >
+        {selectedRotation ? (
+          <HStack spacing={3} justify="center">
+            <Heading size="md">
+              {rotations.find(r => r._id === selectedRotation)?.killer || 'Rotation'}
+            </Heading>
+            <AttackTypeBadge 
+              attackType={rotations.find(r => r._id === selectedRotation)?.attack || ''} 
+            />
+            <AlterationImage 
+              alteration={rotations.find(r => r._id === selectedRotation)?.alteration || ''} 
+              size="24px" 
+            />
+          </HStack>
+        ) : (
+          <Heading size="md" textAlign="center">
+            Tous les Builds
+          </Heading>
         )}
       </Box>
 
@@ -193,9 +242,32 @@ const RotationsBuildsGuide = () => {
                   transition: "all 0.2s"
                 }}
                 cursor="pointer"
+                onClick={() => {
+                  setSelectedBuild(build);
+                  onDetailOpen();
+                }}
               >
                 <CardBody>
                   <VStack align="stretch" spacing={4}>
+                    {/* Rotation (seulement si aucun filtre) */}
+                    {!selectedRotation && build.rotation && (
+                      <Box>
+                        <HStack spacing={2} justify="center">
+                          <Text fontSize="sm" fontWeight="bold">
+                            {rotations.find(r => r._id === build.rotation_id)?.killer || 'Rotation'}
+                          </Text>
+                          <AttackTypeBadge 
+                            attackType={rotations.find(r => r._id === build.rotation_id)?.attack || ''} 
+                          />
+                          <AlterationImage 
+                            alteration={rotations.find(r => r._id === build.rotation_id)?.alteration || ''} 
+                            size="16px" 
+                          />
+                        </HStack>
+                        <Divider mt={3} />
+                      </Box>
+                    )}
+
                     {/* En-tête avec créateur */}
                     <HStack justify="space-between">
                       {build.user ? (
@@ -215,7 +287,7 @@ const RotationsBuildsGuide = () => {
                     {/* Description */}
                     {build.description && (
                       <Box>
-                        <Text fontSize="sm" whiteSpace="pre-wrap">
+                        <Text fontSize="sm" whiteSpace="pre-wrap" noOfLines={3}>
                           {build.description}
                         </Text>
                       </Box>
@@ -223,7 +295,7 @@ const RotationsBuildsGuide = () => {
 
                     <Divider />
 
-                    {/* Team */}
+                    {/* Team - Avatars uniquement */}
                     <Box>
                       <Text
                         fontSize="xs"
@@ -233,57 +305,20 @@ const RotationsBuildsGuide = () => {
                       >
                         COMPOSITION
                       </Text>
-                      <VStack align="stretch" spacing={3}>
+                      <HStack spacing={3} justify="center">
                         {build.team?.slice(0, 3).map((member, idx) => (
-                          <Box key={idx}>
-                            <HStack spacing={3}>
-                              <RouterLink
-                                to={`/personnage/${member.id_character}`}
-                              >
-                                <Avatar
-                                  size="md"
-                                  src={
-                                    member.character?.image ||
-                                    member.character?.link
-                                  }
-                                  name={member.character?.name || "?"}
-                                  bg="gray.200"
-                                  cursor="pointer"
-                                  _hover={{ opacity: 0.8 }}
-                                />
-                              </RouterLink>
-                              <VStack align="start" spacing={1} flex={1}>
-                                <CustomLink
-                                  to={`/personnage/${member.id_character}`}
-                                  text={member.character?.name || "Personnage inconnu"}
-                                />
-                              </VStack>
-                            </HStack>
-                            {member.links && member.links.length > 0 && (
-                              <HStack spacing={2} mt={2} ml={14}>
-                                {member.links.map((link, linkIdx) => (
-                                  <RouterLink
-                                    key={linkIdx}
-                                    to={`/personnage/${link.id_character}`}
-                                  >
-                                    <Avatar
-                                      size="sm"
-                                      src={
-                                        link.character?.image ||
-                                        link.character?.link
-                                      }
-                                      name={link.character?.name || "?"}
-                                      bg="gray.100"
-                                      cursor="pointer"
-                                      _hover={{ opacity: 0.8 }}
-                                    />
-                                  </RouterLink>
-                                ))}
-                              </HStack>
-                            )}
-                          </Box>
+                          <Avatar
+                            key={idx}
+                            size="lg"
+                            src={
+                              member.character?.image ||
+                              member.character?.link
+                            }
+                            name={member.character?.name || "?"}
+                            bg="gray.200"
+                          />
                         ))}
-                      </VStack>
+                      </HStack>
                     </Box>
                   </VStack>
                 </CardBody>
@@ -317,6 +352,13 @@ const RotationsBuildsGuide = () => {
           onSuccess={handleBuildCreated}
         />
       )}
+
+      {/* Modal de détails */}
+      <BuildDetailModal 
+        isOpen={isDetailOpen}
+        onClose={onDetailClose}
+        build={selectedBuild}
+      />
     </VStack>
   );
 };

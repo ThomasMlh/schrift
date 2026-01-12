@@ -26,6 +26,8 @@ import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import { createBuild } from "../../hooks/useAPIMutations";
 import { useCharacters } from "../../hooks/useAPI";
 import { CharacterSearchSelect } from "./CharacterSearchSelect";
+import { SkillSearchSelect } from "./SkillSearchSelect";
+import { AccessorySearchSelect } from "./AccessorySearchSelect";
 
 interface BuildCreationModalProps {
   isOpen: boolean;
@@ -38,14 +40,16 @@ interface TeamMember {
   id_character: string;
   position: number;
   links: Array<{ id_character: string }>;
+  skills?: string[];
+  accessories?: Array<{ id_accessory: string; id_subeffect?: string }>;
 }
 
 const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess }: BuildCreationModalProps) => {
   const [description, setDescription] = useState("");
   const [team, setTeam] = useState<TeamMember[]>([
-    { id_character: "", position: 1, links: [] },
-    { id_character: "", position: 2, links: [] },
-    { id_character: "", position: 3, links: [] },
+    { id_character: "", position: 1, links: [], skills: [], accessories: [] },
+    { id_character: "", position: 2, links: [], skills: [], accessories: [] },
+    { id_character: "", position: 3, links: [], skills: [], accessories: [] },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
@@ -62,9 +66,9 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess }: BuildCre
     if (isOpen) {
       setDescription("");
       setTeam([
-        { id_character: "", position: 1, links: [] },
-        { id_character: "", position: 2, links: [] },
-        { id_character: "", position: 3, links: [] },
+        { id_character: "", position: 1, links: [], skills: [], accessories: [] },
+        { id_character: "", position: 2, links: [], skills: [], accessories: [] },
+        { id_character: "", position: 3, links: [], skills: [], accessories: [] },
       ]);
     }
   }, [isOpen]);
@@ -178,6 +182,69 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess }: BuildCre
     );
   };
 
+  const handleSkillsChange = (position: number, skillIds: string[]) => {
+    setTeam((prev) =>
+      prev.map((member) =>
+        member.position === position ? { ...member, skills: skillIds } : member
+      )
+    );
+  };
+
+  // Gestion des accessoires
+  const handleAddAccessory = (position: number) => {
+    setTeam((prev) =>
+      prev.map((member) =>
+        member.position === position && (member.accessories?.length || 0) < 3
+          ? {
+              ...member,
+              accessories: [
+                ...(member.accessories || []),
+                { id_accessory: "", id_subeffect: undefined },
+              ],
+            }
+          : member
+      )
+    );
+  };
+
+  const handleRemoveAccessory = (position: number, accessoryIndex: number) => {
+    setTeam((prev) =>
+      prev.map((member) =>
+        member.position === position
+          ? {
+              ...member,
+              accessories: member.accessories?.filter((_, i) => i !== accessoryIndex),
+            }
+          : member
+      )
+    );
+  };
+
+  const handleAccessoryChange = (
+    position: number,
+    accessoryIndex: number,
+    accessory: { id_accessory: string; id_subeffect?: string }
+  ) => {
+    setTeam((prev) =>
+      prev.map((member) => {
+        if (member.position !== position) return member;
+
+        const accessories = [...(member.accessories || [])];
+        accessories[accessoryIndex] = accessory;
+
+        return { ...member, accessories };
+      })
+    );
+  };
+
+  const getUsedAccessoryIds = (position: number) => {
+    const member = team.find((m) => m.position === position);
+    if (!member?.accessories) return [];
+    return member.accessories
+      .map((acc) => acc.id_accessory)
+      .filter((id) => id !== "");
+  };
+
   const handleSubmit = async () => {
     // Vérifier que l'utilisateur est connecté
     const token = localStorage.getItem('userToken');
@@ -209,6 +276,13 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess }: BuildCre
       .map((member) => ({
         ...member,
         links: member.links.filter((link) => link.id_character !== ""),
+        skills: member.skills && member.skills.length > 0 ? member.skills : undefined,
+        accessories: member.accessories
+          ?.filter((acc) => acc.id_accessory !== "")
+          .map((acc) => ({
+            id_accessory: acc.id_accessory,
+            ...(acc.id_subeffect && { id_subeffect: acc.id_subeffect }),
+          })),
       }));
 
     setIsSubmitting(true);
@@ -344,6 +418,70 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess }: BuildCre
                         >
                           Ajouter un link
                         </Button>
+                      )}
+
+                      {/* Skills */}
+                      {member.id_character && (
+                        <FormControl>
+                          <FormLabel fontSize="sm">
+                            Compétences bonus (optionnel, max 2)
+                          </FormLabel>
+                          <SkillSearchSelect
+                            value={member.skills || []}
+                            onChange={(skillIds) => handleSkillsChange(member.position, skillIds)}
+                            placeholder="Rechercher une compétence..."
+                            size="sm"
+                            maxSkills={2}
+                          />
+                        </FormControl>
+                      )}
+
+                      {/* Accessories */}
+                      {member.id_character && (
+                        <Box>
+                          <Text fontSize="sm" fontWeight="medium" mb={2}>
+                            Accessoires ({(member.accessories?.length || 0)}/3)
+                          </Text>
+                          {member.accessories && member.accessories.length > 0 && (
+                            <VStack spacing={2} align="stretch" mb={2}>
+                              {member.accessories.map((accessory, accIndex) => (
+                                <HStack key={accIndex} align="flex-start">
+                                  <Box flex={1}>
+                                    <AccessorySearchSelect
+                                      value={accessory}
+                                      onChange={(acc) =>
+                                        handleAccessoryChange(member.position, accIndex, acc)
+                                      }
+                                      placeholder="Rechercher un accessoire..."
+                                      excludeIds={getUsedAccessoryIds(member.position).filter(
+                                        (_, idx) => idx !== accIndex
+                                      )}
+                                    />
+                                  </Box>
+                                  <IconButton
+                                    aria-label="Supprimer l'accessoire"
+                                    icon={<DeleteIcon />}
+                                    size="sm"
+                                    colorScheme="red"
+                                    variant="ghost"
+                                    onClick={() => handleRemoveAccessory(member.position, accIndex)}
+                                    mt={6}
+                                  />
+                                </HStack>
+                              ))}
+                            </VStack>
+                          )}
+                          {(member.accessories?.length || 0) < 3 && (
+                            <Button
+                              size="sm"
+                              leftIcon={<AddIcon />}
+                              variant="outline"
+                              onClick={() => handleAddAccessory(member.position)}
+                            >
+                              Ajouter un accessoire
+                            </Button>
+                          )}
+                        </Box>
                       )}
                     </VStack>
                   </Box>

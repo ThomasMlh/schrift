@@ -28,6 +28,7 @@ const CharacterDetailPage = () => {
     const borderColor = useColorModeValue('gray.200', 'gray.600');
     const shadowColor = useColorModeValue('lg', 'dark-lg');
     const buttonColor = useColorModeValue('black', 'white');
+    const textSecondary = useColorModeValue('gray.700', 'gray.300');
 
     useEffect(() => {
         if (fetchError) {
@@ -184,7 +185,7 @@ const CharacterDetailPage = () => {
                                         alignItems="center"
                                         justifyContent="center"
                                         fontSize="2xl"
-                                        color="gray.500"
+                                        color={textSecondary}
                                         borderWidth="2px"
                                         borderColor={borderColor}
                                     >
@@ -251,7 +252,7 @@ const CharacterDetailPage = () => {
                                             >
                                                 <Text 
                                                     fontWeight="semibold" 
-                                                    color="gray.600" 
+                                                    color={textSecondary}
                                                     fontSize={{ base: "sm", md: "md" }}
                                                     minW={{ base: "auto", md: "100px" }}
                                                 >
@@ -275,7 +276,7 @@ const CharacterDetailPage = () => {
                                             >
                                                 <Text 
                                                     fontWeight="semibold" 
-                                                    color="gray.600" 
+                                                    color={textSecondary}
                                                     fontSize={{ base: "sm", md: "md" }}
                                                     minW={{ base: "auto", md: "100px" }}
                                                 >
@@ -285,7 +286,7 @@ const CharacterDetailPage = () => {
                                                 <Text 
                                                     fontFamily="mono" 
                                                     fontSize="sm" 
-                                                    color="gray.500" 
+                                                    color={textSecondary}
                                                     textAlign={{ base: "center", md: "left" }}
                                                 >
                                                     {character.search_name}
@@ -458,14 +459,14 @@ const CharacterDetailPage = () => {
 
                                 {/* Autres informations */}
                                 <Box>
-                                    <Heading size="md" color="gray.500" mb={4}>
+                                    <Heading size="md" color={textSecondary} mb={4}>
                                         Informations
                                     </Heading>
                                     <VStack spacing={3} align="stretch">
                                         {character.created_at && (
                                             <HStack justify="space-between">
                                                 <Text fontWeight="medium">Créé le:</Text>
-                                                <Text fontSize="sm" color="gray.500">
+                                                <Text fontSize="sm" color={textSecondary}>
                                                     {(character.release_date)}
                                                 </Text>
                                             </HStack>
@@ -473,7 +474,7 @@ const CharacterDetailPage = () => {
                                         {character.resurrection_release && (
                                             <HStack justify="space-between">
                                                 <Text fontWeight="medium">Résurrection:</Text>
-                                                <Text fontSize="sm" color="gray.500">
+                                                <Text fontSize="sm" color={textSecondary}>
                                                     {(character.resurrection_release)}
                                                 </Text>
                                             </HStack>

@@ -306,6 +306,32 @@ export interface IComparisonResponse {
   filters: IComparisonFilters;
 }
 
+// Interface pour les skills
+export interface ISkill {
+  _id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+}
+
+// Interfaces pour les accessories
+export interface IAccessory {
+  _id: string;
+  name: string;
+}
+
+export interface IAccessorySubeffect {
+  _id: string;
+  name: string;
+}
+
+export interface IBuildAccessory {
+  id_accessory: string;
+  id_subeffect?: string;
+  accessory?: IAccessory;
+  subeffect?: IAccessorySubeffect;
+}
+
 // Interfaces pour les builds/teams
 export interface IBuildLink {
   id_character: string;
@@ -317,6 +343,7 @@ export interface IBuildLink {
     rarity?: string;
     element?: string;
     affinity?: string;
+    soul_traits?: string[];
   };
 }
 
@@ -324,6 +351,8 @@ export interface IBuildTeamMember {
   id_character: string;
   position: number; // 1, 2 ou 3
   links?: IBuildLink[];
+  skills?: string[] | ISkill[]; // Array d'IDs ou d'objets enrichis
+  accessories?: IBuildAccessory[];
   character?: {
     _id: string;
     name: string;
