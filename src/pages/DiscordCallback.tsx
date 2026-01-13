@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flex, Spinner, Text, useToast } from "@chakra-ui/react";
+import { useAuth } from "../providers/AuthProvider";
 
 const DiscordCallback = () => {
   const navigate = useNavigate();
   const toast = useToast();
+  const { login } = useAuth();
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const hasProcessed = useRef(false);
 
@@ -68,11 +70,8 @@ const DiscordCallback = () => {
 
         const data = await response.json();
         
-        // Stocker le token JWT
-        localStorage.setItem('userToken', data.token);
-        
-        // Déclencher un événement personnalisé pour notifier MainRouter
-        window.dispatchEvent(new Event('authStateChange'));
+        // Stocker le token JWT via le context
+        login(data.token);
         
         toast({
           title: "Connexion réussie",

@@ -19,11 +19,8 @@ import {
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { FaDiscord } from "react-icons/fa";
-import { useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
-import type { IUser } from "../interfaces";
-import { getDiscordAvatarUrl } from "../utils/discord";
 import CustomLink from "./ui/CustomLink";
+import { useAuth } from "../providers/AuthProvider";
 
 const ColorModeSwitcher = () => {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -36,10 +33,7 @@ const ColorModeSwitcher = () => {
 
 export const Header = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userInfo, setUserInfo] = useState<IUser | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isGuildManager, setIsGuildManager] = useState(false);
+  const { currentUser, isLoggedIn, isAdmin, isGuildManager, logout: authLogout } = useAuth();
   const toast = useToast();
   const placement = "left";
 
@@ -121,21 +115,6 @@ export const Header = () => {
     }
   ];
 
-  // Fonction utilitaire pour vérifier la validité du token
-  const isTokenValid = (token: string | null): boolean => {
-    if (!token) return false;
-    try {
-      const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-      if (decoded.exp && decoded.exp < currentTime) {
-        return false;
-      }
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   // Fonction pour initier l'authentification Discord
   const handleDiscordAuth = () => {
     const discordClientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
@@ -163,77 +142,16 @@ export const Header = () => {
 
   // Fonction de déconnexion
   const handleLogout = () => {
-    localStorage.removeItem("userToken");
-    localStorage.removeItem("adminToken");
-    setIsAdmin(false);
-    setIsGuildManager(false);
-    setIsLoggedIn(false);
-    setUserInfo(null);
-
-    window.dispatchEvent(new Event("authStateChange"));
-
-    toast({ title: "Déconnexion réussie", status: "info" });
+    authLogout();
+    onClose();
+    toast({
+      title: "Déconnecté",
+      description: "Vous avez été déconnecté avec succès.",
+      status: "success",
+      duration: 3000,
+      isClosable: true
+    });
   };
-
-  // Vérifier le token au chargement
-  useEffect(() => {
-    const checkAuthState = () => {
-      const token =
-        localStorage.getItem("userToken") || localStorage.getItem("adminToken");
-      if (token && isTokenValid(token)) {
-        try {
-          const decoded = jwtDecode<IUser>(token);
-          setIsLoggedIn(true);
-          setIsAdmin(decoded.is_admin || false);
-          setIsGuildManager(
-            decoded.role === "chef" || decoded.role === "sous-chef"
-          );
-
-          let avatarUrl = null;
-          if (decoded.avatar && decoded.discord_id) {
-            avatarUrl = getDiscordAvatarUrl(decoded.discord_id, decoded.avatar);
-          }
-
-          setUserInfo({
-            ...decoded,
-            avatar: avatarUrl || undefined
-          });
-
-          if (localStorage.getItem("adminToken")) {
-            localStorage.setItem("userToken", token);
-            localStorage.removeItem("adminToken");
-          }
-        } catch (error) {
-          console.error("Erreur décodage token:", error);
-          localStorage.removeItem("userToken");
-          localStorage.removeItem("adminToken");
-          setIsLoggedIn(false);
-          setIsAdmin(false);
-          setIsGuildManager(false);
-          setUserInfo(null);
-        }
-      } else {
-        setIsLoggedIn(false);
-        setIsAdmin(false);
-        setIsGuildManager(false);
-        setUserInfo(null);
-      }
-    };
-
-    checkAuthState();
-
-    const handleAuthStateChange = () => {
-      checkAuthState();
-    };
-
-    window.addEventListener("authStateChange", handleAuthStateChange);
-    window.addEventListener("storage", handleAuthStateChange);
-
-    return () => {
-      window.removeEventListener("authStateChange", handleAuthStateChange);
-      window.removeEventListener("storage", handleAuthStateChange);
-    };
-  }, []);
 
   const renderAuthButton = () => {
     if (isLoggedIn) {
@@ -242,13 +160,13 @@ export const Header = () => {
           <HStack spacing={2}>
             <Avatar
               size="sm"
-              src={userInfo?.avatar}
-              name={userInfo?.username}
+              src={currentUser?.avatar}
+              name={currentUser?.username}
             />
             <VStack spacing={0} align="start">
               <CustomLink
-                to={`/joueur/${userInfo?._id}`}
-                text={`${userInfo?.global_name}`}
+                to={`/joueur/${currentUser?._id}`}
+                text={`${currentUser?.global_name}`}
                 textSize="sm"
               />
               {isAdmin && (
@@ -398,13 +316,13 @@ export const Header = () => {
                   <HStack spacing={2}>
                     <Avatar
                       size="sm"
-                      src={userInfo?.avatar}
-                      name={userInfo?.username}
+                      src={currentUser?.avatar}
+                      name={currentUser?.username}
                     />
                     <VStack spacing={0} align="start">
                       <CustomLink
-                        to={`/joueur/${userInfo?._id}`}
-                        text={`${userInfo?.global_name}`}
+                        to={`/joueur/${currentUser?._id}`}
+                        text={`${currentUser?.global_name}`}
                         textSize="sm"
                       />
                       {isAdmin && (

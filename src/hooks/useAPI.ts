@@ -1,5 +1,6 @@
 import useSWR from 'swr';
 import type { ICycle, IGuild, IUser, ICharactersResponse, ICharacter, IRotationTemplate, IScoresResponse, IPodiumResponse, IOrbGuideResponse, IPagination } from '../interfaces';
+import { useAuth } from '../providers/AuthProvider';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -13,24 +14,29 @@ const fetcher = async (url: string) => {
   return data;
 };
 
-// Fonction fetcher authentifiée
-const authenticatedFetcher = async (url: string) => {
-  const token = localStorage.getItem('token');
-  const response = await fetch(url, {
-    headers: {
-      'Authorization': token ? `Bearer ${token}` : '',
-    },
-  });
-  if (!response.ok) {
-    throw new Error('Erreur lors de la récupération des données');
-  }
-  const data = await response.json();
-  return data;
+// Hook pour créer un fetcher authentifié
+const useAuthenticatedFetcher = () => {
+  const { token } = useAuth();
+  
+  return async (url: string) => {
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Erreur lors de la récupération des données');
+    }
+    const data = await response.json();
+    return data;
+  };
 };
 
 // Hook pour récupérer les cycles
 export const useCycles = (options?: { limit?: number; page?: number; authenticated?: boolean }) => {
   const { limit, page, authenticated = false } = options || {};
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  
   let url = `${apiUrl}/api/cycles`;
   const params = new URLSearchParams();
   if (limit) params.append('limit', limit.toString());
@@ -89,6 +95,7 @@ export const useCycle = (cycleId?: string) => {
 
 // Hook pour récupérer les guildes
 export const useGuilds = (authenticated: boolean = false) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
   const url = `${apiUrl}/api/guildes`;
   
   const { data, error, isLoading, mutate } = useSWR<IGuild[] | { guilds?: IGuild[]; data?: IGuild[]; success?: boolean }>(
@@ -122,6 +129,7 @@ export const useGuilds = (authenticated: boolean = false) => {
 
 // Hook pour récupérer les membres d'une guilde
 export const useGuildMembers = (guildId?: string, authenticated: boolean = true) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
   const url = guildId ? `${apiUrl}/api/guildes/${guildId}/membres` : null;
   
   const { data, error, isLoading, mutate } = useSWR<IUser[] | { data?: IUser[]; success?: boolean }>(
@@ -151,13 +159,47 @@ export const useGuildMembers = (guildId?: string, authenticated: boolean = true)
 }
 
 // Hook pour récupérer les utilisateurs
-export const useUsers = (authenticated: boolean = true, limit?: number) => {
+export const useUsers = (options?: {
+  authenticated?: boolean;
+  page?: number;
+  limit?: number;
+  guilde_id?: string;
+  role?: string;
+  search?: string;
+}) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const { 
+    authenticated = true, 
+    page = 1, 
+    limit = 50,
+    guilde_id,
+    role,
+    search
+  } = options || {};
+  
   let url = `${apiUrl}/api/users`;
-  if (limit) {
-    url += `?limit=${limit}`;
+  const params = new URLSearchParams();
+  
+  if (page) params.append('page', page.toString());
+  if (limit) params.append('limit', limit.toString());
+  if (guilde_id) params.append('guilde_id', guilde_id);
+  if (role) params.append('role', role);
+  if (search) params.append('search', search);
+  
+  if (params.toString()) {
+    url += `?${params.toString()}`;
   }
   
-  const { data, error, isLoading, mutate } = useSWR<IUser[] | { users?: IUser[]; data?: IUser[]; success?: boolean }>(
+  const { data, error, isLoading, mutate } = useSWR<{
+    success: boolean;
+    users: IUser[];
+    pagination: IPagination;
+    activeFilters: {
+      guilde_id: string | null;
+      role: string | null;
+      search: string | null;
+    };
+  }>(
     url,
     authenticated ? authenticatedFetcher : fetcher,
     {
@@ -165,25 +207,15 @@ export const useUsers = (authenticated: boolean = true, limit?: number) => {
     }
   );
 
-  // Normaliser la réponse (peut être un tableau ou un objet avec users/data)
-  let users: IUser[] = [];
-  if (data) {
-    if (Array.isArray(data)) {
-      users = data;
-    } else if (data.users) {
-      users = data.users;
-    } else if (data.data) {
-      users = data.data;
-    }
-  }
-
   return {
-    users,
+    users: data?.users || [],
+    pagination: data?.pagination,
+    activeFilters: data?.activeFilters,
     isLoading,
     error,
     mutate,
   };
-}
+};
 
 // Hook pour récupérer les personnages avec pagination
 export const useCharacters = (options?: { 
@@ -285,6 +317,7 @@ export const useScores = (options?: {
   guild_id?: string;
   authenticated?: boolean;
 }) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
   const { page = 1, limit = 20, search, cycle_id, rotation_id, guild_id, authenticated = false } = options || {};
   
   let url = `${apiUrl}/api/scores?page=${page}&limit=${limit}`;
@@ -318,14 +351,19 @@ export const usePodium = (options?: {
   rotation_id?: string;
   authenticated?: boolean;
 }) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
   const { cycle_id, guild_id, rotation_id, authenticated = false } = options || {};
   
-  let url = `${apiUrl}/api/scores/podium`;
-  const params = new URLSearchParams();
-  if (cycle_id) params.append('cycle_id', cycle_id);
-  if (guild_id) params.append('guild_id', guild_id);
-  if (rotation_id) params.append('rotation_id', rotation_id);
-  if (params.toString()) url += `?${params.toString()}`;
+  // Ne pas faire de requête si cycle_id n'est pas fourni
+  let url: string | null = null;
+  if (cycle_id) {
+    url = `${apiUrl}/api/users/podium`;
+    const params = new URLSearchParams();
+    params.append('cycle_id', cycle_id);
+    if (guild_id) params.append('guild_id', guild_id);
+    if (rotation_id) params.append('rotation_id', rotation_id);
+    url += `?${params.toString()}`;
+  }
 
   const { data, error, isLoading, mutate } = useSWR<IPodiumResponse>(
     url,
@@ -337,8 +375,10 @@ export const usePodium = (options?: {
   );
 
   return {
-    podium: data?.data || [],
+    podium: data?.podium || data?.data || [],
     pagination: data?.pagination,
+    meta: data?.meta,
+    filters: data?.filters,
     isLoading,
     error,
     mutate,
@@ -374,6 +414,7 @@ export const useBuilds = (options?: {
   isValid?: boolean;
   authenticated?: boolean;
 }) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
   const { page = 1, limit = 20, rotation_id, isValid, authenticated = false } = options || {};
   
   let url = `${apiUrl}/api/builds?page=${page}&limit=${limit}`;
@@ -401,6 +442,7 @@ export const useBuilds = (options?: {
 
 // Hook pour récupérer un build spécifique
 export const useBuild = (buildId?: string, authenticated: boolean = false) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
   const url = buildId ? `${apiUrl}/api/builds/${buildId}` : null;
   
   const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: import('../interfaces').IBuild }>(

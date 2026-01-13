@@ -23,11 +23,12 @@ import {
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
-import { createBuild } from "../../hooks/useAPIMutations";
+import { useAPIMutations } from "../../hooks/useAPIMutations";
 import { useCharacters } from "../../hooks/useAPI";
 import { CharacterSearchSelect } from "./CharacterSearchSelect";
 import { SkillSearchSelect } from "./SkillSearchSelect";
 import { AccessorySearchSelect } from "./AccessorySearchSelect";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface BuildCreationModalProps {
   isOpen: boolean;
@@ -45,6 +46,8 @@ interface TeamMember {
 }
 
 const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess }: BuildCreationModalProps) => {
+  const { createBuild } = useAPIMutations();
+  const { token } = useAuth();
   const [description, setDescription] = useState("");
   const [team, setTeam] = useState<TeamMember[]>([
     { id_character: "", position: 1, links: [], skills: [], accessories: [] },
@@ -247,7 +250,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess }: BuildCre
 
   const handleSubmit = async () => {
     // Vérifier que l'utilisateur est connecté
-    const token = localStorage.getItem('userToken');
     if (!token) {
       toast({
         title: "Erreur d'authentification",

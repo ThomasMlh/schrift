@@ -1,28 +1,16 @@
 import { Container, Heading, Flex, useColorModeValue, Button, useToast, SimpleGrid, VStack } from "@chakra-ui/react";
-import { jwtDecode } from 'jwt-decode';
 import GuildsAdminSection from "../components/GuildsAdminSection";
 import CyclesSection from "../components/CyclesSection";
 import ScoresSection from "../components/ScoresSection";
 import UsersTable from "../components/UsersTable";
 import GuidesAdminSection from "../components/GuidesAdminSection";
 import { useState, useMemo } from "react";
-import type { AdminPage as IAdminPage, IUser } from "../interfaces";
+import type { AdminPage as IAdminPage } from "../interfaces";
+import { useAuth } from "../providers/AuthProvider";
 
 const AdminPage = () => {
   // Détection des permissions utilisateur
-  const getCurrentUser = () => {
-    try {
-      const token = localStorage.getItem('userToken');
-      if (!token) return null;
-      return jwtDecode<IUser>(token);
-    } catch {
-      return null;
-    }
-  };
-
-  const currentUser = getCurrentUser();
-  const isFullAdmin = currentUser?.is_admin || false;
-  const isGuildManager = currentUser?.role === 'chef' || currentUser?.role === 'sous-chef';
+  const { isAdmin: isFullAdmin, isGuildManager, token } = useAuth();
   
   // Pages autorisées selon le rôle
   const allowedPages = useMemo(() => {
@@ -43,7 +31,6 @@ const AdminPage = () => {
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
   const handleUpdateCharacters = () => {
-    const token = localStorage.getItem('userToken');
     // En utilisant Toast pour les notifications
     setIsUpdatingCharacters(true);
 

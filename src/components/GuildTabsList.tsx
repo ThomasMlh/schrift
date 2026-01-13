@@ -26,7 +26,8 @@ import { useEffect, useRef, useState } from "react";
 import type { Role, IGuild, IUser } from "../interfaces";
 import { UserDisplay } from "./ui/UserDisplay";
 import { useGuilds } from "@/hooks/useAPI";
-import { updateUserRole, moveUserToGuild, removeGuildMember } from "@/hooks/useAPIMutations";
+import { useAPIMutations } from "@/hooks/useAPIMutations";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface GuildTabsListProps {
   editable?: boolean;
@@ -37,6 +38,8 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
   editable = false,
   refreshTrigger = 0
 }) => {
+  const { getAuthHeaders } = useAuth();
+  const { updateUserRole, moveUserToGuild, removeGuildMember } = useAPIMutations();
   // Utiliser useSWR pour les guildes (cache automatique + déduplication)
   const { guilds, mutate: mutateGuilds } = useGuilds(true);
   
@@ -63,25 +66,14 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
 
   const shadowColor = useColorModeValue("lg", "dark-lg");
 
-  // Fonction utilitaire pour les requêtes authentifiées
-  const authenticatedFetch = (url: string, options: RequestInit = {}) => {
-    const token = localStorage.getItem("userToken");
-    return fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers
-      }
-    });
-  };
-
   // Charger les membres quand les guildes changent
   useEffect(() => {
     if (!apiUrl || guilds.length === 0) return;
 
     guilds.forEach((guild) => {
-      authenticatedFetch(`${apiUrl}/api/guildes/${guild._id}/membres`)
+      fetch(`${apiUrl}/api/guildes/${guild._id}/membres`, {
+        headers: getAuthHeaders()
+      })
         .then((res) => res.json())
         .then((data) => {
           // L'API retourne { success: true, membres: [...], count: number } ou { success: true, data: [...], count: number }
@@ -108,7 +100,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
           });
         });
     });
-  }, [apiUrl, guilds, toast]);
+  }, [apiUrl, guilds, toast, getAuthHeaders]);
 
   // Réagir aux changements externes (quand une guilde est modifiée depuis AdminPage)
   useEffect(() => {
@@ -123,7 +115,9 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
     if (!apiUrl || guilds.length === 0) return;
 
     guilds.forEach((guild) => {
-      authenticatedFetch(`${apiUrl}/api/guildes/${guild._id}/membres`)
+      fetch(`${apiUrl}/api/guildes/${guild._id}/membres`, {
+        headers: getAuthHeaders()
+      })
         .then((res) => res.json())
         .then((data) => {
           // L'API retourne { success: true, membres: [...], count: number } ou { success: true, data: [...], count: number }

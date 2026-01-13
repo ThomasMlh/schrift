@@ -31,7 +31,7 @@ import {
 } from "@chakra-ui/react";
 import { useState, useRef } from "react";
 import { useBuilds } from "../hooks/useAPI";
-import { deleteBuild, validateBuild } from "../hooks/useAPIMutations";
+import { useAPIMutations } from "../hooks/useAPIMutations";
 import { CheckIcon, CloseIcon, DeleteIcon, ViewIcon } from "@chakra-ui/icons";
 import type { IBuild } from "../interfaces";
 import { Pagination } from "./ui/Pagination";
@@ -40,6 +40,7 @@ import { UserDisplay } from "./ui/UserDisplay";
 import { BuildDetailModal } from "./ui/BuildDetailModal";
 
 const BuildsAdminSection = () => {
+  const { deleteBuild, validateBuild } = useAPIMutations();
   const [currentPage, setCurrentPage] = useState(1);
   const [filterIsValid, setFilterIsValid] = useState<boolean | undefined>(undefined);
   const [selectedBuild, setSelectedBuild] = useState<IBuild | null>(null);
@@ -69,10 +70,11 @@ const BuildsAdminSection = () => {
         duration: 3000,
       });
       mutate();
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       toast({
         title: "Erreur",
-        description: error.message || "Impossible de modifier le statut",
+        description: err.message || "Impossible de modifier le statut",
         status: "error",
         duration: 5000,
       });
@@ -92,10 +94,11 @@ const BuildsAdminSection = () => {
       mutate();
       onDeleteClose();
       setBuildToDelete(null);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       toast({
         title: "Erreur",
-        description: error.message || "Impossible de supprimer le build",
+        description: err.message || "Impossible de supprimer le build",
         status: "error",
         duration: 5000,
       });

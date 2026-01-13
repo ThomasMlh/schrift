@@ -287,15 +287,21 @@ export const CurrentInfoSection = () => {
                             <CustomLink 
                               to={`/cycle/${currentCycle._id}/rotation/${currentRotation.position}`} 
                               text={`Rotation #${currentRotation.position}`} 
-                              textSize="xl" 
+                              textSize="md" 
                             />
                           ) : (
-                            <Text fontSize="xl" fontWeight="bold" color="gray.500">
+                            <Text fontSize="md" color="gray.500">
                               Rotation (sans position)
                             </Text>
                           )}
-                          <Text fontSize="xl" fontWeight="bold">
+                          <Text fontSize="md">
+                            {" - "}
+                          </Text>
+                          <Text fontSize="md">
                             {currentRotation.killer}
+                          </Text>
+                          <Text fontSize="md">
+                            {" - "}
                           </Text>
                           <AttackTypeBadge
                             attackType={currentRotation.attack}
@@ -305,7 +311,7 @@ export const CurrentInfoSection = () => {
                             alteration={currentRotation.alteration}
                             showLabel={true}
                             size="24px"
-                            fontWeight="bold"
+                          
                           />
                         </HStack>
                         

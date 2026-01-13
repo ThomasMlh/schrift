@@ -4,7 +4,7 @@ import path from 'path';
 // Routes statiques à inclure dans le sitemap
 const staticRoutes = [
   { path: '/', priority: '1.0', changefreq: 'daily' },
-  { path: '/personnages', priority: '0.8', changefreq: 'weekly' },
+  { path: '/personnages', priority: '0.8', changefreq: 'daily' },
   { path: '/cycles', priority: '0.8', changefreq: 'weekly' },
   { path: '/joueurs', priority: '0.7', changefreq: 'daily' },
   { path: '/scores', priority: '0.9', changefreq: 'daily' },

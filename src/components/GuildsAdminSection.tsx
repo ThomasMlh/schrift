@@ -3,8 +3,10 @@ import { GuildTabsList } from "./GuildTabsList";
 import AdminFormsSection from "./AdminFormsSection";
 import { useEffect, useRef, useState } from "react";
 import type { IGuild } from "../interfaces";
+import { useAPIMutations } from "@/hooks/useAPIMutations";
 
 const GuildsAdminSection = () => {
+  const { deleteGuild, updateGuild } = useAPIMutations();
   const [deleteGuildId, setDeleteGuildId] = useState("");
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [guilds, setGuilds] = useState<IGuild[]>([]);
@@ -20,18 +22,6 @@ const GuildsAdminSection = () => {
   
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-  const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
-    const token = localStorage.getItem('userToken');
-    return fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` }),
-        ...options.headers,
-      },
-    });
-  };
-
   const refreshData = () => {
     fetch(`${apiUrl}/api/guildes`)
       .then(res => res.json())
@@ -42,38 +32,32 @@ const GuildsAdminSection = () => {
       .catch(() => setGuilds([]));
   };
 
-  const handleDeleteGuild = (guildId: string) => {
-    authenticatedFetch(`${apiUrl}/api/guildes/${guildId}`, {
-      method: "DELETE"
-    })
-      .then(res => res.json().then(data => ({ ok: res.ok, data })))
-      .then(({ ok, data }) => {
-        if (!ok) throw new Error(data.message || "Erreur lors de la suppression");
-        refreshData();
-        toast({ title: data.message || "Guilde supprimée", status: "success" });
-      })
-      .catch((error) => {
-        toast({ title: error.message || "Erreur lors de la suppression", status: "error" });
+  const handleDeleteGuild = async (guildId: string) => {
+    try {
+      const data = await deleteGuild(guildId);
+      refreshData();
+      toast({ title: data.message || "Guilde supprimée", status: "success" });
+    } catch (error) {
+      toast({ 
+        title: error instanceof Error ? error.message : "Erreur lors de la suppression", 
+        status: "error" 
       });
+    }
   };
 
-  const handleRenameGuild = (guildId: string, newName: string) => {
+  const handleRenameGuild = async (guildId: string, newName: string) => {
     if (!newName.trim()) return;
 
-    authenticatedFetch(`${apiUrl}/api/guildes/${guildId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newName.trim() })
-    })
-      .then(res => res.json().then(data => ({ ok: res.ok, data })))
-      .then(({ ok, data }) => {
-        if (!ok) throw new Error(data.message || "Erreur lors du renommage");
-        refreshData();
-        toast({ title: data.message || "Guilde renommée", status: "success" });
-      })
-      .catch((error) => {
-        toast({ title: error.message || "Erreur lors du renommage", status: "error" });
+    try {
+      const data = await updateGuild(guildId, { name: newName.trim() });
+      refreshData();
+      toast({ title: data.message || "Guilde renommée", status: "success" });
+    } catch (error) {
+      toast({ 
+        title: error instanceof Error ? error.message : "Erreur lors du renommage", 
+        status: "error" 
       });
+    }
   };
 
   const openDeleteConfirm = (guildId: string) => {
@@ -120,8 +104,6 @@ const GuildsAdminSection = () => {
       <Flex justify="center" w="100%" px={4}>
         <AdminFormsSection
           guilds={guilds}
-          apiUrl={apiUrl}
-          authenticatedFetch={authenticatedFetch}
           onDataChange={refreshData}
           onDeleteRequest={openDeleteConfirm}
           onRenameRequest={openRenameConfirm}

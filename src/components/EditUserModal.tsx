@@ -5,6 +5,7 @@ import {
 import { useState, useEffect } from "react";
 import type { IUser, IGuild, Role } from "../interfaces";
 import { getUserAvatarUrl } from "../utils/discord";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface EditUserModalProps {
     isOpen: boolean;
@@ -15,6 +16,7 @@ interface EditUserModalProps {
 }
 
 const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, guilds, onUserUpdated }) => {
+    const { token } = useAuth();
     const [formData, setFormData] = useState({
         bbs_id: "",
         bbs_name: "",
@@ -48,7 +50,6 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, gu
         if (!user) return;
 
         setIsLoading(true);
-        const token = localStorage.getItem('userToken');
 
         try {
             const response = await fetch(`${apiUrl}/api/users/${user._id}`, {

@@ -34,6 +34,7 @@ import {
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface OrbSource {
   _id?: string;
@@ -48,6 +49,7 @@ interface OrbGuideResponse {
 }
 
 const OrbGuideAdminSection = () => {
+  const { token } = useAuth();
   const [orbData, setOrbData] = useState<OrbSource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -108,7 +110,6 @@ const OrbGuideAdminSection = () => {
   const handleSave = async () => {
     if (!selectedOrb) return;
 
-    const token = localStorage.getItem("userToken");
     setSaving(true);
 
     try {
@@ -173,7 +174,6 @@ const OrbGuideAdminSection = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cette entrée ?")) return;
 
-    const token = localStorage.getItem("userToken");
     setSaving(true);
 
     try {

@@ -24,12 +24,12 @@ import { useBuilds, useRotations } from "../../hooks/useAPI";
 import BuildCreationModal from "../ui/BuildCreationModal";
 import { BuildDetailModal } from "../ui/BuildDetailModal";
 import { Pagination } from "../ui/Pagination";
-import { jwtDecode } from "jwt-decode";
+import { useAuth } from "../../providers/AuthProvider";
 import { UserDisplay } from "../ui/UserDisplay";
 import { CustomSelect } from "../ui/CustomSelect";
 import { AttackTypeBadge } from "../ui/AttackTypeBadge";
 import { AlterationImage } from "../ui/AlterationImage";
-import type { IBuild, IUser } from "../../interfaces";
+import type { IBuild } from "../../interfaces";
 
 const RotationsBuildsGuide = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,17 +42,7 @@ const RotationsBuildsGuide = () => {
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
   // Vérifier si l'utilisateur est connecté
-  const getCurrentUser = () => {
-    try {
-      const token = localStorage.getItem("userToken");
-      if (!token) return null;
-      return jwtDecode<IUser>(token);
-    } catch {
-      return null;
-    }
-  };
-
-  const currentUser = getCurrentUser();
+  const { currentUser } = useAuth();
   const isAuthenticated = !!currentUser;
 
   // Récupérer toutes les rotations
@@ -113,10 +103,10 @@ const RotationsBuildsGuide = () => {
         <Flex
           direction={{ base: "column", md: "row" }}
           gap={4}
-          align={{ base: "stretch", md: "center" }}
+          align={{ base: "stretch", md: "flex-end" }}
           justify="space-between"
         >
-          <Box flex={1}>
+          <Box flex={1} maxW={{ base: "100%", md: "500px" }}>
             <Text fontSize="sm" fontWeight="medium" mb={2}>
               Filtrer par rotation
             </Text>
@@ -162,7 +152,8 @@ const RotationsBuildsGuide = () => {
               colorScheme="orange"
               onClick={onOpen}
               isDisabled={!selectedRotation}
-              size="sm"
+              size="md"
+              flexShrink={0}
             >
               Créer un Build
             </Button>

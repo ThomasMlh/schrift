@@ -60,7 +60,7 @@ const ComparatorPage: React.FC = () => {
   const [entity2SearchQuery, setEntity2SearchQuery] = useState<string>("");
 
   // Utiliser useSWR pour les données (cache automatique)
-  const { users = [] } = useUsers(false);
+  const { users = [] } = useUsers({ authenticated: false });
   const { guilds = [] } = useGuilds(false);
   const { cycles = [] } = useCycles();
   const { rotations: allRotations = [] } = useRotations();

@@ -17,35 +17,23 @@ import {
 import { useState, useEffect } from "react";
 import { UserDisplay } from "./ui/UserDisplay";
 import { ScoreBadge } from "./ui/ScoreBadge";
-import type { ICycle, IPodiumPlayer, IPodiumData } from "@/interfaces";
-import { useCycles, useGuilds } from "@/hooks/useAPI";
+import type { ICycle, IPodiumPlayer } from "@/interfaces";
+import { useCycles, useGuilds, usePodium } from "@/hooks/useAPI";
 
 export const PodiumSection: React.FC = () => {
-  const [podiumData, setPodiumData] = useState<IPodiumData | null>(null);
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
   const [selectedGuildId, setSelectedGuildId] = useState<string>("global");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Utilisation de useSWR pour les cycles et guildes (cache automatique + déduplication)
   const { cycles, isLoading: cyclesLoading } = useCycles({ limit: 50, authenticated: true });
   const { guilds } = useGuilds(true);
 
-  // API URL depuis les variables d'environnement
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
-
-  // Fonction utilitaire pour les requêtes authentifiées
-  const authenticatedFetch = (url: string, options: RequestInit = {}) => {
-    const token = localStorage.getItem("userToken");
-    return fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers
-      }
-    });
-  };
+  // Utilisation du hook usePodium pour charger les données du podium
+  const { podium, meta, isLoading, error } = usePodium({
+    cycle_id: selectedCycleId,
+    guild_id: selectedGuildId !== "global" ? selectedGuildId : undefined,
+    authenticated: true,
+  });
 
   // Hooks UI
   const bgColor = useColorModeValue("white", "gray.800");
@@ -72,48 +60,6 @@ export const PodiumSection: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cycles, cyclesLoading]);
-
-  const loadPodium = async () => {
-    if (!selectedCycleId || !apiUrl) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const params = new URLSearchParams({
-        cycle_id: selectedCycleId
-      });
-
-      // Ajouter guild_id seulement si ce n'est pas "global"
-      if (selectedGuildId !== "global") {
-        params.append("guild_id", selectedGuildId);
-      }
-
-      const response = await authenticatedFetch(
-        `${apiUrl}/api/users/podium?${params.toString()}`
-      );
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setPodiumData(data);
-      } else {
-        setError(data.message || "Erreur lors du chargement du podium");
-      }
-    } catch (error) {
-      console.error("Erreur lors du chargement du podium:", error);
-      setError("Erreur de connexion");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Charger le podium quand les filtres changent
-  useEffect(() => {
-    if (selectedCycleId) {
-      loadPodium();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCycleId, selectedGuildId]);
 
   const getRankDisplay = (rank: number) => {
     const medals = {
@@ -281,7 +227,7 @@ export const PodiumSection: React.FC = () => {
         ) : error ? (
           <Alert status="error" borderRadius="md">
             <AlertIcon />
-            <Text>{error}</Text>
+            <Text>{error instanceof Error ? error.message : String(error)}</Text>
           </Alert>
         ) : isLoading ? (
           <Flex justify="center" align="center" py={8}>
@@ -290,12 +236,12 @@ export const PodiumSection: React.FC = () => {
               <Text>Chargement du podium...</Text>
             </VStack>
           </Flex>
-        ) : podiumData && podiumData.podium.length > 0 ? (
+        ) : podium && podium.length > 0 ? (
           <>
             {/* Affichage mobile : toujours en colonne unique */}
             <Box display={{ base: "block", lg: "none" }}>
               <VStack spacing={3} align="stretch">
-                {podiumData.podium.map((player) =>
+                {podium.map((player) =>
                   renderPlayerCard(player)
                 )}
               </VStack>
@@ -303,17 +249,17 @@ export const PodiumSection: React.FC = () => {
 
             {/* Affichage desktop */}
             <Box display={{ base: "none", lg: "block" }}>
-              {podiumData.podium.length === 10 &&
+              {podium.length === 10 &&
               selectedGuildId === "global" ? (
                 // 2 colonnes pour 10 joueurs en mode Global seulement
                 <HStack spacing={4} align="start">
                   <VStack spacing={3} align="stretch" flex={1}>
-                    {podiumData.podium
+                    {podium
                       .slice(0, 5)
                       .map((player) => renderPlayerCard(player))}
                   </VStack>
                   <VStack spacing={3} align="stretch" flex={1}>
-                    {podiumData.podium
+                    {podium
                       .slice(5, 10)
                       .map((player) => renderPlayerCard(player))}
                   </VStack>
@@ -321,7 +267,7 @@ export const PodiumSection: React.FC = () => {
               ) : (
                 // Colonne unique
                 <VStack spacing={3} align="stretch">
-                  {podiumData.podium.map((player) =>
+                  {podium.map((player) =>
                     renderPlayerCard(player)
                   )}
                 </VStack>
@@ -336,10 +282,10 @@ export const PodiumSection: React.FC = () => {
         )}
 
         {/* Stats supplémentaires */}
-        {podiumData && selectedCycleId && (
+        {meta && selectedCycleId && (
           <Text fontSize="xs" color="gray.500" textAlign="center">
-            {podiumData.meta.totalPlayers} joueur
-            {podiumData.meta.totalPlayers > 1 ? "s" : ""} au total
+            {meta.totalPlayers} joueur
+            {meta.totalPlayers > 1 ? "s" : ""} au total
           </Text>
         )}
       </VStack>

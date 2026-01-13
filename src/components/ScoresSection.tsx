@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { jwtDecode } from 'jwt-decode';
 import {
     Container,
     VStack,
@@ -20,22 +19,24 @@ import {
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 // import { AddIcon } from "@chakra-ui/icons";
-import type { IScore, IScoreFormData, IUser } from "../interfaces";
+import type { IScore, IScoreFormData } from "../interfaces";
+import { useAuth } from "@/providers/AuthProvider";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import ScoresTable from "./ui/ScoresTable";
 import { ScoreModal } from "./ui/ScoreModal";
 import { DeleteConfirmationModal } from "./ui/DeleteConfirmationModal";
 import BulkScoreModal from "./ui/BulkScoreModal";
 import { useCycles, useUsers, useGuilds, useScores } from "@/hooks/useAPI";
-import { createScore, updateScore, deleteScore, createBulkScores } from "@/hooks/useAPIMutations";
+import { useAPIMutations } from "@/hooks/useAPIMutations";
 
 const ScoresSection = () => {
+    const { createScore, updateScore, deleteScore, createBulkScores } = useAPIMutations();
     const [scoreSearchQuery, setScoreSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     
     // Utiliser useSWR pour les données (cache automatique + déduplication)
     const { cycles, isLoading: isLoadingCycles } = useCycles({ authenticated: true });
-    const { users } = useUsers(true, 1000);
+    const { users } = useUsers({ authenticated: true, limit: 1000 });
     const { guilds } = useGuilds(true);
     const { scores, pagination, isLoading: isLoadingScores, mutate: mutateScores } = useScores({
         page: currentPage,
@@ -66,22 +67,8 @@ const ScoresSection = () => {
     const toast = useToast();
     const { isOpen, onClose } = useDisclosure();
 
-    // Récupérer les informations utilisateur depuis le token JWT
-    const getCurrentUser = () => {
-        try {
-            const token = localStorage.getItem('userToken');
-            if (!token) return null;
-
-            const decoded = jwtDecode<IUser>(token);
-            return decoded;
-        } catch {
-            return null;
-        }
-    };
-
-    const currentUser = getCurrentUser();
-    const isAdmin = currentUser?.is_admin || false;
-    const isGuildManager = currentUser?.role === 'chef' || currentUser?.role === 'sous-chef';
+    // Récupérer les informations utilisateur depuis le context
+    const { currentUser, isAdmin, isGuildManager } = useAuth();
     const userGuildId = currentUser?.guilde_id;
 
     const handleSubmitScore = async () => {

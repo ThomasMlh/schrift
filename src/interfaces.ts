@@ -178,20 +178,20 @@ export interface IRankInfo {
 }
 
 export interface IPodiumPlayer {
-    rank: number;
-    user_id: string;
-    bbs_name?: string;
-    discord_id?: string;
-    global_name: string;
-    score?: number; // Score individuel (si rotation spécifiée)
-    raw_score?: number;
-    is_differential?: boolean;
-    averageScore: number; // Moyenne des scores (si pas de rotation)
-    totalScores: number; // Nombre de scores pris en compte pour la moyenne
-    totalRawScore?: number;
-    avatar?: string;
-    hasUser: boolean;
-    username: string;
+  rank: number;
+  user_id: string;
+  bbs_name?: string;
+  discord_id?: string;
+  global_name: string;
+  score?: number; // Score individuel (si rotation spécifiée)
+  raw_score?: number;
+  is_differential?: boolean;
+  averageScore: number; // Moyenne des scores (si pas de rotation)
+  totalScores: number; // Nombre de scores pris en compte pour la moyenne
+  totalRawScore?: number;
+  avatar?: string;
+  hasUser: boolean;
+  username: string;
 }
 
 export interface IPodiumData {
@@ -217,32 +217,33 @@ export interface IProtectedRoute {
 }
 
 export interface IPodiumResponse {
-    success: boolean;
-    data: IPodiumPlayer[];
-    pagination: IPagination;
-    filters: {
-        cycle_name: string;
-        cycle_id: string;
-        rotation_id: string;
-        guild_name?: string;
+  success: boolean;
+  podium?: IPodiumPlayer[]; // Nouvelle API retourne podium
+  data?: IPodiumPlayer[]; // Ancienne API retournait data
+  pagination: IPagination;
+  filters: {
+    cycle_name: string;
+    cycle_id: string;
+    rotation_id: string;
+    guild_name?: string;
+  };
+  meta: {
+    totalPlayers: number;
+    cycleName: string;
+    rotationInfo?: {
+      _id: string;
+      position: number;
+      killer: string;
+      attack: string;
+      start_date: string;
+      end_date: string;
+      period: string;
     };
-    meta: {
-        totalPlayers: number;
-        cycleName: string;
-        rotationInfo?: {
-            _id: string;
-            position: number;
-            killer: string;
-            attack: string;
-            start_date: string;
-            end_date: string;
-            period: string;
-        };
-        guildSpecific: boolean;
-        fullPodium: boolean;
-        podiumType: 'individual_scores' | 'average_scores';
-        averageScore?: number;
-    };
+    guildSpecific: boolean;
+    fullPodium: boolean;
+    podiumType: "individual_scores" | "average_scores";
+    averageScore?: number;
+  };
 }
 
 // Interfaces pour le comparateur
@@ -430,4 +431,15 @@ export interface IOrbGuideResponse {
   success: boolean;
   data: IGuideOrb[];
   totalOrbes: number;
+}
+
+export interface IEvent {
+  cycleName: string;
+  rotationNumber: number;
+  killer: string;
+  attack: string;
+  alteration: string;
+  start_date: string;
+  end_date: string;
+  period: string;
 }

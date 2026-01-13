@@ -9,13 +9,15 @@ import {
   HStack
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
-import type { IRotationTemplate, ICycleRotation, ICycleFormData, ICycle } from "../interfaces";
+import type { IRotationTemplate, ICycleRotation, ICycleFormData, ICycle, IEvent } from "../interfaces";
 import type { DropResult } from '@hello-pangea/dnd';
 import { ExistingCyclesList } from "./cycles/ExistingCyclesList";
 import { CycleCreationModal } from "./cycles/CycleCreationModal";
 import { useCycles, useRotations } from "@/hooks/useAPI";
+import { useAPIMutations } from "@/hooks/useAPIMutations";
 
 const CyclesSection = () => {
+  const { deleteCycle, createCycle } = useAPIMutations();
   // Utiliser useSWR pour les cycles et rotations (cache automatique + déduplication)
   const { cycles, mutate: mutateCycles, isLoading: isLoadingCycles } = useCycles({ authenticated: true });
   const { rotations: rotationTemplates = [] } = useRotations();
@@ -26,30 +28,12 @@ const CyclesSection = () => {
 
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
   // Supprimer un cycle
   const handleDeleteCycle = async (cycleId: string): Promise<void> => {
-    try {
-      const token = localStorage.getItem('userToken');
-      const response = await fetch(`${apiUrl}/api/cycles/${cycleId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Erreur lors de la suppression du cycle');
-      }
-
-      // Recharger la liste des cycles après suppression
-      await mutateCycles();
-    } catch (error) {
-      throw error; // Renvoyer l'erreur pour qu'elle soit gérée par le composant appelant
-    }
+    await deleteCycle(cycleId);
+    // Recharger la liste des cycles après suppression
+    await mutateCycles();
   };
 
   // Ajouter une rotation sélectionnée
@@ -281,43 +265,25 @@ const CyclesSection = () => {
         rotations: rotationsWithCorrectPositions
       };
 
-      const token = localStorage.getItem('userToken');
-      const response = await fetch(`${apiUrl}/api/cycles`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-        body: JSON.stringify(cycleData)
+      await createCycle(cycleData);
+
+      toast({
+        title: "Cycle créé",
+        description: "Le cycle a été créé avec succès",
+        status: "success",
+        duration: 3000,
       });
 
-      if (response.ok) {
-        toast({
-          title: "Cycle créé",
-          description: "Le cycle a été créé avec succès",
-          status: "success",
-          duration: 3000,
-        });
+      // Réinitialiser le formulaire
+      setCycleName("");
+      setSelectedRotations([]);
 
-        // Réinitialiser le formulaire
-        setCycleName("");
-        setSelectedRotations([]);
-
-        // Recharger la liste des cycles
-        mutateCycles();
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        toast({
-          title: "Erreur",
-          description: errorData.message || "Erreur lors de la création du cycle",
-          status: "error",
-          duration: 3000,
-        });
-      }
-    } catch {
+      // Recharger la liste des cycles
+      mutateCycles();
+    } catch (error) {
       toast({
         title: "Erreur",
-        description: "Erreur de connexion lors de la création du cycle",
+        description: error instanceof Error ? error.message : "Erreur lors de la création du cycle",
         status: "error",
         duration: 3000,
       });
@@ -339,7 +305,7 @@ const CyclesSection = () => {
     }
 
     // Créer la structure des events pour ce cycle spécifique
-    const events: any[] = [];
+    const events: IEvent[] = [];
 
     cycle.rotations.forEach((rotation, index) => {
       events.push({
@@ -388,7 +354,7 @@ const CyclesSection = () => {
     }
 
     // Créer la structure des events avec toutes les rotations de tous les cycles
-    const events: any[] = [];
+    const events: IEvent[] = [];
 
     cycles.forEach((cycle) => {
       if (cycle.rotations && Array.isArray(cycle.rotations)) {

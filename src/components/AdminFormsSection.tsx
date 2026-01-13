@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { IGuild, Role } from "../interfaces";
 import { UserSearchSelect } from "./ui/UserSearchSelect";
 import { useUsers } from "@/hooks/useAPI";
+import { useAPIMutations } from "@/hooks/useAPIMutations";
 
 // Composant wrapper pour les formulaires mobiles (défini en dehors pour éviter les re-créations)
 
@@ -59,8 +60,6 @@ const MobileFormWrapper: React.FC<MobileFormWrapperProps> = ({
 
 interface AdminFormsSectionProps {
   guilds: IGuild[];
-  apiUrl: string;
-  authenticatedFetch: (url: string, options?: RequestInit) => Promise<Response>;
   onDataChange: () => void;
   onDeleteRequest: (guildId: string) => void;
   onRenameRequest: (guildId: string, newName: string) => void;
@@ -68,14 +67,13 @@ interface AdminFormsSectionProps {
 
 const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
   guilds,
-  apiUrl,
-  authenticatedFetch,
   onDataChange,
   onDeleteRequest,
   onRenameRequest
 }) => {
+  const { createGuild, assignUserToGuild } = useAPIMutations();
   // Utiliser useSWR pour les utilisateurs (cache automatique)
-  const { users } = useUsers(true);
+  const { users } = useUsers({ authenticated: true });
   
   // États pour les formulaires
   const [newGuildName, setNewGuildName] = useState("");
@@ -115,21 +113,14 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
     }
 
     try {
-      const res = await authenticatedFetch(`${apiUrl}/api/guildes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newGuildName.trim() })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Erreur lors de la création");
-
+      await createGuild({ name: newGuildName.trim() });
       onDataChange();
       setNewGuildName("");
       if (isMobile) setOpenForm(null);
-      toast({ title: data.message || "Guilde créée", status: "success" });
-    } catch (error: any) {
-      toast({ title: error.message || "Erreur lors de la création de la guilde", status: "error" });
+      toast({ title: "Guilde créée avec succès", status: "success" });
+    } catch (error) {
+      const err = error as Error;
+      toast({ title: err.message || "Erreur lors de la création de la guilde", status: "error" });
     }
   };
 
@@ -140,34 +131,17 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
       return;
     }
 
-    const selectedUser = users.find(user => user._id === selectedUserId);
-    if (!selectedUser) {
-      toast({ title: "Utilisateur introuvable", status: "error" });
-      return;
-    }
-
     try {
-      const res = await authenticatedFetch(`${apiUrl}/api/guildes/${selectedGuildId}/assign-member`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: selectedUser.username,
-          role: newMemberRole,
-          userId: selectedUserId
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Erreur lors de l'ajout");
-
+      await assignUserToGuild(selectedGuildId, selectedUserId);
       onDataChange();
       setSelectedUserId("");
       setUserSearchQuery("");
       setNewMemberRole("membre");
       if (isMobile) setOpenForm(null);
-      toast({ title: data.message || "Membre ajouté", status: "success" });
-    } catch (error: any) {
-      toast({ title: error.message || "Erreur lors de l'ajout du membre", status: "error" });
+      toast({ title: "Membre ajouté avec succès", status: "success" });
+    } catch (error) {
+      const err = error as Error;
+      toast({ title: err.message || "Erreur lors de l'ajout du membre", status: "error" });
     }
   };
 
