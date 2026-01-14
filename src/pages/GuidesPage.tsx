@@ -57,7 +57,7 @@ const GuidesPage = () => {
   return (
     <>
       <SEOHead
-        title="Guides - Schrift BBS"
+        title="Schrift BBS - Guides"
         description="Guides complets pour Bleach Brave Souls : rotations, équipes recommandées, farming d'orbes et plus encore."
         keywords="Bleach Brave Souls, guides, rotations, équipes, farming orbes, tutoriel BBS"
         url="https://bbs-schrift.fr/guides"

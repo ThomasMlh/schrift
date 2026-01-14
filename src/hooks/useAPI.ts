@@ -77,7 +77,7 @@ export const useCycles = (options?: { limit?: number; page?: number; authenticat
 export const useCycle = (cycleId?: string) => {
   const url = cycleId ? `${apiUrl}/api/cycles/${cycleId}` : null;
   
-  const { data, error, isLoading, mutate } = useSWR<ICycle>(
+  const { data, error, isLoading, mutate } = useSWR<{ cycle?: ICycle; success?: boolean }>(
     url,
     fetcher,
     {
@@ -86,7 +86,7 @@ export const useCycle = (cycleId?: string) => {
   );
 
   return {
-    cycle: data,
+    cycle: data?.cycle,
     isLoading,
     error,
     mutate,

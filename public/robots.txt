@@ -16,3 +16,4 @@ Allow: /joueurs
 Allow: /scores
 Allow: /podium
 Allow: /comparateur
+Allow: /guides
