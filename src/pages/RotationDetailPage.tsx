@@ -1,29 +1,27 @@
 import {
-    Container, VStack, HStack, Heading, Text, Box, Badge, Spinner,
+    Container, VStack, HStack, Heading, Text, Box, Spinner,
     useColorModeValue, Button, Flex, Table, Thead, Tbody, Tr, Th, Td,
     TableContainer, useToast, Select, IconButton
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowBackIcon, ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import type { IRotationTemplate, IScoreWithUser, IScoreDetailApiResponse, IRankInfo } from "@/interfaces";
+import type { IRotationTemplate, IScoreWithUser, IRankInfo } from "@/interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { UserDisplay } from "@/components/ui/UserDisplay";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { ScoreLegend } from "@/components/ui/ScoreLegend";
-import { useGuilds } from "@/hooks/useAPI";
+import { useGuilds, useRotationScores } from "@/hooks/useAPI";
+import { RankBadge } from "@/components/ui/RankBadge";
 
 const RotationDetailPage = () => {
     const { cycleId, position } = useParams<{ cycleId: string; position: string }>();
     const navigate = useNavigate();
     const toast = useToast();
-    const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
     const [scores, setScores] = useState<IScoreWithUser[]>([]);
     const [cycle, setCycle] = useState<string | null>(null);
     const [rotation, setRotation] = useState<IRotationTemplate | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
     const [totalPages, setTotalPages] = useState(1);
@@ -32,8 +30,9 @@ const RotationDetailPage = () => {
     // Constante : chaque cycle a toujours 20 rotations
     const totalRotations = 20;
     
-    // Utiliser useSWR pour les guildes (cache automatique)
+    // Utiliser les hooks API
     const { guilds, isLoading: isLoadingGuilds } = useGuilds();
+    const { fetchRotationScores, isLoading, error: apiError } = useRotationScores();
     const [selectedGuild, setSelectedGuild] = useState<string>(''); // ID de la guilde ou vide pour "toutes"
 
     // Hooks UI
@@ -42,54 +41,38 @@ const RotationDetailPage = () => {
     const textSecondary = useColorModeValue('gray.700', 'gray.300');
     const shadowColor = useColorModeValue('lg', 'dark-lg');
 
-        const loadScores = async (guildFilter?: string) => {
+    const loadScores = async (guildFilter?: string) => {
         if (!cycleId || !position) return;
 
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            // Construire l'URL avec les paramètres
-            const params = new URLSearchParams({
-                page: currentPage.toString(),
-                limit: itemsPerPage.toString()
-            });
-            
-            // Ajouter le filtre de guilde si fourni
-            if (guildFilter) {
-                const selectedGuildData = guilds.find(guild => guild._id === guildFilter);
-                if (selectedGuildData) {
-                    params.append('guild', selectedGuildData.name);
-                }
+        // Trouver le nom de la guilde si un filtre est fourni
+        let guildName: string | undefined;
+        if (guildFilter) {
+            const selectedGuildData = guilds.find(guild => guild._id === guildFilter);
+            if (selectedGuildData) {
+                guildName = selectedGuildData.name;
             }
+        }
 
-            const response = await fetch(
-                `${apiUrl}/api/cycles/${cycleId}/rotations/${position}/scores?${params.toString()}`
-            );
-            
-            if (response.ok) {
-                const data: IScoreDetailApiResponse = await response.json();
-                setScores(data.data);
-                setCycle(data.cycle);
-                setRotation(data.rotation);
-                setCurrentPage(data.pagination?.currentPage || 1);
-                setTotalPages(data.pagination?.totalPages || 1);
-                setTotalItems(data.pagination?.totalItems || data.data?.length || 0);
-            } else if (response.status === 404) {
-                setError("Rotation introuvable");
-            } else {
-                setError("Erreur lors du chargement des scores");
-            }
-        } catch {
-            setError("Erreur de connexion");
+        const data = await fetchRotationScores(cycleId, position, {
+            page: currentPage,
+            limit: itemsPerPage,
+            guildName,
+        });
+
+        if (data) {
+            setScores(data.data);
+            setCycle(data.cycle);
+            setRotation(data.rotation);
+            setCurrentPage(data.pagination?.currentPage || 1);
+            setTotalPages(data.pagination?.totalPages || 1);
+            setTotalItems(data.pagination?.totalItems || data.data?.length || 0);
+        } else if (apiError) {
             toast({
                 title: "Erreur",
-                description: "Impossible de charger les scores de la rotation",
+                description: apiError,
                 status: "error",
                 duration: 5000
             });
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -172,37 +155,6 @@ const RotationDetailPage = () => {
         }
     };
 
-    const renderRankBadge = (rankInfo: IRankInfo) => {
-        if (rankInfo.rank <= 3) {
-            const symbols = { 1: "🥇", 2: "🥈", 3: "🥉" };
-            return (
-                <Badge
-                    colorScheme={rankInfo.rank === 1 ? "yellow" : rankInfo.rank === 2 ? "gray" : "orange"}
-                    variant="solid"
-                    fontSize="sm"
-                    px={3}
-                    py={1}
-                    borderRadius="full"
-                >
-                    {symbols[rankInfo.rank as keyof typeof symbols]} #{rankInfo.rank}
-                </Badge>
-            );
-        } else {
-            return (
-                <Badge
-                    variant="outline"
-                    colorScheme="gray"
-                    fontSize="sm"
-                    px={3}
-                    py={1}
-                    borderRadius="full"
-                >
-                    #{rankInfo.rank}
-                </Badge>
-            );
-        }
-    };
-
     if (isLoading) {
         return (
             <Container maxW="container.xl" py={8}>
@@ -213,12 +165,12 @@ const RotationDetailPage = () => {
         );
     }
 
-    if (error) {
+    if (apiError) {
         return (
             <Container maxW="container.xl" py={8}>
                 <VStack spacing={6} align="center">
                     <Text fontSize="xl" color="red.500">
-                        {error}
+                        {apiError}
                     </Text>
                     <Button
                         leftIcon={<ArrowBackIcon />}
@@ -374,7 +326,7 @@ const RotationDetailPage = () => {
                                                     borderLeftColor={rankInfo.borderColor}
                                                 >
                                                     <Td>
-                                                        {renderRankBadge(rankInfo)}
+                                                        <RankBadge rank={rankInfo.rank} variant="compact" />
                                                     </Td>
                                                     <Td>
                                                         <UserDisplay user={score.user} />

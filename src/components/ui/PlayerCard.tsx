@@ -1,5 +1,4 @@
 import {
-  Badge,
   Card,
   CardBody,
   Center,
@@ -10,38 +9,7 @@ import {
 import { UserDisplay } from "./UserDisplay";
 import type { IPodiumPlayer, IUser } from "@/interfaces";
 import { ScoreBadge } from "./ScoreBadge";
-
-// Fonction pour obtenir l'affichage du rang (comme dans PodiumSection)
-const getRankDisplay = (rank: number) => {
-  let colorScheme = "gray";
-  let emoji = "";
-
-  if (rank === 1) {
-    colorScheme = "yellow";
-    emoji = "🥇";
-  } else if (rank === 2) {
-    colorScheme = "gray";
-    emoji = "🥈";
-  } else if (rank === 3) {
-    colorScheme = "orange";
-    emoji = "🥉";
-  }
-
-  return (
-    <Badge
-      colorScheme={colorScheme}
-      variant="solid"
-      fontSize="sm"
-      px={3}
-      py={1}
-      borderRadius="full"
-      minW={{ base: "55px", md: "auto" }}
-      textAlign="center"
-    >
-      {emoji}#{rank}
-    </Badge>
-  );
-};
+import { RankBadge } from "./RankBadge";
 
 const PlayerCard = (
   player: IPodiumPlayer,
@@ -55,7 +23,7 @@ const PlayerCard = (
           // Layout horizontal pour desktop
           <Flex justify="space-between" align="center">
             <HStack spacing={4} flex={1}>
-              {getRankDisplay(player.rank)}
+              <RankBadge rank={player.rank} />
               <UserDisplay
                 user={
                   {
@@ -84,7 +52,7 @@ const PlayerCard = (
         ) : (
           // Layout vertical pour mobile ou mode compact
           <VStack spacing={3} align="stretch">
-            <Center>{getRankDisplay(player.rank)}</Center>
+            <Center><RankBadge rank={player.rank} /></Center>
             <VStack spacing={1} align="center">
               <UserDisplay
                 user={

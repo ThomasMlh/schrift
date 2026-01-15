@@ -1,6 +1,7 @@
 import useSWR from 'swr';
-import type { ICycle, IGuild, IUser, ICharactersResponse, ICharacter, IRotationTemplate, IScoresResponse, IPodiumResponse, IOrbGuideResponse, IPagination } from '../interfaces';
+import type { ICycle, IGuild, IUser, ICharactersResponse, ICharacter, IRotationTemplate, IScoresResponse, IPodiumResponse, IPodiumWeeklyResponse, IPodiumMissesResponse, IOrbGuideResponse, IPagination, IScoreDetailApiResponse } from '../interfaces';
 import { useAuth } from '../providers/AuthProvider';
+import { useState, useCallback } from 'react';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -357,7 +358,7 @@ export const usePodium = (options?: {
   // Ne pas faire de requête si cycle_id n'est pas fourni
   let url: string | null = null;
   if (cycle_id) {
-    url = `${apiUrl}/api/users/podium`;
+    url = `${apiUrl}/api/podium`;
     const params = new URLSearchParams();
     params.append('cycle_id', cycle_id);
     if (guild_id) params.append('guild_id', guild_id);
@@ -532,3 +533,145 @@ export const useAccessoriesSubeffects = (search?: string) => {
     mutate,
   };
 }
+
+// Hook pour récupérer le podium (tous les modes) - version fetch
+export const usePodiumFetch = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPodium = useCallback(async (
+    mode: 'cycle' | 'rotation' | 'weekly' | 'misses',
+    cycleName: string,
+    options: {
+      rotationId?: string;
+      weekNumber?: string;
+      guildName?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse | null> => {
+    if (!cycleName) {
+      return null;
+    }
+
+    const { rotationId, weekNumber, guildName, page = 1, limit = 50 } = options;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      let url = '';
+
+      // Construction de l'URL selon le mode
+      if (mode === 'weekly') {
+        if (!weekNumber) {
+          return null;
+        }
+        url = `${apiUrl}/api/podium/weekly?cycle_name=${encodeURIComponent(
+          cycleName
+        )}&week_number=${weekNumber}&page=${page}&limit=${limit}`;
+      } else if (mode === 'misses') {
+        url = `${apiUrl}/api/podium/misses?cycle_name=${encodeURIComponent(
+          cycleName
+        )}&page=${page}&limit=${limit}`;
+      } else {
+        // Mode cycle ou rotation
+        url = `${apiUrl}/api/podium/full?cycle_name=${encodeURIComponent(
+          cycleName
+        )}&page=${page}&limit=${limit}`;
+
+        if (rotationId && rotationId.trim() !== '') {
+          url += `&rotation_id=${encodeURIComponent(rotationId)}`;
+        }
+      }
+
+      if (guildName && guildName.trim() !== '') {
+        url += `&guild_name=${encodeURIComponent(guildName.trim())}`;
+      }
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Impossible de charger le podium');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors du chargement du podium';
+      setError(errorMessage);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return {
+    fetchPodium,
+    isLoading,
+    error,
+  };
+};
+
+// Hook pour récupérer les scores d'une rotation spécifique
+export const useRotationScores = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRotationScores = useCallback(async (
+    cycleId: string,
+    position: string,
+    options: {
+      page?: number;
+      limit?: number;
+      guildName?: string;
+    } = {}
+  ): Promise<IScoreDetailApiResponse | null> => {
+    if (!cycleId || !position) {
+      return null;
+    }
+
+    const { page = 1, limit = 20, guildName } = options;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+
+      if (guildName) {
+        params.append('guild', guildName);
+      }
+
+      const response = await fetch(
+        `${apiUrl}/api/cycles/${cycleId}/rotations/${position}/scores?${params.toString()}`
+      );
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Rotation introuvable');
+        }
+        throw new Error('Erreur lors du chargement des scores');
+      }
+
+      const data: IScoreDetailApiResponse = await response.json();
+      return data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
+      setError(errorMessage);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return {
+    fetchRotationScores,
+    isLoading,
+    error,
+  };
+};

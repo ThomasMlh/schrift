@@ -246,6 +246,81 @@ export interface IPodiumResponse {
   };
 }
 
+// Interfaces pour le podium weekly
+export interface IPodiumWeeklyPlayer {
+  rank: number;
+  user_id: string;
+  bbs_name?: string;
+  discord_id?: string;
+  global_name: string;
+  guild_name?: string;
+  week_total_score: number;
+  rotation1_score: number;
+  rotation2_score: number;
+  avatar?: string;
+  hasUser: boolean;
+  username: string;
+}
+
+export interface IPodiumWeeklyResponse {
+  success: boolean;
+  data: IPodiumWeeklyPlayer[];
+  pagination: IPagination;
+  filters: {
+    cycle_name: string;
+    cycle_id: string;
+    week_number: number;
+    guild_name?: string;
+  };
+  meta: {
+    weekNumber: number;
+    rotationsInfo: Array<{
+      position: number;
+      killer: string;
+      attack: string;
+      start_date: string;
+      end_date: string;
+    }>;
+    totalPlayers: number;
+    averageWeekScore: number;
+  };
+}
+
+// Interfaces pour le podium misses
+export interface IPodiumMissPlayer {
+  rank: number;
+  user_id: string;
+  bbs_name?: string;
+  discord_id?: string;
+  global_name: string;
+  guild_name?: string;
+  total_misses: number;
+  total_negative_score: number;
+  missed_rotations: Array<{
+    rotation_position: number;
+    score: number;
+  }>;
+  avatar?: string;
+  hasUser: boolean;
+  username: string;
+}
+
+export interface IPodiumMissesResponse {
+  success: boolean;
+  data: IPodiumMissPlayer[];
+  pagination: IPagination;
+  filters: {
+    cycle_name: string;
+    cycle_id: string;
+    guild_name?: string;
+  };
+  meta: {
+    totalPlayersWithMisses: number;
+    totalMissesInCycle: number;
+    averageMissesPerPlayer: number;
+  };
+}
+
 // Interfaces pour le comparateur
 export interface IComparisonStats {
   averageScore: number;

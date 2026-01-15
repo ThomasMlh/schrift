@@ -7,7 +7,6 @@ import {
   Select,
   Card,
   CardBody,
-  Badge,
   Flex,
   Spinner,
   useColorModeValue,
@@ -17,6 +16,7 @@ import {
 import { useState, useEffect } from "react";
 import { UserDisplay } from "./ui/UserDisplay";
 import { ScoreBadge } from "./ui/ScoreBadge";
+import { RankBadge } from "./ui/RankBadge";
 import type { ICycle, IPodiumPlayer } from "@/interfaces";
 import { useCycles, useGuilds, usePodium } from "@/hooks/useAPI";
 
@@ -61,47 +61,6 @@ export const PodiumSection: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cycles, cyclesLoading]);
 
-  const getRankDisplay = (rank: number) => {
-    const medals = {
-      1: { emoji: "🥇", color: "yellow", bg: "yellow.50" },
-      2: { emoji: "🥈", color: "gray", bg: "gray.50" },
-      3: { emoji: "🥉", color: "orange", bg: "orange.50" }
-    };
-
-    const medal = medals[rank as keyof typeof medals];
-
-    if (medal) {
-      return (
-        <HStack spacing={2}>
-          <Text fontSize="xl">{medal.emoji}</Text>
-          <Badge
-            colorScheme={medal.color}
-            variant="solid"
-            fontSize="sm"
-            px={3}
-            py={1}
-            borderRadius="full"
-          >
-            #{rank}
-          </Badge>
-        </HStack>
-      );
-    }
-
-    return (
-      <Badge
-        variant="outline"
-        colorScheme="gray"
-        fontSize="sm"
-        px={3}
-        py={1}
-        borderRadius="full"
-      >
-        #{rank}
-      </Badge>
-    );
-  };
-
   const renderPlayerCard = (
     player: IPodiumPlayer,
   ) => {
@@ -109,7 +68,7 @@ export const PodiumSection: React.FC = () => {
       <Card key={player.user_id} variant="outline">
         <CardBody p={{ base: 3, md: 4 }}>
             <VStack align="center">
-              {getRankDisplay(player.rank)}
+              <RankBadge rank={player.rank} variant="with-emoji-separated" />
               <UserDisplay
                 user={{
                   _id: player.user_id,
