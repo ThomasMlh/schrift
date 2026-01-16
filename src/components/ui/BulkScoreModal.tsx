@@ -195,6 +195,17 @@ const BulkScoreModal = ({
 
     const canSubmit = selectedGuildId && selectedCycleId && selectedRotationId && guildMembers.length > 0;
 
+    // Fonction pour formater les nombres avec des virgules
+    const formatNumber = (value: string | number): string => {
+        const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+        return numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    };
+
+    // Fonction pour parser les nombres formatés
+    const parseNumber = (value: string): string => {
+        return value.replace(/,/g, '');
+    };
+
     return (
         <Modal isOpen={isOpen} onClose={handleClose} size="6xl" scrollBehavior="inside">
             <ModalOverlay />
@@ -346,10 +357,13 @@ const BulkScoreModal = ({
                                                 size="sm"
                                                 min={0}
                                                 max={9999999999}
+                                                step={10000000}
                                                 value={scores[member._id] || 0}
                                                 onChange={(_, value) => handleScoreChange(member._id, value)}
                                                 isDisabled={isSubmitting || isLoadingScores}
                                                 flex={1}
+                                                format={formatNumber}
+                                                parse={parseNumber}
                                             >
                                                 <NumberInputField />
                                                 <NumberInputStepper>

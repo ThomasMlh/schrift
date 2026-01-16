@@ -9,7 +9,7 @@ import { UserDisplay } from "./UserDisplay";
 import type { IPodiumMissPlayer, IUser } from "@/interfaces";
 import { RankBadge } from "./RankBadge";
 
-const PlayerCardMiss = (player: IPodiumMissPlayer) => {
+const PlayerCardMiss = (player: IPodiumMissPlayer, showGuildName = false) => {
   return (
     <Card key={player.user_id} variant="outline" borderColor="red.200">
       <CardBody p={{ base: 3, md: 4 }}>
@@ -18,7 +18,7 @@ const PlayerCardMiss = (player: IPodiumMissPlayer) => {
           justify="space-between"
           align="center"
         >
-          <Stack direction={{ base: "column", md: "row" }} spacing={4} flex={1}>
+          <Stack direction={{ base: "column", md: "row" }} spacing={4} flex={1} align="center">
             <RankBadge rank={player.rank} variant="miss" />
             <UserDisplay
               user={
@@ -37,6 +37,11 @@ const PlayerCardMiss = (player: IPodiumMissPlayer) => {
               avatarSize="sm"
               textSize="sm"
             />
+            {showGuildName && player.guild_name && (
+              <Badge colorScheme="blue" fontSize="xs">
+                {player.guild_name}
+              </Badge>
+            )}
           </Stack>
           <Tooltip
             label={player.missed_rotations

@@ -1,7 +1,7 @@
 import {
     Container, VStack, HStack, Heading, Text, Box, Spinner,
     useColorModeValue, Button, Flex, Table, Thead, Tbody, Tr, Th, Td,
-    TableContainer, useToast, Select, IconButton
+    TableContainer, useToast, Select, IconButton, Badge
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -40,6 +40,13 @@ const RotationDetailPage = () => {
     const borderColor = useColorModeValue('gray.200', 'gray.600');
     const textSecondary = useColorModeValue('gray.700', 'gray.300');
     const shadowColor = useColorModeValue('lg', 'dark-lg');
+
+    // Fonction pour obtenir le nom de la guilde à partir de l'ID
+    const getGuildNameFromId = (guildId?: string): string | undefined => {
+        if (!guildId) return undefined;
+        const guild = guilds.find(g => g._id === guildId);
+        return guild?.name;
+    };
 
     const loadScores = async (guildFilter?: string) => {
         if (!cycleId || !position) return;
@@ -311,6 +318,7 @@ const RotationDetailPage = () => {
                                         <Tr>
                                             <Th>Rang</Th>
                                             <Th>Joueur</Th>
+                                            {!selectedGuild && <Th display={{ base: "none", md: "table-cell" }}>Guilde</Th>}
                                             <Th isNumeric>Score</Th>
                                             <Th display={{ base: "none", sm: "table-cell" }}>Date</Th>
                                         </Tr>
@@ -329,8 +337,20 @@ const RotationDetailPage = () => {
                                                         <RankBadge rank={rankInfo.rank} variant="compact" />
                                                     </Td>
                                                     <Td>
-                                                        <UserDisplay user={score.user} />
+                                                        <UserDisplay 
+                                                            user={score.user} 
+                                                            rainbowText={score.rank === 1}
+                                                        />
                                                     </Td>
+                                                    {!selectedGuild && (
+                                                        <Td display={{ base: "none", md: "table-cell" }}>
+                                                            {score.user.guilde_id && (
+                                                                <Badge colorScheme="blue" fontSize="xs">
+                                                                    {getGuildNameFromId(score.user.guilde_id)}
+                                                                </Badge>
+                                                            )}
+                                                        </Td>
+                                                    )}
                                                     <Td isNumeric>
                                                         <ScoreBadge score={score.score} />
                                                     </Td>

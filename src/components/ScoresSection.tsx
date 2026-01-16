@@ -220,7 +220,21 @@ const ScoresSection = () => {
         setEditingScore(score);
         setSelectedUserId(score.user_id);
         setSelectedCycleId(score.cycle_id);
-        setSelectedRotationId(score.rotation_id);
+        
+        // Trouver la rotation correspondante dans le cycle
+        const cycle = cycles.find(c => c._id === score.cycle_id);
+        if (cycle) {
+            // Le score stocke rotation_id, mais le select utilise rotation._id
+            const rotation = cycle.rotations.find(r => r.rotation_id === score.rotation_id);
+            if (rotation) {
+                setSelectedRotationId(rotation._id || "");
+            } else {
+                setSelectedRotationId("");
+            }
+        } else {
+            setSelectedRotationId("");
+        }
+        
         setScoreValue(score.score);
         setIsEditModalOpen(true);
     };
@@ -263,10 +277,25 @@ const ScoresSection = () => {
 
         setIsUpdating(true);
         try {
+            // Trouver le rotation_id à partir de l'_id sélectionné
+            const cycle = cycles.find(c => c._id === selectedCycleId);
+            const rotation = cycle?.rotations.find(r => r._id === selectedRotationId);
+            
+            if (!rotation) {
+                toast({
+                    title: "Rotation introuvable",
+                    description: "La rotation sélectionnée n'a pas été trouvée",
+                    status: "error",
+                    duration: 3000,
+                });
+                setIsUpdating(false);
+                return;
+            }
+
             const scoreData: IScoreFormData = {
                 user_id: selectedUserId,
                 cycle_id: selectedCycleId,
-                rotation_id: selectedRotationId,
+                rotation_id: rotation.rotation_id, // Utiliser rotation_id au lieu de _id
                 guild_id: guildId,
                 score: scoreValue
             };

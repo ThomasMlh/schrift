@@ -72,6 +72,17 @@ export const ScoreModal = ({
     const selectedCycle = cycles.find(cycle => cycle._id === selectedCycleId);
     const selectedUser = users.find(u => u._id === selectedUserId);
 
+    // Fonction pour formater les nombres avec des virgules
+    const formatNumber = (value: string | number): string => {
+        const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+        return numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    };
+
+    // Fonction pour parser les nombres formatés
+    const parseNumber = (value: string): string => {
+        return value.replace(/,/g, '');
+    };
+
     const handleClose = () => {
         setSelectedCycleId("");
         setSelectedRotationId("");
@@ -91,14 +102,33 @@ export const ScoreModal = ({
                     <VStack spacing={4}>
                         <FormControl isRequired>
                             <FormLabel>Joueur</FormLabel>
-                            <UserSearchSelect
-                                users={users}
-                                selectedUserId={selectedUserId}
-                                onUserSelect={setSelectedUserId}
-                                searchQuery={userSearchQuery}
-                                onSearchChange={setUserSearchQuery}
-                                placeholder="Rechercher et sélectionner un joueur"
-                            />
+                            {isEdit && selectedUser ? (
+                                <Box
+                                    p={3}
+                                    borderWidth="1px"
+                                    borderRadius="md"
+                                    bg="gray.50"
+                                    _dark={{ bg: "gray.700" }}
+                                >
+                                    <Text fontWeight="medium">
+                                        {selectedUser.bbs_name || selectedUser.global_name}
+                                    </Text>
+                                    {selectedUser.discord_id && (
+                                        <Text fontSize="sm" color="gray.500">
+                                            Discord: {selectedUser.discord_id}
+                                        </Text>
+                                    )}
+                                </Box>
+                            ) : (
+                                <UserSearchSelect
+                                    users={users}
+                                    selectedUserId={selectedUserId}
+                                    onUserSelect={setSelectedUserId}
+                                    searchQuery={userSearchQuery}
+                                    onSearchChange={setUserSearchQuery}
+                                    placeholder="Rechercher et sélectionner un joueur"
+                                />
+                            )}
                         </FormControl>
 
                         <FormControl isRequired>
@@ -110,7 +140,7 @@ export const ScoreModal = ({
                                     setSelectedCycleId(e.target.value);
                                     setSelectedRotationId(""); // Reset rotation selection
                                 }}
-                                isDisabled={isLoadingCycles}
+                                isDisabled={isLoadingCycles || isEdit}
                             >
                                 {cycles.map((cycle) => (
                                     <option key={cycle._id} value={cycle._id}>
@@ -126,7 +156,7 @@ export const ScoreModal = ({
                                 placeholder="Sélectionner une rotation"
                                 value={selectedRotationId}
                                 onChange={(e) => setSelectedRotationId(e.target.value)}
-                                isDisabled={!selectedCycle}
+                                isDisabled={!selectedCycle || isEdit}
                             >
                                 {selectedCycle?.rotations.map((rotation, index) => (
                                     <option key={rotation._id} value={rotation._id}>
@@ -144,6 +174,8 @@ export const ScoreModal = ({
                                 min={0}
                                 max={9999999999}
                                 step={1000}
+                                format={formatNumber}
+                                parse={parseNumber}
                             >
                                 <NumberInputField placeholder="Saisir le score" />
                                 <NumberInputStepper>

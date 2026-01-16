@@ -14,6 +14,7 @@ import {
 import { SearchIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
 import { AffinityIcon } from "./AffinityIcon";
+import { useCharacters, useCharacter } from "../../hooks/useAPI";
 
 interface Character {
   _id: string;
@@ -24,26 +25,25 @@ interface Character {
 }
 
 interface CharacterSearchSelectProps {
-  characters: Character[];
   value: string;
   onChange: (characterId: string) => void;
   placeholder?: string;
   size?: "sm" | "md";
   isDisabled?: boolean;
-  isLoading?: boolean;
+  excludeIds?: string[];
 }
 
 export const CharacterSearchSelect = ({
-  characters,
   value,
   onChange,
   placeholder = "Rechercher un personnage...",
   size = "md",
   isDisabled = false,
-  isLoading = false,
+  excludeIds = [],
 }: CharacterSearchSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const bgColor = useColorModeValue("white", "gray.700");
@@ -51,12 +51,32 @@ export const CharacterSearchSelect = ({
   const hoverBg = useColorModeValue("gray.50", "gray.600");
   const menuBg = useColorModeValue("white", "gray.800");
 
-  const selectedCharacter = characters.find((c) => c._id === value);
+  // Récupérer les personnages avec recherche API
+  const { characters, isLoading } = useCharacters({
+    limit: 50,
+    searchQuery: searchTerm || undefined,
+  });
 
-  // Filtrer les personnages selon la recherche
-  const filteredCharacters = characters.filter((char) =>
-    char.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Récupérer le personnage sélectionné si on a un value
+  const { character: currentCharacter } = useCharacter(value || undefined);
+
+  // Charger le personnage sélectionné au montage ou quand value change
+  useEffect(() => {
+    if (value) {
+      // Chercher dans les personnages chargés
+      const found = characters.find((c) => c._id === value);
+      if (found) {
+        setSelectedCharacter(found);
+      } else if (currentCharacter) {
+        setSelectedCharacter(currentCharacter as Character);
+      }
+    } else {
+      setSelectedCharacter(null);
+    }
+  }, [value, characters, currentCharacter]);
+
+  // Filtrer les personnages exclus
+  const filteredCharacters = characters.filter((char) => !excludeIds.includes(char._id));
 
   // Gérer le clic en dehors
   useEffect(() => {
@@ -77,6 +97,10 @@ export const CharacterSearchSelect = ({
   }, [isOpen]);
 
   const handleSelect = (characterId: string) => {
+    const selected = characters.find((c) => c._id === characterId);
+    if (selected) {
+      setSelectedCharacter(selected);
+    }
     onChange(characterId);
     setIsOpen(false);
     setSearchTerm("");

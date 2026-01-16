@@ -192,6 +192,7 @@ export interface IPodiumPlayer {
   avatar?: string;
   hasUser: boolean;
   username: string;
+  guild_name?: string; // Nom de la guilde du joueur
 }
 
 export interface IPodiumData {

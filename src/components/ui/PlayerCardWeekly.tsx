@@ -4,14 +4,15 @@ import {
   HStack,
   VStack,
   Text,
-  Stack
+  Stack,
+  Badge
 } from "@chakra-ui/react";
 import { UserDisplay } from "./UserDisplay";
 import type { IPodiumWeeklyPlayer, IUser } from "@/interfaces";
 import { ScoreBadge } from "./ScoreBadge";
 import { RankBadge } from "./RankBadge";
 
-const PlayerCardWeekly = (player: IPodiumWeeklyPlayer) => {
+const PlayerCardWeekly = (player: IPodiumWeeklyPlayer, showGuildName = false) => {
   return (
     <Card key={player.user_id} variant="outline">
       <CardBody p={{ base: 3, md: 4 }}>
@@ -40,9 +41,14 @@ const PlayerCardWeekly = (player: IPodiumWeeklyPlayer) => {
               textSize="sm"
               rainbowText={player.rank === 1}
             />
+            {showGuildName && player.guild_name && (
+              <Badge colorScheme="blue" fontSize="xs">
+                {player.guild_name}
+              </Badge>
+            )}
           </Stack>
           <VStack spacing={1} align={{ base: "center", md: "flex-end" }}>
-            <ScoreBadge score={player.week_total_score} />
+            <ScoreBadge score={player.week_total_score} forceBlue={true} />
             <HStack spacing={2} fontSize="xs" color="gray.600" >
               <Text>R1: {player.rotation1_score.toLocaleString("fr-FR")}</Text>
               <Text>•</Text>

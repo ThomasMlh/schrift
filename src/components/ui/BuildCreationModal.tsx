@@ -24,7 +24,6 @@ import {
 import { useState, useEffect } from "react";
 import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import { useAPIMutations } from "../../hooks/useAPIMutations";
-import { useCharacters } from "../../hooks/useAPI";
 import { CharacterSearchSelect } from "./CharacterSearchSelect";
 import { SkillSearchSelect } from "./SkillSearchSelect";
 import { AccessorySearchSelect } from "./AccessorySearchSelect";
@@ -59,11 +58,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess }: BuildCre
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const bgColor = useColorModeValue("gray.50", "gray.700");
 
-  // Récupérer tous les personnages
-  const { characters, isLoading: isLoadingCharacters } = useCharacters({
-    limit: 1000,
-  });
-
   useEffect(() => {
     // Réinitialiser le formulaire quand la modal s'ouvre
     if (isOpen) {
@@ -90,18 +84,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess }: BuildCre
       });
     });
     return usedIds;
-  };
-
-  // Fonction pour obtenir les personnages disponibles (non utilisés)
-  const getAvailableCharacters = (excludeCurrentId?: string) => {
-    const usedIds = getUsedCharacterIds();
-    return characters.filter((char) => {
-      // Ne pas exclure le personnage actuellement sélectionné
-      if (excludeCurrentId && char._id === excludeCurrentId) {
-        return true;
-      }
-      return !usedIds.has(char._id);
-    });
   };
 
   const handleCharacterChange = (position: number, characterId: string) => {
@@ -367,12 +349,10 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess }: BuildCre
                       <FormControl isRequired={member.position === 1}>
                         <FormLabel fontSize="sm">Personnage principal</FormLabel>
                         <CharacterSearchSelect
-                          characters={getAvailableCharacters(member.id_character)}
                           value={member.id_character}
                           onChange={(characterId) => handleCharacterChange(member.position, characterId)}
                           placeholder="Rechercher un personnage..."
-                          isDisabled={isLoadingCharacters}
-                          isLoading={isLoadingCharacters}
+                          excludeIds={Array.from(getUsedCharacterIds()).filter(id => id !== member.id_character)}
                         />
                       </FormControl>
 
@@ -387,15 +367,13 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess }: BuildCre
                               <HStack key={linkIndex}>
                                 <Box flex={1}>
                                   <CharacterSearchSelect
-                                    characters={getAvailableCharacters(link.id_character)}
                                     value={link.id_character}
                                     onChange={(characterId) =>
                                       handleLinkChange(member.position, linkIndex, characterId)
                                     }
                                     placeholder="Rechercher un link..."
                                     size="sm"
-                                    isDisabled={isLoadingCharacters}
-                                    isLoading={isLoadingCharacters}
+                                    excludeIds={Array.from(getUsedCharacterIds()).filter(id => id !== link.id_character)}
                                   />
                                 </Box>
                                 <IconButton

@@ -189,11 +189,19 @@ const PodiumPage = () => {
   // Handlers
   const handleModeChange = (mode: DisplayMode) => {
     setDisplayMode(mode);
-    if (mode === "weekly" || mode === "misses") {
+    
+    let rotationIdToUse = selectedRotationId;
+    let weekNumberToUse = selectedWeekNumber;
+    
+    if (mode === "rotation" && !selectedRotationId && selectedCycle && selectedCycle.rotations && selectedCycle.rotations.length > 0) {
+      // Sélectionner la première rotation par défaut
+      rotationIdToUse = selectedCycle.rotations[0].rotation_id;
+      setSelectedRotationId(rotationIdToUse);
+    } else if (mode === "weekly" || mode === "misses") {
+      rotationIdToUse = "";
       setSelectedRotationId("");
     }
     
-    let weekNumberToUse = selectedWeekNumber;
     if (mode === "weekly" && !selectedWeekNumber) {
       // Sélectionner la semaine 1 par défaut
       weekNumberToUse = "1";
@@ -204,8 +212,8 @@ const PodiumPage = () => {
     }
     
     if (selectedCycleName) {
-      loadPodium(1, mode, selectedCycleName, "", selectedGuildName, weekNumberToUse);
-      updateURLParams(mode, selectedCycleName, "", selectedGuildName, weekNumberToUse, itemsPerPage, 1);
+      loadPodium(1, mode, selectedCycleName, rotationIdToUse, selectedGuildName, weekNumberToUse);
+      updateURLParams(mode, selectedCycleName, rotationIdToUse, selectedGuildName, weekNumberToUse, itemsPerPage, 1);
     }
   };
 
@@ -338,6 +346,7 @@ const PodiumPage = () => {
                 podiumData={podiumData}
                 selectedCycleName={selectedCycleName}
                 selectedWeekNumber={selectedWeekNumber}
+                selectedGuildName={selectedGuildName}
                 onPageChange={handlePageChange}
               />
             </VStack>

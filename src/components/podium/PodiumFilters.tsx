@@ -151,7 +151,7 @@ export const PodiumFilters = ({
             Réinitialiser
           </Button>
           
-          <ScoreLegend />
+          {displayMode === "rotation" && <ScoreLegend />}
         </Flex>
       </Flex>
       

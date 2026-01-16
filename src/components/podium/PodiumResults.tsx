@@ -18,6 +18,7 @@ interface PodiumResultsProps {
   selectedCycleName: string;
   selectedWeekNumber: string;
   onPageChange: (page: number) => void;
+  selectedGuildName?: string; // Ajouter pour savoir si une guilde est filtrée
 }
 
 // Type guards
@@ -46,7 +47,9 @@ export const PodiumResults = ({
   selectedCycleName,
   selectedWeekNumber,
   onPageChange,
+  selectedGuildName = "",
 }: PodiumResultsProps) => {
+  const showGuildName = !selectedGuildName; // Afficher la guilde si aucune n'est filtrée
   if (isLoading) {
     return (
       <Flex justify="center" align="center" py={8}>
@@ -89,12 +92,12 @@ export const PodiumResults = ({
         <VStack spacing={3} align="stretch">
           {displayMode === "weekly" && isWeeklyResponse(podiumData)
             ? podiumData.data.map((player) =>
-                PlayerCardWeekly(player)
+                PlayerCardWeekly(player, showGuildName)
               )
             : displayMode === "misses" && isMissesResponse(podiumData)
-            ? podiumData.data.map((player) => PlayerCardMiss(player))
+            ? podiumData.data.map((player) => PlayerCardMiss(player, showGuildName))
             : isPodiumResponse(podiumData)
-            ? podiumData.data.map((player) => PlayerCard(player, true, false))
+            ? podiumData.data.map((player) => PlayerCard(player, showGuildName))
             : null}
         </VStack>
       </Box>
@@ -108,30 +111,30 @@ export const PodiumResults = ({
               {displayMode === "weekly" && isWeeklyResponse(podiumData)
                 ? podiumData.data
                     .slice(0, Math.ceil(podiumData.data.length / 2))
-                    .map((player) => PlayerCardWeekly(player))
+                    .map((player) => PlayerCardWeekly(player, showGuildName))
                 : displayMode === "misses" && isMissesResponse(podiumData)
                 ? podiumData.data
                     .slice(0, Math.ceil(podiumData.data.length / 2))
-                    .map((player) => PlayerCardMiss(player))
+                    .map((player) => PlayerCardMiss(player, showGuildName))
                 : isPodiumResponse(podiumData)
                 ? podiumData.data
                     .slice(0, Math.ceil(podiumData.data.length / 2))
-                    .map((player) => PlayerCard(player, false, true))
+                    .map((player) => PlayerCard(player, showGuildName))
                 : null}
             </VStack>
             <VStack spacing={3} align="stretch" flex={1}>
               {displayMode === "weekly" && isWeeklyResponse(podiumData)
                 ? podiumData.data
                     .slice(Math.ceil(podiumData.data.length / 2))
-                    .map((player) => PlayerCardWeekly(player))
+                    .map((player) => PlayerCardWeekly(player, showGuildName))
                 : displayMode === "misses" && isMissesResponse(podiumData)
                 ? podiumData.data
                     .slice(Math.ceil(podiumData.data.length / 2))
-                    .map((player) => PlayerCardMiss(player))
+                    .map((player) => PlayerCardMiss(player, showGuildName))
                 : isPodiumResponse(podiumData)
                 ? podiumData.data
                     .slice(Math.ceil(podiumData.data.length / 2))
-                    .map((player) => PlayerCard(player, false, true))
+                    .map((player) => PlayerCard(player, showGuildName))
                 : null}
             </VStack>
           </HStack>
@@ -140,14 +143,14 @@ export const PodiumResults = ({
           <VStack spacing={3} align="stretch">
             {displayMode === "weekly" && isWeeklyResponse(podiumData)
               ? podiumData.data.map((player) =>
-                  PlayerCardWeekly(player)
+                  PlayerCardWeekly(player, showGuildName)
                 )
               : displayMode === "misses" && isMissesResponse(podiumData)
               ? podiumData.data.map((player) =>
-                  PlayerCardMiss(player)
+                  PlayerCardMiss(player, showGuildName)
                 )
               : isPodiumResponse(podiumData)
-              ? podiumData.data.map((player) => PlayerCard(player, false, true))
+              ? podiumData.data.map((player) => PlayerCard(player, showGuildName))
               : null}
           </VStack>
         )}

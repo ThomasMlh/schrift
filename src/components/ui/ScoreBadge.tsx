@@ -3,12 +3,27 @@ import { Badge, Box } from "@chakra-ui/react";
 interface ScoreBadgeProps {
     score: number;
     fontSize?: string | { base?: string; md?: string };
+    forceBlue?: boolean; // Nouvelle prop pour forcer la couleur bleue
 }
 
-export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" } }: ScoreBadgeProps) => {
+export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" }, forceBlue = false }: ScoreBadgeProps) => {
     // Vérification de sécurité
     if (score === undefined || score === null || score === 0) {
         return <Badge colorScheme="gray">Miss</Badge>;
+    }
+
+    // Si forceBlue est activé, retourner directement un badge bleu
+    if (forceBlue) {
+        return (
+            <Badge
+                colorScheme="blue"
+                variant="solid"
+                fontWeight="bold"
+                fontSize={fontSize}
+            >
+                {score.toLocaleString()}
+            </Badge>
+        );
     }
 
     const getScoreStyle = (value: number) => {
