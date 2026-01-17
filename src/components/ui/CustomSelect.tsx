@@ -1,8 +1,8 @@
 import {
     Box, Button, Text, Flex,
-    useColorModeValue, IconButton, Input
+    useColorModeValue, Input
 } from "@chakra-ui/react";
-import { ChevronDownIcon, CloseIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
@@ -10,6 +10,7 @@ interface SelectOption {
     value: string;
     label: string;
     content?: ReactNode; // Pour afficher du contenu personnalisé
+    group?: string; // Groupe optionnel pour regroupement
 }
 
 interface CustomSelectProps {
@@ -24,6 +25,7 @@ interface CustomSelectProps {
     enableSearch?: boolean; // Activer la recherche
     onSearchChange?: (search: string) => void; // Callback pour la recherche (pour API)
     isLoading?: boolean; // État de chargement
+    size?: 'sm' | 'md' | 'lg'; // Taille du select
 }
 
 export const CustomSelect = ({
@@ -37,7 +39,8 @@ export const CustomSelect = ({
     bg,
     enableSearch = false,
     onSearchChange,
-    isLoading = false
+    isLoading = false,
+    size = 'md'
 }: CustomSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -85,11 +88,6 @@ export const CustomSelect = ({
         setIsOpen(false);
     };
 
-    const handleDeselect = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        onChange('');
-    };
-
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newSearchTerm = e.target.value;
         setSearchTerm(newSearchTerm);
@@ -112,6 +110,34 @@ export const CustomSelect = ({
     const menuBg = useColorModeValue('white', 'gray.800');
     const textColor = useColorModeValue('gray.900', 'white');
     const placeholderColor = useColorModeValue('gray.600', 'gray.400');
+    const groupHeaderBg = useColorModeValue('gray.100', 'gray.700');
+    const groupHeaderColor = useColorModeValue('blue.600', 'blue.300');
+    const backgroundOption = useColorModeValue('gray.300', 'gray.600');
+    const backgroundOptionHover = useColorModeValue('gray.400', 'gray.500');
+
+    // Tailles selon le size prop
+    const sizeProps = {
+        sm: { px: 2, py: 2, minH: "32px", fontSize: "sm" },
+        md: { px: 3, py: 2.5, minH: "40px", fontSize: "md" },
+        lg: { px: 4, py: 3, minH: "48px", fontSize: "lg" }
+    };
+
+    const currentSizeProps = sizeProps[size];
+
+    // Grouper les options par groupe si défini
+    const groupedOptions: { [key: string]: SelectOption[] } = {};
+    const ungroupedOptions: SelectOption[] = [];
+
+    filteredOptions.forEach(option => {
+        if (option.group) {
+            if (!groupedOptions[option.group]) {
+                groupedOptions[option.group] = [];
+            }
+            groupedOptions[option.group].push(option);
+        } else {
+            ungroupedOptions.push(option);
+        }
+    });
 
     return (
         <Box position="relative" ref={menuRef}>
@@ -119,7 +145,9 @@ export const CustomSelect = ({
                 // Affichage quand une option est sélectionnée
                 <Flex
                     w="100%"
-                    p={3}
+                    minW="150px"
+                    px={currentSizeProps.px}
+                    py={currentSizeProps.py}
                     border="1px solid"
                     borderColor={borderColor}
                     borderRadius="md"
@@ -130,45 +158,31 @@ export const CustomSelect = ({
                     opacity={isDisabled ? 0.6 : 1}
                     _hover={!isDisabled ? { borderColor: "gray.300" } : {}}
                     color={textColor}
-                    minH="56px"
+                    h={currentSizeProps.minH}
+                    minH={currentSizeProps.minH}
+                    fontSize={currentSizeProps.fontSize}
+                    onClick={() => !isDisabled && setIsOpen(!isOpen)}
                 >
                     <Box 
-                        flex={1} 
-                        cursor={isDisabled ? "not-allowed" : "pointer"} 
-                        onClick={() => !isDisabled && setIsOpen(!isOpen)}
+                        flex={1}
+                        overflow="hidden"
                     >
                         {renderSelected ? renderSelected(selectedOption) : (
-                            <Text fontWeight="medium">
+                            <Text fontWeight="medium" isTruncated>
                                 {selectedOption.label}
                             </Text>
                         )}
                     </Box>
-                    <Flex gap={1}>
-                        <IconButton
-                            aria-label="Changer l'option"
-                            icon={<ChevronDownIcon />}
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => !isDisabled && setIsOpen(!isOpen)}
-                            isDisabled={isDisabled}
-                        />
-                        {allowDeselect && (
-                            <IconButton
-                                aria-label="Désélectionner"
-                                icon={<CloseIcon />}
-                                size="sm"
-                                variant="ghost"
-                                onClick={handleDeselect}
-                                colorScheme="red"
-                                isDisabled={isDisabled}
-                            />
-                        )}
-                    </Flex>
+                    <ChevronDownIcon 
+                        boxSize={currentSizeProps.fontSize === "sm" ? 4 : currentSizeProps.fontSize === "lg" ? 6 : 5}
+                        color={textColor}
+                    />
                 </Flex>
             ) : (
                 // Bouton par défaut quand aucune option n'est sélectionnée
                 <Button
                     w="100%"
+                    minW="150px"
                     justifyContent="space-between"
                     variant="outline"
                     rightIcon={<ChevronDownIcon />}
@@ -177,15 +191,16 @@ export const CustomSelect = ({
                     borderColor={borderColor}
                     textAlign="left"
                     fontWeight="normal"
-                    px={3}
-                    py={4}
-                    h="auto"
-                    minH="56px"
+                    px={currentSizeProps.px}
+                    py={currentSizeProps.py}
+                    h={currentSizeProps.minH}
+                    minH={currentSizeProps.minH}
+                    fontSize={currentSizeProps.fontSize}
                     isDisabled={isDisabled}
                     color={textColor}
                     _hover={!isDisabled ? { borderColor: "gray.300", bg: hoverBg } : {}}
                 >
-                    <Text color={placeholderColor}>{placeholder}</Text>
+                    <Text color={placeholderColor} isTruncated>{placeholder}</Text>
                 </Button>
             )}
 
@@ -201,9 +216,24 @@ export const CustomSelect = ({
                     borderColor={borderColor}
                     borderRadius="md"
                     boxShadow="lg"
-                    maxH="300px"
+                    maxH="250px"
                     overflowY="auto"
                     mt={1}
+                    sx={{
+                        '&::-webkit-scrollbar': {
+                            width: '6px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                            background: 'transparent',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            background: backgroundOption,
+                            borderRadius: '3px',
+                        },
+                        '&::-webkit-scrollbar-thumb:hover': {
+                            background: backgroundOptionHover,
+                        },
+                    }}
                 >
                     {/* Champ de recherche */}
                     {enableSearch && (
@@ -237,7 +267,8 @@ export const CustomSelect = ({
                             {allowDeselect && (
                                 <Flex
                                     key="deselect-option"
-                                    p={3}
+                                    px={currentSizeProps.px}
+                                    py={currentSizeProps.py}
                                     cursor="pointer"
                                     _hover={{ bg: hoverBg }}
                                     onClick={() => handleSelect('')}
@@ -246,38 +277,103 @@ export const CustomSelect = ({
                                     borderColor={borderColor}
                                     fontStyle="italic"
                                     color={placeholderColor}
+                                    fontSize={currentSizeProps.fontSize}
                                 >
                                     <Text>Aucune sélection</Text>
                                 </Flex>
                             )}
                             
-                            {/* Liste des options */}
-                            {filteredOptions.length > 0 ? (
-                                filteredOptions.map((option) => (
-                                    <Flex
-                                        key={option.value}
-                                        p={3}
-                                        cursor="pointer"
-                                        _hover={{ bg: hoverBg }}
-                                        onClick={() => handleSelect(option.value)}
-                                        align="center"
+                            {/* Options non groupées */}
+                            {ungroupedOptions.length > 0 && ungroupedOptions.map((option) => (
+                                <Flex
+                                    key={option.value}
+                                    px={currentSizeProps.px}
+                                    py={currentSizeProps.py}
+                                    cursor="pointer"
+                                    _hover={{ bg: hoverBg }}
+                                    onClick={() => handleSelect(option.value)}
+                                    align="center"
+                                    borderBottom="1px solid"
+                                    borderColor={borderColor}
+                                    color={textColor}
+                                    bg={bgColor}
+                                    fontSize={currentSizeProps.fontSize}
+                                >
+                                    <Box flex={1}>
+                                        {option.content || (
+                                            <Text fontWeight="medium">
+                                                {option.label}
+                                            </Text>
+                                        )}
+                                    </Box>
+                                </Flex>
+                            ))}
+
+                            {/* Options groupées */}
+                            {Object.entries(groupedOptions)
+                                .sort(([a], [b]) => {
+                                    // Trier par ordre décroissant (années les plus récentes en premier)
+                                    const numA = Number(a);
+                                    const numB = Number(b);
+                                    if (!isNaN(numA) && !isNaN(numB)) {
+                                        return numB - numA;
+                                    }
+                                    // Pour les groupes non numériques, ordre alphabétique
+                                    return a.localeCompare(b);
+                                })
+                                .map(([groupName, groupOptions]) => (
+                                <Box key={groupName}>
+                                    <Box
+                                        px={currentSizeProps.px}
+                                        py={1.5}
+                                        bg={groupHeaderBg}
                                         borderBottom="1px solid"
                                         borderColor={borderColor}
-                                        _last={{ borderBottom: "none" }}
-                                        color={textColor}
-                                        bg={bgColor}
+                                        position="sticky"
+                                        top={enableSearch ? "40px" : 0}
+                                        zIndex={2}
                                     >
-                                        <Box flex={1}>
-                                            {option.content || (
-                                                <Text fontWeight="medium">
-                                                    {option.label}
-                                                </Text>
-                                            )}
-                                        </Box>
-                                    </Flex>
-                                ))
-                            ) : (
-                                <Text p={3} color={placeholderColor} textAlign="center">
+                                        <Text 
+                                            fontSize="xs" 
+                                            fontWeight="bold" 
+                                            color={groupHeaderColor}
+                                            textTransform="uppercase"
+                                            letterSpacing="wide"
+                                        >
+                                            {groupName}
+                                        </Text>
+                                    </Box>
+                                    {groupOptions.map((option) => (
+                                        <Flex
+                                            key={option.value}
+                                            px={currentSizeProps.px}
+                                            py={currentSizeProps.py}
+                                            cursor="pointer"
+                                            _hover={{ bg: hoverBg }}
+                                            onClick={() => handleSelect(option.value)}
+                                            align="center"
+                                            borderBottom="1px solid"
+                                            borderColor={borderColor}
+                                            _last={{ borderBottom: "none" }}
+                                            color={textColor}
+                                            bg={bgColor}
+                                            fontSize={currentSizeProps.fontSize}
+                                        >
+                                            <Box flex={1}>
+                                                {option.content || (
+                                                    <Text fontWeight="medium">
+                                                        {option.label}
+                                                    </Text>
+                                                )}
+                                            </Box>
+                                        </Flex>
+                                    ))}
+                                </Box>
+                            ))}
+
+                            {/* Message si aucune option */}
+                            {ungroupedOptions.length === 0 && Object.keys(groupedOptions).length === 0 && (
+                                <Text px={currentSizeProps.px} py={3} color={placeholderColor} textAlign="center" fontSize={currentSizeProps.fontSize}>
                                     {searchTerm ? "Aucun résultat" : "Aucune option disponible"}
                                 </Text>
                             )}

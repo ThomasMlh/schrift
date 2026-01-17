@@ -41,7 +41,7 @@ export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalPro
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={onClose} size="6xl" scrollBehavior="inside">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Détails du Build</ModalHeader>

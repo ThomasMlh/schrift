@@ -27,6 +27,7 @@ const AdminPage = () => {
   );
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
   const bgColor = useColorModeValue('white', 'gray.800');
+  const bgAdminPage = useColorModeValue('gray.50', 'gray.900')
   const toast = useToast();
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -69,7 +70,7 @@ const AdminPage = () => {
   };
 
   return (
-    <Flex w="100%" align="center" justify="center" bg={useColorModeValue('gray.50', 'gray.900')}>
+    <Flex w="100%" align="center" justify="center" bg={bgAdminPage}>
       <Container
         maxW="100vw"
         w="100%"

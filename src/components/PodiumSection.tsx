@@ -4,20 +4,21 @@ import {
   HStack,
   Heading,
   Text,
-  Select,
   Card,
   CardBody,
   Flex,
   Spinner,
   useColorModeValue,
   Alert,
-  AlertIcon
+  AlertIcon,
+  Stack
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { UserDisplay } from "./ui/UserDisplay";
 import { ScoreBadge } from "./ui/ScoreBadge";
 import { RankBadge } from "./ui/RankBadge";
-import { generateCycleOptions } from "@/utils/cycles";
+import { CycleSelect } from "./ui/CycleSelect";
+import { CustomSelect } from "./ui/CustomSelect";
 import type { ICycle, IPodiumPlayer } from "@/interfaces";
 import { useCycles, useGuilds, usePodium } from "@/hooks/useAPI";
 
@@ -123,40 +124,43 @@ export const PodiumSection: React.FC = () => {
         </VStack>
 
         {/* Filtres */}
-        <HStack spacing={4} flexWrap="wrap">
+        <Stack direction={{ base: "column", md: "row" }} spacing={3} align="stretch">
           {/* Sélection du cycle */}
-          <VStack align="start" spacing={1} flex={1} minW="200px">
-            <Text fontSize="sm" fontWeight="medium" color="gray.600">
+          <Box flex={1}>
+            <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
               Cycle
             </Text>
-            <Select
+            <CycleSelect
+              cycles={cycles}
               value={selectedCycleId}
-              onChange={(e) => setSelectedCycleId(e.target.value)}
+              onChange={setSelectedCycleId}
+              placeholder="Sélectionner un cycle"
+              allowDeselect={true}
               size="sm"
-            >
-              <option value="">Sélectionner un cycle</option>
-              {generateCycleOptions(cycles)}
-            </Select>
-          </VStack>
+            />
+          </Box>
 
-          <VStack align="start" spacing={1} flex={1} minW="200px">
-            <Text fontSize="sm" fontWeight="medium" color="gray.600">
+          {/* Sélection de la guilde */}
+          <Box flex={1}>
+            <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
               Guilde
             </Text>
-            <Select
+            <CustomSelect
               value={selectedGuildId}
-              onChange={(e) => setSelectedGuildId(e.target.value)}
+              onChange={setSelectedGuildId}
+              options={[
+                { value: "global", label: "🌍 Global (Toutes les guildes)" },
+                ...guilds.map((guild) => ({
+                  value: guild._id,
+                  label: `🏰 ${guild.name}`
+                }))
+              ]}
+              placeholder="Sélectionner une guilde"
+              allowDeselect={false}
               size="sm"
-            >
-              <option value="global">🌍 Global (Toutes les guildes)</option>
-              {guilds.map((guild) => (
-                <option key={guild._id} value={guild._id}>
-                  🏰 {guild.name}
-                </option>
-              ))}
-            </Select>
-          </VStack>
-        </HStack>
+            />
+          </Box>
+        </Stack>
 
         {/* Informations du filtre actuel */}
         {selectedCycle && (

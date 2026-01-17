@@ -24,15 +24,14 @@ import {
     Center,
     Alert,
     AlertIcon,
-    useColorModeValue,
-    Select
+    useColorModeValue
 } from "@chakra-ui/react";
 
 import { useState, useEffect } from "react";
 import type { IUser, ICycle, IGuild, IScoreFormData, ICycleRotation } from "../../interfaces";
 import { useGuildMembers, useScores } from "@/hooks/useAPI";
 import { AttackTypeBadge } from "./AttackTypeBadge";
-import { generateCycleOptions } from "@/utils/cycles";
+import { CycleSelect } from "./CycleSelect";
 import { CustomSelect } from "./CustomSelect";
 import { UserDisplay } from "./UserDisplay";
 
@@ -63,7 +62,7 @@ const BulkScoreModal = ({
     // Déplacer useColorModeValue au niveau du composant pour éviter les appels conditionnels
     const guildBoxBg = useColorModeValue("blue.50", "blue.900");
     const guildTextColor = useColorModeValue("blue.700", "blue.200");
-    const modalBg = useColorModeValue("white", "gray.700");
+    const modalBg = useColorModeValue("white", "gray.800");
 
     const [selectedGuildId, setSelectedGuildId] = useState<string>(isGuildRestricted ? userGuildId || "" : "");
     const [selectedCycleId, setSelectedCycleId] = useState<string>("");
@@ -224,12 +223,12 @@ const BulkScoreModal = ({
                                     value={selectedGuildId}
                                     onChange={setSelectedGuildId}
                                     isDisabled={isSubmitting}
-                                    bg={modalBg}
                                     options={guilds.map((guild: IGuild) => ({
                                         value: guild._id,
                                         label: guild.name
                                     }))}
                                     allowDeselect={false}
+                                    size="md"
                                 />
                             </FormControl>
                         )}
@@ -249,14 +248,16 @@ const BulkScoreModal = ({
                         {/* Sélection du cycle */}
                         <FormControl>
                             <FormLabel>Cycle</FormLabel>
-                            <Select
-                                placeholder="Sélectionnez un cycle"
+                            <CycleSelect
+                                cycles={cycles}
                                 value={selectedCycleId}
-                                onChange={(e) => setSelectedCycleId(e.target.value)}
+                                onChange={setSelectedCycleId}
+                                placeholder="Sélectionnez un cycle"
                                 isDisabled={isSubmitting}
-                            >
-                                {generateCycleOptions(cycles)}
-                            </Select>
+                                allowDeselect={true}
+                                showRotationCount={true}
+                                size="md"
+                            />
                         </FormControl>
 
                         {/* Sélection de la rotation */}
@@ -268,7 +269,7 @@ const BulkScoreModal = ({
                                     value={selectedRotationId}
                                     onChange={setSelectedRotationId}
                                     isDisabled={isSubmitting}
-                                    bg={modalBg}
+                                    size="md"
                                     options={selectedCycle.rotations.map((rotation: ICycleRotation) => ({
                                         value: rotation.rotation_id,
                                         label: `Rotation #${rotation.position} - ${rotation.killer}`,

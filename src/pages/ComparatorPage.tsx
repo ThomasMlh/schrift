@@ -22,16 +22,15 @@ import {
   StatArrow,
   IconButton,
   Divider,
-  Grid,
-  Select
+  Grid
 } from "@chakra-ui/react";
 import { RepeatIcon } from "@chakra-ui/icons";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CustomSelect } from "../components/ui/CustomSelect";
+import { CycleSelect } from "../components/ui/CycleSelect";
 import { UserSearchSelect } from "../components/ui/UserSearchSelect";
 import { HeroSection } from "../components/HeroSection";
-import { generateCycleOptions } from "@/utils/cycles";
 import type { IComparisonResponse, ICycleRotation, IRotationTemplate } from "../interfaces";
 import { SEOHead } from "@/components/SEOHead";
 import ComparisonEntity from "@/components/ui/ComparisonEntity";
@@ -313,11 +312,10 @@ const ComparatorPage: React.FC = () => {
                         <Text fontSize="sm" fontWeight="medium" mb={2}>
                           Cycle (optionnel)
                         </Text>
-                        <Select
-                          placeholder="Tous les cycles"
+                        <CycleSelect
+                          cycles={cycles.filter((cycle) => cycle._id)}
                           value={selectedCycleId}
-                          onChange={(e) => {
-                            const value = e.target.value;
+                          onChange={(value) => {
                             setSelectedCycleId(value);
                             setSelectedRotationId("");
                             updateURLParams(
@@ -328,10 +326,10 @@ const ComparatorPage: React.FC = () => {
                               ""
                             );
                           }}
+                          placeholder="Tous les cycles"
                           isDisabled={isLoading}
-                        >
-                          {generateCycleOptions(cycles.filter((cycle) => cycle._id))}
-                        </Select>
+                          size="md"
+                        />
                       </Box>
                       {/* Sélection de la rotation (optionnel) */}
                       <Box flex={1}>

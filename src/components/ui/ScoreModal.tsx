@@ -8,7 +8,6 @@ import {
     ModalCloseButton,
     FormControl,
     FormLabel,
-    Select,
     NumberInput,
     NumberInputField,
     NumberInputStepper,
@@ -19,7 +18,8 @@ import {
     Box,
     Text
 } from "@chakra-ui/react";
-import { generateCycleOptions } from "@/utils/cycles";
+import { CycleSelect } from "./CycleSelect";
+import { CustomSelect } from "./CustomSelect";
 import type { IUser, ICycle } from "../../interfaces";
 import { UserSearchSelect } from "./UserSearchSelect";
 
@@ -134,33 +134,37 @@ export const ScoreModal = ({
 
                         <FormControl isRequired>
                             <FormLabel>Cycle</FormLabel>
-                            <Select
-                                placeholder="Sélectionner un cycle"
+                            <CycleSelect
+                                cycles={cycles}
                                 value={selectedCycleId}
-                                onChange={(e) => {
-                                    setSelectedCycleId(e.target.value);
+                                onChange={(value) => {
+                                    setSelectedCycleId(value);
                                     setSelectedRotationId(""); // Reset rotation selection
                                 }}
+                                placeholder="Sélectionner un cycle"
                                 isDisabled={isLoadingCycles || isEdit}
-                            >
-                                {generateCycleOptions(cycles, '_id', true)}
-                            </Select>
+                                allowDeselect={false}
+                                showRotationCount={true}
+                                size="md"
+                            />
                         </FormControl>
 
                         <FormControl isRequired>
                             <FormLabel>Rotation</FormLabel>
-                            <Select
+                            <CustomSelect
                                 placeholder="Sélectionner une rotation"
                                 value={selectedRotationId}
-                                onChange={(e) => setSelectedRotationId(e.target.value)}
+                                onChange={setSelectedRotationId}
                                 isDisabled={!selectedCycle || isEdit}
-                            >
-                                {selectedCycle?.rotations.map((rotation, index) => (
-                                    <option key={rotation._id} value={rotation._id}>
-                                        #{index + 1} - {rotation.killer} ({rotation.period})
-                                    </option>
-                                ))}
-                            </Select>
+                                options={(selectedCycle?.rotations || [])
+                                    .filter(rotation => rotation._id)
+                                    .map((rotation, index) => ({
+                                        value: rotation._id as string,
+                                        label: `#${index + 1} - ${rotation.killer} (${rotation.period})`
+                                    }))}
+                                allowDeselect={false}
+                                size="md"
+                            />
                         </FormControl>
 
                         <FormControl isRequired>

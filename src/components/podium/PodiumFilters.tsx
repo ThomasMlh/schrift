@@ -1,5 +1,6 @@
-import { Flex, Select, Button, VStack, Box, Badge, HStack, Text } from "@chakra-ui/react";
-import { generateCycleOptions } from "@/utils/cycles";
+import { Flex, Button, VStack, Box, Badge, HStack, Text } from "@chakra-ui/react";
+import { CycleSelect } from "@/components/ui/CycleSelect";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import type { ICycle, IGuild, ICycleRotation } from "@/interfaces";
 import { ScoreLegend } from "@/components/ui/ScoreLegend";
 
@@ -64,85 +65,87 @@ export const PodiumFilters = ({
           flex={1}
         >
           {/* Filtre par mode d'affichage */}
-          <Select
+          <CustomSelect
             value={displayMode}
-            onChange={(e) => onModeChange(e.target.value as DisplayMode)}
-            maxW="200px"
-          >
-            <option value="cycle">Cycle complet</option>
-            <option value="rotation">Par rotation</option>
-            <option value="weekly">Par semaine</option>
-            <option value="misses">Miss</option>
-          </Select>
+            onChange={(value) => onModeChange(value as DisplayMode)}
+            options={[
+              { value: "cycle", label: "Cycle complet" },
+              { value: "rotation", label: "Par rotation" },
+              { value: "weekly", label: "Par semaine" },
+              { value: "misses", label: "Miss" }
+            ]}
+            allowDeselect={false}
+            size="md"
+          />
           
           {/* Filtre par cycle */}
-          <Select
-            placeholder="Sélectionner un cycle"
+          <CycleSelect
+            cycles={cycles}
             value={selectedCycleName}
-            onChange={(e) => onCycleChange(e.target.value)}
-            maxW="200px"
-          >
-            {generateCycleOptions(cycles, 'name')}
-          </Select>
+            onChange={onCycleChange}
+            placeholder="Sélectionner un cycle"
+            valueKey="name"
+            allowDeselect={false}
+            size="md"
+          />
           
           {/* Filtre par rotation (uniquement en mode rotation) */}
           {selectedCycle && displayMode === "rotation" && (
-            <Select
+            <CustomSelect
               placeholder="Sélectionner une rotation"
               value={selectedRotationId}
-              onChange={(e) => onRotationChange(e.target.value)}
-              maxW="300px"
-            >
-              {selectedCycle.rotations.map((rotation: ICycleRotation) => (
-                <option key={rotation.rotation_id} value={rotation.rotation_id}>
-                  #{rotation.position} - {rotation.killer} ({rotation.attack})
-                </option>
-              ))}
-            </Select>
+              onChange={onRotationChange}
+              options={selectedCycle.rotations.map((rotation: ICycleRotation) => ({
+                value: rotation.rotation_id,
+                label: `#${rotation.position} - ${rotation.killer} (${rotation.attack})`
+              }))}
+              allowDeselect={false}
+              size="md"
+            />
           )}
           
           {/* Filtre par semaine (uniquement en mode weekly) */}
           {selectedCycle && displayMode === "weekly" && (
-            <Select
+            <CustomSelect
               placeholder="Sélectionner une semaine"
               value={selectedWeekNumber}
-              onChange={(e) => onWeekChange(e.target.value)}
-              maxW="200px"
-            >
-              {Array.from({ length: availableWeeks }, (_, i) => i + 1).map(
-                (weekNum) => (
-                  <option key={weekNum} value={weekNum}>
-                    Semaine {weekNum}
-                  </option>
-                )
+              onChange={onWeekChange}
+              options={Array.from({ length: availableWeeks }, (_, i) => i + 1).map(
+                (weekNum) => ({
+                  value: String(weekNum),
+                  label: `Semaine ${weekNum}`
+                })
               )}
-            </Select>
+              allowDeselect={false}
+              size="md"
+            />
           )}
           
           {/* Filtre par guilde */}
-          <Select
+          <CustomSelect
             placeholder="Toutes les guildes"
             value={selectedGuildName}
-            onChange={(e) => onGuildChange(e.target.value)}
-            maxW="200px"
-          >
-            {guilds.map((guild) => (
-              <option key={guild._id} value={guild.name}>
-                {guild.name}
-              </option>
-            ))}
-          </Select>
+            onChange={onGuildChange}
+            options={guilds.map((guild) => ({
+              value: guild.name,
+              label: guild.name
+            }))}
+            allowDeselect={true}
+            size="md"
+          />
           
           {/* Éléments par page */}
-          <Select
-            value={itemsPerPage}
-            onChange={(e) => onItemsPerPageChange(parseInt(e.target.value))}
-            maxW="120px"
-          >
-            <option value={25}>25 / page</option>
-            <option value={50}>50 / page</option>
-            <option value={100}>100 / page</option>
-          </Select>
+          <CustomSelect
+            value={String(itemsPerPage)}
+            onChange={(value) => onItemsPerPageChange(parseInt(value))}
+            options={[
+              { value: "25", label: "25 / page" },
+              { value: "50", label: "50 / page" },
+              { value: "100", label: "100 / page" }
+            ]}
+            allowDeselect={false}
+            size="md"
+          />
           
           <Button onClick={onReset} variant="outline" minW="120px">
             Réinitialiser
