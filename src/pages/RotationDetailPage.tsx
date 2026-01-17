@@ -233,6 +233,7 @@ const RotationDetailPage = () => {
                             <VStack spacing={2} align="start">
                                 <HStack spacing={2} align="center" flexWrap="wrap">
                                     <Text as="span">{cycle}</Text>
+                                    
                                     <Text as="span" color={textSecondary}>-</Text>
                                     <Text as="span">Rotation #{position}</Text>
                                 </HStack>

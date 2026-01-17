@@ -17,6 +17,7 @@ import { useState, useEffect } from "react";
 import { UserDisplay } from "./ui/UserDisplay";
 import { ScoreBadge } from "./ui/ScoreBadge";
 import { RankBadge } from "./ui/RankBadge";
+import { generateCycleOptions } from "@/utils/cycles";
 import type { ICycle, IPodiumPlayer } from "@/interfaces";
 import { useCycles, useGuilds, usePodium } from "@/hooks/useAPI";
 
@@ -134,11 +135,7 @@ export const PodiumSection: React.FC = () => {
               size="sm"
             >
               <option value="">Sélectionner un cycle</option>
-              {cycles.map((cycle) => (
-                <option key={cycle._id} value={cycle._id}>
-                  {cycle.name} {cycle.year ? `(${cycle.year})` : ''}
-                </option>
-              ))}
+              {generateCycleOptions(cycles)}
             </Select>
           </VStack>
 

@@ -160,7 +160,10 @@ export interface IScoresResponse {
 export interface IScoreDetailApiResponse {
   success: boolean;
   data: IScoreWithUser[];
-  cycle: string;
+  cycle: {
+    name: string;
+    year: number;
+  }
   rotation: IRotationTemplate | null;
   pagination: {
     currentPage: number;

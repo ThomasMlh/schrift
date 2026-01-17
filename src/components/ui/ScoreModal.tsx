@@ -19,6 +19,7 @@ import {
     Box,
     Text
 } from "@chakra-ui/react";
+import { generateCycleOptions } from "@/utils/cycles";
 import type { IUser, ICycle } from "../../interfaces";
 import { UserSearchSelect } from "./UserSearchSelect";
 
@@ -142,11 +143,7 @@ export const ScoreModal = ({
                                 }}
                                 isDisabled={isLoadingCycles || isEdit}
                             >
-                                {cycles.map((cycle) => (
-                                    <option key={cycle._id} value={cycle._id}>
-                                        {cycle.name} {cycle.year ? `(${cycle.year})` : ''} - {cycle.rotations?.length || 0} rotations
-                                    </option>
-                                ))}
+                                {generateCycleOptions(cycles, '_id', true)}
                             </Select>
                         </FormControl>
 

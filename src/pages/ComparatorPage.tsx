@@ -22,7 +22,8 @@ import {
   StatArrow,
   IconButton,
   Divider,
-  Grid
+  Grid,
+  Select
 } from "@chakra-ui/react";
 import { RepeatIcon } from "@chakra-ui/icons";
 import { useState, useEffect } from "react";
@@ -30,6 +31,7 @@ import { useSearchParams } from "react-router-dom";
 import { CustomSelect } from "../components/ui/CustomSelect";
 import { UserSearchSelect } from "../components/ui/UserSearchSelect";
 import { HeroSection } from "../components/HeroSection";
+import { generateCycleOptions } from "@/utils/cycles";
 import type { IComparisonResponse, ICycleRotation, IRotationTemplate } from "../interfaces";
 import { SEOHead } from "@/components/SEOHead";
 import ComparisonEntity from "@/components/ui/ComparisonEntity";
@@ -311,10 +313,11 @@ const ComparatorPage: React.FC = () => {
                         <Text fontSize="sm" fontWeight="medium" mb={2}>
                           Cycle (optionnel)
                         </Text>
-                        <CustomSelect
+                        <Select
                           placeholder="Tous les cycles"
                           value={selectedCycleId}
-                          onChange={(value) => {
+                          onChange={(e) => {
+                            const value = e.target.value;
                             setSelectedCycleId(value);
                             setSelectedRotationId("");
                             updateURLParams(
@@ -325,15 +328,10 @@ const ComparatorPage: React.FC = () => {
                               ""
                             );
                           }}
-                          options={cycles
-                            .filter((cycle) => cycle._id) // Filtrer les cycles sans _id
-                            .map((cycle) => ({
-                              value: cycle._id!,
-                              label: `${cycle.name}${cycle.year ? ` (${cycle.year})` : ''}`
-                            }))}
-                          allowDeselect={true}
                           isDisabled={isLoading}
-                        />
+                        >
+                          {generateCycleOptions(cycles.filter((cycle) => cycle._id))}
+                        </Select>
                       </Box>
                       {/* Sélection de la rotation (optionnel) */}
                       <Box flex={1}>

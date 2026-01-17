@@ -24,13 +24,15 @@ import {
     Center,
     Alert,
     AlertIcon,
-    useColorModeValue
+    useColorModeValue,
+    Select
 } from "@chakra-ui/react";
 
 import { useState, useEffect } from "react";
 import type { IUser, ICycle, IGuild, IScoreFormData, ICycleRotation } from "../../interfaces";
 import { useGuildMembers, useScores } from "@/hooks/useAPI";
 import { AttackTypeBadge } from "./AttackTypeBadge";
+import { generateCycleOptions } from "@/utils/cycles";
 import { CustomSelect } from "./CustomSelect";
 import { UserDisplay } from "./UserDisplay";
 
@@ -247,18 +249,14 @@ const BulkScoreModal = ({
                         {/* Sélection du cycle */}
                         <FormControl>
                             <FormLabel>Cycle</FormLabel>
-                            <CustomSelect
+                            <Select
                                 placeholder="Sélectionnez un cycle"
                                 value={selectedCycleId}
-                                onChange={setSelectedCycleId}
+                                onChange={(e) => setSelectedCycleId(e.target.value)}
                                 isDisabled={isSubmitting}
-                                bg={modalBg}
-                                options={cycles.map((cycle: ICycle) => ({
-                                    value: cycle._id || '',
-                                    label: `${cycle.name}${cycle.year ? ` (${cycle.year})` : ''}`
-                                }))}
-                                allowDeselect={false}
-                            />
+                            >
+                                {generateCycleOptions(cycles)}
+                            </Select>
                         </FormControl>
 
                         {/* Sélection de la rotation */}
@@ -308,7 +306,7 @@ const BulkScoreModal = ({
                                 <AlertIcon />
                                 <VStack align="start" spacing={1}>
                                     <Text><strong>Guilde:</strong> {selectedGuild.name}</Text>
-                                    <Text><strong>Cycle:</strong> {selectedCycle.name}</Text>
+                                    <Text><strong>Cycle:</strong> {selectedCycle.name} {selectedCycle.year ? `(${selectedCycle.year})` : ''}</Text>
                                     <Text><strong>Rotation:</strong> #{selectedCycle.rotations.find((r: ICycleRotation) => r.rotation_id === selectedRotationId)?.position}</Text>
                                 </VStack>
                             </Alert>

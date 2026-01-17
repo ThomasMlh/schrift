@@ -81,7 +81,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                                     </HStack>
                                 </Td>
                                 <Td>
-                                    <CustomLink to={`/cycle/${cycle?._id}`} text={cycle?.name || "Cycle inconnu"} textSize="md" />
+                                    <CustomLink to={`/cycle/${cycle?._id}`} text={`${cycle?.name}${cycle?.year ? ` - (${cycle.year})` : ''}` || "Cycle inconnu"} textSize="md" />
                                 </Td>
                                 <Td>
                                     {rotation ? (

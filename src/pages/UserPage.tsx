@@ -27,6 +27,7 @@ import {
 import type { IUser, ICycle } from "../interfaces";
 import { getUserAvatarUrl } from "../utils/discord";
 import { formatRoleName } from "@/utils/user";
+import { generateCycleOptions } from "@/utils/cycles";
 import { SEOHead } from "@/components/SEOHead";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 
@@ -305,11 +306,7 @@ const UserPage = () => {
               maxW="300px"
               placeholder="Tous les cycles"
             >
-              {cycles.map((cycle) => (
-                <option key={cycle._id} value={cycle._id}>
-                  {cycle.name} {cycle.year ? `(${cycle.year})` : ''}
-                </option>
-              ))}
+              {generateCycleOptions(cycles)}
             </Select>
           </HStack>
         </CardBody>

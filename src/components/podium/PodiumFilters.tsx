@@ -1,4 +1,5 @@
 import { Flex, Select, Button, VStack, Box, Badge, HStack, Text } from "@chakra-ui/react";
+import { generateCycleOptions } from "@/utils/cycles";
 import type { ICycle, IGuild, ICycleRotation } from "@/interfaces";
 import { ScoreLegend } from "@/components/ui/ScoreLegend";
 
@@ -81,11 +82,7 @@ export const PodiumFilters = ({
             onChange={(e) => onCycleChange(e.target.value)}
             maxW="200px"
           >
-            {cycles.map((cycle) => (
-              <option key={cycle._id} value={cycle.name}>
-                {cycle.name} {cycle.year ? `(${cycle.year})` : ''}
-              </option>
-            ))}
+            {generateCycleOptions(cycles, 'name')}
           </Select>
           
           {/* Filtre par rotation (uniquement en mode rotation) */}
