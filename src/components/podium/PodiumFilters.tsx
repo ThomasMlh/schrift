@@ -83,7 +83,7 @@ export const PodiumFilters = ({
           >
             {cycles.map((cycle) => (
               <option key={cycle._id} value={cycle.name}>
-                {cycle.name}
+                {cycle.name} {cycle.year ? `(${cycle.year})` : ''}
               </option>
             ))}
           </Select>

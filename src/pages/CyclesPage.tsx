@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import {
   Box,
@@ -173,13 +174,53 @@ const CyclesPage = () => {
           </Alert>
         ) : (
           <VStack spacing={8}>
-            <SimpleGrid columns={{ base: 1, lg: 2, xl: 3 }} spacing={8}>
-              {cycles.map((cycle) => (
-              <Card
-                key={cycle._id}
-                bg={cardBg}
-                borderColor={borderColor}
-                borderWidth={1}
+            {(() => {
+              // Grouper les cycles par année
+              const cyclesByYear = cycles.reduce((acc, cycle) => {
+                const year = cycle.year;
+                if (!acc[year]) acc[year] = [];
+                acc[year].push(cycle);
+                return acc;
+              }, {} as Record<number, typeof cycles>);
+
+              // Trier les années par ordre décroissant
+              const sortedYears = Object.keys(cyclesByYear).sort((a, b) => Number(b) - Number(a));
+
+              return sortedYears.map((year) => (
+                <React.Fragment key={year}>
+                  {/* Séparateur d'année */}
+                  <Box 
+                    w="100%" 
+                    py={4}
+                    px={6}
+                    bg={useColorModeValue('blue.50', 'blue.900')}
+                    borderRadius="xl"
+                    borderWidth={2}
+                    borderColor={useColorModeValue('blue.200', 'blue.700')}
+                    boxShadow="md"
+                  >
+                    <HStack spacing={3} justify="center">
+                      <CalendarIcon boxSize={6} color="blue.500" />
+                      <Heading 
+                        size="lg" 
+                        bgGradient="linear(to-r, blue.500, purple.500)" 
+                        bgClip="text"
+                        fontWeight="bold"
+                      >
+                        Année {year}
+                      </Heading>
+                      <CalendarIcon boxSize={6} color="purple.500" />
+                    </HStack>
+                  </Box>
+
+                  {/* Grille des cycles de cette année */}
+                  <SimpleGrid columns={{ base: 1, lg: 2, xl: 3 }} spacing={8} w="100%">
+                    {cyclesByYear[Number(year)].map((cycle) => (
+                      <Card
+                        key={cycle._id}
+                        bg={cardBg}
+                        borderColor={borderColor}
+                        borderWidth={1}
                 _hover={{ 
                   transform: 'translateY(-8px)', 
                   shadow: '2xl',
@@ -413,8 +454,11 @@ const CyclesPage = () => {
                   </Box>
                 </CardBody>
               </Card>
-            ))}
-            </SimpleGrid>
+                    ))}
+                  </SimpleGrid>
+                </React.Fragment>
+              ));
+            })()}
             
             {/* Pagination */}
             {pagination && (

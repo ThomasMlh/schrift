@@ -144,7 +144,7 @@ export const ScoreModal = ({
                             >
                                 {cycles.map((cycle) => (
                                     <option key={cycle._id} value={cycle._id}>
-                                        {cycle.name} ({cycle.rotations?.length || 0} rotations)
+                                        {cycle.name} {cycle.year ? `(${cycle.year})` : ''} - {cycle.rotations?.length || 0} rotations
                                     </option>
                                 ))}
                             </Select>

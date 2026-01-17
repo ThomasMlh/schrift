@@ -136,7 +136,7 @@ export const PodiumSection: React.FC = () => {
               <option value="">Sélectionner un cycle</option>
               {cycles.map((cycle) => (
                 <option key={cycle._id} value={cycle._id}>
-                  {cycle.name}
+                  {cycle.name} {cycle.year ? `(${cycle.year})` : ''}
                 </option>
               ))}
             </Select>

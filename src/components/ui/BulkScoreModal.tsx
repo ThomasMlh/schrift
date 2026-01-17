@@ -255,7 +255,7 @@ const BulkScoreModal = ({
                                 bg={modalBg}
                                 options={cycles.map((cycle: ICycle) => ({
                                     value: cycle._id || '',
-                                    label: cycle.name
+                                    label: `${cycle.name}${cycle.year ? ` (${cycle.year})` : ''}`
                                 }))}
                                 allowDeselect={false}
                             />

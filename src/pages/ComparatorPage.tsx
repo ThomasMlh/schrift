@@ -329,7 +329,7 @@ const ComparatorPage: React.FC = () => {
                             .filter((cycle) => cycle._id) // Filtrer les cycles sans _id
                             .map((cycle) => ({
                               value: cycle._id!,
-                              label: cycle.name
+                              label: `${cycle.name}${cycle.year ? ` (${cycle.year})` : ''}`
                             }))}
                           allowDeselect={true}
                           isDisabled={isLoading}

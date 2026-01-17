@@ -307,7 +307,7 @@ const UserPage = () => {
             >
               {cycles.map((cycle) => (
                 <option key={cycle._id} value={cycle._id}>
-                  {cycle.name}
+                  {cycle.name} {cycle.year ? `(${cycle.year})` : ''}
                 </option>
               ))}
             </Select>

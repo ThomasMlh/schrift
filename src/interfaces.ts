@@ -107,8 +107,8 @@ export interface ICycle {
   name: string;
   created_at?: string;
   updated_at?: string;
-  isActive?: boolean;
   rotations: ICycleRotation[];
+  year: number;
 }
 
 export interface ICycleFormData {
