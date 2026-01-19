@@ -39,6 +39,7 @@ const CyclesPage = () => {
   
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const bgColor = useColorModeValue('blue.50', 'blue.900');
   const cardHeaderBg = useColorModeValue(
     'linear(to-br, blue.50, purple.50)',
     'linear(to-br, blue.900, purple.900)'
@@ -193,10 +194,10 @@ const CyclesPage = () => {
                     w="100%" 
                     py={4}
                     px={6}
-                    bg={useColorModeValue('blue.50', 'blue.900')}
+                    bg={bgColor}
                     borderRadius="xl"
                     borderWidth={2}
-                    borderColor={useColorModeValue('blue.200', 'blue.700')}
+                    borderColor={borderColor}
                     boxShadow="md"
                   >
                     <HStack spacing={3} justify="center">

@@ -40,6 +40,8 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
   const [categories] = useState<string[]>(CharactersCategories);
   const [killers] = useState<string[]>(CharactersKillers);
 
+  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+
   // Hooks UI
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -297,10 +299,10 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
                 <Tr key={character._id} _hover={{ bg: hoverBg }}>
                   <Td>
                     <HStack spacing={3}>
-                      {character.link ? (
+                      {character._id ? (
                         <Avatar
                           size="sm"
-                          src={character.link}
+                          src={`${bucketUrl}/characters/thumb/${character._id}.png`}
                           name={character.name}
                         />
                       ) : (

@@ -54,12 +54,16 @@ const BuildsAdminSection = () => {
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
+  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+
   const { builds, pagination, isLoading, mutate } = useBuilds({
     page: currentPage,
     limit: 20,
     isValid: filterIsValid,
     authenticated: true,
   });
+
+  console.log(builds);
 
   const handleValidate = async (buildId: string, isValid: boolean) => {
     try {
@@ -215,7 +219,7 @@ const BuildsAdminSection = () => {
                             <HStack key={idx} spacing={2}>
                               <Avatar
                                 size="xs"
-                                src={member.character?.link || member.character?.image}
+                                src={`${bucketUrl}/characters/thumb/${member.character?._id}.png`}
                                 name={member.character?.name || "?"}
                                 bg="gray.200"
                               />

@@ -42,6 +42,7 @@ export interface ICharacter {
   stats?: ICharacterStats;
   immunities?: string[];
   release_date?: string;
+  banner_id?: string;
   resurrection_release?: string;
   banner_url?: string;
   attack_url?: string;
@@ -160,10 +161,7 @@ export interface IScoresResponse {
 export interface IScoreDetailApiResponse {
   success: boolean;
   data: IScoreWithUser[];
-  cycle: {
-    name: string;
-    year: number;
-  }
+  cycle: string;
   rotation: IRotationTemplate | null;
   pagination: {
     currentPage: number;

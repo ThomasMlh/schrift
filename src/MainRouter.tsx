@@ -86,7 +86,14 @@ const AppRoutes = () => {
           />
           <Route path="/discord-callback" element={<DiscordCallback />} />
           <Route path="/joueurs" element={<UsersPage />} />
-          <Route path="/joueur/:userId" element={<UserPage />} />
+          <Route path="/joueur/:userId" element={<ProtectedRoute
+                isAuthenticated={isLoggedIn}
+                isAdmin={isAdmin}
+                isGuildManager={isGuildManager}
+                isLoading={isAuthLoading}
+              >
+                <UserPage />
+              </ProtectedRoute>} />
           <Route path="/podium" element={<PodiumPage />} />
           <Route path="/comparateur" element={<ComparatorPage />} />
           <Route path="/guides" element={<GuidesPage />} />

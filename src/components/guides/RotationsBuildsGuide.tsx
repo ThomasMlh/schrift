@@ -41,6 +41,8 @@ const RotationsBuildsGuide = () => {
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
+  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+
   // Vérifier si l'utilisateur est connecté
   const { currentUser } = useAuth();
   const isAuthenticated = !!currentUser;
@@ -302,8 +304,7 @@ const RotationsBuildsGuide = () => {
                             key={idx}
                             size="lg"
                             src={
-                              member.character?.image ||
-                              member.character?.link
+                              `${bucketUrl}/characters/thumb/${member.character?._id}.png`
                             }
                             name={member.character?.name || "?"}
                             bg="gray.200"

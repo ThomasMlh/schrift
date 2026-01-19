@@ -14,6 +14,7 @@ import {
   Badge,
   Avatar,
   useColorModeValue,
+  Stack
 } from "@chakra-ui/react";
 import { UserDisplay } from "./UserDisplay";
 import { AffinityIcon } from "./AffinityIcon";
@@ -25,9 +26,15 @@ interface BuildDetailModalProps {
   build: IBuild | null;
 }
 
-export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalProps) => {
+export const BuildDetailModal = ({
+  isOpen,
+  onClose,
+  build
+}: BuildDetailModalProps) => {
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const linkBgColor = useColorModeValue("gray.50", "gray.700");
+
+  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
@@ -36,7 +43,7 @@ export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalPro
       month: "2-digit",
       year: "numeric",
       hour: "2-digit",
-      minute: "2-digit",
+      minute: "2-digit"
     });
   };
 
@@ -70,7 +77,9 @@ export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalPro
                   <HStack spacing={2}>
                     <Badge colorScheme="blue">{build.rotation.killer}</Badge>
                     <Badge colorScheme="green">{build.rotation.attack}</Badge>
-                    <Badge colorScheme="orange">{build.rotation.alteration}</Badge>
+                    <Badge colorScheme="orange">
+                      {build.rotation.alteration}
+                    </Badge>
                   </HStack>
                 </Box>
               )}
@@ -80,7 +89,9 @@ export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalPro
                 <Text fontWeight="bold" mb={2}>
                   Description :
                 </Text>
-                <Text whiteSpace="pre-wrap">{build.description || "Aucune description"}</Text>
+                <Text whiteSpace="pre-wrap">
+                  {build.description || "Aucune description"}
+                </Text>
               </Box>
 
               {/* Statut */}
@@ -89,7 +100,11 @@ export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalPro
                   <Text fontWeight="bold" mb={2}>
                     Statut :
                   </Text>
-                  <Badge colorScheme={build.isValid ? "green" : "gray"} fontSize="md" p={2}>
+                  <Badge
+                    colorScheme={build.isValid ? "green" : "gray"}
+                    fontSize="md"
+                    p={2}
+                  >
                     {build.isValid ? "✓ Validé" : "⏱ En attente de validation"}
                   </Badge>
                 </Box>
@@ -100,7 +115,12 @@ export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalPro
                 <Text fontWeight="bold" mb={2}>
                   Composition de la team :
                 </Text>
-                <VStack align="stretch" spacing={3}>
+                <Stack
+                  direction={{ base: "column", xl: "row" }}
+                  justify="space-around"
+                  align="stretch"
+                  spacing={3}
+                >
                   {build.team?.map((member, index) => (
                     <Box
                       key={index}
@@ -109,24 +129,30 @@ export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalPro
                       borderRadius="md"
                       borderColor={borderColor}
                     >
-                      <HStack spacing={3} mb={2} justify="space-between">
+                      <VStack spacing={3} mb={2} justify="flex-start">
+                        <Badge colorScheme="purple">
+                          Position {member.position}
+                        </Badge>
                         <HStack spacing={3}>
-                          <Badge colorScheme="purple">Position {member.position}</Badge>
                           <Avatar
                             size="sm"
-                            src={member.character?.link || member.character?.image}
+                            src={`${bucketUrl}/characters/thumb/${member.character?._id}.png`}
                             name={member.character?.name || "?"}
                             bg="gray.200"
                           />
                           <Text fontWeight="medium">
-                            {member.character?.name || `Personnage ${member.id_character}`}
+                            {member.character?.name ||
+                              `Personnage ${member.id_character}`}
                           </Text>
+                          {member.character?.affinity && (
+                            <AffinityIcon
+                              affinity={member.character.affinity}
+                              size="20px"
+                            />
+                          )}
                         </HStack>
-                        {member.character?.affinity && (
-                          <AffinityIcon affinity={member.character.affinity} size="20px" />
-                        )}
-                      </HStack>
-                      
+                      </VStack>
+
                       {/* Skills */}
                       {member.skills && member.skills.length > 0 && (
                         <Box ml={4} mt={2}>
@@ -135,11 +161,12 @@ export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalPro
                           </Text>
                           <HStack spacing={2} flexWrap="wrap">
                             {member.skills.map((skill, skillIndex) => {
-                              const skillName = typeof skill === 'string' ? skill : skill.name;
+                              const skillName =
+                                typeof skill === "string" ? skill : skill.name;
                               return (
-                                <Badge 
-                                  key={skillIndex} 
-                                  colorScheme="purple" 
+                                <Badge
+                                  key={skillIndex}
+                                  colorScheme="purple"
                                   fontSize="xs"
                                   px={3}
                                   py={1}
@@ -159,26 +186,48 @@ export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalPro
                           <Text fontSize="sm" fontWeight="medium" mb={1}>
                             Accessoires :
                           </Text>
-                          <VStack align="stretch" spacing={1}>
+                          <VStack align="stretch" spacing={2}>
                             {member.accessories.map((acc, accIndex) => (
-                              <HStack key={accIndex} spacing={2}>
-                                <Badge colorScheme="cyan" fontSize="xs" px={2} py={1}>
-                                  {acc.accessory?.name || acc.id_accessory}
+                              <Stack
+                                direction={{ base: "column", md: "row" }}
+                                key={accIndex}
+                                spacing={1}
+                              >
+                                <Badge
+                                  colorScheme="cyan"
+                                  fontSize="xs"
+                                  px={2}
+                                  py={1}
+                                  w={"max-content"}
+                                >
+                                  {acc.accessory?.name}
                                 </Badge>
                                 {acc.subeffect && (
                                   <>
-                                    <Text fontSize="xs" color="gray.500">→</Text>
-                                    <Badge colorScheme="teal" fontSize="xs" px={2} py={1}>
+                                    <Text
+                                      fontSize="xs"
+                                      color="gray.500"
+                                      display={{ base: "none", md: "block" }}
+                                    >
+                                      →
+                                    </Text>
+                                    <Badge
+                                      colorScheme="teal"
+                                      fontSize="xs"
+                                      px={2}
+                                      py={1}
+                                      w={"max-content"}
+                                    >
                                       {acc.subeffect.name}
                                     </Badge>
                                   </>
                                 )}
-                              </HStack>
+                              </Stack>
                             ))}
                           </VStack>
                         </Box>
                       )}
-                      
+
                       {/* Links */}
                       {member.links && member.links.length > 0 && (
                         <Box ml={4} mt={2}>
@@ -187,7 +236,7 @@ export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalPro
                           </Text>
                           <VStack align="stretch" spacing={2}>
                             {member.links.map((link, linkIndex) => (
-                              <Box 
+                              <Box
                                 key={linkIndex}
                                 p={2}
                                 borderRadius="md"
@@ -196,30 +245,37 @@ export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalPro
                                 <HStack spacing={2} align="start">
                                   <Avatar
                                     size="xs"
-                                    src={link.character?.link || link.character?.image}
+                                    src={`${bucketUrl}/characters/thumb/${link.character?._id}.png`}
                                     name={link.character?.name || "?"}
                                     bg="gray.200"
                                   />
                                   <VStack align="start" spacing={0} flex={1}>
                                     <HStack spacing={2} align="center">
                                       <Text fontSize="sm" fontWeight="medium">
-                                        {link.character?.name || `Personnage ${link.id_character}`}
+                                        {link.character?.name ||
+                                          `Personnage ${link.id_character}`}
                                       </Text>
                                       {link.character?.affinity && (
-                                        <AffinityIcon affinity={link.character.affinity} size="14px" />
+                                        <AffinityIcon
+                                          affinity={link.character.affinity}
+                                          size="14px"
+                                        />
                                       )}
                                     </HStack>
-                                    {link.character?.soul_traits && link.character.soul_traits.map((trait, traitIdx) => (
-                                      <Text 
-                                        key={traitIdx}
-                                        fontSize="xs" 
-                                        color="gray.500"
-                                        mt={1}
-                                        noOfLines={2}
-                                      >
-                                        {trait}
-                                      </Text>
-                                    ))}
+                                    {link.character?.soul_traits &&
+                                      link.character.soul_traits.map(
+                                        (trait, traitIdx) => (
+                                          <Text
+                                            key={traitIdx}
+                                            fontSize="xs"
+                                            color="gray.500"
+                                            mt={1}
+                                            noOfLines={2}
+                                          >
+                                            {trait}
+                                          </Text>
+                                        )
+                                      )}
                                   </VStack>
                                 </HStack>
                               </Box>
@@ -229,7 +285,7 @@ export const BuildDetailModal = ({ isOpen, onClose, build }: BuildDetailModalPro
                       )}
                     </Box>
                   ))}
-                </VStack>
+                </Stack>
               </Box>
 
               {/* Dates */}

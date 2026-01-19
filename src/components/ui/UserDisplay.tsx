@@ -3,6 +3,7 @@ import { getUserAvatarUrl } from "@/utils/discord";
 import type { IUser } from "@/interfaces";
 import CustomLink from "./CustomLink";
 import { formatRoleName } from "@/utils/user";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface UserDisplayProps {
   user?: IUser;
@@ -18,11 +19,13 @@ export const UserDisplay = ({
   user,
   avatarSize = "sm",
   spacing = 3,
-  showUsername = true,
+  showUsername = false,
   roleBadge = false,
   rainbowText = false
 }: UserDisplayProps) => {
   // Si pas d'utilisateur, afficher un fallback
+  const { isLoggedIn } = useAuth();
+
   if (!user) {
     return (
       <HStack spacing={spacing}>
@@ -49,7 +52,7 @@ export const UserDisplay = ({
       />
       <VStack spacing={0} align="start">
         <CustomLink
-          to={`/joueur/${user._id}`}
+          to={isLoggedIn ? `/joueur/${user._id}` : "/"}
           text={user.bbs_name || user.global_name}
           sx={
             rainbowText

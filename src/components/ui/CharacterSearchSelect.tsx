@@ -51,6 +51,8 @@ export const CharacterSearchSelect = ({
   const hoverBg = useColorModeValue("gray.50", "gray.600");
   const menuBg = useColorModeValue("white", "gray.800");
 
+  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+
   // Récupérer les personnages avec recherche API
   const { characters, isLoading } = useCharacters({
     limit: 50,
@@ -129,7 +131,7 @@ export const CharacterSearchSelect = ({
         >
           <Avatar
             size={size === "sm" ? "xs" : "sm"}
-            src={selectedCharacter.link || selectedCharacter.image}
+            src={`${bucketUrl}/characters/thumb/${selectedCharacter._id}.png`}
             name={selectedCharacter.name}
             bg="gray.200"
           />
@@ -203,7 +205,7 @@ export const CharacterSearchSelect = ({
                   <HStack spacing={3} flex={1}>
                     <Avatar
                       size={size === "sm" ? "xs" : "sm"}
-                      src={character.link || character.image}
+                      src={`${bucketUrl}/characters/thumb/${character._id}.png`}
                       name={character.name}
                       bg="gray.200"
                     />
