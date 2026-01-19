@@ -49,12 +49,12 @@ export const KillerFilter = ({
         <HStack spacing={2}>
           {selectedKiller ? (
             <>
-              <KillerIcon killer={selectedKiller} size="24px" />
+              <KillerIcon killer={selectedKiller} size="20px" />
               <Text fontSize="sm">{selectedKiller}</Text>
             </>
           ) : (
             <>
-              <KillerIcon killer={"Toutes"} size="24px" />
+              <KillerIcon killer={"Toutes"} size="20px" />
               <Text fontSize="sm">Tous les tueurs</Text>
             </>
           )}
