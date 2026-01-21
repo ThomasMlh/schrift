@@ -17,9 +17,11 @@ import {
   SimpleGrid,
   Card,
   CardBody,
+  IconButton,
+  Tooltip,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { AddIcon, InfoIcon } from "@chakra-ui/icons";
+import { AddIcon, InfoIcon, EditIcon } from "@chakra-ui/icons";
 import { useBuilds, useRotations } from "../../hooks/useAPI";
 import BuildCreationModal from "../ui/BuildCreationModal";
 import { BuildDetailModal } from "../ui/BuildDetailModal";
@@ -35,6 +37,7 @@ const RotationsBuildsGuide = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRotation, setSelectedRotation] = useState<string>("");
   const [selectedBuild, setSelectedBuild] = useState<IBuild | null>(null);
+  const [buildToEdit, setBuildToEdit] = useState<IBuild | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isDetailOpen, onOpen: onDetailOpen, onClose: onDetailClose } = useDisclosure();
 
@@ -70,6 +73,30 @@ const RotationsBuildsGuide = () => {
 
   const handleBuildCreated = () => {
     mutate();
+  };
+
+  const handleCreateBuild = () => {
+    setBuildToEdit(null);
+    onOpen();
+  };
+
+  const handleEditBuild = (build: IBuild, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation(); // Empêcher l'ouverture du détail
+    }
+    setBuildToEdit(build);
+    onOpen();
+  };
+
+  const handleCloseModal = () => {
+    setBuildToEdit(null);
+    onClose();
+  };
+
+  // Vérifier si l'utilisateur peut éditer un build
+  const canEditBuild = (build: IBuild) => {
+    if (!currentUser) return false;
+    return build.user_id === currentUser._id || currentUser.is_admin;
   };
 
   return (
@@ -152,7 +179,7 @@ const RotationsBuildsGuide = () => {
             <Button
               leftIcon={<AddIcon />}
               colorScheme="orange"
-              onClick={onOpen}
+              onClick={handleCreateBuild}
               isDisabled={!selectedRotation}
               size="md"
               flexShrink={0}
@@ -266,9 +293,23 @@ const RotationsBuildsGuide = () => {
                       {build.user ? (
                         <>
                           <UserDisplay user={build.user} />
-                          <Text fontSize="xs" color="gray.500">
-                            {formatDate(build.created_at)}
-                          </Text>
+                          <HStack spacing={2}>
+                            <Text fontSize="xs" color="gray.500">
+                              {formatDate(build.created_at)}
+                            </Text>
+                            {canEditBuild(build) && (
+                              <Tooltip label="Modifier ce build" placement="top">
+                                <IconButton
+                                  aria-label="Modifier le build"
+                                  icon={<EditIcon />}
+                                  size="xs"
+                                  colorScheme="blue"
+                                  variant="ghost"
+                                  onClick={(e) => handleEditBuild(build, e)}
+                                />
+                              </Tooltip>
+                            )}
+                          </HStack>
                         </>
                       ) : (
                         <Text fontSize="sm" color="gray.500">
@@ -335,13 +376,14 @@ const RotationsBuildsGuide = () => {
 
       <Divider my={8} />
 
-      {/* Modal de création */}
-      {selectedRotation && (
+      {/* Modal de création/édition */}
+      {(selectedRotation || buildToEdit) && (
         <BuildCreationModal
           isOpen={isOpen}
-          onClose={onClose}
-          rotationId={selectedRotation}
+          onClose={handleCloseModal}
+          rotationId={buildToEdit?.rotation_id || selectedRotation}
           onSuccess={handleBuildCreated}
+          buildToEdit={buildToEdit}
         />
       )}
 
@@ -350,6 +392,7 @@ const RotationsBuildsGuide = () => {
         isOpen={isDetailOpen}
         onClose={onDetailClose}
         build={selectedBuild}
+        onEdit={handleEditBuild}
       />
     </VStack>
   );

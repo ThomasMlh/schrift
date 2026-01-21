@@ -69,6 +69,7 @@ const BulkScoreModal = ({
     const [selectedRotationId, setSelectedRotationId] = useState<string>("");
     const [scores, setScores] = useState<{ [userId: string]: number }>({});
     const [hasExistingScores, setHasExistingScores] = useState(false);
+    const [displayedMembers, setDisplayedMembers] = useState<IUser[]>([]);
     
     // Charger les membres avec le hook
     const { members: guildMembers = [], isLoading } = useGuildMembers(
@@ -91,52 +92,70 @@ const BulkScoreModal = ({
         }
     }, [isOpen, isGuildRestricted, userGuildId]);
 
-    // Initialiser les scores quand les membres changent
+    // Déterminer la liste des membres à afficher et initialiser les scores
     useEffect(() => {
-        if (Array.isArray(guildMembers) && guildMembers.length > 0) {
-            const initialScores: { [userId: string]: number } = {};
-            guildMembers.forEach((user: IUser) => {
-                initialScores[user._id] = 0;
-            });
-            setScores(initialScores);
-        }
-    }, [guildMembers]);
-
-    // Charger les scores existants pour la rotation sélectionnée
-    useEffect(() => {
-        if (!selectedGuildId || !selectedCycleId || !selectedRotationId || !Array.isArray(guildMembers) || guildMembers.length === 0) {
-            setHasExistingScores(false);
+        if (!selectedGuildId || !selectedCycleId || !selectedRotationId) {
+            if (displayedMembers.length > 0 || Object.keys(scores).length > 0) {
+                setDisplayedMembers([]);
+                setScores({});
+                setHasExistingScores(false);
+            }
             return;
         }
 
-        // Créer un objet de scores
-        const newScores: { [userId: string]: number } = {};
-        
-        // Initialiser avec 0 pour tous les membres
-        guildMembers.forEach((user: IUser) => {
-            newScores[user._id] = 0;
-        });
+        if (isLoading || isLoadingScores) {
+            return;
+        }
 
+        const newScores: { [userId: string]: number } = {};
+        let membersToDisplay: IUser[] = [];
+        let foundExistingScores = false;
+
+        // Si des scores existent déjà, utiliser uniquement les joueurs de ces scores
         if (existingScoresData.length > 0) {
-            // Remplacer par les scores existants si disponibles
-            let foundExistingScores = false;
-            existingScoresData.forEach((score: IScoreFormData) => {
-                if (score.raw_score !== undefined) {
-                    newScores[score.user_id] = score.raw_score;
-                    if (score.raw_score > 0) {
-                        foundExistingScores = true;
+            // Extraire les utilisateurs des scores existants
+            existingScoresData.forEach((score: any) => {
+                if (score.user) {
+                    // score.user peut être un tableau ou un objet selon le pipeline MongoDB
+                    const user = Array.isArray(score.user) ? score.user[0] : score.user;
+                    if (user) {
+                        membersToDisplay.push(user);
+                        newScores[user._id] = score.raw_score || 0;
+                        if (score.raw_score > 0) {
+                            foundExistingScores = true;
+                        }
                     }
                 }
             });
-            
-            setHasExistingScores(foundExistingScores);
         } else {
-            setHasExistingScores(false);
+            // Sinon, utiliser la liste des membres actuels de la guilde
+            if (Array.isArray(guildMembers) && guildMembers.length > 0) {
+                guildMembers.forEach((user: IUser) => {
+                    newScores[user._id] = 0;
+                });
+                membersToDisplay = guildMembers;
+            }
         }
 
-        // Toujours mettre à jour les scores (soit avec les scores existants, soit avec des 0)
-        setScores(newScores);
-    }, [selectedGuildId, selectedCycleId, selectedRotationId, guildMembers, existingScoresData]);
+        // Ne mettre à jour que si les données ont changé
+        const membersChanged = membersToDisplay.length !== displayedMembers.length || 
+            membersToDisplay.some((m, i) => m._id !== displayedMembers[i]?._id);
+        
+        const scoresChanged = Object.keys(newScores).length !== Object.keys(scores).length ||
+            Object.keys(newScores).some(key => newScores[key] !== scores[key]);
+
+        if (membersChanged) {
+            setDisplayedMembers(membersToDisplay);
+        }
+        
+        if (scoresChanged) {
+            setScores(newScores);
+        }
+        
+        if (hasExistingScores !== foundExistingScores) {
+            setHasExistingScores(foundExistingScores);
+        }
+    }, [selectedGuildId, selectedCycleId, selectedRotationId, guildMembers, existingScoresData, isLoading, isLoadingScores, displayedMembers, scores, hasExistingScores]);
 
     const selectedCycle = cycles.find(cycle => cycle._id === selectedCycleId);
     const selectedGuild = guilds.find(guild => guild._id === selectedGuildId);
@@ -160,8 +179,8 @@ const BulkScoreModal = ({
             return;
         }
 
-        // Créer les données de scores pour tous les membres
-        const scoresData: IScoreFormData[] = guildMembers.map((member: IUser) => ({
+        // Créer les données de scores pour tous les membres affichés
+        const scoresData: IScoreFormData[] = displayedMembers.map((member: IUser) => ({
             user_id: member._id,
             cycle_id: selectedCycleId,
             rotation_id: selectedRotationId,
@@ -191,10 +210,11 @@ const BulkScoreModal = ({
         setSelectedRotationId("");
         setScores({});
         setHasExistingScores(false);
+        setDisplayedMembers([]);
         onClose();
     };
 
-    const canSubmit = selectedGuildId && selectedCycleId && selectedRotationId && guildMembers.length > 0;
+    const canSubmit = selectedGuildId && selectedCycleId && selectedRotationId && displayedMembers.length > 0;
 
     // Fonction pour formater les nombres avec des virgules
     const formatNumber = (value: string | number): string => {
@@ -330,11 +350,11 @@ const BulkScoreModal = ({
                                     <Text>Chargement des scores existants...</Text>
                                 </VStack>
                             </Center>
-                        ) : guildMembers.length > 0 ? (
+                        ) : displayedMembers.length > 0 ? (
                             <Box>
                                 <HStack justify="space-between" align="center" mb={4}>
                                     <Text fontSize="lg" fontWeight="bold">
-                                        Saisie des scores ({guildMembers.length} membres)
+                                        Saisie des scores ({displayedMembers.length} membres)
                                     </Text>
                                     {hasExistingScores && (
                                         <Text fontSize="sm" color="green.500" fontStyle="italic">
@@ -343,7 +363,7 @@ const BulkScoreModal = ({
                                     )}
                                 </HStack>
                                 <Grid templateColumns="repeat(auto-fill, minmax(240px, 1fr))" gap={2}>
-                                    {guildMembers.map((member: IUser) => (
+                                    {displayedMembers.map((member: IUser) => (
                                         <VStack 
                                             key={member._id}
                                             p={2}
@@ -394,7 +414,7 @@ const BulkScoreModal = ({
                             loadingText="Envoi en cours..."
                             isDisabled={!canSubmit}
                         >
-                            Enregistrer les scores ({guildMembers.length})
+                            Enregistrer les scores ({displayedMembers.length})
                         </Button>
                     </HStack>
                 </ModalFooter>

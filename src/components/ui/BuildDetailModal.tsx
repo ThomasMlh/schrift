@@ -16,23 +16,28 @@ import {
   useColorModeValue,
   Stack
 } from "@chakra-ui/react";
+import { EditIcon } from "@chakra-ui/icons";
 import { UserDisplay } from "./UserDisplay";
 import { AffinityIcon } from "./AffinityIcon";
 import type { IBuild } from "../../interfaces";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface BuildDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   build: IBuild | null;
+  onEdit?: (build: IBuild) => void;
 }
 
 export const BuildDetailModal = ({
   isOpen,
   onClose,
-  build
+  build,
+  onEdit
 }: BuildDetailModalProps) => {
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const linkBgColor = useColorModeValue("gray.50", "gray.700");
+  const { currentUser } = useAuth();
 
   const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
@@ -45,6 +50,18 @@ export const BuildDetailModal = ({
       hour: "2-digit",
       minute: "2-digit"
     });
+  };
+
+  // Vérifier si l'utilisateur peut éditer ce build
+  const canEdit = build && currentUser && (
+    build.user_id === currentUser._id || currentUser.is_admin
+  );
+
+  const handleEdit = () => {
+    if (build && onEdit) {
+      onEdit(build);
+      onClose();
+    }
   };
 
   return (
@@ -313,7 +330,18 @@ export const BuildDetailModal = ({
           )}
         </ModalBody>
         <ModalFooter>
-          <Button onClick={onClose}>Fermer</Button>
+          <HStack spacing={3}>
+            {canEdit && onEdit && (
+              <Button
+                leftIcon={<EditIcon />}
+                colorScheme="blue"
+                onClick={handleEdit}
+              >
+                Modifier
+              </Button>
+            )}
+            <Button onClick={onClose}>Fermer</Button>
+          </HStack>
         </ModalFooter>
       </ModalContent>
     </Modal>

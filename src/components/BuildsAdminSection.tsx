@@ -63,8 +63,6 @@ const BuildsAdminSection = () => {
     authenticated: true,
   });
 
-  console.log(builds);
-
   const handleValidate = async (buildId: string, isValid: boolean) => {
     try {
       await validateBuild(buildId, isValid);
