@@ -20,7 +20,8 @@ import {
   IconButton,
   Tooltip,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AddIcon, InfoIcon, EditIcon } from "@chakra-ui/icons";
 import { useBuilds, useRotations } from "../../hooks/useAPI";
 import BuildCreationModal from "../ui/BuildCreationModal";
@@ -34,10 +35,12 @@ import { AlterationImage } from "../ui/AlterationImage";
 import type { IBuild } from "../../interfaces";
 
 const RotationsBuildsGuide = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRotation, setSelectedRotation] = useState<string>("");
   const [selectedBuild, setSelectedBuild] = useState<IBuild | null>(null);
   const [buildToEdit, setBuildToEdit] = useState<IBuild | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isDetailOpen, onOpen: onDetailOpen, onClose: onDetailClose } = useDisclosure();
 
@@ -53,6 +56,23 @@ const RotationsBuildsGuide = () => {
   // Récupérer toutes les rotations
   const { rotations, isLoading: isLoadingRotations } = useRotations();
 
+  // Initialiser les états depuis l'URL au chargement
+  useEffect(() => {
+    const rotationParam = searchParams.get("rotation");
+    const pageParam = searchParams.get("page");
+
+    if (rotationParam && rotationParam !== selectedRotation) {
+      setSelectedRotation(rotationParam);
+    }
+    if (pageParam) {
+      const page = parseInt(pageParam, 10);
+      if (!isNaN(page) && page !== currentPage) {
+        setCurrentPage(page);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Récupérer les builds validés uniquement
   const { builds, pagination, isLoading, mutate } = useBuilds({
     page: currentPage,
@@ -61,6 +81,44 @@ const RotationsBuildsGuide = () => {
     isValid: true, // Toujours seulement les builds validés pour les utilisateurs
     authenticated: false
   });
+
+  // Ouvrir le modal de détail si un build est spécifié dans l'URL
+  useEffect(() => {
+    const buildParam = searchParams.get("build");
+    if (buildParam && builds.length > 0 && !selectedBuild && isInitialLoad) {
+      const build = builds.find((b) => b._id === buildParam);
+      if (build) {
+        setSelectedBuild(build);
+        onDetailOpen();
+        setIsInitialLoad(false);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [builds, searchParams, isInitialLoad]);
+
+  // Mettre à jour l'URL quand les filtres changent (sauf au chargement initial)
+  useEffect(() => {
+    if (isInitialLoad) return;
+
+    const params = new URLSearchParams();
+    
+    if (selectedRotation) {
+      params.set("rotation", selectedRotation);
+    }
+    if (currentPage > 1) {
+      params.set("page", currentPage.toString());
+    }
+    if (selectedBuild?._id) {
+      params.set("build", selectedBuild._id);
+    }
+
+    const newSearch = params.toString();
+    const currentSearch = searchParams.toString();
+    
+    if (newSearch !== currentSearch) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [selectedRotation, currentPage, selectedBuild, setSearchParams, searchParams, isInitialLoad]);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
@@ -91,6 +149,24 @@ const RotationsBuildsGuide = () => {
   const handleCloseModal = () => {
     setBuildToEdit(null);
     onClose();
+  };
+
+  const handleCloseDetailModal = () => {
+    setSelectedBuild(null);
+    onDetailClose();
+    // Marquer que le chargement initial est terminé après la première interaction
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+    }
+  };
+
+  const handleOpenBuild = (build: IBuild) => {
+    setSelectedBuild(build);
+    onDetailOpen();
+    // Marquer que le chargement initial est terminé après la première interaction
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+    }
   };
 
   // Vérifier si l'utilisateur peut éditer un build
@@ -262,10 +338,7 @@ const RotationsBuildsGuide = () => {
                   transition: "all 0.2s"
                 }}
                 cursor="pointer"
-                onClick={() => {
-                  setSelectedBuild(build);
-                  onDetailOpen();
-                }}
+                onClick={() => handleOpenBuild(build)}
               >
                 <CardBody>
                   <VStack align="stretch" spacing={4}>
@@ -390,7 +463,7 @@ const RotationsBuildsGuide = () => {
       {/* Modal de détails */}
       <BuildDetailModal 
         isOpen={isDetailOpen}
-        onClose={onDetailClose}
+        onClose={handleCloseDetailModal}
         build={selectedBuild}
         onEdit={handleEditBuild}
       />

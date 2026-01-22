@@ -41,6 +41,9 @@ export const CurrentInfoSection = () => {
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const textColor = useColorModeValue("black.900", "white.900");
+  const cycleIconColor = useColorModeValue("blue.600", "blue.300");
+  const rotationIconColor = useColorModeValue("purple.600", "purple.300");
+  const currentInfoIconColor = useColorModeValue("green.600", "green.300");
 
   // Traiter les cycles quand ils sont chargés
   useEffect(() => {
@@ -180,12 +183,12 @@ export const CurrentInfoSection = () => {
             placeItems="center"
             bg={bgColor}
             border="1px solid"
-            borderColor={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
+            borderColor={borderColor}
           >
             <Icon
               as={FaClock}
               boxSize={4}
-              color={useColorModeValue("green.600", "green.300")}
+              color={currentInfoIconColor}
             />
           </Box>
 
@@ -252,7 +255,7 @@ export const CurrentInfoSection = () => {
                         <Icon
                           as={FaCalendarAlt}
                           boxSize={4}
-                          color={useColorModeValue("blue.600", "blue.300")}
+                          color={cycleIconColor}
                         />
                         <Text
                           fontSize="xs"
@@ -337,7 +340,7 @@ export const CurrentInfoSection = () => {
                       <Icon
                         as={FaClock}
                         boxSize={4}
-                        color={useColorModeValue("purple.600", "purple.300")}
+                        color={rotationIconColor}
                       />
                       <Text
                         fontSize="xs"
