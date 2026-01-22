@@ -137,25 +137,17 @@ const BulkScoreModal = ({
             }
         }
 
-        // Ne mettre à jour que si les données ont changé
+        // Ne mettre à jour que si les membres ont changé
         const membersChanged = membersToDisplay.length !== displayedMembers.length || 
             membersToDisplay.some((m, i) => m._id !== displayedMembers[i]?._id);
-        
-        const scoresChanged = Object.keys(newScores).length !== Object.keys(scores).length ||
-            Object.keys(newScores).some(key => newScores[key] !== scores[key]);
 
         if (membersChanged) {
             setDisplayedMembers(membersToDisplay);
-        }
-        
-        if (scoresChanged) {
             setScores(newScores);
-        }
-        
-        if (hasExistingScores !== foundExistingScores) {
             setHasExistingScores(foundExistingScores);
         }
-    }, [selectedGuildId, selectedCycleId, selectedRotationId, guildMembers, existingScoresData, isLoading, isLoadingScores, displayedMembers, scores, hasExistingScores]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedGuildId, selectedCycleId, selectedRotationId, guildMembers, existingScoresData, isLoading, isLoadingScores]);
 
     const selectedCycle = cycles.find(cycle => cycle._id === selectedCycleId);
     const selectedGuild = guilds.find(guild => guild._id === selectedGuildId);
