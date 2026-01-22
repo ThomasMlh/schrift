@@ -380,9 +380,9 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     <Modal isOpen={isOpen} onClose={onClose} size="4xl" scrollBehavior="inside">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{isEditMode ? 'Modifier le Build' : 'Créer un Build'}</ModalHeader>
+        <ModalHeader boxShadow={"lg"}>{isEditMode ? 'Modifier le Build' : 'Créer un Build'}</ModalHeader>
         <ModalCloseButton />
-        <ModalBody>
+        <ModalBody py={4}>
           <VStack spacing={6} align="stretch">
             <Alert status="info" borderRadius="md">
               <AlertIcon />
@@ -426,7 +426,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
           </VStack>
         </ModalBody>
 
-        <ModalFooter>
+        <ModalFooter boxShadow={"0 -6px 12px -4px rgba(0,0,0,0.15)"}>
           <Button variant="ghost" mr={3} onClick={onClose} isDisabled={isSubmitting}>
             Annuler
           </Button>
