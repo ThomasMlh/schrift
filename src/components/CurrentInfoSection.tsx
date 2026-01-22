@@ -31,11 +31,16 @@ export const CurrentInfoSection = () => {
   const shadowColor = useColorModeValue("lg", "dark-lg");
 
   // Utilisation de useSWR pour les cycles (cache automatique + déduplication)
-  const { cycles: allCycles, isLoading, error: cyclesError } = useCycles({ limit: 5, authenticated: true });
+  const {
+    cycles: allCycles,
+    isLoading,
+    error: cyclesError
+  } = useCycles({ limit: 5, authenticated: true });
 
   // Hooks UI
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
+  const textColor = useColorModeValue("black.900", "white.900");
 
   // Traiter les cycles quand ils sont chargés
   useEffect(() => {
@@ -107,7 +112,7 @@ export const CurrentInfoSection = () => {
           setCurrentRotation(null);
           setIsRotationActive(false);
         }
-      } 
+      }
       // Sinon, chercher le prochain cycle
       else if (allCycles.length > 0) {
         const nextCycleData = allCycles[0]; // Le plus récent
@@ -118,7 +123,7 @@ export const CurrentInfoSection = () => {
         setIsRotationActive(false);
       }
     }
-    
+
     if (cyclesError) {
       setError("Erreur lors du chargement des données");
     }
@@ -147,21 +152,6 @@ export const CurrentInfoSection = () => {
     return { realStartDate, realEndDate };
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "Non définie";
-
-    try {
-      const date = parseDate(dateString);
-      return date.toLocaleDateString("fr-FR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-      });
-    } catch {
-      return "Date invalide";
-    }
-  };
-
   const formatRealDateTime = (date: Date) => {
     return (
       date.toLocaleDateString("fr-FR", {
@@ -179,144 +169,261 @@ export const CurrentInfoSection = () => {
 
   return (
     <Box w="100%">
-      <VStack spacing={6} align="stretch">
-        {/* En-tête moderne */}
-        <HStack spacing={3} mb={2}>
-          <Icon as={FaClock} boxSize={6} color="green.500" />
-          <Text fontWeight="bold" fontSize="2xl">
-            Informations Actuelles
-          </Text>
+      <VStack spacing={4} align="stretch">
+        {/* Header section */}
+        <HStack spacing={3} align="center">
+          <Box
+            w="36px"
+            h="36px"
+            rounded="lg"
+            display="grid"
+            placeItems="center"
+            bg={bgColor}
+            border="1px solid"
+            borderColor={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
+          >
+            <Icon
+              as={FaClock}
+              boxSize={4}
+              color={useColorModeValue("green.600", "green.300")}
+            />
+          </Box>
+
+          <Box>
+            <Text fontWeight="bold" fontSize="xl">
+              Informations actuelles
+            </Text>
+            <Text fontSize="sm" opacity={0.75}>
+              Aperçu du cycle et de la rotation (dates, statut, détails).
+            </Text>
+          </Box>
         </HStack>
-        
+
+        {/* Container */}
         <Box
-          bg={bgColor}
-          borderRadius="xl"
+          borderRadius="2xl"
           borderWidth="1px"
           borderColor={borderColor}
+          bg={bgColor}
+          backdropFilter="blur(10px)"
           boxShadow={shadowColor}
-          overflow="hidden"
+          p={{ base: 4, md: 5 }}
         >
           {error ? (
-          <Box p={6}>
-            <Alert status="error" borderRadius="md">
+            <Alert status="error" borderRadius="lg">
               <AlertIcon />
               <Text>{error}</Text>
             </Alert>
-          </Box>
-        ) : isLoading ? (
-          <Flex justify="center" align="center" py={8}>
-            <HStack spacing={3}>
-              <Spinner size="lg" color="blue.500" thickness="4px" />
-              <Text fontSize="lg">Chargement...</Text>
-            </HStack>
-          </Flex>
-        ) : !currentCycle && !nextCycle ? (
-          /* Aucun cycle disponible */
-          <Box p={8} textAlign="center">
-            <VStack spacing={3}>
-              <Icon as={FaCalendarAlt} boxSize={12} color="gray.400" />
-              <Text fontSize="lg" fontWeight="medium" color="gray.500">
-                Aucun cycle disponible
-              </Text>
-            </VStack>
-          </Box>
-        ) : (
-          <>
-                {/* Cycle actuel ou prochain */}
+          ) : isLoading ? (
+            <Flex justify="center" align="center" py={10}>
+              <HStack spacing={3}>
+                <Spinner size="lg" color="blue.500" thickness="4px" />
+                <Text fontSize="lg">Chargement…</Text>
+              </HStack>
+            </Flex>
+          ) : !currentCycle && !nextCycle ? (
+            <Flex justify="center" align="center" py={12}>
+              <VStack spacing={3}>
+                <Icon as={FaCalendarAlt} boxSize={10} opacity={0.5} />
+                <Text fontSize="md" fontWeight="semibold" opacity={0.75}>
+                  Aucun cycle disponible
+                </Text>
+              </VStack>
+            </Flex>
+          ) : (
+            <Box>
+              {/* GRID: Cycle + Rotation */}
+              <Box
+                display="grid"
+                gridTemplateColumns={{ base: "1fr", lg: "1fr 1fr" }}
+                gap={4}
+              >
+                {/* Card: Cycle */}
                 {(currentCycle || nextCycle) && (
-                  <Box p={6}>
-                    <HStack justify="space-between" align="start">
-                      <VStack align="start" spacing={2} flex={1}>
-                        <HStack spacing={2}>
-                          <Icon as={FaCalendarAlt} boxSize={5} color="blue.500" />
-                          <Text fontSize="sm" fontWeight="semibold" color="gray.500" textTransform="uppercase" letterSpacing="wide">
-                            {isCycleActive ? "Cycle en cours" : "Prochain cycle"}
-                          </Text>
-                        </HStack>
-                        <CustomLink
-                          to={`/cycle/${(currentCycle || nextCycle)?._id}`}
-                          text={(currentCycle || nextCycle)?.name || ""}
-                          textSize="xl"
+                  <Box
+                    rounded="xl"
+                    borderWidth="1px"
+                    borderColor={borderColor}
+                    bg={bgColor}
+                    p={5}
+                  >
+                    <HStack justify="space-between" align="start" mb={3}>
+                      <HStack spacing={2}>
+                        <Icon
+                          as={FaCalendarAlt}
+                          boxSize={4}
+                          color={useColorModeValue("blue.600", "blue.300")}
                         />
-                        {(currentCycle || nextCycle)?.created_at && (
-                          <Text fontSize="xs" color="gray.500">
-                            Créé le {formatDate((currentCycle || nextCycle)?.created_at)}
-                          </Text>
-                        )}
-                      </VStack>
-                      <Badge 
-                        colorScheme={isCycleActive ? "blue" : "orange"} 
-                        variant="solid" 
-                        fontSize="xs"
+                        <Text
+                          fontSize="xs"
+                          fontWeight="semibold"
+                          textTransform="uppercase"
+                          letterSpacing="0.12em"
+                          color={textColor}
+                        >
+                          {isCycleActive ? "Cycle en cours" : "Prochain cycle"}
+                        </Text>
+                      </HStack>
+
+                      <Badge
+                        colorScheme={isCycleActive ? "blue" : "orange"}
+                        variant="subtle"
+                        rounded="full"
                         px={3}
                         py={1}
-                        borderRadius="full"
+                        fontSize="xs"
                       >
-                        {isCycleActive ? "ACTIF" : "PROCHAIN"}
+                        {isCycleActive ? "Actif" : "Prochain"}
                       </Badge>
                     </HStack>
+
+                    <VStack align="start" spacing={3}>
+                      <CustomLink
+                        to={`/cycle/${(currentCycle || nextCycle)?._id}`}
+                        text={(currentCycle || nextCycle)?.name || ""}
+                        textSize="lg"
+                      />
+
+                      {currentCycle && currentCycle.rotations && (
+                        <Box
+                          w="100%"
+                          rounded="lg"
+                          borderWidth="1px"
+                          borderColor={borderColor}
+                          bg={bgColor}
+                          p={3}
+                        >
+                          {(() => {
+                            const { realStartDate, realEndDate } =
+                              getRotationRealDates(
+                                currentCycle.rotations[0].start_date,
+                                currentCycle.rotations[
+                                  currentCycle.rotations.length - 1
+                                ].end_date
+                              );
+                            return (
+                              <VStack align="start" spacing={1}>
+                                <HStack spacing={2} fontSize="sm">
+                                  <Text fontWeight="semibold">Début :</Text>
+                                  <Text opacity={0.8}>
+                                    {formatRealDateTime(realStartDate)}
+                                  </Text>
+                                </HStack>
+                                <HStack spacing={2} fontSize="sm">
+                                  <Text fontWeight="semibold">Fin :</Text>
+                                  <Text opacity={0.8}>
+                                    {formatRealDateTime(realEndDate)}
+                                  </Text>
+                                </HStack>
+                              </VStack>
+                            );
+                          })()}
+                        </Box>
+                      )}
+                    </VStack>
                   </Box>
                 )}
 
-                {/* Rotation actuelle ou prochaine - seulement si on a un cycle actif */}
-                {currentCycle && currentRotation ? (
-                  <Box p={6}>
-                    <VStack align="stretch" spacing={4}>
-                      <HStack justify="space-between" align="start">
-                        <HStack spacing={2}>
-                          <Icon as={FaClock} boxSize={5} color="purple.500" />
-                          <Text fontSize="sm" fontWeight="semibold" color="gray.500" textTransform="uppercase" letterSpacing="wide">
-                            {isRotationActive ? "Rotation en cours" : "Prochaine rotation"}
+                {/* Card: Rotation */}
+                <Box
+                  rounded="xl"
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                  bg={bgColor}
+                  p={5}
+                >
+                  <HStack justify="space-between" align="start" mb={3}>
+                    <HStack spacing={2}>
+                      <Icon
+                        as={FaClock}
+                        boxSize={4}
+                        color={useColorModeValue("purple.600", "purple.300")}
+                      />
+                      <Text
+                        fontSize="xs"
+                        fontWeight="semibold"
+                        textTransform="uppercase"
+                        letterSpacing="0.12em"
+                        color={textColor}
+                      >
+                        {currentCycle && currentRotation
+                          ? isRotationActive
+                            ? "Rotation en cours"
+                            : "Prochaine rotation"
+                          : "Rotation"}
+                      </Text>
+                    </HStack>
+
+                    {currentCycle && currentRotation ? (
+                      <Badge
+                        colorScheme={isRotationActive ? "purple" : "orange"}
+                        variant="subtle"
+                        rounded="full"
+                        px={3}
+                        py={1}
+                        fontSize="xs"
+                      >
+                        {isRotationActive ? "En cours" : "Prochaine"}
+                      </Badge>
+                    ) : (
+                      <Badge
+                        variant="outline"
+                        rounded="full"
+                        px={3}
+                        py={1}
+                        fontSize="xs"
+                        opacity={0.8}
+                      >
+                        N/A
+                      </Badge>
+                    )}
+                  </HStack>
+
+                  {currentCycle && currentRotation ? (
+                    <VStack align="start" spacing={3}>
+                      {/* line 1 */}
+                      <HStack spacing={2} flexWrap="wrap" align="center">
+                        {currentRotation.position ? (
+                          <CustomLink
+                            to={`/cycle/${currentCycle._id}/rotation/${currentRotation.position}`}
+                            text={`Rotation #${currentRotation.position}`}
+                            textSize="md"
+                          />
+                        ) : (
+                          <Text fontSize="md" opacity={0.7}>
+                            Rotation (sans position)
                           </Text>
-                        </HStack>
-                        <Badge 
-                          colorScheme={isRotationActive ? "purple" : "orange"} 
-                          variant="solid" 
-                          fontSize="xs"
-                          px={3}
-                          py={1}
-                          borderRadius="full"
-                        >
-                          {isRotationActive ? "EN COURS" : "PROCHAINE"}
-                        </Badge>
+                        )}
+
+                        <Text opacity={0.5}>•</Text>
+                        <Text fontSize="md" fontWeight="semibold">
+                          {currentRotation.killer}
+                        </Text>
+
+                        <Text opacity={0.5}>•</Text>
+
+                        <AttackTypeBadge
+                          attackType={currentRotation.attack}
+                          size="28px"
+                        />
+                        <AlterationImage
+                          alteration={currentRotation.alteration}
+                          showLabel
+                          size="24px"
+                        />
                       </HStack>
-                      
-                      <VStack align="start" spacing={3}>
-                        <HStack spacing={3} flexWrap="wrap" align="center">
-                          {currentRotation.position ? (
-                            <CustomLink 
-                              to={`/cycle/${currentCycle._id}/rotation/${currentRotation.position}`} 
-                              text={`Rotation #${currentRotation.position}`} 
-                              textSize="md" 
-                            />
-                          ) : (
-                            <Text fontSize="md" color="gray.500">
-                              Rotation (sans position)
-                            </Text>
-                          )}
-                          <Text fontSize="md">
-                            {" - "}
-                          </Text>
-                          <Text fontSize="md">
-                            {currentRotation.killer}
-                          </Text>
-                          <Text fontSize="md">
-                            {" - "}
-                          </Text>
-                          <AttackTypeBadge
-                            attackType={currentRotation.attack}
-                            size="28px"
-                          />
-                          <AlterationImage
-                            alteration={currentRotation.alteration}
-                            showLabel={true}
-                            size="24px"
-                          
-                          />
-                        </HStack>
-                        
-                        {currentRotation.start_date && currentRotation.end_date && (
-                          <HStack spacing={6} flexWrap="wrap" fontSize="sm" color="gray.600">
+
+                      {/* line 2 - dates */}
+                      {currentRotation.start_date &&
+                        currentRotation.end_date && (
+                          <Box
+                            w="100%"
+                            rounded="lg"
+                            borderWidth="1px"
+                            borderColor={borderColor}
+                            bg={bgColor}
+                            p={3}
+                          >
                             {(() => {
                               const { realStartDate, realEndDate } =
                                 getRotationRealDates(
@@ -324,33 +431,37 @@ export const CurrentInfoSection = () => {
                                   currentRotation.end_date
                                 );
                               return (
-                                <>
-                                  <HStack spacing={2}>
-                                    <Text fontWeight="medium">Début:</Text>
-                                    <Text>{formatRealDateTime(realStartDate)}</Text>
+                                <VStack align="start" spacing={1}>
+                                  <HStack spacing={2} fontSize="sm">
+                                    <Text fontWeight="semibold">Début :</Text>
+                                    <Text opacity={0.8}>
+                                      {formatRealDateTime(realStartDate)}
+                                    </Text>
                                   </HStack>
-                                  <HStack spacing={2}>
-                                    <Text fontWeight="medium">Fin:</Text>
-                                    <Text>{formatRealDateTime(realEndDate)}</Text>
+                                  <HStack spacing={2} fontSize="sm">
+                                    <Text fontWeight="semibold">Fin :</Text>
+                                    <Text opacity={0.8}>
+                                      {formatRealDateTime(realEndDate)}
+                                    </Text>
                                   </HStack>
-                                </>
+                                </VStack>
                               );
                             })()}
-                          </HStack>
+                          </Box>
                         )}
-                      </VStack>
                     </VStack>
-                  </Box>
-                ) : (
-                  currentCycle && (
-                    <Box p={6} textAlign="center">
-                      <Text fontSize="sm" color="gray.500">
-                        Aucune rotation définie pour ce cycle
-                      </Text>
-                    </Box>
-                  )
-                )}
-            </>
+                  ) : currentCycle ? (
+                    <Text fontSize="sm" opacity={0.75}>
+                      Aucune rotation définie pour ce cycle.
+                    </Text>
+                  ) : (
+                    <Text fontSize="sm" opacity={0.75}>
+                      Sélectionne un cycle pour voir la rotation.
+                    </Text>
+                  )}
+                </Box>
+              </Box>
+            </Box>
           )}
         </Box>
       </VStack>
