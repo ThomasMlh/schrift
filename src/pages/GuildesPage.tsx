@@ -5,25 +5,21 @@ import {
   Box,
   Button,
   HStack,
-  useToast,
   Flex,
-  useColorModeValue
+  useColorModeValue,
+  Image
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { SEOHead } from "../components/SEOHead";
 import { GuildOrgChart } from "../components/GuildOrgChart";
-import { useGuilds } from "@/hooks/useAPI";
-import { useAuth } from "@/providers/AuthProvider";
-import type { IUser, IGuild } from "../interfaces";
+import { useGuilds, useGuildMembers } from "@/hooks/useAPI";
+import type { IGuild } from "../interfaces";
 
 const GuildesPage = () => {
-  const { getAuthHeaders } = useAuth();
   const { guilds } = useGuilds(true);
   const [selectedGuild, setSelectedGuild] = useState<IGuild | null>(null);
-  const [members, setMembers] = useState<IUser[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const toast = useToast();
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
   const buttonBg = useColorModeValue("white", "gray.800");
   const buttonHoverBg = useColorModeValue("blue.50", "blue.900");
@@ -37,34 +33,8 @@ const GuildesPage = () => {
     }
   }, [guilds, selectedGuild]);
 
-  // Charger les membres de la guilde sélectionnée
-  useEffect(() => {
-    if (!selectedGuild || !apiUrl) return;
-
-    setIsLoading(true);
-    fetch(`${apiUrl}/api/guildes/${selectedGuild._id}/membres`, {
-      headers: getAuthHeaders()
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const membersList = data.data || data;
-        const membersArray = Array.isArray(membersList) ? membersList : [];
-        setMembers(membersArray);
-      })
-      .catch((error) => {
-        console.error("Erreur lors du chargement des membres:", error);
-        setMembers([]);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les membres de la guilde",
-          status: "error",
-          duration: 3000
-        });
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [selectedGuild, apiUrl, toast, getAuthHeaders]);
+  // Charger les membres de la guilde sélectionnée via useAPI
+  const { members, isLoading } = useGuildMembers(selectedGuild?._id, true);
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -105,7 +75,17 @@ const GuildesPage = () => {
                 fontWeight="bold"
                 px={8}
               >
-                {guild.name}
+                {!imageErrors[guild._id] ? (
+                  <Image 
+                    src={`${bucketUrl}/guilds/${guild.name}.png`} 
+                    alt={guild.name} 
+                    height="90%" 
+                    width="auto"
+                    onError={() => setImageErrors(prev => ({ ...prev, [guild._id]: true }))}
+                  />
+                ) : (
+                  guild.name
+                )}
               </Button>
             ))}
           </HStack>

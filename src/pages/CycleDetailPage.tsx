@@ -96,7 +96,7 @@ const CycleDetailPage = () => {
         {/* Titre du cycle */}
         <Box textAlign="center">
           <Heading size="xl" mb={2}>
-            {cycle.name}
+            {cycle.name} - {cycle.year}
           </Heading>
           <Text color={textSecondary}>Détail du cycle de rotation</Text>
         </Box>

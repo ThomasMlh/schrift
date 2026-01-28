@@ -53,7 +53,7 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
                 : undefined
             }
           />
-          <CustomLink to={`/joueur/${member._id}`} text={member.global_name || member.username} />
+          <CustomLink to={`/joueur/${member._id}`} text={member.global_name || member.username} requireAuth={true} />
           <Badge
             colorScheme={
               roleLabel === "Chef"

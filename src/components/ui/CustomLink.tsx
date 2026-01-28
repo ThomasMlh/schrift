@@ -1,20 +1,35 @@
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Link, useColorModeValue } from '@chakra-ui/react';
+import { Link, useColorModeValue, Text } from '@chakra-ui/react';
 import type { SystemStyleObject } from '@chakra-ui/react';
+import { useAuth } from '@/providers/AuthProvider';
 
 interface CustomLinkProps {
     to: string;
     text: string;
     textSize?: "xs" | "sm" | "md" | "lg" | "xl";
     sx?: SystemStyleObject;
+    requireAuth?: boolean;
 }
 
-const CustomLink: React.FC<CustomLinkProps> = ({ to, text, textSize = "sm", sx }) => {
+const CustomLink: React.FC<CustomLinkProps> = ({ to, text, textSize = "sm", sx, requireAuth = false }) => {
     const linkColor = useColorModeValue("black", "white");
+    const { isLoggedIn } = useAuth();
     
-    // Si le lien a un gradient rainbow, on adapte le hover
     const hasRainbowGradient = sx?.bgGradient || sx?.backgroundImage;
+
+    if (requireAuth && !isLoggedIn) {
+        return (
+            <Text
+                color={linkColor}
+                fontWeight="medium"
+                fontSize={textSize}
+                sx={sx}
+            >
+                {text}
+            </Text>
+        );
+    }
 
     return <Link 
         as={RouterLink} 

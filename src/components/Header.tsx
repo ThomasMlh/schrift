@@ -178,6 +178,7 @@ export const Header = () => {
                 to={`/joueur/${currentUser?._id}`}
                 text={`${currentUser?.global_name}`}
                 textSize="sm"
+                requireAuth={true}
               />
               {isAdmin && (
                 <Text fontSize="xs" color="orange.500" lineHeight="short">
@@ -332,6 +333,7 @@ export const Header = () => {
                         to={`/joueur/${currentUser?._id}`}
                         text={`${currentUser?.global_name}`}
                         textSize="sm"
+                        requireAuth={true}
                       />
                       {isAdmin && (
                         <Text fontSize="xs" color="orange.500">

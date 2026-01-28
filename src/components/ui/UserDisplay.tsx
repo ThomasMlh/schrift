@@ -3,7 +3,6 @@ import { getUserAvatarUrl } from "@/utils/discord";
 import type { IUser } from "@/interfaces";
 import CustomLink from "./CustomLink";
 import { formatRoleName } from "@/utils/user";
-import { useAuth } from "@/providers/AuthProvider";
 
 interface UserDisplayProps {
   user?: IUser;
@@ -23,8 +22,6 @@ export const UserDisplay = ({
   roleBadge = false,
   rainbowText = false
 }: UserDisplayProps) => {
-  // Si pas d'utilisateur, afficher un fallback
-  const { isLoggedIn } = useAuth();
 
   if (!user) {
     return (
@@ -52,8 +49,9 @@ export const UserDisplay = ({
       />
       <VStack spacing={0} align="start">
         <CustomLink
-          to={isLoggedIn ? `/joueur/${user._id}` : "/"}
+          to={`/joueur/${user._id}`}
           text={user.bbs_name || user.global_name}
+          requireAuth={true}
           sx={
             rainbowText
               ? {

@@ -294,7 +294,7 @@ export const CurrentInfoSection = () => {
                     <VStack align="start" spacing={3}>
                       <CustomLink
                         to={`/cycle/${(currentCycle || nextCycle)?._id}`}
-                        text={(currentCycle || nextCycle)?.name || ""}
+                        text={`${(currentCycle || nextCycle)?.name} - ${(currentCycle || nextCycle)?.year}`}
                         textSize="lg"
                       />
 

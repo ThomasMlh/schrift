@@ -161,7 +161,7 @@ export interface IScoresResponse {
 export interface IScoreDetailApiResponse {
   success: boolean;
   data: IScoreWithUser[];
-  cycle: string;
+  cycle: ICycle | null;
   rotation: IRotationTemplate | null;
   pagination: {
     currentPage: number;

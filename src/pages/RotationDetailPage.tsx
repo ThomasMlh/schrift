@@ -6,7 +6,7 @@ import {
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowBackIcon, ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import type { IRotationTemplate, IScoreWithUser, IRankInfo } from "@/interfaces";
+import type { IRotationTemplate, IScoreWithUser, IRankInfo, ICycle } from "@/interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { UserDisplay } from "@/components/ui/UserDisplay";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
@@ -20,7 +20,7 @@ const RotationDetailPage = () => {
     const toast = useToast();
 
     const [scores, setScores] = useState<IScoreWithUser[]>([]);
-    const [cycle, setCycle] = useState<string | null>(null);
+    const [cycle, setCycle] = useState<ICycle | null>(null);
     const [rotation, setRotation] = useState<IRotationTemplate | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
@@ -232,7 +232,7 @@ const RotationDetailPage = () => {
                         <Heading size={{ base: "md", md: "lg" }}>
                             <VStack spacing={2} align="start">
                                 <HStack spacing={2} align="center" flexWrap="wrap">
-                                    <Text as="span">{cycle}</Text>
+                                    <Text as="span">{cycle?.name} - {cycle?.year}</Text>
                                     
                                     <Text as="span" color={textSecondary}>-</Text>
                                     <Text as="span">Rotation #{position}</Text>
