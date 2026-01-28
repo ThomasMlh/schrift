@@ -1,6 +1,4 @@
 import { Container, Flex, Box, VStack } from "@chakra-ui/react";
-import { GuildTabsList } from "../components/GuildTabsList";
-import { PodiumSection } from "../components/PodiumSection";
 import { CurrentInfoSection } from "../components/CurrentInfoSection";
 import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "../components/SEOHead";
@@ -45,15 +43,6 @@ const HomePage = () => {
           <VStack spacing={8} w="100%">
             <Box w="100%">
               <CurrentInfoSection />
-            </Box>
-            
-            <Box w="100%">
-              <GuildTabsList />
-            </Box>
-            
-            {/* Section Podium */}
-            <Box w="100%">
-              <PodiumSection />
             </Box>
           </VStack>
         </Container>

@@ -54,6 +54,9 @@ export const Header = () => {
   const comparatorHoverColor = useColorModeValue("cyan.600", "cyan.200");
   const guidesHoverBg = useColorModeValue("orange.50", "orange.900");
   const guidesHoverColor = useColorModeValue("orange.600", "orange.200");
+  const guildsHoverBg = useColorModeValue("yellow.50", "yellow.900");
+  const guildsHoverColor = useColorModeValue("yellow.600", "yellow.200");
+  const bgColor = useColorModeValue("white", "gray.800");
 
   const menuItems = [
     {
@@ -62,6 +65,13 @@ export const Header = () => {
       icon: "🏠",
       hoverBg: homeHoverBg,
       hoverColor: homeHoverColor
+    },
+    {
+      name: "Guildes",
+      path: "/guildes",
+      icon: "🛡️",
+      hoverBg: guildsHoverBg,
+      hoverColor: guildsHoverColor
     },
     {
       name: "Personnages",
@@ -194,8 +204,6 @@ export const Header = () => {
       );
     }
   };
-
-  const bgColor = useColorModeValue("white", "gray.800");
 
   return (
     <Box

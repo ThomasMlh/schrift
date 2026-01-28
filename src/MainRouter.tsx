@@ -19,6 +19,7 @@ import AdminPage from "./pages/AdminPage";
 import PodiumPage from "./pages/PodiumPage";
 import ComparatorPage from "./pages/ComparatorPage";
 import GuidesPage from "./pages/GuidesPage";
+import GuildesPage from "./pages/GuildesPage";
 import NotFound from "./pages/NotFound";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
@@ -63,6 +64,7 @@ const AppRoutes = () => {
         >
           <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/guildes" element={<GuildesPage />} />
           <Route path="/personnages" element={<CharactersPage />} />
           <Route path="/personnage/:id" element={<CharacterDetailPage />} />
           <Route path="/cycles" element={<CyclesPage />} />

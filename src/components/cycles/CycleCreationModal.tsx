@@ -94,7 +94,6 @@ export const CycleCreationModal = ({
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={6} align="stretch">
-            {/* Nom du cycle */}
             <VStack spacing={2} align="stretch">
               <Text fontSize="sm" fontWeight="medium">Nom du cycle</Text>
               <Input
@@ -104,15 +103,11 @@ export const CycleCreationModal = ({
                 isDisabled={isSubmitting}
               />
             </VStack>
-
-            {/* Templates de rotation */}
             <RotationTemplatesSection
               templates={rotationTemplates}
               onAddRotation={onAddRotation}
               selectedRotationsCount={selectedRotations.length}
             />
-
-            {/* Rotations sélectionnées */}
             <SelectedRotationsList
               rotations={selectedRotations}
               onDragEnd={onDragEnd}

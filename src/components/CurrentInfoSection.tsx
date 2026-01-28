@@ -30,14 +30,12 @@ export const CurrentInfoSection = () => {
   const [error, setError] = useState<string | null>(null);
   const shadowColor = useColorModeValue("lg", "dark-lg");
 
-  // Utilisation de useSWR pour les cycles (cache automatique + déduplication)
   const {
     cycles: allCycles,
     isLoading,
     error: cyclesError
   } = useCycles({ limit: 5, authenticated: true });
 
-  // Hooks UI
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const textColor = useColorModeValue("black.900", "white.900");
@@ -45,7 +43,6 @@ export const CurrentInfoSection = () => {
   const rotationIconColor = useColorModeValue("purple.600", "purple.300");
   const currentInfoIconColor = useColorModeValue("green.600", "green.300");
 
-  // Traiter les cycles quand ils sont chargés
   useEffect(() => {
     if (!isLoading && allCycles.length > 0) {
       const now = new Date();
@@ -55,10 +52,8 @@ export const CurrentInfoSection = () => {
       let isRotationCurrentlyActive = false;
       let isCycleCurrentlyActive = false;
 
-      // Chercher un cycle avec au moins une rotation active
       for (const cycle of allCycles) {
         if (cycle.rotations && cycle.rotations.length > 0) {
-          // Vérifier s'il y a une rotation active dans ce cycle
           for (const rotation of cycle.rotations) {
             if (rotation.start_date && rotation.end_date) {
               const { realStartDate, realEndDate } = getRotationRealDates(
@@ -66,7 +61,6 @@ export const CurrentInfoSection = () => {
                 rotation.end_date
               );
 
-              // Rotation actuellement active
               if (now >= realStartDate && now <= realEndDate) {
                 activeCycle = cycle;
                 activeRotation = rotation;
@@ -78,7 +72,6 @@ export const CurrentInfoSection = () => {
           }
           if (isRotationCurrentlyActive) break;
 
-          // Si pas de rotation active, chercher s'il y a au moins une rotation future dans ce cycle
           if (!activeCycle) {
             for (const rotation of cycle.rotations) {
               if (rotation.start_date && rotation.end_date) {
@@ -99,7 +92,6 @@ export const CurrentInfoSection = () => {
         }
       }
 
-      // Si on a trouvé un cycle actif
       if (activeCycle && isCycleCurrentlyActive) {
         setCurrentCycle(activeCycle);
         setIsCycleActive(true);
@@ -116,14 +108,42 @@ export const CurrentInfoSection = () => {
           setIsRotationActive(false);
         }
       }
-      // Sinon, chercher le prochain cycle
       else if (allCycles.length > 0) {
-        const nextCycleData = allCycles[0]; // Le plus récent
-        setCurrentCycle(null);
-        setNextCycle(nextCycleData);
-        setIsCycleActive(false);
-        setCurrentRotation(null);
-        setIsRotationActive(false);
+        let futureNextCycle = null;
+        
+        for (const cycle of allCycles) {
+          if (cycle.rotations && cycle.rotations.length > 0) {
+            const hasFutureRotation = cycle.rotations.some(rotation => {
+              if (rotation.start_date && rotation.end_date) {
+                const { realStartDate } = getRotationRealDates(
+                  rotation.start_date,
+                  rotation.end_date
+                );
+                return now < realStartDate;
+              }
+              return false;
+            });
+            
+            if (hasFutureRotation) {
+              futureNextCycle = cycle;
+              break;
+            }
+          }
+        }
+        
+        if (futureNextCycle) {
+          setCurrentCycle(null);
+          setNextCycle(futureNextCycle);
+          setIsCycleActive(false);
+          setCurrentRotation(null);
+          setIsRotationActive(false);
+        } else {
+          setCurrentCycle(null);
+          setNextCycle(null);
+          setIsCycleActive(false);
+          setCurrentRotation(null);
+          setIsRotationActive(false);
+        }
       }
     }
 
@@ -132,25 +152,19 @@ export const CurrentInfoSection = () => {
     }
   }, [allCycles, isLoading, cyclesError]);
 
-  const parseDate = (dateString: string) => {
-    // Les dates semblent être au format DD/MM/YYYY
-    if (dateString.includes("/")) {
-      const [day, month, year] = dateString.split("/");
-      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    }
-    // Fallback pour d'autres formats
-    return new Date(dateString);
-  };
-
   const getRotationRealDates = (startDate: string, endDate: string) => {
-    // La rotation commence la veille de start_date à 16h
-    const realStartDate = parseDate(startDate);
-    realStartDate.setDate(realStartDate.getDate() - 1);
-    realStartDate.setHours(16, 0, 0, 0);
-
-    // La rotation se termine le jour de end_date à 16h
-    const realEndDate = parseDate(endDate);
-    realEndDate.setHours(16, 0, 0, 0);
+    const createParisDate = (dateStr: string, baseHourUTC: number, dayOffset: number = 0) => {
+      const [day, month, year] = dateStr.split('/').map(Number);
+      
+      const finalDate = new Date(Date.UTC(year, month - 1, day + dayOffset, baseHourUTC, 0, 0));
+      
+      return finalDate;
+    };
+    const BASE_HOUR_UTC = 15;
+    
+    const realStartDate = createParisDate(startDate, BASE_HOUR_UTC, -1);
+    
+    const realEndDate = createParisDate(endDate, BASE_HOUR_UTC, 0);
 
     return { realStartDate, realEndDate };
   };
@@ -202,7 +216,6 @@ export const CurrentInfoSection = () => {
           </Box>
         </HStack>
 
-        {/* Container */}
         <Box
           borderRadius="2xl"
           borderWidth="1px"
@@ -229,19 +242,17 @@ export const CurrentInfoSection = () => {
               <VStack spacing={3}>
                 <Icon as={FaCalendarAlt} boxSize={10} opacity={0.5} />
                 <Text fontSize="md" fontWeight="semibold" opacity={0.75}>
-                  Aucun cycle disponible
+                  Pas de prochain cycle prévu
                 </Text>
               </VStack>
             </Flex>
           ) : (
             <Box>
-              {/* GRID: Cycle + Rotation */}
               <Box
                 display="grid"
                 gridTemplateColumns={{ base: "1fr", lg: "1fr 1fr" }}
                 gap={4}
               >
-                {/* Card: Cycle */}
                 {(currentCycle || nextCycle) && (
                   <Box
                     rounded="xl"
@@ -327,7 +338,6 @@ export const CurrentInfoSection = () => {
                   </Box>
                 )}
 
-                {/* Card: Rotation */}
                 <Box
                   rounded="xl"
                   borderWidth="1px"
@@ -384,7 +394,6 @@ export const CurrentInfoSection = () => {
 
                   {currentCycle && currentRotation ? (
                     <VStack align="start" spacing={3}>
-                      {/* line 1 */}
                       <HStack spacing={2} flexWrap="wrap" align="center">
                         {currentRotation.position ? (
                           <CustomLink
@@ -416,7 +425,6 @@ export const CurrentInfoSection = () => {
                         />
                       </HStack>
 
-                      {/* line 2 - dates */}
                       {currentRotation.start_date &&
                         currentRotation.end_date && (
                           <Box

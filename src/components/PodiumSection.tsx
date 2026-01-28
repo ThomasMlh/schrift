@@ -26,11 +26,9 @@ export const PodiumSection: React.FC = () => {
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
   const [selectedGuildId, setSelectedGuildId] = useState<string>("global");
 
-  // Utilisation de useSWR pour les cycles et guildes (cache automatique + déduplication)
   const { cycles, isLoading: cyclesLoading } = useCycles({ limit: 50, authenticated: true });
   const { guilds } = useGuilds(true);
 
-  // Utilisation du hook usePodium pour charger les données du podium
   const { podium, meta, isLoading, error } = usePodium({
     cycle_id: selectedCycleId,
     guild_id: selectedGuildId !== "global" ? selectedGuildId : undefined,
