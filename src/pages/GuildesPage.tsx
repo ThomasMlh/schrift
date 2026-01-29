@@ -7,12 +7,14 @@ import {
   HStack,
   Flex,
   useColorModeValue,
-  Image
+  Image,
+  Text,
+  Badge
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { SEOHead } from "../components/SEOHead";
 import { GuildOrgChart } from "../components/GuildOrgChart";
-import { useGuilds, useGuildMembers } from "@/hooks/useAPI";
+import { useGuilds, useAllGuildsMemberCounts } from "@/hooks/useAPI";
 import type { IGuild } from "../interfaces";
 
 const GuildesPage = () => {
@@ -21,10 +23,12 @@ const GuildesPage = () => {
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
-  const buttonBg = useColorModeValue("white", "gray.800");
+  const buttonBg = useColorModeValue("white", "gray.700");
   const buttonHoverBg = useColorModeValue("blue.50", "blue.900");
   const selectedBg = useColorModeValue("blue.500", "blue.600");
   const selectedColor = "white";
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const selectedBorderColor = useColorModeValue("blue.600", "blue.400");
 
   // Sélectionner la première guilde par défaut
   useEffect(() => {
@@ -33,8 +37,11 @@ const GuildesPage = () => {
     }
   }, [guilds, selectedGuild]);
 
-  // Charger les membres de la guilde sélectionnée via useAPI
-  const { members, isLoading } = useGuildMembers(selectedGuild?._id, true);
+  // Récupérer le nombre de membres et les membres pour toutes les guildes via useAPI
+  const { memberCounts: guildMemberCounts, membersByGuild, isLoading } = useAllGuildsMemberCounts(guilds, true);
+  
+  // Récupérer les membres de la guilde sélectionnée depuis les données déjà chargées
+  const members = selectedGuild ? (membersByGuild[selectedGuild._id] || []) : [];
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -70,22 +77,42 @@ const GuildesPage = () => {
                 bg={selectedGuild?._id === guild._id ? selectedBg : buttonBg}
                 color={selectedGuild?._id === guild._id ? selectedColor : undefined}
                 _hover={{
-                  bg: selectedGuild?._id === guild._id ? selectedBg : buttonHoverBg
+                  bg: selectedGuild?._id === guild._id ? selectedBg : buttonHoverBg,
+                  transform: "scale(1.05)",
+                  boxShadow: "lg"
                 }}
+                border="3px solid"
+                borderColor={selectedGuild?._id === guild._id ? selectedBorderColor : borderColor}
+                boxShadow={selectedGuild?._id === guild._id ? "xl" : "md"}
                 fontWeight="bold"
                 px={8}
+                py={6}
+                h="auto"
+                transition="all 0.2s"
+                position="relative"
               >
-                {!imageErrors[guild._id] ? (
-                  <Image 
-                    src={`${bucketUrl}/guilds/${guild.name}.png`} 
-                    alt={guild.name} 
-                    height="90%" 
-                    width="auto"
-                    onError={() => setImageErrors(prev => ({ ...prev, [guild._id]: true }))}
-                  />
-                ) : (
-                  guild.name
-                )}
+                <VStack spacing={2}>
+                  {!imageErrors[guild._id] ? (
+                    <Image 
+                      src={`${bucketUrl}/guilds/${guild.name}.png`} 
+                      alt={guild.name} 
+                      height="50px" 
+                      width="auto"
+                      onError={() => setImageErrors(prev => ({ ...prev, [guild._id]: true }))}
+                    />
+                  ) : (
+                    <Text fontSize="xl">{guild.name}</Text>
+                  )}
+                  <Badge 
+                    colorScheme={selectedGuild?._id === guild._id ? "white" : "blue"}
+                    fontSize="sm"
+                    px={2}
+                    py={1}
+                    borderRadius="full"
+                  >
+                    {guildMemberCounts?.[guild._id] || 0} joueur{guildMemberCounts?.[guild._id] !== 1 ? 's' : ''}
+                  </Badge>
+                </VStack>
               </Button>
             ))}
           </HStack>

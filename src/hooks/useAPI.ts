@@ -159,6 +159,53 @@ export const useGuildMembers = (guildId?: string, authenticated: boolean = true)
   };
 }
 
+// Hook pour récupérer le nombre de membres pour toutes les guildes
+export const useAllGuildsMemberCounts = (guilds: IGuild[], authenticated: boolean = true) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  
+  // Créer les URLs pour toutes les guildes
+  const urls = guilds.map(guild => `${apiUrl}/api/guildes/${guild._id}/membres`);
+  
+  // Utiliser SWR pour chaque guilde (SWR gère le cache automatiquement)
+  const results = urls.map(url => 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useSWR<IUser[] | { data?: IUser[]; success?: boolean }>(
+      url,
+      authenticated ? authenticatedFetcher : fetcher,
+      {
+        revalidateOnFocus: false,
+        dedupingInterval: 60000, // Cache de 60 secondes
+      }
+    )
+  );
+
+  // Créer un objet avec le nombre de membres et les membres par guild ID
+  const memberCounts: Record<string, number> = {};
+  const membersByGuild: Record<string, IUser[]> = {};
+  
+  guilds.forEach((guild, index) => {
+    const { data } = results[index];
+    if (data) {
+      const members = Array.isArray(data) ? data : (data.data || []);
+      memberCounts[guild._id] = members.length;
+      membersByGuild[guild._id] = members;
+    } else {
+      memberCounts[guild._id] = 0;
+      membersByGuild[guild._id] = [];
+    }
+  });
+
+  const isLoading = results.some(r => r.isLoading);
+  const error = results.find(r => r.error)?.error;
+
+  return {
+    memberCounts,
+    membersByGuild,
+    isLoading,
+    error,
+  };
+}
+
 // Hook pour récupérer les utilisateurs
 export const useUsers = (options?: {
   authenticated?: boolean;
