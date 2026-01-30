@@ -3,38 +3,35 @@ import {
     Container,
     VStack,
     Text,
-    useToast,
     useDisclosure,
     Button,
-    HStack,
     Card,
     CardBody,
     Spinner,
     Flex,
     Alert,
     AlertIcon,
-    Input,
-    InputGroup,
-    InputLeftElement
+    Box,
+    Heading
 } from "@chakra-ui/react";
-import { SearchIcon } from "@chakra-ui/icons";
-// import { AddIcon } from "@chakra-ui/icons";
-import type { IScore, IScoreFormData } from "../interfaces";
+import type { IScore } from "../interfaces";
 import { useAuth } from "@/providers/AuthProvider";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import ScoresTable from "./ui/ScoresTable";
-import { ScoreModal } from "./ui/ScoreModal";
-import { DeleteConfirmationModal } from "./ui/DeleteConfirmationModal";
-import BulkScoreModal from "./ui/BulkScoreModal";
 import { useCycles, useUsers, useGuilds, useScores } from "@/hooks/useAPI";
-import { useAPIMutations } from "@/hooks/useAPIMutations";
+import { useScoreManagement } from "@/hooks/useScoreManagement";
+import { ScoresStatsCards } from "./scores/ScoresStatsCards";
+import { ScoresFilters } from "./scores/ScoresFilters";
+import { ScoreModals } from "./scores/ScoreModals";
 
 const ScoresSection = () => {
-    const { createScore, updateScore, deleteScore, createBulkScores } = useAPIMutations();
     const [scoreSearchQuery, setScoreSearchQuery] = useState("");
+    const [filterCycleId, setFilterCycleId] = useState("");
+    const [filterRotationId, setFilterRotationId] = useState("");
+    const [filterGuildId, setFilterGuildId] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     
-    // Utiliser useSWR pour les données (cache automatique + déduplication)
+    // Hooks de données
     const { cycles, isLoading: isLoadingCycles } = useCycles({ authenticated: true });
     const { users } = useUsers({ authenticated: true, limit: 1000 });
     const { guilds } = useGuilds(true);
@@ -42,373 +39,116 @@ const ScoresSection = () => {
         page: currentPage,
         limit: 20,
         search: scoreSearchQuery,
+        cycle_id: filterCycleId || undefined,
+        rotation_id: filterRotationId || undefined,
+        guild_id: filterGuildId || undefined,
         authenticated: true
     });
-    
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Formulaire
-    const [selectedCycleId, setSelectedCycleId] = useState("");
-    const [selectedRotationId, setSelectedRotationId] = useState("");
-    const [selectedUserId, setSelectedUserId] = useState("");
-    const [userSearchQuery, setUserSearchQuery] = useState("");
-    const [scoreValue, setScoreValue] = useState<number>(0);
-
-    // États pour l'édition et suppression
-    const [editingScore, setEditingScore] = useState<IScore | null>(null);
-    const [scoreToDelete, setScoreToDelete] = useState<IScore | null>(null);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [isUpdating, setIsUpdating] = useState(false);
-    const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
-    const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
-
-    const toast = useToast();
     const { isOpen, onClose } = useDisclosure();
-
-    // Récupérer les informations utilisateur depuis le context
     const { currentUser, isAdmin, isGuildManager } = useAuth();
-    const userGuildId = currentUser?.guilde_id;
 
-    const handleSubmitScore = async () => {
-        if (!currentUser) {
-            toast({
-                title: "Erreur",
-                description: "Vous devez être connecté pour ajouter un score",
-                status: "error",
-                duration: 3000,
-            });
-            return;
-        }
+    // Hook de gestion des scores
+    const scoreManagement = useScoreManagement({ users, cycles, onClose });
 
-        if (!selectedCycleId || !selectedRotationId || !selectedUserId || scoreValue < 0) {
-            toast({
-                title: "Données manquantes",
-                description: "Veuillez sélectionner un utilisateur, un cycle, une rotation et saisir un score valide",
-                status: "error",
-                duration: 3000,
-            });
-            return;
-        }
-
-        // Récupérer les informations de l'utilisateur sélectionné
-        const selectedUser = users.find(user => user._id === selectedUserId);
-        if (!selectedUser) {
-            toast({
-                title: "Utilisateur introuvable",
-                description: "L'utilisateur sélectionné n'a pas été trouvé",
-                status: "error",
-                duration: 3000,
-            });
-            return;
-        }
-
-        const guildId = selectedUser.guilde_id;
-        if (!guildId) {
-            toast({
-                title: "Guilde manquante",
-                description: "L'utilisateur sélectionné n'a pas de guilde associée",
-                status: "error",
-                duration: 3000,
-            });
-            return;
-        }
-
-        setIsSubmitting(true);
-        try {
-            const scoreData: IScoreFormData = {
-                user_id: selectedUserId,
-                cycle_id: selectedCycleId,
-                rotation_id: selectedRotationId,
-                guild_id: guildId,
-                score: scoreValue
-            };
-
-            await createScore(scoreData);
-            
-            toast({
-                title: "Score ajouté",
-                description: "Le score a été ajouté avec succès",
-                status: "success",
-                duration: 3000,
-            });
-
-            // Réinitialiser le formulaire
-            setSelectedCycleId("");
-            setSelectedRotationId("");
-            setSelectedUserId("");
-            setUserSearchQuery("");
-            setScoreValue(0);
-            onClose();
-
-            // Le cache est automatiquement invalidé par createScore
-        } catch (error: unknown) {
-            const err = error as Error;
-            toast({
-                title: "Erreur",
-                description: err.message || "Erreur lors de l'ajout du score",
-                status: "error",
-                duration: 3000,
-            });
-        } finally {
-            setIsSubmitting(false);
-        }
+    // Gestion des filtres
+    const handleCycleFilterChange = (cycleId: string) => {
+        setFilterCycleId(cycleId);
+        setFilterRotationId("");
+        setCurrentPage(1);
     };
 
-    // Fonction pour supprimer un score
-    const handleDeleteScore = async () => {
-        if (!scoreToDelete) return;
-
-        setIsDeleting(true);
-        try {
-            await deleteScore(scoreToDelete._id!);
-            
-            toast({
-                title: "Score supprimé",
-                description: "Le score a été supprimé avec succès",
-                status: "success",
-                duration: 3000,
-            });
-
-            setIsDeleteModalOpen(false);
-            setScoreToDelete(null);
-            // Le cache est automatiquement invalidé par deleteScore
-        } catch (error: unknown) {
-            const err = error as Error;
-            toast({
-                title: "Erreur",
-                description: err.message || "Erreur lors de la suppression du score",
-                status: "error",
-                duration: 3000,
-            });
-        } finally {
-            setIsDeleting(false);
-        }
+    const handleRotationFilterChange = (rotationId: string) => {
+        setFilterRotationId(rotationId);
+        setCurrentPage(1);
     };
 
-    // Fonction pour la saisie groupée des scores
-    const handleBulkScoreSubmit = async (scoresData: IScoreFormData[]) => {
-        setIsBulkSubmitting(true);
-        try {
-            await createBulkScores(scoresData);
-            
-            toast({
-                title: "Scores enregistrés",
-                description: `${scoresData.length} scores ont été enregistrés avec succès`,
-                status: "success",
-                duration: 3000,
-            });
-
-            setIsBulkModalOpen(false);
-            // Le cache est automatiquement invalidé par createBulkScores
-        } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : "Erreur lors de l'enregistrement des scores";
-            toast({
-                title: "Erreur",
-                description: errorMessage,
-                status: "error",
-                duration: 3000,
-            });
-        } finally {
-            setIsBulkSubmitting(false);
-        }
+    const handleSearchChange = (search: string) => {
+        setScoreSearchQuery(search);
+        setCurrentPage(1);
     };
 
-    // Fonction pour ouvrir le modal d'édition
-    const handleEditScore = (score: IScore) => {
-        setEditingScore(score);
-        setSelectedUserId(score.user_id);
-        setSelectedCycleId(score.cycle_id);
-        
-        // Trouver la rotation correspondante dans le cycle
-        const cycle = cycles.find(c => c._id === score.cycle_id);
-        if (cycle) {
-            // Le score stocke rotation_id, mais le select utilise rotation._id
-            const rotation = cycle.rotations.find(r => r.rotation_id === score.rotation_id);
-            if (rotation) {
-                setSelectedRotationId(rotation._id || "");
-            } else {
-                setSelectedRotationId("");
-            }
-        } else {
-            setSelectedRotationId("");
-        }
-        
-        setScoreValue(score.score);
-        setIsEditModalOpen(true);
+    const handleGuildFilterChange = (guildId: string) => {
+        setFilterGuildId(guildId);
+        setCurrentPage(1);
     };
 
-    // Fonction pour modifier un score
-    const handleUpdateScore = async () => {
-        if (!editingScore) return;
-
-        if (!selectedCycleId || !selectedRotationId || !selectedUserId || scoreValue < 0) {
-            toast({
-                title: "Données manquantes",
-                description: "Veuillez sélectionner un utilisateur, un cycle, une rotation et saisir un score valide",
-                status: "error",
-                duration: 3000,
-            });
-            return;
-        }
-
-        const selectedUser = users.find(user => user._id === selectedUserId);
-        if (!selectedUser) {
-            toast({
-                title: "Utilisateur introuvable",
-                description: "L'utilisateur sélectionné n'a pas été trouvé",
-                status: "error",
-                duration: 3000,
-            });
-            return;
-        }
-
-        const guildId = selectedUser.guilde_id;
-        if (!guildId) {
-            toast({
-                title: "Guilde manquante",
-                description: "L'utilisateur sélectionné n'a pas de guilde associée",
-                status: "error",
-                duration: 3000,
-            });
-            return;
-        }
-
-        setIsUpdating(true);
-        try {
-            // Trouver le rotation_id à partir de l'_id sélectionné
-            const cycle = cycles.find(c => c._id === selectedCycleId);
-            const rotation = cycle?.rotations.find(r => r._id === selectedRotationId);
-            
-            if (!rotation) {
-                toast({
-                    title: "Rotation introuvable",
-                    description: "La rotation sélectionnée n'a pas été trouvée",
-                    status: "error",
-                    duration: 3000,
-                });
-                setIsUpdating(false);
-                return;
-            }
-
-            const scoreData: IScoreFormData = {
-                user_id: selectedUserId,
-                cycle_id: selectedCycleId,
-                rotation_id: rotation.rotation_id, // Utiliser rotation_id au lieu de _id
-                guild_id: guildId,
-                score: scoreValue
-            };
-
-            await updateScore(editingScore._id!, scoreData);
-            
-            toast({
-                title: "Score modifié",
-                description: "Le score a été modifié avec succès",
-                status: "success",
-                duration: 3000,
-            });
-
-            // Réinitialiser le formulaire
-            setSelectedCycleId("");
-            setSelectedRotationId("");
-            setSelectedUserId("");
-            setUserSearchQuery("");
-            setScoreValue(0);
-            setIsEditModalOpen(false);
-            setEditingScore(null);
-            // Le cache est automatiquement invalidé par updateScore
-        } catch (error: unknown) {
-            const err = error as Error;
-            toast({
-                title: "Erreur",
-                description: err.message || "Erreur lors de la modification du score",
-                status: "error",
-                duration: 3000,
-            });
-        } finally {
-            setIsUpdating(false);
-        }
+    const handleResetFilters = () => {
+        setFilterCycleId("");
+        setFilterRotationId("");
+        setFilterGuildId("");
+        setScoreSearchQuery("");
+        setCurrentPage(1);
     };
 
-    // Obtenir les informations d'un utilisateur
-    const getUserInfo = (userId: string) => {
-        return users.find(user => user._id === userId);
-    };
-
-    // Obtenir les informations d'un cycle
-    const getCycleInfo = (cycleId: string) => {
-        return cycles.find(cycle => cycle._id === cycleId);
-    };
-
-    // Gestion du changement de page
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
 
+    // Données dérivées
+    const selectedCycle = cycles.find(c => c._id === filterCycleId);
+    const availableRotations = selectedCycle?.rotations || [];
+    const activeFiltersCount = [scoreSearchQuery, filterCycleId, filterRotationId, filterGuildId].filter(Boolean).length;
+
+    const getUserInfo = (userId: string) => users.find(user => user._id === userId);
+    const getCycleInfo = (cycleId: string) => cycles.find(cycle => cycle._id === cycleId);
+
     return (
         <Container maxW="container.xl" py={8}>
             <VStack spacing={6} align="stretch">
-                <HStack justify="space-between" align="center">
-                    <Text fontSize="2xl" fontWeight="bold">
-                        Gestion des Scores
-                    </Text>
-                    <HStack spacing={3}>
-                        {/* <Button
-                            leftIcon={<AddIcon />}
-                            colorScheme="blue"
-                            onClick={onOpen}
-                            isDisabled={!currentUser}
-                        >
-                            Ajouter un score
-                        </Button> */}
-                        {(isAdmin || isGuildManager) && (
-                            <Button
-                                colorScheme="green"
-                                onClick={() => setIsBulkModalOpen(true)}
-                                isDisabled={!currentUser}
-                            >
-                                Saisie groupée
-                            </Button>
+                {/* En-tête */}
+                <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
+                    <Box>
+                        <Heading size="lg" mb={1}>Gestion des Scores</Heading>
+                        {pagination && (
+                            <Text fontSize="sm" color="gray.500">
+                                {pagination.totalCount.toLocaleString()} scores enregistrés
+                            </Text>
                         )}
-                    </HStack>
-                </HStack>
+                    </Box>
+                    {(isAdmin || isGuildManager) && (
+                        <Button
+                            colorScheme="green"
+                            onClick={() => scoreManagement.setIsBulkModalOpen(true)}
+                            isDisabled={!currentUser}
+                            size="lg"
+                        >
+                            Saisie groupée
+                        </Button>
+                    )}
+                </Flex>
+
+                {/* Stats rapides */}
+                <ScoresStatsCards
+                    pagination={pagination}
+                    activeFiltersCount={activeFiltersCount}
+                    isLoadingScores={isLoadingScores}
+                    onRefresh={mutateScores}
+                />
+
+                {/* Section Filtres */}
+                <ScoresFilters
+                    scoreSearchQuery={scoreSearchQuery}
+                    filterCycleId={filterCycleId}
+                    filterRotationId={filterRotationId}
+                    filterGuildId={filterGuildId}
+                    cycles={cycles}
+                    guilds={guilds}
+                    availableRotations={availableRotations}
+                    activeFiltersCount={activeFiltersCount}
+                    isLoadingCycles={isLoadingCycles}
+                    pagination={pagination}
+                    onSearchChange={handleSearchChange}
+                    onCycleChange={handleCycleFilterChange}
+                    onRotationChange={handleRotationFilterChange}
+                    onGuildChange={handleGuildFilterChange}
+                    onResetFilters={handleResetFilters}
+                />
 
                 {/* Liste des scores */}
                 <Card>
                     <CardBody>
                         <VStack spacing={4} align="stretch">
-                            <HStack justify="space-between" align="center">
-                                <VStack spacing={1} align="start">
-                                    <Text fontSize="lg" fontWeight="semibold">
-                                        Scores récents
-                                    </Text>
-                                    {pagination && (
-                                        <Text fontSize="sm" color="gray.500">
-                                            {pagination.itemsOnPage} scores sur {pagination.totalCount} au total
-                                        </Text>
-                                    )}
-                                </VStack>
-                                <InputGroup maxW="300px">
-                                    <InputLeftElement pointerEvents="none">
-                                        <SearchIcon color="gray.300" />
-                                    </InputLeftElement>
-                                    <Input
-                                        placeholder="Rechercher dans les scores..."
-                                        value={scoreSearchQuery}
-                                        onChange={(e) => setScoreSearchQuery(e.target.value)}
-                                    />
-                                </InputGroup>
-                                <Button
-                                    size="sm"
-                                    onClick={() => mutateScores()}
-                                    isLoading={isLoadingScores}
-                                    loadingText="Chargement..."
-                                >
-                                    Actualiser
-                                </Button>
-                            </HStack>
-
                             {isLoadingScores ? (
                                 <Flex justify="center" p={8}>
                                     <Spinner size="lg" />
@@ -425,10 +165,10 @@ const ScoresSection = () => {
                                     cycles={cycles}
                                     isAdmin={isAdmin}
                                     isGuildManager={isGuildManager}
-                                    onEditScore={handleEditScore}
+                                    onEditScore={scoreManagement.handleEditScore}
                                     onDeleteScore={(score: IScore) => {
-                                        setScoreToDelete(score);
-                                        setIsDeleteModalOpen(true);
+                                        scoreManagement.setScoreToDelete(score);
+                                        scoreManagement.setIsDeleteModalOpen(true);
                                     }}
                                 />
                             )}
@@ -449,89 +189,49 @@ const ScoresSection = () => {
                     </CardBody>
                 </Card>
 
-                {/* Modal d'ajout de score */}
-                <ScoreModal
+                {/* Modals */}
+                <ScoreModals
                     isOpen={isOpen}
                     onClose={onClose}
-                    users={users}
-                    cycles={cycles}
-                    selectedUserId={selectedUserId}
-                    setSelectedUserId={setSelectedUserId}
-                    selectedCycleId={selectedCycleId}
-                    setSelectedCycleId={setSelectedCycleId}
-                    selectedRotationId={selectedRotationId}
-                    setSelectedRotationId={setSelectedRotationId}
-                    scoreValue={scoreValue}
-                    setScoreValue={setScoreValue}
-                    userSearchQuery={userSearchQuery}
-                    setUserSearchQuery={setUserSearchQuery}
-                    onSubmit={handleSubmitScore}
-                    isSubmitting={isSubmitting}
-                    isLoadingCycles={isLoadingCycles}
-                    title="Ajouter un score"
-                    submitButtonText="Ajouter le score"
-                />
-
-                {/* Modal d'édition de score */}
-                <ScoreModal
-                    isOpen={isEditModalOpen}
-                    onClose={() => {
-                        setIsEditModalOpen(false);
-                        setEditingScore(null);
+                    isEditModalOpen={scoreManagement.isEditModalOpen}
+                    onEditModalClose={() => {
+                        scoreManagement.setIsEditModalOpen(false);
+                        scoreManagement.resetForm();
                     }}
-                    users={users}
-                    cycles={cycles}
-                    selectedUserId={selectedUserId}
-                    setSelectedUserId={setSelectedUserId}
-                    selectedCycleId={selectedCycleId}
-                    setSelectedCycleId={setSelectedCycleId}
-                    selectedRotationId={selectedRotationId}
-                    setSelectedRotationId={setSelectedRotationId}
-                    scoreValue={scoreValue}
-                    setScoreValue={setScoreValue}
-                    userSearchQuery={userSearchQuery}
-                    setUserSearchQuery={setUserSearchQuery}
-                    onSubmit={handleUpdateScore}
-                    isSubmitting={isUpdating}
-                    isLoadingCycles={isLoadingCycles}
-                    title="Modifier le score"
-                    submitButtonText="Modifier le score"
-                    submitButtonColor="yellow"
-                    isEdit={true}
-                />
-
-                {/* Modal de confirmation de suppression */}
-                <DeleteConfirmationModal
-                    isOpen={isDeleteModalOpen}
-                    onClose={() => {
-                        setIsDeleteModalOpen(false);
-                        setScoreToDelete(null);
+                    isDeleteModalOpen={scoreManagement.isDeleteModalOpen}
+                    onDeleteModalClose={() => {
+                        scoreManagement.setIsDeleteModalOpen(false);
+                        scoreManagement.setScoreToDelete(null);
                     }}
-                    onConfirm={handleDeleteScore}
-                    isDeleting={isDeleting}
-                    title="Supprimer le score"
-                    description="Êtes-vous sûr de vouloir supprimer ce score ? Cette action est irréversible."
-                    itemDetails={
-                        scoreToDelete ? (
-                            <Text fontSize="sm">
-                                <strong>Score:</strong> {scoreToDelete.score.toLocaleString()}<br />
-                                <strong>Utilisateur:</strong> {getUserInfo(scoreToDelete.user_id)?.global_name || "Utilisateur inconnu"}<br />
-                                <strong>Cycle:</strong> {getCycleInfo(scoreToDelete.cycle_id)?.name || "Cycle inconnu"}
-                            </Text>
-                        ) : undefined
-                    }
-                />
-
-                {/* Modal de saisie groupée */}
-                <BulkScoreModal
-                    isOpen={isBulkModalOpen}
-                    onClose={() => setIsBulkModalOpen(false)}
+                    onDeleteConfirm={scoreManagement.handleDeleteScore}
+                    isDeleting={scoreManagement.isDeleting}
+                    scoreToDelete={scoreManagement.scoreToDelete}
+                    isBulkModalOpen={scoreManagement.isBulkModalOpen}
+                    onBulkModalClose={() => scoreManagement.setIsBulkModalOpen(false)}
+                    onBulkSubmit={scoreManagement.handleBulkScoreSubmit}
+                    isBulkSubmitting={scoreManagement.isBulkSubmitting}
+                    isGuildRestricted={!isAdmin && isGuildManager}
+                    userGuildId={currentUser?.guilde_id}
+                    users={users}
                     cycles={cycles}
                     guilds={guilds}
-                    onSubmit={handleBulkScoreSubmit}
-                    isSubmitting={isBulkSubmitting}
-                    isGuildRestricted={!isAdmin && isGuildManager}
-                    userGuildId={userGuildId}
+                    isLoadingCycles={isLoadingCycles}
+                    selectedUserId={scoreManagement.selectedUserId}
+                    setSelectedUserId={scoreManagement.setSelectedUserId}
+                    selectedCycleId={scoreManagement.selectedCycleId}
+                    setSelectedCycleId={scoreManagement.setSelectedCycleId}
+                    selectedRotationId={scoreManagement.selectedRotationId}
+                    setSelectedRotationId={scoreManagement.setSelectedRotationId}
+                    scoreValue={scoreManagement.scoreValue}
+                    setScoreValue={scoreManagement.setScoreValue}
+                    userSearchQuery={scoreManagement.userSearchQuery}
+                    setUserSearchQuery={scoreManagement.setUserSearchQuery}
+                    onSubmitScore={() => scoreManagement.handleSubmitScore(currentUser)}
+                    onUpdateScore={scoreManagement.handleUpdateScore}
+                    isSubmitting={scoreManagement.isSubmitting}
+                    isUpdating={scoreManagement.isUpdating}
+                    getUserInfo={getUserInfo}
+                    getCycleInfo={getCycleInfo}
                 />
             </VStack>
         </Container>

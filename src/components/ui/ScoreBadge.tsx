@@ -9,7 +9,7 @@ interface ScoreBadgeProps {
 export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" }, forceBlue = false }: ScoreBadgeProps) => {
     // Vérification de sécurité
     if (score === undefined || score === null || score === 0) {
-        return <Badge colorScheme="gray">Miss</Badge>;
+        return <Badge colorScheme="gray" fontSize={fontSize}>Miss</Badge>;
     }
 
     // Si forceBlue est activé, retourner directement un badge bleu
