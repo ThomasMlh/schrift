@@ -13,6 +13,7 @@ const staticRoutes = [
   { path: '/guides', priority: '0.7', changefreq: 'weekly' },
   { path: '/guides/rotations-builds', priority: '0.7', changefreq: 'weekly' },
   { path: '/guides/orbs', priority: '0.7', changefreq: 'weekly' },
+  { path: '/guildes', priority: '0.7', changefreq: 'weekly' }
 ];
 
 const baseUrl = 'https://bbs-schrift.fr';

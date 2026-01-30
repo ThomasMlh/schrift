@@ -177,6 +177,16 @@ const routes = [
       <a href="/">Retour à l'accueil</a> | <a href="/cycles">Voir les cycles</a>
     `
   },
+  {
+    path: 'guildes/index.html',
+    title: 'Guildes Schrift - Bleach Brave Souls',
+    description: 'Rejoignez les guildes Schrift A, B, C et D pour Bleach Brave Souls. Découvrez les avantages et comment participer aux classements.',
+    keywords: 'Bleach Brave Souls, guildes, Schrift, guilde A, guilde B, guilde C, guilde D',
+    content: `
+      <h1>Guildes Schrift pour Bleach Brave Souls</h1>
+      <p>Rejoignez l'une des guildes Schrift A, B, C ou D et participez aux Guild Quests pour améliorer vos scores et gagner des récompenses.</p>
+    `
+  }
 ];
 
 function generatePrerenderedHTML(route) {

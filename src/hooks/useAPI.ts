@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import type { ICycle, IGuild, IUser, ICharactersResponse, ICharacter, IRotationTemplate, IScoresResponse, IPodiumResponse, IPodiumWeeklyResponse, IPodiumMissesResponse, IOrbGuideResponse, IPagination, IScoreDetailApiResponse } from '../interfaces';
 import { useAuth } from '../providers/AuthProvider';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -161,42 +161,59 @@ export const useGuildMembers = (guildId?: string, authenticated: boolean = true)
 
 // Hook pour récupérer le nombre de membres pour toutes les guildes
 export const useAllGuildsMemberCounts = (guilds: IGuild[], authenticated: boolean = true) => {
-  const authenticatedFetcher = useAuthenticatedFetcher();
-  
-  // Créer les URLs pour toutes les guildes
-  const urls = guilds.map(guild => `${apiUrl}/api/guildes/${guild._id}/membres`);
-  
-  // Utiliser SWR pour chaque guilde (SWR gère le cache automatiquement)
-  const results = urls.map(url => 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useSWR<IUser[] | { data?: IUser[]; success?: boolean }>(
-      url,
-      authenticated ? authenticatedFetcher : fetcher,
-      {
-        revalidateOnFocus: false,
-        dedupingInterval: 60000, // Cache de 60 secondes
-      }
-    )
-  );
+  const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
+  const [membersByGuild, setMembersByGuild] = useState<Record<string, IUser[]>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const { token } = useAuth();
 
-  // Créer un objet avec le nombre de membres et les membres par guild ID
-  const memberCounts: Record<string, number> = {};
-  const membersByGuild: Record<string, IUser[]> = {};
-  
-  guilds.forEach((guild, index) => {
-    const { data } = results[index];
-    if (data) {
-      const members = Array.isArray(data) ? data : (data.data || []);
-      memberCounts[guild._id] = members.length;
-      membersByGuild[guild._id] = members;
-    } else {
-      memberCounts[guild._id] = 0;
-      membersByGuild[guild._id] = [];
+  useEffect(() => {
+    if (guilds.length === 0) {
+      setIsLoading(false);
+      return;
     }
-  });
 
-  const isLoading = results.some(r => r.isLoading);
-  const error = results.find(r => r.error)?.error;
+    const fetchAllMembers = async () => {
+      setIsLoading(true);
+      setError(null);
+      const counts: Record<string, number> = {};
+      const members: Record<string, IUser[]> = {};
+
+      try {
+        // Fetch tous les membres en parallèle
+        const promises = guilds.map(guild =>
+          fetch(`${apiUrl}/api/guildes/${guild._id}/membres`, {
+            headers: authenticated && token ? { 'Authorization': `Bearer ${token}` } : {},
+          })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+              if (data) {
+                const guildMembers = Array.isArray(data) ? data : (data.data || []);
+                counts[guild._id] = guildMembers.length;
+                members[guild._id] = guildMembers;
+              } else {
+                counts[guild._id] = 0;
+                members[guild._id] = [];
+              }
+            })
+            .catch(() => {
+              counts[guild._id] = 0;
+              members[guild._id] = [];
+            })
+        );
+
+        await Promise.all(promises);
+        setMemberCounts(counts);
+        setMembersByGuild(members);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Erreur lors de la récupération des membres'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllMembers();
+  }, [guilds, authenticated, token]);
 
   return {
     memberCounts,
