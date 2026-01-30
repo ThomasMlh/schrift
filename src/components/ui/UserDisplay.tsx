@@ -1,4 +1,4 @@
-import { HStack, VStack, Text, Avatar } from "@chakra-ui/react";
+import { VStack, Text, Avatar, Stack } from "@chakra-ui/react";
 import { getUserAvatarUrl } from "@/utils/discord";
 import type { IUser } from "@/interfaces";
 import CustomLink from "./CustomLink";
@@ -9,9 +9,10 @@ interface UserDisplayProps {
   avatarSize?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
   spacing?: number;
   showUsername?: boolean;
-  textSize?: "xs" | "sm" | "md" | "lg";
+  textSize?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
   roleBadge?: boolean;
   rainbowText?: boolean;
+  direction?: "row" | "column";
 }
 
 export const UserDisplay = ({
@@ -20,15 +21,17 @@ export const UserDisplay = ({
   spacing = 3,
   showUsername = false,
   roleBadge = false,
-  rainbowText = false
+  rainbowText = false,
+  textSize = "md",
+  direction = "row"
 }: UserDisplayProps) => {
 
   if (!user) {
     return (
-      <HStack spacing={spacing}>
+      <Stack direction={direction} spacing={spacing} fontSize={textSize}>
         <Avatar size={avatarSize} />
         <Text color="gray.500">Utilisateur inconnu</Text>
-      </HStack>
+      </Stack>
     );
   }
 
@@ -41,16 +44,17 @@ export const UserDisplay = ({
       : undefined;
 
   return (
-    <HStack spacing={spacing}>
+    <Stack direction={direction} justify={direction === "row" ? "flex-start" : "center"} align="center" spacing={spacing}>
       <Avatar
         size={avatarSize}
         src={avatarUrl}
         name={user.bbs_name || user.global_name}
       />
-      <VStack spacing={0} align="start">
+      <VStack spacing={0} align={direction === "row" ? "start" : "center"}>
         <CustomLink
           to={`/joueur/${user._id}`}
           text={user.bbs_name || user.global_name}
+          textSize={textSize}
           requireAuth={true}
           sx={
             rainbowText
@@ -79,10 +83,10 @@ export const UserDisplay = ({
         )}
       </VStack>
       {roleBadge && user.role && (
-        <Text as="span" fontSize="xs" color="gray.500" ml={2}>
+        <Text as="span" fontSize="xs" color="gray.500" ml={direction === "row" ? 2 : 0}>
           [{formatRoleName(user.role)}]
         </Text>
       )}
-    </HStack>
+    </Stack>
   );
 };

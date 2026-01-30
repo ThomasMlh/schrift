@@ -7,7 +7,7 @@ import { useAuth } from '@/providers/AuthProvider';
 interface CustomLinkProps {
     to: string;
     text: string;
-    textSize?: "xs" | "sm" | "md" | "lg" | "xl";
+    textSize?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
     sx?: SystemStyleObject;
     requireAuth?: boolean;
 }

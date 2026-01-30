@@ -739,3 +739,97 @@ export const useRotationScores = () => {
     error,
   };
 };
+
+// Hook pour récupérer un utilisateur spécifique
+export const useUser = (userId: string | undefined) => {
+  const url = userId ? `${apiUrl}/api/users/${userId}` : null;
+  const { data, error, isLoading, mutate } = useSWR<{ user: IUser }>(url, fetcher, {
+    revalidateOnFocus: false
+  });
+
+  return {
+    user: data?.user,
+    isLoading,
+    error,
+    mutate
+  };
+};
+
+// Interface pour les statistiques utilisateur
+interface IUserStats {
+  totalScores: number;
+  averageScore: number;
+  totalPoints: number;
+  allRotations: {
+    rotation_id: string;
+    rotation_killer: string;
+    rotation_attack: string;
+    cycle_id: string;
+    averageScore: number;
+    scoreCount: number;
+  }[];
+  bestRotation: {
+    rotation_id: string;
+    rotation_killer: string;
+    rotation_attack: string;
+    cycle_id: string;
+    averageScore: number;
+    totalScore: number;
+    scoreCount: number;
+  } | null;
+  worstRotation: {
+    rotation_id: string;
+    rotation_killer: string;
+    rotation_attack: string;
+    cycle_id: string;
+    averageScore: number;
+    totalScore: number;
+    scoreCount: number;
+  } | null;
+  bestScore: {
+    score: number;
+    rotation_id: string;
+    rotation_killer: string;
+    rotation_attack: string;
+    cycle_id: string;
+  };
+  worstScore: {
+    score: number;
+    rotation_id: string;
+    rotation_killer: string;
+    rotation_attack: string;
+    cycle_id: string;
+  };
+}
+
+// Hook pour récupérer les statistiques d'un utilisateur
+export const useUserStats = (userId: string | undefined, cycleId?: string) => {
+  const url = userId 
+    ? `${apiUrl}/api/users/${userId}/stats${cycleId ? `?cycle_id=${cycleId}` : ''}`
+    : null;
+  const { data, error, isLoading, mutate } = useSWR<{ data: { stats: IUserStats } }>(url, fetcher, {
+    revalidateOnFocus: false
+  });
+
+  return {
+    stats: data?.data?.stats,
+    isLoading,
+    error,
+    mutate
+  };
+};
+
+// Hook pour récupérer une guilde spécifique
+export const useGuild = (guildId: string | undefined) => {
+  const url = guildId ? `${apiUrl}/api/guildes/${guildId}` : null;
+  const { data, error, isLoading, mutate } = useSWR<{ name: string }>(url, fetcher, {
+    revalidateOnFocus: false
+  });
+
+  return {
+    guildName: data?.name,
+    isLoading,
+    error,
+    mutate
+  };
+};

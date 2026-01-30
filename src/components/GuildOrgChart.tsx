@@ -3,7 +3,6 @@ import {
   VStack,
   HStack,
   Text,
-  Avatar,
   Card,
   CardBody,
   Flex,
@@ -11,7 +10,7 @@ import {
   useColorModeValue
 } from "@chakra-ui/react";
 import type { IUser } from "../interfaces";
-import CustomLink from "./ui/CustomLink";
+import { UserDisplay } from "./ui/UserDisplay";
 
 interface GuildOrgChartProps {
   members: IUser[];
@@ -44,16 +43,7 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
     >
       <CardBody>
         <VStack spacing={2}>
-          <Avatar
-            size="lg"
-            name={member.bbs_name || member.global_name}
-            src={
-              member.avatar
-                ? `https://cdn.discordapp.com/avatars/${member.discord_id}/${member.avatar}.png`
-                : undefined
-            }
-          />
-          <CustomLink to={`/joueur/${member._id}`} text={member.bbs_name || member.global_name} requireAuth={true} />
+        <UserDisplay user={member} direction="column" avatarSize="lg" textSize="lg" />
           <Badge
             colorScheme={
               roleLabel === "Chef"
