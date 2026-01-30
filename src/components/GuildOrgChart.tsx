@@ -46,14 +46,14 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
         <VStack spacing={2}>
           <Avatar
             size="lg"
-            name={member.global_name || member.username}
+            name={member.bbs_name || member.global_name}
             src={
               member.avatar
                 ? `https://cdn.discordapp.com/avatars/${member.discord_id}/${member.avatar}.png`
                 : undefined
             }
           />
-          <CustomLink to={`/joueur/${member._id}`} text={member.global_name || member.username} requireAuth={true} />
+          <CustomLink to={`/joueur/${member._id}`} text={member.bbs_name || member.global_name} requireAuth={true} />
           <Badge
             colorScheme={
               roleLabel === "Chef"
