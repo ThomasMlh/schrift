@@ -87,6 +87,7 @@ export const PodiumFilters = ({
             valueKey="name"
             allowDeselect={false}
             size="md"
+            showActiveBadge={true}
           />
           
           {/* Filtre par rotation (uniquement en mode rotation) */}

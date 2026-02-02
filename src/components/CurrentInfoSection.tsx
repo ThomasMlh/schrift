@@ -18,6 +18,7 @@ import { AttackTypeBadge } from "./ui/AttackTypeBadge";
 import { AlterationImage } from "./ui/AlterationImage";
 import CustomLink from "./ui/CustomLink";
 import { useCycles } from "@/hooks/useAPI";
+import { getRotationRealDates } from "@/utils/cycleHelpers";
 
 export const CurrentInfoSection = () => {
   const [currentCycle, setCurrentCycle] = useState<ICycle | null>(null);
@@ -151,23 +152,6 @@ export const CurrentInfoSection = () => {
       setError("Erreur lors du chargement des données");
     }
   }, [allCycles, isLoading, cyclesError]);
-
-  const getRotationRealDates = (startDate: string, endDate: string) => {
-    const createParisDate = (dateStr: string, baseHourUTC: number, dayOffset: number = 0) => {
-      const [day, month, year] = dateStr.split('/').map(Number);
-      
-      const finalDate = new Date(Date.UTC(year, month - 1, day + dayOffset, baseHourUTC, 0, 0));
-      
-      return finalDate;
-    };
-    const BASE_HOUR_UTC = 15;
-    
-    const realStartDate = createParisDate(startDate, BASE_HOUR_UTC, -1);
-    
-    const realEndDate = createParisDate(endDate, BASE_HOUR_UTC, 0);
-
-    return { realStartDate, realEndDate };
-  };
 
   const formatRealDateTime = (date: Date) => {
     return (

@@ -106,6 +106,7 @@ export const ScoresFilters = ({
                                 allowDeselect={true}
                                 valueKey="_id"
                                 size="md"
+                                showActiveBadge={true}
                             />
                         </Box>
 

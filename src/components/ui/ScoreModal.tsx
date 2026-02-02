@@ -144,7 +144,7 @@ export const ScoreModal = ({
                                 placeholder="Sélectionner un cycle"
                                 isDisabled={isLoadingCycles || isEdit}
                                 allowDeselect={false}
-                                showRotationCount={true}
+                                showActiveBadge={true}
                                 size="md"
                             />
                         </FormControl>

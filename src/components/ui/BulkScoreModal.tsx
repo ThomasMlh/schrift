@@ -267,7 +267,7 @@ const BulkScoreModal = ({
                                 placeholder="Sélectionnez un cycle"
                                 isDisabled={isSubmitting}
                                 allowDeselect={true}
-                                showRotationCount={true}
+                                showActiveBadge={true}
                                 size="md"
                             />
                         </FormControl>

@@ -2,6 +2,7 @@ import { Text, HStack, Badge } from "@chakra-ui/react";
 import { CustomSelect } from "./CustomSelect";
 import type { ICycle } from "../../interfaces";
 import type { ReactNode } from "react";
+import { isCycleActive } from "../../utils/cycleHelpers";
 
 interface SelectOption {
     value: string;
@@ -18,7 +19,7 @@ interface CycleSelectProps {
     isDisabled?: boolean;
     allowDeselect?: boolean;
     valueKey?: '_id' | 'name';
-    showRotationCount?: boolean;
+    showActiveBadge?: boolean;
     size?: 'sm' | 'md' | 'lg';
 }
 
@@ -30,7 +31,7 @@ export const CycleSelect = ({
     isDisabled = false,
     allowDeselect = true,
     valueKey = '_id',
-    showRotationCount = false,
+    showActiveBadge = false,
     size = 'md'
 }: CycleSelectProps) => {
     // Grouper les cycles par année
@@ -70,11 +71,21 @@ export const CycleSelect = ({
                             <Text fontWeight="medium">
                                 {cycle.name}
                             </Text>
-                            {showRotationCount && (
-                                <Badge colorScheme="purple" fontSize="xs">
-                                    {cycle.rotations?.length || 0} rot.
-                                </Badge>
-                            )}
+                            <HStack spacing={1}>
+                                {showActiveBadge && (
+                                    <>
+                                        {isCycleActive(cycle) ? (
+                                            <Badge colorScheme="green" fontSize="xs">
+                                                Actif
+                                            </Badge>
+                                        ) : (
+                                            <Badge colorScheme="purple" fontSize="xs" variant="subtle">
+                                                {cycle.rotations?.length || 0} rot.
+                                            </Badge>
+                                        )}
+                                    </>
+                                )}
+                            </HStack>
                         </HStack>
                     )
                 });
@@ -97,9 +108,9 @@ export const CycleSelect = ({
                         {selectedCycle.year}
                     </Badge>
                 )}
-                {showRotationCount && selectedCycle && (
-                    <Badge colorScheme="purple" fontSize="xs">
-                        {selectedCycle.rotations?.length || 0} rot.
+                {showActiveBadge && selectedCycle && isCycleActive(selectedCycle) && (
+                    <Badge colorScheme="green" fontSize="xs">
+                        Actif
                     </Badge>
                 )}
             </HStack>
