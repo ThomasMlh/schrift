@@ -14,15 +14,23 @@ const routes = [
     content: `
       <h1>Bienvenue sur Schrift BBS</h1>
       <p>Plateforme officielle de gestion des guildes Schrift pour Bleach Brave Souls. Consultez les scores, les rotations, et le classement des meilleurs joueurs.</p>
-      <ul>
-        <li><a href="/personnages">Personnages de BBS</a> - Base de données complète</li>
-        <li><a href="/cycles">Cycles et Rotations</a> - Planning des guildes</li>
-        <li><a href="/joueurs">Joueurs</a> - Profils et statistiques</li>
-        <li><a href="/scores">Scores</a> - Tableau des classements</li>
-        <li><a href="/podium">Podium</a> - Top joueurs</li>
-        <li><a href="/comparateur">Comparateur</a> - Comparez les personnages</li>
-      </ul>
-      <p>Guildes: Schrift A, Schrift B, Schrift C, Schrift D</p>
+      <nav aria-label="Navigation principale">
+        <h2>Navigation</h2>
+        <ul>
+          <li><a href="/personnages" title="Base de données des personnages BBS">Personnages de BBS</a> - Base de données complète avec statistiques et affinités</li>
+          <li><a href="/podium" title="Podium des meilleurs joueurs">Podium</a> - Top joueurs et meilleurs scores de Guild Quest</li>
+          <li><a href="/cycles" title="Cycles et rotations de guilde">Cycles et Rotations</a> - Planning et historique des guildes</li>
+          <li><a href="/joueurs" title="Liste des joueurs">Joueurs</a> - Profils et statistiques des membres</li>
+          <li><a href="/scores" title="Tableau des scores">Scores</a> - Tableau des classements par cycle</li>
+          <li><a href="/guildes" title="Guildes Schrift">Guildes</a> - Organisation des guildes Schrift A, B, C et D</li>
+          <li><a href="/comparateur" title="Comparateur de personnages">Comparateur</a> - Comparez les personnages BBS</li>
+          <li><a href="/guides" title="Guides BBS">Guides</a> - Astuces et stratégies pour Bleach Brave Souls</li>
+        </ul>
+      </nav>
+      <section>
+        <h2>Guildes Schrift</h2>
+        <p>Rejoignez l'une de nos quatre guildes compétitives : <strong>Schrift A</strong>, <strong>Schrift B</strong>, <strong>Schrift C</strong>, <strong>Schrift D</strong></p>
+      </section>
     `
   },
   {
@@ -41,7 +49,14 @@ const routes = [
         <li><strong>Killer</strong>: Bonus de dégâts contre certains types</li>
       </ul>
       <p>Filtrez et recherchez parmi des centaines de personnages pour optimiser vos équipes de guilde.</p>
-      <a href="/">Retour à l'accueil</a>
+      <nav aria-label="Navigation">
+        <ul>
+          <li><a href="/" title="Accueil Schrift BBS">Retour à l'accueil</a></li>
+          <li><a href="/comparateur" title="Comparer les personnages">Utiliser le comparateur</a></li>
+          <li><a href="/guides/rotations-builds" title="Guides des builds">Voir les guides de builds</a></li>
+          <li><a href="/cycles" title="Cycles de guilde">Consulter les cycles</a></li>
+        </ul>
+      </nav>
     `
   },
   {
@@ -123,7 +138,15 @@ const routes = [
         <li><strong>Records absolus</strong> - Les scores légendaires</li>
       </ul>
       <p>Rejoignez une guilde Schrift et défiez les meilleurs joueurs de la communauté Bleach Brave Souls !</p>
-      <a href="/">Retour à l'accueil</a> | <a href="/joueurs">Voir les joueurs</a>
+      <nav aria-label="Navigation">
+        <ul>
+          <li><a href="/" title="Accueil Schrift BBS">Retour à l'accueil</a></li>
+          <li><a href="/joueurs" title="Liste des joueurs">Voir tous les joueurs</a></li>
+          <li><a href="/scores" title="Tous les scores">Consulter tous les scores</a></li>
+          <li><a href="/cycles" title="Cycles de guilde">Explorer les cycles</a></li>
+          <li><a href="/guildes" title="Guildes Schrift">Découvrir les guildes</a></li>
+        </ul>
+      </nav>
     `
   },
   {

@@ -8,15 +8,81 @@ const HomePage = () => {
 
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "Organization",
+    "@type": "WebSite",
     "name": "Schrift BBS",
-    "description": "Guildes communautaires pour Bleach Brave Souls",
+    "description": "Guildes communautaires pour Bleach Brave Souls - Classements, rotations et statistiques",
     "url": "https://bbs-schrift.fr",
-    "logo": "https://bbs-schrift.fr/logo.png",
-    "sameAs": [],
-    "memberOf": {
+    "publisher": {
+      "@type": "Organization",
+      "name": "Schrift BBS",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://bbs-schrift.fr/logo.png"
+      }
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://bbs-schrift.fr/personnages?search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    },
+    "about": {
       "@type": "Game",
       "name": "Bleach Brave Souls"
+    },
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": "Navigation principale",
+      "numberOfItems": 8,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Personnages",
+          "url": "https://bbs-schrift.fr/personnages"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Podium",
+          "url": "https://bbs-schrift.fr/podium"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Cycles",
+          "url": "https://bbs-schrift.fr/cycles"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Scores",
+          "url": "https://bbs-schrift.fr/scores"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Joueurs",
+          "url": "https://bbs-schrift.fr/joueurs"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Guildes",
+          "url": "https://bbs-schrift.fr/guildes"
+        },
+        {
+          "@type": "ListItem",
+          "position": 7,
+          "name": "Comparateur",
+          "url": "https://bbs-schrift.fr/comparateur"
+        },
+        {
+          "@type": "ListItem",
+          "position": 8,
+          "name": "Guides",
+          "url": "https://bbs-schrift.fr/guides"
+        }
+      ]
     }
   };
 

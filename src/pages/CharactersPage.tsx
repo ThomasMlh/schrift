@@ -7,10 +7,36 @@ const CharactersPage = () => {
 
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "ItemList",
+    "@type": "CollectionPage",
     "name": "Personnages Bleach Brave Souls",
     "description": "Base de données complète des personnages de Bleach Brave Souls avec leurs statistiques, affinités et informations détaillées",
-    "url": "https://bbs-schrift.fr/personnages"
+    "url": "https://bbs-schrift.fr/personnages",
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": "Liste des personnages BBS",
+      "description": "Tous les personnages jouables de Bleach Brave Souls"
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Accueil",
+          "item": "https://bbs-schrift.fr"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Personnages",
+          "item": "https://bbs-schrift.fr/personnages"
+        }
+      ]
+    },
+    "about": {
+      "@type": "Game",
+      "name": "Bleach Brave Souls"
+    }
   };
 
   return (

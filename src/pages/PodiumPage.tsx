@@ -55,11 +55,36 @@ const PodiumPage = () => {
   // Structured Data
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: "Podium des joueurs - Bleach Brave Souls | Schrift BBS",
-    description:
-      "Classement des meilleurs joueurs de Bleach Brave Souls par cycle et rotation.",
-    url: "https://bbs-schrift.fr/podium",
+    "@type": "CollectionPage",
+    "name": "Podium des joueurs - Bleach Brave Souls | Schrift BBS",
+    "description": "Classement des meilleurs joueurs de Bleach Brave Souls par cycle et rotation.",
+    "url": "https://bbs-schrift.fr/podium",
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": "Classement des meilleurs joueurs",
+      "description": "Top joueurs et scores de Guild Quest"
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Accueil",
+          "item": "https://bbs-schrift.fr"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Podium",
+          "item": "https://bbs-schrift.fr/podium"
+        }
+      ]
+    },
+    "about": {
+      "@type": "Game",
+      "name": "Bleach Brave Souls"
+    }
   };
 
   // Fonction pour mettre à jour l'URL
