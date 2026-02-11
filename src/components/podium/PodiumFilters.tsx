@@ -8,7 +8,7 @@ type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
 
 interface PodiumFiltersProps {
   displayMode: DisplayMode;
-  selectedCycleName: string;
+  selectedCycleId: string;
   selectedRotationId: string;
   selectedWeekNumber: string;
   selectedGuildName: string;
@@ -18,7 +18,7 @@ interface PodiumFiltersProps {
   selectedCycle?: ICycle;
   availableWeeks: number;
   onModeChange: (mode: DisplayMode) => void;
-  onCycleChange: (cycleName: string) => void;
+  onCycleChange: (cycleId: string) => void;
   onRotationChange: (rotationId: string) => void;
   onWeekChange: (weekNumber: string) => void;
   onGuildChange: (guildName: string) => void;
@@ -29,7 +29,7 @@ interface PodiumFiltersProps {
 
 export const PodiumFilters = ({
   displayMode,
-  selectedCycleName,
+  selectedCycleId,
   selectedRotationId,
   selectedWeekNumber,
   selectedGuildName,
@@ -81,10 +81,10 @@ export const PodiumFilters = ({
           {/* Filtre par cycle */}
           <CycleSelect
             cycles={cycles}
-            value={selectedCycleName}
+            value={selectedCycleId}
             onChange={onCycleChange}
             placeholder="Sélectionner un cycle"
-            valueKey="name"
+            valueKey="_id"
             allowDeselect={false}
             size="md"
             showActiveBadge={true}
@@ -98,7 +98,7 @@ export const PodiumFilters = ({
               onChange={onRotationChange}
               options={selectedCycle.rotations.map((rotation: ICycleRotation) => ({
                 value: rotation.rotation_id,
-                label: `#${rotation.position} - ${rotation.killer} (${rotation.attack})`
+                label: `#${rotation.position} - ${rotation.killer} ${rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : "🟠 Mêlée"}`
               }))}
               allowDeselect={false}
               size="md"
@@ -157,7 +157,7 @@ export const PodiumFilters = ({
       </Flex>
       
       {/* Filtres actifs */}
-      {(selectedCycleName || selectedGuildName || displayMode !== "cycle") && (
+      {(selectedCycleId || selectedGuildName || displayMode !== "cycle") && (
         <Box p={3} bg={filterBg} borderRadius="md">
           <HStack spacing={2} flexWrap="wrap">
             <Text fontSize="sm" fontWeight="medium">
@@ -173,8 +173,8 @@ export const PodiumFilters = ({
                   : "Miss"}
               </Badge>
             )}
-            {selectedCycleName && (
-              <Badge colorScheme="blue">Cycle: {selectedCycleName}</Badge>
+            {selectedCycle && (
+              <Badge colorScheme="blue">Cycle: {selectedCycle.name} - {selectedCycle.year}</Badge>
             )}
             {selectedWeekNumber && displayMode === "weekly" && (
               <Badge colorScheme="teal">Semaine: {selectedWeekNumber}</Badge>

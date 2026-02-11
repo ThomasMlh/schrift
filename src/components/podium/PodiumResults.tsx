@@ -15,7 +15,7 @@ interface PodiumResultsProps {
   displayMode: DisplayMode;
   isLoading: boolean;
   podiumData: IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse | null;
-  selectedCycleName: string;
+  selectedCycleId: string;
   selectedWeekNumber: string;
   onPageChange: (page: number) => void;
   selectedGuildName?: string; // Ajouter pour savoir si une guilde est filtrée
@@ -44,7 +44,7 @@ export const PodiumResults = ({
   displayMode,
   isLoading,
   podiumData,
-  selectedCycleName,
+  selectedCycleId,
   selectedWeekNumber,
   onPageChange,
   selectedGuildName = "",
@@ -66,7 +66,7 @@ export const PodiumResults = ({
       <Alert status="warning" borderRadius="md">
         <AlertIcon />
         <Text>
-          {selectedCycleName
+          {selectedCycleId
             ? displayMode === "weekly" && !selectedWeekNumber
               ? "Veuillez sélectionner une semaine"
               : "Aucun score trouvé pour cette sélection"
