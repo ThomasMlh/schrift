@@ -12,21 +12,28 @@ import {
   AlertIcon,
   Card,
   CardBody,
-  Heading,
   SimpleGrid,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
   Box,
-  Divider
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  Icon,
+  useColorModeValue,
+  Flex
 } from "@chakra-ui/react";
 import { formatRoleName } from "@/utils/user";
 import { SEOHead } from "@/components/SEOHead";
-import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { UserDisplay } from "@/components/ui/UserDisplay";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import { useCycles, useUser, useUserStats, useGuild } from "@/hooks/useAPI";
+import { StatCard } from "@/components/user/StatCard";
+import { UserStatsOverview } from "@/components/user/UserStatsOverview";
+import { UserPerformances } from "@/components/user/UserPerformances";
+import { UserTopRotations } from "@/components/user/UserTopRotations";
+import { FiBarChart2, FiTrendingUp, FiAward } from "react-icons/fi";
+import { getDiscordBannerUrl } from "@/utils/discord";
 
 const UserPage = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -49,10 +56,11 @@ const UserPage = () => {
   const user = userData
     ? {
         ...userData,
-        guild_name: guildName
+        guild_name: guildName,
       }
     : null;
 
+  const bannerUrl = user?.discord_id && user?.banner ? getDiscordBannerUrl(user.discord_id, user.banner) : null;
   const loading = userLoading || guildLoading;
   const error = userError
     ? "Erreur lors du chargement du profil utilisateur"
@@ -69,6 +77,53 @@ const UserPage = () => {
       default:
         return "gray";
     }
+  };
+
+  const cardBg = useColorModeValue("white", "gray.800");
+  const gradientBg = useColorModeValue(
+    "linear(to-br, blue.50, purple.50)",
+    "linear(to-br, gray.800, purple.900)"
+  );
+  const tabBg = useColorModeValue("white", "gray.800");
+
+  // Styles communs pour les onglets
+  const tabStyles = {
+    fontWeight: "semibold",
+    fontSize: "md",
+    px: 6,
+    py: 3,
+    borderRadius: "lg",
+    border: "2px solid",
+    borderColor: "gray.300",
+    bg: "gray.100",
+    color: "gray.700",
+    _dark: {
+      borderColor: "gray.500",
+      bg: "gray.700",
+      color: "gray.200"
+    },
+    _selected: {
+      bg: "blue.600",
+      color: "white",
+      borderColor: "blue.600",
+      boxShadow: "0 0 0 3px rgba(66, 153, 225, 0.3)",
+      _dark: {
+        bg: "blue.600",
+        color: "white",
+        borderColor: "blue.600"
+      }
+    },
+    _hover: {
+      borderColor: "blue.400",
+      bg: "blue.50",
+      color: "blue.700",
+      transform: "translateY(-2px)",
+      _dark: {
+        bg: "gray.600",
+        color: "white"
+      }
+    },
+    transition: "all 0.2s"
   };
 
   if (loading) {
@@ -112,10 +167,57 @@ const UserPage = () => {
         url={`https://bbs-schrift.fr/joueur/${userId}`}
         noIndex={true}
       />
-      <Container maxW="container.md" py={8}>
-        <Card>
-          <CardBody>
-            <VStack spacing={2} align="center">
+      <Container maxW="container.xl" py={8}>
+        {/* Header avec profil utilisateur */}
+        <Card
+          bgGradient={gradientBg}
+          {...(bannerUrl && {
+            backgroundImage: `url('${bannerUrl}')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center"
+          })}
+          borderRadius="2xl"
+          boxShadow="2xl"
+          mb={6}
+          overflow="hidden"
+          position="relative"
+        >
+          {/* Overlay sombre pour la lisibilité (uniquement si bannière) */}
+          {bannerUrl && (
+            <Box
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              bottom={0}
+              bg="blackAlpha.600"
+              zIndex={0}
+            />
+          )}
+          {!bannerUrl && (
+            <Box
+              position="absolute"
+              top={0}
+              right={0}
+              width="300px"
+              height="300px"
+              opacity={0.1}
+            />
+          )}
+          <CardBody py={8}>
+            <VStack 
+              spacing={4} 
+              align="center" 
+              position="relative" 
+              zIndex={1}
+              {...(bannerUrl && {
+                sx: {
+                  "& *": {
+                    color: "white !important"
+                  }
+                }
+              })}
+            >
               <UserDisplay
                 user={user}
                 avatarSize="2xl"
@@ -130,15 +232,17 @@ const UserPage = () => {
                     <Badge
                       colorScheme={getRoleBadgeColor(user.role || "membre")}
                       variant="solid"
-                      px={3}
-                      py={1}
+                      px={4}
+                      py={2}
                       borderRadius="full"
+                      fontSize="md"
+                      textTransform="uppercase"
                     >
                       {formatRoleName(user.role)} {user.guild_name}
                     </Badge>
                   </HStack>
                 ) : (
-                  <Text fontSize="md" color="gray.500">
+                  <Text fontSize="md" color={bannerUrl ? "whiteAlpha.800" : "gray.500"}>
                     Aucune guilde
                   </Text>
                 )}
@@ -147,11 +251,21 @@ const UserPage = () => {
           </CardBody>
         </Card>
 
-        <Card mt={6}>
+        {/* Filtre de cycle */}
+        <Card mb={6} bg={cardBg} borderRadius="xl" boxShadow="lg">
           <CardBody>
-            <HStack spacing={4} align="center">
-              <Text fontWeight="semibold">Filtrer par cycle:</Text>
-              <Box maxW="300px">
+            <Flex
+              direction={{ base: "column", md: "row" }}
+              gap={4}
+              align={{ base: "stretch", md: "center" }}
+            >
+              <HStack spacing={3} flex="1">
+                <Icon as={FiBarChart2} boxSize={5} color="blue.500" />
+                <Text fontWeight="semibold" fontSize="lg">
+                  Filtrer par cycle:
+                </Text>
+              </HStack>
+              <Box maxW={{ base: "full", md: "300px" }}>
                 <CycleSelect
                   cycles={cycles}
                   value={selectedCycle}
@@ -162,178 +276,120 @@ const UserPage = () => {
                   size="md"
                 />
               </Box>
-            </HStack>
+            </Flex>
           </CardBody>
         </Card>
 
         {statsLoading ? (
           <Center mt={5}>
-            <Spinner />
+            <VStack spacing={4}>
+              <Spinner size="xl" color="blue.500" thickness="4px" />
+              <Text>Chargement des statistiques...</Text>
+            </VStack>
           </Center>
         ) : stats && stats.totalScores > 0 ? (
-          <VStack spacing={6} mt={6}>
-            <Card w="full">
+          <VStack spacing={6}>
+            {/* Statistiques principales */}
+            <SimpleGrid
+              columns={{ base: 1, sm: 2, lg: 4 }}
+              spacing={6}
+              w="full"
+            >
+              <StatCard
+                icon="🎯"
+                label="Total Scores"
+                value={stats.totalScores}
+                helpText="Participations"
+                borderColor="blue.500"
+                valueColor="blue.500"
+              />
+              <StatCard
+                icon="📈"
+                label="Score Moyen"
+                value={`${(Math.round(stats.averageScore) / 1000000).toFixed(1)}M`}
+                helpText="Par rotation"
+                borderColor="purple.500"
+                valueColor="purple.500"
+              />
+              <StatCard
+                icon="💰"
+                label="Points Totaux"
+                value={`${(stats.totalPoints / 1000000000).toFixed(1)}B`}
+                helpText="Cumulés"
+                borderColor="green.500"
+                valueColor="green.500"
+              />
+              <StatCard
+                icon="🏆"
+                label="Meilleur Score"
+                value={stats.bestScore.score.toLocaleString()}
+                helpText="Record personnel"
+                borderColor="orange.500"
+                valueColor="orange.500"
+              />
+            </SimpleGrid>
+
+            {/* Onglets pour les différentes visualisations */}
+            <Card w="full" bg={tabBg} borderRadius="xl" boxShadow="lg">
               <CardBody>
-                <Heading size="md" mb={4}>
-                  📊 Statistiques Globales
-                </Heading>
-                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-                  <Stat>
-                    <StatLabel>Total Scores</StatLabel>
-                    <StatNumber fontSize="3xl">{stats.totalScores}</StatNumber>
-                    <StatHelpText>Participations</StatHelpText>
-                  </Stat>
-                  <Stat>
-                    <StatLabel>Score Moyen</StatLabel>
-                    <StatNumber fontSize="3xl">
-                      {Math.round(stats.averageScore).toLocaleString()}
-                    </StatNumber>
-                    <StatHelpText>Par rotation</StatHelpText>
-                  </Stat>
-                  <Stat>
-                    <StatLabel>Points Totaux</StatLabel>
-                    <StatNumber fontSize="3xl">
-                      {stats.totalPoints.toLocaleString()}
-                    </StatNumber>
-                    <StatHelpText>Cumulés</StatHelpText>
-                  </Stat>
-                </SimpleGrid>
+                <Tabs colorScheme="blue" variant="enclosed">
+                  <TabList mb={6} flexWrap="wrap" gap={2} borderBottom="none">
+                    <Tab {...tabStyles}>
+                      <Icon as={FiBarChart2} mr={2} />
+                      Vue d'ensemble
+                    </Tab>
+                    <Tab {...tabStyles}>
+                      <Icon as={FiTrendingUp} mr={2} />
+                      Performances
+                    </Tab>
+                    <Tab {...tabStyles}>
+                      <Icon as={FiAward} mr={2} />
+                      Top Rotations
+                    </Tab>
+                  </TabList>
 
-                <Divider my={6} />
+                  <TabPanels>
+                    {/* Vue d'ensemble */}
+                    <TabPanel>
+                      <UserStatsOverview
+                        stats={stats}
+                        guildName={user?.guild_name}
+                        hasGuild={!!user?.guilde_id}
+                      />
+                    </TabPanel>
 
-                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-                  <Box>
-                    <Stat>
-                      <StatLabel color="green.500">🏆 Meilleur Score</StatLabel>
-                      <StatNumber fontSize="2xl" color="green.500">
-                        {stats.bestScore.score.toLocaleString()}
-                      </StatNumber>
-                      <StatHelpText>
-                        <HStack spacing={2}>
-                          <Text>{stats.bestScore.rotation_killer}</Text>
-                          <AttackTypeBadge
-                            attackType={stats.bestScore.rotation_attack}
-                          />
-                        </HStack>
-                      </StatHelpText>
-                    </Stat>
-                  </Box>
-                  <Box>
-                    <Stat>
-                      <StatLabel color="red.500">📉 Pire Score</StatLabel>
-                      <StatNumber fontSize="2xl" color="red.500">
-                        {stats.worstScore.score.toLocaleString()}
-                      </StatNumber>
-                      <StatHelpText>
-                        <HStack spacing={2}>
-                          <Text>{stats.worstScore.rotation_killer}</Text>
-                          <AttackTypeBadge
-                            attackType={stats.worstScore.rotation_attack}
-                          />
-                        </HStack>
-                      </StatHelpText>
-                    </Stat>
-                  </Box>
-                </SimpleGrid>
+                    {/* Graphique de performances */}
+                    <TabPanel>
+                      <UserPerformances stats={stats} />
+                    </TabPanel>
+
+                    {/* Top Rotations détaillées */}
+                    <TabPanel>
+                      <UserTopRotations stats={stats} />
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
               </CardBody>
             </Card>
-
-            {stats.bestRotation && stats.worstRotation && (
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="full">
-                <Card>
-                  <CardBody>
-                    <Heading size="sm" mb={3} color="green.500">
-                      🏆 Meilleure Rotation
-                    </Heading>
-                    <VStack align="stretch" spacing={2}>
-                      <HStack spacing={2}>
-                        <Text fontWeight="bold" fontSize="lg">
-                          {stats.bestRotation.rotation_killer}
-                        </Text>
-                        <AttackTypeBadge
-                          attackType={stats.bestRotation.rotation_attack}
-                        />
-                      </HStack>
-                      <Divider />
-                      <HStack justify="space-between">
-                        <Text fontSize="sm" color="gray.500">
-                          Moyenne:
-                        </Text>
-                        <Text fontWeight="semibold">
-                          {stats.bestRotation.averageScore.toLocaleString()}
-                        </Text>
-                      </HStack>
-                      <HStack justify="space-between">
-                        <Text fontSize="sm" color="gray.500">
-                          Participations:
-                        </Text>
-                        <Badge>{stats.bestRotation.scoreCount}</Badge>
-                      </HStack>
-                      <HStack justify="space-between">
-                        <Text fontSize="sm" color="gray.500">
-                          Total:
-                        </Text>
-                        <Text fontWeight="semibold">
-                          {stats.bestRotation.totalScore.toLocaleString()}
-                        </Text>
-                      </HStack>
-                    </VStack>
-                  </CardBody>
-                </Card>
-
-                <Card>
-                  <CardBody>
-                    <Heading size="sm" mb={3} color="red.500">
-                      📉 Rotation à Améliorer
-                    </Heading>
-                    <VStack align="stretch" spacing={2}>
-                      <HStack spacing={2}>
-                        <Text fontWeight="bold" fontSize="lg">
-                          {stats.worstRotation.rotation_killer}
-                        </Text>
-                        <AttackTypeBadge
-                          attackType={stats.worstRotation.rotation_attack}
-                        />
-                      </HStack>
-                      <Divider />
-                      <HStack justify="space-between">
-                        <Text fontSize="sm" color="gray.500">
-                          Moyenne:
-                        </Text>
-                        <Text fontWeight="semibold">
-                          {stats.worstRotation.averageScore.toLocaleString()}
-                        </Text>
-                      </HStack>
-                      <HStack justify="space-between">
-                        <Text fontSize="sm" color="gray.500">
-                          Participations:
-                        </Text>
-                        <Badge>{stats.worstRotation.scoreCount}</Badge>
-                      </HStack>
-                      <HStack justify="space-between">
-                        <Text fontSize="sm" color="gray.500">
-                          Total:
-                        </Text>
-                        <Text fontWeight="semibold">
-                          {stats.worstRotation.totalScore.toLocaleString()}
-                        </Text>
-                      </HStack>
-                    </VStack>
-                  </CardBody>
-                </Card>
-              </SimpleGrid>
-            )}
           </VStack>
         ) : (
-          <Center mt={5}>
-            <Box textAlign="center" py={8}>
-              <Text fontSize="lg" color="gray.500">
-                Aucune statistique disponible
-              </Text>
-              <Text fontSize="sm" color="gray.400" mt={2}>
-                Ce joueur n'a pas encore de scores enregistrés
-              </Text>
-            </Box>
+          <Center mt={8}>
+            <Card bg={cardBg} borderRadius="xl" boxShadow="lg" maxW="md">
+              <CardBody textAlign="center" py={10}>
+                <Icon as={FiBarChart2} boxSize={16} color="gray.400" mb={4} />
+                <Text
+                  fontSize="xl"
+                  fontWeight="semibold"
+                  color="gray.600"
+                  mb={2}
+                >
+                  Aucune statistique disponible
+                </Text>
+                <Text fontSize="md" color="gray.500">
+                  Ce joueur n'a pas encore de scores enregistrés
+                </Text>
+              </CardBody>
+            </Card>
           </Center>
         )}
       </Container>

@@ -22,6 +22,7 @@ export interface IUser {
   last_login?: string;
   exp?: number;
   guild_name?: string;
+  banner?: string;
 }
 
 export interface ICharacter {

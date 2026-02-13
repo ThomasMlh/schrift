@@ -756,7 +756,7 @@ export const useUser = (userId: string | undefined) => {
 };
 
 // Interface pour les statistiques utilisateur
-interface IUserStats {
+export interface IUserStats {
   totalScores: number;
   averageScore: number;
   totalPoints: number;
@@ -799,6 +799,12 @@ interface IUserStats {
     rotation_killer: string;
     rotation_attack: string;
     cycle_id: string;
+  };
+  ranking?: {
+    global: number | null;
+    totalPlayers: number | null;
+    guild: number | null;
+    totalGuildPlayers: number | null;
   };
 }
 
