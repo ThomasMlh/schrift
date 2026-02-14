@@ -358,7 +358,7 @@ const UserPage = () => {
             <Card w="full" bg={tabBg} borderRadius="xl" boxShadow="lg">
               <CardBody>
                 <Tabs colorScheme="blue" variant="enclosed" index={tabIndex} onChange={handleTabChange}>
-                  <TabList mb={6} flexWrap="wrap" gap={2} borderBottom="none">
+                  <TabList mb={6} flexWrap="wrap" justifyContent={{ base: "center", md: "flex-start" }} flexDirection={{ base: "column", md: "row" }} gap={2} borderBottom="none">
                     <Tab {...tabStyles}>
                       <Icon as={FiBarChart2} mr={2} />
                       Vue d'ensemble
@@ -375,7 +375,7 @@ const UserPage = () => {
 
                   <TabPanels>
                     {/* Vue d'ensemble */}
-                    <TabPanel>
+                    <TabPanel p={0}>
                       <UserStatsOverview
                         stats={stats}
                         guildName={user?.guild_name}
@@ -384,12 +384,12 @@ const UserPage = () => {
                     </TabPanel>
 
                     {/* Graphique de performances */}
-                    <TabPanel>
+                    <TabPanel p={0}>
                       <UserPerformances stats={stats} />
                     </TabPanel>
 
                     {/* Top Rotations détaillées */}
-                    <TabPanel>
+                    <TabPanel p={0}>
                       <UserTopRotations stats={stats} />
                     </TabPanel>
                   </TabPanels>
