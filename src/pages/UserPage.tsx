@@ -32,7 +32,8 @@ import { StatCard } from "@/components/user/StatCard";
 import { UserStatsOverview } from "@/components/user/UserStatsOverview";
 import { UserPerformances } from "@/components/user/UserPerformances";
 import { UserTopRotations } from "@/components/user/UserTopRotations";
-import { FiBarChart2, FiTrendingUp, FiAward } from "react-icons/fi";
+import { UserTemporalEvolution } from "@/components/user/UserTemporalEvolution";
+import { FiBarChart2, FiTrendingUp, FiAward, FiActivity } from "react-icons/fi";
 import { getDiscordBannerUrl } from "@/utils/discord";
 
 const UserPage = () => {
@@ -44,9 +45,10 @@ const UserPage = () => {
   const TAB_MAP: Record<string, number> = {
     "vue-ensemble": 0,
     "performances": 1,
-    "top-rotations": 2
+    "top-rotations": 2,
+    "evolution": 3
   };
-  const TAB_NAMES = ["vue-ensemble", "performances", "top-rotations"];
+  const TAB_NAMES = ["vue-ensemble", "performances", "top-rotations", "evolution"];
 
   // Déterminer l'onglet actif depuis l'URL
   const tabParam = searchParams.get("tab");
@@ -371,6 +373,10 @@ const UserPage = () => {
                       <Icon as={FiAward} mr={2} />
                       Top Rotations
                     </Tab>
+                    <Tab {...tabStyles}>
+                      <Icon as={FiActivity} mr={2} />
+                      Évolution
+                    </Tab>
                   </TabList>
 
                   <TabPanels>
@@ -391,6 +397,11 @@ const UserPage = () => {
                     {/* Top Rotations détaillées */}
                     <TabPanel p={0}>
                       <UserTopRotations stats={stats} />
+                    </TabPanel>
+
+                    {/* Évolution temporelle */}
+                    <TabPanel p={0}>
+                      <UserTemporalEvolution stats={stats} />
                     </TabPanel>
                   </TabPanels>
                 </Tabs>

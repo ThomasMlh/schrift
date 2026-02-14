@@ -28,7 +28,7 @@ export const RankingSection = ({
   }
 
   return (
-    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+    <SimpleGrid columns={{ base: 1, md: ranking.guild && hasGuild ? 2 : 1 }} spacing={6}>
       {ranking.global && (
         <Card
           bg={statCardBg}
@@ -53,7 +53,15 @@ export const RankingSection = ({
               <StatHelpText>
                 Sur {ranking.totalPlayers} joueur
                 {(ranking.totalPlayers || 0) > 1 ? "s" : ""}
+                {ranking.percentile && (
+                  <> • Top {100 - ranking.percentile}%</>
+                )}
               </StatHelpText>
+              {ranking.gapWithTop1 !== null && ranking.gapWithTop1 !== undefined && ranking.global !== 1 && (
+                <StatHelpText mt={1} color="orange.500" fontWeight="medium">
+                  📊 -{(ranking.gapWithTop1 / 1000000).toFixed(2)}M du top 1
+                </StatHelpText>
+              )}
             </Stat>
           </CardBody>
         </Card>

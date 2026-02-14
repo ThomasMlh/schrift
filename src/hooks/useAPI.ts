@@ -805,7 +805,26 @@ export interface IUserStats {
     totalPlayers: number | null;
     guild: number | null;
     totalGuildPlayers: number | null;
+    percentile: number | null;
+    gapWithTop1: number | null;
   };
+  bestCycle?: {
+    cycle_id: string;
+    cycle_name?: string;
+    averageScore: number;
+    totalScore: number;
+    scoreCount: number;
+  } | null;
+  firstParticipation?: string | null;
+  buildsCount?: number;
+  temporalEvolution?: {
+    cycle_id: string;
+    cycle_name: string;
+    averageScore: number;
+    scoreCount: number;
+    year?: number;
+    start_date?: string;
+  }[];
 }
 
 // Hook pour récupérer les statistiques d'un utilisateur

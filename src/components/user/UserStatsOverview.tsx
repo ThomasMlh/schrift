@@ -25,6 +25,31 @@ export const UserStatsOverview = ({
   guildName,
   hasGuild
 }: UserStatsOverviewProps) => {
+  // Formater la date d'ancienneté
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return "Inconnue";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+  };
+
+  // Calculer le nombre de jours depuis la première participation
+  const getDaysSinceFirstParticipation = (dateString: string | null | undefined) => {
+    if (!dateString) return null;
+    const firstDate = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - firstDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const daysSinceFirst = stats.firstParticipation 
+    ? getDaysSinceFirstParticipation(stats.firstParticipation)
+    : null;
+
   return (
     <VStack spacing={6} align="stretch">
       {/* Classement */}
@@ -75,6 +100,63 @@ export const UserStatsOverview = ({
             </StatHelpText>
           </Stat>
         </Box>
+      </SimpleGrid>
+
+      <Divider />
+
+      {/* Nouvelles statistiques */}
+      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
+        {stats.bestCycle && (
+          <Box>
+            <Stat>
+              <StatLabel color="purple.500" fontSize="lg" mb={2}>
+                🎖️ Meilleur Cycle
+              </StatLabel>
+              <StatNumber fontSize="2xl" color="purple.500">
+                {stats.bestCycle.cycle_name || "Cycle"}
+              </StatNumber>
+              <StatHelpText mt={2}>
+                Moy: {(stats.bestCycle.averageScore / 1000000).toFixed(2)}M
+                <br />
+                {stats.bestCycle.scoreCount} rotation{stats.bestCycle.scoreCount > 1 ? "s" : ""}
+              </StatHelpText>
+            </Stat>
+          </Box>
+        )}
+        
+        {stats.firstParticipation && (
+          <Box>
+            <Stat>
+              <StatLabel color="teal.500" fontSize="lg" mb={2}>
+                📅 Ancienneté
+              </StatLabel>
+              <StatNumber fontSize="xl" color="teal.500">
+                {formatDate(stats.firstParticipation)}
+              </StatNumber>
+              <StatHelpText mt={2}>
+                {daysSinceFirst !== null && (
+                  <>Il y a {daysSinceFirst} jour{daysSinceFirst > 1 ? "s" : ""}</>
+                )}
+              </StatHelpText>
+            </Stat>
+          </Box>
+        )}
+        
+        {stats.buildsCount !== undefined && (
+          <Box>
+            <Stat>
+              <StatLabel color="orange.500" fontSize="lg" mb={2}>
+                🔧 Builds Créés
+              </StatLabel>
+              <StatNumber fontSize="3xl" color="orange.500">
+                {stats.buildsCount}
+              </StatNumber>
+              <StatHelpText mt={2}>
+                Contribution{stats.buildsCount > 1 ? "s" : ""} à la communauté
+              </StatHelpText>
+            </Stat>
+          </Box>
+        )}
       </SimpleGrid>
     </VStack>
   );
