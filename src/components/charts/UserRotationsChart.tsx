@@ -1,4 +1,4 @@
-import { Box, useColorModeValue, useBreakpointValue } from "@chakra-ui/react";
+import { Box, useColorModeValue, useBreakpointValue, Flex } from "@chakra-ui/react";
 import {
   BarChart,
   Bar,
@@ -10,6 +10,7 @@ import {
   Cell,
   LabelList
 } from "recharts";
+import { AttackTypeBadge } from "../ui/AttackTypeBadge";
 
 interface UserRotationsChartProps {
   rotations: {
@@ -34,7 +35,7 @@ export const UserRotationsChart = ({ rotations, showAll = false }: UserRotations
   const labelFontSize = isMobile ? "9px" : "11px";
 
   const mobileMargin = { top: 10, right: 5, left: 5, bottom: 10 };
-  const desktopMargin = { top: 20, right: 30, left: 20, bottom: 100 };
+  const desktopMargin = { top: 20, right: 30, left: 20, bottom: 20 };
 
   // Trier par score moyen et prendre toutes ou les 10 meilleures
   const sortedRotations = [...rotations]
@@ -104,9 +105,9 @@ export const UserRotationsChart = ({ rotations, showAll = false }: UserRotations
           <Box fontSize="sm" color={textColor}>
             Participations: {payload[0].payload.count}
           </Box>
-          {/* <Box fontSize="sm" color={textColor} mt={1}>
-            Type: {payload[0].payload.attack}
-          </Box> */}
+          <Flex fontSize="sm" alignItems="center" gap={2} color={textColor} mt={1}>
+            Type: <AttackTypeBadge attackType={payload[0].payload.attack} />
+          </Flex>
         </Box>
       );
     }
@@ -169,6 +170,9 @@ export const UserRotationsChart = ({ rotations, showAll = false }: UserRotations
           height={80}
           stroke={textColor}
           style={{ fontSize }}
+          interval={0}
+          angle={25}
+          textAnchor="end"
           tickFormatter={(value) => {
             const rotation = topRotations.find(r => r.id === value);
             return rotation?.name || value;

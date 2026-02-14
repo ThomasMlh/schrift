@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import {
   Container,
@@ -37,7 +37,32 @@ import { getDiscordBannerUrl } from "@/utils/discord";
 
 const UserPage = () => {
   const { userId } = useParams<{ userId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCycle, setSelectedCycle] = useState<string>("");
+
+  // Mapping des onglets
+  const TAB_MAP: Record<string, number> = {
+    "vue-ensemble": 0,
+    "performances": 1,
+    "top-rotations": 2
+  };
+  const TAB_NAMES = ["vue-ensemble", "performances", "top-rotations"];
+
+  // Déterminer l'onglet actif depuis l'URL
+  const tabParam = searchParams.get("tab");
+  const tabIndex = tabParam && TAB_MAP[tabParam] !== undefined ? TAB_MAP[tabParam] : 0;
+
+  // Handler pour changer d'onglet
+  const handleTabChange = (index: number) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (index === 0) {
+      // Retirer le paramètre tab pour l'onglet par défaut
+      newParams.delete("tab");
+    } else {
+      newParams.set("tab", TAB_NAMES[index]);
+    }
+    setSearchParams(newParams);
+  };
 
   // Utilisation des hooks
   const {
@@ -332,7 +357,7 @@ const UserPage = () => {
             {/* Onglets pour les différentes visualisations */}
             <Card w="full" bg={tabBg} borderRadius="xl" boxShadow="lg">
               <CardBody>
-                <Tabs colorScheme="blue" variant="enclosed">
+                <Tabs colorScheme="blue" variant="enclosed" index={tabIndex} onChange={handleTabChange}>
                   <TabList mb={6} flexWrap="wrap" gap={2} borderBottom="none">
                     <Tab {...tabStyles}>
                       <Icon as={FiBarChart2} mr={2} />
