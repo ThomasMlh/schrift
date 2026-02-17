@@ -825,6 +825,33 @@ export interface IUserStats {
     year?: number;
     start_date?: string;
   }[];
+  missRate?: number;
+  missCount?: number;
+  recentTrend?: {
+    direction: 'up' | 'down' | 'stable';
+    percentage: number;
+    recentAverage: number;
+    previousAverage: number;
+    scores: {
+      score: number;
+      rotation_killer: string;
+      rotation_attack: string;
+      rotation_position: number;
+      rotation_start_date: string;
+    }[];
+  } | null;
+  rivals?: {
+    rank: number;
+    user_id: string;
+    discord_id?: string;
+    global_name?: string;
+    bbs_name?: string;
+    avatar?: string;
+    guilde_id?: string;
+    guild_name?: string | null;
+    averageScore: number;
+    scoreDifference: number;
+  }[];
 }
 
 // Hook pour récupérer les statistiques d'un utilisateur

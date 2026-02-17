@@ -33,7 +33,9 @@ import { UserStatsOverview } from "@/components/user/UserStatsOverview";
 import { UserPerformances } from "@/components/user/UserPerformances";
 import { UserTopRotations } from "@/components/user/UserTopRotations";
 import { UserTemporalEvolution } from "@/components/user/UserTemporalEvolution";
-import { FiBarChart2, FiTrendingUp, FiAward, FiActivity } from "react-icons/fi";
+import { UserRecentTrend } from "@/components/user/UserRecentTrend";
+import { UserRivals } from "@/components/user/UserRivals";
+import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock } from "react-icons/fi";
 import { getDiscordBannerUrl } from "@/utils/discord";
 
 const UserPage = () => {
@@ -44,11 +46,12 @@ const UserPage = () => {
   // Mapping des onglets
   const TAB_MAP: Record<string, number> = {
     "vue-ensemble": 0,
-    "performances": 1,
-    "top-rotations": 2,
-    "evolution": 3
+    "tendance": 1,
+    "performances": 2,
+    "top-rotations": 3,
+    "evolution": 4
   };
-  const TAB_NAMES = ["vue-ensemble", "performances", "top-rotations", "evolution"];
+  const TAB_NAMES = ["vue-ensemble", "tendance", "performances", "top-rotations", "evolution"];
 
   // Déterminer l'onglet actif depuis l'URL
   const tabParam = searchParams.get("tab");
@@ -251,6 +254,7 @@ const UserPage = () => {
                 direction="column"
                 textSize="2xl"
                 spacing={4}
+                asLink={false}
               />
 
               <VStack spacing={2} textAlign="center">
@@ -365,8 +369,12 @@ const UserPage = () => {
                       <Icon as={FiBarChart2} mr={2} />
                       Vue d'ensemble
                     </Tab>
-                    <Tab {...tabStyles}>
+                    <Tab {...tabStyles} isDisabled={!selectedCycle || !stats.recentTrend}>
                       <Icon as={FiTrendingUp} mr={2} />
+                      Tendance
+                    </Tab>
+                    <Tab {...tabStyles}>
+                      <Icon as={FiActivity} mr={2} />
                       Performances
                     </Tab>
                     <Tab {...tabStyles}>
@@ -374,7 +382,7 @@ const UserPage = () => {
                       Top Rotations
                     </Tab>
                     <Tab {...tabStyles}>
-                      <Icon as={FiActivity} mr={2} />
+                      <Icon as={FiClock} mr={2} />
                       Évolution
                     </Tab>
                   </TabList>
@@ -382,11 +390,36 @@ const UserPage = () => {
                   <TabPanels>
                     {/* Vue d'ensemble */}
                     <TabPanel p={0}>
-                      <UserStatsOverview
-                        stats={stats}
-                        guildName={user?.guild_name}
-                        hasGuild={!!user?.guilde_id}
-                      />
+                      <VStack spacing={6} align="stretch">
+                        <UserStatsOverview
+                          stats={stats}
+                          guildName={user?.guild_name}
+                          hasGuild={!!user?.guilde_id}
+                        />
+
+                        {/* Rivaux */}
+                        {stats.rivals && stats.rivals.length > 0 && user && (
+                          <UserRivals 
+                            rivals={stats.rivals} 
+                            currentUser={user}
+                            currentUserRank={stats.ranking?.global || null}
+                            currentUserAverage={stats.averageScore}
+                          />
+                        )}
+                      </VStack>
+                    </TabPanel>
+
+                    {/* Tendance récente */}
+                    <TabPanel p={0}>
+                      {stats.recentTrend && selectedCycle ? (
+                        <UserRecentTrend recentTrend={stats.recentTrend} />
+                      ) : (
+                        <Box textAlign="center" py={10}>
+                          <Text fontSize="lg" color="gray.500">
+                            📊 Sélectionnez un cycle pour voir votre tendance récente
+                          </Text>
+                        </Box>
+                      )}
                     </TabPanel>
 
                     {/* Graphique de performances */}

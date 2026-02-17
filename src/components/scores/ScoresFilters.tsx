@@ -119,7 +119,7 @@ export const ScoresFilters = ({
                             <CustomSelect
                                 options={availableRotations.map((rotation) => ({
                                     value: rotation.rotation_id,
-                                    label: `Rotation #${rotation.position} - ${rotation.period}`
+                                    label: `#${rotation.position} - ${rotation.killer} ${rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : "🟠 Mêlée"}`
                                 }))}
                                 value={filterRotationId}
                                 onChange={onRotationChange}

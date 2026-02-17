@@ -13,6 +13,7 @@ interface UserDisplayProps {
   roleBadge?: boolean;
   rainbowText?: boolean;
   direction?: "row" | "column";
+  asLink?: boolean;
 }
 
 export const UserDisplay = ({
@@ -23,9 +24,9 @@ export const UserDisplay = ({
   roleBadge = false,
   rainbowText = false,
   textSize = "md",
-  direction = "row"
+  direction = "row",
+  asLink = true
 }: UserDisplayProps) => {
-
   if (!user) {
     return (
       <Stack direction={direction} spacing={spacing} fontSize={textSize}>
@@ -34,6 +35,22 @@ export const UserDisplay = ({
       </Stack>
     );
   }
+
+  const styleText = {
+    bgGradient:
+      "linear-gradient(90deg, #ff6b6b, #ffa07a, #ffd966, #90ee90, #87ceeb, #9370db)",
+    backgroundSize: "300% 300%",
+    backgroundClip: "text",
+    animation: "rainbow 6s ease infinite",
+    fontWeight: "medium",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    "@keyframes rainbow": {
+      "0%": { backgroundPosition: "0% 50%" },
+      "50%": { backgroundPosition: "100% 50%" },
+      "100%": { backgroundPosition: "0% 50%" }
+    }
+  };
 
   const avatarUrl =
     user.avatar && user.discord_id
@@ -44,38 +61,43 @@ export const UserDisplay = ({
       : undefined;
 
   return (
-    <Stack direction={direction} justify={direction === "row" ? "flex-start" : "center"} align="center" spacing={spacing}>
+    <Stack
+      direction={direction}
+      justify={direction === "row" ? "flex-start" : "center"}
+      align="center"
+      spacing={spacing}
+    >
       <Avatar
         size={avatarSize}
         src={avatarUrl}
         name={user.bbs_name || user.global_name}
       />
       <VStack spacing={0} align={direction === "row" ? "start" : "center"}>
-        <CustomLink
-          to={`/joueur/${user._id}`}
-          text={user.bbs_name || user.global_name}
-          textSize={textSize}
-          requireAuth={true}
-          sx={
-            rainbowText
-              ? {
-                  bgGradient:
-                    "linear-gradient(90deg, #ff6b6b, #ffa07a, #ffd966, #90ee90, #87ceeb, #9370db)",
-                  backgroundSize: "300% 300%",
-                  backgroundClip: "text",
-                  animation: "rainbow 6s ease infinite",
-                  fontWeight: "medium",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  "@keyframes rainbow": {
-                    "0%": { backgroundPosition: "0% 50%" },
-                    "50%": { backgroundPosition: "100% 50%" },
-                    "100%": { backgroundPosition: "0% 50%" }
-                  }
-                }
-              : undefined
-          }
-        />
+        {asLink ? (
+          <CustomLink
+            to={`/joueur/${user._id}`}
+            text={user.bbs_name || user.global_name}
+            textSize={textSize}
+            requireAuth={true}
+            sx={
+              rainbowText
+                ? {...styleText}
+                : undefined
+            }
+          />
+        ) : (
+          <Text
+            fontSize={textSize}
+            fontWeight={"medium"}
+            sx={
+              rainbowText
+                ? {...styleText}
+                : undefined
+            }
+          >
+            {user.bbs_name || user.global_name}
+          </Text>
+        )}
         {showUsername && user.global_name && (
           <Text as="span" fontSize="xs" color="gray.500">
             {user.global_name}
@@ -83,7 +105,12 @@ export const UserDisplay = ({
         )}
       </VStack>
       {roleBadge && user.role && (
-        <Text as="span" fontSize="xs" color="gray.500" ml={direction === "row" ? 2 : 0}>
+        <Text
+          as="span"
+          fontSize="xs"
+          color="gray.500"
+          ml={direction === "row" ? 2 : 0}
+        >
           [{formatRoleName(user.role)}]
         </Text>
       )}

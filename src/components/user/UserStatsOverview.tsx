@@ -158,6 +158,26 @@ export const UserStatsOverview = ({
           </Box>
         )}
       </SimpleGrid>
+
+      {/* Taux de miss */}
+      {stats.missRate !== undefined && (
+        <>
+          <Divider />
+          <Box>
+            <Stat>
+              <StatLabel color={stats.missRate > 20 ? "red.500" : stats.missRate > 10 ? "yellow.500" : "green.500"} fontSize="lg" mb={2}>
+                ⚠️ Taux de Miss
+              </StatLabel>
+              <StatNumber fontSize="3xl" color={stats.missRate > 20 ? "red.500" : stats.missRate > 10 ? "yellow.500" : "green.500"}>
+                {stats.missRate}%
+              </StatNumber>
+              <StatHelpText mt={2}>
+                {stats.missCount} score{stats.missCount !== 1 ? "s" : ""} à 0 sur {stats.totalScores} rotation{stats.totalScores > 1 ? "s" : ""}
+              </StatHelpText>
+            </Stat>
+          </Box>
+        </>
+      )}
     </VStack>
   );
 };
