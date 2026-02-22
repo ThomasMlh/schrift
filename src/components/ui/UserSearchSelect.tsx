@@ -1,10 +1,12 @@
 import {
     Box, Button, Text, InputGroup, InputLeftElement, Input, Flex,
-    useColorModeValue, IconButton
+    useColorModeValue, IconButton,
+    HStack,
+    Badge
 } from "@chakra-ui/react";
 import { ChevronDownIcon, SearchIcon, CloseIcon } from "@chakra-ui/icons";
-import { useState, useEffect, useRef } from "react";
-import type { IUser } from "../../interfaces";
+import { useState, useEffect, useRef, useMemo } from "react";
+import type { IUser, IGuild } from "../../interfaces";
 
 interface UserSearchSelectProps {
     users: IUser[];
@@ -13,6 +15,7 @@ interface UserSearchSelectProps {
     searchQuery: string;
     onSearchChange: (query: string) => void;
     placeholder?: string;
+    guilds?: IGuild[];
 }
 
 export const UserSearchSelect = ({
@@ -21,7 +24,8 @@ export const UserSearchSelect = ({
     onUserSelect,
     searchQuery,
     onSearchChange,
-    placeholder = "Choisir un utilisateur"
+    placeholder = "Choisir un utilisateur",
+    guilds = []
 }: UserSearchSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [filteredUsers, setFilteredUsers] = useState<IUser[]>(users || []);
@@ -29,6 +33,22 @@ export const UserSearchSelect = ({
     const inputRef = useRef<HTMLInputElement>(null);
 
     const selectedUser = users?.find(user => user._id === selectedUserId);
+
+    // Créer une map des guildes pour un accès rapide
+    const guildMap = useMemo(() => {
+        const map: Record<string, string> = {};
+        guilds?.forEach(guild => {
+            if (guild._id) {
+                map[guild._id] = guild.name;
+            }
+        });
+        return map;
+    }, [guilds]);
+
+    // Fonction helper pour obtenir le nom de la guilde
+    const getGuildName = (user: IUser) => {
+        return user.guilde_id ? guildMap[user.guilde_id] : null;
+    };
 
     // Filtrer les utilisateurs selon la recherche
     useEffect(() => {
@@ -39,10 +59,14 @@ export const UserSearchSelect = ({
         if (!searchQuery.trim()) {
             setFilteredUsers(users);
         } else {
-            const filtered = users.filter(user =>
-                user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                (user.global_name && user.global_name.toLowerCase().includes(searchQuery.toLowerCase()))
-            );
+            const filtered = users.filter(user => {
+                const query = searchQuery.toLowerCase();
+                return (
+                    user.username.toLowerCase().includes(query) ||
+                    (user.global_name && user.global_name.toLowerCase().includes(query)) ||
+                    (user.bbs_name && user.bbs_name.toLowerCase().includes(query))
+                );
+            });
             setFilteredUsers(filtered);
         }
     }, [searchQuery, users]);
@@ -78,7 +102,7 @@ export const UserSearchSelect = ({
         onSearchChange(''); // Reset search
     };
 
-    const bgColor = useColorModeValue('white', 'gray.700');
+    // const bgColor = useColorModeValue('white', 'gray.700');
     const borderColor = useColorModeValue('gray.200', 'gray.600');
     const hoverBg = useColorModeValue('gray.50', 'gray.600');
     const menuBg = useColorModeValue('white', 'gray.800');
@@ -90,25 +114,26 @@ export const UserSearchSelect = ({
                 // Affichage quand un utilisateur est sélectionné
                 <Flex
                     w="100%"
-                    p={3}
+                    px={2}
+                    py={1}
                     border="1px solid"
                     borderColor={borderColor}
                     borderRadius="md"
-                    bg={bgColor}
+                    bg={menuBg}
                     align="center"
                     justify="space-between"
                     color={textColor}
                 >
-                    <Box flex={1} cursor="pointer" onClick={() => setIsOpen(!isOpen)}>
+                    <HStack flex={1} cursor="pointer" onClick={() => setIsOpen(!isOpen)}>
                         <Text fontWeight="medium">
                             {selectedUser.bbs_name || selectedUser.global_name}
                         </Text>
-                        {selectedUser.discord_id && (
-                            <Text fontSize="xs" color="gray.500">
-                                Discord: {selectedUser.discord_id}
-                            </Text>
+                        {getGuildName(selectedUser) && (
+                            <Badge fontSize="xs" colorScheme="blue">
+                                {getGuildName(selectedUser)}
+                            </Badge>
                         )}
-                    </Box>
+                    </HStack>
                     <Flex gap={1}>
                         <IconButton
                             aria-label="Changer d'utilisateur"
@@ -135,7 +160,7 @@ export const UserSearchSelect = ({
                     variant="outline"
                     rightIcon={<ChevronDownIcon />}
                     onClick={() => setIsOpen(!isOpen)}
-                    bg={bgColor}
+                    bg={menuBg}
                     borderColor={borderColor}
                     textAlign="left"
                     fontWeight="normal"
@@ -161,7 +186,7 @@ export const UserSearchSelect = ({
                     border="1px solid"
                     borderColor={borderColor}
                     borderRadius="md"
-                    boxShadow="lg"
+                    boxShadow="xl"
                     maxH="300px"
                     overflowY="auto"
                     mt={1}
@@ -222,16 +247,16 @@ export const UserSearchSelect = ({
                                     borderColor={borderColor}
                                     _last={{ borderBottom: "none" }}
                                 >
-                                    <Box flex={1}>
+                                    <HStack flex={1}>
                                         <Text fontWeight="medium" color={textColor}>
                                             {user.bbs_name || user.global_name}
                                         </Text>
-                                        {user.global_name && (
+                                        {getGuildName(user) && (
                                             <Text fontSize="xs" color="gray.500">
-                                                Discord: {user.global_name}
+                                                {getGuildName(user)}
                                             </Text>
                                         )}
-                                    </Box>
+                                    </HStack>
                                 </Flex>
                             ))
                         ) : (

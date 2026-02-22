@@ -52,59 +52,53 @@ const AppRoutes = () => {
   const { isLoggedIn, isAdmin, isGuildManager, isAuthLoading } = useAuth();
 
   return (
-    <Flex direction="column" minH="100vh">
-      <Header />
-        <Box
-          as="main"
-          flex="1"
-          px={4}
-          py={2}
-          overflow="auto"
-          overflowX="hidden"
-        >
-          <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/guildes" element={<GuildesPage />} />
-          <Route path="/personnages" element={<CharactersPage />} />
-          <Route path="/personnage/:id" element={<CharacterDetailPage />} />
-          <Route path="/cycles" element={<CyclesPage />} />
-          <Route path="/cycle/:id" element={<CycleDetailPage />} />
-          <Route
-            path="/cycle/:cycleId/rotation/:position"
-            element={<RotationDetailPage />}
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute
-                isAuthenticated={isLoggedIn}
-                isAdmin={isAdmin}
-                isGuildManager={isGuildManager}
-                isLoading={isAuthLoading}
-              >
-                <AdminPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/discord-callback" element={<DiscordCallback />} />
-          <Route path="/joueurs" element={<UsersPage />} />
-          <Route path="/joueur/:userId" element={<ProtectedRoute
-                isAuthenticated={isLoggedIn}
-                isAdmin={isAdmin}
-                isGuildManager={isGuildManager}
-                isLoading={isAuthLoading}
-              >
-                <UserPage />
-              </ProtectedRoute>} />
-          <Route path="/podium" element={<PodiumPage />} />
-          <Route path="/comparateur" element={<ComparatorPage />} />
-          <Route path="/guides" element={<GuidesPage />} />
-          <Route path="/guides/:section" element={<GuidesPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Box>
-      <Footer />
-    </Flex>
+    <Box as="main" flex="1" px={4} overflow="auto">
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/guildes" element={<GuildesPage />} />
+        <Route path="/personnages" element={<CharactersPage />} />
+        <Route path="/personnage/:id" element={<CharacterDetailPage />} />
+        <Route path="/cycles" element={<CyclesPage />} />
+        <Route path="/cycle/:id" element={<CycleDetailPage />} />
+        <Route
+          path="/cycle/:cycleId/rotation/:position"
+          element={<RotationDetailPage />}
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isLoggedIn}
+              isAdmin={isAdmin}
+              isGuildManager={isGuildManager}
+              isLoading={isAuthLoading}
+            >
+              <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/discord-callback" element={<DiscordCallback />} />
+        <Route path="/joueurs" element={<UsersPage />} />
+        <Route
+          path="/joueur/:userId"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isLoggedIn}
+              isAdmin={isAdmin}
+              isGuildManager={isGuildManager}
+              isLoading={isAuthLoading}
+            >
+              <UserPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/podium" element={<PodiumPage />} />
+        <Route path="/comparateur" element={<ComparatorPage />} />
+        <Route path="/guides" element={<GuidesPage />} />
+        <Route path="/guides/:section" element={<GuidesPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Box>
   );
 };
 
@@ -112,7 +106,11 @@ const MainRouter = () => {
   return (
     <Router>
       <AuthProvider>
-        <AppRoutes />
+        <Flex direction="column" minH="100vh">
+          <Header />
+          <AppRoutes />
+          <Footer />
+        </Flex>
       </AuthProvider>
     </Router>
   );

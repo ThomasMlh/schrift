@@ -222,7 +222,7 @@ const BulkScoreModal = ({
     return (
         <Modal isOpen={isOpen} onClose={handleClose} size="6xl" scrollBehavior="inside">
             <ModalOverlay />
-            <ModalContent minH="60vh" bg={modalBg}>
+            <ModalContent minH="80dvh" bg={modalBg}>
                 <ModalHeader>Saisie groupée des scores</ModalHeader>
                 <ModalBody>
                     <VStack spacing={6} align="stretch">
@@ -284,7 +284,7 @@ const BulkScoreModal = ({
                                     size="md"
                                     options={selectedCycle.rotations.map((rotation: ICycleRotation) => ({
                                         value: rotation.rotation_id,
-                                        label: `Rotation #${rotation.position} - ${rotation.killer}`,
+                                        label: `Rotation #${rotation.position} - ${rotation.killer} ${rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : "🟠 Mêlée"}`,
                                         content: (
                                             <VStack align="start" spacing={1} w="100%">
                                                 <HStack spacing={2} w="100%">
@@ -314,16 +314,23 @@ const BulkScoreModal = ({
                                 />
                             </FormControl>
                         )}                        {/* Informations de la sélection */}
-                        {selectedGuild && selectedCycle && selectedRotationId && (
-                            <Alert status="info">
-                                <AlertIcon />
-                                <VStack align="start" spacing={1}>
-                                    <Text><strong>Guilde:</strong> {selectedGuild.name}</Text>
-                                    <Text><strong>Cycle:</strong> {selectedCycle.name} {selectedCycle.year ? `(${selectedCycle.year})` : ''}</Text>
-                                    <Text><strong>Rotation:</strong> #{selectedCycle.rotations.find((r: ICycleRotation) => r.rotation_id === selectedRotationId)?.position}</Text>
-                                </VStack>
-                            </Alert>
-                        )}
+                        {selectedGuild && selectedCycle && selectedRotationId && (() => {
+                            const rotation = selectedCycle.rotations.find((r: ICycleRotation) => r.rotation_id === selectedRotationId);
+                            return (
+                                <Alert status="info">
+                                    <AlertIcon />
+                                    <VStack align="start" spacing={1}>
+                                        <Text><strong>Guilde:</strong> {selectedGuild.name}</Text>
+                                        <Text><strong>Cycle:</strong> {selectedCycle.name} {selectedCycle.year ? `(${selectedCycle.year})` : ''}</Text>
+                                        {rotation && (
+                                            <Text>
+                                                <strong>Rotation:</strong> #{rotation.position} - {rotation.killer} {rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : "🟠"} ({rotation.start_date} → {rotation.end_date})
+                                            </Text>
+                                        )}
+                                    </VStack>
+                                </Alert>
+                            );
+                        })()}
 
                         <Divider />
 
@@ -363,7 +370,7 @@ const BulkScoreModal = ({
                                             borderRadius="md"
                                             spacing={2}
                                         >
-                                            <UserDisplay user={member} avatarSize="xs" showUsername={false} />
+                                            <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />
                                             <NumberInput
                                                 size="sm"
                                                 min={0}

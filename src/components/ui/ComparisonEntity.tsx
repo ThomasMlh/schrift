@@ -6,12 +6,11 @@ import {
   CardHeader,
   Grid,
   HStack,
-  Stat,
-  StatLabel,
-  StatNumber,
   Text,
   useColorModeValue,
-  VStack
+  VStack,
+  Box,
+  Progress
 } from "@chakra-ui/react";
 import { UserDisplay } from "./UserDisplay";
 
@@ -32,17 +31,42 @@ const ComparisonEntity: React.FC<ComparisonEntityProps> = ({
   const entityInfo = entityData.entityInfo;
   const stats = entityData.stats;
 
-  const winnerBg = useColorModeValue("green.50", "green.900");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const winnerBg = useColorModeValue(
+    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+  );
+  const loserBg = useColorModeValue(
+    "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+  );
+  const cardBg = useColorModeValue("white", "gray.800");
+  const statBg = useColorModeValue("gray.50", "gray.700");
 
   return (
     <Card
       key={entityId}
-      bg={isWinner ? winnerBg : undefined}
-      borderWidth={isWinner ? 2 : 1}
-      borderColor={isWinner ? "green.500" : borderColor}
+      position="relative"
+      overflow="hidden"
+      bg={cardBg}
+      borderWidth={0}
+      boxShadow={isWinner ? "xl" : "lg"}
+      transform={isWinner ? "scale(1.02)" : "scale(1)"}
+      transition="all 0.3s ease"
+      _hover={{
+        transform: "translateY(-4px)",
+        boxShadow: "2xl"
+      }}
     >
-      <CardHeader pb={2}>
+      {/* Barre de gradient en haut */}
+      <Box
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        height="4px"
+        bgGradient={isWinner ? winnerBg : loserBg}
+      />
+      <CardHeader pb={2} pt={6}>
         <HStack justify="space-between" align="center">
           <VStack spacing={1} align="start" flex={1}>
             {comparisonType === "players" ? (
@@ -83,46 +107,123 @@ const ComparisonEntity: React.FC<ComparisonEntityProps> = ({
           </VStack>
 
           {isWinner && (
-            <Badge colorScheme="green" variant="solid" px={3} py={1}>
-              🏆 Gagnant
+            <Badge
+              bgGradient="linear(to-r, green.400, teal.500)"
+              color="white"
+              px={4}
+              py={2}
+              borderRadius="full"
+              fontSize="sm"
+              fontWeight="bold"
+              boxShadow="lg"
+              animation="pulse 2s infinite"
+            >
+              🏆 GAGNANT
             </Badge>
           )}
         </HStack>
       </CardHeader>
 
-      <CardBody pt={0}>
-        <VStack spacing={3} align="stretch">
-          <Grid templateColumns="repeat(2, 1fr)" gap={3}>
-            <Stat>
-              <StatLabel>Score Moyen</StatLabel>
-              <StatNumber color="blue.500">
+      <CardBody pt={4}>
+        <VStack spacing={4} align="stretch">
+          {/* Statistique principale */}
+          <Box
+            p={4}
+            borderRadius="xl"
+            bgGradient={isWinner ? winnerBg : loserBg}
+            color="white"
+            textAlign="center"
+            position="relative"
+            overflow="hidden"
+          >
+            <Box position="relative" zIndex={1}>
+              <Text fontSize="xs" fontWeight="medium" opacity={0.9} mb={1}>
+                Score Moyen
+              </Text>
+              <Text fontSize="3xl" fontWeight="black" letterSpacing="tight">
                 {stats.averageScore.toLocaleString("fr-FR")}
-              </StatNumber>
-            </Stat>
-            <Stat>
-              <StatLabel>Total Scores</StatLabel>
-              <StatNumber>{stats.totalScores}</StatNumber>
-            </Stat>
-          </Grid>
+              </Text>
+            </Box>
+            {/* Pattern de fond */}
+            <Box
+              position="absolute"
+              top="-50%"
+              right="-20%"
+              width="150%"
+              height="200%"
+              opacity={0.1}
+              transform="rotate(-12deg)"
+              bgGradient="linear(to-br, white, transparent)"
+            />
+          </Box>
 
+          {/* Autres statistiques */}
           <Grid templateColumns="repeat(2, 1fr)" gap={3}>
-            <Stat size="sm">
-              <StatLabel>Score Max</StatLabel>
-              <StatNumber fontSize="md">
-                {stats.maxScore.toLocaleString("fr-FR")}
-              </StatNumber>
-            </Stat>
-            <Stat size="sm">
-              <StatLabel>Score Min</StatLabel>
-              <StatNumber fontSize="md">
-                {stats.minScore.toLocaleString("fr-FR")}
-              </StatNumber>
-            </Stat>
+            <Box
+              p={3}
+              borderRadius="lg"
+              bg={statBg}
+              transition="all 0.2s"
+              _hover={{ bg: useColorModeValue("gray.100", "gray.600") }}
+            >
+              <Text fontSize="xs" color="gray.500" mb={1}>
+                📊 Total Scores
+              </Text>
+              <Text fontSize="xl" fontWeight="bold">
+                {stats.totalScores}
+              </Text>
+            </Box>
+            <Box
+              p={3}
+              borderRadius="lg"
+              bg={statBg}
+              transition="all 0.2s"
+              _hover={{ bg: useColorModeValue("gray.100", "gray.600") }}
+            >
+              <Text fontSize="xs" color="gray.500" mb={1}>
+                📈 Score Brut Moyen
+              </Text>
+              <Text fontSize="xl" fontWeight="bold">
+                {(stats.averageRawScore / 1000000).toFixed(1)}M
+              </Text>
+            </Box>
           </Grid>
 
-          <Text fontSize="xs" color="gray.500">
-            Score brut moyen: {stats.averageRawScore.toLocaleString("fr-FR")}
-          </Text>
+          {/* Min/Max avec barres */}
+          <VStack spacing={2} align="stretch">
+            <Box>
+              <HStack justify="space-between" mb={1}>
+                <Text fontSize="xs" color="gray.500">
+                  🔥 Score Max
+                </Text>
+                <Text fontSize="sm" fontWeight="semibold">
+                  {stats.maxScore.toLocaleString("fr-FR")}
+                </Text>
+              </HStack>
+              <Progress
+                value={100}
+                size="sm"
+                colorScheme="green"
+                borderRadius="full"
+              />
+            </Box>
+            <Box>
+              <HStack justify="space-between" mb={1}>
+                <Text fontSize="xs" color="gray.500">
+                  ❄️ Score Min
+                </Text>
+                <Text fontSize="sm" fontWeight="semibold">
+                  {stats.minScore.toLocaleString("fr-FR")}
+                </Text>
+              </HStack>
+              <Progress
+                value={(stats.minScore / stats.maxScore) * 100}
+                size="sm"
+                colorScheme="blue"
+                borderRadius="full"
+              />
+            </Box>
+          </VStack>
         </VStack>
       </CardBody>
     </Card>

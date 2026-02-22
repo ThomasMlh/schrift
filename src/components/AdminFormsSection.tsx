@@ -227,6 +227,7 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
               <FormLabel>Rechercher et sélectionner un utilisateur</FormLabel>
               <UserSearchSelect
                 users={users}
+                guilds={guilds}
                 selectedUserId={selectedUserId}
                 onUserSelect={setSelectedUserId}
                 searchQuery={userSearchQuery}
