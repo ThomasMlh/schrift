@@ -1,0 +1,259 @@
+import {
+  Box,
+  Card,
+  CardBody,
+  Text,
+  HStack,
+  VStack,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Badge,
+  useColorModeValue,
+  Icon,
+  Flex
+} from "@chakra-ui/react";
+import { FiTrendingUp, FiTrendingDown, FiMinus } from "react-icons/fi";
+import type { IUserStats } from "@/hooks/useAPI";
+
+interface PlayerComparisonTableProps {
+  playersData: Array<{
+    name: string;
+    stats: IUserStats | null;
+    color: string;
+  }>;
+}
+
+export const PlayerComparisonTable = ({
+  playersData
+}: PlayerComparisonTableProps) => {
+  const cardBg = useColorModeValue("white", "gray.800");
+  const tableBg = useColorModeValue("gray.50", "gray.700");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+
+  // Trouver le meilleur pour chaque métrique
+  const getBest = (metric: keyof IUserStats | "bestScore"): number | null => {
+    const values = playersData
+      .filter((p) => p.stats)
+      .map((p) => {
+        if (metric === "bestScore") {
+          return p.stats!.bestScore?.score || 0;
+        }
+        return (p.stats![metric] as number) || 0;
+      });
+
+    if (values.length === 0) return null;
+    const max = Math.max(...values);
+    return max === -Infinity ? null : max;
+  };
+
+  const formatNumber = (num: number | undefined) => {
+    if (num === undefined || num === null) return "N/A";
+    return num.toLocaleString("fr-FR");
+  };
+
+  const formatScore = (score: number | undefined) => {
+    if (score === undefined || score === null) return "N/A";
+    if (score >= 1000000000) {
+      return `${(score / 1000000000).toFixed(2)}B`;
+    }
+    if (score >= 1000000) {
+      return `${(score / 1000000).toFixed(2)}M`;
+    }
+    return formatNumber(score);
+  };
+
+  const isTopValue = (value: number, metric: keyof IUserStats | "bestScore") => {
+    const best = getBest(metric);
+    return best !== null && value === best;
+  };
+
+  const getComparisonIcon = (
+    value: number,
+    metric: keyof IUserStats | "bestScore"
+  ) => {
+    const best = getBest(metric);
+    if (best === null || best === 0 || value === best) {
+      return <Icon as={FiTrendingUp} color="green.500" />;
+    }
+    const percentage = (value / best) * 100;
+    if (percentage >= 90) {
+      return <Icon as={FiMinus} color="yellow.500" />;
+    }
+    return <Icon as={FiTrendingDown} color="red.500" />;
+  };
+
+  const metrics = [
+    {
+      label: "Score Moyen",
+      key: "averageScore" as const,
+      format: formatScore,
+      icon: "📊"
+    },
+    {
+      label: "Meilleur Score",
+      key: "bestScore" as const,
+      format: (stats: IUserStats | null) =>
+        formatNumber(stats?.bestScore?.score),
+      icon: "🏆"
+    },
+    {
+      label: "Pire Score",
+      key: "worstScore" as const,
+      format: (stats: IUserStats | null) =>
+        formatNumber(stats?.worstScore?.score),
+      icon: "📉"
+    },
+    {
+      label: "Participations",
+      key: "totalScores" as const,
+      format: formatNumber,
+      icon: "🎯"
+    },
+    {
+      label: "Points Totaux",
+      key: "totalPoints" as const,
+      format: formatScore,
+      icon: "💰"
+    },
+    {
+      label: "Taux de Miss",
+      key: "missRate" as const,
+      format: (value: number | undefined) =>
+        value !== undefined ? `${value}%` : "N/A",
+      icon: "⚠️",
+      inverse: true
+    }
+  ];
+
+  return (
+    <Card bg={cardBg} borderRadius="xl" boxShadow="lg">
+      <CardBody>
+        <VStack spacing={4} align="stretch">
+          <Text fontSize="lg" fontWeight="bold">
+            📋 Tableau Comparatif Détaillé
+          </Text>
+
+          <Box overflowX="auto">
+            <Table variant="simple" size="sm">
+              <Thead bg={tableBg}>
+                <Tr>
+                  <Th borderColor={borderColor} minW="150px">
+                    Métrique
+                  </Th>
+                  {playersData.map((player, index) => (
+                    <Th key={index} borderColor={borderColor} textAlign="center">
+                      <VStack spacing={1}>
+                        <Box
+                          w={3}
+                          h={3}
+                          borderRadius="full"
+                          bg={player.color}
+                        />
+                        <Text fontSize="xs" fontWeight="bold">
+                          {player.name}
+                        </Text>
+                      </VStack>
+                    </Th>
+                  ))}
+                </Tr>
+              </Thead>
+              <Tbody>
+                {metrics.map((metric, metricIndex) => (
+                  <Tr
+                    key={metricIndex}
+                    _hover={{ bg: tableBg }}
+                    transition="all 0.2s"
+                  >
+                    <Td borderColor={borderColor} fontWeight="medium">
+                      <HStack spacing={2}>
+                        <Text fontSize="sm">{metric.icon}</Text>
+                        <Text fontSize="sm">{metric.label}</Text>
+                      </HStack>
+                    </Td>
+                    {playersData.map((player, playerIndex) => {
+                      const stats = player.stats;
+                      let value: any;
+                      let rawValue: number = 0;
+
+                      if (metric.key === "bestScore") {
+                        value = metric.format(stats);
+                        rawValue = stats?.bestScore?.score || 0;
+                      } else if (metric.key === "worstScore") {
+                        value = metric.format(stats);
+                        rawValue = stats?.worstScore?.score || 0;
+                      } else {
+                        value =
+                          typeof metric.format === "function"
+                            ? (metric.format as (v: any) => string)(
+                                stats?.[metric.key]
+                              )
+                            : "N/A";
+                        rawValue = (stats?.[metric.key] as number) || 0;
+                      }
+
+                      const isTop =
+                        stats &&
+                        (metric.inverse
+                          ? isTopValue(100 - rawValue, metric.key)
+                          : isTopValue(rawValue, metric.key));
+
+                      return (
+                        <Td
+                          key={playerIndex}
+                          borderColor={borderColor}
+                          textAlign="center"
+                        >
+                          <Flex
+                            direction="column"
+                            align="center"
+                            justify="center"
+                            gap={1}
+                          >
+                            {isTop && (
+                              <Badge
+                                colorScheme="green"
+                                fontSize="2xs"
+                                px={2}
+                                borderRadius="full"
+                              >
+                                MEILLEUR
+                              </Badge>
+                            )}
+                            <Text
+                              fontSize="sm"
+                              fontWeight={isTop ? "bold" : "normal"}
+                              color={isTop ? "green.500" : undefined}
+                            >
+                              {value}
+                            </Text>
+                            {stats &&
+                              !metric.inverse &&
+                              getComparisonIcon(rawValue, metric.key)}
+                          </Flex>
+                        </Td>
+                      );
+                    })}
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
+
+          <Box
+            p={3}
+            borderRadius="lg"
+            bg={useColorModeValue("purple.50", "gray.700")}
+          >
+            <Text fontSize="xs" color="gray.600" _dark={{ color: "gray.400" }}>
+              💡 Les valeurs marquées <Badge colorScheme="green" fontSize="2xs">MEILLEUR</Badge> représentent le top pour chaque métrique.
+            </Text>
+          </Box>
+        </VStack>
+      </CardBody>
+    </Card>
+  );
+};

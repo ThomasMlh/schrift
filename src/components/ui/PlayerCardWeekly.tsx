@@ -1,18 +1,13 @@
-import {
-  Card,
-  CardBody,
-  HStack,
-  VStack,
-  Text,
-  Stack,
-  Badge
-} from "@chakra-ui/react";
+import { Card, CardBody, Stack, Badge, Tooltip, Box } from "@chakra-ui/react";
 import { UserDisplay } from "./UserDisplay";
 import type { IPodiumWeeklyPlayer, IUser } from "@/interfaces";
 import { ScoreBadge } from "./ScoreBadge";
 import { RankBadge } from "./RankBadge";
 
-const PlayerCardWeekly = (player: IPodiumWeeklyPlayer, showGuildName = false) => {
+const PlayerCardWeekly = (
+  player: IPodiumWeeklyPlayer,
+  showGuildName = false
+) => {
   return (
     <Card key={player.user_id} variant="outline">
       <CardBody p={{ base: 3, md: 4 }}>
@@ -21,7 +16,12 @@ const PlayerCardWeekly = (player: IPodiumWeeklyPlayer, showGuildName = false) =>
           justify="space-between"
           align="center"
         >
-          <Stack direction={{ base: "column", md: "row" }} spacing={4} flex={1} align="center">
+          <Stack
+            direction={{ base: "column", md: "row" }}
+            spacing={4}
+            flex={1}
+            align="center"
+          >
             <RankBadge rank={player.rank} />
             <UserDisplay
               user={
@@ -47,14 +47,15 @@ const PlayerCardWeekly = (player: IPodiumWeeklyPlayer, showGuildName = false) =>
               </Badge>
             )}
           </Stack>
-          <VStack spacing={1} align={{ base: "center", md: "flex-end" }}>
+          <Tooltip
+            label={`R1: ${player.rotation1_score.toLocaleString("fr-FR")} • R2: ${player.rotation2_score.toLocaleString("fr-FR")}`}
+            placement="bottom"
+          >
+            <Box>
             <ScoreBadge score={player.week_total_score} forceBlue={true} />
-            <HStack spacing={2} fontSize="xs" color="gray.600" >
-              <Text>R1: {player.rotation1_score.toLocaleString("fr-FR")}</Text>
-              <Text>•</Text>
-              <Text>R2: {player.rotation2_score.toLocaleString("fr-FR")}</Text>
-            </HStack>
-          </VStack>
+
+            </Box>
+          </Tooltip>
         </Stack>
       </CardBody>
     </Card>

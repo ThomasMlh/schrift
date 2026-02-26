@@ -885,3 +885,57 @@ export const useGuild = (guildId: string | undefined) => {
     mutate
   };
 };
+
+// Interface pour les statistiques de guilde
+export interface IGuildStats {
+  totalMembers: number;
+  averageScore: number;
+  totalScores: number;
+  bestScore: number;
+  totalPoints: number;
+}
+
+// Hook pour récupérer les statistiques d'une guilde
+export const useGuildStats = (guildId: string | undefined, cycleId?: string) => {
+  const url = guildId 
+    ? `${apiUrl}/api/guildes/${guildId}/stats${cycleId ? `?cycle_id=${cycleId}` : ''}`
+    : null;
+  const { data, error, isLoading, mutate } = useSWR<{ data: IGuildStats }>(url, fetcher, {
+    revalidateOnFocus: false
+  });
+
+  return {
+    stats: data?.data,
+    isLoading,
+    error,
+    mutate
+  };
+};
+
+// Fonction helper pour récupérer les stats d'un utilisateur (sans SWR, pour usage dans des loops)
+export const fetchUserStats = async (userId: string, cycleId?: string): Promise<IUserStats | null> => {
+  try {
+    const url = `${apiUrl}/api/users/${userId}/stats${cycleId ? `?cycle_id=${cycleId}` : ''}`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.data?.stats || null;
+  } catch (error) {
+    console.error(`Error fetching user stats for ${userId}:`, error);
+    return null;
+  }
+};
+
+// Fonction helper pour récupérer les stats d'une guilde (sans SWR, pour usage dans des loops)
+export const fetchGuildStats = async (guildId: string, cycleId?: string): Promise<IGuildStats | null> => {
+  try {
+    const url = `${apiUrl}/api/guildes/${guildId}/stats${cycleId ? `?cycle_id=${cycleId}` : ''}`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.data || null;
+  } catch (error) {
+    console.error(`Error fetching guild stats for ${guildId}:`, error);
+    return null;
+  }
+};

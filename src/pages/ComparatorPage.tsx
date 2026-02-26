@@ -5,868 +5,510 @@ import {
   Box,
   Card,
   CardBody,
-  Flex,
   HStack,
-  Badge,
   Button,
   Alert,
   AlertIcon,
   useToast,
   useColorModeValue,
-  Stat,
-  StatArrow,
-  IconButton,
-  Divider,
-  Grid
+  SimpleGrid,
+  Spinner,
+  Center,
+  Badge,
+  Icon,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel
 } from "@chakra-ui/react";
-import { RepeatIcon } from "@chakra-ui/icons";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CustomSelect } from "../components/ui/CustomSelect";
-import { CycleSelect } from "../components/ui/CycleSelect";
-import { UserSearchSelect } from "../components/ui/UserSearchSelect";
 import { HeroSection } from "../components/HeroSection";
-import type { IComparisonResponse, ICycleRotation, IRotationTemplate } from "../interfaces";
 import { SEOHead } from "@/components/SEOHead";
-import ComparisonEntity from "@/components/ui/ComparisonEntity";
-import { useUsers, useGuilds, useCycles, useRotations } from "@/hooks/useAPI";
+import { CycleSelect } from "@/components/ui/CycleSelect";
+import { MultiPlayerSelector } from "@/components/comparator/MultiPlayerSelector";
+import { PlayerComparisonRadar } from "@/components/comparator/PlayerComparisonRadar";
+import { PlayerComparisonTable } from "@/components/comparator/PlayerComparisonTable";
+import { MultiGuildSelector } from "@/components/comparator/MultiGuildSelector";
+import { GuildComparisonRadar } from "@/components/comparator/GuildComparisonRadar";
+import { GuildComparisonTable } from "@/components/comparator/GuildComparisonTable";
+import { useUsers, useCycles, useGuilds, fetchUserStats, fetchGuildStats } from "@/hooks/useAPI";
+import type { IUser, IGuild } from "@/interfaces";
+import type { IUserStats, IGuildStats } from "@/hooks/useAPI";
+import { FiRefreshCw, FiBarChart2, FiUsers } from "react-icons/fi";
+
+interface SelectedPlayer {
+  id: string;
+  user: IUser;
+}
+
+interface SelectedGuild {
+  id: string;
+  guild: IGuild;
+}
 
 const ComparatorPage: React.FC = () => {
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Estados
+  // Type de comparaison
   const [comparisonType, setComparisonType] = useState<"players" | "guilds">(
     (searchParams.get("type") as "players" | "guilds") || "players"
   );
-  const [entity1, setEntity1] = useState<string>(
-    searchParams.get("entity1") || ""
-  );
-  const [entity2, setEntity2] = useState<string>(
-    searchParams.get("entity2") || ""
-  );
+
+  // États pour les joueurs
+  const [selectedPlayers, setSelectedPlayers] = useState<SelectedPlayer[]>([]);
+  const [playersStats, setPlayersStats] = useState<Map<string, IUserStats | null>>(new Map());
+
+  // États pour les guildes
+  const [selectedGuilds, setSelectedGuilds] = useState<SelectedGuild[]>([]);
+  const [guildsStats, setGuildsStats] = useState<Map<string, IGuildStats | null>>(new Map());
+
   const [selectedCycleId, setSelectedCycleId] = useState<string>(
     searchParams.get("cycle_id") || ""
   );
-  const [selectedRotationId, setSelectedRotationId] = useState<string>(
-    searchParams.get("rotation_id") || ""
-  );
-  const [entity1SearchQuery, setEntity1SearchQuery] = useState<string>("");
-  const [entity2SearchQuery, setEntity2SearchQuery] = useState<string>("");
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
 
-  // Utiliser useSWR pour les données (cache automatique)
-
+  // Hooks
   const { users = [] } = useUsers({ authenticated: false, limit: 1000 });
   const { guilds = [] } = useGuilds(false);
   const { cycles = [] } = useCycles();
-  const { rotations: allRotations = [] } = useRotations();
-  const [comparisonResult, setComparisonResult] =
-    useState<IComparisonResponse | null>(null);
 
-  // États de chargement
-  const [isLoading, setIsLoading] = useState(false);
+  // Couleurs pour les entités
+  const entityColors = [
+    "#3182CE", // blue.500
+    "#38A169", // green.500
+    "#DD6B20", // orange.500
+    "#9F7AEA", // purple.500
+    "#E53E3E"  // red.500
+  ];
 
-  // Hooks UI
+  // UI Colors
   const bgColor = useColorModeValue("white", "gray.800");
-  const hoverBgGray = useColorModeValue("gray.100", "gray.700");
-  const borderColorBlue = useColorModeValue("blue.200", "blue.700");
-  const borderColorPurple = useColorModeValue("purple.300", "purple.600");
-  const bgGradientOrGray = useColorModeValue("gradient", "gray.700");
-  const borderColorBlueAlt = useColorModeValue("blue.200", "blue.600");
-  const borderColorGreen = useColorModeValue("green.200", "green.600");
-  const borderColorOrange = useColorModeValue("orange.200", "orange.600");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
 
-  // Effet pour déclencher automatiquement la comparaison si les paramètres URL sont présents
+  // Charger depuis l'URL au montage
   useEffect(() => {
-    if (entity1 && entity2) {
-      performComparison();
+    if (comparisonType === "players") {
+      const playerIds = searchParams.get("players")?.split(",") || [];
+      const validPlayers: SelectedPlayer[] = [];
+      playerIds.forEach((id) => {
+        const user = users.find((u) => u._id === id);
+        if (user) validPlayers.push({ id, user });
+      });
+      if (validPlayers.length > 0) setSelectedPlayers(validPlayers);
+    } else {
+      const guildIds = searchParams.get("guilds")?.split(",") || [];
+      const validGuilds: SelectedGuild[] = [];
+      guildIds.forEach((id) => {
+        const guild = guilds.find((g) => g._id === id);
+        if (guild) validGuilds.push({ id, guild });
+      });
+      if (validGuilds.length > 0) setSelectedGuilds(validGuilds);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entity1, entity2]);
+  }, [users, guilds, comparisonType]);
 
-  // Fonction pour mettre à jour les paramètres URL
-  const updateURLParams = (
-    type = comparisonType,
-    e1 = entity1,
-    e2 = entity2,
-    cycleId = selectedCycleId,
-    rotationId = selectedRotationId
-  ) => {
+  // Mettre à jour l'URL
+  const updateURLParams = () => {
     const params = new URLSearchParams();
+    params.set("type", comparisonType);
 
-    params.set("type", type);
-    if (e1) params.set("entity1", e1);
-    if (e2) params.set("entity2", e2);
-    if (cycleId) params.set("cycle_id", cycleId);
-    if (rotationId) params.set("rotation_id", rotationId);
+    if (comparisonType === "players" && selectedPlayers.length > 0) {
+      params.set("players", selectedPlayers.map((p) => p.id).join(","));
+    } else if (comparisonType === "guilds" && selectedGuilds.length > 0) {
+      params.set("guilds", selectedGuilds.map((g) => g.id).join(","));
+    }
+
+    if (selectedCycleId) {
+      params.set("cycle_id", selectedCycleId);
+    }
 
     setSearchParams(params);
   };
 
-  // Fonction pour effectuer la comparaison
-  const performComparison = async () => {
-    if (!entity1 || !entity2) {
+  useEffect(() => {
+    updateURLParams();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [comparisonType, selectedPlayers, selectedGuilds, selectedCycleId]);
+
+  // Charger les stats des joueurs
+  const loadPlayersStats = async () => {
+    if (selectedPlayers.length < 2) {
       toast({
-        title: "Sélection incomplète",
-        description: "Veuillez sélectionner deux entités à comparer",
+        title: "Sélection insuffisante",
+        description: "Veuillez sélectionner au moins 2 joueurs pour comparer",
         status: "warning",
         duration: 3000
       });
       return;
     }
 
-    if (entity1 === entity2) {
-      toast({
-        title: "Sélection invalide",
-        description: "Vous devez sélectionner deux entités différentes",
-        status: "warning",
-        duration: 3000
-      });
-      return;
-    }
+    setIsLoadingStats(true);
+    const newStatsMap = new Map<string, IUserStats | null>();
 
-    setIsLoading(true);
     try {
-      let url = `${apiUrl}/api/scores/compare?type=${comparisonType}&entity1=${encodeURIComponent(
-        entity1
-      )}&entity2=${encodeURIComponent(entity2)}`;
+      await Promise.all(
+        selectedPlayers.map(async (player) => {
+          const stats = await fetchUserStats(player.id, selectedCycleId);
+          newStatsMap.set(player.id, stats);
+        })
+      );
 
-      if (selectedCycleId) {
-        url += `&cycle_id=${encodeURIComponent(selectedCycleId)}`;
-      }
+      setPlayersStats(newStatsMap);
 
-      if (selectedRotationId) {
-        url += `&rotation_id=${encodeURIComponent(selectedRotationId)}`;
-      }
-
-      const response = await fetch(url);
-
-      if (response.ok) {
-        const data: IComparisonResponse = await response.json();
-        setComparisonResult(data);
-      } else {
-        const errorData = await response.json();
-        toast({
-          title: "Erreur",
-          description: errorData.message || "Erreur lors de la comparaison",
-          status: "error",
-          duration: 3000
-        });
-      }
-    } catch {
+      toast({
+        title: "Comparaison chargée",
+        description: `Stats de ${selectedPlayers.length} joueurs chargées avec succès`,
+        status: "success",
+        duration: 2000
+      });
+    } catch (error) {
       toast({
         title: "Erreur",
-        description: "Erreur de connexion lors de la comparaison",
+        description: "Erreur lors du chargement des statistiques",
         status: "error",
         duration: 3000
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingStats(false);
     }
   };
 
-  // Fonction pour inverser les entités
-  const swapEntities = () => {
-    const temp = entity1;
-    setEntity1(entity2);
-    setEntity2(temp);
-    updateURLParams(
-      comparisonType,
-      entity2,
-      entity1,
-      selectedCycleId,
-      selectedRotationId
-    );
+  // Charger les stats des guildes
+  const loadGuildsStats = async () => {
+    if (selectedGuilds.length < 2) {
+      toast({
+        title: "Sélection insuffisante",
+        description: "Veuillez sélectionner au moins 2 guildes pour comparer",
+        status: "warning",
+        duration: 3000
+      });
+      return;
+    }
+
+    setIsLoadingStats(true);
+    const newStatsMap = new Map<string, IGuildStats | null>();
+
+    try {
+      await Promise.all(
+        selectedGuilds.map(async (guild) => {
+          const stats = await fetchGuildStats(guild.id, selectedCycleId);
+          newStatsMap.set(guild.id, stats);
+        })
+      );
+
+      setGuildsStats(newStatsMap);
+
+      toast({
+        title: "Comparaison chargée",
+        description: `Stats de ${selectedGuilds.length} guildes chargées avec succès`,
+        status: "success",
+        duration: 2000
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Erreur lors du chargement des statistiques",
+        status: "error",
+        duration: 3000
+      });
+    } finally {
+      setIsLoadingStats(false);
+    }
   };
 
-  // Fonction pour réinitialiser
-  const resetComparison = () => {
-    setEntity1("");
-    setEntity2("");
-    setEntity1SearchQuery("");
-    setEntity2SearchQuery("");
+  // Handlers pour joueurs
+  const handleAddPlayer = (userId: string, user: IUser) => {
+    setSelectedPlayers([...selectedPlayers, { id: userId, user }]);
+  };
+
+  const handleRemovePlayer = (id: string) => {
+    setSelectedPlayers(selectedPlayers.filter((p) => p.id !== id));
+    const newStats = new Map(playersStats);
+    newStats.delete(id);
+    setPlayersStats(newStats);
+  };
+
+  // Handlers pour guildes
+  const handleAddGuild = (guildId: string, guild: IGuild) => {
+    setSelectedGuilds([...selectedGuilds, { id: guildId, guild }]);
+  };
+
+  const handleRemoveGuild = (id: string) => {
+    setSelectedGuilds(selectedGuilds.filter((g) => g.id !== id));
+    const newStats = new Map(guildsStats);
+    newStats.delete(id);
+    setGuildsStats(newStats);
+  };
+
+  const handleCycleChange = (cycleId: string) => {
+    setSelectedCycleId(cycleId);
+    setPlayersStats(new Map());
+    setGuildsStats(new Map());
+  };
+
+  const handleReset = () => {
+    setSelectedPlayers([]);
+    setSelectedGuilds([]);
     setSelectedCycleId("");
-    setSelectedRotationId("");
-    setComparisonResult(null);
+    setPlayersStats(new Map());
+    setGuildsStats(new Map());
     setSearchParams(new URLSearchParams({ type: comparisonType }));
   };
 
-  // Obtenir le cycle sélectionné
-  const selectedCycle = cycles.find((c) => c._id === selectedCycleId);
-
-  // Obtenir les rotations disponibles (du cycle sélectionné ou toutes les rotations)
-  const getAvailableRotations = () => {
-    if (selectedCycle && selectedCycle.rotations) {
-      return selectedCycle.rotations;
-    }
-    return allRotations;
+  const handleTabChange = (index: number) => {
+    const newType = index === 0 ? "players" : "guilds";
+    setComparisonType(newType);
+    setSearchParams(new URLSearchParams({ type: newType }));
   };
 
-  // Obtenir les informations de la rotation sélectionnée
-  const getSelectedRotationInfo = () => {
-    if (!selectedRotationId) return null;
+  // Préparer les données pour les graphiques
+  const playersData = selectedPlayers.map((player, index) => ({
+    name: player.user.bbs_name || player.user.global_name || "Joueur",
+    stats: playersStats.get(player.id) || null,
+    color: entityColors[index % entityColors.length]
+  }));
 
-    // Chercher d'abord dans les rotations du cycle sélectionné
-    if (selectedCycle && selectedCycle.rotations) {
-      const rotation = selectedCycle.rotations.find(
-        (r: ICycleRotation) => r._id === selectedRotationId
-      );
-      if (rotation) return rotation;
-    }
+  const guildsData = selectedGuilds.map((guild, index) => ({
+    name: guild.guild.name,
+    stats: guildsStats.get(guild.id) || null,
+    color: entityColors[index % entityColors.length]
+  }));
 
-    // Sinon chercher dans toutes les rotations
-    return allRotations.find((r: IRotationTemplate) => r._id === selectedRotationId);
-  };
+  const hasPlayersStats = playersStats.size > 0 && Array.from(playersStats.values()).some(s => s !== null);
+  const hasGuildsStats = guildsStats.size > 0 && Array.from(guildsStats.values()).some(s => s !== null);
 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Comparateur - Bleach Brave Souls | Schrift BBS",
-    description:
-      "Comparez les performances entre joueurs ou guildes dans Bleach Brave Souls. Analysez les scores moyens, totaux et plus encore.",
+    description: "Comparez les performances entre joueurs ou guildes dans Bleach Brave Souls.",
     url: "https://bbs-schrift.fr/comparateur"
   };
 
   return (
-    <>
+    <Box mb={"150px"}>
       <SEOHead
         title="Schrift BBS - Comparateur"
-        description="Comparez les performances entre joueurs ou guildes dans Bleach Brave Souls. Analysez les scores moyens, totaux et plus encore."
-        keywords="comparateur, comparaison, joueurs, guildes, scores, statistiques"
+        description="Comparez les performances entre joueurs ou guildes dans Bleach Brave Souls."
+        keywords="comparateur, multi-joueurs, guildes, radar, statistiques, comparaison"
         url="https://bbs-schrift.fr/comparateur"
         structuredData={structuredData}
       />
-      <Flex w="100%" align="center" justify="center" flexDir="column" mb={"10%"}>
+
+      <Box w="100%">
         <HeroSection
-          title="Comparateur"
-          description="Comparez les performances entre joueurs ou guildes"
+          title="Comparateur Avancé"
+          description="Comparez les performances de joueurs ou de guildes"
           badge={{ text: "Analyse", icon: "⚔️" }}
         />
 
         <Container maxW="container.xl" py={8} >
-            <VStack spacing={6} align="stretch" w={{ base: "100%", md: "90%" }} mx="auto">
-              {/* Contrôles de configuration */}
-              <Card
-                borderWidth={0}
-                boxShadow="2xl"
-                bg={bgColor}
+          <VStack spacing={6} align="stretch">
+            {/* Configuration générale */}
+            <Card
+              bg={bgColor}
+              borderRadius="xl"
+              boxShadow="lg"
+              borderWidth="1px"
+              borderColor={borderColor}
+            >
+              <Box
+                bgGradient="linear(to-r, blue.500, purple.500)"
+                p={4}
+                color="white"
+                borderTopRadius="xl"
               >
-                {/* En-tête avec gradient */}
-                <Box
-                  bgGradient="linear(to-r, blue.500, purple.500)"
-                  p={4}
-                  color="white"
-                  borderTopRadius="md"
-                >
-                  <HStack spacing={2}>
-                    <Text fontSize="2xl">⚙️</Text>
-                    <Text fontSize="lg" fontWeight="bold">
-                      Configuration
+                <HStack spacing={2}>
+                  <Icon as={FiBarChart2} boxSize={6} />
+                  <Text fontSize="lg" fontWeight="bold">
+                    Configuration
+                  </Text>
+                </HStack>
+              </Box>
+
+              <CardBody>
+                <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
+                  {/* Sélecteur de cycle */}
+                  <Box>
+                    <Text fontSize="sm" fontWeight="medium" mb={2}>
+                      📊 Filtrer par cycle (optionnel)
                     </Text>
-                  </HStack>
-                </Box>
-                <CardBody p={6}>
-                  <VStack spacing={4} align="stretch">
-                    {/* Type de comparaison */}
-                    <Flex direction={{ base: "column", md: "row" }} gap={4}>
-                      <Box flex={1}>
-                        <Text fontSize="sm" fontWeight="medium" mb={2}>
-                          Type de comparaison
-                        </Text>
-                        <CustomSelect
-                          value={comparisonType}
-                          onChange={(value) => {
-                            const newType = value as "players" | "guilds";
-                            setComparisonType(newType);
-                            setEntity1("");
-                            setEntity2("");
-                            setEntity1SearchQuery("");
-                            setEntity2SearchQuery("");
-                            setComparisonResult(null);
-                            updateURLParams(
-                              newType,
-                              "",
-                              "",
-                              selectedCycleId,
-                              selectedRotationId
-                            );
-                          }}
-                          options={[
-                            { value: "players", label: "👤 Joueurs" },
-                            { value: "guilds", label: "🏛️ Guildes" }
-                          ]}
-                          isDisabled={isLoading}
-                        />
-                      </Box>
-                      {/* Sélection du cycle (optionnel) */}
-                      <Box flex={1}>
-                        <Text fontSize="sm" fontWeight="medium" mb={2}>
-                          Cycle (optionnel)
-                        </Text>
-                        <CycleSelect
-                          cycles={cycles.filter((cycle) => cycle._id)}
-                          value={selectedCycleId}
-                          onChange={(value) => {
-                            setSelectedCycleId(value);
-                            setSelectedRotationId("");
-                            updateURLParams(
-                              comparisonType,
-                              entity1,
-                              entity2,
-                              value,
-                              ""
-                            );
-                          }}
-                          placeholder="Tous les cycles"
-                          isDisabled={isLoading}
-                          size="md"
-                        />
-                      </Box>
-                      {/* Sélection de la rotation (optionnel) */}
-                      <Box flex={1}>
-                        <Text fontSize="sm" fontWeight="medium" mb={2}>
-                          Rotation (optionnel)
-                        </Text>
-                        <CustomSelect
-                          placeholder="Toutes les rotations"
-                          value={selectedRotationId}
-                          onChange={(value) => {
-                            setSelectedRotationId(value);
-                            updateURLParams(
-                              comparisonType,
-                              entity1,
-                              entity2,
-                              selectedCycleId,
-                              value
-                            );
-                          }}
-                          options={getAvailableRotations()
-                            .filter((rotation) => rotation._id) // Filtrer les rotations sans _id
-                            .map((rotation) => ({
-                              value: ('rotation_id' in rotation && rotation.rotation_id) ? rotation.rotation_id : (rotation._id || ''),
-                              label: `${
-                                'position' in rotation && rotation.position
-                                  ? `#${rotation.position} - `
-                                  : ""
-                              }${rotation.killer} ${rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : "🟠 Mêlée"}`
-                            }))}
-                          allowDeselect={true}
-                          isDisabled={isLoading}
-                        />
-                      </Box>
-                    </Flex>
-                    <Divider />
-                    {/* Sélection des entités */}
-                    <VStack spacing={4} align="stretch">
-                      <Text fontSize="sm" fontWeight="medium">
-                        Sélection des{" "}
-                        {comparisonType === "players" ? "joueurs" : "guildes"}
-                      </Text>
-                      <Flex
-                        direction={{ base: "column", lg: "row" }}
-                        gap={4}
-                        align="center"
-                      >
-                        {/* Entité 1 */}
-                        <Box flex={1} w="full">
-                          {comparisonType === "players" ? (
-                            <UserSearchSelect
-                              users={users}
-                              guilds={guilds}
-                              selectedUserId={entity1}
-                              onUserSelect={(userId) => {
-                                setEntity1(userId);
-                                updateURLParams(
-                                  comparisonType,
-                                  userId,
-                                  entity2,
-                                  selectedCycleId,
-                                  selectedRotationId
-                                );
-                              }}
-                              searchQuery={entity1SearchQuery}
-                              onSearchChange={setEntity1SearchQuery}
-                              placeholder="Sélectionner le premier joueur"
-                            />
-                          ) : (
-                            <CustomSelect
-                              placeholder="Sélectionner la première guilde"
-                              value={entity1}
-                              onChange={(value) => {
-                                setEntity1(value);
-                                updateURLParams(
-                                  comparisonType,
-                                  value,
-                                  entity2,
-                                  selectedCycleId,
-                                  selectedRotationId
-                                );
-                              }}
-                              options={guilds.map((guild) => ({
-                                value: guild.name,
-                                label: guild.name
-                              }))}
-                              isDisabled={isLoading}
-                            />
-                          )}
-                        </Box>
-                        {/* Bouton d'échange */}
-                        <IconButton
-                          aria-label="Échanger les entités"
-                          icon={<RepeatIcon />}
-                          onClick={swapEntities}
-                          isDisabled={!entity1 || !entity2 || isLoading}
-                          variant="ghost"
-                          size="sm"
-                        />
-                        {/* Entité 2 */}
-                        <Box flex={1} w="full">
-                          {comparisonType === "players" ? (
-                            <UserSearchSelect
-                              users={users}
-                              guilds={guilds}
-                              selectedUserId={entity2}
-                              onUserSelect={(userId) => {
-                                setEntity2(userId);
-                                updateURLParams(
-                                  comparisonType,
-                                  entity1,
-                                  userId,
-                                  selectedCycleId,
-                                  selectedRotationId
-                                );
-                              }}
-                              searchQuery={entity2SearchQuery}
-                              onSearchChange={setEntity2SearchQuery}
-                              placeholder="Sélectionner le second joueur"
-                            />
-                          ) : (
-                            <CustomSelect
-                              placeholder="Sélectionner la seconde guilde"
-                              value={entity2}
-                              onChange={(value) => {
-                                setEntity2(value);
-                                updateURLParams(
-                                  comparisonType,
-                                  entity1,
-                                  value,
-                                  selectedCycleId,
-                                  selectedRotationId
-                                );
-                              }}
-                              options={guilds.map((guild) => ({
-                                value: guild.name,
-                                label: guild.name
-                              }))}
-                              isDisabled={isLoading}
-                            />
-                          )}
-                        </Box>
-                      </Flex>
-                    </VStack>
-                    {/* Boutons d'action */}
-                    <HStack spacing={3} justify="center" pt={2}>
-                      <Button
-                        size="lg"
-                        bgGradient="linear(to-r, blue.400, purple.500)"
-                        color="white"
-                        _hover={{
-                          bgGradient: "linear(to-r, blue.500, purple.600)",
-                          transform: "translateY(-2px)",
-                          boxShadow: "xl"
-                        }}
-                        _active={{
-                          transform: "translateY(0)"
-                        }}
-                        onClick={performComparison}
-                        isLoading={isLoading}
-                        loadingText="Comparaison..."
-                        isDisabled={!entity1 || !entity2 || entity1 === entity2}
-                        minW="200px"
-                        fontWeight="bold"
-                        boxShadow="lg"
-                        transition="all 0.3s"
-                        leftIcon={<Text fontSize="lg">🔍</Text>}
-                      >
-                        Comparer
-                      </Button>
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        colorScheme="gray"
-                        onClick={resetComparison}
-                        isDisabled={isLoading}
-                        minW="150px"
-                        _hover={{
-                          bg: hoverBgGray,
-                          transform: "translateY(-2px)"
-                        }}
-                        transition="all 0.3s"
-                      >
-                        Réinitialiser
-                      </Button>
-                    </HStack>
-                  </VStack>
-                </CardBody>
-              </Card>
-              {/* Résultats de la comparaison */}
-              {comparisonResult && comparisonResult.comparison && (
-                <VStack spacing={6} align="stretch">
-                  {/* Informations de filtre */}
-                  <Box
-                    p={5}
-                    bgGradient="linear(to-r, blue.50, purple.50)"
-                    _dark={{ bgGradient: "linear(to-r, blue.900, purple.900)" }}
-                    borderRadius="xl"
-                    borderWidth="2px"
-                    borderColor={borderColorBlue}
-                    boxShadow="md"
-                  >
-                    <VStack spacing={3} align="stretch">
-                      <HStack spacing={2} flexWrap="wrap">
-                        <Text fontSize="sm" fontWeight="bold" color="gray.700" _dark={{ color: "gray.200" }}>
-                          📊 Comparaison:
-                        </Text>
-                        <Badge
-                          colorScheme="blue"
-                          px={3}
-                          py={1}
-                          borderRadius="full"
-                          fontSize="xs"
-                          fontWeight="bold"
-                        >
-                          {comparisonResult.filters.type === "players"
-                            ? "👤 Joueurs"
-                            : "🏛️ Guildes"}
-                        </Badge>
-                        <Badge
-                          colorScheme="green"
-                          px={3}
-                          py={1}
-                          borderRadius="full"
-                          fontSize="xs"
-                          fontWeight="bold"
-                        >
-                          {comparisonResult.filters.cycle_id
-                            ? "🎯 Cycle spécifique"
-                            : "🔄 Tous les cycles"}
-                        </Badge>
-                        {selectedRotationId && (
-                          <Badge
-                            colorScheme="purple"
-                            px={3}
-                            py={1}
-                            borderRadius="full"
-                            fontSize="xs"
-                            fontWeight="bold"
-                          >
-                            🔄 Rotation spécifique
-                          </Badge>
-                        )}
-                      </HStack>
-
-                      {/* Informations détaillées sur la rotation */}
-                      {selectedRotationId &&
-                        (() => {
-                          const rotationInfo = getSelectedRotationInfo();
-                          return rotationInfo ? (
-                            <Box
-                              p={4}
-                              bgGradient="linear(to-r, purple.100, pink.100)"
-                              _dark={{ bgGradient: "linear(to-r, purple.800, pink.800)" }}
-                              borderRadius="lg"
-                              borderWidth="2px"
-                              borderColor={borderColorPurple}
-                              mt={2}
-                            >
-                              <VStack spacing={2} align="start">
-                                <HStack spacing={2}>
-                                  <Text fontSize="lg">
-                                    {rotationInfo.attack === "R" ? "🔴" : rotationInfo.attack === "B" ? "🔵" : "🟠"}
-                                  </Text>
-                                  <Text fontSize="md" fontWeight="bold">
-                                    {'position' in rotationInfo && rotationInfo.position && `#${rotationInfo.position} - `}
-                                    {rotationInfo.killer}
-                                  </Text>
-                                  <Badge colorScheme={rotationInfo.attack === "R" ? "red" : "blue"} fontSize="xs">
-                                    {rotationInfo.attack}
-                                  </Badge>
-                                </HStack>
-                                {'start_date' in rotationInfo &&
-                                  'end_date' in rotationInfo &&
-                                  rotationInfo.start_date &&
-                                  rotationInfo.end_date && (
-                                    <HStack spacing={1}>
-                                      <Text fontSize="xs">📅</Text>
-                                      <Text fontSize="sm" fontWeight="medium" color="gray.600" _dark={{ color: "gray.300" }}>
-                                        {rotationInfo.start_date} → {rotationInfo.end_date}
-                                      </Text>
-                                    </HStack>
-                                  )}
-                                {'period' in rotationInfo && rotationInfo.period && (
-                                  <HStack spacing={1}>
-                                    <Text fontSize="xs">⏰</Text>
-                                    <Text fontSize="sm" color="gray.500" _dark={{ color: "gray.400" }}>
-                                      {rotationInfo.period}
-                                    </Text>
-                                  </HStack>
-                                )}
-                              </VStack>
-                            </Box>
-                          ) : null;
-                        })()}
-                    </VStack>
-                  </Box>
-                  {/* Cartes de comparaison */}
-                  <Grid
-                    templateColumns={{ base: "1fr", lg: "1fr 1fr" }}
-                    gap={8}
-                  >
-                    {Object.entries(comparisonResult.comparison.entities).map(
-                      ([entityId, entityData]) => (
-                        <ComparisonEntity
-                          key={entityId}
-                          entityId={entityId}
-                          entityData={entityData}
-                          isWinner={
-                            comparisonResult.comparison.winner === entityId
-                          }
-                          comparisonType={comparisonType}
-                        />
-                      )
+                    <CycleSelect
+                      cycles={cycles}
+                      value={selectedCycleId}
+                      onChange={handleCycleChange}
+                      placeholder="Tous les cycles"
+                      allowDeselect={true}
+                      size="md"
+                    />
+                    {selectedCycleId && (
+                      <Badge mt={2} colorScheme="blue">
+                        Cycle sélectionné
+                      </Badge>
                     )}
-                  </Grid>
-                  {/* Analyse des différences */}
-                  {comparisonResult.comparison.differences && (
-                    <Card
-                      borderWidth={0}
-                      boxShadow="xl"
-                      position="relative"
+                  </Box>
+
+                  {/* Actions */}
+                  <VStack align="stretch" justify="flex-end" spacing={3}>
+                    <Button
+                      colorScheme="blue"
+                      size="lg"
+                      onClick={comparisonType === "players" ? loadPlayersStats : loadGuildsStats}
+                      isDisabled={
+                        comparisonType === "players" 
+                          ? selectedPlayers.length < 2 
+                          : selectedGuilds.length < 2
+                      }
+                      isLoading={isLoadingStats}
+                      leftIcon={<Icon as={FiBarChart2} />}
                     >
-                      {/* Gradient header */}
-                      <Box
-                        bgGradient="linear(to-r, purple.500, pink.500)"
-                        p={6}
-                        color="white"
-                        position="relative"
-                        overflow="hidden"
-                        borderTopRadius="md"
-                      >
-                        <Box position="relative" zIndex={1}>
-                          <HStack spacing={2} mb={2}>
-                            <Text fontSize="2xl">📊</Text>
-                            <Text fontSize="xl" fontWeight="bold">
-                              Analyse des différences
-                            </Text>
-                          </HStack>
-                          <Text fontSize="sm" opacity={0.9}>
-                            Comparaison détaillée des performances
-                          </Text>
-                        </Box>
-                        {/* Pattern de fond */}
-                        <Box
-                          position="absolute"
-                          top="-50%"
-                          right="-10%"
-                          width="120%"
-                          height="200%"
-                          opacity={0.1}
-                          transform="rotate(-12deg)"
-                          bgGradient="linear(to-br, white, transparent)"
+                      Comparer {comparisonType === "players" ? selectedPlayers.length : selectedGuilds.length}{" "}
+                      {comparisonType === "players" ? "joueur" : "guilde"}
+                      {((comparisonType === "players" && selectedPlayers.length > 1) || 
+                        (comparisonType === "guilds" && selectedGuilds.length > 1)) && "s"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleReset}
+                      leftIcon={<Icon as={FiRefreshCw} />}
+                    >
+                      Réinitialiser
+                    </Button>
+                  </VStack>
+                </SimpleGrid>
+              </CardBody>
+            </Card>
+
+            {/* Tabs pour joueurs vs guildes */}
+            <Card bg={bgColor} borderRadius="xl" boxShadow="lg">
+              <CardBody>
+                <Tabs
+                  index={comparisonType === "players" ? 0 : 1}
+                  onChange={handleTabChange}
+                  colorScheme="blue"
+                  variant="enclosed"
+                >
+                  <TabList>
+                    <Tab fontSize="md" fontWeight="semibold">
+                      <Icon as={FiUsers} mr={2} />
+                      Joueurs
+                    </Tab>
+                    <Tab fontSize="md" fontWeight="semibold">
+                      <Icon as={FiUsers} mr={2} />
+                      Guildes
+                    </Tab>
+                  </TabList>
+
+                  <TabPanels>
+                    {/* Tab Joueurs */}
+                    <TabPanel p={0} pt={6}>
+                      <VStack spacing={6} align="stretch">
+                        {/* Sélecteur de joueurs */}
+                        <MultiPlayerSelector
+                          selectedPlayers={selectedPlayers}
+                          onAddPlayer={handleAddPlayer}
+                          onRemovePlayer={handleRemovePlayer}
+                          availableUsers={users}
+                          maxPlayers={5}
                         />
-                      </Box>
 
-                      <CardBody p={6}>
-                        <Grid
-                          templateColumns={{
-                            base: "1fr",
-                            md: "repeat(2, 1fr)",
-                            lg: "repeat(3, 1fr)"
-                          }}
-                          gap={6}
-                        >
-                          {/* Différence de moyenne */}
-                          <Box
-                            p={5}
-                            borderRadius="xl"
-                            bg={bgGradientOrGray}
-                            bgGradient="linear(135deg, blue.50 0%, purple.50 100%)"
-                            _dark={{ bg: "gray.700" }}
-                            border="2px solid"
-                            borderColor={borderColorBlueAlt}
-                            transition="all 0.3s"
-                            _hover={{
-                              transform: "translateY(-4px)",
-                              boxShadow: "lg"
-                            }}
-                          >
-                            <VStack align="start" spacing={3}>
-                              <HStack>
-                                <Text fontSize="2xl">📈</Text>
-                                <Text fontSize="sm" fontWeight="medium" color="gray.600">
-                                  Différence de moyenne
-                                </Text>
-                              </HStack>
-                              <Text fontSize="3xl" fontWeight="black">
-                                {comparisonResult.comparison.differences
-                                  .averageScore.difference > 0
-                                  ? "+"
-                                  : ""}
-                                {comparisonResult.comparison.differences.averageScore.difference.toLocaleString(
-                                  "fr-FR"
-                                )}
-                              </Text>
-                              <Stat>
-                                <HStack spacing={1}>
-                                  <StatArrow
-                                    type={
-                                      comparisonResult.comparison.differences
-                                        .averageScore.difference >= 0
-                                        ? "increase"
-                                        : "decrease"
-                                    }
-                                  />
-                                  <Text fontSize="xs" color="gray.500">
-                                    points de différence
-                                  </Text>
-                                </HStack>
-                              </Stat>
-                            </VStack>
-                          </Box>
+                        {selectedPlayers.length < 2 && (
+                          <Alert status="info" borderRadius="xl">
+                            <AlertIcon />
+                            Sélectionnez au moins 2 joueurs pour commencer la comparaison
+                          </Alert>
+                        )}
 
-                          {/* Différence de participation */}
-                          <Box
-                            p={5}
-                            borderRadius="xl"
-                            bgGradient="linear(135deg, green.50 0%, teal.50 100%)"
-                            _dark={{ bg: "gray.700" }}
-                            border="2px solid"
-                            borderColor={borderColorGreen}
-                            transition="all 0.3s"
-                            _hover={{
-                              transform: "translateY(-4px)",
-                              boxShadow: "lg"
-                            }}
-                          >
-                            <VStack align="start" spacing={3}>
-                              <HStack>
-                                <Text fontSize="2xl">🎯</Text>
-                                <Text fontSize="sm" fontWeight="medium" color="gray.600">
-                                  Différence de participation
-                                </Text>
-                              </HStack>
-                              <Text fontSize="3xl" fontWeight="black">
-                                {comparisonResult.comparison.differences
-                                  .totalScores.difference > 0
-                                  ? "+"
-                                  : ""}
-                                {
-                                  comparisonResult.comparison.differences
-                                    .totalScores.difference
-                                }
-                              </Text>
-                              <Stat>
-                                <HStack spacing={1}>
-                                  <StatArrow
-                                    type={
-                                      comparisonResult.comparison.differences
-                                        .totalScores.difference >= 0
-                                        ? "increase"
-                                        : "decrease"
-                                    }
-                                  />
-                                  <Text fontSize="xs" color="gray.500">
-                                    scores supplémentaires
-                                  </Text>
-                                </HStack>
-                              </Stat>
+                        {isLoadingStats && (
+                          <Center py={20}>
+                            <VStack spacing={4}>
+                              <Spinner size="xl" color="blue.500" thickness="4px" />
+                              <Text>Chargement des statistiques...</Text>
                             </VStack>
-                          </Box>
+                          </Center>
+                        )}
 
-                          {/* Différence score brut moyen */}
-                          <Box
-                            p={5}
-                            borderRadius="xl"
-                            bgGradient="linear(135deg, orange.50 0%, red.50 100%)"
-                            _dark={{ bg: "gray.700" }}
-                            border="2px solid"
-                            borderColor={borderColorOrange}
-                            transition="all 0.3s"
-                            _hover={{
-                              transform: "translateY(-4px)",
-                              boxShadow: "lg"
-                            }}
-                          >
-                            <VStack align="start" spacing={3}>
-                              <HStack>
-                                <Text fontSize="2xl">⚡</Text>
-                                <Text fontSize="sm" fontWeight="medium" color="gray.600">
-                                  Score brut moyen
+                        {!isLoadingStats && hasPlayersStats && (
+                          <VStack spacing={6} align="stretch">
+                            <PlayerComparisonRadar playersData={playersData} />
+                            <PlayerComparisonTable playersData={playersData} />
+
+                            <Alert status="success" borderRadius="xl" variant="subtle">
+                              <AlertIcon />
+                              <VStack align="start" spacing={1}>
+                                <Text fontWeight="bold">✅ Comparaison réussie !</Text>
+                                <Text fontSize="sm">
+                                  {selectedPlayers.length} joueur{selectedPlayers.length > 1 ? "s" : ""} comparé
+                                  {selectedPlayers.length > 1 ? "s" : ""}{" "}
+                                  {selectedCycleId ? "sur le cycle sélectionné" : "sur tous les cycles"}
                                 </Text>
-                              </HStack>
-                              <Text fontSize="3xl" fontWeight="black">
-                                {comparisonResult.comparison.differences
-                                  .averageRawScore.difference > 0
-                                  ? "+"
-                                  : ""}
-                                {comparisonResult.comparison.differences.averageRawScore.difference.toLocaleString(
-                                  "fr-FR"
-                                )}
-                              </Text>
-                              <Stat>
-                                <HStack spacing={1}>
-                                  <StatArrow
-                                    type={
-                                      comparisonResult.comparison.differences
-                                        .averageRawScore.difference >= 0
-                                        ? "increase"
-                                        : "decrease"
-                                    }
-                                  />
-                                  <Text fontSize="xs" color="gray.500">
-                                    points de différence
-                                  </Text>
-                                </HStack>
-                              </Stat>
-                            </VStack>
-                          </Box>
-                        </Grid>
-                      </CardBody>
-                    </Card>
-                  )}
-                  {/* Message égalité */}
-                  {!comparisonResult.comparison.winner && (
-                    <Alert
-                      status="info"
-                      borderRadius="xl"
-                      variant="subtle"
-                      boxShadow="md"
-                      p={4}
-                    >
-                      <AlertIcon />
-                      <VStack align="start" spacing={1}>
-                        <Text fontWeight="bold">
-                          🤝 Performance égale !
-                        </Text>
-                        <Text fontSize="sm">
-                          Les deux entités ont une moyenne identique de{" "}
-                          <Text as="span" fontWeight="bold">
-                            {comparisonResult.comparison.summary.entity1.averageScore.toLocaleString(
-                              "fr-FR"
-                            )}
-                          </Text>{" "}
-                          points
-                        </Text>
+                              </VStack>
+                            </Alert>
+                          </VStack>
+                        )}
                       </VStack>
-                    </Alert>
-                  )}
-                </VStack>
-              )}
-            </VStack>
+                    </TabPanel>
+
+                    {/* Tab Guildes */}
+                    <TabPanel p={0} pt={6}>
+                      <VStack spacing={6} align="stretch">
+                        {/* Sélecteur de guildes */}
+                        <MultiGuildSelector
+                          selectedGuilds={selectedGuilds}
+                          onAddGuild={handleAddGuild}
+                          onRemoveGuild={handleRemoveGuild}
+                          availableGuilds={guilds}
+                          maxGuilds={5}
+                        />
+
+                        {selectedGuilds.length < 2 && (
+                          <Alert status="info" borderRadius="xl">
+                            <AlertIcon />
+                            Sélectionnez au moins 2 guildes pour commencer la comparaison
+                          </Alert>
+                        )}
+
+                        {isLoadingStats && (
+                          <Center py={20}>
+                            <VStack spacing={4}>
+                              <Spinner size="xl" color="purple.500" thickness="4px" />
+                              <Text>Chargement des statistiques...</Text>
+                            </VStack>
+                          </Center>
+                        )}
+
+                        {!isLoadingStats && hasGuildsStats && (
+                          <VStack spacing={6} align="stretch">
+                            <GuildComparisonRadar guildsData={guildsData} />
+                            <GuildComparisonTable guildsData={guildsData} />
+
+                            <Alert status="success" borderRadius="xl" variant="subtle">
+                              <AlertIcon />
+                              <VStack align="start" spacing={1}>
+                                <Text fontWeight="bold">✅ Comparaison réussie !</Text>
+                                <Text fontSize="sm">
+                                  {selectedGuilds.length} guilde{selectedGuilds.length > 1 ? "s" : ""} comparée
+                                  {selectedGuilds.length > 1 ? "s" : ""}{" "}
+                                  {selectedCycleId ? "sur le cycle sélectionné" : "sur tous les cycles"}
+                                </Text>
+                              </VStack>
+                            </Alert>
+                          </VStack>
+                        )}
+                      </VStack>
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
+              </CardBody>
+            </Card>
+          </VStack>
         </Container>
-      </Flex>
-    </>
+      </Box>
+    </Box>
   );
 };
 
