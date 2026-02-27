@@ -939,3 +939,21 @@ export const fetchGuildStats = async (guildId: string, cycleId?: string): Promis
     return null;
   }
 };
+
+// Hook pour récupérer la liste des screenshotters OCR (endpoint public)
+export const useScreenshotters = () => {
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: Array<{ id: string; label: string }> }>(
+    `${apiUrl}/api/ocr/screenshotters`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 300000, // Cache 5 minutes
+    }
+  );
+
+  return {
+    screenshotters: data?.data || [],
+    isLoading,
+    error,
+  };
+};

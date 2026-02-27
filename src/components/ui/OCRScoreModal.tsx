@@ -23,7 +23,7 @@ import {
 import { useState } from "react";
 import { FiUpload, FiCheckCircle, FiSettings } from "react-icons/fi";
 import { useGuildMembers } from "@/hooks/useAPI";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAPIMutations } from "@/hooks/useAPIMutations";
 import { OCRContextSelection } from "@/components/ocr/OCRContextSelection";
 import { OCRScreenshotUploader } from "@/components/ocr/OCRScreenshotUploader";
 import { OCRResultsValidation } from "@/components/ocr/OCRResultsValidation";
@@ -76,7 +76,7 @@ const OCRScoreModal = ({
   userGuildId
 }: OCRScoreModalProps) => {
   const toast = useToast();
-  const { getAuthHeaders } = useAuth();
+  const { processOCRBatch, submitOCRBatch } = useAPIMutations();
   const modalBg = useColorModeValue("white", "gray.800");
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -116,30 +116,13 @@ const OCRScoreModal = ({
     setIsProcessing(true);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/ocr/batch-guild-ranking`,
-        {
-          method: "POST",
-          headers: getAuthHeaders(),
-          body: JSON.stringify({
-            guild_id: selectedGuildId,
-            cycle_id: selectedCycleId,
-            rotation_id: selectedRotationId,
-            screenshotter_id: selectedScreenshotterId,
-            screenshots: uploadedScreenshots
-          })
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || `Erreur HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      if (!data.success) {
-        throw new Error(data.message || "Erreur OCR");
-      }
+      const data = await processOCRBatch({
+        guild_id: selectedGuildId,
+        cycle_id: selectedCycleId,
+        rotation_id: selectedRotationId,
+        screenshotter_id: selectedScreenshotterId,
+        screenshots: uploadedScreenshots
+      });
 
       setOcrResults(data.data.screenshots);
       setCurrentStep(2);
@@ -167,29 +150,12 @@ const OCRScoreModal = ({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/ocr/submit-batch`,
-        {
-          method: "POST",
-          headers: getAuthHeaders(),
-          body: JSON.stringify({
-            guild_id: selectedGuildId,
-            cycle_id: selectedCycleId,
-            rotation_id: selectedRotationId,
-            scores: validatedScores
-          })
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Erreur lors de la soumission");
-      }
-
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.message || "Erreur soumission");
-      }
+      const data = await submitOCRBatch({
+        guild_id: selectedGuildId,
+        cycle_id: selectedCycleId,
+        rotation_id: selectedRotationId,
+        scores: validatedScores
+      });
 
       const rotationInfo = data.data.rotation_info;
       const isDifferential = rotationInfo?.is_differential;

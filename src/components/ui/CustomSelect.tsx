@@ -44,13 +44,47 @@ export const CustomSelect = ({
 }: CustomSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
-    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 });
+    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0, maxH: 250, openUp: false });
     const menuRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLDivElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const isDragging = useRef(false);
+    const dragStartY = useRef(0);
+    const scrollStartTop = useRef(0);
+    const hasDragged = useRef(false);
 
     const selectedOption = options.find(option => option.value === value);
+
+    // Drag-to-scroll sur le dropdown
+    const handleDragStart = useCallback((e: React.MouseEvent) => {
+        if (!dropdownRef.current) return;
+        // Ne pas activer le drag si on clique sur l'input de recherche
+        if ((e.target as HTMLElement).tagName === 'INPUT') return;
+        isDragging.current = true;
+        hasDragged.current = false;
+        dragStartY.current = e.clientY;
+        scrollStartTop.current = dropdownRef.current.scrollTop;
+        e.preventDefault(); // empêche la sélection de texte
+    }, []);
+
+    useEffect(() => {
+        const handleDragMove = (e: MouseEvent) => {
+            if (!isDragging.current || !dropdownRef.current) return;
+            const delta = dragStartY.current - e.clientY;
+            if (Math.abs(delta) > 3) hasDragged.current = true;
+            dropdownRef.current.scrollTop = scrollStartTop.current + delta;
+        };
+        const handleDragEnd = () => {
+            isDragging.current = false;
+        };
+        document.addEventListener('mousemove', handleDragMove);
+        document.addEventListener('mouseup', handleDragEnd);
+        return () => {
+            document.removeEventListener('mousemove', handleDragMove);
+            document.removeEventListener('mouseup', handleDragEnd);
+        };
+    }, []);
 
     // Gérer le clic en dehors du composant
     useEffect(() => {
@@ -77,11 +111,33 @@ export const CustomSelect = ({
     const updateMenuPosition = useCallback(() => {
         if (triggerRef.current) {
             const rect = triggerRef.current.getBoundingClientRect();
-            setMenuPosition({
-                top: rect.bottom + window.scrollY + 4,
-                left: rect.left + window.scrollX,
-                width: rect.width
-            });
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+            const desiredMaxH = 250;
+            const margin = 8;
+
+            // Ouvrir vers le haut s'il n'y a pas assez de place en bas mais plus de place en haut
+            const openUp = spaceBelow < desiredMaxH && spaceAbove > spaceBelow;
+            const availableSpace = openUp ? spaceAbove - margin : spaceBelow - margin;
+            const maxH = Math.min(desiredMaxH, Math.max(100, availableSpace));
+
+            if (openUp) {
+                setMenuPosition({
+                    top: rect.top + window.scrollY - maxH - 4,
+                    left: rect.left + window.scrollX,
+                    width: rect.width,
+                    maxH,
+                    openUp: true
+                });
+            } else {
+                setMenuPosition({
+                    top: rect.bottom + window.scrollY + 4,
+                    left: rect.left + window.scrollX,
+                    width: rect.width,
+                    maxH,
+                    openUp: false
+                });
+            }
         }
     }, []);
 
@@ -115,6 +171,11 @@ export const CustomSelect = ({
     }, [isOpen, onSearchChange]);
 
     const handleSelect = (optionValue: string) => {
+        // Ignorer le clic si l'utilisateur a fait un drag-scroll
+        if (hasDragged.current) {
+            hasDragged.current = false;
+            return;
+        }
         onChange(optionValue);
         setIsOpen(false);
     };
@@ -251,9 +312,12 @@ export const CustomSelect = ({
                     borderColor={borderColor}
                     borderRadius="md"
                     boxShadow="xl"
-                    maxH="250px"
+                    maxH={`${menuPosition.maxH}px`}
                     overflowY="auto"
                     mt={1}
+                    cursor="grab"
+                    userSelect="none"
+                    onMouseDown={handleDragStart}
                     sx={{
                         '&::-webkit-scrollbar': {
                             width: '6px',

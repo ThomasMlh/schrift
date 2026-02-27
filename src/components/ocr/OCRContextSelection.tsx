@@ -18,12 +18,8 @@ import { useState, useEffect } from "react";
 import { CycleSelect } from "../ui/CycleSelect";
 import { CustomSelect } from "../ui/CustomSelect";
 import type { ICycle, IGuild, ICycleRotation } from "@/interfaces";
+import { useScreenshotters } from "@/hooks/useAPI";
 import { FiArrowRight } from "react-icons/fi";
-
-interface Screenshotter {
-  id: string;
-  label: string;
-}
 
 interface OCRContextSelectionProps {
   cycles: ICycle[];
@@ -46,8 +42,7 @@ export const OCRContextSelection = ({
   const [selectedCycleId, setSelectedCycleId] = useState("");
   const [selectedRotationId, setSelectedRotationId] = useState("");
   const [selectedScreenshotterId, setSelectedScreenshotterId] = useState("");
-  const [screenshotters, setScreenshotters] = useState<Screenshotter[]>([]);
-  const [loadingScreenshotters, setLoadingScreenshotters] = useState(true);
+  const { screenshotters, isLoading: loadingScreenshotters } = useScreenshotters();
 
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
@@ -58,24 +53,6 @@ export const OCRContextSelection = ({
     }
   }, [isGuildRestricted, userGuildId]);
 
-  // Charger la liste des screenshotters depuis l'API
-  useEffect(() => {
-    const fetchScreenshotters = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/ocr/screenshotters`);
-        const data = await res.json();
-        if (data.success) {
-          setScreenshotters(data.data);
-        }
-      } catch (error) {
-        console.error("Erreur chargement screenshotters:", error);
-      } finally {
-        setLoadingScreenshotters(false);
-      }
-    };
-    fetchScreenshotters();
-  }, []);
-
   const selectedCycle = cycles.find((c) => c._id === selectedCycleId);
   const rotations = selectedCycle?.rotations || [];
 
@@ -85,12 +62,11 @@ export const OCRContextSelection = ({
   }));
 
   const rotationOptions = rotations.map((r: ICycleRotation) => {
-    // Construire un label lisible
-    const killerAttack = r.killer && r.attack ? ` - ${r.killer}/${r.attack}` : '';
-    const period = r.period ? ` (${r.period})` : '';
+    const killerAttack = r.killer && r.attack ? ` - ${r.killer} ${r.attack === "R" ? "🔴" : r.attack === "B" ? "🔵" : r.attack}` : '';
+
     return {
       value: r.rotation_id || r._id || "",
-      label: `Rotation ${r.position}${killerAttack}${period}`
+      label: `Rotation ${r.position}${killerAttack} (du ${r.start_date} au ${r.end_date})`
     };
   });
 

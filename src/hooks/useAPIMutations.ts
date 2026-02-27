@@ -464,6 +464,93 @@ export const useAPIMutations = () => {
     return true;
   };
 
+  // === OCR ===
+
+  // Traiter un batch de screenshots OCR
+  const processOCRBatch = async (params: {
+    guild_id: string;
+    cycle_id: string;
+    rotation_id: string;
+    screenshotter_id: string;
+    screenshots: Array<{ data: string; filename: string }>;
+  }) => {
+    const response = await fetch(`${apiUrl}/api/ocr/batch-guild-ranking`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+      },
+      body: JSON.stringify(params),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `Erreur HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    if (!data.success) {
+      throw new Error(data.message || 'Erreur OCR');
+    }
+
+    return data;
+  };
+
+  // Soumettre les scores validés depuis l'OCR
+  const submitOCRBatch = async (params: {
+    guild_id: string;
+    cycle_id: string;
+    rotation_id: string;
+    scores: Array<{ user_id: string; raw_score: number; screenshot_index: number }>;
+  }) => {
+    const response = await fetch(`${apiUrl}/api/ocr/submit-batch`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+      },
+      body: JSON.stringify(params),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Erreur lors de la soumission');
+    }
+
+    if (!data.success) {
+      throw new Error(data.message || 'Erreur soumission');
+    }
+
+    // Invalider le cache des scores
+    await mutate((key) => typeof key === 'string' && key.includes('/api/scores'));
+
+    return data;
+  };
+
+  // Visualiser les zones OCR (debug)
+  const visualizeOCRZones = async (params: {
+    screenshot: { data: string; filename: string };
+    screenshotter_id: string;
+  }) => {
+    const response = await fetch(`${apiUrl}/api/ocr/debug/visualize-zones`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+      },
+      body: JSON.stringify(params),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Erreur visualisation');
+    }
+
+    return data;
+  };
+
   return {
     createCycle,
     updateCycle,
@@ -483,6 +570,9 @@ export const useAPIMutations = () => {
     updateBuild,
     validateBuild,
     deleteBuild,
+    processOCRBatch,
+    submitOCRBatch,
+    visualizeOCRZones,
   };
 };
 

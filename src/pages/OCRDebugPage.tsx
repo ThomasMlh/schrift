@@ -16,18 +16,15 @@ import {
   Select,
   Skeleton
 } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { SEOHead } from "@/components/SEOHead";
-import { useAuth } from "@/providers/AuthProvider";
-
-interface Screenshotter {
-  id: string;
-  label: string;
-}
+import { useScreenshotters } from "@/hooks/useAPI";
+import { useAPIMutations } from "@/hooks/useAPIMutations";
 
 const OCRDebugPage = () => {
   const toast = useToast();
-  const { getAuthHeaders } = useAuth();
+  const { screenshotters, isLoading: loadingScreenshotters } = useScreenshotters();
+  const { visualizeOCRZones } = useAPIMutations();
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -41,27 +38,7 @@ const OCRDebugPage = () => {
   }>>([]);
   const [dimensions, setDimensions] = useState<{ width: number; height: number, confidence: number } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [screenshotters, setScreenshotters] = useState<Screenshotter[]>([]);
-  const [selectedScreenshotterId, setSelectedScreenshotterId] = useState("");
-  const [loadingScreenshotters, setLoadingScreenshotters] = useState(true);
-
-  // Charger la liste des screenshotters depuis l'API
-  useEffect(() => {
-    const fetchScreenshotters = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/ocr/screenshotters`);
-        const data = await res.json();
-        if (data.success) {
-          setScreenshotters(data.data);
-        }
-      } catch (error) {
-        console.error("Erreur chargement screenshotters:", error);
-      } finally {
-        setLoadingScreenshotters(false);
-      }
-    };
-    fetchScreenshotters();
-  }, []);
+  const [screenshotterValue, setScreenshotterValue] = useState("");
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -85,7 +62,7 @@ const OCRDebugPage = () => {
       return;
     }
 
-    if (!selectedScreenshotterId) {
+    if (!screenshotterValue) {
       toast({
         title: "Profil manquant",
         description: "Veuillez sélectionner qui a pris le screenshot",
@@ -97,26 +74,13 @@ const OCRDebugPage = () => {
     setIsProcessing(true);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/ocr/debug/visualize-zones`,
-        {
-          method: "POST",
-          headers: getAuthHeaders(),
-          body: JSON.stringify({
-            screenshot: {
-              data: previewUrl,
-              filename: selectedFile.name
-            },
-            screenshotter_id: selectedScreenshotterId
-          })
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Erreur visualisation");
-      }
+      const data = await visualizeOCRZones({
+        screenshot: {
+          data: previewUrl,
+          filename: selectedFile.name
+        },
+        screenshotter_id: screenshotterValue
+      });
 
       setAnnotatedImage(data.data.annotatedImage);
       setExtractedZones(data.data.extractedZones);
@@ -203,8 +167,8 @@ const OCRDebugPage = () => {
                     <Skeleton height="40px" borderRadius="md" />
                   ) : (
                     <Select
-                      value={selectedScreenshotterId}
-                      onChange={(e) => setSelectedScreenshotterId(e.target.value)}
+                      value={screenshotterValue}
+                      onChange={(e) => setScreenshotterValue(e.target.value)}
                       placeholder="Sélectionner la personne"
                     >
                       {screenshotters.map((s) => (
@@ -218,7 +182,7 @@ const OCRDebugPage = () => {
                   colorScheme="green"
                   onClick={handleVisualize}
                   isLoading={isProcessing}
-                  isDisabled={!selectedFile || !selectedScreenshotterId}
+                  isDisabled={!selectedFile || !screenshotterValue}
                   size="lg"
                 >
                   🔍 Visualiser les zones d'extraction
