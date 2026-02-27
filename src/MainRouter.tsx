@@ -20,6 +20,7 @@ import PodiumPage from "./pages/PodiumPage";
 import ComparatorPage from "./pages/ComparatorPage";
 import GuidesPage from "./pages/GuidesPage";
 import GuildesPage from "./pages/GuildesPage";
+import OCRDebugPage from "./pages/OCRDebugPage";
 import NotFound from "./pages/NotFound";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
@@ -94,6 +95,19 @@ const AppRoutes = () => {
         />
         <Route path="/podium" element={<PodiumPage />} />
         <Route path="/comparateur" element={<ComparatorPage />} />
+        <Route
+          path="/ocr-debug"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isLoggedIn}
+              isAdmin={isAdmin}
+              isGuildManager={isGuildManager}
+              isLoading={isAuthLoading}
+            >
+              <OCRDebugPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/guides" element={<GuidesPage />} />
         <Route path="/guides/:section" element={<GuidesPage />} />
         <Route path="*" element={<NotFound />} />

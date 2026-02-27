@@ -2,6 +2,7 @@ import { Text } from "@chakra-ui/react";
 import { ScoreModal } from "@/components/ui/ScoreModal";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import BulkScoreModal from "@/components/ui/BulkScoreModal";
+import OCRScoreModal from "@/components/ui/OCRScoreModal";
 import type { IScore, IUser, ICycle, IGuild } from "@/interfaces";
 
 interface ScoreModalsProps {
@@ -27,6 +28,10 @@ interface ScoreModalsProps {
     isBulkSubmitting: boolean;
     isGuildRestricted: boolean;
     userGuildId: string | undefined;
+
+    // Modal OCR
+    isOCRModalOpen: boolean;
+    onOCRModalClose: () => void;
 
     // Données communes
     users: IUser[];
@@ -73,6 +78,8 @@ export const ScoreModals = ({
     isBulkSubmitting,
     isGuildRestricted,
     userGuildId,
+    isOCRModalOpen,
+    onOCRModalClose,
     users,
     cycles,
     guilds,
@@ -171,6 +178,16 @@ export const ScoreModals = ({
                 guilds={guilds}
                 onSubmit={onBulkSubmit}
                 isSubmitting={isBulkSubmitting}
+                isGuildRestricted={isGuildRestricted}
+                userGuildId={userGuildId}
+            />
+
+            {/* Modal OCR */}
+            <OCRScoreModal
+                isOpen={isOCRModalOpen}
+                onClose={onOCRModalClose}
+                cycles={cycles}
+                guilds={guilds}
                 isGuildRestricted={isGuildRestricted}
                 userGuildId={userGuildId}
             />

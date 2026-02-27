@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
     Container,
     VStack,
+    HStack,
     Text,
     useDisclosure,
     Button,
@@ -107,14 +108,24 @@ const ScoresSection = () => {
                         )}
                     </Box>
                     {(isAdmin || isGuildManager) && (
-                        <Button
-                            colorScheme="green"
-                            onClick={() => scoreManagement.setIsBulkModalOpen(true)}
-                            isDisabled={!currentUser}
-                            size="lg"
-                        >
-                            Saisie groupée
-                        </Button>
+                        <HStack spacing={3}>
+                            <Button
+                                colorScheme="blue"
+                                onClick={() => scoreManagement.setIsOCRModalOpen(true)}
+                                isDisabled={!currentUser}
+                                size="lg"
+                            >
+                                📸 Saisie automatique
+                            </Button>
+                            <Button
+                                colorScheme="green"
+                                onClick={() => scoreManagement.setIsBulkModalOpen(true)}
+                                isDisabled={!currentUser}
+                                size="lg"
+                            >
+                                Saisie groupée
+                            </Button>
+                        </HStack>
                     )}
                 </Flex>
 
@@ -212,6 +223,8 @@ const ScoresSection = () => {
                     isBulkSubmitting={scoreManagement.isBulkSubmitting}
                     isGuildRestricted={!isAdmin && isGuildManager}
                     userGuildId={currentUser?.guilde_id}
+                    isOCRModalOpen={scoreManagement.isOCRModalOpen}
+                    onOCRModalClose={() => scoreManagement.setIsOCRModalOpen(false)}
                     users={users}
                     cycles={cycles}
                     guilds={guilds}

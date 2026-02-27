@@ -26,6 +26,7 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+    const [isOCRModalOpen, setIsOCRModalOpen] = useState(false);
 
     // États de chargement
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -296,6 +297,8 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
         setIsDeleteModalOpen,
         isBulkModalOpen,
         setIsBulkModalOpen,
+        isOCRModalOpen,
+        setIsOCRModalOpen,
 
         // États de chargement
         isSubmitting,

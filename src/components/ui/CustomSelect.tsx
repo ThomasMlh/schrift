@@ -1,9 +1,9 @@
 import {
     Box, Button, Text, Flex,
-    useColorModeValue, Input
+    useColorModeValue, Input, Portal
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import type { ReactNode } from "react";
 
 interface SelectOption {
@@ -44,7 +44,10 @@ export const CustomSelect = ({
 }: CustomSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 });
     const menuRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     const selectedOption = options.find(option => option.value === value);
@@ -52,7 +55,11 @@ export const CustomSelect = ({
     // Gérer le clic en dehors du composant
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            const target = event.target as Node;
+            if (
+                menuRef.current && !menuRef.current.contains(target) &&
+                dropdownRef.current && !dropdownRef.current.contains(target)
+            ) {
                 setIsOpen(false);
             }
         };
@@ -65,6 +72,30 @@ export const CustomSelect = ({
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen]);
+
+    // Calculer la position du dropdown par rapport au trigger
+    const updateMenuPosition = useCallback(() => {
+        if (triggerRef.current) {
+            const rect = triggerRef.current.getBoundingClientRect();
+            setMenuPosition({
+                top: rect.bottom + window.scrollY + 4,
+                left: rect.left + window.scrollX,
+                width: rect.width
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        if (isOpen) {
+            updateMenuPosition();
+            window.addEventListener('scroll', updateMenuPosition, true);
+            window.addEventListener('resize', updateMenuPosition);
+        }
+        return () => {
+            window.removeEventListener('scroll', updateMenuPosition, true);
+            window.removeEventListener('resize', updateMenuPosition);
+        };
+    }, [isOpen, updateMenuPosition]);
 
     // Focus sur l'input de recherche quand le menu s'ouvre
     useEffect(() => {
@@ -141,6 +172,7 @@ export const CustomSelect = ({
 
     return (
         <Box position="relative" ref={menuRef}>
+            <Box ref={triggerRef}>
             {selectedOption ? (
                 // Affichage quand une option est sélectionnée
                 <Flex
@@ -203,14 +235,17 @@ export const CustomSelect = ({
                     <Text color={placeholderColor} isTruncated>{placeholder}</Text>
                 </Button>
             )}
+            </Box>
 
             {isOpen && !isDisabled && (
+                <Portal>
                 <Box
+                    ref={dropdownRef}
                     position="absolute"
-                    top="100%"
-                    left={0}
-                    right={0}
-                    zIndex={1000}
+                    top={`${menuPosition.top}px`}
+                    left={`${menuPosition.left}px`}
+                    width={`${menuPosition.width}px`}
+                    zIndex={9999}
                     bg={menuBg}
                     border="1px solid"
                     borderColor={borderColor}
@@ -380,6 +415,7 @@ export const CustomSelect = ({
                         </>
                     )}
                 </Box>
+                </Portal>
             )}
         </Box>
     );
