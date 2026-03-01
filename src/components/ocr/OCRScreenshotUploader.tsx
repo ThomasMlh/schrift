@@ -19,6 +19,7 @@ import {
 } from "@chakra-ui/react";
 import { useState, useRef } from "react";
 import { FiUpload, FiX, FiArrowLeft, FiArrowRight } from "react-icons/fi";
+import { compressImage } from "../../utils/imageCompression";
 
 interface OCRScreenshotUploaderProps {
   onUpload: (screenshots: Array<{ data: string; filename: string }>) => void;
@@ -58,7 +59,7 @@ export const OCRScreenshotUploader = ({
 
   const processFiles = async (files: File[]) => {
     const maxFiles = 10;
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 10 * 1024 * 1024; // 10MB (avant compression)
 
     if (screenshots.length + files.length > maxFiles) {
       alert(`Maximum ${maxFiles} screenshots autorisés`);
@@ -74,25 +75,28 @@ export const OCRScreenshotUploader = ({
       }
 
       if (file.size > maxSize) {
-        alert(`${file.name} est trop volumineux (max 5MB)`);
+        alert(`${file.name} est trop volumineux (max 10MB)`);
         continue;
       }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const data = e.target?.result as string;
-        newScreenshots.push({
-          data,
-          filename: file.name,
-          preview: data
-        });
+      const rawDataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = () => reject(new Error("Erreur lecture fichier"));
+        reader.readAsDataURL(file);
+      });
 
-        if (newScreenshots.length === files.length) {
-          setScreenshots([...screenshots, ...newScreenshots]);
-        }
-      };
-      reader.readAsDataURL(file);
+      // Compresser l'image pour rester sous la limite Vercel (4.5MB total)
+      const compressedData = await compressImage(rawDataUrl, 1400, 0.7);
+
+      newScreenshots.push({
+        data: compressedData,
+        filename: file.name,
+        preview: compressedData
+      });
     }
+
+    setScreenshots((prev) => [...prev, ...newScreenshots]);
   };
 
   const handleRemoveScreenshot = (index: number) => {
