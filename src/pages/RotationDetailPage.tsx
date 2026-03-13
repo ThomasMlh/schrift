@@ -41,6 +41,7 @@ import { ScoreLegend } from "@/components/ui/ScoreLegend";
 import { useGuilds, useRotationScores } from "@/hooks/useAPI";
 import { RankBadge } from "@/components/ui/RankBadge";
 import { AlterationImage } from "@/components/ui/AlterationImage";
+import { SEOHead } from "@/components/SEOHead";
 
 const RotationDetailPage = () => {
   const { cycleId, position } = useParams<{
@@ -233,7 +234,13 @@ const RotationDetailPage = () => {
   }
 
   return (
-    <Container maxW="container.xl" py={8}>
+    <>
+      <SEOHead
+        title={`Rotation ${position} - Cycle ${cycleId} - Schrift BBS`}
+        description={`Détails de la rotation ${position} du cycle ${cycleId}`}
+        noIndex={true}
+      />
+      <Container maxW="container.xl" py={8}>
       <VStack spacing={6} align="stretch">
         {/* Header */}
         <VStack spacing={4} align="stretch">
@@ -507,6 +514,7 @@ const RotationDetailPage = () => {
         </Box>
       </VStack>
     </Container>
+    </>
   );
 };
 

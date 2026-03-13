@@ -4,9 +4,8 @@ Allow: /
 # Sitemap
 Sitemap: https://bbs-schrift.fr/sitemap.xml
 
-# Disallow admin pages and private user profiles
+# Disallow admin pages only (joueur/ and cycle/ use noindex meta tag instead)
 Disallow: /admin
-Disallow: /joueur/
 
 # Allow important pages
 Allow: /

@@ -27,6 +27,7 @@ import { handleAttackType } from "../utils/attackTypes";
 import { AlterationImage } from "../components/ui/AlterationImage";
 import CustomLink from "@/components/ui/CustomLink";
 import { useCycle } from "@/hooks/useAPI";
+import { SEOHead } from "@/components/SEOHead";
 
 const CycleDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -86,7 +87,13 @@ const CycleDetailPage = () => {
   }
 
   return (
-    <Box minH="100vh" py={8}>
+    <>
+      <SEOHead
+        title={`Cycle ${id} - Schrift BBS`}
+        description={`Détails du cycle ${id} de la Guilde War Schrift`}
+        noIndex={true}
+      />
+      <Box minH="100vh" py={8}>
       <Container maxW="container.xl">
         <VStack spacing={8} align="stretch">
           {/* Header avec bouton retour */}
@@ -453,6 +460,7 @@ const CycleDetailPage = () => {
         </VStack>
       </Container>
     </Box>
+    </>
   );
 };
 
