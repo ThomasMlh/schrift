@@ -551,6 +551,32 @@ export const useAPIMutations = () => {
     return data;
   };
 
+  // Fonction pour exécuter un draft (déplacements en masse de joueurs entre guildes)
+  const executeDraft = async (moves: { userId: string; toGuildId: string | null; role?: string }[]) => {
+    const response = await fetch(`${apiUrl}/api/guildes/draft`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+      },
+      body: JSON.stringify({ moves }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Erreur lors de l\'exécution du draft');
+    }
+
+    // Invalider les caches pour les utilisateurs et les guildes
+    await mutate((key) => typeof key === 'string' && (
+      key.startsWith(`${apiUrl}/api/users`) || 
+      key.startsWith(`${apiUrl}/api/guildes`)
+    ));
+
+    return data;
+  };
+
   return {
     createCycle,
     updateCycle,
@@ -573,6 +599,7 @@ export const useAPIMutations = () => {
     processOCRBatch,
     submitOCRBatch,
     visualizeOCRZones,
+    executeDraft,
   };
 };
 
