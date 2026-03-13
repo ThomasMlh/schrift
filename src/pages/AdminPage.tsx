@@ -1,5 +1,6 @@
 import { Container, Heading, Flex, useColorModeValue, Button, useToast, SimpleGrid, VStack } from "@chakra-ui/react";
 import GuildsAdminSection from "../components/GuildsAdminSection";
+import DraftSection from "../components/DraftSection";
 import CyclesSection from "../components/CyclesSection";
 import ScoresSection from "../components/ScoresSection";
 import UsersTable from "../components/UsersTable";
@@ -15,7 +16,7 @@ const AdminPage = () => {
   // Pages autorisées selon le rôle
   const allowedPages = useMemo(() => {
     if (isFullAdmin) {
-      return ['guilds', 'cycles', 'scores', 'users', 'guides'] as IAdminPage[];
+      return ['guilds', 'draft', 'cycles', 'scores', 'users', 'guides'] as IAdminPage[];
     } else if (isGuildManager) {
       return ['scores'] as IAdminPage[];
     }
@@ -23,7 +24,7 @@ const AdminPage = () => {
   }, [isFullAdmin, isGuildManager]);
 
   const [currentPage, setCurrentPage] = useState<IAdminPage>(
-    allowedPages.includes('scores') ? 'scores' : allowedPages[0] || 'scores'
+    isFullAdmin ? allowedPages[0] : "scores"
   );
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
   const bgColor = useColorModeValue('white', 'gray.800');
@@ -55,6 +56,8 @@ const AdminPage = () => {
 
   const renderPage = () => {
     switch (currentPage) {
+      case "draft":
+        return <DraftSection onDraftComplete={() => {}} />;
       case "cycles":
         return <CyclesSection />;
       case "scores":
@@ -92,7 +95,7 @@ const AdminPage = () => {
         <VStack spacing={4} mb={6} w="100%" maxW="800px" px={4}>
           {/* Navigation principale - seulement les sections autorisées */}
           <SimpleGrid 
-            columns={{ base: Math.min(allowedPages.length, 2), md: Math.min(allowedPages.length, 5) }} 
+            columns={{ base: Math.min(allowedPages.length, 2), md: Math.min(allowedPages.length, 6) }} 
             spacing={3} 
             w="100%"
           >
@@ -104,6 +107,16 @@ const AdminPage = () => {
                 size={{ base: "sm", md: "md" }}
               >
                 🏰 Guildes
+              </Button>
+            )}
+            {allowedPages.includes('draft') && (
+              <Button
+                variant={currentPage === "draft" ? "solid" : "outline"}
+                colorScheme="orange"
+                onClick={() => setCurrentPage("draft")}
+                size={{ base: "sm", md: "md" }}
+              >
+                🔀 Draft
               </Button>
             )}
             {allowedPages.includes('cycles') && (

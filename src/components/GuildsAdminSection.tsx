@@ -1,7 +1,6 @@
 import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button, Container, Flex, Heading, Text, useColorModeValue, useToast } from "@chakra-ui/react";
 import { GuildTabsList } from "./GuildTabsList";
 import AdminFormsSection from "./AdminFormsSection";
-import DraftSection from "./DraftSection";
 import { useEffect, useRef, useState } from "react";
 import type { IGuild } from "../interfaces";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
@@ -117,12 +116,6 @@ const GuildsAdminSection = () => {
           editable={true} 
           refreshTrigger={refreshTrigger}
         />
-      </Flex>
-
-      
-      {/* Section Draft */}
-      <Flex justify="center" w="100%" px={4} mt={8}>
-        <DraftSection onDraftComplete={refreshData} />
       </Flex>
 
       {/* Dialog de confirmation de suppression */}
