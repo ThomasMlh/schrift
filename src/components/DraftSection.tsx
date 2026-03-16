@@ -4,7 +4,6 @@ import {
   VStack,
   HStack,
   Text,
-  Select,
   IconButton,
   useToast,
   Badge,
@@ -30,9 +29,10 @@ import {
 import { ArrowForwardIcon, AddIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import type { IGuild, IUser } from "../interfaces";
-import { useGuilds, useAllGuildsMemberCounts } from "@/hooks/useAPI";
+import { useGuilds, useAllGuildsMemberCounts, useGuildlessUsers } from "@/hooks/useAPI";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
 import { UserDisplay } from "./ui/UserDisplay";
+import { CustomSelect } from "./ui/CustomSelect";
 
 interface DraftMove {
   id: string;
@@ -59,8 +59,12 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   const [selectedTargetGuild, setSelectedTargetGuild] = useState<string>("");
   const [isExecuting, setIsExecuting] = useState(false);
 
+  const { users: guildlessUsers, isLoading: guildlessLoading } =
+    useGuildlessUsers(selectedSourceGuild === "__no_guild__");
+
   const cardBg = useColorModeValue("white", "gray.800");
   const subtleBg = useColorModeValue("gray.50", "gray.750");
+  const selectBg = useColorModeValue("orange.50", "rgba(251, 146, 60, 0.06)");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const mutedText = useColorModeValue("gray.500", "gray.400");
   const moveHoverBg = useColorModeValue("gray.50", "gray.650");
@@ -75,16 +79,23 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
         members.push({ ...member, guildId });
       }
     }
+    // Include guildless users with empty guildId
+    for (const user of guildlessUsers) {
+      members.push({ ...user, guildId: "" });
+    }
     return members;
-  }, [membersByGuild]);
+  }, [membersByGuild, guildlessUsers]);
 
   const availableUsers = useMemo(() => {
-    if (!selectedSourceGuild) return [];
     const draftedUserIds = new Set(draftMoves.map((m) => m.user._id));
+    if (selectedSourceGuild === "__no_guild__") {
+      return guildlessUsers.filter((u) => !draftedUserIds.has(u._id));
+    }
+    if (!selectedSourceGuild) return [];
     return (membersByGuild[selectedSourceGuild] || []).filter(
       (member) => !draftedUserIds.has(member._id)
     );
-  }, [selectedSourceGuild, membersByGuild, draftMoves]);
+  }, [selectedSourceGuild, membersByGuild, guildlessUsers, draftMoves]);
 
   const projectedCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -124,7 +135,8 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     if (!user) return;
 
     const isRemoval = selectedTargetGuild === "__none__";
-    const fromGuild = user.guildId ? guildMap[user.guildId] || null : null;
+    const isFromNoGuild = selectedSourceGuild === "__no_guild__";
+    const fromGuild = isFromNoGuild ? null : (user.guildId ? guildMap[user.guildId] || null : null);
     const toGuild = isRemoval ? null : guildMap[selectedTargetGuild] || null;
 
     if (!isRemoval && !toGuild) return;
@@ -133,6 +145,16 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
       toast({
         title: "Même guilde",
         description: "Le joueur est déjà dans cette guilde",
+        status: "warning",
+        duration: 2000,
+      });
+      return;
+    }
+
+    if (isRemoval && isFromNoGuild) {
+      toast({
+        title: "Action inutile",
+        description: "Ce joueur n'a déjà pas de guilde",
         status: "warning",
         duration: 2000,
       });
@@ -150,7 +172,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     ]);
     setSelectedUser("");
     setSelectedTargetGuild("");
-  }, [selectedUser, selectedTargetGuild, allMembers, guildMap, toast]);
+  }, [selectedUser, selectedTargetGuild, selectedSourceGuild, allMembers, guildMap, toast]);
 
   const removeMove = (moveId: string) => {
     setDraftMoves((prev) => prev.filter((m) => m.id !== moveId));
@@ -248,72 +270,75 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
               <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>
                 Depuis
               </Text>
-              <Select
+              <CustomSelect
                 placeholder="Guilde source"
                 value={selectedSourceGuild}
-                onChange={(e) => setSelectedSourceGuild(e.target.value)}
+                onChange={(val) => setSelectedSourceGuild(val)}
                 size="sm"
-                borderRadius="lg"
-                bg={subtleBg}
-                _focus={{ borderColor: "orange.400", boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)" }}
-              >
-                {guilds.map((guild) => (
-                  <option key={guild._id} value={guild._id}>
-                    {guild.name} ({membersByGuild[guild._id]?.length || 0})
-                  </option>
-                ))}
-              </Select>
+                bg={selectBg}
+                allowDeselect={false}
+                accentColor="orange.400"
+                options={[
+                  { value: "__no_guild__", label: "Sans guilde" },
+                  ...guilds.map((guild) => ({
+                    value: guild._id,
+                    label: `${guild.name} (${membersByGuild[guild._id]?.length || 0})`,
+                  })),
+                ]}
+              />
             </Box>
 
             <Box flex={1}>
               <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>
                 Joueur
               </Text>
-              <Select
+              <CustomSelect
                 placeholder="Sélectionner"
                 value={selectedUser}
-                onChange={(e) => setSelectedUser(e.target.value)}
+                onChange={(val) => setSelectedUser(val)}
                 size="sm"
-                borderRadius="lg"
-                bg={subtleBg}
+                bg={selectBg}
+                allowDeselect={false}
+                enableSearch
+                accentColor="orange.400"
+
                 isDisabled={!selectedSourceGuild}
-                _focus={{ borderColor: "orange.400", boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)" }}
-              >
-                {availableUsers.map((user) => (
-                  <option key={user._id} value={user._id}>
-                    {user.bbs_name || user.global_name || user.username}
-                  </option>
-                ))}
-              </Select>
+                isLoading={guildlessLoading}
+                options={availableUsers.map((user) => ({
+                  value: user._id,
+                  label: user.bbs_name || user.global_name || user.username,
+                }))}
+              />
             </Box>
 
             <Box flex={1}>
               <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>
                 Vers
               </Text>
-              <Select
+              <CustomSelect
                 placeholder="Guilde cible"
                 value={selectedTargetGuild}
-                onChange={(e) => setSelectedTargetGuild(e.target.value)}
+                onChange={(val) => setSelectedTargetGuild(val)}
                 size="sm"
-                borderRadius="lg"
-                bg={subtleBg}
+                bg={selectBg}
+                allowDeselect={false}
+                accentColor="orange.400"
                 isDisabled={!selectedUser}
-                _focus={{ borderColor: "orange.400", boxShadow: "0 0 0 1px var(--chakra-colors-orange-400)" }}
-              >
-                <option value="__none__">✕ Retirer de la guilde</option>
-                {guilds
-                  .filter((g) => g._id !== selectedSourceGuild)
-                  .map((guild) => {
-                    const count = projectedCounts[guild._id] || 0;
-                    return (
-                      <option key={guild._id} value={guild._id}>
-                        {guild.name} ({count}/20)
-                        {count >= 20 ? " — pleine" : ""}
-                      </option>
-                    );
-                  })}
-              </Select>
+                options={[
+                  ...(selectedSourceGuild !== "__no_guild__"
+                    ? [{ value: "__none__", label: "✕ Retirer de la guilde" }]
+                    : []),
+                  ...guilds
+                    .filter((g) => g._id !== selectedSourceGuild)
+                    .map((guild) => {
+                      const count = projectedCounts[guild._id] || 0;
+                      return {
+                        value: guild._id,
+                        label: `${guild.name} (${count}/20)${count >= 20 ? " — pleine" : ""}`,
+                      };
+                    }),
+                ]}
+              />
             </Box>
 
             <Tooltip label={!selectedUser || !selectedTargetGuild ? "Remplissez tous les champs" : "Ajouter ce transfert"} hasArrow>

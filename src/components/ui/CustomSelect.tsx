@@ -26,6 +26,7 @@ interface CustomSelectProps {
     onSearchChange?: (search: string) => void; // Callback pour la recherche (pour API)
     isLoading?: boolean; // État de chargement
     size?: 'sm' | 'md' | 'lg'; // Taille du select
+    accentColor?: string; // Couleur d'accent pour le hover/focus
 }
 
 export const CustomSelect = ({
@@ -40,7 +41,8 @@ export const CustomSelect = ({
     enableSearch = false,
     onSearchChange,
     isLoading = false,
-    size = 'md'
+    size = 'md',
+    accentColor
 }: CustomSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -242,19 +244,20 @@ export const CustomSelect = ({
                     px={currentSizeProps.px}
                     py={currentSizeProps.py}
                     border="1px solid"
-                    borderColor={borderColor}
+                    borderColor={accentColor || borderColor}
                     borderRadius="md"
                     bg={bgColor}
                     align="center"
                     justify="space-between"
                     cursor={isDisabled ? "not-allowed" : "pointer"}
                     opacity={isDisabled ? 0.6 : 1}
-                    _hover={!isDisabled ? { borderColor: "gray.300" } : {}}
+                    _hover={!isDisabled ? { borderColor: accentColor || "gray.300" } : {}}
                     color={textColor}
                     h={currentSizeProps.minH}
                     minH={currentSizeProps.minH}
                     fontSize={currentSizeProps.fontSize}
                     onClick={() => !isDisabled && setIsOpen(!isOpen)}
+                    {...(isOpen && accentColor ? { boxShadow: `0 0 0 1px var(--chakra-colors-${accentColor.replace('.', '-')})` } : {})}
                 >
                     <Box 
                         flex={1}
@@ -281,7 +284,7 @@ export const CustomSelect = ({
                     rightIcon={<ChevronDownIcon />}
                     onClick={() => !isDisabled && setIsOpen(!isOpen)}
                     bg={bgColor}
-                    borderColor={borderColor}
+                    borderColor={accentColor || borderColor}
                     textAlign="left"
                     fontWeight="normal"
                     px={currentSizeProps.px}
@@ -291,7 +294,8 @@ export const CustomSelect = ({
                     fontSize={currentSizeProps.fontSize}
                     isDisabled={isDisabled}
                     color={textColor}
-                    _hover={!isDisabled ? { borderColor: "gray.300", bg: hoverBg } : {}}
+                    _hover={!isDisabled ? { borderColor: accentColor || "gray.300", bg: hoverBg } : {}}
+                    {...(isOpen && accentColor ? { boxShadow: `0 0 0 1px var(--chakra-colors-${accentColor.replace('.', '-')})` } : {})}
                 >
                     <Text color={placeholderColor} isTruncated>{placeholder}</Text>
                 </Button>

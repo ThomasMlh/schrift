@@ -223,6 +223,21 @@ export const useAllGuildsMemberCounts = (guilds: IGuild[], authenticated: boolea
   };
 }
 
+// Hook pour récupérer les utilisateurs sans guilde
+export const useGuildlessUsers = (enabled: boolean = false) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+
+  const url = enabled ? `${apiUrl}/api/users/without-guild?limit=1000` : null;
+  const { data, error, isLoading } = useSWR(url, authenticatedFetcher);
+
+  return {
+    users: (data?.users || []) as IUser[],
+    totalCount: data?.pagination?.totalCount || 0,
+    isLoading,
+    error,
+  };
+};
+
 // Hook pour récupérer les utilisateurs
 export const useUsers = (options?: {
   authenticated?: boolean;
