@@ -79,8 +79,10 @@ const DiscordCallback = () => {
           status: "success"
         });
         
-        // Rediriger vers l'accueil
-        navigate('/');
+        // Rediriger vers la page d'origine ou l'accueil
+        const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
+        sessionStorage.removeItem('redirectAfterLogin');
+        navigate(redirectPath);
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
@@ -89,6 +91,7 @@ const DiscordCallback = () => {
           description: errorMessage,
           status: "error"
         });
+        sessionStorage.removeItem('redirectAfterLogin');
         navigate('/');
       }
     };

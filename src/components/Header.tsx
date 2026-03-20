@@ -147,6 +147,9 @@ export const Header = () => {
     const scope = encodeURIComponent("identify guilds guilds.members.read");
     const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordClientId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=${scope}`;
 
+    // Sauvegarder la page actuelle pour y revenir après connexion
+    sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
+
     window.location.href = discordAuthUrl;
   };
 
