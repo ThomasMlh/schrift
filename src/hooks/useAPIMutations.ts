@@ -577,6 +577,50 @@ export const useAPIMutations = () => {
     return data;
   };
 
+  // Fonction pour bannir un utilisateur
+  const banUser = async (userId: string, reason?: string) => {
+    const response = await fetch(`${apiUrl}/api/users/${userId}/ban`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+      },
+      body: JSON.stringify({ reason }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Erreur lors du bannissement');
+    }
+
+    const result = await response.json();
+
+    await mutate((key) => typeof key === 'string' && key.startsWith(`${apiUrl}/api/users`));
+
+    return result;
+  };
+
+  // Fonction pour débannir un utilisateur
+  const unbanUser = async (userId: string) => {
+    const response = await fetch(`${apiUrl}/api/users/${userId}/unban`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Erreur lors du débannissement');
+    }
+
+    const result = await response.json();
+
+    await mutate((key) => typeof key === 'string' && key.startsWith(`${apiUrl}/api/users`));
+
+    return result;
+  };
+
   return {
     createCycle,
     updateCycle,
@@ -600,6 +644,8 @@ export const useAPIMutations = () => {
     submitOCRBatch,
     visualizeOCRZones,
     executeDraft,
+    banUser,
+    unbanUser,
   };
 };
 

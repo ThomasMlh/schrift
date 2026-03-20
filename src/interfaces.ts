@@ -23,6 +23,9 @@ export interface IUser {
   exp?: number;
   guild_name?: string;
   banner?: string;
+  is_banned?: boolean;
+  ban_reason?: string;
+  banned_at?: string;
 }
 
 export interface ICharacter {
