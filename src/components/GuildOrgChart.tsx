@@ -1,12 +1,8 @@
 import {
   Box,
   VStack,
-  HStack,
   Text,
-  Card,
-  CardBody,
   Flex,
-  Badge,
   useColorModeValue
 } from "@chakra-ui/react";
 import type { IUser } from "../interfaces";
@@ -16,98 +12,213 @@ interface GuildOrgChartProps {
   members: IUser[];
 }
 
-export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const cardBg = useColorModeValue("white", "gray.800");
-  const shadowColor = useColorModeValue("md", "dark-lg");
+const roleConfig = {
+  Chef: {
+    gradient: "linear(to-r, purple.400, pink.400)",
+    glow: "purple.400",
+    ringGradient: "linear-gradient(135deg, #9F7AEA, #ED64A6)",
+    icon: "👑",
+  },
+  "Sous-Chef": {
+    gradient: "linear(to-r, blue.400, cyan.400)",
+    glow: "blue.400",
+    ringGradient: "linear-gradient(135deg, #4299E1, #0BC5EA)",
+    icon: "⭐",
+  },
+  Membre: {
+    gradient: "linear(to-r, whiteAlpha.600, whiteAlpha.800)",
+    glow: "whiteAlpha.400",
+    ringGradient: "linear-gradient(135deg, #e7eaee, #ffffff)",
+    icon: "",
+  },
+};
 
-  // Trier les membres par rôle
+export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
+  const cardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.8)");
+  const cardBorder = useColorModeValue("gray.200", "whiteAlpha.100");
+  const connectorColor = useColorModeValue("gray.300", "whiteAlpha.200");
+  const subtleText = useColorModeValue("gray.500", "whiteAlpha.600");
+
   const chef = members.find((m) => m.role === "chef");
   const sousChefs = members.filter((m) => m.role === "sous-chef");
   const regularMembers = members.filter((m) => m.role === "membre");
 
   const MemberCard = ({
     member,
-    roleLabel
+    roleLabel,
+    isLead = false,
   }: {
     member: IUser;
-    roleLabel: string;
-  }) => (
-    <Card
-      bg={cardBg}
-      shadow={shadowColor}
-      borderWidth="1px"
-      borderColor={borderColor}
-      minW="200px"
-      maxW="250px"
-    >
-      <CardBody>
-        <VStack spacing={2}>
-        <UserDisplay user={member} direction="column" avatarSize="lg" textSize="lg" />
-          <Badge
-            colorScheme={
-              roleLabel === "Chef"
-                ? "purple"
-                : roleLabel === "Sous-Chef"
-                  ? "blue"
-                  : "gray"
-            }
-          >
-            {roleLabel}
-          </Badge>
-        </VStack>
-      </CardBody>
-    </Card>
+    roleLabel: "Chef" | "Sous-Chef" | "Membre";
+    isLead?: boolean;
+  }) => {
+    const config = roleConfig[roleLabel];
+    return (
+      <Box
+        position="relative"
+        role="group"
+        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+        _hover={{ transform: "translateY(-4px)" }}
+      >
+        {/* Glow effect behind card */}
+        {isLead && (
+          <Box
+            position="absolute"
+            inset="-2px"
+            borderRadius="2xl"
+            bgGradient={config.gradient}
+            opacity={0.15}
+            filter="blur(12px)"
+            transition="opacity 0.3s"
+            _groupHover={{ opacity: 0.3 }}
+          />
+        )}
+        <Box
+          bg={cardBg}
+          backdropFilter="blur(12px)"
+          borderRadius="xl"
+          borderWidth="1px"
+          borderColor={isLead ? "transparent" : cardBorder}
+          p={5}
+          minW={isLead ? "180px" : "150px"}
+          maxW="280px"
+          position="relative"
+          overflow="hidden"
+          boxShadow={
+            isLead
+              ? `0 4px 20px -4px var(--chakra-colors-${config.glow.replace(".", "-")})`
+              : "0 2px 12px rgba(0, 0, 0, 0.6)"
+          }
+          _before={
+            isLead
+              ? {
+                  content: '""',
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "xl",
+                  padding: "1px",
+                  background: config.ringGradient,
+                  WebkitMask:
+                    "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                  WebkitMaskComposite: "xor",
+                  maskComposite: "exclude",
+                  pointerEvents: "none",
+                }
+              : undefined
+          }
+        >
+          <VStack spacing={3}>
+            {/* Role icon */}
+            {config.icon && (
+              <Text fontSize={isLead ? "xl" : "md"} lineHeight={1}>
+                {config.icon}
+              </Text>
+            )}
+            <UserDisplay
+              user={member}
+              direction="column"
+              avatarSize={isLead ? "lg" : "md"}
+              textSize={isLead ? "md" : "sm"}
+            />
+            {/* Modern role tag */}
+            <Text
+              fontSize="2xs"
+              fontWeight="bold"
+              textTransform="uppercase"
+              letterSpacing="wider"
+              bgGradient={config.gradient}
+              bgClip="text"
+              whiteSpace="nowrap"
+            >
+              {roleLabel}
+            </Text>
+          </VStack>
+        </Box>
+      </Box>
+    );
+  };
+
+  const Connector = ({ height = "32px" }: { height?: string }) => (
+    <Flex justify="center" w="100%">
+      <Box
+        w="2px"
+        h={height}
+        bgGradient={`linear(to-b, ${connectorColor}, transparent)`}
+        opacity={0.6}
+      />
+    </Flex>
   );
 
+  const HorizontalBranch = ({ count }: { count: number }) => {
+    if (count <= 1) return <Connector />;
+    return (
+      <Flex direction="column" align="center" w="100%">
+        <Box
+          w="2px"
+          h="24px"
+          bgGradient={`linear(to-b, ${connectorColor}, ${connectorColor})`}
+          opacity={0.4}
+        />
+        <Box
+          h="2px"
+          w={{ base: `${Math.min(count * 140, 600)}px`, md: `${Math.min(count * 180, 800)}px` }}
+          maxW="90%"
+          bgGradient={`linear(to-r, transparent, ${connectorColor}, transparent)`}
+          opacity={0.4}
+        />
+      </Flex>
+    );
+  };
+
   return (
-    <Flex direction="column" align="center" w="100%" gap={8} py={8}>
+    <Flex direction="column" align="center" w="100%" gap={2} py={8}>
       {/* Chef */}
       {chef && (
-        <Box>
-          <MemberCard member={chef} roleLabel="Chef" />
-        </Box>
+        <MemberCard member={chef} roleLabel="Chef" isLead />
       )}
 
-      {/* Ligne de connexion vers sous-chefs */}
+      {/* Connector to sous-chefs */}
       {chef && sousChefs.length > 0 && (
-        <Box w="2px" h="40px" bg={borderColor} />
+        <HorizontalBranch count={sousChefs.length} />
       )}
 
       {/* Sous-chefs */}
       {sousChefs.length > 0 && (
-        <HStack spacing={8} justify="center" wrap="wrap">
-          {sousChefs.map((sousChef) => (
-            <MemberCard
-              key={sousChef._id}
-              member={sousChef}
-              roleLabel="Sous-Chef"
-            />
+        <Flex gap={{ base: 4, md: 6 }} justify="center" wrap="wrap">
+          {sousChefs.map((sc) => (
+            <MemberCard key={sc._id} member={sc} roleLabel="Sous-Chef" isLead />
           ))}
-        </HStack>
+        </Flex>
       )}
 
-      {/* Ligne de connexion vers membres */}
+      {/* Connector to members */}
       {(chef || sousChefs.length > 0) && regularMembers.length > 0 && (
-        <Box w="2px" h="40px" bg={borderColor} />
+        <Connector height="40px" />
       )}
 
-      {/* Membres */}
+      {/* Section label for regular members */}
       {regularMembers.length > 0 && (
-        <Flex
-          direction="row"
-          wrap="wrap"
-          justify="center"
-          gap={4}
-          maxW="1200px"
+        <Text
+          fontSize="xs"
+          fontWeight="semibold"
+          textTransform="uppercase"
+          letterSpacing="widest"
+          color={subtleText}
+          mb={2}
         >
+          Membres · {regularMembers.length}
+        </Text>
+      )}
+
+      {/* Regular members grid */}
+      {regularMembers.length > 0 && (
+        <Flex wrap="wrap" justify="center" gap={4} maxW="1100px">
           {regularMembers.map((member) => (
             <MemberCard key={member._id} member={member} roleLabel="Membre" />
           ))}
         </Flex>
       )}
 
-      {/* Message si aucun membre */}
       {members.length === 0 && (
         <Text color="gray.500" fontSize="lg">
           Aucun membre dans cette guilde

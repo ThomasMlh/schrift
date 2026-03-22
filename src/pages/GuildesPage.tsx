@@ -3,13 +3,10 @@ import {
   VStack,
   Heading,
   Box,
-  Button,
-  HStack,
   Flex,
   useColorModeValue,
   Image,
   Text,
-  Badge
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { SEOHead } from "../components/SEOHead";
@@ -23,12 +20,11 @@ const GuildesPage = () => {
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
-  const buttonBg = useColorModeValue("white", "gray.700");
-  const buttonHoverBg = useColorModeValue("blue.50", "blue.900");
-  const selectedBg = useColorModeValue("blue.500", "blue.600");
-  const selectedColor = "white";
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const selectedBorderColor = useColorModeValue("blue.600", "blue.400");
+  const cardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.6)");
+  const cardBorder = useColorModeValue("gray.200", "whiteAlpha.100");
+  const hoverBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const countColor = useColorModeValue("gray.500", "whiteAlpha.600");
+  const selectedRing = "linear-gradient(135deg, #9F7AEA, #ED64A6)";
 
   // Sélectionner la première guilde par défaut
   useEffect(() => {
@@ -67,55 +63,85 @@ const GuildesPage = () => {
             Guildes Ṣčhrīft
           </Heading>
 
-          {/* Sélecteur de guilde - Système de boutons */}
-          <HStack spacing={4} wrap="wrap" justify="center">
-            {guilds.map((guild) => (
-              <Button
-                key={guild._id}
-                size="lg"
-                onClick={() => setSelectedGuild(guild)}
-                bg={selectedGuild?._id === guild._id ? selectedBg : buttonBg}
-                color={selectedGuild?._id === guild._id ? selectedColor : undefined}
-                _hover={{
-                  bg: selectedGuild?._id === guild._id ? selectedBg : buttonHoverBg,
-                  transform: "scale(1.05)",
-                  boxShadow: "lg"
-                }}
-                border="3px solid"
-                borderColor={selectedGuild?._id === guild._id ? selectedBorderColor : borderColor}
-                boxShadow={selectedGuild?._id === guild._id ? "xl" : "md"}
-                fontWeight="bold"
-                px={8}
-                py={6}
-                h="auto"
-                transition="all 0.2s"
-                position="relative"
-              >
-                <VStack spacing={2}>
-                  {!imageErrors[guild._id] ? (
-                    <Image 
-                      src={`${bucketUrl}/guilds/${guild.name}.png`} 
-                      alt={guild.name} 
-                      height="50px" 
-                      width="auto"
-                      onError={() => setImageErrors(prev => ({ ...prev, [guild._id]: true }))}
+          {/* Sélecteur de guilde */}
+          <Flex gap={3} wrap="wrap" justify="center">
+            {guilds.map((guild) => {
+              const isSelected = selectedGuild?._id === guild._id;
+              const memberCount = guildMemberCounts?.[guild._id] || 0;
+              return (
+                <Box
+                  key={guild._id}
+                  as="button"
+                  onClick={() => setSelectedGuild(guild)}
+                  position="relative"
+                  role="group"
+                  transition="all 0.25s cubic-bezier(0.4, 0, 0.2, 1)"
+                  _hover={{ transform: "translateY(-2px)" }}
+                >
+                  {/* Gradient border for selected */}
+                  {isSelected && (
+                    <Box
+                      position="absolute"
+                      inset="-1px"
+                      borderRadius="xl"
+                      background={selectedRing}
+                      opacity={0.9}
+                      zIndex={0}
                     />
-                  ) : (
-                    <Text fontSize="xl">{guild.name}</Text>
                   )}
-                  <Badge 
-                    colorScheme={selectedGuild?._id === guild._id ? "white" : "blue"}
-                    fontSize="sm"
-                    px={2}
-                    py={1}
-                    borderRadius="full"
+                  {/* Glow behind selected */}
+                  {isSelected && (
+                    <Box
+                      position="absolute"
+                      inset="-4px"
+                      borderRadius="xl"
+                      background={selectedRing}
+                      opacity={0.15}
+                      filter="blur(10px)"
+                      zIndex={0}
+                    />
+                  )}
+                  <Flex
+                    direction="column"
+                    align="center"
+                    gap={2}
+                    bg={cardBg}
+                    backdropFilter="blur(12px)"
+                    borderRadius="lg"
+                    borderWidth={isSelected ? 0 : "1px"}
+                    borderColor={cardBorder}
+                    px={5}
+                    py={3}
+                    position="relative"
+                    zIndex={1}
+                    _groupHover={{
+                      bg: isSelected ? cardBg : hoverBg,
+                    }}
                   >
-                    {guildMemberCounts?.[guild._id] || 0} joueur{guildMemberCounts?.[guild._id] !== 1 ? 's' : ''}
-                  </Badge>
-                </VStack>
-              </Button>
-            ))}
-          </HStack>
+                    {!imageErrors[guild._id] ? (
+                      <Image
+                        src={`${bucketUrl}/guilds/${guild.name}.png`}
+                        alt={guild.name}
+                        height="40px"
+                        width="auto"
+                        onError={() => setImageErrors(prev => ({ ...prev, [guild._id]: true }))}
+                      />
+                    ) : (
+                      <Text fontSize="lg" fontWeight="bold">{guild.name}</Text>
+                    )}
+                    <Text
+                      fontSize="xs"
+                      fontWeight="semibold"
+                      letterSpacing="wide"
+                      color={isSelected ? "purple.300" : countColor}
+                    >
+                      {memberCount} joueur{memberCount !== 1 ? "s" : ""}
+                    </Text>
+                  </Flex>
+                </Box>
+              );
+            })}
+          </Flex>
 
           {/* Organigramme */}
           <Box w="100%" minH="400px">
