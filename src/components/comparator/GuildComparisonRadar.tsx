@@ -31,7 +31,7 @@ export const GuildComparisonRadar = ({
   guildsData
 }: GuildComparisonRadarProps) => {
   const cardBg = useColorModeValue("white", "gray.800");
-  const textColor = useColorModeValue("gray.700", "gray.200");
+  const textColor = useColorModeValue("gray.700", "whiteAlpha.800");
 
   // Normaliser les données pour le radar (échelle 0-100)
   const normalizeValue = (value: number, max: number) => {

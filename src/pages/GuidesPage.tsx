@@ -6,7 +6,8 @@ import {
   Tab,
   TabPanel,
   Flex,
-  Image
+  Image,
+  useColorModeValue
 } from "@chakra-ui/react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -54,6 +55,7 @@ const GuidesPage = () => {
     navigate(`/guides/${newSection}`, { replace: true });
   };
   
+  const menuTextColor = useColorModeValue("gray.700", "whiteAlpha.800");
   return (
     <>
       <SEOHead
@@ -78,12 +80,12 @@ const GuidesPage = () => {
               overflowY="hidden"
               flexWrap="nowrap"
             >
-              <Tab whiteSpace="nowrap">
-                <Flex align="center" gap={2}>
+              <Tab whiteSpace="nowrap" color={menuTextColor} _selected={{ color: "white", bg: "purple.500" }}>
+                <Flex align="center" gap={2} >
                   🔄 Rotations & Builds
                 </Flex>
               </Tab>
-              <Tab whiteSpace="nowrap" gap={2}>
+              <Tab whiteSpace="nowrap" gap={2} color={menuTextColor} _selected={{ color: "white", bg: "purple.500" }}>
                 <Image
                   src="/orb.png"
                   alt="Icône Orbe"
