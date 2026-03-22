@@ -24,12 +24,16 @@ import {
   TagLabel,
   Progress,
   Tooltip,
-  SimpleGrid,
+  SimpleGrid
 } from "@chakra-ui/react";
 import { ArrowForwardIcon, AddIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import type { IGuild, IUser } from "../interfaces";
-import { useGuilds, useAllGuildsMemberCounts, useGuildlessUsers } from "@/hooks/useAPI";
+import {
+  useGuilds,
+  useAllGuildsMemberCounts,
+  useGuildlessUsers
+} from "@/hooks/useAPI";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
 import { UserDisplay } from "./ui/UserDisplay";
 import { CustomSelect } from "./ui/CustomSelect";
@@ -64,7 +68,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
 
   const cardBg = useColorModeValue("white", "gray.800");
   const subtleBg = useColorModeValue("gray.50", "gray.750");
-  const selectBg = useColorModeValue("orange.50", "rgba(251, 146, 60, 0.06)");
+  const selectBg = useColorModeValue("orange.50", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const mutedText = useColorModeValue("gray.500", "gray.400");
   const moveHoverBg = useColorModeValue("gray.50", "gray.650");
@@ -136,7 +140,11 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
 
     const isRemoval = selectedTargetGuild === "__none__";
     const isFromNoGuild = selectedSourceGuild === "__no_guild__";
-    const fromGuild = isFromNoGuild ? null : (user.guildId ? guildMap[user.guildId] || null : null);
+    const fromGuild = isFromNoGuild
+      ? null
+      : user.guildId
+        ? guildMap[user.guildId] || null
+        : null;
     const toGuild = isRemoval ? null : guildMap[selectedTargetGuild] || null;
 
     if (!isRemoval && !toGuild) return;
@@ -146,7 +154,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
         title: "Même guilde",
         description: "Le joueur est déjà dans cette guilde",
         status: "warning",
-        duration: 2000,
+        duration: 2000
       });
       return;
     }
@@ -156,7 +164,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
         title: "Action inutile",
         description: "Ce joueur n'a déjà pas de guilde",
         status: "warning",
-        duration: 2000,
+        duration: 2000
       });
       return;
     }
@@ -167,12 +175,19 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
         id: `${user._id}-${Date.now()}`,
         user,
         fromGuild,
-        toGuild,
-      },
+        toGuild
+      }
     ]);
     setSelectedUser("");
     setSelectedTargetGuild("");
-  }, [selectedUser, selectedTargetGuild, selectedSourceGuild, allMembers, guildMap, toast]);
+  }, [
+    selectedUser,
+    selectedTargetGuild,
+    selectedSourceGuild,
+    allMembers,
+    guildMap,
+    toast
+  ]);
 
   const removeMove = (moveId: string) => {
     setDraftMoves((prev) => prev.filter((m) => m.id !== moveId));
@@ -190,7 +205,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     try {
       const moves = draftMoves.map((m) => ({
         userId: m.user._id,
-        toGuildId: m.toGuild?._id || null,
+        toGuildId: m.toGuild?._id || null
       }));
 
       await executeDraft(moves);
@@ -199,7 +214,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
         title: "Draft exécuté",
         description: `${draftMoves.length} joueur(s) déplacé(s) avec succès`,
         status: "success",
-        duration: 3000,
+        duration: 3000
       });
 
       clearDraft();
@@ -213,7 +228,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
             ? error.message
             : "Erreur lors de l'exécution du draft",
         status: "error",
-        duration: 5000,
+        duration: 5000
       });
     } finally {
       setIsExecuting(false);
@@ -235,7 +250,14 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     <Box w="100%" maxW="960px" mx="auto">
       <VStack spacing={5} align="stretch">
         {/* Header with gradient accent */}
-        <Box position="relative" overflow="hidden" borderRadius="xl" bg={cardBg} borderWidth="1px" borderColor={borderColor}>
+        <Box
+          position="relative"
+          overflow="hidden"
+          borderRadius="xl"
+          bg={cardBg}
+          borderWidth="1px"
+          borderColor={borderColor}
+        >
           <Box h="3px" bgGradient={accentGradient} />
           <Box p={5}>
             <HStack spacing={3} mb={1}>
@@ -261,13 +283,35 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
         </Box>
 
         {/* Form */}
-        <Box bg={cardBg} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={5}>
-          <Text fontSize="sm" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={4}>
+        <Box
+          bg={cardBg}
+          borderRadius="xl"
+          borderWidth="1px"
+          borderColor={borderColor}
+          p={5}
+        >
+          <Text
+            fontSize="sm"
+            fontWeight="semibold"
+            textTransform="uppercase"
+            letterSpacing="wide"
+            color={mutedText}
+            mb={4}
+          >
             Nouveau transfert
           </Text>
-          <Flex gap={3} direction={{ base: "column", md: "row" }} align={{ md: "flex-end" }}>
+          <Flex
+            gap={3}
+            direction={{ base: "column", md: "row" }}
+            align={{ md: "flex-end" }}
+          >
             <Box flex={1}>
-              <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>
+              <Text
+                fontSize="xs"
+                fontWeight="medium"
+                mb={1.5}
+                color={mutedText}
+              >
                 Depuis
               </Text>
               <CustomSelect
@@ -282,14 +326,19 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                   { value: "__no_guild__", label: "Sans guilde" },
                   ...guilds.map((guild) => ({
                     value: guild._id,
-                    label: `${guild.name} (${membersByGuild[guild._id]?.length || 0})`,
-                  })),
+                    label: `${guild.name} (${membersByGuild[guild._id]?.length || 0})`
+                  }))
                 ]}
               />
             </Box>
 
             <Box flex={1}>
-              <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>
+              <Text
+                fontSize="xs"
+                fontWeight="medium"
+                mb={1.5}
+                color={mutedText}
+              >
                 Joueur
               </Text>
               <CustomSelect
@@ -301,18 +350,22 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                 allowDeselect={false}
                 enableSearch
                 accentColor="orange.400"
-
                 isDisabled={!selectedSourceGuild}
                 isLoading={guildlessLoading}
                 options={availableUsers.map((user) => ({
                   value: user._id,
-                  label: user.bbs_name || user.global_name || user.username,
+                  label: user.bbs_name || user.global_name || user.username
                 }))}
               />
             </Box>
 
             <Box flex={1}>
-              <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>
+              <Text
+                fontSize="xs"
+                fontWeight="medium"
+                mb={1.5}
+                color={mutedText}
+              >
                 Vers
               </Text>
               <CustomSelect
@@ -334,14 +387,21 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                       const count = projectedCounts[guild._id] || 0;
                       return {
                         value: guild._id,
-                        label: `${guild.name} (${count}/20)${count >= 20 ? " — pleine" : ""}`,
+                        label: `${guild.name} (${count}/20)${count >= 20 ? " — pleine" : ""}`
                       };
-                    }),
+                    })
                 ]}
               />
             </Box>
 
-            <Tooltip label={!selectedUser || !selectedTargetGuild ? "Remplissez tous les champs" : "Ajouter ce transfert"} hasArrow>
+            <Tooltip
+              label={
+                !selectedUser || !selectedTargetGuild
+                  ? "Remplissez tous les champs"
+                  : "Ajouter ce transfert"
+              }
+              hasArrow
+            >
               <IconButton
                 aria-label="Ajouter"
                 icon={<AddIcon />}
@@ -357,12 +417,30 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
 
         {/* Move list */}
         {draftMoves.length > 0 ? (
-          <Box bg={cardBg} borderRadius="xl" borderWidth="1px" borderColor={borderColor} overflow="hidden">
+          <Box
+            bg={cardBg}
+            borderRadius="xl"
+            borderWidth="1px"
+            borderColor={borderColor}
+            overflow="hidden"
+          >
             <Flex justify="space-between" align="center" px={5} pt={4} pb={2}>
-              <Text fontSize="sm" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText}>
+              <Text
+                fontSize="sm"
+                fontWeight="semibold"
+                textTransform="uppercase"
+                letterSpacing="wide"
+                color={mutedText}
+              >
                 Transferts
               </Text>
-              <Button size="xs" variant="ghost" colorScheme="red" fontWeight="normal" onClick={clearDraft}>
+              <Button
+                size="xs"
+                variant="ghost"
+                colorScheme="red"
+                fontWeight="normal"
+                onClick={clearDraft}
+              >
                 Tout effacer
               </Button>
             </Flex>
@@ -382,15 +460,30 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                   borderColor={borderColor}
                 >
                   <Box flex={1} minW={0}>
-                    <UserDisplay user={move.user} avatarSize="xs" textSize="sm" asLink={false} />
+                    <UserDisplay
+                      user={move.user}
+                      avatarSize="xs"
+                      textSize="sm"
+                      asLink={false}
+                    />
                   </Box>
 
                   <HStack spacing={2} flexShrink={0}>
-                    <Tag size="sm" borderRadius="full" variant="subtle" colorScheme="red">
+                    <Tag
+                      size="sm"
+                      borderRadius="full"
+                      variant="subtle"
+                      colorScheme="red"
+                    >
                       <TagLabel>{move.fromGuild?.name || "—"}</TagLabel>
                     </Tag>
                     <ArrowForwardIcon boxSize={3} color={mutedText} />
-                    <Tag size="sm" borderRadius="full" variant="subtle" colorScheme={move.toGuild ? "green" : "gray"}>
+                    <Tag
+                      size="sm"
+                      borderRadius="full"
+                      variant="subtle"
+                      colorScheme={move.toGuild ? "green" : "gray"}
+                    >
                       <TagLabel>{move.toGuild?.name || "Retrait"}</TagLabel>
                     </Tag>
                   </HStack>
@@ -402,7 +495,11 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                     variant="ghost"
                     borderRadius="full"
                     color={mutedText}
-                    _hover={{ bg: "red.50", color: "red.500", _dark: { bg: "red.900", color: "red.300" } }}
+                    _hover={{
+                      bg: "red.50",
+                      color: "red.500",
+                      _dark: { bg: "red.900", color: "red.300" }
+                    }}
                     onClick={() => removeMove(move.id)}
                   />
                 </Flex>
@@ -411,17 +508,31 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
 
             {/* Guild capacity overview */}
             <Box px={5} pb={4} pt={2}>
-              <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={3}>
+              <Text
+                fontSize="xs"
+                fontWeight="semibold"
+                textTransform="uppercase"
+                letterSpacing="wide"
+                color={mutedText}
+                mb={3}
+              >
                 Effectifs après draft
               </Text>
-              <SimpleGrid columns={{ base: 1, sm: 2, md: guilds.length }} spacing={3}>
+              <SimpleGrid
+                columns={{ base: 1, sm: 2, md: guilds.length }}
+                spacing={3}
+              >
                 {guilds.map((guild) => {
                   const current = membersByGuild[guild._id]?.length || 0;
                   const projected = projectedCounts[guild._id] || 0;
                   const diff = projected - current;
                   const pct = (projected / 20) * 100;
                   const isOver = projected > 20;
-                  const barScheme = isOver ? "red" : projected === 20 ? "orange" : "green";
+                  const barScheme = isOver
+                    ? "red"
+                    : projected === 20
+                      ? "orange"
+                      : "green";
 
                   return (
                     <Box key={guild._id} bg={subtleBg} borderRadius="lg" p={3}>
@@ -430,12 +541,28 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                           {guild.name}
                         </Text>
                         <HStack spacing={1}>
-                          <Text fontSize="xs" fontWeight="bold" color={isOver ? "red.400" : undefined}>
+                          <Text
+                            fontSize="xs"
+                            fontWeight="bold"
+                            color={isOver ? "red.400" : undefined}
+                          >
                             {projected}
                           </Text>
-                          <Text fontSize="xs" color={mutedText}>/20</Text>
+                          <Text fontSize="xs" color={mutedText}>
+                            /20
+                          </Text>
                           {diff !== 0 && (
-                            <Text fontSize="xs" fontWeight="semibold" color={diff > 0 ? (isOver ? "red.400" : "orange.400") : "green.400"}>
+                            <Text
+                              fontSize="xs"
+                              fontWeight="semibold"
+                              color={
+                                diff > 0
+                                  ? isOver
+                                    ? "red.400"
+                                    : "orange.400"
+                                  : "green.400"
+                              }
+                            >
                               {diff > 0 ? `+${diff}` : diff}
                             </Text>
                           )}
@@ -454,16 +581,28 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
               </SimpleGrid>
 
               {hasOverflow && (
-                <Alert status="error" mt={3} borderRadius="lg" py={2} fontSize="sm">
+                <Alert
+                  status="error"
+                  mt={3}
+                  borderRadius="lg"
+                  py={2}
+                  fontSize="sm"
+                >
                   <AlertIcon />
-                  Des guildes dépassent 20 membres — déplacez ou retirez des joueurs avant de valider.
+                  Des guildes dépassent 20 membres — déplacez ou retirez des
+                  joueurs avant de valider.
                 </Alert>
               )}
             </Box>
 
             {/* Actions */}
             <Flex justify="flex-end" gap={3} px={5} pb={5}>
-              <Button variant="ghost" onClick={clearDraft} size="sm" borderRadius="lg">
+              <Button
+                variant="ghost"
+                onClick={clearDraft}
+                size="sm"
+                borderRadius="lg"
+              >
                 Annuler
               </Button>
               <Button
@@ -472,7 +611,11 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                 borderRadius="lg"
                 onClick={onOpen}
                 isDisabled={hasOverflow}
-                title={hasOverflow ? "Des guildes dépassent la limite de 20 membres" : undefined}
+                title={
+                  hasOverflow
+                    ? "Des guildes dépassent la limite de 20 membres"
+                    : undefined
+                }
                 leftIcon={<Text fontSize="sm">✓</Text>}
               >
                 Valider ({draftMoves.length})
@@ -490,7 +633,8 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
             textAlign="center"
           >
             <Text color={mutedText} fontSize="sm">
-              Aucun transfert prévu — utilisez le formulaire ci-dessus pour commencer.
+              Aucun transfert prévu — utilisez le formulaire ci-dessus pour
+              commencer.
             </Text>
           </Box>
         )}
@@ -506,15 +650,29 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
           <ModalBody>
             <Alert status="warning" mb={5} borderRadius="lg" fontSize="sm">
               <AlertIcon />
-              Les joueurs seront d'abord retirés de leur guilde, puis réassignés. 
-              Cette opération est irréversible.
+              Les joueurs seront d'abord retirés de leur guilde, puis
+              réassignés. Cette opération est irréversible.
             </Alert>
 
-            <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={3}>
+            <Text
+              fontSize="xs"
+              fontWeight="semibold"
+              textTransform="uppercase"
+              letterSpacing="wide"
+              color={mutedText}
+              mb={3}
+            >
               {draftMoves.length} transfert{draftMoves.length > 1 ? "s" : ""}
             </Text>
 
-            <VStack spacing={0} align="stretch" borderWidth="1px" borderColor={borderColor} borderRadius="lg" overflow="hidden">
+            <VStack
+              spacing={0}
+              align="stretch"
+              borderWidth="1px"
+              borderColor={borderColor}
+              borderRadius="lg"
+              overflow="hidden"
+            >
               {draftMoves.map((move, index) => (
                 <Flex
                   key={move.id}
@@ -526,14 +684,26 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                   borderColor={borderColor}
                 >
                   <Text fontSize="sm" fontWeight="medium" flex={1}>
-                    {move.user.bbs_name || move.user.global_name || move.user.username}
+                    {move.user.bbs_name ||
+                      move.user.global_name ||
+                      move.user.username}
                   </Text>
                   <HStack spacing={2}>
-                    <Tag size="sm" borderRadius="full" variant="subtle" colorScheme="red">
+                    <Tag
+                      size="sm"
+                      borderRadius="full"
+                      variant="subtle"
+                      colorScheme="red"
+                    >
                       <TagLabel>{move.fromGuild?.name || "—"}</TagLabel>
                     </Tag>
                     <ArrowForwardIcon boxSize={3} color={mutedText} />
-                    <Tag size="sm" borderRadius="full" variant="subtle" colorScheme={move.toGuild ? "green" : "gray"}>
+                    <Tag
+                      size="sm"
+                      borderRadius="full"
+                      variant="subtle"
+                      colorScheme={move.toGuild ? "green" : "gray"}
+                    >
                       <TagLabel>{move.toGuild?.name || "Retrait"}</TagLabel>
                     </Tag>
                   </HStack>
@@ -542,23 +712,47 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
             </VStack>
 
             {/* Impact summary - only guilds that change */}
-            {guilds.some((g) => (membersByGuild[g._id]?.length || 0) !== (projectedCounts[g._id] || 0)) && (
+            {guilds.some(
+              (g) =>
+                (membersByGuild[g._id]?.length || 0) !==
+                (projectedCounts[g._id] || 0)
+            ) && (
               <Box mt={4}>
-                <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={2}>
+                <Text
+                  fontSize="xs"
+                  fontWeight="semibold"
+                  textTransform="uppercase"
+                  letterSpacing="wide"
+                  color={mutedText}
+                  mb={2}
+                >
                   Impact
                 </Text>
                 <Flex gap={2} flexWrap="wrap">
                   {guilds
-                    .filter((g) => (membersByGuild[g._id]?.length || 0) !== (projectedCounts[g._id] || 0))
+                    .filter(
+                      (g) =>
+                        (membersByGuild[g._id]?.length || 0) !==
+                        (projectedCounts[g._id] || 0)
+                    )
                     .map((guild) => {
                       const current = membersByGuild[guild._id]?.length || 0;
                       const projected = projectedCounts[guild._id] || 0;
                       const diff = projected - current;
                       return (
-                        <Tag key={guild._id} size="sm" borderRadius="full" variant="outline">
+                        <Tag
+                          key={guild._id}
+                          size="sm"
+                          borderRadius="full"
+                          variant="outline"
+                        >
                           <TagLabel>
                             {guild.name} {current}→{projected}{" "}
-                            <Text as="span" color={diff > 0 ? "orange.400" : "green.400"} fontWeight="bold">
+                            <Text
+                              as="span"
+                              color={diff > 0 ? "orange.400" : "green.400"}
+                              fontWeight="bold"
+                            >
                               ({diff > 0 ? `+${diff}` : diff})
                             </Text>
                           </TagLabel>
