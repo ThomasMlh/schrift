@@ -577,6 +577,31 @@ export const useAPIMutations = () => {
     return data;
   };
 
+  // Fonction pour activer/désactiver une guilde
+  const toggleGuildDisable = async (guildId: string) => {
+    const response = await fetch(`${apiUrl}/api/guildes/${guildId}/toggle-disable`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Erreur lors du changement de statut de la guilde');
+    }
+
+    const result = await response.json();
+
+    // Invalider les caches pour les guildes et utilisateurs
+    await mutate((key) => typeof key === 'string' && (
+      key.startsWith(`${apiUrl}/api/users`) || 
+      key.startsWith(`${apiUrl}/api/guildes`)
+    ));
+
+    return result;
+  };
+
   // Fonction pour bannir un utilisateur
   const banUser = async (userId: string, reason?: string) => {
     const response = await fetch(`${apiUrl}/api/users/${userId}/ban`, {
@@ -628,6 +653,7 @@ export const useAPIMutations = () => {
     createGuild,
     updateGuild,
     deleteGuild,
+    toggleGuildDisable,
     assignUserToGuild,
     updateUserRole,
     moveUserToGuild,

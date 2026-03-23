@@ -41,7 +41,9 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
   const { getAuthHeaders } = useAuth();
   const { updateUserRole, moveUserToGuild, removeGuildMember } = useAPIMutations();
   // Utiliser useSWR pour les guildes (cache automatique + déduplication)
-  const { guilds, mutate: mutateGuilds } = useGuilds(true);
+  const { guilds: allGuilds, mutate: mutateGuilds } = useGuilds(true, editable);
+  // En mode éditable (admin), afficher toutes les guildes ; sinon filtrer les désactivées
+  const guilds = editable ? allGuilds : allGuilds.filter(g => !g.disabled);
   
   // États
   const [membersByGuild, setMembersByGuild] = useState<Record<string, IUser[]>>(
@@ -289,12 +291,11 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
         {guilds.map((guild: IGuild) => (
           <Tab
             key={guild._id}
-            // _focus={{ boxShadow: 'none' }}
-            // _focusVisible={{ boxShadow: 'outline' }}
             borderBottomLeftRadius={0}
             borderBottomRightRadius={0}
+            opacity={guild.disabled ? 0.5 : 1}
           >
-            Ṣčhrīft {guild.name}
+            Ṣčhrīft {guild.name} {guild.disabled ? "(désactivée)" : ""}
           </Tab>
         ))}
       </TabList>

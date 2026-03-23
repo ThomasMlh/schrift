@@ -95,12 +95,12 @@ export const useCycle = (cycleId?: string) => {
 }
 
 // Hook pour récupérer les guildes
-export const useGuilds = (authenticated: boolean = false) => {
+export const useGuilds = (authenticated: boolean = false, includeDisabled: boolean = false) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const url = `${apiUrl}/api/guildes`;
   
   const { data, error, isLoading, mutate } = useSWR<IGuild[] | { guilds?: IGuild[]; data?: IGuild[]; success?: boolean }>(
-    url,
+    `${url}?include_disabled=${includeDisabled}`,
     authenticated ? authenticatedFetcher : fetcher,
     {
       revalidateOnFocus: false,

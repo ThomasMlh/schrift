@@ -63,13 +63,15 @@ interface AdminFormsSectionProps {
   onDataChange: () => void;
   onDeleteRequest: (guildId: string) => void;
   onRenameRequest: (guildId: string, newName: string) => void;
+  onDisableRequest: (guildId: string, guildName: string, isCurrentlyDisabled: boolean) => void;
 }
 
 const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
   guilds,
   onDataChange,
   onDeleteRequest,
-  onRenameRequest
+  onRenameRequest,
+  onDisableRequest
 }) => {
   const { createGuild, assignUserToGuild } = useAPIMutations();
   // Utiliser useSWR pour les utilisateurs (cache automatique)
@@ -82,6 +84,7 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
   const [deleteGuildId, setDeleteGuildId] = useState("");
   const [renameGuildId, setRenameGuildId] = useState("");
   const [renameGuildName, setRenameGuildName] = useState("");
+  const [disableGuildId, setDisableGuildId] = useState("");
 
   // États pour la gestion des utilisateurs
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -156,6 +159,15 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
     e.preventDefault();
     if (!renameGuildName.trim()) return;
     onRenameRequest(renameGuildId, renameGuildName.trim());
+  };
+
+  const handleDisableGuild = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!disableGuildId) return;
+    const guild = guilds.find(g => g._id === disableGuildId);
+    if (guild) {
+      onDisableRequest(guild._id, guild.name, !!guild.disabled);
+    }
   };
 
   return (
@@ -343,6 +355,49 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
             </FormControl>
             <Button colorScheme="orange" type="submit">
               Renommer
+            </Button>
+          </VStack>
+        </Box>
+      </MobileFormWrapper>
+
+      {/* Formulaire désactivation/réactivation guilde */}
+      <MobileFormWrapper
+        title="Désactiver/Réactiver"
+        formName="disable"
+        colorScheme="yellow"
+        isMobile={isMobile}
+        openForm={openForm}
+        toggleForm={toggleForm}
+        bgColor={bgColor}
+        boxShadow={boxShadow}
+      >
+        <Box
+          as="form"
+          onSubmit={handleDisableGuild}
+          p={isMobile ? 0 : 4}
+          borderWidth={isMobile ? 0 : 1}
+          borderRadius="lg"
+          boxShadow={isMobile ? "none" : boxShadow}
+          bg={isMobile ? "transparent" : bgColor}
+        >
+          <VStack spacing={4} align="stretch">
+            <FormControl>
+              <FormLabel>Désactiver / Réactiver une guilde</FormLabel>
+              <Select value={disableGuildId} onChange={e => setDisableGuildId(e.target.value)}>
+                <option value="">Sélectionner une guilde</option>
+                {sortedGuilds.map((g: IGuild) => (
+                  <option key={g._id} value={g._id}>
+                    {g.name} {g.disabled ? "(❌ désactivée)" : "(✅ active)"}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              colorScheme={guilds.find(g => g._id === disableGuildId)?.disabled ? "green" : "orange"}
+              type="submit"
+              isDisabled={!disableGuildId}
+            >
+              {guilds.find(g => g._id === disableGuildId)?.disabled ? "Réactiver" : "Désactiver"}
             </Button>
           </VStack>
         </Box>

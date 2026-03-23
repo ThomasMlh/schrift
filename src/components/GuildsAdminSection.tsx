@@ -6,10 +6,14 @@ import type { IGuild } from "../interfaces";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
 
 const GuildsAdminSection = () => {
-  const { deleteGuild, updateGuild } = useAPIMutations();
+  const { deleteGuild, updateGuild, toggleGuildDisable } = useAPIMutations();
   const [deleteGuildId, setDeleteGuildId] = useState("");
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [guilds, setGuilds] = useState<IGuild[]>([]);
+  const [disableGuildId, setDisableGuildId] = useState("");
+  const [disableGuildName, setDisableGuildName] = useState("");
+  const [disableGuildAction, setDisableGuildAction] = useState<"disable" | "enable">("disable");
+  const [isDisableConfirmOpen, setIsDisableConfirmOpen] = useState(false);
   const [renameGuildId, setRenameGuildId] = useState("");
   const [renameGuildName, setRenameGuildName] = useState("");
   const [isRenameConfirmOpen, setIsRenameConfirmOpen] = useState(false);
@@ -23,7 +27,7 @@ const GuildsAdminSection = () => {
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
   const refreshData = () => {
-    fetch(`${apiUrl}/api/guildes`)
+    fetch(`${apiUrl}/api/guildes?include_disabled=true`)
       .then(res => res.json())
       .then(data => {
         setGuilds(Array.isArray(data) ? data : []);
@@ -79,6 +83,31 @@ const GuildsAdminSection = () => {
     setIsRenameConfirmOpen(true);
   };
 
+  const openDisableConfirm = (guildId: string, guildName: string, isCurrentlyDisabled: boolean) => {
+    setDisableGuildId(guildId);
+    setDisableGuildName(guildName);
+    setDisableGuildAction(isCurrentlyDisabled ? "enable" : "disable");
+    setIsDisableConfirmOpen(true);
+  };
+
+  const confirmToggleDisable = async () => {
+    if (disableGuildId) {
+      try {
+        const data = await toggleGuildDisable(disableGuildId);
+        refreshData();
+        toast({ title: data.message || "Statut de la guilde modifié", status: "success" });
+      } catch (error) {
+        toast({ 
+          title: error instanceof Error ? error.message : "Erreur lors du changement de statut", 
+          status: "error" 
+        });
+      }
+    }
+    setIsDisableConfirmOpen(false);
+    setDisableGuildId("");
+    setDisableGuildName("");
+  };
+
   const confirmRename = () => {
     if (renameGuildId && renameGuildName.trim()) {
       handleRenameGuild(renameGuildId, renameGuildName);
@@ -90,7 +119,7 @@ const GuildsAdminSection = () => {
 
   // Charger les guildes au montage
   useEffect(() => {
-    fetch(`${apiUrl}/api/guildes`)
+    fetch(`${apiUrl}/api/guildes?include_disabled=true`)
       .then(res => res.json())
       .then(data => Array.isArray(data) ? setGuilds(data) : setGuilds([]))
       .catch(() => setGuilds([]));
@@ -107,6 +136,7 @@ const GuildsAdminSection = () => {
           onDataChange={refreshData}
           onDeleteRequest={openDeleteConfirm}
           onRenameRequest={openRenameConfirm}
+          onDisableRequest={openDisableConfirm}
         />
       </Flex>
 
@@ -177,6 +207,45 @@ const GuildsAdminSection = () => {
               </Button>
               <Button colorScheme="blue" onClick={confirmRename} ml={3}>
                 Renommer
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+
+      {/* Dialog de confirmation de désactivation/réactivation */}
+      <AlertDialog
+        isOpen={isDisableConfirmOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={() => setIsDisableConfirmOpen(false)}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              {disableGuildAction === "disable" ? "Désactiver" : "Réactiver"} la guilde
+            </AlertDialogHeader>
+            <AlertDialogBody>
+              {disableGuildAction === "disable" ? (
+                <>
+                  Êtes-vous sûr de vouloir désactiver la guilde <strong>{disableGuildName}</strong> ?
+                  <Text mt={2} color="orange.400" fontSize="sm">
+                    Tous les membres seront retirés de la guilde. La guilde n'apparaîtra plus dans les pages publiques.
+                  </Text>
+                </>
+              ) : (
+                <>Êtes-vous sûr de vouloir réactiver la guilde <strong>{disableGuildName}</strong> ?</>
+              )}
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={() => setIsDisableConfirmOpen(false)}>
+                Annuler
+              </Button>
+              <Button
+                colorScheme={disableGuildAction === "disable" ? "orange" : "green"}
+                onClick={confirmToggleDisable}
+                ml={3}
+              >
+                {disableGuildAction === "disable" ? "Désactiver" : "Réactiver"}
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>

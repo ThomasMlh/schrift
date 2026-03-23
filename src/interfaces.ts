@@ -6,6 +6,7 @@ export type Role = "chef" | "sous-chef" | "membre";
 export interface IGuild {
   _id: string;
   name: string;
+  disabled?: boolean;
 }
 
 export interface IUser {
