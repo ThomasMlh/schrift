@@ -63,7 +63,7 @@ const RotationDetailPage = () => {
   const totalRotations = 20;
 
   // Utiliser les hooks API
-  const { guilds, isLoading: isLoadingGuilds } = useGuilds();
+  const { guilds, isLoading: isLoadingGuilds } = useGuilds(false, true);
   const {
     fetchRotationScores,
     isLoading,

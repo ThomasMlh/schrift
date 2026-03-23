@@ -45,7 +45,7 @@ const PodiumPage = () => {
 
   // Hooks
   const { cycles, isLoading: cyclesLoading } = useCycles();
-  const { guilds } = useGuilds();
+  const { guilds } = useGuilds(false, true);
   const { fetchPodium, isLoading, error } = usePodiumFetch();
 
   // UI
