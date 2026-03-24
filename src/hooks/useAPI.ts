@@ -779,6 +779,7 @@ export interface IUserStats {
     rotation_id: string;
     rotation_killer: string;
     rotation_attack: string;
+    rotation_position?: number;
     cycle_id: string;
     averageScore: number;
     scoreCount: number;

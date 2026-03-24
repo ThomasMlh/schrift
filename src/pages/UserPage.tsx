@@ -1,5 +1,5 @@
 import { useParams, useSearchParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   VStack,
@@ -81,6 +81,22 @@ const UserPage = () => {
     userId,
     selectedCycle
   );
+
+  // Sélectionner le cycle le plus récent par défaut
+  useEffect(() => {
+    if (cycles.length > 0 && !selectedCycle) {
+      const sorted = [...cycles].sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year;
+        if (a.created_at && b.created_at) {
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
+        return 0;
+      });
+      if (sorted[0]?._id) {
+        setSelectedCycle(sorted[0]._id);
+      }
+    }
+  }, [cycles]);
 
   // Enrichir l'utilisateur avec l'avatar et le nom de guilde
   const user = userData
