@@ -411,13 +411,31 @@ const CyclesSection = () => {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={6} align="stretch">
+        {/* Modern header */}
         <HStack justify="space-between" align="center">
-          <Text fontSize="2xl" fontWeight="bold">
-            Gestion des Cycles
-          </Text>
+          <VStack align="start" spacing={0}>
+            <Text
+              fontSize="2xl"
+              fontWeight="extrabold"
+              bgGradient="linear(to-r, blue.400, purple.500)"
+              bgClip="text"
+              letterSpacing="tight"
+            >
+              Gestion des Cycles
+            </Text>
+            <Text fontSize="sm" color="gray.500">
+              Créez et gérez les cycles de rotation
+            </Text>
+          </VStack>
           <Button
             leftIcon={<AddIcon />}
-            colorScheme="blue"
+            bgGradient="linear(to-r, blue.400, purple.500)"
+            color="white"
+            _hover={{ bgGradient: "linear(to-r, blue.500, purple.600)", transform: "translateY(-1px)", shadow: "lg" }}
+            _active={{ transform: "translateY(0)" }}
+            transition="all 0.2s"
+            borderRadius="xl"
+            px={6}
             onClick={onOpen}
           >
             Créer un cycle
