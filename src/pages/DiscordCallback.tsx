@@ -17,10 +17,11 @@ const DiscordCallback = () => {
 
     const processDiscordCallback = async () => {
       try {
-        // Récupérer le code depuis les paramètres URL
+        // Récupérer le code et le state depuis les paramètres URL
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         const error = urlParams.get('error');
+        const returnedState = urlParams.get('state');
         
         // Vérifier si l'utilisateur a refusé l'autorisation
         if (error) {
@@ -31,31 +32,20 @@ const DiscordCallback = () => {
           throw new Error('Code d\'autorisation manquant');
         }
 
-        // Obtenir la même redirect_uri qui a été utilisée pour la génération du lien
-        let redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI;
-        
-        if (!redirectUri) {
-          if (window.location.hostname === 'localhost') {
-            redirectUri = 'http://localhost:5173/discord-callback';
-          } else if (window.location.hostname === 'www.bbs-schrift.fr') {
-            redirectUri = 'https://www.bbs-schrift.fr/discord-callback';
-          } else if (window.location.hostname === 'bbs-schrift.fr') {
-            redirectUri = 'https://bbs-schrift.fr/discord-callback';
-          } else {
-            redirectUri = `${window.location.origin}/discord-callback`;
-          }
+        // Vérifier le state anti-CSRF
+        const savedState = sessionStorage.getItem('oauth_state');
+        sessionStorage.removeItem('oauth_state');
+        if (!returnedState || returnedState !== savedState) {
+          throw new Error('Vérification de sécurité échouée (state invalide)');
         }
 
-        // Envoyer le code au backend avec la redirect_uri
+        // Envoyer le code au backend (le backend détermine lui-même la redirect_uri)
         const response = await fetch(`${apiUrl}/api/auth/discord/callback`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ 
-            code,
-            redirect_uri: redirectUri 
-          }),
+          body: JSON.stringify({ code }),
         });
 
         if (!response.ok) {
@@ -70,8 +60,8 @@ const DiscordCallback = () => {
 
         const data = await response.json();
         
-        // Stocker le token JWT via le context
-        login(data.token);
+        // Stocker le token JWT et le refresh token via le context
+        login(data.token, data.refreshToken);
         
         toast({
           title: "Connexion réussie",

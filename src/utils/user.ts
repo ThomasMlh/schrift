@@ -1,12 +1,21 @@
 import { jwtDecode } from 'jwt-decode';
 import type { IUser } from '../interfaces';
 
+const TOKEN_KEY = 'userToken';
+const REFRESH_TOKEN_KEY = 'refreshToken';
+
 /**
  * Récupère le token depuis le localStorage
- * Vérifie d'abord userToken puis adminToken
  */
 export const getToken = (): string | null => {
-  return localStorage.getItem("userToken") || localStorage.getItem("adminToken");
+  return localStorage.getItem(TOKEN_KEY);
+};
+
+/**
+ * Récupère le refresh token
+ */
+export const getRefreshToken = (): string | null => {
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
 };
 
 /**
@@ -47,16 +56,22 @@ export const getUserFromToken = (): IUser | null => {
  * Nettoie tous les tokens du localStorage
  */
 export const clearTokens = (): void => {
-  localStorage.removeItem("userToken");
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  // Nettoyer les anciens clés legacy
   localStorage.removeItem("adminToken");
   localStorage.removeItem("token");
 };
 
 /**
- * Stocke le token dans le localStorage sous userToken
+ * Stocke les tokens dans le localStorage
  */
 export const setToken = (token: string): void => {
-  localStorage.setItem("userToken", token);
+  localStorage.setItem(TOKEN_KEY, token);
+};
+
+export const setRefreshToken = (refreshToken: string): void => {
+  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
 };
 
 export const formatRoleName = (role: string): string => {

@@ -128,24 +128,15 @@ export const Header = () => {
   // Fonction pour initier l'authentification Discord
   const handleDiscordAuth = () => {
     const discordClientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
+    const redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI || `${window.location.origin}/discord-callback`;
 
-    let redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI;
-
-    if (!redirectUri) {
-      if (window.location.hostname === "localhost") {
-        redirectUri = "http://localhost:5173/discord-callback";
-      } else if (window.location.hostname === "www.bbs-schrift.fr") {
-        redirectUri = "https://www.bbs-schrift.fr/discord-callback";
-      } else if (window.location.hostname === "bbs-schrift.fr") {
-        redirectUri = "https://bbs-schrift.fr/discord-callback";
-      } else {
-        redirectUri = `${window.location.origin}/discord-callback`;
-      }
-    }
+    // Générer un state anti-CSRF et le stocker en session
+    const state = crypto.randomUUID();
+    sessionStorage.setItem('oauth_state', state);
 
     const encodedRedirectUri = encodeURIComponent(redirectUri);
     const scope = encodeURIComponent("identify guilds guilds.members.read");
-    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordClientId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=${scope}`;
+    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${discordClientId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=${scope}&state=${state}`;
 
     // Sauvegarder la page actuelle pour y revenir après connexion
     sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
