@@ -5,9 +5,11 @@ import type { ICycle, IGuild, ICycleRotation } from "@/interfaces";
 import { ScoreLegend } from "@/components/ui/ScoreLegend";
 
 type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
+type CycleRankingType = "average" | "max";
 
 interface PodiumFiltersProps {
   displayMode: DisplayMode;
+  cycleRankingType: CycleRankingType;
   selectedCycleId: string;
   selectedRotationId: string;
   selectedWeekNumber: string;
@@ -18,6 +20,7 @@ interface PodiumFiltersProps {
   selectedCycle?: ICycle;
   availableWeeks: number;
   onModeChange: (mode: DisplayMode) => void;
+  onCycleRankingTypeChange: (rankingType: CycleRankingType) => void;
   onCycleChange: (cycleId: string) => void;
   onRotationChange: (rotationId: string) => void;
   onWeekChange: (weekNumber: string) => void;
@@ -29,6 +32,7 @@ interface PodiumFiltersProps {
 
 export const PodiumFilters = ({
   displayMode,
+  cycleRankingType,
   selectedCycleId,
   selectedRotationId,
   selectedWeekNumber,
@@ -39,6 +43,7 @@ export const PodiumFilters = ({
   selectedCycle,
   availableWeeks,
   onModeChange,
+  onCycleRankingTypeChange,
   onCycleChange,
   onRotationChange,
   onWeekChange,
@@ -77,6 +82,22 @@ export const PodiumFilters = ({
             allowDeselect={false}
             size="md"
           />
+
+          {/* Type de podium (uniquement en mode cycle complet) */}
+          {displayMode === "cycle" && (
+            <CustomSelect
+              value={cycleRankingType}
+              onChange={(value) =>
+                onCycleRankingTypeChange(value as CycleRankingType)
+              }
+              options={[
+                { value: "average", label: "Par score moyen" },
+                { value: "max", label: "Par score max (somme)" }
+              ]}
+              allowDeselect={false}
+              size="md"
+            />
+          )}
           
           {/* Filtre par cycle */}
           <CycleSelect
@@ -157,7 +178,7 @@ export const PodiumFilters = ({
       </Flex>
       
       {/* Filtres actifs */}
-      {(selectedCycleId || selectedGuildName || displayMode !== "cycle") && (
+      {(selectedCycleId || selectedGuildName || displayMode !== "cycle" || cycleRankingType !== "average") && (
         <Box p={3} bg={filterBg} borderRadius="md">
           <HStack spacing={2} flexWrap="wrap">
             <Text fontSize="sm" fontWeight="medium">
@@ -172,6 +193,9 @@ export const PodiumFilters = ({
                   ? "Semaine"
                   : "Miss"}
               </Badge>
+            )}
+            {displayMode === "cycle" && cycleRankingType !== "average" && (
+              <Badge colorScheme="pink">Type: Score max (somme)</Badge>
             )}
             {selectedCycle && (
               <Badge colorScheme="blue">Cycle: {selectedCycle.name} - {selectedCycle.year}</Badge>

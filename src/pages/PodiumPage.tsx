@@ -14,6 +14,7 @@ import { PodiumInfo } from "@/components/podium/PodiumInfo";
 import { PodiumResults } from "@/components/podium/PodiumResults";
 
 type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
+type CycleRankingType = "average" | "max";
 
 const PodiumPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,6 +27,9 @@ const PodiumPage = () => {
   >(null);
   const [displayMode, setDisplayMode] = useState<DisplayMode>(
     (searchParams.get("mode") as DisplayMode) || "cycle"
+  );
+  const [cycleRankingType, setCycleRankingType] = useState<CycleRankingType>(
+    (searchParams.get("ranking_type") as CycleRankingType) || "average"
   );
   const [selectedCycleId, setSelectedCycleId] = useState(
     searchParams.get("cycle_id") || ""
@@ -91,6 +95,7 @@ const PodiumPage = () => {
   // Fonction pour mettre à jour l'URL
   const updateURLParams = (
     mode: DisplayMode = displayMode,
+    rankingType: CycleRankingType = cycleRankingType,
     cycleId = "",
     rotationId = "",
     guildName = "",
@@ -100,6 +105,9 @@ const PodiumPage = () => {
   ) => {
     const params = new URLSearchParams();
     if (mode && mode !== "cycle") params.set("mode", mode);
+    if (mode === "cycle" && rankingType !== "average") {
+      params.set("ranking_type", rankingType);
+    }
     if (cycleId) params.set("cycle_id", cycleId);
     if (rotationId) params.set("rotation_id", rotationId);
     if (weekNumber) params.set("week_number", weekNumber);
@@ -113,6 +121,7 @@ const PodiumPage = () => {
   const loadPodium = async (
     page = 1,
     mode: DisplayMode = displayMode,
+    rankingType: CycleRankingType = cycleRankingType,
     cycleId = "",
     rotationId = "",
     guildName = "",
@@ -124,6 +133,7 @@ const PodiumPage = () => {
     const cycleName = cycle?.name || "";
     
     const data = await fetchPodium(mode, cycleName, {
+      rankingType,
       rotationId,
       weekNumber,
       guildName,
@@ -167,9 +177,10 @@ const PodiumPage = () => {
       }
 
       setSelectedCycleId(cycleToSelect._id || "");
-      loadPodium(1, displayMode, cycleToSelect._id || "", "", "", "");
+      loadPodium(1, displayMode, cycleRankingType, cycleToSelect._id || "", "", "", "");
       updateURLParams(
         displayMode,
+        cycleRankingType,
         cycleToSelect._id || "",
         "",
         "",
@@ -187,12 +198,15 @@ const PodiumPage = () => {
     
     const currentPage = parseInt(searchParams.get("page") || "1");
     const currentMode = (searchParams.get("mode") as DisplayMode) || "cycle";
+    const currentRankingType =
+      (searchParams.get("ranking_type") as CycleRankingType) || "average";
     const currentCycleId = searchParams.get("cycle_id") || "";
     const currentRotationId = searchParams.get("rotation_id") || "";
     const currentGuildName = searchParams.get("guild_name") || "";
     const currentWeekNumber = searchParams.get("week_number") || "";
 
     setDisplayMode(currentMode);
+    setCycleRankingType(currentRankingType);
     setSelectedCycleId(currentCycleId);
     setSelectedRotationId(currentRotationId);
     setSelectedGuildName(currentGuildName);
@@ -203,6 +217,7 @@ const PodiumPage = () => {
       loadPodium(
         currentPage,
         currentMode,
+        currentRankingType,
         currentCycleId,
         currentRotationId,
         currentGuildName,
@@ -247,51 +262,69 @@ const PodiumPage = () => {
     }
     
     if (selectedCycleId) {
-      loadPodium(1, mode, selectedCycleId, rotationIdToUse, selectedGuildName, weekNumberToUse);
-      updateURLParams(mode, selectedCycleId, rotationIdToUse, selectedGuildName, weekNumberToUse, itemsPerPage, 1);
+      loadPodium(1, mode, cycleRankingType, selectedCycleId, rotationIdToUse, selectedGuildName, weekNumberToUse);
+      updateURLParams(mode, cycleRankingType, selectedCycleId, rotationIdToUse, selectedGuildName, weekNumberToUse, itemsPerPage, 1);
     }
+  };
+
+  const handleCycleRankingTypeChange = (rankingType: CycleRankingType) => {
+    setCycleRankingType(rankingType);
+    if (selectedCycleId && displayMode === "cycle") {
+      loadPodium(1, "cycle", rankingType, selectedCycleId, "", selectedGuildName, "");
+    }
+    updateURLParams(
+      displayMode,
+      rankingType,
+      selectedCycleId,
+      selectedRotationId,
+      selectedGuildName,
+      selectedWeekNumber,
+      itemsPerPage,
+      1
+    );
   };
 
   const handleCycleChange = (cycleId: string) => {
     setSelectedCycleId(cycleId);
     setSelectedRotationId("");
     setSelectedWeekNumber("");
-    loadPodium(1, displayMode, cycleId, "", selectedGuildName, "");
-    updateURLParams(displayMode, cycleId, "", selectedGuildName, "", itemsPerPage, 1);
+    loadPodium(1, displayMode, cycleRankingType, cycleId, "", selectedGuildName, "");
+    updateURLParams(displayMode, cycleRankingType, cycleId, "", selectedGuildName, "", itemsPerPage, 1);
   };
 
   const handleRotationChange = (rotationId: string) => {
     setSelectedRotationId(rotationId);
     setDisplayMode("rotation");
-    loadPodium(1, "rotation", selectedCycleId, rotationId, selectedGuildName, "");
-    updateURLParams("rotation", selectedCycleId, rotationId, selectedGuildName, "", itemsPerPage, 1);
+    loadPodium(1, "rotation", cycleRankingType, selectedCycleId, rotationId, selectedGuildName, "");
+    updateURLParams("rotation", cycleRankingType, selectedCycleId, rotationId, selectedGuildName, "", itemsPerPage, 1);
   };
 
   const handleWeekChange = (weekNumber: string) => {
     setSelectedWeekNumber(weekNumber);
-    loadPodium(1, "weekly", selectedCycleId, "", selectedGuildName, weekNumber);
-    updateURLParams("weekly", selectedCycleId, "", selectedGuildName, weekNumber, itemsPerPage, 1);
+    loadPodium(1, "weekly", cycleRankingType, selectedCycleId, "", selectedGuildName, weekNumber);
+    updateURLParams("weekly", cycleRankingType, selectedCycleId, "", selectedGuildName, weekNumber, itemsPerPage, 1);
   };
 
   const handleGuildChange = (guildName: string) => {
     setSelectedGuildName(guildName);
-    loadPodium(1, displayMode, selectedCycleId, selectedRotationId, guildName, selectedWeekNumber);
-    updateURLParams(displayMode, selectedCycleId, selectedRotationId, guildName, selectedWeekNumber, itemsPerPage, 1);
+    loadPodium(1, displayMode, cycleRankingType, selectedCycleId, selectedRotationId, guildName, selectedWeekNumber);
+    updateURLParams(displayMode, cycleRankingType, selectedCycleId, selectedRotationId, guildName, selectedWeekNumber, itemsPerPage, 1);
   };
 
   const handlePageChange = (page: number) => {
-    loadPodium(page, displayMode, selectedCycleId, selectedRotationId, selectedGuildName, selectedWeekNumber);
-    updateURLParams(displayMode, selectedCycleId, selectedRotationId, selectedGuildName, selectedWeekNumber, itemsPerPage, page);
+    loadPodium(page, displayMode, cycleRankingType, selectedCycleId, selectedRotationId, selectedGuildName, selectedWeekNumber);
+    updateURLParams(displayMode, cycleRankingType, selectedCycleId, selectedRotationId, selectedGuildName, selectedWeekNumber, itemsPerPage, page);
   };
 
   const handleItemsPerPageChange = (newLimit: number) => {
     setItemsPerPage(newLimit);
-    loadPodium(1, displayMode, selectedCycleId, selectedRotationId, selectedGuildName, selectedWeekNumber, newLimit);
-    updateURLParams(displayMode, selectedCycleId, selectedRotationId, selectedGuildName, selectedWeekNumber, newLimit, 1);
+    loadPodium(1, displayMode, cycleRankingType, selectedCycleId, selectedRotationId, selectedGuildName, selectedWeekNumber, newLimit);
+    updateURLParams(displayMode, cycleRankingType, selectedCycleId, selectedRotationId, selectedGuildName, selectedWeekNumber, newLimit, 1);
   };
 
   const resetFilters = () => {
     setDisplayMode("cycle");
+    setCycleRankingType("average");
     setSelectedCycleId("");
     setSelectedRotationId("");
     setSelectedWeekNumber("");
@@ -325,6 +358,8 @@ const PodiumPage = () => {
               ? "Classement par semaine (2 rotations)"
               : displayMode === "misses"
               ? "Classement des miss (scores négatifs)"
+              : cycleRankingType === "max"
+              ? "Classement par score max (somme des scores) sur le cycle"
               : "Classement des moyennes par cycle"
           }
           badge={{ text: "Classement", icon: "🏆" }}
@@ -345,6 +380,7 @@ const PodiumPage = () => {
               {/* Filtres */}
               <PodiumFilters
                 displayMode={displayMode}
+                cycleRankingType={cycleRankingType}
                 selectedCycleId={selectedCycleId}
                 selectedRotationId={selectedRotationId}
                 selectedWeekNumber={selectedWeekNumber}
@@ -355,6 +391,7 @@ const PodiumPage = () => {
                 selectedCycle={selectedCycle}
                 availableWeeks={availableWeeks}
                 onModeChange={handleModeChange}
+                onCycleRankingTypeChange={handleCycleRankingTypeChange}
                 onCycleChange={handleCycleChange}
                 onRotationChange={handleRotationChange}
                 onWeekChange={handleWeekChange}

@@ -12,11 +12,17 @@ import { RankBadge } from "./RankBadge";
 
 const PlayerCard = (
   player: IPodiumPlayer,
-  showGuildName = false
+  showGuildName = false,
+  podiumType: "individual_scores" | "average_scores" | "max_scores" =
+    "average_scores"
 ) => {
   // Si player.score est défini, c'est une rotation individuelle (respecter code couleur)
   // Sinon c'est une moyenne de cycle (forcer bleu)
   const isRotationMode = player.score !== undefined;
+  const cycleScore =
+    podiumType === "max_scores"
+      ? player.totalScore ?? player.averageScore ?? 0
+      : player.averageScore ?? player.totalScore ?? 0;
   
   return (
     <Card key={player.user_id} variant="outline">
@@ -54,7 +60,7 @@ const PlayerCard = (
           </Stack>
           <VStack spacing={1} align={{ base: "center", md: "flex-end" }}>
             <ScoreBadge
-              score={player.score ? player.score : player.averageScore}
+              score={isRotationMode ? player.score || 0 : cycleScore}
               forceBlue={!isRotationMode}
             />
           </VStack>

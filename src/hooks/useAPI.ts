@@ -622,6 +622,7 @@ export const usePodiumFetch = () => {
     mode: 'cycle' | 'rotation' | 'weekly' | 'misses',
     cycleName: string,
     options: {
+      rankingType?: 'average' | 'max';
       rotationId?: string;
       weekNumber?: string;
       guildName?: string;
@@ -633,7 +634,14 @@ export const usePodiumFetch = () => {
       return null;
     }
 
-    const { rotationId, weekNumber, guildName, page = 1, limit = 50 } = options;
+    const {
+      rankingType = 'average',
+      rotationId,
+      weekNumber,
+      guildName,
+      page = 1,
+      limit = 50,
+    } = options;
 
     setIsLoading(true);
     setError(null);
@@ -658,6 +666,10 @@ export const usePodiumFetch = () => {
         url = `${apiUrl}/api/podium/full?cycle_name=${encodeURIComponent(
           cycleName
         )}&page=${page}&limit=${limit}`;
+
+        if (mode === 'cycle') {
+          url += `&ranking_type=${encodeURIComponent(rankingType)}`;
+        }
 
         if (rotationId && rotationId.trim() !== '') {
           url += `&rotation_id=${encodeURIComponent(rotationId)}`;

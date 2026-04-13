@@ -65,7 +65,7 @@ const RotationTimeline = ({ rotations }: { rotations: ICycle["rotations"] }) => 
         {rotations.map((rotation, i) => (
           <Tooltip
             key={i}
-            label={`#${i + 1} ${rotation.killer} — ${rotation.period}`}
+            label={`#${i + 1} ${rotation.killer} — ${rotation.period} ${rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : rotation.attack}`}
             placement="top"
             hasArrow
             fontSize="xs"
@@ -73,7 +73,7 @@ const RotationTimeline = ({ rotations }: { rotations: ICycle["rotations"] }) => 
             <Box
               flex={1}
               h="full"
-              bg={rotation.period === "Mardi-Jeudi" ? "blue.400" : "purple.400"}
+              bg={rotation.attack === "R" ? "red.400" : rotation.attack === "B" ? "blue.400" : "gray.400"}
               opacity={0.85}
               _hover={{ opacity: 1, transform: "scaleY(1.6)" }}
               transition="all 0.15s"
@@ -169,7 +169,7 @@ const ExistingCyclesList = ({
     "linear(to-r, blue.500, purple.500)",
     "linear(to-r, blue.400, purple.500)"
   );
-  const statBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const statBg = useColorModeValue("gray.50", "transparent");
 
   // Computed stats
   const totalRotations = useMemo(
@@ -416,7 +416,7 @@ const ExistingCyclesList = ({
                           transition="color 0.15s"
                           noOfLines={1}
                         >
-                          {cycle.name}
+                          {cycle.name} - {cycle.year}
                         </Text>
                         <Tooltip label="Voir le détail" hasArrow>
                           <Box as={Link} to={`/cycle/${cycle._id}`} color="gray.500" _hover={{ color: "blue.400" }}>

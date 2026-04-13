@@ -97,7 +97,9 @@ export const PodiumResults = ({
             : displayMode === "misses" && isMissesResponse(podiumData)
             ? podiumData.data.map((player) => PlayerCardMiss(player, showGuildName))
             : isPodiumResponse(podiumData)
-            ? podiumData.data.map((player) => PlayerCard(player, showGuildName))
+            ? podiumData.data.map((player) =>
+                PlayerCard(player, showGuildName, podiumData.meta.podiumType)
+              )
             : null}
         </VStack>
       </Box>
@@ -119,7 +121,9 @@ export const PodiumResults = ({
                 : isPodiumResponse(podiumData)
                 ? podiumData.data
                     .slice(0, Math.ceil(podiumData.data.length / 2))
-                    .map((player) => PlayerCard(player, showGuildName))
+                  .map((player) =>
+                    PlayerCard(player, showGuildName, podiumData.meta.podiumType)
+                  )
                 : null}
             </VStack>
             <VStack spacing={3} align="stretch" flex={1}>
@@ -134,7 +138,9 @@ export const PodiumResults = ({
                 : isPodiumResponse(podiumData)
                 ? podiumData.data
                     .slice(Math.ceil(podiumData.data.length / 2))
-                    .map((player) => PlayerCard(player, showGuildName))
+                    .map((player) =>
+                      PlayerCard(player, showGuildName, podiumData.meta.podiumType)
+                    )
                 : null}
             </VStack>
           </HStack>
@@ -150,7 +156,9 @@ export const PodiumResults = ({
                   PlayerCardMiss(player, showGuildName)
                 )
               : isPodiumResponse(podiumData)
-              ? podiumData.data.map((player) => PlayerCard(player, showGuildName))
+              ? podiumData.data.map((player) =>
+                  PlayerCard(player, showGuildName, podiumData.meta.podiumType)
+                )
               : null}
           </VStack>
         )}

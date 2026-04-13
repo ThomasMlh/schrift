@@ -192,7 +192,8 @@ export interface IPodiumPlayer {
   score?: number; // Score individuel (si rotation spécifiée)
   raw_score?: number;
   is_differential?: boolean;
-  averageScore: number; // Moyenne des scores (si pas de rotation)
+  averageScore?: number; // Moyenne des scores (si mode cycle en moyenne)
+  totalScore?: number; // Somme des scores (si mode cycle en max)
   totalScores: number; // Nombre de scores pris en compte pour la moyenne
   totalRawScore?: number;
   avatar?: string;
@@ -231,8 +232,9 @@ export interface IPodiumResponse {
   filters: {
     cycle_name: string;
     cycle_id: string;
-    rotation_id: string;
+    rotation_id: string | null;
     guild_name?: string;
+    ranking_type?: "average" | "max" | null;
   };
   meta: {
     totalPlayers: number;
@@ -248,7 +250,7 @@ export interface IPodiumResponse {
     };
     guildSpecific: boolean;
     fullPodium: boolean;
-    podiumType: "individual_scores" | "average_scores";
+    podiumType: "individual_scores" | "average_scores" | "max_scores";
     averageScore?: number;
   };
 }
