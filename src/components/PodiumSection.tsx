@@ -86,7 +86,7 @@ export const PodiumSection: React.FC = () => {
               />
 
               <ScoreBadge
-                score={player.averageScore}
+                score={player.averageScore ?? 0}
               />
               <Text fontSize="sm" color="gray.500">
                 {player.totalScores} score
