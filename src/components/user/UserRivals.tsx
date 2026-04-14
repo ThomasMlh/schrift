@@ -43,25 +43,24 @@ export const UserRivals = ({
     return null;
   }
 
-  // Insérer le joueur actuel au milieu de la liste
-  const midpoint = Math.floor(rivals.length / 2);
-  const rivalsWithCurrentUser = [
-    ...rivals.slice(0, midpoint),
-    {
-      rank: currentUserRank || 0,
-      user_id: currentUser._id,
-      discord_id: currentUser.discord_id,
-      global_name: currentUser.global_name,
-      bbs_name: currentUser.bbs_name,
-      avatar: currentUser.avatar,
-      guilde_id: currentUser.guilde_id,
-      guild_name: currentUser.guild_name,
-      averageScore: currentUserAverage,
-      scoreDifference: 0,
-      isCurrentUser: true
-    },
-    ...rivals.slice(midpoint)
-  ];
+  // Insérer le joueur du profil à sa position correcte selon le rang
+  const profileEntry = {
+    rank: currentUserRank || 0,
+    user_id: currentUser._id,
+    discord_id: currentUser.discord_id,
+    global_name: currentUser.global_name,
+    bbs_name: currentUser.bbs_name,
+    avatar: currentUser.avatar,
+    guilde_id: currentUser.guilde_id,
+    guild_name: currentUser.guild_name,
+    averageScore: currentUserAverage,
+    scoreDifference: 0,
+    isCurrentUser: true
+  };
+  const insertIndex = rivals.findIndex(r => r.rank > profileEntry.rank);
+  const rivalsWithCurrentUser = insertIndex === -1
+    ? [...rivals, profileEntry]
+    : [...rivals.slice(0, insertIndex), profileEntry, ...rivals.slice(insertIndex)];
 
   const getRankEmoji = (rank: number) => {
     if (rank === 1) return "🥇";
@@ -100,9 +99,14 @@ export const UserRivals = ({
               key={rival.user_id}
               position="relative"
               borderRadius="xl"
-              overflow="hidden"
               boxShadow={isProfileUser ? "lg" : "sm"}
               transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+              bgGradient={isProfileUser ? currentUserBg : undefined}
+              bg={isProfileUser ? undefined : cardBg}
+              borderWidth={isProfileUser ? "2px" : "1px"}
+              borderColor={isProfileUser ? currentUserBorder : borderColor}
+              p={5}
+              overflow="hidden"
               _hover={
                 isProfileUser
                   ? {
@@ -114,14 +118,6 @@ export const UserRivals = ({
                     }
               }
             >
-              <Box
-                bgGradient={isProfileUser ? currentUserBg : undefined}
-                bg={isProfileUser ? undefined : cardBg}
-                borderWidth={isProfileUser ? "2px" : "1px"}
-                borderColor={isProfileUser ? currentUserBorder : borderColor}
-                p={5}
-                position="relative"
-              >
                 <Flex
                   direction={{ base: "column", md: "row" }}
                   gap={2}
@@ -273,7 +269,6 @@ export const UserRivals = ({
                     )}
                   </VStack>
                 </Flex>
-              </Box>
             </Box>
           );
         })}
