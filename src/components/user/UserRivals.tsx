@@ -34,6 +34,8 @@ export const UserRivals = ({
     "linear(to-r, purple.900, pink.900)"
   );
   const currentUserBorder = useColorModeValue("purple.400", "purple.500");
+  const rankBg = useColorModeValue("gray.100", "gray.700");
+  const diffBg = useColorModeValue("white", "gray.800");
 
   if (!rivals || rivals.length === 0) {
     return null;
@@ -148,7 +150,7 @@ export const UserRivals = ({
                         justify="center"
                         minW="60px"
                         h="60px"
-                        bg={useColorModeValue("gray.100", "gray.700")}
+                        bg={rankBg}
                         borderRadius="lg"
                         fontWeight="bold"
                         fontSize="sm"
@@ -239,7 +241,7 @@ export const UserRivals = ({
                     {!isCurrentUser && (
                       <HStack
                         spacing={2}
-                        bg={useColorModeValue("white", "gray.800")}
+                        bg={diffBg}
                         px={3}
                         py={1.5}
                         borderRadius="full"
