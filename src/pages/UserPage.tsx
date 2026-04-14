@@ -35,7 +35,8 @@ import { UserTopRotations } from "@/components/user/UserTopRotations";
 import { UserTemporalEvolution } from "@/components/user/UserTemporalEvolution";
 import { UserRecentTrend } from "@/components/user/UserRecentTrend";
 import { UserRivals } from "@/components/user/UserRivals";
-import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock, FiAlertCircle } from "react-icons/fi";
+import { BanDetailsCard } from "@/components/user/BanDetailsCard";
+import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock } from "react-icons/fi";
 import { getDiscordBannerUrl } from "@/utils/discord";
 import { useAuth } from "@/providers/AuthProvider";
 
@@ -43,7 +44,7 @@ const UserPage = () => {
   const { userId } = useParams<{ userId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCycle, setSelectedCycle] = useState<string>("");
-  const { isAdmin } = useAuth();
+  const { isAdmin, currentUser } = useAuth();
 
   // Mapping des onglets
   const TAB_MAP: Record<string, number> = {
@@ -314,40 +315,7 @@ const UserPage = () => {
         </Card>
 
         {/* Détails du bannissement - visible uniquement par les admins */}
-        {isAdmin && user.is_banned && (
-          <Card mb={6} bg={cardBg} borderRadius="xl" boxShadow="lg" borderLeft="4px solid" borderLeftColor="red.500">
-            <CardBody>
-              <HStack spacing={3} mb={3}>
-                <Icon as={FiAlertCircle} boxSize={5} color="red.500" />
-                <Text fontWeight="bold" fontSize="lg" color="red.500">
-                  Utilisateur banni
-                </Text>
-              </HStack>
-              <VStack align="start" spacing={2}>
-                {user.ban_reason && (
-                  <HStack spacing={2}>
-                    <Text fontWeight="semibold" color="gray.600" _dark={{ color: "gray.400" }}>Raison :</Text>
-                    <Text>{user.ban_reason}</Text>
-                  </HStack>
-                )}
-                {user.banned_at && (
-                  <HStack spacing={2}>
-                    <Text fontWeight="semibold" color="gray.600" _dark={{ color: "gray.400" }}>Banni le :</Text>
-                    <Text>
-                      {new Date(user.banned_at).toLocaleDateString('fr-FR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </Text>
-                  </HStack>
-                )}
-              </VStack>
-            </CardBody>
-          </Card>
-        )}
+        {isAdmin && user.is_banned && <BanDetailsCard user={user} />}
 
         {/* Filtre de cycle */}
         <Card mb={6} bg={cardBg} borderRadius="xl" boxShadow="lg">
@@ -471,6 +439,7 @@ const UserPage = () => {
                             currentUser={user}
                             currentUserRank={stats.ranking?.global || null}
                             currentUserAverage={stats.averageScore}
+                            loggedInUserId={currentUser?._id}
                           />
                         )}
                       </VStack>

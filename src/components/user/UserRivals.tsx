@@ -19,13 +19,15 @@ interface UserRivalsProps {
   currentUser: IUser;
   currentUserRank: number | null;
   currentUserAverage: number;
+  loggedInUserId?: string;
 }
 
 export const UserRivals = ({
   rivals,
   currentUser,
   currentUserRank,
-  currentUserAverage
+  currentUserAverage,
+  loggedInUserId
 }: UserRivalsProps) => {
   const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
@@ -83,7 +85,8 @@ export const UserRivals = ({
 
       <VStack spacing={2} align="stretch">
         {rivalsWithCurrentUser.map((rival) => {
-          const isCurrentUser = "isCurrentUser" in rival && rival.isCurrentUser;
+          const isProfileUser = "isCurrentUser" in rival && rival.isCurrentUser;
+          const isLoggedInUser = loggedInUserId === rival.user_id;
           const isAbove = rival.rank < (currentUserRank || Infinity);
           const diffColor =
             rival.scoreDifference > 0
@@ -98,10 +101,10 @@ export const UserRivals = ({
               position="relative"
               borderRadius="xl"
               overflow="hidden"
-              boxShadow={isCurrentUser ? "lg" : "sm"}
+              boxShadow={isProfileUser ? "lg" : "sm"}
               transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
               _hover={
-                isCurrentUser
+                isProfileUser
                   ? {
                       boxShadow: "xl"
                     }
@@ -112,30 +115,13 @@ export const UserRivals = ({
               }
             >
               <Box
-                bgGradient={isCurrentUser ? currentUserBg : undefined}
-                bg={isCurrentUser ? undefined : cardBg}
-                borderWidth={isCurrentUser ? "2px" : "1px"}
-                borderColor={isCurrentUser ? currentUserBorder : borderColor}
+                bgGradient={isProfileUser ? currentUserBg : undefined}
+                bg={isProfileUser ? undefined : cardBg}
+                borderWidth={isProfileUser ? "2px" : "1px"}
+                borderColor={isProfileUser ? currentUserBorder : borderColor}
                 p={5}
                 position="relative"
               >
-                {/* Badge "Vous" pour le joueur actuel */}
-                {isCurrentUser && (
-                  <Badge
-                    position="absolute"
-                    top={3}
-                    right={3}
-                    colorScheme="purple"
-                    fontSize="xs"
-                    px={3}
-                    py={1}
-                    borderRadius="full"
-                    fontWeight="bold"
-                  >
-                    ✨ VOUS
-                  </Badge>
-                )}
-
                 <Flex
                   direction={{ base: "column", md: "row" }}
                   gap={2}
@@ -204,8 +190,20 @@ export const UserRivals = ({
                         }
                         avatarSize="lg"
                         textSize="lg"
-                        asLink={!isCurrentUser}
+                        asLink={!isProfileUser}
                       />
+                      {isLoggedInUser && (
+                        <Badge
+                          colorScheme="purple"
+                          fontSize="xs"
+                          px={3}
+                          py={1}
+                          borderRadius="full"
+                          fontWeight="bold"
+                        >
+                          ✨ VOUS
+                        </Badge>
+                      )}
                     </HStack>
                   </Flex>
 
@@ -228,9 +226,9 @@ export const UserRivals = ({
                       <Text
                         fontSize="2xl"
                         fontWeight="bold"
-                        color={isCurrentUser ? "purple.600" : "blue.600"}
+                        color={isProfileUser ? "purple.600" : "blue.600"}
                         _dark={{
-                          color: isCurrentUser ? "purple.300" : "blue.300"
+                          color: isProfileUser ? "purple.300" : "blue.300"
                         }}
                       >
                         {(rival.averageScore / 1000000).toFixed(1)}M
@@ -238,7 +236,7 @@ export const UserRivals = ({
                     </Box>
 
                     {/* Différence de score */}
-                    {!isCurrentUser && (
+                    {!isProfileUser && (
                       <HStack
                         spacing={2}
                         bg={diffBg}
