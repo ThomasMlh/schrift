@@ -246,6 +246,7 @@ export const useUsers = (options?: {
   guilde_id?: string;
   role?: string;
   search?: string;
+  is_banned?: string;
 }) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const { 
@@ -254,7 +255,8 @@ export const useUsers = (options?: {
     limit = 50,
     guilde_id,
     role,
-    search
+    search,
+    is_banned
   } = options || {};
   
   let url = `${apiUrl}/api/users`;
@@ -265,6 +267,7 @@ export const useUsers = (options?: {
   if (guilde_id) params.append('guilde_id', guilde_id);
   if (role) params.append('role', role);
   if (search) params.append('search', search);
+  if (is_banned) params.append('is_banned', is_banned);
   
   if (params.toString()) {
     url += `?${params.toString()}`;

@@ -4,6 +4,7 @@ import DraftSection from "../components/DraftSection";
 import CyclesSection from "../components/CyclesSection";
 import ScoresSection from "../components/ScoresSection";
 import UsersTable from "../components/UsersTable";
+import BannedUsersSection from "../components/BannedUsersSection";
 import GuidesAdminSection from "../components/GuidesAdminSection";
 import { useState, useMemo } from "react";
 import type { AdminPage as IAdminPage } from "../interfaces";
@@ -16,7 +17,7 @@ const AdminPage = () => {
   // Pages autorisées selon le rôle
   const allowedPages = useMemo(() => {
     if (isFullAdmin) {
-      return ['guilds', 'draft', 'cycles', 'scores', 'users', 'guides'] as IAdminPage[];
+      return ['guilds', 'draft', 'cycles', 'scores', 'users', 'banned', 'guides'] as IAdminPage[];
     } else if (isGuildManager) {
       return ['scores'] as IAdminPage[];
     }
@@ -64,6 +65,8 @@ const AdminPage = () => {
         return <ScoresSection />;
       case "users":
         return <UsersTable isAdminMode={true} />;
+      case "banned":
+        return <BannedUsersSection />;
       case "guides":
         return <GuidesAdminSection />;
       case "guilds":
@@ -95,7 +98,7 @@ const AdminPage = () => {
         <VStack spacing={4} mb={6} w="100%" maxW="800px" px={4}>
           {/* Navigation principale - seulement les sections autorisées */}
           <SimpleGrid 
-            columns={{ base: Math.min(allowedPages.length, 2), md: Math.min(allowedPages.length, 6) }} 
+            columns={{ base: Math.min(allowedPages.length, 2), md: Math.min(allowedPages.length, 7) }} 
             spacing={3} 
             w="100%"
           >
@@ -147,6 +150,16 @@ const AdminPage = () => {
                 size={{ base: "sm", md: "md" }}
               >
                 👥 Joueurs
+              </Button>
+            )}
+            {allowedPages.includes('banned') && (
+              <Button
+                variant={currentPage === "banned" ? "solid" : "outline"}
+                colorScheme="red"
+                onClick={() => setCurrentPage("banned")}
+                size={{ base: "sm", md: "md" }}
+              >
+                🚫 Bannis
               </Button>
             )}
             {allowedPages.includes('guides') && (
