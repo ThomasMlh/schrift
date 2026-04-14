@@ -28,7 +28,7 @@ const BanUserModal: React.FC<BanUserModalProps> = ({ isOpen, onClose, user, onUs
         try {
             await banUser(user._id, reason.trim() || undefined);
             toast({
-                title: "Utilisateur banni",
+                title: "Joueur banni",
                 description: `${user.global_name || user.username} a été banni avec succès.`,
                 status: "success",
                 duration: 3000,
