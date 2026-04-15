@@ -20,13 +20,16 @@ interface CustomSelectProps {
     placeholder?: string;
     allowDeselect?: boolean;
     isDisabled?: boolean;
-    renderSelected?: (option: SelectOption) => ReactNode; // Pour personnaliser l'affichage de l'option sélectionnée
-    bg?: string; // Couleur de fond personnalisée
-    enableSearch?: boolean; // Activer la recherche
-    onSearchChange?: (search: string) => void; // Callback pour la recherche (pour API)
-    isLoading?: boolean; // État de chargement
-    size?: 'sm' | 'md' | 'lg'; // Taille du select
-    accentColor?: string; // Couleur d'accent pour le hover/focus
+    renderSelected?: (option: SelectOption) => ReactNode;
+    bg?: string;
+    enableSearch?: boolean;
+    onSearchChange?: (search: string) => void;
+    isLoading?: boolean;
+    size?: 'sm' | 'md' | 'lg';
+    accentColor?: string;
+    maxW?: string | object;
+    w?: string | object;
+    flex?: string | number;
 }
 
 export const CustomSelect = ({
@@ -42,10 +45,14 @@ export const CustomSelect = ({
     onSearchChange,
     isLoading = false,
     size = 'md',
-    accentColor
+    accentColor,
+    maxW,
+    w,
+    flex
 }: CustomSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0, maxH: 250, openUp: false });
     const menuRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLDivElement>(null);
@@ -162,10 +169,11 @@ export const CustomSelect = ({
         }
     }, [isOpen, enableSearch]);
 
-    // Réinitialiser la recherche quand on ferme le menu
+    // Réinitialiser la recherche et le highlight quand on ferme le menu
     useEffect(() => {
         if (!isOpen) {
             setSearchTerm("");
+            setHighlightedIndex(-1);
             if (onSearchChange) {
                 onSearchChange("");
             }
@@ -187,6 +195,109 @@ export const CustomSelect = ({
         setSearchTerm(newSearchTerm);
         if (onSearchChange) {
             onSearchChange(newSearchTerm);
+        }
+    };
+
+    // Construire la liste plate de toutes les options (pour la navigation clavier)
+    const getAllOptions = useCallback(() => {
+        const all: SelectOption[] = [];
+        // Options de déselection en premier si allowDeselect
+        if (allowDeselect) {
+            all.push({ value: '', label: 'Aucune sélection' });
+        }
+        // Options non groupées
+        const ug: SelectOption[] = [];
+        const go: { [key: string]: SelectOption[] } = {};
+        const filtered = enableSearch && !onSearchChange
+            ? options.filter(option => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
+            : options;
+        filtered.forEach(option => {
+            if (option.group) {
+                if (!go[option.group]) go[option.group] = [];
+                go[option.group].push(option);
+            } else {
+                ug.push(option);
+            }
+        });
+        all.push(...ug);
+        Object.entries(go)
+            .sort(([a], [b]) => {
+                const numA = Number(a);
+                const numB = Number(b);
+                if (!isNaN(numA) && !isNaN(numB)) return numB - numA;
+                return a.localeCompare(b);
+            })
+            .forEach(([, groupOpts]) => all.push(...groupOpts));
+        return all;
+    }, [options, allowDeselect, enableSearch, onSearchChange, searchTerm]);
+
+    // Scroll l'option highlighted dans la vue
+    const scrollHighlightedIntoView = useCallback((index: number) => {
+        if (!dropdownRef.current) return;
+        const items = dropdownRef.current.querySelectorAll('[data-option-index]');
+        const target = items[index] as HTMLElement | undefined;
+        if (target) {
+            target.scrollIntoView({ block: 'nearest' });
+        }
+    }, []);
+
+    // Gestion clavier pour l'accessibilité
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (isDisabled) return;
+        const allOptions = getAllOptions();
+        switch (e.key) {
+            case 'Enter':
+                e.preventDefault();
+                if (isOpen && highlightedIndex >= 0 && highlightedIndex < allOptions.length) {
+                    // Confirmer la sélection
+                    handleSelect(allOptions[highlightedIndex].value);
+                } else {
+                    setIsOpen(!isOpen);
+                    if (!isOpen) {
+                        // Positionner le highlight sur la valeur actuelle
+                        const idx = allOptions.findIndex(o => o.value === value);
+                        setHighlightedIndex(idx >= 0 ? idx : 0);
+                    }
+                }
+                break;
+            case ' ':
+                e.preventDefault();
+                if (!isOpen) {
+                    setIsOpen(true);
+                    const idx = allOptions.findIndex(o => o.value === value);
+                    setHighlightedIndex(idx >= 0 ? idx : 0);
+                } else if (highlightedIndex >= 0 && highlightedIndex < allOptions.length) {
+                    handleSelect(allOptions[highlightedIndex].value);
+                }
+                break;
+            case 'Escape':
+                e.preventDefault();
+                setIsOpen(false);
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                if (!isOpen) {
+                    setIsOpen(true);
+                    const idx = allOptions.findIndex(o => o.value === value);
+                    setHighlightedIndex(idx >= 0 ? idx : 0);
+                } else {
+                    const nextIndex = highlightedIndex < allOptions.length - 1 ? highlightedIndex + 1 : highlightedIndex;
+                    setHighlightedIndex(nextIndex);
+                    scrollHighlightedIntoView(nextIndex);
+                }
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                if (!isOpen) {
+                    setIsOpen(true);
+                    const idx = allOptions.findIndex(o => o.value === value);
+                    setHighlightedIndex(idx >= 0 ? idx : 0);
+                } else {
+                    const prevIndex = highlightedIndex > 0 ? highlightedIndex - 1 : 0;
+                    setHighlightedIndex(prevIndex);
+                    scrollHighlightedIntoView(prevIndex);
+                }
+                break;
         }
     };
 
@@ -234,13 +345,12 @@ export const CustomSelect = ({
     });
 
     return (
-        <Box position="relative" ref={menuRef}>
+        <Box position="relative" ref={menuRef} maxW={maxW} w={w} flex={flex}>
             <Box ref={triggerRef}>
             {selectedOption ? (
                 // Affichage quand une option est sélectionnée
                 <Flex
                     w="100%"
-                    minW="150px"
                     px={currentSizeProps.px}
                     py={currentSizeProps.py}
                     border="1px solid"
@@ -252,11 +362,17 @@ export const CustomSelect = ({
                     cursor={isDisabled ? "not-allowed" : "pointer"}
                     opacity={isDisabled ? 0.6 : 1}
                     _hover={!isDisabled ? { borderColor: accentColor || "gray.300" } : {}}
+                    _focus={{ boxShadow: "outline", outline: "none" }}
                     color={textColor}
                     h={currentSizeProps.minH}
                     minH={currentSizeProps.minH}
                     fontSize={currentSizeProps.fontSize}
                     onClick={() => !isDisabled && setIsOpen(!isOpen)}
+                    onKeyDown={handleKeyDown}
+                    tabIndex={isDisabled ? -1 : 0}
+                    role="combobox"
+                    aria-expanded={isOpen}
+                    aria-haspopup="listbox"
                     {...(isOpen && accentColor ? { boxShadow: `0 0 0 1px var(--chakra-colors-${accentColor.replace('.', '-')})` } : {})}
                 >
                     <Box 
@@ -278,11 +394,11 @@ export const CustomSelect = ({
                 // Bouton par défaut quand aucune option n'est sélectionnée
                 <Button
                     w="100%"
-                    minW="150px"
                     justifyContent="space-between"
                     variant="outline"
                     rightIcon={<ChevronDownIcon />}
                     onClick={() => !isDisabled && setIsOpen(!isOpen)}
+                    onKeyDown={handleKeyDown}
                     bg={bgColor}
                     borderColor={accentColor || borderColor}
                     textAlign="left"
@@ -294,6 +410,9 @@ export const CustomSelect = ({
                     fontSize={currentSizeProps.fontSize}
                     isDisabled={isDisabled}
                     color={textColor}
+                    role="combobox"
+                    aria-expanded={isOpen}
+                    aria-haspopup="listbox"
                     _hover={!isDisabled ? { borderColor: accentColor || "gray.300", bg: hoverBg } : {}}
                     {...(isOpen && accentColor ? { boxShadow: `0 0 0 1px var(--chakra-colors-${accentColor.replace('.', '-')})` } : {})}
                 >
@@ -370,11 +489,14 @@ export const CustomSelect = ({
                             {allowDeselect && (
                                 <Flex
                                     key="deselect-option"
+                                    data-option-index={0}
                                     px={currentSizeProps.px}
                                     py={currentSizeProps.py}
                                     cursor="pointer"
                                     _hover={{ bg: hoverBg }}
+                                    bg={highlightedIndex === 0 ? hoverBg : undefined}
                                     onClick={() => handleSelect('')}
+                                    onMouseEnter={() => setHighlightedIndex(0)}
                                     align="center"
                                     borderBottom="1px solid"
                                     borderColor={borderColor}
@@ -387,19 +509,23 @@ export const CustomSelect = ({
                             )}
                             
                             {/* Options non groupées */}
-                            {ungroupedOptions.length > 0 && ungroupedOptions.map((option) => (
+                            {ungroupedOptions.length > 0 && ungroupedOptions.map((option, idx) => {
+                                const flatIndex = (allowDeselect ? 1 : 0) + idx;
+                                return (
                                 <Flex
                                     key={option.value}
+                                    data-option-index={flatIndex}
                                     px={currentSizeProps.px}
                                     py={currentSizeProps.py}
                                     cursor="pointer"
                                     _hover={{ bg: hoverBg }}
+                                    bg={highlightedIndex === flatIndex ? hoverBg : bgColor}
                                     onClick={() => handleSelect(option.value)}
+                                    onMouseEnter={() => setHighlightedIndex(flatIndex)}
                                     align="center"
                                     borderBottom="1px solid"
                                     borderColor={borderColor}
                                     color={textColor}
-                                    bg={bgColor}
                                     fontSize={currentSizeProps.fontSize}
                                 >
                                     <Box flex={1}>
@@ -410,69 +536,78 @@ export const CustomSelect = ({
                                         )}
                                     </Box>
                                 </Flex>
-                            ))}
+                                );
+                            })}
 
                             {/* Options groupées */}
-                            {Object.entries(groupedOptions)
-                                .sort(([a], [b]) => {
-                                    // Trier par ordre décroissant (années les plus récentes en premier)
-                                    const numA = Number(a);
-                                    const numB = Number(b);
-                                    if (!isNaN(numA) && !isNaN(numB)) {
-                                        return numB - numA;
-                                    }
-                                    // Pour les groupes non numériques, ordre alphabétique
-                                    return a.localeCompare(b);
-                                })
-                                .map(([groupName, groupOptions]) => (
-                                <Box key={groupName}>
-                                    <Box
-                                        px={currentSizeProps.px}
-                                        py={1.5}
-                                        bg={groupHeaderBg}
-                                        borderBottom="1px solid"
-                                        borderColor={borderColor}
-                                        position="sticky"
-                                        top={enableSearch ? "40px" : 0}
-                                        zIndex={2}
-                                    >
-                                        <Text 
-                                            fontSize="xs" 
-                                            fontWeight="bold" 
-                                            color={groupHeaderColor}
-                                            textTransform="uppercase"
-                                            letterSpacing="wide"
-                                        >
-                                            {groupName}
-                                        </Text>
-                                    </Box>
-                                    {groupOptions.map((option) => (
-                                        <Flex
-                                            key={option.value}
+                            {(() => {
+                                let runningIndex = (allowDeselect ? 1 : 0) + ungroupedOptions.length;
+                                return Object.entries(groupedOptions)
+                                    .sort(([a], [b]) => {
+                                        const numA = Number(a);
+                                        const numB = Number(b);
+                                        if (!isNaN(numA) && !isNaN(numB)) return numB - numA;
+                                        return a.localeCompare(b);
+                                    })
+                                    .map(([groupName, groupOptions]) => {
+                                        const groupStartIndex = runningIndex;
+                                        runningIndex += groupOptions.length;
+                                        return (
+                                    <Box key={groupName}>
+                                        <Box
                                             px={currentSizeProps.px}
-                                            py={currentSizeProps.py}
-                                            cursor="pointer"
-                                            _hover={{ bg: hoverBg }}
-                                            onClick={() => handleSelect(option.value)}
-                                            align="center"
+                                            py={1.5}
+                                            bg={groupHeaderBg}
                                             borderBottom="1px solid"
                                             borderColor={borderColor}
-                                            _last={{ borderBottom: "none" }}
-                                            color={textColor}
-                                            bg={bgColor}
-                                            fontSize={currentSizeProps.fontSize}
+                                            position="sticky"
+                                            top={enableSearch ? "40px" : 0}
+                                            zIndex={2}
                                         >
-                                            <Box flex={1}>
-                                                {option.content || (
-                                                    <Text fontWeight="medium">
-                                                        {option.label}
-                                                    </Text>
-                                                )}
-                                            </Box>
-                                        </Flex>
-                                    ))}
-                                </Box>
-                            ))}
+                                            <Text 
+                                                fontSize="xs" 
+                                                fontWeight="bold" 
+                                                color={groupHeaderColor}
+                                                textTransform="uppercase"
+                                                letterSpacing="wide"
+                                            >
+                                                {groupName}
+                                            </Text>
+                                        </Box>
+                                        {groupOptions.map((option, idx) => {
+                                            const flatIndex = groupStartIndex + idx;
+                                            return (
+                                            <Flex
+                                                key={option.value}
+                                                data-option-index={flatIndex}
+                                                px={currentSizeProps.px}
+                                                py={currentSizeProps.py}
+                                                cursor="pointer"
+                                                _hover={{ bg: hoverBg }}
+                                                bg={highlightedIndex === flatIndex ? hoverBg : bgColor}
+                                                onClick={() => handleSelect(option.value)}
+                                                onMouseEnter={() => setHighlightedIndex(flatIndex)}
+                                                align="center"
+                                                borderBottom="1px solid"
+                                                borderColor={borderColor}
+                                                _last={{ borderBottom: "none" }}
+                                                color={textColor}
+                                                fontSize={currentSizeProps.fontSize}
+                                            >
+                                                <Box flex={1}>
+                                                    {option.content || (
+                                                        <Text fontWeight="medium">
+                                                            {option.label}
+                                                        </Text>
+                                                    )}
+                                                </Box>
+                                            </Flex>
+                                            );
+                                        })}
+                                    </Box>
+                                        );
+                                    });
+                            })()}
 
                             {/* Message si aucune option */}
                             {ungroupedOptions.length === 0 && Object.keys(groupedOptions).length === 0 && (
