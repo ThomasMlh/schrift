@@ -1,6 +1,6 @@
 import {
   Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
-  Text, Input, InputGroup, InputLeftElement, Select, Spinner,
+  Text, Input, InputGroup, InputLeftElement, Spinner,
   useColorModeValue, Badge, Flex, Avatar
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
@@ -18,6 +18,7 @@ import { AttackTypeFilter } from "./ui/AttackTypeFilter";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import CustomLink from "./ui/CustomLink";
 import { CharactersKillers, CharactersCategories, CharactersAffinities } from "../utils/chractersData";
+import { CustomSelect } from "./ui/CustomSelect";
 
 interface CharactersTableProps {
   apiUrl: string;
@@ -197,16 +198,18 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
           />
 
           {/* Items par page */}
-          <Select
+          <CustomSelect
             maxW="120px"
-            value={itemsPerPage}
-            onChange={(e) => setItemsPerPage(Number(e.target.value))}
-          >
-            <option value={10}>10 / page</option>
-            <option value={20}>20 / page</option>
-            <option value={50}>50 / page</option>
-            <option value={100}>100 / page</option>
-          </Select>
+            value={String(itemsPerPage)}
+            onChange={(val) => setItemsPerPage(Number(val))}
+            options={[
+              { value: "10", label: "10 / page" },
+              { value: "20", label: "20 / page" },
+              { value: "50", label: "50 / page" },
+              { value: "100", label: "100 / page" },
+            ]}
+            allowDeselect={false}
+          />
 
           {/* Bouton reset */}
           {(searchTerm || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType) && (

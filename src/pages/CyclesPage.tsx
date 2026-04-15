@@ -18,7 +18,6 @@ import {
   useColorModeValue,
   HStack,
   Button,
-  Select
 } from "@chakra-ui/react";
 import { ExternalLinkIcon, CalendarIcon, ViewIcon } from "@chakra-ui/icons";
 
@@ -26,6 +25,7 @@ import { handleAttackType } from "../utils/attackTypes";
 import { AlterationImage } from "../components/ui/AlterationImage";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
 import { Pagination as PaginationComponent } from "../components/ui/Pagination";
+import { CustomSelect } from "../components/ui/CustomSelect";
 import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "../components/SEOHead";
 import { useCycles } from "@/hooks/useAPI";
@@ -132,18 +132,18 @@ const CyclesPage = () => {
             </HStack>
 
             <HStack spacing={3} flexWrap="wrap" justify={{ base: "center", md: "flex-end" }}>
-              <Select
-                value={itemsPerPage}
-                onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
+              <CustomSelect
+                value={String(itemsPerPage)}
+                onChange={(val) => handleItemsPerPageChange(parseInt(val))}
                 w={{ base: "full", sm: "140px" }}
-                size="md"
-                borderRadius="lg"
-              >
-                <option value={3}>3 par page</option>
-                <option value={6}>6 par page</option>
-                <option value={9}>9 par page</option>
-                <option value={12}>12 par page</option>
-              </Select>
+                options={[
+                  { value: "3", label: "3 par page" },
+                  { value: "6", label: "6 par page" },
+                  { value: "9", label: "9 par page" },
+                  { value: "12", label: "12 par page" },
+                ]}
+                allowDeselect={false}
+              />
               <Button
                 leftIcon={<ViewIcon />}
                 size="md"

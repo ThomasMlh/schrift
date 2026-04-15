@@ -9,7 +9,6 @@ import {
   Text,
   HStack,
   Stack,
-  Select,
   IconButton,
   useToast,
   AlertDialog,
@@ -23,6 +22,7 @@ import {
   useColorModeValue
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
+import { CustomSelect } from "./ui/CustomSelect";
 import type { Role, IGuild, IUser } from "../interfaces";
 import { UserDisplay } from "./ui/UserDisplay";
 import { useGuilds } from "@/hooks/useAPI";
@@ -341,18 +341,20 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
                             spacing={2}
                             w={{ base: "100%", md: "auto" }}
                           >
-                            <Select
+                            <CustomSelect
                               size="sm"
                               value={member.role}
-                              width="auto"
-                              onChange={(e) =>
-                                handleRoleChange(member, e.target.value as Role)
+                              w="auto"
+                              onChange={(val) =>
+                                handleRoleChange(member, val as Role)
                               }
-                            >
-                              <option value="membre">Membre</option>
-                              <option value="sous-chef">Sous-Chef</option>
-                              <option value="chef">Chef</option>
-                            </Select>
+                              options={[
+                                { value: "membre", label: "Membre" },
+                                { value: "sous-chef", label: "Sous-Chef" },
+                                { value: "chef", label: "Chef" },
+                              ]}
+                              allowDeselect={false}
+                            />
                             <HStack
                               spacing={2}
                               justify={{
@@ -371,32 +373,33 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
                                   handleRemoveMember(member, guild._id)
                                 }
                               />
-                              <Select
+                              <CustomSelect
                                 size="sm"
                                 value={guild._id}
-                                onChange={(e) =>
+                                onChange={(val) =>
                                   handleMoveMember(
                                     guild._id,
                                     member,
-                                    e.target.value
+                                    val
                                   )
                                 }
-                                width="auto"
+                                w="auto"
                                 flex={1}
-                              >
-                                <option value={guild._id}>Rester</option>
-                                {guilds
-                                  .filter(
-                                    (g: IGuild) =>
-                                      g._id !== guild._id &&
-                                      (membersByGuild[g._id]?.length ?? 0) < 20
-                                  )
-                                  .map((g: IGuild) => (
-                                    <option key={g._id} value={g._id}>
-                                      → {g.name}
-                                    </option>
-                                  ))}
-                              </Select>
+                                options={[
+                                  { value: guild._id, label: "Rester" },
+                                  ...guilds
+                                    .filter(
+                                      (g: IGuild) =>
+                                        g._id !== guild._id &&
+                                        (membersByGuild[g._id]?.length ?? 0) < 20
+                                    )
+                                    .map((g: IGuild) => ({
+                                      value: g._id,
+                                      label: `→ ${g.name}`,
+                                    })),
+                                ]}
+                                allowDeselect={false}
+                              />
                             </HStack>
                           </Stack>
                         )}

@@ -1,6 +1,6 @@
 import {
     Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
-    Text, Input, InputGroup, InputLeftElement, Select, Spinner,
+    Text, Input, InputGroup, InputLeftElement, Spinner,
     useColorModeValue, Badge, Flex, IconButton, useDisclosure, Tooltip
 } from "@chakra-ui/react";
 import { useState, useEffect, useMemo } from "react";
@@ -12,6 +12,7 @@ import EditUserModal from "./EditUserModal";
 import BanUserModal from "./BanUserModal";
 import UnbanUserModal from "./UnbanUserModal";
 import { UserDisplay } from "./ui/UserDisplay";
+import { CustomSelect } from "./ui/CustomSelect";
 import { useGuilds, useUsers } from "@/hooks/useAPI";
 
 interface UsersTableProps {
@@ -185,42 +186,43 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                     wrap="wrap"
                 >
                     {/* Filtre par guilde */}
-                    <Select
+                    <CustomSelect
                         placeholder="Toutes les guildes"
                         value={selectedGuildId}
-                        onChange={(e) => handleGuildChange(e.target.value)}
+                        onChange={(value) => handleGuildChange(value)}
+                        options={guilds.map((guild) => ({
+                            value: guild._id,
+                            label: guild.name
+                        }))}
                         maxW="200px"
-                    >
-                        {guilds.map((guild) => (
-                            <option key={guild._id} value={guild._id}>
-                                {guild.name}
-                            </option>
-                        ))}
-                    </Select>
+                    />
 
                     {/* Filtre par rôle */}
-                    <Select
+                    <CustomSelect
                         placeholder="Tous les rôles"
                         value={selectedRole}
-                        onChange={(e) => handleRoleChange(e.target.value)}
+                        onChange={(value) => handleRoleChange(value)}
+                        options={[
+                            { value: "chef", label: "Chef" },
+                            { value: "sous-chef", label: "Sous-chef" },
+                            { value: "membre", label: "Membre" }
+                        ]}
                         maxW="150px"
-                    >
-                        <option value="chef">Chef</option>
-                        <option value="sous-chef">Sous-chef</option>
-                        <option value="membre">Membre</option>
-                    </Select>
+                    />
 
                     {/* Éléments par page */}
-                    <Select
-                        value={itemsPerPage}
-                        onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                        maxW="120px"
-                    >
-                        <option value={10}>10 / page</option>
-                        <option value={20}>20 / page</option>
-                        <option value={50}>50 / page</option>
-                        <option value={100}>100 / page</option>
-                    </Select>
+                    <CustomSelect
+                        value={String(itemsPerPage)}
+                        onChange={(value) => handleItemsPerPageChange(parseInt(value))}
+                        options={[
+                            { value: "10", label: "10 / page" },
+                            { value: "20", label: "20 / page" },
+                            { value: "50", label: "50 / page" },
+                            { value: "100", label: "100 / page" }
+                        ]}
+                        allowDeselect={false}
+                        maxW="150px"
+                    />
 
                     <Button onClick={resetFilters} variant="outline" minW="120px">
                         Réinitialiser

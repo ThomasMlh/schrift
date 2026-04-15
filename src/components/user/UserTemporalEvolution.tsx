@@ -5,10 +5,10 @@ import {
   Box,
   useColorModeValue,
   HStack,
-  Select,
   Button
 } from "@chakra-ui/react";
 import { useState, useMemo } from "react";
+import { CustomSelect } from "../ui/CustomSelect";
 import {
   LineChart,
   Line,
@@ -125,19 +125,20 @@ export const UserTemporalEvolution = ({ stats }: UserTemporalEvolutionProps) => 
             <Text fontSize="sm" fontWeight="medium" color="gray.600">
               Filtrer par année :
             </Text>
-            <Select
+            <CustomSelect
               size="sm"
               maxW="150px"
               value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-            >
-              <option value="all">Toutes les années</option>
-              {availableYears.map((year) => (
-                <option key={year} value={year.toString()}>
-                  {year}
-                </option>
-              ))}
-            </Select>
+              onChange={(val) => setSelectedYear(val)}
+              options={[
+                { value: "all", label: "Toutes les années" },
+                ...availableYears.map((year) => ({
+                  value: year.toString(),
+                  label: year.toString(),
+                })),
+              ]}
+              allowDeselect={false}
+            />
             {selectedYear !== "all" && (
               <Button
                 size="sm"

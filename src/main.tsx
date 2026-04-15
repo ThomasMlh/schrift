@@ -21,7 +21,29 @@ const theme = extendTheme({
     lg: '62em',    // ~992px
     xl: '64.375em', // 1030px (1030/16 = 64.375)
     '2xl': '96em', // ~1536px
-  }
+  },
+  components: {
+    Input: {
+      defaultProps: {
+        variant: 'outline',
+      },
+      variants: {
+        outline: (props: Record<string, unknown>) => ({
+          field: {
+            borderColor: props.colorMode === 'light' ? 'gray.200' : 'gray.600',
+            bg: props.colorMode === 'light' ? 'white' : 'gray.800',
+            _hover: {
+              borderColor: 'gray.300',
+            },
+            _focus: {
+              boxShadow: 'outline',
+              borderColor: 'blue.500',
+            },
+          },
+        }),
+      },
+    },
+  },
 })
 
 createRoot(document.getElementById('root')!).render(

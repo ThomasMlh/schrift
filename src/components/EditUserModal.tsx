@@ -1,11 +1,12 @@
 import {
     Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton,
-    Button, FormControl, FormLabel, Input, Select, VStack, useToast, HStack, Avatar, Text
+    Button, FormControl, FormLabel, Input, VStack, useToast, HStack, Avatar, Text
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import type { IUser, IGuild, Role } from "../interfaces";
 import { getUserAvatarUrl } from "../utils/discord";
 import { useAuth } from "@/providers/AuthProvider";
+import { CustomSelect } from "./ui/CustomSelect";
 
 interface EditUserModalProps {
     isOpen: boolean;
@@ -141,29 +142,29 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, gu
 
                         <FormControl>
                             <FormLabel>Guilde</FormLabel>
-                            <Select
+                            <CustomSelect
                                 placeholder="Sélectionner une guilde"
                                 value={formData.guilde_id}
-                                onChange={(e) => handleInputChange('guilde_id', e.target.value)}
-                            >
-                                {guilds.map((guild) => (
-                                    <option key={guild._id} value={guild._id}>
-                                        {guild.name}
-                                    </option>
-                                ))}
-                            </Select>
+                                onChange={(value) => handleInputChange('guilde_id', value)}
+                                options={guilds.map((guild) => ({
+                                    value: guild._id,
+                                    label: guild.name
+                                }))}
+                            />
                         </FormControl>
 
                         <FormControl>
                             <FormLabel>Rôle</FormLabel>
-                            <Select
+                            <CustomSelect
                                 value={formData.role}
-                                onChange={(e) => handleInputChange('role', e.target.value as Role)}
-                            >
-                                <option value="membre">Membre</option>
-                                <option value="sous-chef">Sous-chef</option>
-                                <option value="chef">Chef</option>
-                            </Select>
+                                onChange={(value) => handleInputChange('role', value as Role)}
+                                options={[
+                                    { value: "membre", label: "Membre" },
+                                    { value: "sous-chef", label: "Sous-chef" },
+                                    { value: "chef", label: "Chef" }
+                                ]}
+                                allowDeselect={false}
+                            />
                         </FormControl>
                     </VStack>
                 </ModalBody>

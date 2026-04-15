@@ -1,8 +1,9 @@
 import {
-  Box, Button, VStack, FormControl, FormLabel, Input, Select, Stack, Text,
+  Box, Button, VStack, FormControl, FormLabel, Input, Stack, Text,
   useBreakpointValue, useColorModeValue, useToast
 } from "@chakra-ui/react";
 import { useState } from "react";
+import { CustomSelect } from "./ui/CustomSelect";
 import type { IGuild, Role } from "../interfaces";
 import { UserSearchSelect } from "./ui/UserSearchSelect";
 import { useUsers } from "@/hooks/useAPI";
@@ -252,19 +253,17 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
             </FormControl>
             <FormControl>
               <FormLabel>Rôle</FormLabel>
-              <Select value={newMemberRole} onChange={e => setNewMemberRole(e.target.value as Role)}>
-                <option value="membre">Membre</option>
-                <option value="sous-chef">Sous-Chef</option>
-                <option value="chef">Chef</option>
-              </Select>
+              <CustomSelect value={newMemberRole} onChange={(val) => setNewMemberRole(val as Role)} options={[
+                { value: "membre", label: "Membre" },
+                { value: "sous-chef", label: "Sous-Chef" },
+                { value: "chef", label: "Chef" },
+              ]} allowDeselect={false} />
             </FormControl>
             <FormControl>
-              <Select value={selectedGuildId} onChange={e => setSelectedGuildId(e.target.value)}>
-                <option value="">Sélectionner une guilde</option>
-                {sortedGuilds.map((g: IGuild) => (
-                  <option key={g._id} value={g._id}>{g.name}</option>
-                ))}
-              </Select>
+              <CustomSelect value={selectedGuildId} onChange={(val) => setSelectedGuildId(val)} placeholder="Sélectionner une guilde" options={sortedGuilds.map((g: IGuild) => ({
+                value: g._id,
+                label: g.name,
+              }))} />
             </FormControl>
             <Button colorScheme="blue" type="submit">
               Ajouter membre
@@ -296,12 +295,10 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
           <VStack spacing={4} align="stretch">
             <FormControl>
               <FormLabel>Supprimer une guilde</FormLabel>
-              <Select value={deleteGuildId} onChange={e => setDeleteGuildId(e.target.value)}>
-                <option value="">Sélectionner une guilde</option>
-                {sortedGuilds.map((g: IGuild) => (
-                  <option key={g._id} value={g._id}>{g.name}</option>
-                ))}
-              </Select>
+              <CustomSelect value={deleteGuildId} onChange={(val) => setDeleteGuildId(val)} placeholder="Sélectionner une guilde" options={sortedGuilds.map((g: IGuild) => ({
+                value: g._id,
+                label: g.name,
+              }))} />
             </FormControl>
             <Button
               bg={deleteButtonBg}
@@ -339,12 +336,10 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
           <VStack spacing={4} align="stretch">
             <FormControl>
               <FormLabel>Renommer une guilde</FormLabel>
-              <Select value={renameGuildId} onChange={e => setRenameGuildId(e.target.value)}>
-                <option value="">Sélectionner une guilde</option>
-                {sortedGuilds.map((g: IGuild) => (
-                  <option key={g._id} value={g._id}>{g.name}</option>
-                ))}
-              </Select>
+              <CustomSelect value={renameGuildId} onChange={(val) => setRenameGuildId(val)} placeholder="Sélectionner une guilde" options={sortedGuilds.map((g: IGuild) => ({
+                value: g._id,
+                label: g.name,
+              }))} />
             </FormControl>
             <FormControl>
               <Input
@@ -383,14 +378,10 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
           <VStack spacing={4} align="stretch">
             <FormControl>
               <FormLabel>Désactiver / Réactiver une guilde</FormLabel>
-              <Select value={disableGuildId} onChange={e => setDisableGuildId(e.target.value)}>
-                <option value="">Sélectionner une guilde</option>
-                {sortedGuilds.map((g: IGuild) => (
-                  <option key={g._id} value={g._id}>
-                    {g.name} {g.disabled ? "(❌ désactivée)" : "(✅ active)"}
-                  </option>
-                ))}
-              </Select>
+              <CustomSelect value={disableGuildId} onChange={(val) => setDisableGuildId(val)} placeholder="Sélectionner une guilde" options={sortedGuilds.map((g: IGuild) => ({
+                value: g._id,
+                label: `${g.name} ${g.disabled ? "(❌ désactivée)" : "(✅ active)"}`,
+              }))} />
             </FormControl>
             <Button
               colorScheme={guilds.find(g => g._id === disableGuildId)?.disabled ? "green" : "orange"}

@@ -17,7 +17,6 @@ import {
   useDisclosure,
   VStack,
   HStack,
-  Select,
   Spinner,
   AlertDialog,
   AlertDialogBody,
@@ -38,6 +37,7 @@ import { Pagination } from "./ui/Pagination";
 import { AffinityIcon } from "./ui/AffinityIcon";
 import { UserDisplay } from "./ui/UserDisplay";
 import { BuildDetailModal } from "./ui/BuildDetailModal";
+import { CustomSelect } from "./ui/CustomSelect";
 
 const BuildsAdminSection = () => {
   const { deleteBuild, validateBuild } = useAPIMutations();
@@ -135,19 +135,19 @@ const BuildsAdminSection = () => {
               <Text fontSize="sm" fontWeight="medium" mb={2}>
                 Statut de validation
               </Text>
-              <Select
+              <CustomSelect
                 value={filterIsValid === undefined ? "" : filterIsValid.toString()}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFilterIsValid(value === "" ? undefined : value === "true");
+                onChange={(val) => {
+                  setFilterIsValid(val === "" ? undefined : val === "true");
                   setCurrentPage(1);
                 }}
                 w="200px"
-              >
-                <option value="">Tous</option>
-                <option value="true">Validés</option>
-                <option value="false">Non validés</option>
-              </Select>
+                placeholder="Tous"
+                options={[
+                  { value: "true", label: "Validés" },
+                  { value: "false", label: "Non validés" },
+                ]}
+              />
             </Box>
           </HStack>
         </Box>

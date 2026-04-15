@@ -6,7 +6,6 @@ import {
     HStack,
     IconButton,
     Input,
-    Select,
     Badge,
     useColorModeValue
 } from "@chakra-ui/react";
@@ -16,6 +15,7 @@ import type { DropResult } from '@hello-pangea/dnd';
 import type { ICycleRotation } from "../../interfaces";
 import { handleAttackType } from "../../utils/attackTypes";
 import { AlterationImage } from "../ui/AlterationImage";
+import { CustomSelect } from "../ui/CustomSelect";
 
 interface SelectedRotationsListProps {
     rotations: ICycleRotation[];
@@ -154,14 +154,16 @@ const SelectedRotationsList = ({
                                                                         </VStack>
                                                                         <VStack spacing={1} flex={1}>
                                                                             <Text fontSize="xs" color="gray.500">Période</Text>
-                                                                            <Select
+                                                                            <CustomSelect
                                                                                 size="sm"
                                                                                 value={rotation.period}
-                                                                                onChange={(e) => onUpdateRotation(index, 'period', e.target.value)}
-                                                                            >
-                                                                                <option value="Mardi-Jeudi">Mardi-Jeudi</option>
-                                                                                <option value="Vendredi-Dimanche">Vendredi-Dimanche</option>
-                                                                            </Select>
+                                                                                onChange={(val) => onUpdateRotation(index, 'period', val)}
+                                                                                options={[
+                                                                                    { value: "Mardi-Jeudi", label: "Mardi-Jeudi" },
+                                                                                    { value: "Vendredi-Dimanche", label: "Vendredi-Dimanche" },
+                                                                                ]}
+                                                                                allowDeselect={false}
+                                                                            />
                                                                         </VStack>
                                                                     </HStack>
                                                                 </VStack>

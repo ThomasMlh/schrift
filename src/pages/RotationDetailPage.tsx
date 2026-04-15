@@ -17,7 +17,6 @@ import {
   Td,
   TableContainer,
   useToast,
-  Select,
   IconButton,
   Badge
 } from "@chakra-ui/react";
@@ -42,6 +41,7 @@ import { useGuilds, useRotationScores } from "@/hooks/useAPI";
 import { RankBadge } from "@/components/ui/RankBadge";
 import { AlterationImage } from "@/components/ui/AlterationImage";
 import { SEOHead } from "@/components/SEOHead";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 const RotationDetailPage = () => {
   const { cycleId, position } = useParams<{
@@ -172,17 +172,17 @@ const RotationDetailPage = () => {
   };
 
   const handleItemsPerPageChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
+    value: string
   ) => {
-    const newItemsPerPage = parseInt(event.target.value);
+    const newItemsPerPage = parseInt(value);
     setItemsPerPage(newItemsPerPage);
     setCurrentPage(1); // Reset à la première page
   };
 
   const handleGuildChange = async (
-    event: React.ChangeEvent<HTMLSelectElement>
+    value: string
   ) => {
-    const newGuildId = event.target.value;
+    const newGuildId = value;
     setSelectedGuild(newGuildId);
     setCurrentPage(1); // Reset à la première page quand on change le filtre
 
@@ -331,20 +331,18 @@ const RotationDetailPage = () => {
               <Text fontSize="sm" fontWeight="medium" minW="max-content">
                 Filtrer par guilde :
               </Text>
-              <Select
+              <CustomSelect
                 value={selectedGuild}
                 onChange={handleGuildChange}
                 placeholder="Toutes les guildes"
                 size="sm"
                 maxW="300px"
                 isDisabled={isLoadingGuilds}
-              >
-                {guilds.map((guild) => (
-                  <option key={guild._id} value={guild._id}>
-                    {guild.name}
-                  </option>
-                ))}
-              </Select>
+                options={guilds.map((guild) => ({
+                  value: guild._id,
+                  label: guild.name,
+                }))}
+              />
             </HStack>
             <Box>
               <ScoreLegend />
@@ -450,17 +448,19 @@ const RotationDetailPage = () => {
                     <Text fontSize="sm" color={textSecondary}>
                       Afficher
                     </Text>
-                    <Select
+                    <CustomSelect
                       size="sm"
-                      value={itemsPerPage}
+                      value={String(itemsPerPage)}
                       onChange={handleItemsPerPageChange}
                       w="auto"
-                    >
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={50}>50</option>
-                      <option value={100}>100</option>
-                    </Select>
+                      options={[
+                        { value: "10", label: "10" },
+                        { value: "20", label: "20" },
+                        { value: "50", label: "50" },
+                        { value: "100", label: "100" },
+                      ]}
+                      allowDeselect={false}
+                    />
                     <Text
                       fontSize="sm"
                       color={textSecondary}

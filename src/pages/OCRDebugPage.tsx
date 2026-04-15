@@ -13,11 +13,11 @@ import {
   Badge,
   FormControl,
   FormLabel,
-  Select,
   Skeleton
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { SEOHead } from "@/components/SEOHead";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useScreenshotters } from "@/hooks/useAPI";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
 
@@ -166,15 +166,15 @@ const OCRDebugPage = () => {
                   {loadingScreenshotters ? (
                     <Skeleton height="40px" borderRadius="md" />
                   ) : (
-                    <Select
+                    <CustomSelect
                       value={screenshotterValue}
-                      onChange={(e) => setScreenshotterValue(e.target.value)}
+                      onChange={(val) => setScreenshotterValue(val)}
                       placeholder="Sélectionner la personne"
-                    >
-                      {screenshotters.map((s) => (
-                        <option key={s.id} value={s.id}>{s.label}</option>
-                      ))}
-                    </Select>
+                      options={screenshotters.map((s) => ({
+                        value: s.id,
+                        label: s.label,
+                      }))}
+                    />
                   )}
                 </FormControl>
 
