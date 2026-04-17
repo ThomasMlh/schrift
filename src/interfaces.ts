@@ -36,21 +36,16 @@ export interface ICharacter {
   affinity?: string;
   categories?: string[];
   killers?: string[];
-  link?: string;
   attack_type: string;
-  phrase_url?: string;
   image?: string;
   rarity?: string;
   element?: string;
   soul_traits?: string[];
-  artwork?: string;
   stats?: ICharacterStats;
   immunities?: string[];
   release_date?: string;
   banner_id?: string;
   resurrection_release?: string;
-  banner_url?: string;
-  attack_url?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -446,7 +441,6 @@ export interface IBuildLink {
     _id: string;
     name: string;
     image?: string;
-    link?: string;
     rarity?: string;
     element?: string;
     affinity?: string;
@@ -464,7 +458,6 @@ export interface IBuildTeamMember {
     _id: string;
     name: string;
     image?: string;
-    link?: string;
     rarity?: string;
     element?: string;
     affinity?: string;

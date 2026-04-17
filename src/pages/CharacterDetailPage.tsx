@@ -168,9 +168,9 @@ const CharacterDetailPage = () => {
         description={description}
         keywords={keywords}
         image={
-          character.link ||
-          character.artwork ||
-          "https://bbs-schrift.fr/logo.png"
+          character._id
+            ? `${bucketUrl}/characters/thumb/${character._id}.png`
+            : "https://bbs-schrift.fr/logo.png"
         }
         url={`https://bbs-schrift.fr/personnage/${character._id}`}
         type="article"
@@ -639,28 +639,26 @@ const CharacterDetailPage = () => {
                     </Box>
                   </Box>
                   {/* Artwork */}
-                  {character.artwork && (
-                    <Box mb={6}>
-                      <Text fontWeight="medium" mb={3}>
-                        Artwork:
-                      </Text>
-                      <Box
-                        borderRadius="lg"
-                        overflow="hidden"
-                        borderWidth="1px"
-                        borderColor={borderColor}
-                        maxW="100%"
-                      >
-                        <Image
-                          src={`${bucketUrl}/characters/artwork/${character._id}.png`}
-                          alt={`Image de ${character.name}`}
-                          w="100%"
-                          h="auto"
-                          objectFit="cover"
-                        />
-                      </Box>
+                  <Box mb={6}>
+                    <Text fontWeight="medium" mb={3}>
+                      Artwork:
+                    </Text>
+                    <Box
+                      borderRadius="lg"
+                      overflow="hidden"
+                      borderWidth="1px"
+                      borderColor={borderColor}
+                      maxW="100%"
+                    >
+                      <Image
+                        src={`${bucketUrl}/characters/artwork/${character._id}.png`}
+                        alt={`Image de ${character.name}`}
+                        w="100%"
+                        h="auto"
+                        objectFit="cover"
+                      />
                     </Box>
-                  )}
+                  </Box>
                   <Box mb={6}>
                     <Text fontWeight="medium" mb={3}>
                       Phrase:
