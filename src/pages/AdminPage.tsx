@@ -28,6 +28,7 @@ const AdminPage = () => {
     isFullAdmin ? allowedPages[0] : "scores"
   );
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
   const bgColor = useColorModeValue('white', 'gray.800');
   const bgAdminPage = useColorModeValue('gray.50', 'gray.900')
   const toast = useToast();
@@ -53,6 +54,39 @@ const AdminPage = () => {
       toast({ title: error.message || "Erreur lors de la mise à jour des personnages", status: "error" });
     })
     .finally(() => setIsUpdatingCharacters(false));
+  }
+
+  const handleUploadImages = async () => {
+    setIsUploadingImages(true);
+    let totalUploaded = 0;
+    let remaining = 1; // start with non-zero to enter loop
+
+    try {
+      while (remaining > 0) {
+        const res = await fetch(`${apiUrl}/api/characters/update/images`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+          body: JSON.stringify({ batchSize: 100 }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Erreur upload images");
+        totalUploaded += data.statistics?.uploaded || 0;
+        remaining = data.statistics?.remaining || 0;
+        toast({
+          title: `Images: ${totalUploaded} uploadées, ${remaining} restants...`,
+          status: "info",
+          duration: 2000,
+        });
+      }
+      toast({ title: `Upload terminé: ${totalUploaded} images`, status: "success" });
+    } catch (error: any) {
+      toast({ title: error.message || "Erreur upload images", status: "error" });
+    } finally {
+      setIsUploadingImages(false);
+    }
   }
 
   const renderPage = () => {
@@ -176,17 +210,30 @@ const AdminPage = () => {
           
           {/* Actions admin - seulement pour les vrais admins */}
           {isFullAdmin && (
-            <Button
-              variant="outline"
-              colorScheme="orange"
-              onClick={handleUpdateCharacters}
-              isLoading={isUpdatingCharacters}
-              loadingText="Mise à jour..."
-              size={{ base: "sm", md: "md" }}
-              w={{ base: "100%", md: "auto" }}
-            >
-              🔄 Mettre à jour les personnages
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                colorScheme="orange"
+                onClick={handleUpdateCharacters}
+                isLoading={isUpdatingCharacters}
+                loadingText="Mise à jour..."
+                size={{ base: "sm", md: "md" }}
+                w={{ base: "100%", md: "auto" }}
+              >
+                🔄 Mettre à jour les personnages
+              </Button>
+              <Button
+                variant="outline"
+                colorScheme="teal"
+                onClick={handleUploadImages}
+                isLoading={isUploadingImages}
+                loadingText="Upload en cours..."
+                size={{ base: "sm", md: "md" }}
+                w={{ base: "100%", md: "auto" }}
+              >
+                🖼️ Upload images (batch)
+              </Button>
+            </>
           )}
         </VStack>
 
