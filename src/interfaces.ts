@@ -7,6 +7,7 @@ export interface IGuild {
   _id: string;
   name: string;
   disabled?: boolean;
+  discord_channel_id?: string;
 }
 
 export interface IUser {
