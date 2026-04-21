@@ -20,7 +20,7 @@ import {
   IconButton,
   Badge
 } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowBackIcon,
@@ -70,6 +70,7 @@ const RotationDetailPage = () => {
     error: apiError
   } = useRotationScores();
   const [selectedGuild, setSelectedGuild] = useState<string>(""); // ID de la guilde ou vide pour "toutes"
+  const hasInitialData = useRef(false);
 
   // Hooks UI
   const bgColor = useColorModeValue("white", "gray.800");
@@ -111,6 +112,7 @@ const RotationDetailPage = () => {
       setCurrentPage(data.pagination?.currentPage || 1);
       setTotalPages(data.pagination?.totalPages || 1);
       setTotalItems(data.pagination?.totalItems || data.data?.length || 0);
+      hasInitialData.current = true;
     } else if (apiError) {
       toast({
         title: "Erreur",
@@ -204,7 +206,7 @@ const RotationDetailPage = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !hasInitialData.current) {
     return (
       <Container maxW="container.xl" py={8}>
         <Flex justify="center" align="center" minH="200px">
@@ -358,8 +360,22 @@ const RotationDetailPage = () => {
           borderColor={borderColor}
           boxShadow={shadowColor}
           overflow="hidden"
+          position="relative"
         >
-          {scores.length === 0 ? (
+          {isLoading && hasInitialData.current && (
+            <Flex
+              position="absolute"
+              inset={0}
+              zIndex={1}
+              justify="center"
+              align="center"
+              bg="blackAlpha.200"
+              borderRadius="lg"
+            >
+              <Spinner size="lg" />
+            </Flex>
+          )}
+          {scores.length === 0 && !isLoading ? (
             <Flex justify="center" align="center" py={12}>
               <Text fontSize="lg" color={textSecondary}>
                 {selectedGuild
