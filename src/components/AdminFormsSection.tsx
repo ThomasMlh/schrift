@@ -174,10 +174,11 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
   return (
     <Stack 
       direction={{ base: "column", md: "row" }} 
-      spacing={8} 
+      spacing={6}
       mb={8}
       justify="center"
       w="100%"
+      wrap="wrap"
     >
       {/* Formulaire création guilde */}
       <MobileFormWrapper
@@ -198,6 +199,9 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
           borderRadius="lg"
           boxShadow={isMobile ? "none" : boxShadow}
           bg={isMobile ? "transparent" : bgColor}
+          minW={{ md: "220px" }}
+          maxW={{ md: "280px" }}
+          w="100%"
         >
           <VStack spacing={4} align="stretch">
             <FormControl>
@@ -234,6 +238,9 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
           borderRadius="lg"
           boxShadow={isMobile ? "none" : boxShadow}
           bg={isMobile ? "transparent" : bgColor}
+          minW={{ md: "220px" }}
+          maxW={{ md: "280px" }}
+          w="100%"
         >
           <VStack spacing={4} align="stretch">
             <FormControl>
@@ -291,6 +298,9 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
           borderRadius="lg"
           boxShadow={isMobile ? "none" : boxShadow}
           bg={isMobile ? "transparent" : bgColor}
+          minW={{ md: "220px" }}
+          maxW={{ md: "280px" }}
+          w="100%"
         >
           <VStack spacing={4} align="stretch">
             <FormControl>
@@ -332,6 +342,9 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
           borderRadius="lg"
           boxShadow={isMobile ? "none" : boxShadow}
           bg={isMobile ? "transparent" : bgColor}
+          minW={{ md: "220px" }}
+          maxW={{ md: "280px" }}
+          w="100%"
         >
           <VStack spacing={4} align="stretch">
             <FormControl>
@@ -374,6 +387,9 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
           borderRadius="lg"
           boxShadow={isMobile ? "none" : boxShadow}
           bg={isMobile ? "transparent" : bgColor}
+          minW={{ md: "220px" }}
+          maxW={{ md: "280px" }}
+          w="100%"
         >
           <VStack spacing={4} align="stretch">
             <FormControl>
