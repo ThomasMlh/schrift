@@ -28,6 +28,7 @@ interface CustomSelectProps {
     size?: 'sm' | 'md' | 'lg';
     accentColor?: string;
     maxW?: string | object;
+    minW?: string | object;
     w?: string | object;
     flex?: string | number;
 }
@@ -47,6 +48,7 @@ export const CustomSelect = ({
     size = 'md',
     accentColor,
     maxW,
+    minW = "120px",
     w,
     flex
 }: CustomSelectProps) => {
@@ -345,7 +347,7 @@ export const CustomSelect = ({
     });
 
     return (
-        <Box position="relative" ref={menuRef} maxW={maxW} w={w} flex={flex}>
+        <Box position="relative" ref={menuRef} maxW={maxW} minW={minW} w={w} flex={flex}>
             <Box ref={triggerRef}>
             {selectedOption ? (
                 // Affichage quand une option est sélectionnée
