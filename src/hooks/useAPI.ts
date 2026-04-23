@@ -883,6 +883,34 @@ export interface IUserStats {
     averageScore: number;
     scoreDifference: number;
   }[];
+  medianScore?: number;
+  stdDeviation?: number;
+  consistencyScore?: number;
+  cyclesWithFullParticipation?: number;
+  guildContribution?: {
+    averagePct: number;
+    byCycle: {
+      cycle_id: string;
+      userTotal: number;
+      guildTotal: number;
+      contributionPct: number;
+    }[];
+  } | null;
+  performanceByQuartile?: {
+    quartile: string;
+    averageScore: number;
+    count: number;
+  }[];
+  performanceByAttack?: {
+    attack: string;
+    averageScore: number;
+    count: number;
+  }[];
+  performanceByAlteration?: {
+    alteration: string;
+    averageScore: number;
+    count: number;
+  }[];
 }
 
 // Hook pour récupérer les statistiques d'un utilisateur

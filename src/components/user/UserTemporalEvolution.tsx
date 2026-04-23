@@ -21,11 +21,13 @@ import {
 } from "recharts";
 import type { IUserStats } from "@/hooks/useAPI";
 
+type TemporalEvolution = NonNullable<IUserStats["temporalEvolution"]>;
+
 interface UserTemporalEvolutionProps {
-  stats: IUserStats;
+  temporalEvolution: TemporalEvolution;
 }
 
-export const UserTemporalEvolution = ({ stats }: UserTemporalEvolutionProps) => {
+export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvolutionProps) => {
   const lineColor = useColorModeValue("#3182CE", "#63B3ED");
   const gridColor = useColorModeValue("#E2E8F0", "#4A5568");
   const textColor = useColorModeValue("#2D3748", "#E2E8F0");
@@ -35,7 +37,7 @@ export const UserTemporalEvolution = ({ stats }: UserTemporalEvolutionProps) => 
   // État pour le filtre d'année
   const [selectedYear, setSelectedYear] = useState<string>("all");
 
-  if (!stats.temporalEvolution || stats.temporalEvolution.length === 0) {
+  if (!temporalEvolution || temporalEvolution.length === 0) {
     return (
       <VStack spacing={4} align="stretch">
         <Heading size="md">Évolution Temporelle</Heading>
@@ -49,23 +51,23 @@ export const UserTemporalEvolution = ({ stats }: UserTemporalEvolutionProps) => 
   // Extraire les années disponibles
   const availableYears = useMemo(() => {
     const years = new Set<number>();
-    stats.temporalEvolution?.forEach((item) => {
+    temporalEvolution.forEach((item) => {
       if (item.year) {
         years.add(item.year);
       }
     });
     return Array.from(years).sort((a, b) => a - b);
-  }, [stats.temporalEvolution]);
+  }, [temporalEvolution]);
 
   // Filtrer les données par année (déjà triées chronologiquement depuis le backend)
   const filteredData = useMemo(() => {
     if (selectedYear === "all") {
-      return stats.temporalEvolution || [];
+      return temporalEvolution;
     }
-    return (stats.temporalEvolution || []).filter(
+    return temporalEvolution.filter(
       (item) => item.year === parseInt(selectedYear)
     );
-  }, [stats.temporalEvolution, selectedYear]);
+  }, [temporalEvolution, selectedYear]);
 
   // Formater les données pour le graphique
   const chartData = filteredData.map((item) => ({

@@ -8,9 +8,10 @@ import {
   Card,
   CardBody,
   Icon,
+  Tooltip,
   useColorModeValue
 } from "@chakra-ui/react";
-import { FiTrendingUp, FiTrendingDown, FiAward, FiCalendar, FiUsers, FiAlertTriangle } from "react-icons/fi";
+import { FiTrendingUp, FiTrendingDown, FiAward, FiCalendar, FiUsers, FiAlertTriangle, FiBarChart2, FiCheckCircle } from "react-icons/fi";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { RankingSection } from "./RankingSection";
 import type { IUserStats } from "@/hooks/useAPI";
@@ -399,6 +400,113 @@ export const UserStatsOverview = ({
               </HStack>
             </CardBody>
           </Card>
+        </>
+      )}
+
+      {/* Consistance & Cycles */}
+      {(stats.consistencyScore !== undefined || (stats.temporalEvolution && stats.temporalEvolution.length > 0)) && (
+        <>
+          <Divider />
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+
+            {/* Score médian */}
+            {stats.medianScore !== undefined && (
+              <Card bg={cardBg} borderRadius="xl" boxShadow="md" transition="all 0.3s" _hover={{ transform: "translateY(-2px)", boxShadow: "lg", bg: hoverBg }}>
+                <CardBody>
+                  <HStack spacing={3} mb={3}>
+                    <Box p={2} borderRadius="lg" bg="cyan.100" color="cyan.600" _dark={{ bg: "cyan.900", color: "cyan.300" }}>
+                      <Icon as={FiBarChart2} boxSize={5} />
+                    </Box>
+                    <Tooltip label="Valeur centrale de tous tes scores — moins sensible aux extrêmes que la moyenne" placement="top" hasArrow>
+                      <Text fontSize="xs" fontWeight="bold" color="cyan.500" textTransform="uppercase" letterSpacing="wide" cursor="help">
+                        Score Médian
+                      </Text>
+                    </Tooltip>
+                  </HStack>
+                  <Text fontSize="2xl" fontWeight="bold" color="cyan.500" mb={1}>
+                    {(stats.medianScore / 1000000).toFixed(2)}M
+                  </Text>
+                  {stats.averageScore > 0 && (
+                    <Text fontSize="sm" color="gray.600" _dark={{ color: "gray.400" }}>
+                      {stats.medianScore > stats.averageScore
+                        ? `+${((stats.medianScore - stats.averageScore) / 1000000).toFixed(2)}M vs moyenne`
+                        : `${((stats.medianScore - stats.averageScore) / 1000000).toFixed(2)}M vs moyenne`}
+                    </Text>
+                  )}
+                </CardBody>
+              </Card>
+            )}
+
+            {/* Consistance */}
+            {stats.consistencyScore !== undefined && (
+              <Card bg={cardBg} borderRadius="xl" boxShadow="md" transition="all 0.3s" _hover={{ transform: "translateY(-2px)", boxShadow: "lg", bg: hoverBg }}>
+                <CardBody>
+                  <HStack spacing={3} mb={3}>
+                    <Box
+                      p={2}
+                      borderRadius="lg"
+                      bg={stats.consistencyScore <= 15 ? "green.100" : stats.consistencyScore <= 30 ? "yellow.100" : "red.100"}
+                      color={stats.consistencyScore <= 15 ? "green.600" : stats.consistencyScore <= 30 ? "yellow.600" : "red.600"}
+                      _dark={{
+                        bg: stats.consistencyScore <= 15 ? "green.900" : stats.consistencyScore <= 30 ? "yellow.900" : "red.900",
+                        color: stats.consistencyScore <= 15 ? "green.300" : stats.consistencyScore <= 30 ? "yellow.300" : "red.300"
+                      }}
+                    >
+                      <Icon as={FiTrendingUp} boxSize={5} />
+                    </Box>
+                    <Tooltip label="Coefficient de variation : écart-type / moyenne. Plus bas = plus régulier." placement="top" hasArrow>
+                      <Text
+                        fontSize="xs"
+                        fontWeight="bold"
+                        color={stats.consistencyScore <= 15 ? "green.500" : stats.consistencyScore <= 30 ? "yellow.500" : "red.500"}
+                        textTransform="uppercase"
+                        letterSpacing="wide"
+                        cursor="help"
+                      >
+                        Consistance
+                      </Text>
+                    </Tooltip>
+                  </HStack>
+                  <HStack align="baseline" spacing={2} mb={1}>
+                    <Text
+                      fontSize="2xl"
+                      fontWeight="bold"
+                      color={stats.consistencyScore <= 15 ? "green.500" : stats.consistencyScore <= 30 ? "yellow.500" : "red.500"}
+                    >
+                      {stats.consistencyScore <= 15 ? "Très régulier" : stats.consistencyScore <= 30 ? "Régulier" : "Irrégulier"}
+                    </Text>
+                  </HStack>
+                  <Text fontSize="sm" color="gray.600" _dark={{ color: "gray.400" }}>
+                    CV {stats.consistencyScore}% — σ {stats.stdDeviation !== undefined ? (stats.stdDeviation / 1000000).toFixed(2) : "?"}M
+                  </Text>
+                </CardBody>
+              </Card>
+            )}
+
+            {/* Cycles joués */}
+            {(stats.cyclesWithFullParticipation !== undefined || (stats.temporalEvolution && stats.temporalEvolution.length > 0)) && (
+              <Card bg={cardBg} borderRadius="xl" boxShadow="md" transition="all 0.3s" _hover={{ transform: "translateY(-2px)", boxShadow: "lg", bg: hoverBg }}>
+                <CardBody>
+                  <HStack spacing={3} mb={3}>
+                    <Box p={2} borderRadius="lg" bg="teal.100" color="teal.600" _dark={{ bg: "teal.900", color: "teal.300" }}>
+                      <Icon as={FiCheckCircle} boxSize={5} />
+                    </Box>
+                    <Text fontSize="xs" fontWeight="bold" color="teal.500" textTransform="uppercase" letterSpacing="wide">
+                      Cycles Joués
+                    </Text>
+                  </HStack>
+                  <Text fontSize="3xl" fontWeight="bold" color="teal.500" mb={1}>
+                    {stats.temporalEvolution?.length ?? 0}
+                  </Text>
+                  {stats.cyclesWithFullParticipation !== undefined && (
+                    <Text fontSize="sm" color="gray.600" _dark={{ color: "gray.400" }}>
+                      {stats.cyclesWithFullParticipation} cycle{stats.cyclesWithFullParticipation !== 1 ? "s" : ""} complet{stats.cyclesWithFullParticipation !== 1 ? "s" : ""} (20 rot.)
+                    </Text>
+                  )}
+                </CardBody>
+              </Card>
+            )}
+          </SimpleGrid>
         </>
       )}
     </VStack>

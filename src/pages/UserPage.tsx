@@ -35,6 +35,8 @@ import { UserTopRotations } from "@/components/user/UserTopRotations";
 import { UserTemporalEvolution } from "@/components/user/UserTemporalEvolution";
 import { UserRecentTrend } from "@/components/user/UserRecentTrend";
 import { UserRivals } from "@/components/user/UserRivals";
+import { UserGuildContribution } from "@/components/user/UserGuildContribution";
+import { UserPositionPerformance } from "@/components/user/UserPositionPerformance";
 import { BanDetailsCard } from "@/components/user/BanDetailsCard";
 import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock } from "react-icons/fi";
 import { getDiscordBannerUrl } from "@/utils/discord";
@@ -84,6 +86,8 @@ const UserPage = () => {
     userId,
     selectedCycle
   );
+  // Stats sans filtre de cycle — uniquement pour l'évolution temporelle globale
+  const { stats: globalStats } = useUserStats(userId);
 
   // Sélectionner le cycle le plus récent par défaut
   useEffect(() => {
@@ -416,7 +420,7 @@ const UserPage = () => {
                       <Icon as={FiAward} mr={2} />
                       Top Rotations
                     </Tab>
-                    <Tab {...tabStyles}>
+                    <Tab {...tabStyles} isDisabled={!globalStats?.temporalEvolution || globalStats.temporalEvolution.length < 2}>
                       <Icon as={FiClock} mr={2} />
                       Évolution
                     </Tab>
@@ -440,6 +444,22 @@ const UserPage = () => {
                             currentUserRank={stats.ranking?.global || null}
                             currentUserAverage={stats.averageScore}
                             loggedInUserId={currentUser?._id}
+                          />
+                        )}
+
+                        {/* Contribution à la guilde */}
+                        {globalStats?.guildContribution && globalStats.guildContribution.byCycle.length > 0 && (
+                          <UserGuildContribution
+                            guildContribution={globalStats.guildContribution}
+                            guildName={user?.guild_name}
+                            temporalEvolution={globalStats.temporalEvolution}
+                          />
+                        )}
+
+                        {/* Performance par période du cycle */}
+                        {globalStats?.performanceByQuartile && globalStats.performanceByQuartile.length >= 2 && (
+                          <UserPositionPerformance
+                            performanceByQuartile={globalStats.performanceByQuartile}
                           />
                         )}
                       </VStack>
@@ -470,7 +490,7 @@ const UserPage = () => {
 
                     {/* Évolution temporelle */}
                     <TabPanel p={0}>
-                      <UserTemporalEvolution stats={stats} />
+                      <UserTemporalEvolution temporalEvolution={globalStats?.temporalEvolution ?? []} />
                     </TabPanel>
                   </TabPanels>
                 </Tabs>

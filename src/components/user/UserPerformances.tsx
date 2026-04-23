@@ -1,5 +1,6 @@
-import { VStack, Heading, Text, Center } from "@chakra-ui/react";
+import { VStack, Heading, Text, Center, Divider } from "@chakra-ui/react";
 import { UserRotationsChart } from "@/components/charts/UserRotationsChart";
+import { UserTypeAnalysis } from "@/components/user/UserTypeAnalysis";
 import type { IUserStats } from "@/hooks/useAPI";
 
 interface UserPerformancesProps {
@@ -24,6 +25,14 @@ export const UserPerformances = ({ stats }: UserPerformancesProps) => {
           <Text color="gray.500">Pas assez de données disponibles</Text>
         </Center>
       )}
+
+      <Divider />
+
+      <Heading size="md">Analyse par Type</Heading>
+      <Text fontSize="sm" color="gray.500">
+        Performances agrégées par killer, type d'attaque et altération d'état
+      </Text>
+      <UserTypeAnalysis stats={stats} />
     </VStack>
   );
 };
