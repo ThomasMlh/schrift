@@ -1,9 +1,11 @@
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { Box, Button, Container } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const NotFound = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     return (
         <Box w="100%">
             <Container maxW="container.xl" py={8}>
@@ -13,10 +15,10 @@ const NotFound = () => {
                         404
                     </Box>
                     <Box fontSize="2xl" mt={4} mb={2}>
-                        Oops! Page non trouvée.
+                        {t("pages.notFound.title")}
                     </Box>
                     <Box color="gray.500" mb={6}>
-                        La page que vous recherchez n'existe pas.
+                        {t("pages.notFound.message")}
                     </Box>
                 <Button
                     leftIcon={<ArrowBackIcon />}
@@ -24,7 +26,7 @@ const NotFound = () => {
                     alignSelf="flex-start"
                     onClick={() => navigate('/')}
                 >
-                    Retour à l'accueil
+                    {t("pages.notFound.backHome")}
                 </Button>
                 </Box>
             </Container>

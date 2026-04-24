@@ -21,10 +21,12 @@ import { CycleSelect } from "./ui/CycleSelect";
 import { CustomSelect } from "./ui/CustomSelect";
 import type { ICycle, IPodiumPlayer } from "@/interfaces";
 import { useCycles, useGuilds, usePodium } from "@/hooks/useAPI";
+import { useTranslation } from "react-i18next";
 
 export const PodiumSection: React.FC = () => {
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
   const [selectedGuildId, setSelectedGuildId] = useState<string>("global");
+  const { t } = useTranslation();
 
   const { cycles, isLoading: cyclesLoading } = useCycles({ limit: 50, authenticated: true });
   const { guilds } = useGuilds(true);
@@ -115,9 +117,9 @@ export const PodiumSection: React.FC = () => {
       <VStack spacing={6} align="stretch">
         {/* En-tête */}
         <VStack spacing={4} textAlign="center">
-          <Heading size="lg">🏆 Podium des Joueurs</Heading>
+          <Heading size="lg">{t("components.podiumSection.heading")}</Heading>
           <Text color="gray.600" fontSize="sm">
-            Classement basé sur la moyenne des scores par cycle
+            {t("components.podiumSection.description")}
           </Text>
         </VStack>
 
@@ -126,13 +128,13 @@ export const PodiumSection: React.FC = () => {
           {/* Sélection du cycle */}
           <Box flex={1}>
             <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
-              Cycle
+              {t("components.podiumSection.cycleLabel")}
             </Text>
             <CycleSelect
               cycles={cycles}
               value={selectedCycleId}
               onChange={setSelectedCycleId}
-              placeholder="Sélectionner un cycle"
+              placeholder={t("components.podiumSection.cyclePlaceholder")}
               allowDeselect={true}
               size="sm"
             />
@@ -141,19 +143,19 @@ export const PodiumSection: React.FC = () => {
           {/* Sélection de la guilde */}
           <Box flex={1}>
             <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
-              Guilde
+              {t("components.podiumSection.guildLabel")}
             </Text>
             <CustomSelect
               value={selectedGuildId}
               onChange={setSelectedGuildId}
               options={[
-                { value: "global", label: "🌍 Global (Toutes les guildes)" },
+                { value: "global", label: t("components.podiumSection.guildGlobal") },
                 ...guilds.map((guild) => ({
                   value: guild._id,
                   label: `🏰 ${guild.name}`
                 }))
               ]}
-              placeholder="Sélectionner une guilde"
+              placeholder={t("components.podiumSection.guildPlaceholder")}
               allowDeselect={false}
               size="sm"
             />
@@ -166,11 +168,11 @@ export const PodiumSection: React.FC = () => {
             <AlertIcon />
             <VStack align="start" spacing={0} fontSize="sm">
               <Text>
-                <strong>Cycle:</strong> {selectedCycle.name}
+                <strong>{t("components.podiumSection.infoCycle")}:</strong> {selectedCycle.name}
               </Text>
               <Text>
-                <strong>Guilde:</strong>{" "}
-                {selectedGuildId === "global" ? "Global" : selectedGuild?.name}
+                <strong>{t("components.podiumSection.infoGuild")}:</strong>{" "}
+                {selectedGuildId === "global" ? t("components.podiumSection.guildGlobalShort") : selectedGuild?.name}
               </Text>
             </VStack>
           </Alert>
@@ -180,7 +182,7 @@ export const PodiumSection: React.FC = () => {
         {!selectedCycleId ? (
           <Alert status="info" borderRadius="md">
             <AlertIcon />
-            <Text>Veuillez sélectionner un cycle pour afficher le podium</Text>
+            <Text>{t("components.podiumSection.selectCycleHint")}</Text>
           </Alert>
         ) : error ? (
           <Alert status="error" borderRadius="md">
@@ -191,7 +193,7 @@ export const PodiumSection: React.FC = () => {
           <Flex justify="center" align="center" py={8}>
             <VStack spacing={3}>
               <Spinner size="lg" />
-              <Text>Chargement du podium...</Text>
+              <Text>{t("components.podiumSection.loading")}</Text>
             </VStack>
           </Flex>
         ) : podium && podium.length > 0 ? (
@@ -235,7 +237,7 @@ export const PodiumSection: React.FC = () => {
         ) : (
           <Alert status="warning" borderRadius="md">
             <AlertIcon />
-            <Text>Aucun score trouvé pour ce cycle</Text>
+            <Text>{t("components.podiumSection.noScores")}</Text>
           </Alert>
         )}
 

@@ -28,10 +28,12 @@ import { AlterationImage } from "../components/ui/AlterationImage";
 import CustomLink from "@/components/ui/CustomLink";
 import { useCycle } from "@/hooks/useAPI";
 import { SEOHead } from "@/components/SEOHead";
+import { useTranslation } from "react-i18next";
 
 const CycleDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   // Utiliser useSWR pour le cycle (cache automatique)
   const { cycle, isLoading, error: fetchError } = useCycle(id);
@@ -50,10 +52,10 @@ const CycleDetailPage = () => {
 
   useEffect(() => {
     if (fetchError) {
-      setError("Erreur lors du chargement du cycle");
+      setError(t("pages.cycleDetail.errorLoading"));
     }
     if (!id) {
-      setError("ID du cycle manquant");
+      setError(t("pages.cycleDetail.errorMissingId"));
     }
   }, [fetchError, id]);
 
@@ -73,13 +75,13 @@ const CycleDetailPage = () => {
         <VStack spacing={4}>
           <Alert status="error">
             <AlertIcon />
-            {error || "Cycle non trouvé"}
+            {error || t("pages.cycleDetail.errorNotFound")}
           </Alert>
           <Button
             leftIcon={<ArrowBackIcon />}
             onClick={() => navigate("/cycles")}
           >
-            Retour aux cycles
+            {t("pages.cycleDetail.backToCycles")}
           </Button>
         </VStack>
       </Container>
@@ -106,7 +108,7 @@ const CycleDetailPage = () => {
               _hover={{ bg: rotationHoverBg, transform: "translateX(-4px)" }}
               transition="all 0.2s"
             >
-              Retour aux cycles
+              {t("pages.cycleDetail.backToCycles")}
             </Button>
             <Badge
               colorScheme="blue"
@@ -147,7 +149,7 @@ const CycleDetailPage = () => {
                 {cycle.name} - {cycle.year}
               </Heading>
               <Text fontSize="lg" opacity={0.9} fontWeight="medium">
-                Détail du cycle de rotation
+                {t("pages.cycleDetail.subtitle")}
               </Text>
             </VStack>
           </Box>
@@ -164,7 +166,7 @@ const CycleDetailPage = () => {
             <CardBody p={6}>
               <VStack spacing={6} align="stretch">
                 <Heading size="md" fontWeight="bold" color="blue.500">
-                  📊 Informations générales
+                  {t("pages.cycleDetail.infoHeading")}
                 </Heading>
                 <Divider />
                 <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
@@ -184,11 +186,11 @@ const CycleDetailPage = () => {
                         textTransform="uppercase"
                         letterSpacing="wide"
                       >
-                        Date de début
+                        {t("pages.cycleDetail.labelStartDate")}
                       </Text>
                     </HStack>
                     <Text fontSize="xl" fontWeight="bold" color="green.500">
-                      {cycle.rotations[0].start_date || "Non définie"}
+                      {cycle.rotations[0].start_date || t("pages.cycleDetail.notDefined")}
                     </Text>
                   </Box>
                   <Box
@@ -207,12 +209,12 @@ const CycleDetailPage = () => {
                         textTransform="uppercase"
                         letterSpacing="wide"
                       >
-                        Date de fin
+                        {t("pages.cycleDetail.labelEndDate")}
                       </Text>
                     </HStack>
                     <Text fontSize="xl" fontWeight="bold" color="red.500">
                       {cycle.rotations[cycle.rotations.length - 1].end_date ||
-                        "Non définie"}
+                        t("pages.cycleDetail.notDefined")}
                     </Text>
                   </Box>
                   <Box
@@ -231,7 +233,7 @@ const CycleDetailPage = () => {
                         textTransform="uppercase"
                         letterSpacing="wide"
                       >
-                        Rotations
+                        {t("pages.cycleDetail.labelRotations")}
                       </Text>
                     </HStack>
                     <Text fontSize="xl" fontWeight="bold" color="purple.500">
@@ -249,7 +251,7 @@ const CycleDetailPage = () => {
           <Box>
             <VStack spacing={4} align="stretch" mb={6}>
               <Heading size="md" fontWeight="bold" color="purple.500">
-                🎯 Rotations détaillées
+                {t("pages.cycleDetail.rotationsHeading")}
               </Heading>
               <Alert
                 status="info"
@@ -260,7 +262,7 @@ const CycleDetailPage = () => {
               >
                 <AlertIcon />
                 <Text fontSize="sm" fontWeight="medium">
-                  💡 Cliquez sur une rotation pour voir son classement détaillé
+                  {t("pages.cycleDetail.rotationsClickTip")}
                 </Text>
               </Alert>
             </VStack>
@@ -438,13 +440,13 @@ const CycleDetailPage = () => {
                             <HStack spacing={2}>
                               <CalendarIcon color="green.500" boxSize={3} />
                               <Text fontSize="xs" color={textSecondary} fontWeight="medium">
-                                {rotation.start_date || "Non définie"}
+                                {rotation.start_date || t("pages.cycleDetail.notDefined")}
                               </Text>
                             </HStack>
                             <HStack spacing={2}>
                               <CalendarIcon color="red.500" boxSize={3} />
                               <Text fontSize="xs" color={textSecondary} fontWeight="medium">
-                                {rotation.end_date || "Non définie"}
+                                {rotation.end_date || t("pages.cycleDetail.notDefined")}
                               </Text>
                             </HStack>
                           </VStack>

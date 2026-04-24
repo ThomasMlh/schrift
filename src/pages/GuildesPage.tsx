@@ -13,12 +13,14 @@ import { SEOHead } from "../components/SEOHead";
 import { GuildOrgChart } from "../components/GuildOrgChart";
 import { useGuilds, useAllGuildsMemberCounts } from "@/hooks/useAPI";
 import type { IGuild } from "../interfaces";
+import { useTranslation } from "react-i18next";
 
 const GuildesPage = () => {
   const { guilds } = useGuilds(true);
   const [selectedGuild, setSelectedGuild] = useState<IGuild | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+  const { t } = useTranslation();
 
   const cardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.6)");
   const cardBorder = useColorModeValue("gray.200", "whiteAlpha.100");
@@ -50,8 +52,8 @@ const GuildesPage = () => {
   return (
     <>
       <SEOHead
-        title="Guildes - Schrift BBS"
-        description="Découvrez l'organisation des guildes Schrift A, B, C et D pour Bleach Brave Souls. Consultez la hiérarchie et les membres de chaque guilde."
+        title={t("pages.guilds.seoTitle")}
+        description={t("pages.guilds.seoDescription")}
         keywords="Bleach Brave Souls, BBS, guildes, Schrift, organisation, membres"
         url="https://bbs-schrift.fr/guildes"
         structuredData={structuredData}
@@ -60,7 +62,7 @@ const GuildesPage = () => {
       <Container maxW="container.xl" py={8}>
         <VStack spacing={8} w="100%">
           <Heading as="h1" size="xl" textAlign="center">
-            Guildes Ṣčhrīft
+            {t("pages.guilds.heading")}
           </Heading>
 
           {/* Sélecteur de guilde */}
@@ -135,7 +137,7 @@ const GuildesPage = () => {
                       letterSpacing="wide"
                       color={isSelected ? "purple.300" : countColor}
                     >
-                      {memberCount} joueur{memberCount !== 1 ? "s" : ""}
+                      {memberCount} {memberCount !== 1 ? t("pages.guilds.memberPlural") : t("pages.guilds.memberSingular")}
                     </Text>
                   </Flex>
                 </Box>
@@ -148,7 +150,7 @@ const GuildesPage = () => {
             {isLoading ? (
               <Flex justify="center" align="center" h="400px">
                 <Heading size="md" color="gray.500">
-                  Chargement...
+                  {t("pages.guilds.loading")}
                 </Heading>
               </Flex>
             ) : (

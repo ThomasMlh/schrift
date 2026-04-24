@@ -12,6 +12,7 @@ import { useCycles, useGuilds, usePodiumFetch } from "@/hooks/useAPI";
 import { PodiumFilters } from "@/components/podium/PodiumFilters";
 import { PodiumInfo } from "@/components/podium/PodiumInfo";
 import { PodiumResults } from "@/components/podium/PodiumResults";
+import { useTranslation } from "react-i18next";
 
 type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
 type CycleRankingType = "average" | "max";
@@ -19,6 +20,7 @@ type CycleRankingType = "average" | "max";
 const PodiumPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const toast = useToast();
+  const { t } = useTranslation();
   const hasLoadedFromURL = useRef(false);
 
   // États
@@ -145,7 +147,7 @@ const PodiumPage = () => {
       setPodiumData(data);
     } else if (error) {
       toast({
-        title: "Erreur",
+        title: t("common.error"),
         description: error,
         status: "error",
         duration: 3000,
@@ -342,27 +344,27 @@ const PodiumPage = () => {
   return (
     <>
       <SEOHead
-        title="Schrift BBS - Podium des Joueurs - Bleach Brave Souls"
-        description="Découvrez tous les joueurs de Bleach Brave Souls. Consultez leurs statistiques, classements et informations de guilde."
+        title={t("pages.podium.seoTitle")}
+        description={t("pages.podium.seoDescription")}
         keywords="joueurs, classements, statistiques"
         url="https://bbs-schrift.fr/joueurs"
         structuredData={structuredData}
       />
       <Box w="100%">
         <HeroSection
-          title="Podium des Joueurs"
+          title={t("pages.podium.heroTitle")}
           description={
             displayMode === "rotation"
-              ? "Classement des scores individuels pour une rotation"
+              ? t("pages.podium.heroDescriptionRotation")
               : displayMode === "weekly"
-              ? "Classement par semaine (2 rotations)"
+              ? t("pages.podium.heroDescriptionWeekly")
               : displayMode === "misses"
-              ? "Classement des miss (scores négatifs)"
+              ? t("pages.podium.heroDescriptionMisses")
               : cycleRankingType === "max"
-              ? "Classement par score max (somme des scores) sur le cycle"
-              : "Classement des moyennes par cycle"
+              ? t("pages.podium.heroDescriptionMax")
+              : t("pages.podium.heroDescriptionAverage")
           }
-          badge={{ text: "Classement", icon: "🏆" }}
+          badge={{ text: t("pages.podium.heroBadge"), icon: "🏆" }}
         />
 
         <Container maxW="container.xl" py={8}>

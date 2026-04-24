@@ -1,9 +1,11 @@
 import { Container, Heading, VStack } from "@chakra-ui/react";
 import { CharactersTable } from "../components/CharactersTable";
 import { SEOHead } from "../components/SEOHead";
+import { useTranslation } from "react-i18next";
 
 const CharactersPage = () => {
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
+  const { t } = useTranslation();
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -42,8 +44,8 @@ const CharactersPage = () => {
   return (
     <>
       <SEOHead
-        title="Schrift BBS - Base de données complète"
-        description="Découvrez tous les personnages de Bleach Brave Souls avec leurs statistiques, affinités, types d'attaque et informations détaillées. Base de données mise à jour régulièrement."
+        title={t("pages.characters.seoTitle")}
+        description={t("pages.characters.seoDescription")}
         keywords="Bleach Brave Souls, BBS, personnages, statistiques, affinités, base de données, characters"
         url="https://bbs-schrift.fr/personnages"
         structuredData={structuredData}
@@ -51,7 +53,7 @@ const CharactersPage = () => {
       <Container maxW="container.xl" py={8}>
         <VStack spacing={8} align="stretch">
           <Heading textAlign="center">
-            Base de données des personnages Ṣčhrīft
+            {t("pages.characters.heading")}
           </Heading>
           
           <CharactersTable apiUrl={apiUrl} />

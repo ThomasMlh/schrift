@@ -37,6 +37,7 @@ import { useUsers, useCycles, useGuilds, fetchUserStats, fetchGuildStats } from 
 import type { IUser, IGuild } from "@/interfaces";
 import type { IUserStats, IGuildStats } from "@/hooks/useAPI";
 import { FiRefreshCw, FiBarChart2, FiUsers } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 
 interface SelectedPlayer {
   id: string;
@@ -51,6 +52,7 @@ interface SelectedGuild {
 const ComparatorPage: React.FC = () => {
   const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   // Type de comparaison
   const [comparisonType, setComparisonType] = useState<"players" | "guilds">(
@@ -137,8 +139,8 @@ const ComparatorPage: React.FC = () => {
   const loadPlayersStats = async () => {
     if (selectedPlayers.length < 2) {
       toast({
-        title: "Sélection insuffisante",
-        description: "Veuillez sélectionner au moins 2 joueurs pour comparer",
+        title: t("pages.comparator.toastInsufficientTitle"),
+        description: t("pages.comparator.toastMin2Players"),
         status: "warning",
         duration: 3000
       });
@@ -159,15 +161,15 @@ const ComparatorPage: React.FC = () => {
       setPlayersStats(newStatsMap);
 
       toast({
-        title: "Comparaison chargée",
+        title: t("pages.comparator.toastComparisonLoadedTitle"),
         description: `Stats de ${selectedPlayers.length} joueurs chargées avec succès`,
         status: "success",
         duration: 2000
       });
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Erreur lors du chargement des statistiques",
+        title: t("common.error"),
+        description: t("pages.comparator.toastErrorLoadingStats"),
         status: "error",
         duration: 3000
       });
@@ -180,8 +182,8 @@ const ComparatorPage: React.FC = () => {
   const loadGuildsStats = async () => {
     if (selectedGuilds.length < 2) {
       toast({
-        title: "Sélection insuffisante",
-        description: "Veuillez sélectionner au moins 2 guildes pour comparer",
+        title: t("pages.comparator.toastInsufficientTitle"),
+        description: t("pages.comparator.toastMin2Guilds"),
         status: "warning",
         duration: 3000
       });
@@ -202,15 +204,15 @@ const ComparatorPage: React.FC = () => {
       setGuildsStats(newStatsMap);
 
       toast({
-        title: "Comparaison chargée",
+        title: t("pages.comparator.toastComparisonLoadedTitle"),
         description: `Stats de ${selectedGuilds.length} guildes chargées avec succès`,
         status: "success",
         duration: 2000
       });
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Erreur lors du chargement des statistiques",
+        title: t("common.error"),
+        description: t("pages.comparator.toastErrorLoadingStats"),
         status: "error",
         duration: 3000
       });
@@ -291,8 +293,8 @@ const ComparatorPage: React.FC = () => {
   return (
     <Box mb={"150px"}>
       <SEOHead
-        title="Schrift BBS - Comparateur"
-        description="Comparez les performances entre joueurs ou guildes dans Bleach Brave Souls."
+        title={t("pages.comparator.seoTitle")}
+        description={t("pages.comparator.seoDescription")}
         keywords="comparateur, multi-joueurs, guildes, radar, statistiques, comparaison"
         url="https://bbs-schrift.fr/comparateur"
         structuredData={structuredData}
@@ -300,9 +302,9 @@ const ComparatorPage: React.FC = () => {
 
       <Box w="100%">
         <HeroSection
-          title="Comparateur Avancé"
-          description="Comparez les performances de joueurs ou de guildes"
-          badge={{ text: "Analyse", icon: "⚔️" }}
+          title={t("pages.comparator.heroTitle")}
+          description={t("pages.comparator.heroDescription")}
+          badge={{ text: t("pages.comparator.heroBadge"), icon: "⚔️" }}
         />
 
         <Container maxW="container.xl" py={8} >
@@ -324,7 +326,7 @@ const ComparatorPage: React.FC = () => {
                 <HStack spacing={2}>
                   <Icon as={FiBarChart2} boxSize={6} />
                   <Text fontSize="lg" fontWeight="bold">
-                    Configuration
+                    {t("pages.comparator.configHeading")}
                   </Text>
                 </HStack>
               </Box>
@@ -334,19 +336,19 @@ const ComparatorPage: React.FC = () => {
                   {/* Sélecteur de cycle */}
                   <Box>
                     <Text fontSize="sm" fontWeight="medium" mb={2}>
-                      📊 Filtrer par cycle (optionnel)
+                      {t("pages.comparator.cycleFilterLabel")}
                     </Text>
                     <CycleSelect
                       cycles={cycles}
                       value={selectedCycleId}
                       onChange={handleCycleChange}
-                      placeholder="Tous les cycles"
+                      placeholder={t("pages.comparator.cycleAllPlaceholder")}
                       allowDeselect={true}
                       size="md"
                     />
                     {selectedCycleId && (
                       <Badge mt={2} colorScheme="blue">
-                        Cycle sélectionné
+                        {t("pages.comparator.badgeCycleSelected")}
                       </Badge>
                     )}
                   </Box>
@@ -376,7 +378,7 @@ const ComparatorPage: React.FC = () => {
                       onClick={handleReset}
                       leftIcon={<Icon as={FiRefreshCw} />}
                     >
-                      Réinitialiser
+                      {t("pages.comparator.buttonReset")}
                     </Button>
                   </VStack>
                 </SimpleGrid>
@@ -395,11 +397,11 @@ const ComparatorPage: React.FC = () => {
                   <TabList>
                     <Tab fontSize="md" fontWeight="semibold">
                       <Icon as={FiUsers} mr={2} />
-                      Joueurs
+                      {t("pages.comparator.tabPlayers")}
                     </Tab>
                     <Tab fontSize="md" fontWeight="semibold">
                       <Icon as={FiUsers} mr={2} />
-                      Guildes
+                      {t("pages.comparator.tabGuilds")}
                     </Tab>
                   </TabList>
 
@@ -419,7 +421,7 @@ const ComparatorPage: React.FC = () => {
                         {selectedPlayers.length < 2 && (
                           <Alert status="info" borderRadius="xl">
                             <AlertIcon />
-                            Sélectionnez au moins 2 joueurs pour commencer la comparaison
+                            {t("pages.comparator.alertMin2Players")}
                           </Alert>
                         )}
 
@@ -427,7 +429,7 @@ const ComparatorPage: React.FC = () => {
                           <Center py={20}>
                             <VStack spacing={4}>
                               <Spinner size="xl" color="blue.500" thickness="4px" />
-                              <Text>Chargement des statistiques...</Text>
+                              <Text>{t("pages.comparator.loadingStats")}</Text>
                             </VStack>
                           </Center>
                         )}
@@ -440,11 +442,11 @@ const ComparatorPage: React.FC = () => {
                             <Alert status="success" borderRadius="xl" variant="subtle">
                               <AlertIcon />
                               <VStack align="start" spacing={1}>
-                                <Text fontWeight="bold">✅ Comparaison réussie !</Text>
+                                <Text fontWeight="bold">{t("pages.comparator.comparisonSuccessTitle")}</Text>
                                 <Text fontSize="sm">
                                   {selectedPlayers.length} joueur{selectedPlayers.length > 1 ? "s" : ""} comparé
                                   {selectedPlayers.length > 1 ? "s" : ""}{" "}
-                                  {selectedCycleId ? "sur le cycle sélectionné" : "sur tous les cycles"}
+                                  {selectedCycleId ? t("pages.comparator.comparisonOnSelectedCycle") : t("pages.comparator.comparisonOnAllCycles")}
                                 </Text>
                               </VStack>
                             </Alert>
@@ -468,7 +470,7 @@ const ComparatorPage: React.FC = () => {
                         {selectedGuilds.length < 2 && (
                           <Alert status="info" borderRadius="xl">
                             <AlertIcon />
-                            Sélectionnez au moins 2 guildes pour commencer la comparaison
+                            {t("pages.comparator.alertMin2Guilds")}
                           </Alert>
                         )}
 
@@ -476,7 +478,7 @@ const ComparatorPage: React.FC = () => {
                           <Center py={20}>
                             <VStack spacing={4}>
                               <Spinner size="xl" color="purple.500" thickness="4px" />
-                              <Text>Chargement des statistiques...</Text>
+                              <Text>{t("pages.comparator.loadingStats")}</Text>
                             </VStack>
                           </Center>
                         )}
@@ -489,11 +491,11 @@ const ComparatorPage: React.FC = () => {
                             <Alert status="success" borderRadius="xl" variant="subtle">
                               <AlertIcon />
                               <VStack align="start" spacing={1}>
-                                <Text fontWeight="bold">✅ Comparaison réussie !</Text>
+                                <Text fontWeight="bold">{t("pages.comparator.comparisonSuccessTitle")}</Text>
                                 <Text fontSize="sm">
                                   {selectedGuilds.length} guilde{selectedGuilds.length > 1 ? "s" : ""} comparée
                                   {selectedGuilds.length > 1 ? "s" : ""}{" "}
-                                  {selectedCycleId ? "sur le cycle sélectionné" : "sur tous les cycles"}
+                                  {selectedCycleId ? t("pages.comparator.comparisonOnSelectedCycle") : t("pages.comparator.comparisonOnAllCycles")}
                                 </Text>
                               </VStack>
                             </Alert>

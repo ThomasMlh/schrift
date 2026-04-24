@@ -29,10 +29,12 @@ import { CustomSelect } from "../components/ui/CustomSelect";
 import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "../components/SEOHead";
 import { useCycles } from "@/hooks/useAPI";
+import { useTranslation } from "react-i18next";
 
 const CyclesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(6); // Bon nombre pour la grille
+  const [itemsPerPage, setItemsPerPage] = useState(6);
+  const { t } = useTranslation();
   
   // Utiliser useSWR pour les cycles avec pagination
   const { cycles = [], pagination, isLoading, mutate: mutateCycles } = useCycles({ page: currentPage, limit: itemsPerPage });
@@ -71,17 +73,17 @@ const CyclesPage = () => {
   return (
     <>
       <SEOHead
-        title="Schrift BBS - Cycles de Rotation - Bleach Brave Souls"
-        description="Découvrez tous les cycles de rotation de Bleach Brave Souls. Consultez les rotations, événements et classements de guilde détaillés."
+        title={t("pages.cycles.seoTitle")}
+        description={t("pages.cycles.seoDescription")}
         keywords="cycles, rotation, événements, classements"
         url="https://bbs-schrift.fr/cycles"
         structuredData={structuredData}
       />
       <Box w="100%">
         <HeroSection
-          title="Cycles de Rotation"
-          description="Découvrez tous les cycles de rotation disponibles"
-          badge={{ text: "Événements BBS", icon: "⚡" }}
+          title={t("pages.cycles.heroTitle")}
+          description={t("pages.cycles.heroDescription")}
+          badge={{ text: t("pages.cycles.heroBadge"), icon: "⚡" }}
           size="lg"
         />
 
@@ -102,14 +104,14 @@ const CyclesPage = () => {
                 <HStack spacing={2}>
                   <CalendarIcon boxSize={5} color="blue.500" />
                   <Text fontSize="xs" fontWeight="semibold" color="gray.500" textTransform="uppercase" letterSpacing="wide">
-                    Total
+                    {t("pages.cycles.statsTotal")}
                   </Text>
                 </HStack>
                 <Text fontSize="3xl" fontWeight="bold" bgGradient="linear(to-r, blue.500, purple.500)" bgClip="text">
                   {isLoading ? "..." : (pagination?.totalCount ?? cycles.length)}
                 </Text>
                 <Text fontSize="sm" color="gray.500">
-                  cycle{(pagination?.totalCount ?? cycles.length) > 1 ? 's' : ''} disponible{(pagination?.totalCount ?? cycles.length) > 1 ? 's' : ''}
+                  {(pagination?.totalCount ?? cycles.length) > 1 ? t("pages.cycles.statsCyclePlural") : t("pages.cycles.statsCycleSingular")}
                 </Text>
               </VStack>
               
@@ -118,14 +120,14 @@ const CyclesPage = () => {
                   <HStack spacing={2}>
                     <ViewIcon boxSize={5} color="purple.500" />
                     <Text fontSize="xs" fontWeight="semibold" color="gray.500" textTransform="uppercase" letterSpacing="wide">
-                      Page actuelle
+                      {t("pages.cycles.statsCurrentPage")}
                     </Text>
                   </HStack>
                   <Text fontSize="3xl" fontWeight="bold" bgGradient="linear(to-r, purple.500, pink.500)" bgClip="text">
                     {pagination.itemsOnPage}
                   </Text>
                   <Text fontSize="sm" color="gray.500">
-                    sur cette page
+                    {t("pages.cycles.statsOnPage")}
                   </Text>
                 </VStack>
               )}
@@ -137,10 +139,10 @@ const CyclesPage = () => {
                 onChange={(val) => handleItemsPerPageChange(parseInt(val))}
                 w={{ base: "full", sm: "140px" }}
                 options={[
-                  { value: "3", label: "3 par page" },
-                  { value: "6", label: "6 par page" },
-                  { value: "9", label: "9 par page" },
-                  { value: "12", label: "12 par page" },
+                  { value: "3", label: t("pages.cycles.select3") },
+                  { value: "6", label: t("pages.cycles.select6") },
+                  { value: "9", label: t("pages.cycles.select9") },
+                  { value: "12", label: t("pages.cycles.select12") },
                 ]}
                 allowDeselect={false}
               />
@@ -155,7 +157,7 @@ const CyclesPage = () => {
                 borderRadius="lg"
                 px={6}
               >
-                Actualiser
+                {t("pages.cycles.buttonRefresh")}
               </Button>
             </HStack>
           </Flex>
@@ -165,13 +167,13 @@ const CyclesPage = () => {
           <Flex justify="center" p={16}>
             <VStack spacing={4}>
               <Spinner size="xl" color="blue.500" thickness="4px" />
-              <Text color="gray.500">Chargement des cycles...</Text>
+              <Text color="gray.500">{t("pages.cycles.loading")}</Text>
             </VStack>
           </Flex>
         ) : !Array.isArray(cycles) || cycles.length === 0 ? (
           <Alert status="info" borderRadius="lg">
             <AlertIcon />
-            {!Array.isArray(cycles) ? "Erreur lors du chargement des cycles." : "Aucun cycle disponible pour le moment."}
+            {!Array.isArray(cycles) ? t("pages.cycles.errorLoading") : t("pages.cycles.noCycles")}
           </Alert>
         ) : (
           <VStack spacing={8}>
@@ -208,7 +210,7 @@ const CyclesPage = () => {
                         bgClip="text"
                         fontWeight="bold"
                       >
-                        Année {year}
+                        {t("pages.cycles.yearPrefix")} {year}
                       </Heading>
                       <CalendarIcon boxSize={6} color="purple.500" />
                     </HStack>
@@ -296,7 +298,7 @@ const CyclesPage = () => {
                               <CalendarIcon color="green.600" _dark={{ color: "green.300" }} boxSize={3.5} />
                             </Box>
                             <VStack spacing={0} align="start">
-                              <Text fontSize="xs" color="gray.500" fontWeight="medium">Début</Text>
+                              <Text fontSize="xs" color="gray.500" fontWeight="medium">{t("pages.cycles.dateStart")}</Text>
                               <Text color="gray.700" _dark={{ color: "gray.200" }} fontWeight="semibold">
                                 {cycle.rotations[0].start_date}
                               </Text>
@@ -308,7 +310,7 @@ const CyclesPage = () => {
                                 <CalendarIcon color="red.600" _dark={{ color: "red.300" }} boxSize={3.5} />
                               </Box>
                               <VStack spacing={0} align="start">
-                                <Text fontSize="xs" color="gray.500" fontWeight="medium">Fin</Text>
+                                <Text fontSize="xs" color="gray.500" fontWeight="medium">{t("pages.cycles.dateEnd")}</Text>
                                 <Text color="gray.700" _dark={{ color: "gray.200" }} fontWeight="semibold">
                                   {cycle.rotations[cycle.rotations.length - 1].end_date}
                                 </Text>
@@ -328,7 +330,7 @@ const CyclesPage = () => {
                           <HStack spacing={2}>
                             <Box w="3px" h="20px" bg="blue.500" borderRadius="full" />
                             <Text fontSize="md" fontWeight="bold" color="gray.700" _dark={{ color: "gray.200" }}>
-                              Aperçu des rotations
+                              {t("pages.cycles.rotationsPreview")}
                             </Text>
                           </HStack>
                           <Badge variant="subtle" colorScheme="purple" fontSize="xs" px={2} py={1} borderRadius="md">
@@ -425,7 +427,7 @@ const CyclesPage = () => {
                               _dark={{ borderColor: "purple.600" }}
                             >
                               <Text fontSize="sm" color="purple.600" _dark={{ color: "purple.300" }} fontWeight="semibold">
-                                ✨ +{cycle.rotations.length - 5} autres rotations disponibles
+                                ✨ +{cycle.rotations.length - 5} {t("pages.cycles.moreRotations")}
                               </Text>
                             </Box>
                           )}
@@ -448,7 +450,7 @@ const CyclesPage = () => {
                           transition="all 0.2s"
                           borderRadius="lg"
                         >
-                          Voir tous les détails
+                          {t("pages.cycles.seeAllDetails")}
                         </Button>
                       </VStack>
                     )}

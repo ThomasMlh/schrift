@@ -5,6 +5,7 @@ import {
   Navigate
 } from "react-router-dom";
 import { Box, Flex, Text } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import HomePage from "./pages/HomePage";
 import CharactersPage from "./pages/CharactersPage";
 import CharacterDetailPage from "./pages/CharacterDetailPage";
@@ -35,10 +36,12 @@ const ProtectedRoute: React.FC<IProtectedRoute> = ({
   children
 }) => {
   // Pendant le chargement, ne pas rediriger
+  const { t } = useTranslation();
+
   if (isLoading) {
     return (
       <Flex w="100%" h="60vh" align="center" justify="center">
-        <Text>Vérification des droits d'accès...</Text>
+        <Text>{t("auth.verifying")}</Text>
       </Flex>
     );
   }

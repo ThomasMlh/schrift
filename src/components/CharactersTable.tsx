@@ -19,6 +19,7 @@ import { Pagination as PaginationComponent } from "./ui/Pagination";
 import CustomLink from "./ui/CustomLink";
 import { CharactersKillers, CharactersCategories, CharactersAffinities } from "../utils/chractersData";
 import { CustomSelect } from "./ui/CustomSelect";
+import { useTranslation } from "react-i18next";
 
 interface CharactersTableProps {
   apiUrl: string;
@@ -26,6 +27,7 @@ interface CharactersTableProps {
 
 export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
   
   // États - Initialiser avec les paramètres URL
   const [characters, setCharacters] = useState<ICharacter[]>([]);
@@ -161,7 +163,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
               <SearchIcon color="gray.300" />
             </InputLeftElement>
             <Input
-              placeholder="Rechercher un personnage..."
+              placeholder={t("components.charactersTable.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -228,18 +230,18 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
       {/* Affichage des filtres actifs */}
       {(searchTerm || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType) && (
         <Box p={3} bg={filterBg} borderRadius="md">
-          <Text fontSize="sm" fontWeight="semibold" mb={2}>Filtres actifs :</Text>
+          <Text fontSize="sm" fontWeight="semibold" mb={2}>{t("components.charactersTable.activeFilters")}:</Text>
           <HStack spacing={2} flexWrap="wrap">
             {searchTerm && (
               <Badge colorScheme="blue" variant={badgeVariant}>
-                Recherche: {searchTerm}
+                {t("components.charactersTable.filterSearch")}: {searchTerm}
               </Badge>
             )}
             {selectedAffinity && (
               <HStack spacing={1}>
                 <AffinityIcon affinity={selectedAffinity} size="20px" />
                 <Badge colorScheme="green" variant={badgeVariant}>
-                  Affinité: {selectedAffinity}
+                  {t("components.charactersTable.filterAffinity")}: {selectedAffinity}
                 </Badge>
               </HStack>
             )}
@@ -247,7 +249,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
               <HStack spacing={1}>
                 <CategoryIcon category={selectedCategory} size="20px" />
                 <Badge colorScheme="purple" variant={badgeVariant}>
-                  Catégorie: {selectedCategory}
+                  {t("components.charactersTable.filterCategory")}: {selectedCategory}
                 </Badge>
               </HStack>
             )}
@@ -255,7 +257,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
               <HStack spacing={1}>
                 <KillerIcon killer={selectedKiller} size="20px" />
                 <Badge colorScheme="orange" variant={badgeVariant}>
-                  Tueur: {selectedKiller}
+                  {t("components.charactersTable.filterKiller")}: {selectedKiller}
                 </Badge>
               </HStack>
             )}
@@ -263,7 +265,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
               <HStack spacing={1}>
                 <AttackTypeBadge attackType={selectedAttackType} size="16px" />
                 <Badge colorScheme="cyan" variant={badgeVariant}>
-                  Type: {selectedAttackType === 'R' ? 'Rouge' : 'Bleu'}
+                  {t("components.charactersTable.filterType")}: {selectedAttackType === 'R' ? t("components.charactersTable.attackRed") : t("components.charactersTable.attackBlue")}
                 </Badge>
               </HStack>
             )}
@@ -274,9 +276,9 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
       {/* Informations sur les résultats */}
       {pagination && (
         <Text fontSize="sm" color="gray.600">
-          {pagination.totalCount} personnage(s) trouvé(s) - 
-          Page {pagination.currentPage} sur {pagination.totalPages} - 
-          Affichage de {pagination.itemsOnPage} résultat(s)
+          {pagination.totalCount} {t("components.charactersTable.paginationCharacters")} - 
+          {t("components.charactersTable.paginationPage")} {pagination.currentPage} {t("components.charactersTable.paginationOf")} {pagination.totalPages} - 
+          {t("components.charactersTable.paginationShowing")} {pagination.itemsOnPage} {t("components.charactersTable.paginationResults")}
         </Text>
       )}
 
@@ -290,11 +292,11 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
           <Table variant="simple">
             <Thead>
               <Tr>
-                <Th>Personnage</Th>
-                <Th>Affinité</Th>
-                <Th>Catégories</Th>
-                <Th>Tueurs</Th>
-                <Th>Type d'attaque</Th>
+                <Th>{t("components.charactersTable.colCharacter")}</Th>
+                <Th>{t("components.charactersTable.colAffinity")}</Th>
+                <Th>{t("components.charactersTable.colCategories")}</Th>
+                <Th>{t("components.charactersTable.colKillers")}</Th>
+                <Th>{t("components.charactersTable.colAttackType")}</Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -400,7 +402,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
       {/* Message si aucun résultat */}
       {!isLoading && characters.length === 0 && (
         <Text textAlign="center" color="gray.500" py={8}>
-          Aucun personnage trouvé
+          {t("components.charactersTable.noResults")}
         </Text>
       )}
     </VStack>

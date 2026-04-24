@@ -28,6 +28,7 @@ import { UserDisplay } from "./ui/UserDisplay";
 import { useGuilds } from "@/hooks/useAPI";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
 import { useAuth } from "@/providers/AuthProvider";
+import { useTranslation } from "react-i18next";
 
 interface GuildTabsListProps {
   editable?: boolean;
@@ -39,6 +40,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
   refreshTrigger = 0
 }) => {
   const { getAuthHeaders } = useAuth();
+  const { t } = useTranslation();
   const { updateUserRole, moveUserToGuild, removeGuildMember } = useAPIMutations();
   // Utiliser useSWR pour les guildes (cache automatique + déduplication)
   const { guilds: allGuilds, mutate: mutateGuilds } = useGuilds(true, editable);
@@ -93,7 +95,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
         .catch((error) => {
           setMembersByGuild((prev) => ({ ...prev, [guild._id]: [] }));
           toast({
-            title: "Erreur",
+            title: t("common.error"),
             description:
               error.message ||
               `Impossible de recharger les membres de la guilde ${guild.name}`,
@@ -134,7 +136,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
         .catch((error) => {
           setMembersByGuild((prev) => ({ ...prev, [guild._id]: [] }));
           toast({
-            title: "Erreur",
+            title: t("common.error"),
             description:
               error instanceof Error
                 ? error.message
@@ -165,18 +167,18 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
 
       loadMembers();
       toast({
-        title: "Membre supprimé",
-        description: "Le membre a été supprimé avec succès",
+        title: t("components.guildTabsList.toastMemberRemovedTitle"),
+        description: t("components.guildTabsList.toastMemberRemovedDesc"),
         status: "success",
         duration: 2000
       });
     } catch (error) {
       toast({
-        title: "Erreur",
+        title: t("common.error"),
         description:
           error instanceof Error
             ? error.message
-            : "Erreur lors de la suppression du membre",
+            : t("components.guildTabsList.toastDeleteError"),
         status: "error",
         duration: 3000
       });
@@ -192,21 +194,21 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
 
       loadMembers();
       toast({
-        title: "Rôle modifié",
-        description: `${member.username} est maintenant ${
+        title: t("components.guildTabsList.toastRoleChangedTitle"),
+        description: `${member.username} ${t("components.guildTabsList.toastRoleChangedDesc")} ${
           newRole === "chef"
-            ? "Chef"
+            ? t("components.guildTabsList.roleChef")
             : newRole === "sous-chef"
-            ? "Sous-Chef"
-            : "Membre"
+            ? t("components.guildTabsList.roleSousChef")
+            : t("components.guildTabsList.roleMembre")
         }`,
         status: "success",
         duration: 2000
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erreur lors de la modification du rôle";
+      const errorMessage = error instanceof Error ? error.message : t("components.guildTabsList.toastRoleError");
       toast({
-        title: "Erreur",
+        title: t("common.error"),
         description: errorMessage,
         status: "error",
         duration: 3000
@@ -228,17 +230,17 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
 
       loadMembers();
       toast({
-        title: "Membre déplacé",
-        description: `${member.username} a été déplacé vers ${
-          targetGuild?.name || "la nouvelle guilde"
+        title: t("components.guildTabsList.toastMovedTitle"),
+        description: `${member.username} ${t("components.guildTabsList.toastMovedDesc")} ${
+          targetGuild?.name || t("components.guildTabsList.toastMovedFallback")
         }`,
         status: "success",
         duration: 2000
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erreur lors du déplacement du membre";
+      const errorMessage = error instanceof Error ? error.message : t("components.guildTabsList.toastMoveError");
       toast({
-        title: "Erreur",
+        title: t("common.error"),
         description: errorMessage,
         status: "error",
         duration: 3000
@@ -268,7 +270,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
   if (guilds.length === 0 || !guilds) {
     return (
       <Text color="gray.500" textAlign="center" py={8}>
-        Aucune guilde disponible.
+        {t("components.guildTabsList.noGuildAvailable")}
       </Text>
     );
   }
@@ -295,7 +297,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
             borderBottomRightRadius={0}
             opacity={guild.disabled ? 0.5 : 1}
           >
-            Ṣčhrīft {guild.name} {guild.disabled ? "(désactivée)" : ""}
+            Ṣčhrīft {guild.name} {guild.disabled ? `(${t("components.guildTabsList.guildDisabled")})` : ""}
           </Tab>
         ))}
       </TabList>
@@ -313,7 +315,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
             >
               <Box p={4}>
                 <Text fontSize="xs" color="gray.500">
-                  {membersByGuild[guild._id]?.length || 0} / 20 membres
+                  {membersByGuild[guild._id]?.length || 0} / 20 {t("components.guildTabsList.membersCount")}
                 </Text>
               </Box>
               <VStack spacing={4} align="stretch">
@@ -349,9 +351,9 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
                                 handleRoleChange(member, val as Role)
                               }
                               options={[
-                                { value: "membre", label: "Membre" },
-                                { value: "sous-chef", label: "Sous-Chef" },
-                                { value: "chef", label: "Chef" },
+                                { value: "membre", label: t("components.guildTabsList.roleMembre") },
+                                { value: "sous-chef", label: t("components.guildTabsList.roleSousChef") },
+                                { value: "chef", label: t("components.guildTabsList.roleChef") },
                               ]}
                               allowDeselect={false}
                             />
@@ -363,7 +365,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
                               }}
                             >
                               <IconButton
-                                aria-label="Supprimer"
+                                aria-label={t("components.guildTabsList.ariaDeleteMember")}
                                 icon={<span>🗑️</span>}
                                 size="sm"
                                 bg="red.500"
@@ -386,7 +388,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
                                 w="auto"
                                 flex={1}
                                 options={[
-                                  { value: guild._id, label: "Rester" },
+                                  { value: guild._id, label: t("components.guildTabsList.moveStay") },
                                   ...guilds
                                     .filter(
                                       (g: IGuild) =>
@@ -408,7 +410,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
                   )
                 ) : (
                   <Text color="gray.500" textAlign="center" py={8}>
-                    Aucun membre dans cette guilde
+                    {t("components.guildTabsList.noMemberInGuild")}
                   </Text>
                 )}
               </VStack>
@@ -428,10 +430,9 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
       >
         <AlertDialogOverlay>
           <AlertDialogContent>
-            <AlertDialogHeader>Confirmer la suppression</AlertDialogHeader>
+            <AlertDialogHeader>{t("components.guildTabsList.dialogDeleteTitle")}</AlertDialogHeader>
             <AlertDialogBody>
-              Êtes-vous sûr de vouloir supprimer le membre "
-              {memberToDelete?.name}" ? Cette action est irréversible.
+              {t("components.guildTabsList.dialogDeleteBody", { name: memberToDelete?.name })}
             </AlertDialogBody>
             <AlertDialogFooter>
               <Button
@@ -441,10 +442,10 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
                   setMemberToDelete(null);
                 }}
               >
-                Annuler
+                {t("common.cancel")}
               </Button>
               <Button colorScheme="red" onClick={confirmDeleteMember} ml={3}>
-                Supprimer
+                {t("common.delete")}
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>

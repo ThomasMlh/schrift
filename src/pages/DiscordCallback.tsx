@@ -2,11 +2,13 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flex, Spinner, Text, useToast } from "@chakra-ui/react";
 import { useAuth } from "../providers/AuthProvider";
+import { useTranslation } from "react-i18next";
 
 const DiscordCallback = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { login } = useAuth();
+  const { t } = useTranslation();
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const hasProcessed = useRef(false);
 
@@ -64,8 +66,8 @@ const DiscordCallback = () => {
         login(data.token, data.refreshToken);
         
         toast({
-          title: "Connexion réussie",
-          description: `Bienvenue ${data.user.global_name}!`,
+          title: t("pages.discordCallback.toastSuccessTitle"),
+          description: `${t("pages.discordCallback.toastSuccessPrefix")} ${data.user.global_name}!`,
           status: "success"
         });
         
@@ -77,7 +79,7 @@ const DiscordCallback = () => {
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
         toast({
-          title: "Erreur de connexion",
+          title: t("pages.discordCallback.toastErrorTitle"),
           description: errorMessage,
           status: "error"
         });
@@ -93,7 +95,7 @@ const DiscordCallback = () => {
   return (
     <Flex w="100%" h="60vh" align="center" justify="center" direction="column">
       <Spinner size="xl" color="purple.500" mb={4} />
-      <Text>Connexion en cours avec Discord...</Text>
+      <Text>{t("pages.discordCallback.loading")}</Text>
     </Flex>
   );
 }

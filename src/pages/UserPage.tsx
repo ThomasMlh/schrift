@@ -41,12 +41,14 @@ import { BanDetailsCard } from "@/components/user/BanDetailsCard";
 import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock } from "react-icons/fi";
 import { getDiscordBannerUrl } from "@/utils/discord";
 import { useAuth } from "@/providers/AuthProvider";
+import { useTranslation } from "react-i18next";
 
 const UserPage = () => {
   const { userId } = useParams<{ userId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCycle, setSelectedCycle] = useState<string>("");
   const { isAdmin, currentUser } = useAuth();
+  const { t } = useTranslation();
 
   // Mapping des onglets
   const TAB_MAP: Record<string, number> = {
@@ -116,7 +118,7 @@ const UserPage = () => {
   const bannerUrl = user?.discord_id && user?.banner ? getDiscordBannerUrl(user.discord_id, user.banner) : null;
   const loading = userLoading || guildLoading;
   const error = userError
-    ? "Erreur lors du chargement du profil utilisateur"
+    ? t("pages.user.errorLoadingProfile")
     : null;
 
   const getRoleBadgeColor = (role: string) => {
@@ -184,7 +186,7 @@ const UserPage = () => {
       <Center h="50vh">
         <VStack spacing={4}>
           <Spinner size="xl" />
-          <Text>Chargement du profil...</Text>
+          <Text>{t("pages.user.loadingProfile")}</Text>
         </VStack>
       </Center>
     );
@@ -206,7 +208,7 @@ const UserPage = () => {
       <Container maxW="container.md" py={8}>
         <Alert status="warning">
           <AlertIcon />
-          Utilisateur introuvable
+          {t("pages.user.userNotFound")}
         </Alert>
       </Container>
     );
@@ -297,7 +299,7 @@ const UserPage = () => {
                   </HStack>
                 ) : (
                   <Text fontSize="md" color={bannerUrl ? "whiteAlpha.800" : "gray.500"}>
-                    Aucune guilde
+                    {t("pages.user.noGuild")}
                   </Text>
                 )}
                 {user.is_banned && (
@@ -310,7 +312,7 @@ const UserPage = () => {
                     fontSize="sm"
                     textTransform="uppercase"
                   >
-                    🚫 Banni
+                    {t("pages.user.badgeBanned")}
                   </Badge>
                 )}
               </VStack>
@@ -332,7 +334,7 @@ const UserPage = () => {
               <HStack spacing={3} flex="1">
                 <Icon as={FiBarChart2} boxSize={5} color="blue.500" />
                 <Text fontWeight="semibold" fontSize="lg">
-                  Filtrer par cycle:
+                  {t("pages.user.cycleFilterLabel")}
                 </Text>
               </HStack>
               <Box maxW={{ base: "full", md: "300px" }}>
@@ -340,7 +342,7 @@ const UserPage = () => {
                   cycles={cycles}
                   value={selectedCycle}
                   onChange={setSelectedCycle}
-                  placeholder="Tous les cycles"
+                  placeholder={t("pages.user.cycleAllPlaceholder")}
                   allowDeselect={true}
                   valueKey="_id"
                   size="md"
@@ -354,7 +356,7 @@ const UserPage = () => {
           <Center mt={5}>
             <VStack spacing={4}>
               <Spinner size="xl" color="blue.500" thickness="4px" />
-              <Text>Chargement des statistiques...</Text>
+              <Text>{t("pages.user.loadingStats")}</Text>
             </VStack>
           </Center>
         ) : stats && stats.totalScores > 0 ? (
@@ -406,23 +408,23 @@ const UserPage = () => {
                   <TabList mb={6} flexWrap="wrap" justifyContent={{ base: "center", md: "flex-start" }} flexDirection={{ base: "column", md: "row" }} gap={2} borderBottom="none">
                     <Tab {...tabStyles}>
                       <Icon as={FiBarChart2} mr={2} />
-                      Vue d'ensemble
+                      {t("pages.user.tabOverview")}
                     </Tab>
                     <Tab {...tabStyles} isDisabled={!selectedCycle || !stats.recentTrend}>
                       <Icon as={FiTrendingUp} mr={2} />
-                      Tendance
+                      {t("pages.user.tabTrend")}
                     </Tab>
                     <Tab {...tabStyles}>
                       <Icon as={FiActivity} mr={2} />
-                      Performances
+                      {t("pages.user.tabPerformances")}
                     </Tab>
                     <Tab {...tabStyles}>
                       <Icon as={FiAward} mr={2} />
-                      Top Rotations
+                      {t("pages.user.tabTopRotations")}
                     </Tab>
                     <Tab {...tabStyles} isDisabled={!globalStats?.temporalEvolution || globalStats.temporalEvolution.length < 2}>
                       <Icon as={FiClock} mr={2} />
-                      Évolution
+                      {t("pages.user.tabEvolution")}
                     </Tab>
                   </TabList>
 
@@ -472,7 +474,7 @@ const UserPage = () => {
                       ) : (
                         <Box textAlign="center" py={10}>
                           <Text fontSize="lg" color="gray.500">
-                            📊 Sélectionnez un cycle pour voir votre tendance récente
+                            {t("pages.user.trendSelectCycleHint")}
                           </Text>
                         </Box>
                       )}
@@ -508,10 +510,10 @@ const UserPage = () => {
                   color="gray.600"
                   mb={2}
                 >
-                  Aucune statistique disponible
+                  {t("pages.user.noStatsTitle")}
                 </Text>
                 <Text fontSize="md" color="gray.500">
-                  Ce joueur n'a pas encore de scores enregistrés
+                  {t("pages.user.noStatsDescription")}
                 </Text>
               </CardBody>
             </Card>

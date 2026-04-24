@@ -21,6 +21,7 @@ import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { FaDiscord } from "react-icons/fa";
 import CustomLink from "./ui/CustomLink";
 import { useAuth } from "../providers/AuthProvider";
+import { useTranslation } from "react-i18next";
 
 const ColorModeSwitcher = () => {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -31,10 +32,28 @@ const ColorModeSwitcher = () => {
   );
 };
 
+const LanguageSwitcher = () => {
+  const { i18n } = useTranslation();
+  const isEN = i18n.language === "en";
+
+  const toggle = () => {
+    const newLang = isEN ? "fr" : "en";
+    i18n.changeLanguage(newLang);
+    localStorage.setItem("schrift-lang", newLang);
+  };
+
+  return (
+    <Button onClick={toggle} variant="ghost" size="sm" fontWeight="bold" minW="auto" px={2}>
+      {isEN ? "FR" : "EN"}
+    </Button>
+  );
+};
+
 export const Header = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { currentUser, isLoggedIn, isAdmin, isGuildManager, logout: authLogout } = useAuth();
   const toast = useToast();
+  const { t } = useTranslation();
   const placement = "left";
 
   // Tous les hooks de couleur en haut
@@ -60,63 +79,63 @@ export const Header = () => {
 
   const menuItems = [
     {
-      name: "Accueil",
+      name: t("nav.home"),
       path: "/",
       icon: "🏠",
       hoverBg: homeHoverBg,
       hoverColor: homeHoverColor
     },
     {
-      name: "Guildes",
+      name: t("nav.guilds"),
       path: "/guildes",
       icon: "🛡️",
       hoverBg: guildsHoverBg,
       hoverColor: guildsHoverColor
     },
     {
-      name: "Personnages",
+      name: t("nav.characters"),
       path: "/personnages",
       icon: "📖",
       hoverBg: charactersHoverBg,
       hoverColor: charactersHoverColor
     },
     {
-      name: "Cycles",
+      name: t("nav.cycles"),
       path: "/cycles",
       icon: "🔄",
       hoverBg: cyclesHoverBg,
       hoverColor: cyclesHoverColor
     },
     {
-      name: "Joueurs",
+      name: t("nav.players"),
       path: "/joueurs",
       icon: "👥",
       hoverBg: usersHoverBg,
       hoverColor: usersHoverColor
     },
     {
-      name: "Podium",
+      name: t("nav.podium"),
       path: "/podium",
       icon: "🏆",
       hoverBg: podiumHoverBg,
       hoverColor: podiumHoverColor
     },
     {
-      name: "Comparateur",
+      name: t("nav.comparator"),
       path: "/comparateur",
       icon: "⚔️",
       hoverBg: comparatorHoverBg,
       hoverColor: comparatorHoverColor
     },
     {
-      name: "Guides",
+      name: t("nav.guides"),
       path: "/guides",
       icon: "📚",
       hoverBg: guidesHoverBg,
       hoverColor: guidesHoverColor
     },
     {
-      name: "Admin",
+      name: t("nav.admin"),
       path: "/admin",
       icon: "⚙️",
       hoverBg: adminHoverBg,
@@ -149,8 +168,8 @@ export const Header = () => {
     authLogout();
     onClose();
     toast({
-      title: "Déconnecté",
-      description: "Vous avez été déconnecté avec succès.",
+      title: t("auth.logoutSuccess"),
+      description: t("auth.logoutDescription"),
       status: "success",
       duration: 3000,
       isClosable: true
@@ -182,7 +201,7 @@ export const Header = () => {
             </VStack>
           </HStack>
           <Button size="sm" variant="outline" onClick={handleLogout}>
-            Déconnexion
+            {t("auth.logout")}
           </Button>
         </HStack>
       );
@@ -194,7 +213,7 @@ export const Header = () => {
           variant="ghost"
           onClick={handleDiscordAuth}
         >
-          Se connecter
+          {t("auth.login")}
         </Button>
       );
     }
@@ -250,6 +269,7 @@ export const Header = () => {
         </Flex>
         <Flex gap={1} align="center" flexShrink={0}>
           {renderAuthButton()}
+          <LanguageSwitcher />
           <ColorModeSwitcher />
         </Flex>
       </Flex>
@@ -260,9 +280,10 @@ export const Header = () => {
       >
         <Box fontWeight="bold">Schrift</Box>
         <HStack>
+          <LanguageSwitcher />
           <ColorModeSwitcher />
           <IconButton
-            aria-label="Ouvrir le menu"
+            aria-label={t("nav.openMenu")}
             icon={<HamburgerIcon />}
             variant="outline"
             onClick={onOpen}
@@ -275,7 +296,7 @@ export const Header = () => {
           <DrawerBody p={0}>
             <Flex justify="flex-end" p={2}>
               <IconButton
-                aria-label="Fermer le menu"
+                aria-label={t("nav.closeMenu")}
                 icon={<CloseIcon />}
                 variant="ghost"
                 onClick={onClose}
@@ -343,7 +364,7 @@ export const Header = () => {
                       onClose();
                     }}
                   >
-                    Déconnexion
+                    {t("auth.logout")}
                   </Button>
                 </VStack>
               ) : (
@@ -356,7 +377,7 @@ export const Header = () => {
                     onClose();
                   }}
                 >
-                  Se connecter
+                  {t("auth.login")}
                 </Button>
               )}
             </VStack>

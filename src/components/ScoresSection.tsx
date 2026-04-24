@@ -28,6 +28,7 @@ import { useScoreManagement } from "@/hooks/useScoreManagement";
 import { ScoresStatsCards } from "./scores/ScoresStatsCards";
 import { ScoresFilters } from "./scores/ScoresFilters";
 import { ScoreModals } from "./scores/ScoreModals";
+import { useTranslation } from "react-i18next";
 
 const ScoresSection = () => {
   const [scoreSearchQuery, setScoreSearchQuery] = useState("");
@@ -35,6 +36,7 @@ const ScoresSection = () => {
   const [filterRotationId, setFilterRotationId] = useState("");
   const [filterGuildId, setFilterGuildId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const { t } = useTranslation();
 
   // Hooks de données
   const navigate = useNavigate();
@@ -120,11 +122,11 @@ const ScoresSection = () => {
         <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
           <Box>
             <Heading size="lg" mb={1}>
-              Gestion des Scores
+              {t("components.scoresSection.heading")}
             </Heading>
             {pagination && (
               <Text fontSize="sm" color="gray.500">
-                {pagination.totalCount.toLocaleString()} scores enregistrés
+                {pagination.totalCount.toLocaleString()} {t("components.scoresSection.scoresCount")}
               </Text>
             )}
           </Box>
@@ -136,7 +138,7 @@ const ScoresSection = () => {
                 isDisabled={!currentUser}
                 size="lg"
               >
-                📸 Saisie automatique
+                {t("components.scoresSection.buttonAutoEntry")}
               </Button>
               <Button
                 colorScheme="green"
@@ -144,7 +146,7 @@ const ScoresSection = () => {
                 isDisabled={!currentUser}
                 size="lg"
               >
-                Saisie manuelle
+                {t("components.scoresSection.buttonManualEntry")}
               </Button>
               {isAdmin && (
                 <Tooltip
@@ -202,7 +204,7 @@ const ScoresSection = () => {
               ) : !Array.isArray(scores) || scores.length === 0 ? (
                 <Alert status="info">
                   <AlertIcon />
-                  Aucun score enregistré pour le moment.
+                  {t("components.scoresSection.noScores")}
                 </Alert>
               ) : (
                 <ScoresTable

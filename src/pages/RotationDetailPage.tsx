@@ -42,6 +42,7 @@ import { RankBadge } from "@/components/ui/RankBadge";
 import { AlterationImage } from "@/components/ui/AlterationImage";
 import { SEOHead } from "@/components/SEOHead";
 import { CustomSelect } from "@/components/ui/CustomSelect";
+import { useTranslation } from "react-i18next";
 
 const RotationDetailPage = () => {
   const { cycleId, position } = useParams<{
@@ -50,6 +51,7 @@ const RotationDetailPage = () => {
   }>();
   const navigate = useNavigate();
   const toast = useToast();
+  const { t } = useTranslation();
 
   const [scores, setScores] = useState<IScoreWithUser[]>([]);
   const [cycle, setCycle] = useState<ICycle | null>(null);
@@ -115,7 +117,7 @@ const RotationDetailPage = () => {
       hasInitialData.current = true;
     } else if (apiError) {
       toast({
-        title: "Erreur",
+        title: t("common.error"),
         description: apiError,
         status: "error",
         duration: 5000
@@ -258,7 +260,7 @@ const RotationDetailPage = () => {
               size="sm"
               onClick={() => navigate(-1)}
             >
-              Retour
+              {t("pages.rotationDetail.buttonBack")}
             </Button>
 
             <HStack spacing={2}>
@@ -269,7 +271,7 @@ const RotationDetailPage = () => {
                 onClick={handlePreviousRotation}
                 isDisabled={parseInt(position || "1") <= 1}
               >
-                Précédente
+                {t("pages.rotationDetail.buttonPrevious")}
               </Button>
               <Button
                 rightIcon={<ChevronRightIcon />}
@@ -278,7 +280,7 @@ const RotationDetailPage = () => {
                 onClick={handleNextRotation}
                 isDisabled={parseInt(position || "1") >= totalRotations}
               >
-                Suivante
+                {t("pages.rotationDetail.buttonNext")}
               </Button>
             </HStack>
           </HStack>
@@ -304,10 +306,10 @@ const RotationDetailPage = () => {
               </VStack>
             </Heading>
             <Text color={textSecondary} fontSize="sm">
-              {totalItems} score{totalItems > 1 ? "s" : ""} au total
+              {totalItems} score{totalItems > 1 ? "s" : ""} {t("pages.rotationDetail.scoreTotalSuffix")}
               {selectedGuild && (
                 <Text as="span" ml={2} fontSize="xs" color="blue.500">
-                  (filtré sur{" "}
+                  ({t("pages.rotationDetail.filteredOnPrefix")}{" "}
                   {guilds.find((g) => g._id === selectedGuild)?.name})
                 </Text>
               )}
@@ -331,12 +333,12 @@ const RotationDetailPage = () => {
           >
             <HStack spacing={4} align="center" flex={1}>
               <Text fontSize="sm" fontWeight="medium" minW="max-content">
-                Filtrer par guilde :
+                {t("pages.rotationDetail.filterGuildLabel")}
               </Text>
               <CustomSelect
                 value={selectedGuild}
                 onChange={handleGuildChange}
-                placeholder="Toutes les guildes"
+                placeholder={t("pages.rotationDetail.allGuilds")}
                 size="sm"
                 maxW="300px"
                 isDisabled={isLoadingGuilds}
@@ -379,8 +381,8 @@ const RotationDetailPage = () => {
             <Flex justify="center" align="center" py={12}>
               <Text fontSize="lg" color={textSecondary}>
                 {selectedGuild
-                  ? `Aucun score trouvé pour la guilde ${guilds.find((g) => g._id === selectedGuild)?.name}`
-                  : "Aucun score trouvé pour cette rotation"}
+                  ? `${t("pages.rotationDetail.noScoreForGuild")} ${guilds.find((g) => g._id === selectedGuild)?.name}`
+                  : t("pages.rotationDetail.noScoreForRotation")}
               </Text>
             </Flex>
           ) : (
@@ -389,15 +391,15 @@ const RotationDetailPage = () => {
                 <Table variant="simple" size={{ base: "sm", md: "md" }}>
                   <Thead>
                     <Tr>
-                      <Th>Rang</Th>
-                      <Th>Joueur</Th>
+                      <Th>{t("pages.rotationDetail.tableRank")}</Th>
+                      <Th>{t("pages.rotationDetail.tablePlayer")}</Th>
                       {!selectedGuild && (
                         <Th display={{ base: "none", md: "table-cell" }}>
-                          Guilde
+                          {t("pages.rotationDetail.tableGuild")}
                         </Th>
                       )}
-                      <Th isNumeric>Score</Th>
-                      <Th display={{ base: "none", sm: "table-cell" }}>Date</Th>
+                      <Th isNumeric>{t("pages.rotationDetail.tableScore")}</Th>
+                      <Th display={{ base: "none", sm: "table-cell" }}>{t("pages.rotationDetail.tableDate")}</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
@@ -462,7 +464,7 @@ const RotationDetailPage = () => {
                 >
                   <HStack spacing={2}>
                     <Text fontSize="sm" color={textSecondary}>
-                      Afficher
+                      {t("pages.rotationDetail.paginationShow")}
                     </Text>
                     <CustomSelect
                       size="sm"
@@ -482,13 +484,13 @@ const RotationDetailPage = () => {
                       color={textSecondary}
                       display={{ base: "none", sm: "block" }}
                     >
-                      par page
+                      {t("pages.rotationDetail.paginationPerPage")}
                     </Text>
                   </HStack>
 
                   <HStack spacing={2}>
                     <IconButton
-                      aria-label="Page précédente"
+                      aria-label={t("pages.rotationDetail.ariaPreviousPage")}
                       icon={<ChevronLeftIcon />}
                       size="sm"
                       variant="outline"

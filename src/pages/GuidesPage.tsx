@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
 import { OrbFarmingGuide, RotationsBuildsGuide } from "../components/guides";
+import { useTranslation } from "react-i18next";
 
 const GuidesPage = () => {
   const { section } = useParams<{ section?: string }>();
@@ -39,6 +40,7 @@ const GuidesPage = () => {
   };
   
   const [tabIndex, setTabIndex] = useState(getInitialIndex());
+  const { t } = useTranslation();
   
   // Mettre à jour l'index quand l'URL change
   useEffect(() => {
@@ -59,15 +61,15 @@ const GuidesPage = () => {
   return (
     <>
       <SEOHead
-        title="Schrift BBS - Guides"
-        description="Guides complets pour Bleach Brave Souls : rotations, équipes recommandées, farming d'orbes et plus encore."
+        title={t("pages.guides.seoTitle")}
+        description={t("pages.guides.seoDescription")}
         keywords="Bleach Brave Souls, guides, rotations, équipes, farming orbes, tutoriel BBS"
         url="https://bbs-schrift.fr/guides"
       />
       <Flex w="100%" align="center" justify="center" flexDir="column">
         <HeroSection
-          title="📚 Guides BBS"
-          description="Découvrez nos guides complets pour améliorer votre expérience de jeu"
+          title={t("pages.guides.heroTitle")}
+          description={t("pages.guides.heroDescription")}
         />
 
         <Container maxW="container.xl" px={{ base: 4, md: 6 }} py={8}>
@@ -82,17 +84,17 @@ const GuidesPage = () => {
             >
               <Tab whiteSpace="nowrap" color={menuTextColor} _selected={{ color: "white", bg: "purple.500" }}>
                 <Flex align="center" gap={2} >
-                  🔄 Rotations & Builds
+                  {t("pages.guides.tabRotationsBuilds")}
                 </Flex>
               </Tab>
               <Tab whiteSpace="nowrap" gap={2} color={menuTextColor} _selected={{ color: "white", bg: "purple.500" }}>
                 <Image
                   src="/orb.png"
-                  alt="Icône Orbe"
+                  alt={t("pages.guides.orbIconAlt")}
                   boxSize="15px"
                   zIndex={1}
                 />
-                Farm d'Orbes
+                {t("pages.guides.tabOrbs")}
               </Tab>
             </TabList>
 
