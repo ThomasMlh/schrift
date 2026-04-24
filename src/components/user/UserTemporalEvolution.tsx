@@ -37,19 +37,9 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
   // État pour le filtre d'année
   const [selectedYear, setSelectedYear] = useState<string>("all");
 
-  if (!temporalEvolution || temporalEvolution.length === 0) {
-    return (
-      <VStack spacing={4} align="stretch">
-        <Heading size="md">Évolution Temporelle</Heading>
-        <Text fontSize="sm" color="gray.500" textAlign="center" py={10}>
-          Aucune donnée d'évolution disponible
-        </Text>
-      </VStack>
-    );
-  }
-
   // Extraire les années disponibles
   const availableYears = useMemo(() => {
+    if (!temporalEvolution || temporalEvolution.length === 0) return [];
     const years = new Set<number>();
     temporalEvolution.forEach((item) => {
       if (item.year) {
@@ -61,6 +51,7 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
 
   // Filtrer les données par année (déjà triées chronologiquement depuis le backend)
   const filteredData = useMemo(() => {
+    if (!temporalEvolution || temporalEvolution.length === 0) return [];
     if (selectedYear === "all") {
       return temporalEvolution;
     }
@@ -68,6 +59,17 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
       (item) => item.year === parseInt(selectedYear)
     );
   }, [temporalEvolution, selectedYear]);
+
+  if (!temporalEvolution || temporalEvolution.length === 0) {
+    return (
+      <VStack spacing={4} align="stretch">
+        <Heading size="md">Évolution Temporelle</Heading>
+        <Text fontSize="sm" color="gray.500" textAlign="center" py={10}>
+          Aucune donnée d'évolution disponible
+        </Text>
+      </VStack>
+    );
+  }
 
   // Formater les données pour le graphique
   const chartData = filteredData.map((item) => ({
