@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { UserSearchSelect } from "../ui/UserSearchSelect";
 import { UserDisplay } from "../ui/UserDisplay";
 import type { IUser } from "@/interfaces";
@@ -40,6 +41,7 @@ export const MultiPlayerSelector = ({
     const bgColor = useColorModeValue("gray.50", "gray.700");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
+  const { t } = useTranslation();
 
   const handleUserSelect = (userId: string) => {
     const user = availableUsers.find((u) => u._id === userId);
@@ -61,7 +63,7 @@ export const MultiPlayerSelector = ({
           <HStack justify="space-between">
             <HStack spacing={2}>
               <Text fontSize="lg" fontWeight="bold">
-                👥 Joueurs sélectionnés
+                {t("components.multiPlayerSelector.heading")}
               </Text>
               <Badge colorScheme="blue" fontSize="sm">
                 {selectedPlayers.length}/{maxPlayers}
@@ -98,7 +100,7 @@ export const MultiPlayerSelector = ({
                   </HStack>
                   <IconButton
                     icon={<CloseIcon />}
-                    aria-label="Retirer le joueur"
+                    aria-label={t("components.multiPlayerSelector.ariaRemove")}
                     size="sm"
                     colorScheme="red"
                     variant="ghost"
@@ -118,10 +120,10 @@ export const MultiPlayerSelector = ({
                 borderColor={borderColor}
               >
                 <Text color="gray.500" fontSize="sm">
-                  Aucun joueur sélectionné
+                  {t("components.multiPlayerSelector.empty")}
                 </Text>
                 <Text color="gray.400" fontSize="xs" mt={1}>
-                  Ajoutez jusqu'à {maxPlayers} joueurs pour comparer
+                  {t("components.multiPlayerSelector.emptyHint", { max: maxPlayers })}
                 </Text>
               </Box>
             )}
@@ -131,7 +133,7 @@ export const MultiPlayerSelector = ({
           {selectedPlayers.length < maxPlayers && (
             <Box>
               <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.600">
-                Ajouter un joueur
+                {t("components.multiPlayerSelector.addLabel")}
               </Text>
               <UserSearchSelect
                 users={availableUsersFiltered}
@@ -139,14 +141,14 @@ export const MultiPlayerSelector = ({
                 onUserSelect={handleUserSelect}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
-                placeholder="Rechercher un joueur..."
+                placeholder={t("components.multiPlayerSelector.searchPlaceholder")}
               />
             </Box>
           )}
 
           {selectedPlayers.length >= maxPlayers && (
             <Text fontSize="xs" color="orange.500" textAlign="center">
-              ⚠️ Limite de {maxPlayers} joueurs atteinte
+              {t("components.multiPlayerSelector.limitReached", { max: maxPlayers })}
             </Text>
           )}
         </VStack>

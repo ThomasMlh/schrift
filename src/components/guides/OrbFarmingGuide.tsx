@@ -17,6 +17,7 @@ import {
   AlertDescription
 } from "@chakra-ui/react";
 import { useOrbGuide } from "@/hooks/useAPI";
+import { useTranslation } from "react-i18next";
 
 interface OrbSource {
   title: string;
@@ -33,6 +34,7 @@ const OrbFarmingGuide = () => {
   const totalBoxBorder = useColorModeValue("purple.200", "purple.600");
   const totalTextColor = useColorModeValue("gray.700", "gray.200");
 
+  const { t } = useTranslation();
   const { orbData, isLoading: loading, error } = useOrbGuide();
 
   const colorSchemes = [
@@ -74,7 +76,7 @@ const OrbFarmingGuide = () => {
       >
         <AlertIcon boxSize="40px" mr={0} />
         <AlertTitle mt={4} mb={1} fontSize="lg">
-          Erreur de chargement
+          {t("components.orbFarmingGuide.errorTitle")}
         </AlertTitle>
         <AlertDescription maxWidth="sm">{error}</AlertDescription>
       </Alert>
@@ -90,15 +92,12 @@ const OrbFarmingGuide = () => {
       <Flex align="center" gap={4}>
         <Box flex={1}>
           <Heading size="lg" mb={2} color={accentColor}>
-            Guide du Farm d'Orbes
+            {t("components.orbFarmingGuide.heading")}
           </Heading>
           <Text fontSize="sm" color={textColor}>
-            Voici toutes les sources d'orbes mensuelles récurrentes. Le total
-            peut atteindre{" "}
-            <strong>
-              {orbData.totalOrbes.toLocaleString("fr-FR")} orbes/mois
-            </strong>{" "}
-            sans compter les sources ponctuelles.
+            {t("components.orbFarmingGuide.description", {
+              total: orbData.totalOrbes.toLocaleString()
+            })}
           </Text>
         </Box>
       </Flex>
@@ -139,15 +138,14 @@ const OrbFarmingGuide = () => {
         <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
           <Box>
             <Heading size="md" mb={2}>
-              📊 Total mensuel récurrent
+              {t("components.orbFarmingGuide.totalHeading")}
             </Heading>
             <Text fontSize="sm" color={totalTextColor}>
-              Sans compter les sources ponctuelles (nouveaux persos, story,
-              events spéciaux)
+              {t("components.orbFarmingGuide.totalDescription")}
             </Text>
           </Box>
           <Badge colorScheme="purple" fontSize="3xl" px={6} py={3}>
-            {orbData.totalOrbes.toLocaleString("fr-FR")} orbes
+            {orbData.totalOrbes.toLocaleString()} {t("components.orbFarmingGuide.orbsUnit")}
           </Badge>
         </Flex>
       </Box>

@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CustomSelect } from "../ui/CustomSelect";
 import type { IGuild } from "@/interfaces";
 
@@ -38,6 +39,7 @@ export const MultiGuildSelector = ({
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const bgColor = useColorModeValue("gray.50", "gray.700");
   const [selectedGuildId, setSelectedGuildId] = useState("");
+  const { t } = useTranslation();
 
   const handleGuildSelect = (guildId: string) => {
     const guild = availableGuilds.find((g) => g._id === guildId);
@@ -63,7 +65,7 @@ export const MultiGuildSelector = ({
           <HStack justify="space-between">
             <HStack spacing={2}>
               <Text fontSize="lg" fontWeight="bold">
-                🏛️ Guildes sélectionnées
+                {t("components.multiGuildSelector.heading")}
               </Text>
               <Badge colorScheme="purple" fontSize="sm">
                 {selectedGuilds.length}/{maxGuilds}
@@ -96,7 +98,7 @@ export const MultiGuildSelector = ({
                   </HStack>
                   <IconButton
                     icon={<CloseIcon />}
-                    aria-label="Retirer la guilde"
+                    aria-label={t("components.multiGuildSelector.ariaRemove")}
                     size="sm"
                     colorScheme="red"
                     variant="ghost"
@@ -116,10 +118,10 @@ export const MultiGuildSelector = ({
                 borderColor={borderColor}
               >
                 <Text color="gray.500" fontSize="sm">
-                  Aucune guilde sélectionnée
+                  {t("components.multiGuildSelector.empty")}
                 </Text>
                 <Text color="gray.400" fontSize="xs" mt={1}>
-                  Ajoutez jusqu'à {maxGuilds} guildes pour comparer
+                  {t("components.multiGuildSelector.emptyHint", { max: maxGuilds })}
                 </Text>
               </Box>
             )}
@@ -129,20 +131,20 @@ export const MultiGuildSelector = ({
           {selectedGuilds.length < maxGuilds && (
             <Box>
               <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.600">
-                Ajouter une guilde
+                {t("components.multiGuildSelector.addLabel")}
               </Text>
               <CustomSelect
                 options={guildOptions}
                 value={selectedGuildId}
                 onChange={handleGuildSelect}
-                placeholder="Sélectionner une guilde..."
+                placeholder={t("components.multiGuildSelector.placeholder")}
               />
             </Box>
           )}
 
           {selectedGuilds.length >= maxGuilds && (
             <Text fontSize="xs" color="orange.500" textAlign="center">
-              ⚠️ Limite de {maxGuilds} guildes atteinte
+              {t("components.multiGuildSelector.limitReached", { max: maxGuilds })}
             </Text>
           )}
         </VStack>

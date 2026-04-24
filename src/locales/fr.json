@@ -154,6 +154,11 @@
       "cycleAllPlaceholder": "Tous les cycles",
       "badgeCycleSelected": "Cycle sélectionné",
       "buttonReset": "Réinitialiser",
+      "buttonCompare": "Comparer",
+      "wordPlayer": "joueur",
+      "wordPlayers": "joueurs",
+      "wordGuild": "guilde",
+      "wordGuilds": "guildes",
       "tabPlayers": "Joueurs",
       "tabGuilds": "Guildes",
       "alertMin2Players": "Sélectionnez au moins 2 joueurs pour commencer la comparaison",
@@ -293,6 +298,65 @@
       "buttonAutoEntry": "📸 Saisie automatique",
       "buttonManualEntry": "Saisie manuelle",
       "noScores": "Aucun score enregistré pour le moment."
+    },
+    "currentInfoSection": {
+      "heading": "Informations actuelles",
+      "subheading": "Aperçu du cycle et de la rotation (dates, statut, détails).",
+      "cycleActive": "Cycle en cours",
+      "cycleNext": "Prochain cycle",
+      "badgeActive": "Actif",
+      "badgeNext": "Prochain",
+      "rotationActive": "Rotation en cours",
+      "rotationNext": "Prochaine rotation",
+      "rotationLabel": "Rotation",
+      "badgeInProgress": "En cours",
+      "badgeUpcoming": "Prochaine",
+      "labelStart": "Début :",
+      "labelEnd": "Fin :",
+      "loading": "Chargement…",
+      "noCycle": "Pas de prochain cycle prévu",
+      "noRotationDefined": "Aucune rotation définie pour ce cycle.",
+      "selectCycle": "Sélectionne un cycle pour voir la rotation.",
+      "rotationNoPosition": "Rotation (sans position)",
+      "errorLoading": "Erreur lors du chargement des données"
+    },
+    "multiPlayerSelector": {
+      "heading": "👥 Joueurs sélectionnés",
+      "empty": "Aucun joueur sélectionné",
+      "emptyHint": "Ajoutez jusqu'à {{max}} joueurs pour comparer",
+      "addLabel": "Ajouter un joueur",
+      "searchPlaceholder": "Rechercher un joueur...",
+      "ariaRemove": "Retirer le joueur",
+      "limitReached": "⚠️ Limite de {{max}} joueurs atteinte"
+    },
+    "multiGuildSelector": {
+      "heading": "🏛️ Guildes sélectionnées",
+      "empty": "Aucune guilde sélectionnée",
+      "emptyHint": "Ajoutez jusqu'à {{max}} guildes pour comparer",
+      "addLabel": "Ajouter une guilde",
+      "placeholder": "Sélectionner une guilde...",
+      "ariaRemove": "Retirer la guilde",
+      "limitReached": "⚠️ Limite de {{max}} guildes atteinte"
+    },
+    "rotationsBuildsGuide": {
+      "heading": "🛠️ Builds de la Communauté",
+      "description": "Découvrez les meilleures compositions d'équipes validées par la communauté et partagez les vôtres !",
+      "loginAlert": "Connectez-vous pour créer et partager vos propres builds avec la communauté.",
+      "filterLabel": "Filtrer par rotation",
+      "filterPlaceholder": "Toutes les rotations",
+      "buttonCreate": "Créer un Build",
+      "titleAllBuilds": "Tous les Builds",
+      "selectRotationHint": "Sélectionnez une rotation pour créer un build",
+      "noBuildsForRotation": "Aucun build trouvé pour cette rotation",
+      "noBuildsAvailable": "Aucun build disponible. Sélectionnez une rotation pour voir les builds."
+    },
+    "orbFarmingGuide": {
+      "heading": "Guide du Farm d'Orbes",
+      "description": "Voici toutes les sources d'orbes mensuelles récurrentes. Le total peut atteindre {{total}} orbes/mois sans compter les sources ponctuelles.",
+      "errorTitle": "Erreur de chargement",
+      "totalHeading": "📊 Total mensuel récurrent",
+      "totalDescription": "Sans compter les sources ponctuelles (nouveaux persos, story, events spéciaux)",
+      "orbsUnit": "orbes"
     }
   }
 }

@@ -13,6 +13,7 @@ import {
   Flex
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { FaClock, FaCalendarAlt } from "react-icons/fa";
 import { AttackTypeBadge } from "./ui/AttackTypeBadge";
 import { AlterationImage } from "./ui/AlterationImage";
@@ -21,6 +22,7 @@ import { useCycles } from "@/hooks/useAPI";
 import { getRotationRealDates } from "@/utils/cycleHelpers";
 
 export const CurrentInfoSection = () => {
+  const { t } = useTranslation();
   const [currentCycle, setCurrentCycle] = useState<ICycle | null>(null);
   const [nextCycle, setNextCycle] = useState<ICycle | null>(null);
   const [isCycleActive, setIsCycleActive] = useState(false);
@@ -149,7 +151,7 @@ export const CurrentInfoSection = () => {
     }
 
     if (cyclesError) {
-      setError("Erreur lors du chargement des données");
+      setError(t("components.currentInfoSection.errorLoading"));
     }
   }, [allCycles, isLoading, cyclesError]);
 
@@ -192,10 +194,10 @@ export const CurrentInfoSection = () => {
 
           <Box>
             <Text fontWeight="bold" fontSize="xl">
-              Informations actuelles
+              {t("components.currentInfoSection.heading")}
             </Text>
             <Text fontSize="sm" opacity={0.75}>
-              Aperçu du cycle et de la rotation (dates, statut, détails).
+              {t("components.currentInfoSection.subheading")}
             </Text>
           </Box>
         </HStack>
@@ -218,7 +220,7 @@ export const CurrentInfoSection = () => {
             <Flex justify="center" align="center" py={10}>
               <HStack spacing={3}>
                 <Spinner size="lg" color="blue.500" thickness="4px" />
-                <Text fontSize="lg">Chargement…</Text>
+                <Text fontSize="lg">{t("components.currentInfoSection.loading")}</Text>
               </HStack>
             </Flex>
           ) : !currentCycle && !nextCycle ? (
@@ -226,7 +228,7 @@ export const CurrentInfoSection = () => {
               <VStack spacing={3}>
                 <Icon as={FaCalendarAlt} boxSize={10} opacity={0.5} />
                 <Text fontSize="md" fontWeight="semibold" opacity={0.75}>
-                  Pas de prochain cycle prévu
+                  {t("components.currentInfoSection.noCycle")}
                 </Text>
               </VStack>
             </Flex>
@@ -259,7 +261,7 @@ export const CurrentInfoSection = () => {
                           letterSpacing="0.12em"
                           color={textColor}
                         >
-                          {isCycleActive ? "Cycle en cours" : "Prochain cycle"}
+                          {isCycleActive ? t("components.currentInfoSection.cycleActive") : t("components.currentInfoSection.cycleNext")}
                         </Text>
                       </HStack>
 
@@ -271,7 +273,7 @@ export const CurrentInfoSection = () => {
                         py={1}
                         fontSize="xs"
                       >
-                        {isCycleActive ? "Actif" : "Prochain"}
+                        {isCycleActive ? t("components.currentInfoSection.badgeActive") : t("components.currentInfoSection.badgeNext")}
                       </Badge>
                     </HStack>
 
@@ -302,13 +304,13 @@ export const CurrentInfoSection = () => {
                             return (
                               <VStack align="start" spacing={1}>
                                 <HStack spacing={2} fontSize="sm">
-                                  <Text fontWeight="semibold">Début :</Text>
+                                  <Text fontWeight="semibold">{t("components.currentInfoSection.labelStart")}</Text>
                                   <Text opacity={0.8}>
                                     {formatRealDateTime(realStartDate)}
                                   </Text>
                                 </HStack>
                                 <HStack spacing={2} fontSize="sm">
-                                  <Text fontWeight="semibold">Fin :</Text>
+                                  <Text fontWeight="semibold">{t("components.currentInfoSection.labelEnd")}</Text>
                                   <Text opacity={0.8}>
                                     {formatRealDateTime(realEndDate)}
                                   </Text>
@@ -345,9 +347,9 @@ export const CurrentInfoSection = () => {
                       >
                         {currentCycle && currentRotation
                           ? isRotationActive
-                            ? "Rotation en cours"
-                            : "Prochaine rotation"
-                          : "Rotation"}
+                            ? t("components.currentInfoSection.rotationActive")
+                            : t("components.currentInfoSection.rotationNext")
+                          : t("components.currentInfoSection.rotationLabel")}
                       </Text>
                     </HStack>
 
@@ -360,7 +362,7 @@ export const CurrentInfoSection = () => {
                         py={1}
                         fontSize="xs"
                       >
-                        {isRotationActive ? "En cours" : "Prochaine"}
+                        {isRotationActive ? t("components.currentInfoSection.badgeInProgress") : t("components.currentInfoSection.badgeUpcoming")}
                       </Badge>
                     ) : (
                       <Badge
@@ -382,12 +384,12 @@ export const CurrentInfoSection = () => {
                         {currentRotation.position ? (
                           <CustomLink
                             to={`/cycle/${currentCycle._id}/rotation/${currentRotation.position}`}
-                            text={`Rotation #${currentRotation.position}`}
+                            text={`${t("components.currentInfoSection.rotationLabel")} #${currentRotation.position}`}
                             textSize="md"
                           />
                         ) : (
                           <Text fontSize="md" opacity={0.7}>
-                            Rotation (sans position)
+                            {t("components.currentInfoSection.rotationNoPosition")}
                           </Text>
                         )}
 
@@ -428,13 +430,13 @@ export const CurrentInfoSection = () => {
                               return (
                                 <VStack align="start" spacing={1}>
                                   <HStack spacing={2} fontSize="sm">
-                                    <Text fontWeight="semibold">Début :</Text>
+                                    <Text fontWeight="semibold">{t("components.currentInfoSection.labelStart")}</Text>
                                     <Text opacity={0.8}>
                                       {formatRealDateTime(realStartDate)}
                                     </Text>
                                   </HStack>
                                   <HStack spacing={2} fontSize="sm">
-                                    <Text fontWeight="semibold">Fin :</Text>
+                                    <Text fontWeight="semibold">{t("components.currentInfoSection.labelEnd")}</Text>
                                     <Text opacity={0.8}>
                                       {formatRealDateTime(realEndDate)}
                                     </Text>
@@ -447,11 +449,11 @@ export const CurrentInfoSection = () => {
                     </VStack>
                   ) : currentCycle ? (
                     <Text fontSize="sm" opacity={0.75}>
-                      Aucune rotation définie pour ce cycle.
+                      {t("components.currentInfoSection.noRotationDefined")}
                     </Text>
                   ) : (
                     <Text fontSize="sm" opacity={0.75}>
-                      Sélectionne un cycle pour voir la rotation.
+                      {t("components.currentInfoSection.selectCycle")}
                     </Text>
                   )}
                 </Box>

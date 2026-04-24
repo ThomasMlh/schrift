@@ -22,6 +22,7 @@ import {
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AddIcon, InfoIcon, EditIcon } from "@chakra-ui/icons";
 import { useBuilds, useRotations } from "../../hooks/useAPI";
 import BuildCreationModal from "../ui/BuildCreationModal";
@@ -47,6 +48,7 @@ const RotationsBuildsGuide = () => {
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
+  const { t } = useTranslation();
   const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
   // Vérifier si l'utilisateur est connecté
@@ -179,19 +181,17 @@ const RotationsBuildsGuide = () => {
     <VStack spacing={6} align="stretch">
       <Box>
         <Heading size="md" mb={4}>
-          🛠️ Builds de la Communauté
+          {t("components.rotationsBuildsGuide.heading")}
         </Heading>
         <Text color="gray.600" mb={4}>
-          Découvrez les meilleures compositions d'équipes validées par la
-          communauté et partagez les vôtres !
+          {t("components.rotationsBuildsGuide.description")}
         </Text>
 
         {!isAuthenticated && (
           <Alert status="info" borderRadius="md" mb={4}>
             <AlertIcon />
             <Text fontSize="sm">
-              Connectez-vous pour créer et partager vos propres builds avec la
-              communauté.
+              {t("components.rotationsBuildsGuide.loginAlert")}
             </Text>
           </Alert>
         )}
@@ -213,10 +213,10 @@ const RotationsBuildsGuide = () => {
         >
           <Box flex={1} maxW={{ base: "100%", md: "500px" }}>
             <Text fontSize="sm" fontWeight="medium" mb={2}>
-              Filtrer par rotation
+              {t("components.rotationsBuildsGuide.filterLabel")}
             </Text>
             <CustomSelect
-              placeholder="Toutes les rotations"
+              placeholder={t("components.rotationsBuildsGuide.filterPlaceholder")}
               value={selectedRotation}
               onChange={(value) => {
                 setSelectedRotation(value);
@@ -260,7 +260,7 @@ const RotationsBuildsGuide = () => {
               size="md"
               flexShrink={0}
             >
-              Créer un Build
+              {t("components.rotationsBuildsGuide.buttonCreate")}
             </Button>
           )}
         </Flex>
@@ -269,7 +269,7 @@ const RotationsBuildsGuide = () => {
           <Flex align="center" gap={2} mt={3} color="orange.500">
             <Icon as={InfoIcon} />
             <Text fontSize="xs">
-              Sélectionnez une rotation pour créer un build
+              {t("components.rotationsBuildsGuide.selectRotationHint")}
             </Text>
           </Flex>
         )}
@@ -298,7 +298,7 @@ const RotationsBuildsGuide = () => {
           </HStack>
         ) : (
           <Heading size="md" textAlign="center">
-            Tous les Builds
+            {t("components.rotationsBuildsGuide.titleAllBuilds")}
           </Heading>
         )}
       </Box>
@@ -319,8 +319,8 @@ const RotationsBuildsGuide = () => {
         >
           <Text color="gray.500">
             {selectedRotation
-              ? "Aucun build trouvé pour cette rotation"
-              : "Aucun build disponible. Sélectionnez une rotation pour voir les builds."}
+              ? t("components.rotationsBuildsGuide.noBuildsForRotation")
+              : t("components.rotationsBuildsGuide.noBuildsAvailable")}
           </Text>
         </Box>
       ) : (
@@ -371,7 +371,7 @@ const RotationsBuildsGuide = () => {
                               {formatDate(build.created_at)}
                             </Text>
                             {canEditBuild(build) && (
-                              <Tooltip label="Modifier ce build" placement="top">
+                          <Tooltip label={t("common.edit")} placement="top">
                                 <IconButton
                                   aria-label="Modifier le build"
                                   icon={<EditIcon />}

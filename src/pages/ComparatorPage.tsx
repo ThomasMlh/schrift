@@ -367,10 +367,10 @@ const ComparatorPage: React.FC = () => {
                       isLoading={isLoadingStats}
                       leftIcon={<Icon as={FiBarChart2} />}
                     >
-                      Comparer {comparisonType === "players" ? selectedPlayers.length : selectedGuilds.length}{" "}
-                      {comparisonType === "players" ? "joueur" : "guilde"}
-                      {((comparisonType === "players" && selectedPlayers.length > 1) || 
-                        (comparisonType === "guilds" && selectedGuilds.length > 1)) && "s"}
+                      {t("pages.comparator.buttonCompare")} {comparisonType === "players" ? selectedPlayers.length : selectedGuilds.length}{" "}
+                      {comparisonType === "players"
+                        ? (selectedPlayers.length > 1 ? t("pages.comparator.wordPlayers") : t("pages.comparator.wordPlayer"))
+                        : (selectedGuilds.length > 1 ? t("pages.comparator.wordGuilds") : t("pages.comparator.wordGuild"))}
                     </Button>
                     <Button
                       variant="outline"
