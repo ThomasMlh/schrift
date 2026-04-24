@@ -15,9 +15,13 @@ import {
   Text,
   useToast,
   Avatar,
-  useColorModeValue
+  useColorModeValue,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from "@chakra-ui/react";
-import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
+import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { FaDiscord } from "react-icons/fa";
 import CustomLink from "./ui/CustomLink";
 import { useAuth } from "../providers/AuthProvider";
@@ -32,20 +36,63 @@ const ColorModeSwitcher = () => {
   );
 };
 
+const LANGUAGES = [
+  { code: "fr", label: "Français", flagSrc: "https://flagcdn.com/20x15/fr.png", short: "FR" },
+  { code: "en", label: "English",  flagSrc: "https://flagcdn.com/20x15/gb.png", short: "EN" },
+];
+
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
-  const isEN = i18n.language === "en";
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const hoverBg = useColorModeValue("gray.50", "gray.700");
+  const activeBg = useColorModeValue("blue.50", "blue.900");
+  const activeColor = useColorModeValue("blue.600", "blue.200");
 
-  const toggle = () => {
-    const newLang = isEN ? "fr" : "en";
-    i18n.changeLanguage(newLang);
-    localStorage.setItem("schrift-lang", newLang);
+  const current = LANGUAGES.find((l) => l.code === i18n.language) ?? LANGUAGES[0];
+
+  const handleSelect = (code: string) => {
+    i18n.changeLanguage(code);
+    localStorage.setItem("schrift-lang", code);
   };
 
   return (
-    <Button onClick={toggle} variant="ghost" size="sm" fontWeight="bold" minW="auto" px={2}>
-      {isEN ? "FR" : "EN"}
-    </Button>
+    <Menu placement="bottom-end">
+      <MenuButton
+        as={Button}
+        variant="outline"
+        size="sm"
+        borderColor={borderColor}
+        rightIcon={<ChevronDownIcon />}
+        fontWeight="semibold"
+        fontSize="sm"
+        px={3}
+        _hover={{ bg: hoverBg }}
+      >
+        <HStack spacing={1.5}>
+          <img src={current.flagSrc} width={20} height={15} alt={current.short} style={{ borderRadius: 2 }} />
+          <Text>{current.short}</Text>
+        </HStack>
+      </MenuButton>
+      <MenuList minW="140px" borderColor={borderColor} py={1} overflow="hidden">
+        {LANGUAGES.map((lang) => (
+          <MenuItem
+            key={lang.code}
+            onClick={() => handleSelect(lang.code)}
+            fontSize="sm"
+            fontWeight={lang.code === current.code ? "bold" : "normal"}
+            bg={lang.code === current.code ? activeBg : undefined}
+            color={lang.code === current.code ? activeColor : undefined}
+            _hover={{ bg: hoverBg }}
+            px={4}
+          >
+            <HStack spacing={2}>
+              <img src={lang.flagSrc} width={20} height={15} alt={lang.short} style={{ borderRadius: 2 }} />
+              <Text>{lang.label}</Text>
+            </HStack>
+          </MenuItem>
+        ))}
+      </MenuList>
+    </Menu>
   );
 };
 
