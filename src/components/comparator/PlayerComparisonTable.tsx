@@ -18,6 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { FiTrendingUp, FiTrendingDown, FiMinus } from "react-icons/fi";
 import type { IUserStats } from "@/hooks/useAPI";
+import { useTranslation } from "react-i18next";
 
 interface PlayerComparisonTableProps {
   playersData: Array<{
@@ -33,6 +34,7 @@ export const PlayerComparisonTable = ({
   const cardBg = useColorModeValue("white", "gray.800");
   const tableBg = useColorModeValue("gray.50", "gray.700");
   const borderColor = useColorModeValue("gray.200", "gray.600");
+  const { t } = useTranslation();
 
   // Trouver le meilleur pour chaque métrique
   const getBest = (metric: keyof IUserStats | "bestScore"): number | null => {
@@ -88,39 +90,39 @@ export const PlayerComparisonTable = ({
 
   const metrics = [
     {
-      label: "Score Moyen",
+      label: t("components.comparatorCharts.metricAvgScore"),
       key: "averageScore" as const,
       format: formatScore,
       icon: "📊"
     },
     {
-      label: "Meilleur Score",
+      label: t("components.comparatorCharts.metricBestScore"),
       key: "bestScore" as const,
       format: (stats: IUserStats | null) =>
         formatNumber(stats?.bestScore?.score),
       icon: "🏆"
     },
     {
-      label: "Pire Score",
+      label: t("components.comparatorCharts.metricWorstScore"),
       key: "worstScore" as const,
       format: (stats: IUserStats | null) =>
         formatNumber(stats?.worstScore?.score),
       icon: "📉"
     },
     {
-      label: "Participations",
+      label: t("components.comparatorCharts.metricParticipations"),
       key: "totalScores" as const,
       format: formatNumber,
       icon: "🎯"
     },
     {
-      label: "Points Totaux",
+      label: t("components.comparatorCharts.metricTotalPoints"),
       key: "totalPoints" as const,
       format: formatScore,
       icon: "💰"
     },
     {
-      label: "Taux de Miss",
+      label: t("components.comparatorCharts.metricMissRate"),
       key: "missRate" as const,
       format: (value: number | undefined) =>
         value !== undefined ? `${value}%` : "N/A",
@@ -134,7 +136,7 @@ export const PlayerComparisonTable = ({
       <CardBody>
         <VStack spacing={4} align="stretch">
           <Text fontSize="lg" fontWeight="bold">
-            📋 Tableau Comparatif Détaillé
+            {t("components.comparatorCharts.tableHeadingPlayers")}
           </Text>
 
           <Box overflowX="auto">
@@ -142,7 +144,7 @@ export const PlayerComparisonTable = ({
               <Thead bg={tableBg}>
                 <Tr>
                   <Th borderColor={borderColor} minW="150px">
-                    Métrique
+                    {t("components.comparatorCharts.colMetric")}
                   </Th>
                   {playersData.map((player, index) => (
                     <Th key={index} borderColor={borderColor} textAlign="center">
@@ -220,7 +222,7 @@ export const PlayerComparisonTable = ({
                                 px={2}
                                 borderRadius="full"
                               >
-                                MEILLEUR
+                                {t("components.comparatorCharts.badgeBest")}
                               </Badge>
                             )}
                             <Text
@@ -249,7 +251,7 @@ export const PlayerComparisonTable = ({
             bg={useColorModeValue("purple.50", "gray.700")}
           >
             <Text fontSize="xs" color="gray.600" _dark={{ color: "gray.400" }}>
-              💡 Les valeurs marquées <Badge colorScheme="green" fontSize="2xs">MEILLEUR</Badge> représentent le top pour chaque métrique.
+              💡 {t("components.comparatorCharts.tableFooterPrefix")} <Badge colorScheme="green" fontSize="2xs">{t("components.comparatorCharts.badgeBest")}</Badge> {t("components.comparatorCharts.tableFooterSuffix")}
             </Text>
           </Box>
         </VStack>

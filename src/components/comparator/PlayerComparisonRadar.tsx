@@ -18,6 +18,7 @@ import {
   Tooltip
 } from "recharts";
 import type { IUserStats } from "@/hooks/useAPI";
+import { useTranslation } from "react-i18next";
 
 interface PlayerComparisonRadarProps {
   playersData: Array<{
@@ -32,6 +33,7 @@ export const PlayerComparisonRadar = ({
 }: PlayerComparisonRadarProps) => {
   const cardBg = useColorModeValue("white", "gray.800");
   const textColor = useColorModeValue("gray.700", "white");
+  const { t } = useTranslation();
 
 
   // Normaliser les données pour le radar (échelle 0-100)
@@ -64,7 +66,7 @@ export const PlayerComparisonRadar = ({
   // Préparer les données pour le radar
   const radarData = [
     {
-      metric: "Moy. Score",
+      metric: t("components.comparatorCharts.radarAvg"),
       ...Object.fromEntries(
         playersData.map((p) => [
           p.name,
@@ -76,7 +78,7 @@ export const PlayerComparisonRadar = ({
       fullMark: 100
     },
     {
-      metric: "Meilleur",
+      metric: t("components.comparatorCharts.radarBest"),
       ...Object.fromEntries(
         playersData.map((p) => [
           p.name,
@@ -88,7 +90,7 @@ export const PlayerComparisonRadar = ({
       fullMark: 100
     },
     {
-      metric: "Participation",
+      metric: t("components.comparatorCharts.radarParticipation"),
       ...Object.fromEntries(
         playersData.map((p) => [
           p.name,
@@ -100,7 +102,7 @@ export const PlayerComparisonRadar = ({
       fullMark: 100
     },
     {
-      metric: "Régularité",
+      metric: t("components.comparatorCharts.radarRegularity"),
       ...Object.fromEntries(
         playersData.map((p) => [
           p.name,
@@ -110,7 +112,7 @@ export const PlayerComparisonRadar = ({
       fullMark: 100
     },
     {
-      metric: "Total Points",
+      metric: t("components.comparatorCharts.radarTotalPoints"),
       ...Object.fromEntries(
         playersData.map((p) => [
           p.name,
@@ -157,10 +159,10 @@ export const PlayerComparisonRadar = ({
         <VStack spacing={4} align="stretch">
           <HStack justify="space-between">
             <Text fontSize="lg" fontWeight="bold">
-              📊 Comparaison Radar
+              {t("components.comparatorCharts.radarHeadingPlayers")}
             </Text>
             <Text fontSize="xs" color="gray.500">
-              Échelle normalisée 0-100%
+              {t("components.comparatorCharts.radarScale")}
             </Text>
           </HStack>
 
@@ -199,8 +201,7 @@ export const PlayerComparisonRadar = ({
             bg={useColorModeValue("blue.50", "gray.700")}
           >
             <Text fontSize="xs" color="gray.600" _dark={{ color: "gray.400" }}>
-              💡 <Text as="span" fontWeight="semibold">Astuce:</Text> Les valeurs sont normalisées pour une comparaison équitable. 
-              Un score de 100% représente le meilleur du groupe pour chaque métrique.
+              💡 <Text as="span" fontWeight="semibold">{t("components.comparatorCharts.radarTip")}</Text> {t("components.comparatorCharts.radarTipText")}
             </Text>
           </Box>
         </VStack>

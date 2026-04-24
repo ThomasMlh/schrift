@@ -18,6 +18,7 @@ import {
   Tooltip
 } from "recharts";
 import type { IGuildStats } from "@/hooks/useAPI";
+import { useTranslation } from "react-i18next";
 
 interface GuildComparisonRadarProps {
   guildsData: Array<{
@@ -32,6 +33,7 @@ export const GuildComparisonRadar = ({
 }: GuildComparisonRadarProps) => {
   const cardBg = useColorModeValue("white", "gray.800");
   const textColor = useColorModeValue("gray.700", "whiteAlpha.800");
+  const { t } = useTranslation();
 
   // Normaliser les données pour le radar (échelle 0-100)
   const normalizeValue = (value: number, max: number) => {
@@ -70,7 +72,7 @@ export const GuildComparisonRadar = ({
   // Préparer les données pour le radar
   const radarData = [
     {
-      metric: "Moy. Score",
+      metric: t("components.comparatorCharts.radarAvg"),
       ...Object.fromEntries(
         guildsData.map((g) => [
           g.name,
@@ -82,7 +84,7 @@ export const GuildComparisonRadar = ({
       fullMark: 100
     },
     {
-      metric: "Meilleur",
+      metric: t("components.comparatorCharts.radarBest"),
       ...Object.fromEntries(
         guildsData.map((g) => [
           g.name,
@@ -94,7 +96,7 @@ export const GuildComparisonRadar = ({
       fullMark: 100
     },
     {
-      metric: "Membres",
+      metric: t("components.comparatorCharts.radarMembers"),
       ...Object.fromEntries(
         guildsData.map((g) => [
           g.name,
@@ -106,7 +108,7 @@ export const GuildComparisonRadar = ({
       fullMark: 100
     },
     {
-      metric: "Participation",
+      metric: t("components.comparatorCharts.radarParticipation"),
       ...Object.fromEntries(
         guildsData.map((g) => [
           g.name,
@@ -118,7 +120,7 @@ export const GuildComparisonRadar = ({
       fullMark: 100
     },
     {
-      metric: "Total Points",
+      metric: t("components.comparatorCharts.radarTotalPoints"),
       ...Object.fromEntries(
         guildsData.map((g) => [
           g.name,
@@ -165,10 +167,10 @@ export const GuildComparisonRadar = ({
         <VStack spacing={4} align="stretch">
           <HStack justify="space-between">
             <Text fontSize="lg" fontWeight="bold">
-              📊 Comparaison Radar des Guildes
+              {t("components.comparatorCharts.radarHeadingGuilds")}
             </Text>
             <Text fontSize="xs" color="gray.500">
-              Échelle normalisée 0-100%
+              {t("components.comparatorCharts.radarScale")}
             </Text>
           </HStack>
 
@@ -207,8 +209,7 @@ export const GuildComparisonRadar = ({
             bg={useColorModeValue("purple.50", "gray.700")}
           >
             <Text fontSize="xs" color="gray.600" _dark={{ color: "gray.400" }}>
-              💡 <Text as="span" fontWeight="semibold">Astuce:</Text> Les valeurs sont normalisées pour une comparaison équitable. 
-              Un score de 100% représente le meilleur du groupe pour chaque métrique.
+              💡 <Text as="span" fontWeight="semibold">{t("components.comparatorCharts.radarTip")}</Text> {t("components.comparatorCharts.radarTipText")}
             </Text>
           </Box>
         </VStack>

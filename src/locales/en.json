@@ -357,6 +357,33 @@
       "totalHeading": "📊 Monthly recurring total",
       "totalDescription": "Not counting one-time sources (new characters, story, special events)",
       "orbsUnit": "orbs"
+    },
+    "comparatorCharts": {
+      "radarHeadingPlayers": "📊 Radar Comparison",
+      "radarHeadingGuilds": "📊 Guild Radar Comparison",
+      "radarScale": "Normalized scale 0-100%",
+      "radarTip": "Tip:",
+      "radarTipText": "Values are normalized for a fair comparison. A score of 100% represents the best in the group for each metric.",
+      "tableHeadingPlayers": "📋 Detailed Comparison Table",
+      "tableHeadingGuilds": "📋 Guild Comparison Table",
+      "colMetric": "Metric",
+      "badgeBest": "BEST",
+      "tableFooterPrefix": "Values marked",
+      "tableFooterSuffix": "represent the top for each metric.",
+      "metricAvgScore": "Average Score",
+      "metricBestScore": "Best Score",
+      "metricWorstScore": "Worst Score",
+      "metricParticipations": "Participations",
+      "metricTotalPoints": "Total Points",
+      "metricMissRate": "Miss Rate",
+      "metricMemberCount": "Member Count",
+      "metricTotalParticipations": "Total Participations",
+      "radarAvg": "Avg. Score",
+      "radarBest": "Best",
+      "radarParticipation": "Participation",
+      "radarRegularity": "Regularity",
+      "radarTotalPoints": "Total Points",
+      "radarMembers": "Members"
     }
   }
 }

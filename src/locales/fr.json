@@ -357,6 +357,33 @@
       "totalHeading": "📊 Total mensuel récurrent",
       "totalDescription": "Sans compter les sources ponctuelles (nouveaux persos, story, events spéciaux)",
       "orbsUnit": "orbes"
+    },
+    "comparatorCharts": {
+      "radarHeadingPlayers": "📊 Comparaison Radar",
+      "radarHeadingGuilds": "📊 Comparaison Radar des Guildes",
+      "radarScale": "Échelle normalisée 0-100%",
+      "radarTip": "Astuce:",
+      "radarTipText": "Les valeurs sont normalisées pour une comparaison équitable. Un score de 100% représente le meilleur du groupe pour chaque métrique.",
+      "tableHeadingPlayers": "📋 Tableau Comparatif Détaillé",
+      "tableHeadingGuilds": "📋 Tableau Comparatif des Guildes",
+      "colMetric": "Métrique",
+      "badgeBest": "MEILLEUR",
+      "tableFooterPrefix": "Les valeurs marquées",
+      "tableFooterSuffix": "représentent le top pour chaque métrique.",
+      "metricAvgScore": "Score Moyen",
+      "metricBestScore": "Meilleur Score",
+      "metricWorstScore": "Pire Score",
+      "metricParticipations": "Participations",
+      "metricTotalPoints": "Points Totaux",
+      "metricMissRate": "Taux de Miss",
+      "metricMemberCount": "Nombre de Membres",
+      "metricTotalParticipations": "Total Participations",
+      "radarAvg": "Moy. Score",
+      "radarBest": "Meilleur",
+      "radarParticipation": "Participation",
+      "radarRegularity": "Régularité",
+      "radarTotalPoints": "Total Points",
+      "radarMembers": "Membres"
     }
   }
 }
