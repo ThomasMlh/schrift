@@ -2,9 +2,11 @@ import { Container, Flex, Box, VStack } from "@chakra-ui/react";
 import { CurrentInfoSection } from "../components/CurrentInfoSection";
 import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "../components/SEOHead";
+import { useTranslation } from "react-i18next";
 // const imageSchrift = new URL('../assets/logo.png', import.meta.url).href;
 
 const HomePage = () => {
+    const { t } = useTranslation();
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -97,8 +99,8 @@ const HomePage = () => {
       />
       <Flex w="100%" align="center" justify="center" flexDir="column">
         <HeroSection
-          title="Guildes Ṣčhrīft"
-          description="Rejoignez notre communauté Bleach Brave Souls et dominez les classements avec les meilleures guildes"
+          title={t("pages.home.heroTitle")}
+          description={t("pages.home.heroDescription")}
         />
 
         <Container
