@@ -37,6 +37,13 @@ const DiscordCallback = () => {
         // Vérifier le state anti-CSRF
         const savedState = sessionStorage.getItem('oauth_state');
         sessionStorage.removeItem('oauth_state');
+
+        if (!savedState) {
+          // Pas de flow OAuth en cours (URL obsolète ou restaurée par le navigateur)
+          navigate('/');
+          return;
+        }
+
         if (!returnedState || returnedState !== savedState) {
           throw new Error('Vérification de sécurité échouée (state invalide)');
         }
