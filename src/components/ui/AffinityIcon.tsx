@@ -1,5 +1,6 @@
 import { Image, Box, Text } from "@chakra-ui/react";
 import { getAffinityIcon } from "../../utils/characterIcons";
+import { useTranslation } from "react-i18next";
 
 interface AffinityIconProps {
   affinity: string;
@@ -12,12 +13,14 @@ export const AffinityIcon = ({
   size = "24px", 
   showLabel = false 
 }: AffinityIconProps) => {
+  const { t } = useTranslation();
+  const label = t(`affinities.${affinity}`, affinity);
   const imageUrl = getAffinityIcon(affinity);
 
   if (!imageUrl) {
     return showLabel ? (
       <Text fontSize="sm" color="gray.500">
-        {affinity}
+        {label}
       </Text>
     ) : null;
   }
@@ -27,13 +30,13 @@ export const AffinityIcon = ({
       <Box display="flex" alignItems="center" gap={2}>
         <Image
           src={imageUrl}
-          alt={affinity}
+          alt={label}
           width={size}
           height={size}
-          fallback={<Text fontSize="sm">{affinity}</Text>}
+          fallback={<Text fontSize="sm">{label}</Text>}
         />
         <Text fontSize="sm">
-          {affinity}
+          {label}
         </Text>
       </Box>
     );
@@ -42,10 +45,10 @@ export const AffinityIcon = ({
   return (
     <Image
       src={imageUrl}
-      alt={affinity}
+      alt={label}
       width={size}
       height={size}
-      fallback={<Text fontSize="sm">{affinity}</Text>}
+      fallback={<Text fontSize="sm">{label}</Text>}
     />
   );
 };

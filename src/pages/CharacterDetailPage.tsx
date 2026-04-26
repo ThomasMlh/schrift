@@ -26,11 +26,13 @@ import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
 import { getStatIcon } from "@/utils/characterIcons";
 import { SEOHead } from "../components/SEOHead";
 import { useCharacter } from "@/hooks/useAPI";
+import { useTranslation } from "react-i18next";
 
 const CharacterDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const toast = useToast();
+  const { t } = useTranslation();
   const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
   // Utiliser useSWR pour le personnage (cache automatique)
@@ -46,10 +48,10 @@ const CharacterDetailPage = () => {
 
   useEffect(() => {
     if (fetchError) {
-      setError("Erreur lors du chargement du personnage");
+      setError(t("pages.characterDetail.errorLoading"));
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les informations du personnage",
+        title: t("pages.characterDetail.errorTitle"),
+        description: t("pages.characterDetail.errorDesc"),
         status: "error",
         duration: 5000
       });
@@ -71,14 +73,14 @@ const CharacterDetailPage = () => {
       <Container maxW="container.lg" py={8}>
         <VStack spacing={6} align="center">
           <Text fontSize="xl" color="red.500">
-            {error || "Personnage introuvable"}
+            {error || t("pages.characterDetail.notFound")}
           </Text>
           <Button
             leftIcon={<ArrowBackIcon />}
             colorScheme="blue"
             onClick={() => navigate("/personnages")}
           >
-            Retour aux personnages
+            {t("pages.characterDetail.backToCharacters")}
           </Button>
         </VStack>
       </Container>
@@ -185,7 +187,7 @@ const CharacterDetailPage = () => {
             alignSelf="flex-start"
             onClick={() => navigate("/personnages")}
           >
-            Retour aux personnages
+            {t("pages.characterDetail.backToCharacters")}
           </Button>
 
           {/* Carte principale du personnage */}
@@ -274,11 +276,11 @@ const CharacterDetailPage = () => {
                         >
                           <Text
                             fontWeight="semibold"
-                            color="gray.600"
+                            color={textSecondary}
                             fontSize={{ base: "sm", md: "md" }}
                             minW={{ base: "auto", md: "100px" }}
                           >
-                            Affinité
+                            {t("pages.characterDetail.labelAffinity")}
                             {/* Ajout des deux points uniquement sur desktop */}
                             <Text
                               as="span"
@@ -309,7 +311,7 @@ const CharacterDetailPage = () => {
                             fontSize={{ base: "sm", md: "md" }}
                             minW={{ base: "auto", md: "100px" }}
                           >
-                            Type
+                            {t("pages.characterDetail.labelType")}
                             <Text
                               as="span"
                               display={{ base: "none", md: "inline" }}
@@ -338,7 +340,7 @@ const CharacterDetailPage = () => {
                             fontSize={{ base: "sm", md: "md" }}
                             minW={{ base: "auto", md: "100px" }}
                           >
-                            Recherche
+                            {t("pages.characterDetail.labelSearch")}
                             <Text
                               as="span"
                               display={{ base: "none", md: "inline" }}
@@ -375,7 +377,7 @@ const CharacterDetailPage = () => {
                   {character.categories && character.categories.length > 0 && (
                     <Box>
                       <Heading size="md" color="purple.500" mb={4}>
-                        Catégories ({character.categories.length})
+                        {t("pages.characterDetail.headingCategories")} ({character.categories.length})
                       </Heading>
                       <VStack spacing={1} align="left">
                         {character.categories.map((category, index) => (
@@ -387,7 +389,7 @@ const CharacterDetailPage = () => {
                                 showLabel={false}
                               />
                               <Badge colorScheme="purple" variant="subtle">
-                                {category}
+                                {t(`factions.${category}`, category)}
                               </Badge>
                             </HStack>
                           </Box>
@@ -400,7 +402,7 @@ const CharacterDetailPage = () => {
                   {character.killers && character.killers.length > 0 && (
                     <Box>
                       <Heading size="md" color="orange.500" mb={4}>
-                        Tueurs ({character.killers.length})
+                        {t("pages.characterDetail.headingKillers")} ({character.killers.length})
                       </Heading>
                       <VStack spacing={1} align="left">
                         {character.killers.map((killer, index) => (
@@ -411,7 +413,7 @@ const CharacterDetailPage = () => {
                               showLabel={false}
                             />
                             <Badge colorScheme="orange" variant="subtle">
-                              {killer}
+                              {t(`factions.${killer}`, killer)}
                             </Badge>
                           </HStack>
                         ))}
@@ -424,7 +426,7 @@ const CharacterDetailPage = () => {
                     character.soul_traits.length > 0 && (
                       <Box>
                         <Heading size="md" color="pink.500" mb={4}>
-                          Traits d'âme ({character.soul_traits.length})
+                          {t("pages.characterDetail.headingSoulTraits")} ({character.soul_traits.length})
                         </Heading>
                         <VStack spacing={1} align="left">
                           {character.soul_traits.map(
@@ -453,7 +455,7 @@ const CharacterDetailPage = () => {
                   {character.stats && (
                     <Box>
                       <Heading size="md" color="blue.500" mb={4}>
-                        Statistiques
+                        {t("pages.characterDetail.headingStats")}
                       </Heading>
                       <VStack spacing={3} align="stretch">
                         {character.stats.end && (
@@ -461,10 +463,10 @@ const CharacterDetailPage = () => {
                             <HStack>
                               <Image
                                 src={getStatIcon("end")!}
-                                alt="Endurance"
+                                alt={t("stats.end")}
                                 boxSize="20px"
                               />
-                              <Text fontWeight="medium">Endurance:</Text>
+                              <Text fontWeight="medium">{t("stats.end")}:</Text>
                             </HStack>
                             <Badge colorScheme="green" variant="solid">
                               {character.stats.end}
@@ -476,10 +478,10 @@ const CharacterDetailPage = () => {
                             <HStack>
                               <Image
                                 src={getStatIcon("atk")!}
-                                alt="Attaque"
+                                alt={t("stats.atk")}
                                 boxSize="20px"
                               />
-                              <Text fontWeight="medium">Attaque:</Text>
+                              <Text fontWeight="medium">{t("stats.atk")}:</Text>
                             </HStack>
                             <Badge colorScheme="red" variant="solid">
                               {character.stats.atk}
@@ -491,10 +493,10 @@ const CharacterDetailPage = () => {
                             <HStack>
                               <Image
                                 src={getStatIcon("def")!}
-                                alt="Défense"
+                                alt={t("stats.def")}
                                 boxSize="20px"
                               />
-                              <Text fontWeight="medium">Défense:</Text>
+                              <Text fontWeight="medium">{t("stats.def")}:</Text>
                             </HStack>
                             <Badge colorScheme="blue" variant="solid">
                               {character.stats.def}
@@ -506,10 +508,10 @@ const CharacterDetailPage = () => {
                             <HStack>
                               <Image
                                 src={getStatIcon("cct")!}
-                                alt="Concentration"
+                                alt={t("stats.cct")}
                                 boxSize="20px"
                               />
-                              <Text fontWeight="medium">Concentration:</Text>
+                              <Text fontWeight="medium">{t("stats.cct")}:</Text>
                             </HStack>
                             <Badge colorScheme="yellow" variant="solid">
                               {character.stats.cct}
@@ -521,11 +523,11 @@ const CharacterDetailPage = () => {
                             <HStack>
                               <Image
                                 src={getStatIcon("pre")!}
-                                alt="Préssion Spirituelle"
+                                alt={t("stats.pre")}
                                 boxSize="20px"
                               />
                               <Text fontWeight="medium">
-                                Préssion Spirituelle:
+                                {t("stats.pre")}:
                               </Text>
                             </HStack>
                             <Badge colorScheme="purple" variant="solid">
@@ -541,7 +543,7 @@ const CharacterDetailPage = () => {
                   {character.immunities && character.immunities.length > 0 && (
                     <Box>
                       <Heading size="md" color="teal.500" mb={4}>
-                        Immunités
+                        {t("pages.characterDetail.headingImmunities")}
                       </Heading>
                       <Flex wrap="wrap" gap={2}>
                         {character.immunities.map(
@@ -562,12 +564,12 @@ const CharacterDetailPage = () => {
                   {/* Autres informations */}
                   <Box>
                     <Heading size="md" color={textSecondary} mb={4}>
-                      Informations
+                      {t("pages.characterDetail.headingInfo")}
                     </Heading>
                     <VStack spacing={3} align="stretch">
                       {character.created_at && (
                         <HStack justify="space-between">
-                          <Text fontWeight="medium">Créé le:</Text>
+                          <Text fontWeight="medium">{t("pages.characterDetail.labelCreatedAt")}:</Text>
                           <Text fontSize="sm" color={textSecondary}>
                             {character.release_date}
                           </Text>
@@ -575,7 +577,7 @@ const CharacterDetailPage = () => {
                       )}
                       {character.resurrection_release && (
                         <HStack justify="space-between">
-                          <Text fontWeight="medium">Résurrection:</Text>
+                          <Text fontWeight="medium">{t("pages.characterDetail.labelResurrection")}:</Text>
                           <Text fontSize="sm" color={textSecondary}>
                             {character.resurrection_release}
                           </Text>
@@ -590,14 +592,14 @@ const CharacterDetailPage = () => {
                 <Divider />
                 <Box>
                   <Heading size="md" color="cyan.500" mb={4}>
-                    Ressources visuelles
+                    {t("pages.characterDetail.headingVisuals")}
                   </Heading>
 
                   {/* Bannière */}
                   {character.banner_id && (
                     <Box mb={6}>
                       <Text fontWeight="medium" mb={3}>
-                        Bannière:
+                        {t("pages.characterDetail.labelBanner")}:
                       </Text>
                       <Box
                         borderRadius="lg"
@@ -620,7 +622,7 @@ const CharacterDetailPage = () => {
                   {/* Attack URL */}
                   <Box mb={6}>
                     <Text fontWeight="medium" mb={3}>
-                      Attaque spéciale:
+                      {t("pages.characterDetail.labelSpecialAttack")}:
                     </Text>
                     <Box
                       borderRadius="lg"
@@ -641,7 +643,7 @@ const CharacterDetailPage = () => {
                   {/* Artwork */}
                   <Box mb={6}>
                     <Text fontWeight="medium" mb={3}>
-                      Artwork:
+                      {t("pages.characterDetail.labelArtwork")}:
                     </Text>
                     <Box
                       borderRadius="lg"
@@ -661,7 +663,7 @@ const CharacterDetailPage = () => {
                   </Box>
                   <Box mb={6}>
                     <Text fontWeight="medium" mb={3}>
-                      Phrase:
+                      {t("pages.characterDetail.labelPhrase")}:
                     </Text>
                     <Box
                       borderRadius="lg"
@@ -695,7 +697,7 @@ const CharacterDetailPage = () => {
                 bgColor: "gray.700"
               }}
             >
-              Voir tous les personnages
+              {t("pages.characterDetail.viewAllCharacters")}
             </Button>
           </Flex>
         </VStack>

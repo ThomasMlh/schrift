@@ -321,7 +321,7 @@ const CycleDetailPage = () => {
                             borderRadius="full"
                             fontWeight="bold"
                           >
-                            {rotation.period}
+                            {t(`periods.${rotation.period}`, rotation.period)}
                           </Badge>
                         </VStack>
                       </Box>
@@ -360,7 +360,7 @@ const CycleDetailPage = () => {
                             textTransform="uppercase"
                             letterSpacing="wide"
                           >
-                            Killer
+                            {t("pages.cycleDetail.fieldKiller")}
                           </Text>
                           <Text fontSize="md" fontWeight="bold" color="green.500">
                             {rotation.killer}
@@ -383,7 +383,7 @@ const CycleDetailPage = () => {
                             textTransform="uppercase"
                             letterSpacing="wide"
                           >
-                            Attaque
+                            {t("pages.cycleDetail.fieldAttack")}
                           </Text>
                           <Badge
                             colorScheme={
@@ -399,7 +399,7 @@ const CycleDetailPage = () => {
                             py={1}
                             borderRadius="md"
                           >
-                            {handleAttackType(rotation)}
+                            {t(`attackTypes.${rotation.attack}`, handleAttackType(rotation))}
                           </Badge>
                         </Box>
 
@@ -419,7 +419,7 @@ const CycleDetailPage = () => {
                             textTransform="uppercase"
                             letterSpacing="wide"
                           >
-                            Altération
+                            {t("pages.cycleDetail.fieldAlteration")}
                           </Text>
                           <AlterationImage
                             alteration={rotation.alteration}

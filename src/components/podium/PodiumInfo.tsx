@@ -7,6 +7,7 @@ import type {
 } from "@/interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import CustomLink from "@/components/ui/CustomLink";
+import { useTranslation } from "react-i18next";
 
 type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
 
@@ -42,6 +43,7 @@ export const PodiumInfo = ({
   selectedCycle,
   filterBg,
 }: PodiumInfoProps) => {
+  const { t } = useTranslation();
   return (
     <>
       {/* Informations sur la rotation (mode rotation) */}
@@ -60,7 +62,7 @@ export const PodiumInfo = ({
               >
                 <CustomLink
                   to={`/cycle/${selectedCycle?._id}/rotation/${podiumData.meta.rotationInfo.position}`}
-                  text={podiumData.meta.rotationInfo.killer}
+                  text={t(`factions.${podiumData.meta.rotationInfo.killer}`, podiumData.meta.rotationInfo.killer)}
                   textSize="md"
                 />
                 <AttackTypeBadge
@@ -72,11 +74,11 @@ export const PodiumInfo = ({
                 {podiumData.meta.rotationInfo.end_date}
               </Text>
               <Text fontSize="md" fontWeight="bold">
-                Score moyen:{" "}
+                {t("components.podiumInfo.rotationScore")}:{" "}
                 {podiumData.meta.averageScore?.toLocaleString("fr-FR")}
               </Text>
               <Text fontSize="sm">
-                {podiumData.meta.totalPlayers} joueur(s) au total
+                {t("components.podiumInfo.totalPlayers", { count: podiumData.meta.totalPlayers })}
               </Text>
             </VStack>
           </Box>
@@ -87,29 +89,29 @@ export const PodiumInfo = ({
         <Box p={4} bg={filterBg} borderRadius="md">
           <VStack spacing={3} align="center">
             <Text fontSize="lg" fontWeight="bold">
-              Semaine {podiumData.meta.weekNumber}
+              {t("components.podiumInfo.weekLabel")} {podiumData.meta.weekNumber}
             </Text>
             <HStack spacing={6} wrap="wrap" justify="center">
               {podiumData.meta.rotationsInfo.map((rotation, idx) => (
                 <VStack key={idx} spacing={1}>
                   <CustomLink
                     to={`/cycle/${selectedCycle?._id}/rotation/${rotation.position}`}
-                    text={`Rotation ${rotation.position}`}
+                    text={`${t("components.podiumInfo.rotationLabel")} ${rotation.position}`}
                     textSize="sm"
                   />
                   <Text fontSize="xs">
-                    {rotation.killer}
+                    {t(`factions.${rotation.killer}`, rotation.killer)}
                   </Text>
                   <AttackTypeBadge attackType={rotation.attack} />
                 </VStack>
               ))}
             </HStack>
             <Text fontSize="md" fontWeight="bold">
-              Score moyen de la semaine:{" "}
+              {t("components.podiumInfo.weeklyScore")}:{" "}
               {podiumData.meta.averageWeekScore?.toLocaleString("fr-FR")}
             </Text>
             <Text fontSize="sm">
-              {podiumData.meta.totalPlayers} joueur(s) au total
+              {t("components.podiumInfo.totalPlayers", { count: podiumData.meta.totalPlayers })}
             </Text>
           </VStack>
         </Box>
@@ -120,18 +122,16 @@ export const PodiumInfo = ({
         <Box p={4} bg={filterBg} borderRadius="md">
           <VStack spacing={2}>
             <Text fontSize="lg" fontWeight="bold" color="red.500">
-              📉 Classement des Miss
+              📉 {t("components.podiumInfo.missTitle")}
             </Text>
             <Text fontSize="md">
-              {podiumData.meta.totalPlayersWithMisses} joueur{podiumData.meta.totalPlayersWithMisses > 1 ? "s" : ""} avec au moins
-              1 miss
+              {t("components.podiumInfo.missPlayers", { count: podiumData.meta.totalPlayersWithMisses })}
             </Text>
             <Text fontSize="sm">
-              Total: {podiumData.meta.totalMissesInCycle} miss dans le cycle
+              {t("components.podiumInfo.missTotal", { count: podiumData.meta.totalMissesInCycle })}
             </Text>
             <Text fontSize="sm">
-              Moyenne: {podiumData.meta.averageMissesPerPlayer}{" "}
-              miss/joueur
+              {t("components.podiumInfo.missAverage", { avg: podiumData.meta.averageMissesPerPlayer })}
             </Text>
           </VStack>
         </Box>

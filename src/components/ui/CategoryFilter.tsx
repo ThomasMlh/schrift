@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { CategoryIcon } from "./CategoryIcon";
+import { useTranslation } from "react-i18next";
 
 interface CategoryFilterProps {
   selectedCategory: string;
@@ -21,6 +22,7 @@ export const CategoryFilter = ({
   categories,
   onCategoryChange
 }: CategoryFilterProps) => {
+  const { t } = useTranslation();
   return (
     <Menu>
       <MenuButton
@@ -50,12 +52,12 @@ export const CategoryFilter = ({
           {selectedCategory ? (
             <>
               <CategoryIcon category={selectedCategory} size="20px" />
-              <Text fontSize="sm">{selectedCategory}</Text>
+              <Text fontSize="sm">{t(`factions.${selectedCategory}`, selectedCategory)}</Text>
             </>
           ) : (
             <>
               <CategoryIcon category={"Toutes"} size="20px" />
-              <Text fontSize="sm">Toutes les catégories</Text>
+              <Text fontSize="sm">{t("factions.allCategories")}</Text>
             </>
           )}
         </HStack>
@@ -64,14 +66,14 @@ export const CategoryFilter = ({
         <MenuItem onClick={() => onCategoryChange("")}>
           <HStack spacing={2}>
             <CategoryIcon category={"Toutes"} size="20px" />
-            <Text fontSize="sm">Toutes les catégories</Text>
+            <Text fontSize="sm">{t("factions.allCategories")}</Text>
           </HStack>
         </MenuItem>
         {categories.map((category) => (
           <MenuItem key={category} onClick={() => onCategoryChange(category)}>
             <HStack spacing={2}>
               <CategoryIcon category={category} size="20px" />
-              <Text fontSize="sm">{category}</Text>
+              <Text fontSize="sm">{t(`factions.${category}`, category)}</Text>
             </HStack>
           </MenuItem>
         ))}

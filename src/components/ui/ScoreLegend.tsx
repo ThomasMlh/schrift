@@ -15,9 +15,10 @@ import {
   useColorModeValue
 } from "@chakra-ui/react";
 import { InfoIcon } from "@chakra-ui/icons";
+import { useTranslation } from "react-i18next";
 
 interface ScoreLegendItem {
-  label: string;
+  labelKey: string;
   minScore: number;
   maxScore?: number;
   colorScheme?: string;
@@ -28,55 +29,55 @@ interface ScoreLegendItem {
 
 const legendItems: ScoreLegendItem[] = [
   {
-    label: "Buff QG (Arc-en-ciel)",
+    labelKey: "rainbow",
     minScore: 600000000,
     isRainbow: true
   },
   {
-    label: "Avant buff",
+    labelKey: "beforeBuff",
     minScore: 566000000,
     maxScore: 599999999,
     colorScheme: "blue"
   },
   {
-    label: "Clear Vague Extra 3 et 4",
+    labelKey: "clearExtraWave34",
     minScore: 400000000,
     maxScore: 565999999,
     colorScheme: "purple"
   },
   {
-    label: "Clear Vague Extra 1 et 2",
+    labelKey: "clearExtraWave12",
     minScore: 300000000,
     maxScore: 399999999,
     colorScheme: "green"
   },
   {
-    label: "Clear très difficile à non clear cauchemar",
+    labelKey: "clearVeryHardToNoClearNightmare",
     minScore: 210000000,
     maxScore: 299999999,
     colorScheme: "yellow"
   },
   {
-    label: "Clear difficile à non clear très difficile",
+    labelKey: "clearHardToNoClearVeryHard",
     minScore: 72000000,
     maxScore: 209999999,
     colorScheme: "orange"
   },
   {
-    label: "Clear normal à non clear difficile",
+    labelKey: "clearNormalToNoClearHard",
     minScore: 22500000,
     maxScore: 71999999,
     colorScheme: "red"
   },
   {
-    label: "Non clear normal",
+    labelKey: "noClearNormal",
     minScore: 1,
     maxScore: 22499999,
     bg: "#8B4513",
     color: "white"
   },
   {
-    label: "N'a pas fait sa QG",
+    labelKey: "noGuildQuest",
     minScore: 0,
     maxScore: 0,
     bg: "gray.700",
@@ -85,6 +86,7 @@ const legendItems: ScoreLegendItem[] = [
 ];
 
 export const ScoreLegend = () => {
+  const { t } = useTranslation();
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const bgColor = useColorModeValue("white", "gray.800");
 
@@ -97,7 +99,7 @@ export const ScoreLegend = () => {
           leftIcon={<Icon as={InfoIcon} />}
           colorScheme="blue"
         >
-          Légende des scores
+          {t("components.scoreLegend.buttonLabel")}
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -108,7 +110,7 @@ export const ScoreLegend = () => {
         <PopoverArrow />
         <PopoverCloseButton />
         <PopoverHeader fontWeight="bold" borderColor={borderColor}>
-          Codes couleurs des scores
+          {t("components.scoreLegend.heading")}
         </PopoverHeader>
         <PopoverBody>
           <VStack spacing={3} align="stretch">
@@ -163,7 +165,7 @@ export const ScoreLegend = () => {
                   </Box>
                 )}
                 <Text fontSize="sm" flex={1}>
-                  {item.label}
+                  {t(`components.scoreLegend.${item.labelKey}`)}
                 </Text>
               </HStack>
             ))}

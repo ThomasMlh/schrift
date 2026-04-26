@@ -1,5 +1,6 @@
 import { Image, Box, Text } from "@chakra-ui/react";
 import { getKillerIcon } from "../../utils/characterIcons";
+import { useTranslation } from "react-i18next";
 
 interface KillerIconProps {
   killer: string;
@@ -12,12 +13,14 @@ export const KillerIcon = ({
   size = "24px", 
   showLabel = false 
 }: KillerIconProps) => {
+  const { t } = useTranslation();
+  const label = t(`factions.${killer}`, killer);
   const imageUrl = getKillerIcon(killer);
 
   if (!imageUrl) {
     return showLabel ? (
       <Text fontSize="sm" color="gray.500">
-        {killer}
+        {label}
       </Text>
     ) : null;
   }
@@ -27,13 +30,13 @@ export const KillerIcon = ({
       <Box display="flex" alignItems="center" gap={2}>
         <Image
           src={imageUrl}
-          alt={killer}
+          alt={label}
           width={size}
           height={size}
-          fallback={<Text fontSize="sm">{killer}</Text>}
+          fallback={<Text fontSize="sm">{label}</Text>}
         />
         <Text fontSize="sm">
-          {killer}
+          {label}
         </Text>
       </Box>
     );
@@ -42,10 +45,10 @@ export const KillerIcon = ({
   return (
     <Image
       src={imageUrl}
-      alt={killer}
+      alt={label}
       width={size}
       height={size}
-      fallback={<Text fontSize="sm">{killer}</Text>}
+      fallback={<Text fontSize="sm">{label}</Text>}
     />
   );
 };

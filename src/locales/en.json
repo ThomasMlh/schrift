@@ -100,7 +100,8 @@
       "rotationsClickTip": "💡 Click on a rotation to see its detailed ranking",
       "fieldKiller": "Killer",
       "fieldAttack": "Attack",
-      "fieldAlteration": "Alteration"
+      "fieldAlteration": "Alteration",
+      "labelPeriod": "Period"
     },
     "rotationDetail": {
       "buttonBack": "Back",
@@ -228,6 +229,30 @@
       "title": "Page not found",
       "message": "The page you are looking for does not exist.",
       "backHome": "Back to home"
+    },
+    "characterDetail": {
+      "backToCharacters": "Back to characters",
+      "viewAllCharacters": "View all characters",
+      "notFound": "Character not found",
+      "errorLoading": "Error loading character",
+      "errorTitle": "Error",
+      "errorDesc": "Unable to load character information",
+      "labelAffinity": "Affinity",
+      "labelType": "Type",
+      "labelSearch": "Search",
+      "headingCategories": "Categories",
+      "headingKillers": "Killers",
+      "headingSoulTraits": "Soul Traits",
+      "headingStats": "Statistics",
+      "headingImmunities": "Immunities",
+      "headingInfo": "Information",
+      "labelCreatedAt": "Released on",
+      "labelResurrection": "Resurrection",
+      "headingVisuals": "Visual resources",
+      "labelBanner": "Banner",
+      "labelSpecialAttack": "Special attack",
+      "labelArtwork": "Artwork",
+      "labelPhrase": "Phrase"
     }
   },
   "components": {
@@ -291,6 +316,59 @@
       "selectCycleHint": "Please select a cycle to display the podium",
       "loading": "Loading podium...",
       "noScores": "No score found for this cycle"
+    },
+    "scoreLegend": {
+      "buttonLabel": "Score legend",
+      "heading": "Score color codes",
+      "rainbow": "Guild HQ buff (Rainbow)",
+      "beforeBuff": "Before buff",
+      "clearExtraWave34": "Clear Extra Wave 3 & 4",
+      "clearExtraWave12": "Clear Extra Wave 1 & 2",
+      "clearVeryHardToNoClearNightmare": "Very hard clear to no clear nightmare",
+      "clearHardToNoClearVeryHard": "Hard clear to no clear very hard",
+      "clearNormalToNoClearHard": "Normal clear to no clear hard",
+      "noClearNormal": "No clear normal",
+      "noGuildQuest": "Did not do Guild Quest"
+    },
+    "podiumFilters": {
+      "modeFullCycle": "Full cycle",
+      "modeByRotation": "By rotation",
+      "modeByWeek": "By week",
+      "modeMiss": "Misses",
+      "rankingAverage": "By average score",
+      "rankingMax": "By max score (sum)",
+      "selectCyclePlaceholder": "Select a cycle",
+      "selectRotationPlaceholder": "Select a rotation",
+      "selectWeekPlaceholder": "Select a week",
+      "allGuilds": "All guilds",
+      "week": "Week",
+      "reset": "Reset",
+      "activeFilters": "Active filters:",
+      "badgeMode": "Mode:",
+      "badgeTypeMax": "Type: Max score (sum)",
+      "badgeCycle": "Cycle:",
+      "badgeWeek": "Week:",
+      "badgeGuild": "Guild:"
+    },
+    "podiumInfo": {
+      "rotationScore": "Average score",
+      "totalPlayers": "{{count}} player(s) in total",
+      "weekLabel": "Week",
+      "rotationLabel": "Rotation",
+      "weeklyScore": "Weekly average score",
+      "missTitle": "Miss Rankings",
+      "missPlayers": "{{count}} player(s) with at least 1 miss",
+      "missTotal": "Total: {{count}} misses in the cycle",
+      "missAverage": "Average: {{avg}} misses/player"
+    },
+    "podiumResults": {
+      "loading": "Loading podium...",
+      "selectWeekFirst": "Please select a week",
+      "noScoreFound": "No score found for this selection",
+      "selectCycleFirst": "Please select a cycle",
+      "paginationInfo": "Page {{current}} of {{total}} - Displaying {{count}} player(s)",
+      "playersWithMiss": "{{count}} player(s) with miss",
+      "playersTotal": "{{count}} player(s) in total"
     },
     "scoresSection": {
       "heading": "Score Management",
@@ -385,5 +463,56 @@
       "radarTotalPoints": "Total Points",
       "radarMembers": "Members"
     }
+  },
+  "affinities": {
+    "Force": "Power",
+    "Vitesse": "Speed",
+    "Instinct": "Heart",
+    "Technique": "Technique",
+    "Connaissance": "Mind",
+    "allAffinities": "All affinities"
+  },
+  "stats": {
+    "end": "Stamina",
+    "atk": "Attack",
+    "def": "Defense",
+    "cct": "Focus",
+    "pre": "Spiritual Pressure"
+  },
+  "factions": {
+    "Arrancar": "Arrancar",
+    "Aucun": "No Affiliation",
+    "Capitaine": "Captain",
+    "Division 0": "Squad Zero",
+    "Espada": "Espada",
+    "Hollow": "Hollow",
+    "Humain": "Human",
+    "Quincy": "Quincy",
+    "Shinigami": "Soul Reaper",
+    "Stern Ritter": "Stern Ritter",
+    "allCategories": "All categories",
+    "allKillers": "All killers"
+  },
+  "alterations": {
+    "Feu": "Fire",
+    "Gel": "Freeze",
+    "Paralysie": "Paralysis",
+    "Faiblesse": "Weaken",
+    "Poison": "Poison",
+    "Lacération": "Laceration"
+  },
+  "attackTypes": {
+    "R": "Melee",
+    "B": "Ranged",
+    "unknown": "Unknown",
+    "meleeFallback": "Melee"
+  },
+  "periods": {
+    "Mardi-Jeudi": "Tuesday-Thursday",
+    "Vendredi-Dimanche": "Friday-Sunday"
+  },
+  "periodsShort": {
+    "Mardi-Jeudi": "Tue-Thu",
+    "Vendredi-Dimanche": "Fri-Sun"
   }
 }

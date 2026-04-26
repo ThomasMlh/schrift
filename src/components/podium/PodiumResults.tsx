@@ -8,6 +8,7 @@ import PlayerCard from "@/components/ui/PlayerCard";
 import PlayerCardWeekly from "@/components/ui/PlayerCardWeekly";
 import PlayerCardMiss from "@/components/ui/PlayerCardMiss";
 import { Pagination as PaginationComponent } from "@/components/ui/Pagination";
+import { useTranslation } from "react-i18next";
 
 type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
 
@@ -49,13 +50,14 @@ export const PodiumResults = ({
   onPageChange,
   selectedGuildName = "",
 }: PodiumResultsProps) => {
+  const { t } = useTranslation();
   const showGuildName = !selectedGuildName; // Afficher la guilde si aucune n'est filtrée
   if (isLoading) {
     return (
       <Flex justify="center" align="center" py={8}>
         <VStack spacing={3}>
           <Spinner size="lg" />
-          <Text>Chargement du podium...</Text>
+          <Text>{t("components.podiumResults.loading")}</Text>
         </VStack>
       </Flex>
     );
@@ -68,9 +70,9 @@ export const PodiumResults = ({
         <Text>
           {selectedCycleId
             ? displayMode === "weekly" && !selectedWeekNumber
-              ? "Veuillez sélectionner une semaine"
-              : "Aucun score trouvé pour cette sélection"
-            : "Veuillez sélectionner un cycle"}
+              ? t("components.podiumResults.selectWeekFirst")
+              : t("components.podiumResults.noScoreFound")
+            : t("components.podiumResults.selectCycleFirst")}
         </Text>
       </Alert>
     );
@@ -81,9 +83,11 @@ export const PodiumResults = ({
       {/* Informations sur les résultats */}
       {podiumData.pagination && (
         <Text fontSize="sm" color="gray.600">
-          Page {podiumData.pagination.currentPage} sur{" "}
-          {podiumData.pagination.totalPages} - Affichage de{" "}
-          {podiumData.pagination.itemsOnPage} joueur(s)
+          {t("components.podiumResults.paginationInfo", {
+            current: podiumData.pagination.currentPage,
+            total: podiumData.pagination.totalPages,
+            count: podiumData.pagination.itemsOnPage,
+          })}
         </Text>
       )}
 
@@ -168,13 +172,9 @@ export const PodiumResults = ({
       {podiumData && (
         <Text fontSize="xs" color="gray.500" textAlign="center">
           {isMissesResponse(podiumData)
-            ? `${podiumData.meta.totalPlayersWithMisses} joueur${
-                podiumData.meta.totalPlayersWithMisses > 1 ? "s" : ""
-              } avec miss`
+            ? t("components.podiumResults.playersWithMiss", { count: podiumData.meta.totalPlayersWithMisses })
             : isPodiumResponse(podiumData) || isWeeklyResponse(podiumData)
-            ? `${podiumData.meta.totalPlayers} joueur${
-                podiumData.meta.totalPlayers > 1 ? "s" : ""
-              } au total`
+            ? t("components.podiumResults.playersTotal", { count: podiumData.meta.totalPlayers })
             : ""}
         </Text>
       )}

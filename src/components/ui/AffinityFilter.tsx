@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { AffinityIcon } from "./AffinityIcon";
+import { useTranslation } from "react-i18next";
 
 interface AffinityFilterProps {
   selectedAffinity: string;
@@ -21,6 +22,7 @@ export const AffinityFilter = ({
   affinities,
   onAffinityChange
 }: AffinityFilterProps) => {
+  const { t } = useTranslation();
   return (
     <Menu>
       <MenuButton
@@ -50,12 +52,12 @@ export const AffinityFilter = ({
           {selectedAffinity ? (
             <>
               <AffinityIcon affinity={selectedAffinity} size="20px" />
-              <Text fontSize="sm">{selectedAffinity}</Text>
+              <Text fontSize="sm">{t(`affinities.${selectedAffinity}`, selectedAffinity)}</Text>
             </>
           ) : (
             <>
               <AffinityIcon affinity={"Goton"} size="20px" />
-              <Text fontSize="sm">Toutes les affinités</Text>
+              <Text fontSize="sm">{t("affinities.allAffinities")}</Text>
             </>
           )}
         </HStack>
@@ -64,14 +66,14 @@ export const AffinityFilter = ({
         <MenuItem onClick={() => onAffinityChange("")}>
           <HStack spacing={2}>
             <AffinityIcon affinity={"Goton"} size="20px" />
-            <Text fontSize="sm">Toutes les affinités</Text>
+            <Text fontSize="sm">{t("affinities.allAffinities")}</Text>
           </HStack>
         </MenuItem>
         {affinities.map((affinity) => (
           <MenuItem key={affinity} onClick={() => onAffinityChange(affinity)}>
             <HStack spacing={2}>
               <AffinityIcon affinity={affinity} size="20px" />
-              <Text fontSize="sm">{affinity}</Text>
+              <Text fontSize="sm">{t(`affinities.${affinity}`, affinity)}</Text>
             </HStack>
           </MenuItem>
         ))}

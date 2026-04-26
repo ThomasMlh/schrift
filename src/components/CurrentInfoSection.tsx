@@ -395,7 +395,7 @@ export const CurrentInfoSection = () => {
 
                         <Text opacity={0.5}>•</Text>
                         <Text fontSize="md" fontWeight="semibold">
-                          {currentRotation.killer}
+                          {t(`factions.${currentRotation.killer}`, currentRotation.killer)}
                         </Text>
 
                         <Text opacity={0.5}>•</Text>

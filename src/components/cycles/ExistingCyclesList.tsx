@@ -39,6 +39,7 @@ import {
 } from "@chakra-ui/icons";
 import { useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { ICycle } from "../../interfaces";
 import { AlterationImage } from "../ui/AlterationImage";
 
@@ -88,6 +89,7 @@ const RotationTimeline = ({ rotations }: { rotations: ICycle["rotations"] }) => 
 
 /** Expanded rotation detail rows */
 const RotationDetails = ({ rotations }: { rotations: ICycle["rotations"] }) => {
+  const { t } = useTranslation();
   if (!rotations || rotations.length === 0) return null;
 
   return (
@@ -133,7 +135,7 @@ const RotationDetails = ({ rotations }: { rotations: ICycle["rotations"] }) => {
               variant="subtle"
               fontSize="2xs"
             >
-              {rotation.period === "Mardi-Jeudi" ? "Mar-Jeu" : "Ven-Dim"}
+              {t(`periodsShort.${rotation.period}`, rotation.period)}
             </Badge>
             {rotation.start_date && (
               <Text color="whiteAlpha.500" fontFamily="mono" fontSize="2xs">

@@ -3,6 +3,7 @@ import { CycleSelect } from "@/components/ui/CycleSelect";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import type { ICycle, IGuild, ICycleRotation } from "@/interfaces";
 import { ScoreLegend } from "@/components/ui/ScoreLegend";
+import { useTranslation } from "react-i18next";
 
 type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
 type CycleRankingType = "average" | "max";
@@ -52,6 +53,7 @@ export const PodiumFilters = ({
   onReset,
   filterBg,
 }: PodiumFiltersProps) => {
+  const { t } = useTranslation();
   return (
     <VStack spacing={4} align="stretch">
       <Flex
@@ -74,10 +76,10 @@ export const PodiumFilters = ({
             value={displayMode}
             onChange={(value) => onModeChange(value as DisplayMode)}
             options={[
-              { value: "cycle", label: "Cycle complet" },
-              { value: "rotation", label: "Par rotation" },
-              { value: "weekly", label: "Par semaine" },
-              { value: "misses", label: "Miss" }
+              { value: "cycle", label: t("components.podiumFilters.modeFullCycle") },
+              { value: "rotation", label: t("components.podiumFilters.modeByRotation") },
+              { value: "weekly", label: t("components.podiumFilters.modeByWeek") },
+              { value: "misses", label: t("components.podiumFilters.modeMiss") }
             ]}
             allowDeselect={false}
             size="md"
@@ -91,8 +93,8 @@ export const PodiumFilters = ({
                 onCycleRankingTypeChange(value as CycleRankingType)
               }
               options={[
-                { value: "average", label: "Par score moyen" },
-                { value: "max", label: "Par score max (somme)" }
+                { value: "average", label: t("components.podiumFilters.rankingAverage") },
+                { value: "max", label: t("components.podiumFilters.rankingMax") }
               ]}
               allowDeselect={false}
               size="md"
@@ -104,7 +106,7 @@ export const PodiumFilters = ({
             cycles={cycles}
             value={selectedCycleId}
             onChange={onCycleChange}
-            placeholder="Sélectionner un cycle"
+            placeholder={t("components.podiumFilters.selectCyclePlaceholder")}
             valueKey="_id"
             allowDeselect={false}
             size="md"
@@ -114,14 +116,15 @@ export const PodiumFilters = ({
           {/* Filtre par rotation (uniquement en mode rotation) */}
           {selectedCycle && displayMode === "rotation" && (
             <CustomSelect
-              placeholder="Sélectionner une rotation"
+              placeholder={t("components.podiumFilters.selectRotationPlaceholder")}
               value={selectedRotationId}
               onChange={onRotationChange}
               options={selectedCycle.rotations.map((rotation: ICycleRotation) => ({
                 value: rotation.rotation_id,
-                label: `#${rotation.position} - ${rotation.killer} ${rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : "🟠 Mêlée"}`
+                label: `#${rotation.position} - ${t(`factions.${rotation.killer}`, rotation.killer)} ${rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : `🟠 ${t("attackTypes.meleeFallback")}`}`
               }))}
               allowDeselect={false}
+              minW={"200px"}
               size="md"
             />
           )}
@@ -129,13 +132,13 @@ export const PodiumFilters = ({
           {/* Filtre par semaine (uniquement en mode weekly) */}
           {selectedCycle && displayMode === "weekly" && (
             <CustomSelect
-              placeholder="Sélectionner une semaine"
+              placeholder={t("components.podiumFilters.selectWeekPlaceholder")}
               value={selectedWeekNumber}
               onChange={onWeekChange}
               options={Array.from({ length: availableWeeks }, (_, i) => i + 1).map(
                 (weekNum) => ({
                   value: String(weekNum),
-                  label: `Semaine ${weekNum}`
+                  label: `${t("components.podiumFilters.week")} ${weekNum}`
                 })
               )}
               allowDeselect={false}
@@ -145,7 +148,7 @@ export const PodiumFilters = ({
           
           {/* Filtre par guilde */}
           <CustomSelect
-            placeholder="Toutes les guildes"
+            placeholder={t("components.podiumFilters.allGuilds")}
             value={selectedGuildName}
             onChange={onGuildChange}
             options={guilds.map((guild) => ({
@@ -170,7 +173,7 @@ export const PodiumFilters = ({
           />
           
           <Button onClick={onReset} variant="outline" minW="120px">
-            Réinitialiser
+            {t("components.podiumFilters.reset")}
           </Button>
           
           {displayMode === "rotation" && <ScoreLegend />}
@@ -182,29 +185,29 @@ export const PodiumFilters = ({
         <Box p={3} bg={filterBg} borderRadius="md">
           <HStack spacing={2} flexWrap="wrap">
             <Text fontSize="sm" fontWeight="medium">
-              Filtres actifs:
+              {t("components.podiumFilters.activeFilters")}
             </Text>
             {displayMode !== "cycle" && (
               <Badge colorScheme="purple">
-                Mode:{" "}
+                {t("components.podiumFilters.badgeMode")}{" "}
                 {displayMode === "rotation"
-                  ? "Rotation"
+                  ? t("components.podiumFilters.modeByRotation")
                   : displayMode === "weekly"
-                  ? "Semaine"
-                  : "Miss"}
+                  ? t("components.podiumFilters.modeByWeek")
+                  : t("components.podiumFilters.modeMiss")}
               </Badge>
             )}
             {displayMode === "cycle" && cycleRankingType !== "average" && (
-              <Badge colorScheme="pink">Type: Score max (somme)</Badge>
+              <Badge colorScheme="pink">{t("components.podiumFilters.badgeTypeMax")}</Badge>
             )}
             {selectedCycle && (
-              <Badge colorScheme="blue">Cycle: {selectedCycle.name} - {selectedCycle.year}</Badge>
+              <Badge colorScheme="blue">{t("components.podiumFilters.badgeCycle")} {selectedCycle.name} - {selectedCycle.year}</Badge>
             )}
             {selectedWeekNumber && displayMode === "weekly" && (
-              <Badge colorScheme="teal">Semaine: {selectedWeekNumber}</Badge>
+              <Badge colorScheme="teal">{t("components.podiumFilters.badgeWeek")} {selectedWeekNumber}</Badge>
             )}
             {selectedGuildName && (
-              <Badge colorScheme="orange">Guilde: {selectedGuildName}</Badge>
+              <Badge colorScheme="orange">{t("components.podiumFilters.badgeGuild")} {selectedGuildName}</Badge>
             )}
           </HStack>
         </Box>

@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { KillerIcon } from "./KillerIcon";
+import { useTranslation } from "react-i18next";
 
 interface KillerFilterProps {
   selectedKiller: string;
@@ -21,6 +22,7 @@ export const KillerFilter = ({
   killers, 
   onKillerChange 
 }: KillerFilterProps) => {
+  const { t } = useTranslation();
   return (
     <Menu>
       <MenuButton 
@@ -50,12 +52,12 @@ export const KillerFilter = ({
           {selectedKiller ? (
             <>
               <KillerIcon killer={selectedKiller} size="20px" />
-              <Text fontSize="sm">{selectedKiller}</Text>
+              <Text fontSize="sm">{t(`factions.${selectedKiller}`, selectedKiller)}</Text>
             </>
           ) : (
             <>
               <KillerIcon killer={"Toutes"} size="20px" />
-              <Text fontSize="sm">Tous les tueurs</Text>
+              <Text fontSize="sm">{t("factions.allKillers")}</Text>
             </>
           )}
         </HStack>
@@ -64,14 +66,14 @@ export const KillerFilter = ({
         <MenuItem onClick={() => onKillerChange("")}>
         <HStack spacing={2}>
           <KillerIcon killer={"Toutes"} size="20px" />
-          <Text fontSize="sm">Tous les tueurs</Text>
+          <Text fontSize="sm">{t("factions.allKillers")}</Text>
           </HStack>
         </MenuItem>
         {killers.map(killer => (
           <MenuItem key={killer} onClick={() => onKillerChange(killer)}>
             <HStack spacing={2}>
               <KillerIcon killer={killer} size="20px" />
-              <Text fontSize="sm">{killer}</Text>
+              <Text fontSize="sm">{t(`factions.${killer}`, killer)}</Text>
             </HStack>
           </MenuItem>
         ))}

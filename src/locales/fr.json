@@ -100,7 +100,8 @@
       "rotationsClickTip": "💡 Cliquez sur une rotation pour voir son classement détaillé",
       "fieldKiller": "Killer",
       "fieldAttack": "Attaque",
-      "fieldAlteration": "Altération"
+      "fieldAlteration": "Altération",
+      "labelPeriod": "Période"
     },
     "rotationDetail": {
       "buttonBack": "Retour",
@@ -228,6 +229,30 @@
       "title": "Page introuvable",
       "message": "La page que vous cherchez n'existe pas.",
       "backHome": "Retour à l'accueil"
+    },
+    "characterDetail": {
+      "backToCharacters": "Retour aux personnages",
+      "viewAllCharacters": "Voir tous les personnages",
+      "notFound": "Personnage introuvable",
+      "errorLoading": "Erreur lors du chargement du personnage",
+      "errorTitle": "Erreur",
+      "errorDesc": "Impossible de charger les informations du personnage",
+      "labelAffinity": "Affinité",
+      "labelType": "Type",
+      "labelSearch": "Recherche",
+      "headingCategories": "Catégories",
+      "headingKillers": "Tueurs",
+      "headingSoulTraits": "Traits d'âme",
+      "headingStats": "Statistiques",
+      "headingImmunities": "Immunités",
+      "headingInfo": "Informations",
+      "labelCreatedAt": "Créé le",
+      "labelResurrection": "Résurrection",
+      "headingVisuals": "Ressources visuelles",
+      "labelBanner": "Bannière",
+      "labelSpecialAttack": "Attaque spéciale",
+      "labelArtwork": "Artwork",
+      "labelPhrase": "Phrase"
     }
   },
   "components": {
@@ -291,6 +316,59 @@
       "selectCycleHint": "Veuillez sélectionner un cycle pour afficher le podium",
       "loading": "Chargement du podium...",
       "noScores": "Aucun score trouvé pour ce cycle"
+    },
+    "scoreLegend": {
+      "buttonLabel": "Légende des scores",
+      "heading": "Codes couleurs des scores",
+      "rainbow": "Buff QG (Arc-en-ciel)",
+      "beforeBuff": "Avant buff",
+      "clearExtraWave34": "Clear Vague Extra 3 et 4",
+      "clearExtraWave12": "Clear Vague Extra 1 et 2",
+      "clearVeryHardToNoClearNightmare": "Clear très difficile à non clear cauchemar",
+      "clearHardToNoClearVeryHard": "Clear difficile à non clear très difficile",
+      "clearNormalToNoClearHard": "Clear normal à non clear difficile",
+      "noClearNormal": "Non clear normal",
+      "noGuildQuest": "N'a pas fait sa QG"
+    },
+    "podiumFilters": {
+      "modeFullCycle": "Cycle complet",
+      "modeByRotation": "Par rotation",
+      "modeByWeek": "Par semaine",
+      "modeMiss": "Miss",
+      "rankingAverage": "Par score moyen",
+      "rankingMax": "Par score max (somme)",
+      "selectCyclePlaceholder": "Sélectionner un cycle",
+      "selectRotationPlaceholder": "Sélectionner une rotation",
+      "selectWeekPlaceholder": "Sélectionner une semaine",
+      "allGuilds": "Toutes les guildes",
+      "week": "Semaine",
+      "reset": "Réinitialiser",
+      "activeFilters": "Filtres actifs :",
+      "badgeMode": "Mode :",
+      "badgeTypeMax": "Type : Score max (somme)",
+      "badgeCycle": "Cycle :",
+      "badgeWeek": "Semaine :",
+      "badgeGuild": "Guilde :"
+    },
+    "podiumInfo": {
+      "rotationScore": "Score moyen",
+      "totalPlayers": "{{count}} joueur(s) au total",
+      "weekLabel": "Semaine",
+      "rotationLabel": "Rotation",
+      "weeklyScore": "Score moyen de la semaine",
+      "missTitle": "Classement des Miss",
+      "missPlayers": "{{count}} joueur(s) avec au moins 1 miss",
+      "missTotal": "Total : {{count}} miss dans le cycle",
+      "missAverage": "Moyenne : {{avg}} miss/joueur"
+    },
+    "podiumResults": {
+      "loading": "Chargement du podium...",
+      "selectWeekFirst": "Veuillez sélectionner une semaine",
+      "noScoreFound": "Aucun score trouvé pour cette sélection",
+      "selectCycleFirst": "Veuillez sélectionner un cycle",
+      "paginationInfo": "Page {{current}} sur {{total}} - Affichage de {{count}} joueur(s)",
+      "playersWithMiss": "{{count}} joueur(s) avec miss",
+      "playersTotal": "{{count}} joueur(s) au total"
     },
     "scoresSection": {
       "heading": "Gestion des Scores",
@@ -385,5 +463,56 @@
       "radarTotalPoints": "Total Points",
       "radarMembers": "Membres"
     }
+  },
+  "affinities": {
+    "Force": "Force",
+    "Vitesse": "Vitesse",
+    "Instinct": "Instinct",
+    "Technique": "Technique",
+    "Connaissance": "Connaissance",
+    "allAffinities": "Toutes les affinités"
+  },
+  "stats": {
+    "end": "Endurance",
+    "atk": "Attaque",
+    "def": "Défense",
+    "cct": "Concentration",
+    "pre": "Préssion Spirituelle"
+  },
+  "factions": {
+    "Arrancar": "Arrancar",
+    "Aucun": "Aucun",
+    "Capitaine": "Capitaine",
+    "Division 0": "Division 0",
+    "Espada": "Espada",
+    "Hollow": "Hollow",
+    "Humain": "Humain",
+    "Quincy": "Quincy",
+    "Shinigami": "Shinigami",
+    "Stern Ritter": "Stern Ritter",
+    "allCategories": "Toutes les catégories",
+    "allKillers": "Tous les tueurs"
+  },
+  "alterations": {
+    "Feu": "Feu",
+    "Gel": "Gel",
+    "Paralysie": "Paralysie",
+    "Faiblesse": "Faiblesse",
+    "Poison": "Poison",
+    "Lacération": "Lacération"
+  },
+  "attackTypes": {
+    "R": "Rouge",
+    "B": "Bleu",
+    "unknown": "Inconnu",
+    "meleeFallback": "Mêlée"
+  },
+  "periods": {
+    "Mardi-Jeudi": "Mardi-Jeudi",
+    "Vendredi-Dimanche": "Vendredi-Dimanche"
+  },
+  "periodsShort": {
+    "Mardi-Jeudi": "Mar-Jeu",
+    "Vendredi-Dimanche": "Ven-Dim"
   }
 }

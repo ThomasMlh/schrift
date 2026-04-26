@@ -1,4 +1,5 @@
 import { Box } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 
 interface AttackTypeBadgeProps {
   attackType: string;
@@ -6,6 +7,7 @@ interface AttackTypeBadgeProps {
 }
 
 export const AttackTypeBadge = ({ attackType, size = "16px" }: AttackTypeBadgeProps) => {
+  const { t } = useTranslation();
   const type = attackType?.toUpperCase();
   
   if (type === 'R') {
@@ -15,7 +17,7 @@ export const AttackTypeBadge = ({ attackType, size = "16px" }: AttackTypeBadgePr
         height={size}
         borderRadius="50%"
         backgroundColor="red.500"
-        title="Rouge"
+        title={t("attackTypes.R")}
       />
     );
   }
@@ -27,7 +29,7 @@ export const AttackTypeBadge = ({ attackType, size = "16px" }: AttackTypeBadgePr
         height={size}
         borderRadius="50%"
         backgroundColor="blue.500"
-        title="Bleu"
+        title={t("attackTypes.B")}
       />
     );
   }
@@ -40,7 +42,7 @@ export const AttackTypeBadge = ({ attackType, size = "16px" }: AttackTypeBadgePr
       borderRadius="50%"
       background="linear-gradient(90deg, red.500 50%, blue.500 50%)"
       bgGradient="linear(to-r, red.500 50%, blue.500 50%)"
-      title="Rouge et Bleu"
+      title={`${t("attackTypes.R")} / ${t("attackTypes.B")}`}
     />
   );
 };

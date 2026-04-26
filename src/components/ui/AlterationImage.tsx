@@ -1,4 +1,5 @@
 import { Image, Box, Text } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import { getAlterationImage } from "../../utils/alterations";
 
 interface AlterationImageProps {
@@ -14,12 +15,14 @@ export const AlterationImage = ({
   showLabel = false,
   fontWeight = "normal"
 }: AlterationImageProps) => {
+  const { t } = useTranslation();
+  const label = t(`alterations.${alteration}`, alteration);
   const imageUrl = getAlterationImage(alteration);
 
   if (!imageUrl) {
     return showLabel ? (
       <Text fontSize="sm" color="gray.500">
-        {alteration}
+        {label}
       </Text>
     ) : null;
   }
@@ -29,13 +32,13 @@ export const AlterationImage = ({
       <Box display="flex" alignItems="center" gap={2}>
         <Image
           src={imageUrl}
-          alt={alteration}
+          alt={label}
           width={size}
           height={size}
-          fallback={<Text fontSize="sm" fontWeight={fontWeight}>{alteration}</Text>}
+          fallback={<Text fontSize="sm" fontWeight={fontWeight}>{label}</Text>}
         />
         <Text fontSize="sm" fontWeight={fontWeight}>
-          {alteration}
+          {label}
         </Text>
       </Box>
     );
@@ -44,10 +47,10 @@ export const AlterationImage = ({
   return (
     <Image
       src={imageUrl}
-      alt={alteration}
+      alt={label}
       width={size}
       height={size}
-      fallback={<Text fontSize="sm" fontWeight={fontWeight}>{alteration}</Text>}
+      fallback={<Text fontSize="sm" fontWeight={fontWeight}>{label}</Text>}
     />
   );
 };

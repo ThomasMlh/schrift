@@ -295,7 +295,7 @@ const RotationDetailPage = () => {
                 </HStack>
                 <Text as="span">Rotation #{position}</Text>
                 <HStack spacing={2} align="center" justify="center" flexWrap="wrap">
-                  <Text as="span">{rotation?.killer}</Text>
+                  <Text as="span">{rotation?.killer ? t(`factions.${rotation.killer}`, rotation.killer) : ""}</Text>
                   {rotation?.attack && (
                     <AttackTypeBadge attackType={rotation.attack} size="24px" />
                   )}
