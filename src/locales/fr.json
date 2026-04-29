@@ -198,6 +198,9 @@
       "userNotFound": "Utilisateur introuvable",
       "errorLoadingProfile": "Erreur lors du chargement du profil utilisateur",
       "noGuild": "Aucune guilde",
+      "seoTitle": "{{name}} - Profil Joueur | Schrift BBS",
+      "seoDescriptionNoGuild": "Profil de {{name}} sur Schrift BBS",
+      "seoDescriptionWithGuild": "Profil de {{name}} - Guilde {{guild}} | Schrift BBS",
       "badgeBanned": "🚫 Banni",
       "cycleFilterLabel": "Filtrer par cycle:",
       "cycleAllPlaceholder": "Tous les cycles",
@@ -217,7 +220,11 @@
       "statBestScoreHelp": "Record personnel",
       "trendSelectCycleHint": "📊 Sélectionnez un cycle pour voir votre tendance récente",
       "noStatsTitle": "Aucune statistique disponible",
-      "noStatsDescription": "Ce joueur n'a pas encore de scores enregistrés"
+      "noStatsDescription": "Ce joueur n'a pas encore de scores enregistrés",
+      "statTotalScoresValue": "Total Scores",
+      "statAverageMLabel": "Score Moyen",
+      "statTotalPointsBLabel": "Points Totaux",
+      "statBestScoreRecord": "Meilleur Score"
     },
     "discordCallback": {
       "loading": "Connexion en cours avec Discord...",
@@ -252,7 +259,9 @@
       "labelBanner": "Bannière",
       "labelSpecialAttack": "Attaque spéciale",
       "labelArtwork": "Artwork",
-      "labelPhrase": "Phrase"
+      "labelPhrase": "Phrase",
+      "tooltipDownload": "Télécharger",
+      "tooltipExpand": "Ouvrir en grand"
     }
   },
   "components": {

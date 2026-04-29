@@ -563,13 +563,13 @@ const CharacterDetailPage = () => {
                         {label}
                       </Text>
                       <HStack spacing={1}>
-                        <Tooltip label="Télécharger">
-                          <IconButton aria-label="Télécharger" icon={<DownloadIcon />} size="xs"
+                        <Tooltip label={t("pages.characterDetail.tooltipDownload")}>
+                          <IconButton aria-label={t("pages.characterDetail.tooltipDownload")} icon={<DownloadIcon />} size="xs"
                             variant="ghost" borderRadius="full"
                             onClick={() => handleDownload(src, `banniere-${character.name}.png`)} />
                         </Tooltip>
-                        <Tooltip label="Ouvrir en grand">
-                          <IconButton aria-label="Agrandir" icon={<ExternalLinkIcon />} size="xs"
+                        <Tooltip label={t("pages.characterDetail.tooltipExpand")}>
+                          <IconButton aria-label={t("pages.characterDetail.tooltipExpand")} icon={<ExternalLinkIcon />} size="xs"
                             variant="ghost" borderRadius="full"
                             onClick={() => openLightbox(src, label)} />
                         </Tooltip>
@@ -603,13 +603,13 @@ const CharacterDetailPage = () => {
                         {label}
                       </Text>
                       <HStack spacing={1}>
-                        <Tooltip label="Télécharger">
-                          <IconButton aria-label="Télécharger" icon={<DownloadIcon />} size="xs"
+                        <Tooltip label={t("pages.characterDetail.tooltipDownload")}>
+                          <IconButton aria-label={t("pages.characterDetail.tooltipDownload")} icon={<DownloadIcon />} size="xs"
                             variant="ghost" borderRadius="full"
                             onClick={() => handleDownload(src, filename)} />
                         </Tooltip>
-                        <Tooltip label="Ouvrir en grand">
-                          <IconButton aria-label="Agrandir" icon={<ExternalLinkIcon />} size="xs"
+                        <Tooltip label={t("pages.characterDetail.tooltipExpand")}>
+                          <IconButton aria-label={t("pages.characterDetail.tooltipExpand")} icon={<ExternalLinkIcon />} size="xs"
                             variant="ghost" borderRadius="full"
                             onClick={() => openLightbox(src, label)} />
                         </Tooltip>
@@ -671,9 +671,9 @@ const CharacterDetailPage = () => {
                     textTransform="uppercase" color="whiteAlpha.700">
                     {lightboxLabel}
                   </Text>
-                  <Tooltip label="Télécharger">
+                  <Tooltip label={t("pages.characterDetail.tooltipDownload")}>
                     <IconButton
-                      aria-label="Télécharger"
+                      aria-label={t("pages.characterDetail.tooltipDownload")}
                       icon={<DownloadIcon />}
                       size="sm"
                       variant="ghost"

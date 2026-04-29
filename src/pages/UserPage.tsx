@@ -217,8 +217,10 @@ const UserPage = () => {
   return (
     <>
       <SEOHead
-        title={`${user.bbs_name || user.global_name} - Profil Joueur`}
-        description={`Profil de ${user.bbs_name || user.global_name}${user.guild_name ? ` - Guilde ${user.guild_name}` : ""}`}
+        title={t("pages.user.seoTitle", { name: user.bbs_name || user.global_name })}
+        description={user.guild_name
+          ? t("pages.user.seoDescriptionWithGuild", { name: user.bbs_name || user.global_name, guild: user.guild_name })
+          : t("pages.user.seoDescriptionNoGuild", { name: user.bbs_name || user.global_name })}
         url={`https://bbs-schrift.fr/joueur/${userId}`}
         noIndex={true}
       />
@@ -369,33 +371,33 @@ const UserPage = () => {
             >
               <StatCard
                 icon="🎯"
-                label="Total Scores"
+                label={t("pages.user.statTotalScoresLabel")}
                 value={stats.totalScores}
-                helpText="Participations"
+                helpText={t("pages.user.statTotalScoresHelp")}
                 borderColor="blue.500"
                 valueColor="blue.500"
               />
               <StatCard
                 icon="📈"
-                label="Score Moyen"
+                label={t("pages.user.statAverageScoreLabel")}
                 value={`${(Math.round(stats.averageScore) / 1000000).toFixed(1)}M`}
-                helpText="Par rotation"
+                helpText={t("pages.user.statAverageScoreHelp")}
                 borderColor="purple.500"
                 valueColor="purple.500"
               />
               <StatCard
                 icon="💰"
-                label="Points Totaux"
+                label={t("pages.user.statTotalPointsLabel")}
                 value={`${(stats.totalPoints / 1000000000).toFixed(1)}B`}
-                helpText="Cumulés"
+                helpText={t("pages.user.statTotalPointsHelp")}
                 borderColor="green.500"
                 valueColor="green.500"
               />
               <StatCard
                 icon="🏆"
-                label="Meilleur Score"
+                label={t("pages.user.statBestScoreLabel")}
                 value={stats.bestScore.score.toLocaleString()}
-                helpText="Record personnel"
+                helpText={t("pages.user.statBestScoreHelp")}
                 borderColor="orange.500"
                 valueColor="orange.500"
               />
