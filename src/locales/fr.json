@@ -471,6 +471,138 @@
       "radarRegularity": "Régularité",
       "radarTotalPoints": "Total Points",
       "radarMembers": "Membres"
+    },
+    "user": {
+      "banDetailsCard": {
+        "bannedPlayer": "Joueur banni",
+        "labelBanReason": "Raison :",
+        "labelBannedOn": "Banni le :"
+      },
+      "guildContribution": {
+        "title": "Contribution \u00e0 la guilde",
+        "tooltip": "Part du score total de la guilde apport\u00e9e par ce joueur, moyenn\u00e9e sur tous les cycles",
+        "labelContribution": "Contribution :",
+        "labelGuildTotal": "total guilde",
+        "labelAvgPerCycle": "moy. / cycle",
+        "chartAvg": "Moy. {{avg}}%"
+      },
+      "performances": {
+        "headingAvgByRotation": "Scores Moyens par Rotation",
+        "subtitleAllRotations": "Toutes vos rotations tri\u00e9es par score moyen d\u00e9croissant",
+        "notePerformance": "\ud83d\udca1 Le pourcentage de performance est calcul\u00e9 par rapport \u00e0 votre meilleure rotation (100%). Une rotation \u00e0 80% signifie qu'elle atteint 80% du score moyen de votre meilleure rotation.",
+        "noData": "Pas assez de donn\u00e9es disponibles",
+        "headingByType": "Analyse par Type",
+        "subtitleByType": "Performances agr\u00e9g\u00e9es par killer, type d'attaque et alt\u00e9ration d'\u00e9tat"
+      },
+      "positionPerformance": {
+        "title": "Performance par p\u00e9riode du cycle",
+        "tooltipAvg": "Moy. :",
+        "rotShort": "rot.",
+        "labelBest": "Meilleur :",
+        "labelWorst": "Plus faible :",
+        "performsBetterIn": "Ce joueur performe mieux en {{period}} de cycle"
+      },
+      "recentTrend": {
+        "trendUp": "\ud83d\udcc8 En Hausse",
+        "trendDown": "\ud83d\udcc9 En Baisse",
+        "trendStable": "\u27a1\ufe0f Stable",
+        "subtitle": "Analyse des 5 derni\u00e8res rotations",
+        "badgeRecent": "3 plus r\u00e9centes",
+        "labelRecentAvg": "Score moyen r\u00e9cent",
+        "badgePrevious": "2 pr\u00e9c\u00e9dentes",
+        "labelPreviousAvg": "Score moyen pr\u00e9c\u00e9dent",
+        "detailHeading": "\ud83d\udcca D\u00e9tail des rotations"
+      },
+      "rivals": {
+        "heading": "Rivaux au Classement",
+        "subtitle": "Joueurs proches de votre classement",
+        "youBadge": "\u2728 VOUS",
+        "positionAbove": "devant",
+        "positionBelow": "derri\u00e8re",
+        "labelAvgScore": "Score moyen"
+      },
+      "statsOverview": {
+        "dateUnknown": "Inconnue",
+        "labelBestScore": "Meilleur Score",
+        "labelWorstScore": "Score \u00e0 Am\u00e9liorer",
+        "labelBestCycle": "Meilleur Cycle",
+        "avgShort": "Moy:",
+        "labelSeniority": "Anciennet\u00e9",
+        "daysAgo_one": "Il y a {{count}} jour",
+        "daysAgo_other": "Il y a {{count}} jours",
+        "labelBuilds": "Builds Cr\u00e9\u00e9s",
+        "communityContrib": "Contribution \u00e0 la communaut\u00e9",
+        "labelMissRate": "Taux de Miss",
+        "missDetail": "{{missCount}} score{{scoreS}} \u00e0 0 sur {{totalScores}} rotation{{rotationS}}",
+        "consistencyVeryRegular": "Tr\u00e8s r\u00e9gulier",
+        "consistencyRegular": "R\u00e9gulier",
+        "consistencyIrregular": "Irr\u00e9gulier",
+        "labelConsistency": "Consistance",
+        "tooltipMedianScore": "Valeur centrale de tous tes scores \u2014 moins sensible aux extr\u00eames que la moyenne",
+        "tooltipConsistency": "Coefficient de variation : \u00e9cart-type / moyenne. Plus bas = plus r\u00e9gulier.",
+        "labelMedianScore": "Score M\u00e9dian",
+        "vsMean": "vs moyenne",
+        "labelCyclesPlayed": "Cycles Jou\u00e9s"
+      },
+      "temporalEvolution": {
+        "heading": "\u00c9volution Temporelle",
+        "noData": "Aucune donn\u00e9e d'\u00e9volution disponible",
+        "allYears": "Toutes les ann\u00e9es",
+        "filterByYear": "Filtrer par ann\u00e9e :",
+        "reset": "R\u00e9initialiser",
+        "noDataForPeriod": "Aucune donn\u00e9e disponible pour la p\u00e9riode s\u00e9lectionn\u00e9e",
+        "subtitle": "Progression de votre score moyen par cycle (du plus ancien au plus r\u00e9cent)",
+        "yAxisLabel": "Score (M)",
+        "lineName": "Score moyen (M)",
+        "tooltipAvgScore": "Score moyen:",
+        "tooltipYear": "Ann\u00e9e",
+        "evolutionNote": "\ud83d\udca1 Ce graphique montre l'\u00e9volution de votre score moyen au fil des cycles, du plus ancien au plus r\u00e9cent. Une tendance \u00e0 la hausse indique une progression constante !",
+        "yearNote": "L'ann\u00e9e est affich\u00e9e entre parenth\u00e8ses.",
+        "cyclesDisplayed_one": "\ud83d\udcca {{count}} cycle affich\u00e9",
+        "cyclesDisplayed_other": "\ud83d\udcca {{count}} cycles affich\u00e9s",
+        "forYear": "pour l'ann\u00e9e {{year}}"
+      },
+      "topRotations": {
+        "bestRotationTitle": "Meilleure Rotation",
+        "worstRotationTitle": "Rotation \u00e0 Am\u00e9liorer",
+        "bestScoreLabel": "\ud83c\udf1f Meilleur Score:",
+        "worstScoreLabel": "\ud83d\udcca Pire Score:",
+        "detailHeading": "\ud83d\udccb D\u00e9tail par rotation",
+        "detailSubtitle": "Toutes les rotations du cycle s\u00e9lectionn\u00e9, tri\u00e9es par position",
+        "colRank": "#",
+        "colKiller": "Killer",
+        "colType": "Type",
+        "colAvgScore": "Score moyen",
+        "colParticipations": "Participations",
+        "badgeBest": "\ud83c\udfc6 Best",
+        "badgeWorst": "\ud83d\udcc9 Pire"
+      },
+      "ranking": {
+        "globalRanking": "\ud83c\udf0d Classement Global",
+        "outOf_one": "Sur {{count}} joueur",
+        "outOf_other": "Sur {{count}} joueurs",
+        "topPercent": "Top {{pct}}%",
+        "gapWithTop1": "-{{gap}}M du top 1",
+        "guildRanking": "\ud83d\udc65 Classement {{name}}",
+        "outOfMembers_one": "Sur {{count}} membre",
+        "outOfMembers_other": "Sur {{count}} membres"
+      },
+      "rotationDetailCard": {
+        "labelAverage": "Moyenne:",
+        "labelParticipations": "Participations:",
+        "labelTotal": "Total:"
+      },
+      "typeAnalysis": {
+        "noData": "Pas assez de donn\u00e9es pour l'analyse par type",
+        "headingAttacks": "Attaques R vs B",
+        "headingAlteration": "Performance par Alt\u00e9ration",
+        "attackRed": "Attaques Rouges",
+        "attackBlue": "Attaques Bleues",
+        "rotShort": "rot.",
+        "bestOnLabel": "Meilleur sur",
+        "red": "Rouges",
+        "blue": "Bleues"
+      }
     }
   },
   "affinities": {

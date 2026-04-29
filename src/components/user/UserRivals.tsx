@@ -10,6 +10,7 @@ import {
   Flex
 } from "@chakra-ui/react";
 import { FiUsers, FiTrendingUp, FiTrendingDown } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 import { UserDisplay } from "@/components/ui/UserDisplay";
 import type { IUserStats } from "@/hooks/useAPI";
 import type { IUser } from "@/interfaces";
@@ -38,6 +39,7 @@ export const UserRivals = ({
   const currentUserBorder = useColorModeValue("purple.400", "purple.500");
   const rankBg = useColorModeValue("gray.100", "gray.700");
   const diffBg = useColorModeValue("white", "gray.800");
+  const { t } = useTranslation();
 
   if (!rivals || rivals.length === 0) {
     return null;
@@ -74,12 +76,12 @@ export const UserRivals = ({
       <HStack spacing={3} mb={2}>
         <Icon as={FiUsers} boxSize={6} color="purple.500" />
         <Heading size="md" color="purple.500">
-          Rivaux au Classement
+          {t("components.user.rivals.heading")}
         </Heading>
       </HStack>
 
       <Text fontSize="sm" color="gray.600" _dark={{ color: "gray.400" }} mb={6}>
-        Joueurs proches de votre classement
+        {t("components.user.rivals.subtitle")}
       </Text>
 
       <VStack spacing={2} align="stretch">
@@ -197,7 +199,7 @@ export const UserRivals = ({
                           borderRadius="full"
                           fontWeight="bold"
                         >
-                          ✨ VOUS
+                          {t("components.user.rivals.youBadge")}
                         </Badge>
                       )}
                     </HStack>
@@ -217,7 +219,7 @@ export const UserRivals = ({
                         fontWeight="medium"
                         mb={1}
                       >
-                        Score moyen
+                        {t("components.user.rivals.labelAvgScore")}
                       </Text>
                       <Text
                         fontSize="2xl"
@@ -263,7 +265,7 @@ export const UserRivals = ({
                           fontSize="xs"
                           textTransform="uppercase"
                         >
-                          {isAbove ? "devant" : "derrière"}
+                          {isAbove ? t("components.user.rivals.positionAbove") : t("components.user.rivals.positionBelow")}
                         </Badge>
                       </HStack>
                     )}

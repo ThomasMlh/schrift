@@ -12,6 +12,7 @@ import {
   Divider
 } from "@chakra-ui/react";
 import { FiTrendingUp, FiTrendingDown, FiMinus } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import type { IUserStats } from "@/hooks/useAPI";
 
@@ -20,6 +21,7 @@ interface UserRecentTrendProps {
 }
 
 export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
+  const { t } = useTranslation();
   const cardBg = useColorModeValue("white", "gray.800");
   const headerBg = useColorModeValue(
     recentTrend.direction === "up"
@@ -49,10 +51,10 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
 
   const trendLabel =
     recentTrend.direction === "up"
-      ? "📈 En Hausse"
+      ? t("components.user.recentTrend.trendUp")
       : recentTrend.direction === "down"
-      ? "📉 En Baisse"
-      : "➡️ Stable";
+      ? t("components.user.recentTrend.trendDown")
+      : t("components.user.recentTrend.trendStable");
 
   const scoreBg = useColorModeValue("gray.50", "gray.700");
 
@@ -74,7 +76,7 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
           </Flex>
 
           <Text fontSize="md" color="gray.600" _dark={{ color: "gray.300" }}>
-            Analyse des 5 dernières rotations
+            {t("components.user.recentTrend.subtitle")}
           </Text>
 
           {recentTrend.percentage > 0 && (
@@ -110,7 +112,7 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
         >
           <VStack spacing={3}>
             <Badge colorScheme="purple" fontSize="sm" px={3} py={1}>
-              3 plus récentes
+              {t("components.user.recentTrend.badgeRecent")}
             </Badge>
             <Text
               fontSize="4xl"
@@ -120,7 +122,7 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
               {(recentTrend.recentAverage / 1000000).toFixed(1)}M
             </Text>
             <Text fontSize="sm" color="gray.600" _dark={{ color: "gray.400" }}>
-              Score moyen récent
+              {t("components.user.recentTrend.labelRecentAvg")}
             </Text>
           </VStack>
         </Box>
@@ -135,13 +137,13 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
         >
           <VStack spacing={3}>
             <Badge colorScheme="gray" fontSize="sm" px={3} py={1}>
-              2 précédentes
+              {t("components.user.recentTrend.badgePrevious")}
             </Badge>
             <Text fontSize="4xl" fontWeight="bold">
               {(recentTrend.previousAverage / 1000000).toFixed(1)}M
             </Text>
             <Text fontSize="sm" color="gray.600" _dark={{ color: "gray.400" }}>
-              Score moyen précédent
+              {t("components.user.recentTrend.labelPreviousAvg")}
             </Text>
           </VStack>
         </Box>
@@ -153,7 +155,7 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
       <Box>
         <HStack spacing={2} mb={4}>
           <Text fontSize="lg" fontWeight="bold">
-            📊 Détail des rotations
+            {t("components.user.recentTrend.detailHeading")}
           </Text>
         </HStack>
 

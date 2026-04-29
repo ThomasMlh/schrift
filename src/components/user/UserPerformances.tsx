@@ -1,4 +1,5 @@
 import { VStack, Heading, Text, Center, Divider } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import { UserRotationsChart } from "@/components/charts/UserRotationsChart";
 import { UserTypeAnalysis } from "@/components/user/UserTypeAnalysis";
 import type { IUserStats } from "@/hooks/useAPI";
@@ -8,29 +9,29 @@ interface UserPerformancesProps {
 }
 
 export const UserPerformances = ({ stats }: UserPerformancesProps) => {
+  const { t } = useTranslation();
   return (
     <VStack spacing={4} align="stretch">
-      <Heading size="md">Scores Moyens par Rotation</Heading>
+      <Heading size="md">{t("components.user.performances.headingAvgByRotation")}</Heading>
       <Text fontSize="sm" color="gray.500">
-        Toutes vos rotations triées par score moyen décroissant
+        {t("components.user.performances.subtitleAllRotations")}
       </Text>
       <Text fontSize="xs" color="gray.400" fontStyle="italic">
-        💡 Le pourcentage de performance est calculé par rapport à votre meilleure rotation (100%). 
-        Une rotation à 80% signifie qu'elle atteint 80% du score moyen de votre meilleure rotation.
+        {t("components.user.performances.notePerformance")}
       </Text>
       {stats.allRotations.length > 0 ? (
         <UserRotationsChart rotations={stats.allRotations} showAll={true} />
       ) : (
         <Center py={10}>
-          <Text color="gray.500">Pas assez de données disponibles</Text>
+          <Text color="gray.500">{t("components.user.performances.noData")}</Text>
         </Center>
       )}
 
       <Divider />
 
-      <Heading size="md">Analyse par Type</Heading>
+      <Heading size="md">{t("components.user.performances.headingByType")}</Heading>
       <Text fontSize="sm" color="gray.500">
-        Performances agrégées par killer, type d'attaque et altération d'état
+        {t("components.user.performances.subtitleByType")}
       </Text>
       <UserTypeAnalysis stats={stats} />
     </VStack>

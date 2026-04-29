@@ -16,6 +16,7 @@ import {
   useColorModeValue,
   Box
 } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import { RotationDetailCard } from "./RotationDetailCard";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import type { IUserStats } from "@/hooks/useAPI";
@@ -25,6 +26,7 @@ interface UserTopRotationsProps {
 }
 
 export const UserTopRotations = ({ stats }: UserTopRotationsProps) => {
+  const { t } = useTranslation();
   const tableBg = useColorModeValue("white", "gray.800");
   const stripedBg = useColorModeValue("gray.50", "gray.700");
   const hoverBg = useColorModeValue("blue.50", "gray.600");
@@ -45,19 +47,19 @@ export const UserTopRotations = ({ stats }: UserTopRotationsProps) => {
     <VStack spacing={6} align="stretch">
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
         <RotationDetailCard
-          title="Meilleure Rotation"
+          title={t("components.user.topRotations.bestRotationTitle")}
           icon="🏆"
           rotation={stats.bestRotation}
           extremeScore={stats.bestScore}
-          extremeLabel="🌟 Meilleur Score:"
+          extremeLabel={t("components.user.topRotations.bestScoreLabel")}
           variant="best"
         />
         <RotationDetailCard
-          title="Rotation à Améliorer"
+          title={t("components.user.topRotations.worstRotationTitle")}
           icon="📉"
           rotation={stats.worstRotation}
           extremeScore={stats.worstScore}
-          extremeLabel="📊 Pire Score:"
+          extremeLabel={t("components.user.topRotations.worstScoreLabel")}
           variant="worst"
         />
       </SimpleGrid>
@@ -67,20 +69,20 @@ export const UserTopRotations = ({ stats }: UserTopRotationsProps) => {
         <Card bg={tableBg} borderRadius="xl" boxShadow="md">
           <CardBody>
             <Heading size="md" mb={4}>
-              📋 Détail par rotation
+              {t("components.user.topRotations.detailHeading")}
             </Heading>
             <Text fontSize="sm" color="gray.500" mb={4}>
-              Toutes les rotations du cycle sélectionné, triées par position
+              {t("components.user.topRotations.detailSubtitle")}
             </Text>
             <Box overflowX="auto">
               <Table variant="simple" size="sm">
                 <Thead>
                   <Tr>
-                    <Th>#</Th>
-                    <Th>Killer</Th>
-                    <Th>Type</Th>
-                    <Th isNumeric>Score moyen</Th>
-                    <Th isNumeric>Participations</Th>
+                    <Th>{t("components.user.topRotations.colRank")}</Th>
+                    <Th>{t("components.user.topRotations.colKiller")}</Th>
+                    <Th>{t("components.user.topRotations.colType")}</Th>
+                    <Th isNumeric>{t("components.user.topRotations.colAvgScore")}</Th>
+                    <Th isNumeric>{t("components.user.topRotations.colParticipations")}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -105,10 +107,10 @@ export const UserTopRotations = ({ stats }: UserTopRotationsProps) => {
                               {rotation.rotation_killer}
                             </Text>
                             {isBest && (
-                              <Badge colorScheme="green" fontSize="xs">🏆 Best</Badge>
+                              <Badge colorScheme="green" fontSize="xs">{t("components.user.topRotations.badgeBest")}</Badge>
                             )}
                             {isWorst && (
-                              <Badge colorScheme="red" fontSize="xs">📉 Pire</Badge>
+                              <Badge colorScheme="red" fontSize="xs">{t("components.user.topRotations.badgeWorst")}</Badge>
                             )}
                           </HStack>
                         </Td>

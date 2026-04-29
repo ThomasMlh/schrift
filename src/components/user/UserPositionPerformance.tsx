@@ -10,6 +10,7 @@ import {
   useColorModeValue
 } from "@chakra-ui/react";
 import { FiClock } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 import {
   RadarChart,
   Radar,
@@ -31,6 +32,7 @@ export const UserPositionPerformance = ({
   const radarColor = useColorModeValue("#3182CE", "#63B3ED");
   const tooltipBg = useColorModeValue("#FFFFFF", "#2D3748");
   const tooltipBorder = useColorModeValue("#E2E8F0", "#4A5568");
+  const { t } = useTranslation();
 
   if (performanceByQuartile.length < 2) return null;
 
@@ -62,9 +64,9 @@ export const UserPositionPerformance = ({
         >
           <Text fontWeight="bold" mb={1}>{d.quartile}</Text>
           <Text fontSize="sm" color="blue.500">
-            Moy. : <strong>{(d.score / 1_000_000).toFixed(2)}M</strong>
+            {t("components.user.positionPerformance.tooltipAvg")} <strong>{(d.score / 1_000_000).toFixed(2)}M</strong>
           </Text>
-          <Text fontSize="xs" color="gray.500">{d.count} rotation{d.count > 1 ? "s" : ""}</Text>
+          <Text fontSize="xs" color="gray.500">{d.count} {t("components.user.positionPerformance.rotShort")}</Text>
         </Box>
       );
     }
@@ -85,20 +87,20 @@ export const UserPositionPerformance = ({
             <Icon as={FiClock} boxSize={5} />
           </Box>
           <VStack align="start" spacing={0}>
-            <Text fontWeight="bold" fontSize="md">Performance par période du cycle</Text>
+            <Text fontWeight="bold" fontSize="md">{t("components.user.positionPerformance.title")}</Text>
             <HStack spacing={2} mt={1}>
               <Badge colorScheme="green" fontSize="xs">
-                Meilleur : {best.quartile}
+                {t("components.user.positionPerformance.labelBest")} {best.quartile}
               </Badge>
               <Badge colorScheme="red" fontSize="xs">
-                Plus faible : {worst.quartile}
+                {t("components.user.positionPerformance.labelWorst")} {worst.quartile}
               </Badge>
             </HStack>
           </VStack>
         </HStack>
 
         <Text fontSize="sm" color="gray.500" mb={4}>
-          Ce joueur performe mieux en <strong>{trend} de cycle</strong>
+          {t("components.user.positionPerformance.performsBetterIn", { period: trend })}
         </Text>
 
         <ResponsiveContainer width="100%" height={220}>
@@ -121,7 +123,7 @@ export const UserPositionPerformance = ({
             <HStack key={q.quartile} justify="space-between" fontSize="sm">
               <Text color="gray.600" _dark={{ color: "gray.400" }}>{q.quartile}</Text>
               <HStack spacing={3}>
-                <Text fontSize="xs" color="gray.500">{q.count} rot.</Text>
+                <Text fontSize="xs" color="gray.500">{q.count} {t("components.user.positionPerformance.rotShort")}</Text>
                 <Text fontWeight="semibold">{(q.averageScore / 1_000_000).toFixed(2)}M</Text>
               </HStack>
             </HStack>

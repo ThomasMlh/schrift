@@ -12,6 +12,7 @@ import {
   useColorModeValue
 } from "@chakra-ui/react";
 import { FiTrendingUp, FiTrendingDown, FiAward, FiCalendar, FiUsers, FiAlertTriangle, FiBarChart2, FiCheckCircle } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { RankingSection } from "./RankingSection";
 import type { IUserStats } from "@/hooks/useAPI";
@@ -27,9 +28,10 @@ export const UserStatsOverview = ({
   guildName,
   hasGuild
 }: UserStatsOverviewProps) => {
+  const { t } = useTranslation();
   // Formater la date d'ancienneté
   const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return "Inconnue";
+    if (!dateString) return t("components.user.statsOverview.dateUnknown");
     const date = new Date(dateString);
     return date.toLocaleDateString("fr-FR", {
       day: "numeric",
@@ -111,7 +113,7 @@ export const UserStatsOverview = ({
                   letterSpacing="wide"
                   mb={2}
                 >
-                  Meilleur Score
+                  {t("components.user.statsOverview.labelBestScore")}
                 </Text>
                 <Text fontSize="4xl" fontWeight="bold" color="green.500" lineHeight="1">
                   {stats.bestScore.score.toLocaleString("fr-FR")}
@@ -171,7 +173,7 @@ export const UserStatsOverview = ({
                   letterSpacing="wide"
                   mb={2}
                 >
-                  Score à Améliorer
+                  {t("components.user.statsOverview.labelWorstScore")}
                 </Text>
                 <Text fontSize="4xl" fontWeight="bold" color="red.500" lineHeight="1">
                   {stats.worstScore.score.toLocaleString("fr-FR")}
@@ -226,7 +228,7 @@ export const UserStatsOverview = ({
                   textTransform="uppercase"
                   letterSpacing="wide"
                 >
-                  Meilleur Cycle
+                  {t("components.user.statsOverview.labelBestCycle")}
                 </Text>
               </HStack>
               <Text fontSize="2xl" fontWeight="bold" color="purple.500" mb={2}>
@@ -234,7 +236,7 @@ export const UserStatsOverview = ({
               </Text>
               <VStack align="start" spacing={0} fontSize="sm" color="gray.600" _dark={{ color: "gray.400" }}>
                 <Text>
-                  Moy: <Text as="span" fontWeight="semibold">{(stats.bestCycle.averageScore / 1000000).toFixed(2)}M</Text>
+                  {t("components.user.statsOverview.avgShort")} <Text as="span" fontWeight="semibold">{(stats.bestCycle.averageScore / 1000000).toFixed(2)}M</Text>
                 </Text>
                 <Text>
                   {stats.bestCycle.scoreCount} rotation{stats.bestCycle.scoreCount > 1 ? "s" : ""}
@@ -278,7 +280,7 @@ export const UserStatsOverview = ({
                   textTransform="uppercase"
                   letterSpacing="wide"
                 >
-                  Ancienneté
+                  {t("components.user.statsOverview.labelSeniority")}
                 </Text>
               </HStack>
               <Text fontSize="lg" fontWeight="bold" color="blue.500" mb={2}>
@@ -286,7 +288,7 @@ export const UserStatsOverview = ({
               </Text>
               {daysSinceFirst !== null && (
                 <Text fontSize="sm" color="gray.600" _dark={{ color: "gray.400" }}>
-                  Il y a {daysSinceFirst} jour{daysSinceFirst > 1 ? "s" : ""}
+                  {t("components.user.statsOverview.daysAgo", { count: daysSinceFirst })}
                 </Text>
               )}
             </CardBody>
@@ -327,14 +329,14 @@ export const UserStatsOverview = ({
                   textTransform="uppercase"
                   letterSpacing="wide"
                 >
-                  Builds Créés
+                  {t("components.user.statsOverview.labelBuilds")}
                 </Text>
               </HStack>
               <Text fontSize="3xl" fontWeight="bold" color="orange.500" mb={2}>
                 {stats.buildsCount}
               </Text>
               <Text fontSize="sm" color="gray.600" _dark={{ color: "gray.400" }}>
-                Contribution à la communauté
+                {t("components.user.statsOverview.communityContrib")}
               </Text>
             </CardBody>
           </Card>
@@ -381,7 +383,7 @@ export const UserStatsOverview = ({
                     letterSpacing="wide"
                     mb={1}
                   >
-                    Taux de Miss
+                    {t("components.user.statsOverview.labelMissRate")}
                   </Text>
                   <HStack spacing={4} align="baseline">
                     <Text 
@@ -393,7 +395,12 @@ export const UserStatsOverview = ({
                       {stats.missRate}%
                     </Text>
                     <Text fontSize="md" color="gray.600" _dark={{ color: "gray.400" }}>
-                      {stats.missCount} score{stats.missCount !== 1 ? "s" : ""} à 0 sur {stats.totalScores} rotation{stats.totalScores > 1 ? "s" : ""}
+                      {t("components.user.statsOverview.missDetail", {
+                        missCount: stats.missCount,
+                        scoreS: stats.missCount !== 1 ? "s" : "",
+                        totalScores: stats.totalScores,
+                        rotationS: stats.totalScores > 1 ? "s" : ""
+                      })}
                     </Text>
                   </HStack>
                 </Box>
@@ -417,9 +424,9 @@ export const UserStatsOverview = ({
                     <Box p={2} borderRadius="lg" bg="cyan.100" color="cyan.600" _dark={{ bg: "cyan.900", color: "cyan.300" }}>
                       <Icon as={FiBarChart2} boxSize={5} />
                     </Box>
-                    <Tooltip label="Valeur centrale de tous tes scores — moins sensible aux extrêmes que la moyenne" placement="top" hasArrow>
+                    <Tooltip label={t("components.user.statsOverview.tooltipMedianScore")} placement="top" hasArrow>
                       <Text fontSize="xs" fontWeight="bold" color="cyan.500" textTransform="uppercase" letterSpacing="wide" cursor="help">
-                        Score Médian
+                        {t("components.user.statsOverview.labelMedianScore")}
                       </Text>
                     </Tooltip>
                   </HStack>
@@ -429,8 +436,8 @@ export const UserStatsOverview = ({
                   {stats.averageScore > 0 && (
                     <Text fontSize="sm" color="gray.600" _dark={{ color: "gray.400" }}>
                       {stats.medianScore > stats.averageScore
-                        ? `+${((stats.medianScore - stats.averageScore) / 1000000).toFixed(2)}M vs moyenne`
-                        : `${((stats.medianScore - stats.averageScore) / 1000000).toFixed(2)}M vs moyenne`}
+                        ? `+${((stats.medianScore - stats.averageScore) / 1000000).toFixed(2)}M ${t("components.user.statsOverview.vsMean")}`
+                        : `${((stats.medianScore - stats.averageScore) / 1000000).toFixed(2)}M ${t("components.user.statsOverview.vsMean")}`}
                     </Text>
                   )}
                 </CardBody>
@@ -454,7 +461,7 @@ export const UserStatsOverview = ({
                     >
                       <Icon as={FiTrendingUp} boxSize={5} />
                     </Box>
-                    <Tooltip label="Coefficient de variation : écart-type / moyenne. Plus bas = plus régulier." placement="top" hasArrow>
+                    <Tooltip label={t("components.user.statsOverview.tooltipConsistency")} placement="top" hasArrow>
                       <Text
                         fontSize="xs"
                         fontWeight="bold"
@@ -463,7 +470,7 @@ export const UserStatsOverview = ({
                         letterSpacing="wide"
                         cursor="help"
                       >
-                        Consistance
+                        {t("components.user.statsOverview.labelConsistency")}
                       </Text>
                     </Tooltip>
                   </HStack>
@@ -473,7 +480,7 @@ export const UserStatsOverview = ({
                       fontWeight="bold"
                       color={stats.consistencyScore <= 15 ? "green.500" : stats.consistencyScore <= 30 ? "yellow.500" : "red.500"}
                     >
-                      {stats.consistencyScore <= 15 ? "Très régulier" : stats.consistencyScore <= 30 ? "Régulier" : "Irrégulier"}
+                      {stats.consistencyScore <= 15 ? t("components.user.statsOverview.consistencyVeryRegular") : stats.consistencyScore <= 30 ? t("components.user.statsOverview.consistencyRegular") : t("components.user.statsOverview.consistencyIrregular")}
                     </Text>
                   </HStack>
                   <Text fontSize="sm" color="gray.600" _dark={{ color: "gray.400" }}>
@@ -492,7 +499,7 @@ export const UserStatsOverview = ({
                       <Icon as={FiCheckCircle} boxSize={5} />
                     </Box>
                     <Text fontSize="xs" fontWeight="bold" color="teal.500" textTransform="uppercase" letterSpacing="wide">
-                      Cycles Joués
+                      {t("components.user.statsOverview.labelCyclesPlayed")}
                     </Text>
                   </HStack>
                   <Text fontSize="3xl" fontWeight="bold" color="teal.500" mb={1}>

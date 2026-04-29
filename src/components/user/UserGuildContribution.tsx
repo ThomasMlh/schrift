@@ -10,6 +10,7 @@ import {
   useColorModeValue
 } from "@chakra-ui/react";
 import { FiUsers } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 import {
   BarChart,
   Bar,
@@ -39,6 +40,7 @@ export const UserGuildContribution = ({
   const textColor = useColorModeValue("#2D3748", "#E2E8F0");
   const tooltipBg = useColorModeValue("#FFFFFF", "#2D3748");
   const tooltipBorder = useColorModeValue("#E2E8F0", "#4A5568");
+  const { t } = useTranslation();
 
   // Construire les données avec le nom du cycle si disponible
   const cycleNameMap: Record<string, string> = {};
@@ -68,10 +70,10 @@ export const UserGuildContribution = ({
         >
           <Text fontWeight="bold" mb={1}>{d.name}</Text>
           <Text fontSize="sm" color="blue.500">
-            Contribution : <strong>{d.pct}%</strong>
+            {t("components.user.guildContribution.labelContribution")} <strong>{d.pct}%</strong>
           </Text>
           <Text fontSize="xs" color="gray.500">
-            {(d.userTotal / 1_000_000_000).toFixed(2)}B / {(d.guildTotal / 1_000_000_000).toFixed(2)}B total guilde
+            {(d.userTotal / 1_000_000_000).toFixed(2)}B / {(d.guildTotal / 1_000_000_000).toFixed(2)}B {t("components.user.guildContribution.labelGuildTotal")}
           </Text>
         </Box>
       );
@@ -95,14 +97,14 @@ export const UserGuildContribution = ({
           <VStack align="start" spacing={0}>
             <HStack spacing={2}>
               <Text fontWeight="bold" fontSize="md">
-                Contribution à la guilde
+                {t("components.user.guildContribution.title")}
               </Text>
               {guildName && (
                 <Text fontSize="sm" color="gray.500">— {guildName}</Text>
               )}
             </HStack>
             <Tooltip
-              label="Part du score total de la guilde apportée par ce joueur, moyennée sur tous les cycles"
+              label={t("components.user.guildContribution.tooltip")}
               placement="top"
               hasArrow
             >
@@ -110,7 +112,7 @@ export const UserGuildContribution = ({
                 <Text fontSize="2xl" fontWeight="bold" color={color}>
                   {avg}%
                 </Text>
-                <Text fontSize="sm" color="gray.500">moy. / cycle</Text>
+                <Text fontSize="sm" color="gray.500">{t("components.user.guildContribution.labelAvgPerCycle")}</Text>
               </HStack>
             </Tooltip>
           </VStack>
@@ -123,7 +125,7 @@ export const UserGuildContribution = ({
               <XAxis dataKey="name" stroke={textColor} fontSize={11} />
               <YAxis stroke={textColor} fontSize={11} unit="%" domain={[0, 'auto']} />
               <RechartsTooltip content={<CustomTooltip />} />
-              <ReferenceLine y={avg} stroke={color} strokeDasharray="4 4" label={{ value: `Moy. ${avg}%`, fill: color, fontSize: 11 }} />
+              <ReferenceLine y={avg} stroke={color} strokeDasharray="4 4" label={{ value: t("components.user.guildContribution.chartAvg", { avg }), fill: color, fontSize: 11 }} />
               <Bar dataKey="pct" radius={[4, 4, 0, 0]}>
                 {chartData.map((entry, i) => (
                   <Cell

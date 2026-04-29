@@ -8,6 +8,7 @@ import {
   Button
 } from "@chakra-ui/react";
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { CustomSelect } from "../ui/CustomSelect";
 import {
   LineChart,
@@ -28,6 +29,7 @@ interface UserTemporalEvolutionProps {
 }
 
 export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvolutionProps) => {
+  const { t } = useTranslation();
   const lineColor = useColorModeValue("#3182CE", "#63B3ED");
   const gridColor = useColorModeValue("#E2E8F0", "#4A5568");
   const textColor = useColorModeValue("#2D3748", "#E2E8F0");
@@ -63,9 +65,9 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
   if (!temporalEvolution || temporalEvolution.length === 0) {
     return (
       <VStack spacing={4} align="stretch">
-        <Heading size="md">Évolution Temporelle</Heading>
+        <Heading size="md">{t("components.user.temporalEvolution.heading")}</Heading>
         <Text fontSize="sm" color="gray.500" textAlign="center" py={10}>
-          Aucune donnée d'évolution disponible
+          {t("components.user.temporalEvolution.noData")}
         </Text>
       </VStack>
     );
@@ -98,11 +100,11 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
           </Text>
           {payload[0].payload.year && (
             <Text color="purple.500" fontSize="xs" mb={1}>
-              Année {payload[0].payload.year}
+              {t("components.user.temporalEvolution.tooltipYear")} {payload[0].payload.year}
             </Text>
           )}
           <Text color="blue.500" fontSize="sm">
-            Score moyen: {payload[0].value}M
+            {t("components.user.temporalEvolution.tooltipAvgScore")} {payload[0].value}M
           </Text>
           <Text color="gray.500" fontSize="xs">
             {payload[0].payload.scoreCount} rotation
@@ -118,16 +120,16 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
     <VStack spacing={4} align="stretch">
       <HStack justify="space-between" align="center" flexWrap="wrap">
         <Box>
-          <Heading size="md">Évolution Temporelle</Heading>
+          <Heading size="md">{t("components.user.temporalEvolution.heading")}</Heading>
           <Text fontSize="sm" color="gray.500">
-            Progression de votre score moyen par cycle (du plus ancien au plus récent)
+            {t("components.user.temporalEvolution.subtitle")}
           </Text>
         </Box>
 
         {availableYears.length > 1 && (
           <HStack spacing={2}>
             <Text fontSize="sm" fontWeight="medium" color="gray.600">
-              Filtrer par année :
+              {t("components.user.temporalEvolution.filterByYear")}
             </Text>
             <CustomSelect
               size="sm"
@@ -135,7 +137,7 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
               value={selectedYear}
               onChange={(val) => setSelectedYear(val)}
               options={[
-                { value: "all", label: "Toutes les années" },
+                { value: "all", label: t("components.user.temporalEvolution.allYears") },
                 ...availableYears.map((year) => ({
                   value: year.toString(),
                   label: year.toString(),
@@ -150,7 +152,7 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
                 onClick={() => setSelectedYear("all")}
                 colorScheme="blue"
               >
-                Réinitialiser
+                {t("components.user.temporalEvolution.reset")}
               </Button>
             )}
           </HStack>
@@ -160,7 +162,7 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
       {chartData.length === 0 ? (
         <Box py={10} textAlign="center">
           <Text color="gray.500">
-            Aucune donnée disponible pour la période sélectionnée
+            {t("components.user.temporalEvolution.noDataForPeriod")}
           </Text>
         </Box>
       ) : (
@@ -182,7 +184,7 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
             <YAxis
               stroke={textColor}
               label={{
-                value: "Score (M)",
+                value: t("components.user.temporalEvolution.yAxisLabel"),
                 angle: -90,
                 position: "insideLeft",
                 style: { fill: textColor }
@@ -202,7 +204,7 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
               strokeWidth={3}
               dot={{ fill: lineColor, r: 5 }}
               activeDot={{ r: 8 }}
-              name="Score moyen (M)"
+            name={t("components.user.temporalEvolution.lineName")}
             />
           </LineChart>
         </ResponsiveContainer>
@@ -212,14 +214,13 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
       {filteredData.length > 0 && (
         <VStack spacing={2} align="stretch">
           <Text fontSize="xs" color="gray.400" fontStyle="italic">
-            💡 Ce graphique montre l'évolution de votre score moyen au fil des
-            cycles, du plus ancien au plus récent. Une tendance à la hausse indique une progression constante !
-            {selectedYear === "all" && " L'année est affichée entre parenthèses."}
+            {t("components.user.temporalEvolution.evolutionNote")}
+            {selectedYear === "all" && ` ${t("components.user.temporalEvolution.yearNote")}`}
           </Text>
           {filteredData.length > 0 && (
             <Text fontSize="xs" color="blue.500" fontWeight="medium">
-              📊 {filteredData.length} cycle{filteredData.length > 1 ? "s" : ""} affiché{filteredData.length > 1 ? "s" : ""}
-              {selectedYear !== "all" && ` pour l'année ${selectedYear}`}
+              {t("components.user.temporalEvolution.cyclesDisplayed", { count: filteredData.length })}
+              {selectedYear !== "all" && ` ${t("components.user.temporalEvolution.forYear", { year: selectedYear })}`}
             </Text>
           )}
         </VStack>

@@ -471,6 +471,138 @@
       "radarRegularity": "Regularity",
       "radarTotalPoints": "Total Points",
       "radarMembers": "Members"
+    },
+    "user": {
+      "banDetailsCard": {
+        "bannedPlayer": "Banned Player",
+        "labelBanReason": "Reason:",
+        "labelBannedOn": "Banned on:"
+      },
+      "guildContribution": {
+        "title": "Guild Contribution",
+        "tooltip": "Share of the guild's total score contributed by this player, averaged over all cycles",
+        "labelContribution": "Contribution:",
+        "labelGuildTotal": "guild total",
+        "labelAvgPerCycle": "avg. / cycle",
+        "chartAvg": "Avg. {{avg}}%"
+      },
+      "performances": {
+        "headingAvgByRotation": "Average Scores by Rotation",
+        "subtitleAllRotations": "All your rotations sorted by descending average score",
+        "notePerformance": "\ud83d\udca1 The performance percentage is calculated relative to your best rotation (100%). A rotation at 80% means it achieves 80% of the average score of your best rotation.",
+        "noData": "Not enough data available",
+        "headingByType": "Analysis by Type",
+        "subtitleByType": "Aggregated performances by killer, attack type and status effect"
+      },
+      "positionPerformance": {
+        "title": "Performance by cycle period",
+        "tooltipAvg": "Avg.:",
+        "rotShort": "rot.",
+        "labelBest": "Best:",
+        "labelWorst": "Weakest:",
+        "performsBetterIn": "This player performs better at the {{period}} of the cycle"
+      },
+      "recentTrend": {
+        "trendUp": "\ud83d\udcc8 Rising",
+        "trendDown": "\ud83d\udcc9 Falling",
+        "trendStable": "\u27a1\ufe0f Stable",
+        "subtitle": "Analysis of the last 5 rotations",
+        "badgeRecent": "3 most recent",
+        "labelRecentAvg": "Recent average score",
+        "badgePrevious": "2 previous",
+        "labelPreviousAvg": "Previous average score",
+        "detailHeading": "\ud83d\udcca Rotation details"
+      },
+      "rivals": {
+        "heading": "Leaderboard Rivals",
+        "subtitle": "Players close to your ranking",
+        "youBadge": "\u2728 YOU",
+        "positionAbove": "ahead",
+        "positionBelow": "behind",
+        "labelAvgScore": "Average score"
+      },
+      "statsOverview": {
+        "dateUnknown": "Unknown",
+        "labelBestScore": "Best Score",
+        "labelWorstScore": "Score to Improve",
+        "labelBestCycle": "Best Cycle",
+        "avgShort": "Avg:",
+        "labelSeniority": "Seniority",
+        "daysAgo_one": "{{count}} day ago",
+        "daysAgo_other": "{{count}} days ago",
+        "labelBuilds": "Builds Created",
+        "communityContrib": "Community contribution",
+        "labelMissRate": "Miss Rate",
+        "missDetail": "{{missCount}} score{{scoreS}} at 0 out of {{totalScores}} rotation{{rotationS}}",
+        "consistencyVeryRegular": "Very consistent",
+        "consistencyRegular": "Consistent",
+        "consistencyIrregular": "Inconsistent",
+        "labelConsistency": "Consistency",
+        "tooltipMedianScore": "Central value of all your scores \u2014 less sensitive to extremes than the average",
+        "tooltipConsistency": "Coefficient of variation: standard deviation / mean. Lower = more consistent.",
+        "labelMedianScore": "Median Score",
+        "vsMean": "vs average",
+        "labelCyclesPlayed": "Cycles Played"
+      },
+      "temporalEvolution": {
+        "heading": "Temporal Evolution",
+        "noData": "No evolution data available",
+        "allYears": "All years",
+        "filterByYear": "Filter by year:",
+        "reset": "Reset",
+        "noDataForPeriod": "No data available for the selected period",
+        "subtitle": "Progression of your average score per cycle (from oldest to most recent)",
+        "yAxisLabel": "Score (M)",
+        "lineName": "Average score (M)",
+        "tooltipAvgScore": "Average score:",
+        "tooltipYear": "Year",
+        "evolutionNote": "\ud83d\udca1 This chart shows the evolution of your average score over cycles, from oldest to most recent. An upward trend indicates steady progress!",
+        "yearNote": "The year is shown in parentheses.",
+        "cyclesDisplayed_one": "\ud83d\udcca {{count}} cycle displayed",
+        "cyclesDisplayed_other": "\ud83d\udcca {{count}} cycles displayed",
+        "forYear": "for year {{year}}"
+      },
+      "topRotations": {
+        "bestRotationTitle": "Best Rotation",
+        "worstRotationTitle": "Rotation to Improve",
+        "bestScoreLabel": "\ud83c\udf1f Best Score:",
+        "worstScoreLabel": "\ud83d\udcca Worst Score:",
+        "detailHeading": "\ud83d\udccb Rotation detail",
+        "detailSubtitle": "All rotations of the selected cycle, sorted by position",
+        "colRank": "#",
+        "colKiller": "Killer",
+        "colType": "Type",
+        "colAvgScore": "Average score",
+        "colParticipations": "Participations",
+        "badgeBest": "\ud83c\udfc6 Best",
+        "badgeWorst": "\ud83d\udcc9 Worst"
+      },
+      "ranking": {
+        "globalRanking": "\ud83c\udf0d Global Ranking",
+        "outOf_one": "Out of {{count}} player",
+        "outOf_other": "Out of {{count}} players",
+        "topPercent": "Top {{pct}}%",
+        "gapWithTop1": "-{{gap}}M from top 1",
+        "guildRanking": "\ud83d\udc65 {{name}} Ranking",
+        "outOfMembers_one": "Out of {{count}} member",
+        "outOfMembers_other": "Out of {{count}} members"
+      },
+      "rotationDetailCard": {
+        "labelAverage": "Average:",
+        "labelParticipations": "Participations:",
+        "labelTotal": "Total:"
+      },
+      "typeAnalysis": {
+        "noData": "Not enough data for type analysis",
+        "headingAttacks": "R vs B Attacks",
+        "headingAlteration": "Performance by Status Effect",
+        "attackRed": "Red Attacks",
+        "attackBlue": "Blue Attacks",
+        "rotShort": "rot.",
+        "bestOnLabel": "Best on",
+        "red": "Red",
+        "blue": "Blue"
+      }
     }
   },
   "affinities": {

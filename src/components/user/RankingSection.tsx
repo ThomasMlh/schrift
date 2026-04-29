@@ -8,6 +8,7 @@ import {
   StatHelpText,
   useColorModeValue
 } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import type { IUserStats } from "@/hooks/useAPI";
 
 interface RankingSectionProps {
@@ -22,6 +23,7 @@ export const RankingSection = ({
   hasGuild
 }: RankingSectionProps) => {
   const statCardBg = useColorModeValue("blue.50", "gray.700");
+  const { t } = useTranslation();
 
   if (!ranking || (!ranking.global && !ranking.guild)) {
     return null;
@@ -45,21 +47,20 @@ export const RankingSection = ({
           <CardBody>
             <Stat>
               <StatLabel fontSize="sm" fontWeight="medium">
-                🌍 Classement Global
+                {t("components.user.ranking.globalRanking")}
               </StatLabel>
               <StatNumber fontSize="3xl" color="cyan.500">
                 #{ranking.global}
               </StatNumber>
               <StatHelpText>
-                Sur {ranking.totalPlayers} joueur
-                {(ranking.totalPlayers || 0) > 1 ? "s" : ""}
+                {t("components.user.ranking.outOf", { count: ranking.totalPlayers ?? 0 })}
                 {ranking.percentile && (
-                  <> • Top {100 - ranking.percentile}%</>
+                  <> • {t("components.user.ranking.topPercent", { pct: 100 - ranking.percentile })}</>
                 )}
               </StatHelpText>
               {ranking.gapWithTop1 !== null && ranking.gapWithTop1 !== undefined && ranking.global !== 1 && (
                 <StatHelpText mt={1} color="orange.500" fontWeight="medium">
-                  📊 -{(ranking.gapWithTop1 / 1000000).toFixed(2)}M du top 1
+                  {t("components.user.ranking.gapWithTop1", { gap: (ranking.gapWithTop1 / 1000000).toFixed(2) })}
                 </StatHelpText>
               )}
             </Stat>
@@ -83,14 +84,13 @@ export const RankingSection = ({
           <CardBody>
             <Stat>
               <StatLabel fontSize="sm" fontWeight="medium">
-                👥 Classement{guildName ? ` ${guildName}` : " Guilde"}
+                {t("components.user.ranking.guildRanking", { name: guildName ?? "Guilde" })}
               </StatLabel>
               <StatNumber fontSize="3xl" color="pink.500">
                 #{ranking.guild}
               </StatNumber>
               <StatHelpText>
-                Sur {ranking.totalGuildPlayers} membre
-                {(ranking.totalGuildPlayers || 0) > 1 ? "s" : ""}
+                {t("components.user.ranking.outOfMembers", { count: ranking.totalGuildPlayers ?? 0 })}
               </StatHelpText>
             </Stat>
           </CardBody>

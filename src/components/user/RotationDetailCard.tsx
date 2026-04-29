@@ -10,6 +10,7 @@ import {
   Badge,
   useColorModeValue
 } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 
 interface ScoreInfo {
@@ -43,6 +44,7 @@ export const RotationDetailCard = ({
   extremeLabel,
   variant
 }: RotationDetailCardProps) => {
+  const { t } = useTranslation();
   const statCardBg = useColorModeValue("blue.50", "gray.700");
   const color = variant === "best" ? "green" : "red";
 
@@ -82,7 +84,7 @@ export const RotationDetailCard = ({
 
           <HStack justify="space-between">
             <Text fontSize="sm" color="gray.500">
-              Moyenne:
+              {t("components.user.rotationDetailCard.labelAverage")}
             </Text>
             <Text fontWeight="semibold" fontSize="lg">
               {rotation.averageScore.toLocaleString()}
@@ -90,7 +92,7 @@ export const RotationDetailCard = ({
           </HStack>
           <HStack justify="space-between">
             <Text fontSize="sm" color="gray.500">
-              Participations:
+              {t("components.user.rotationDetailCard.labelParticipations")}
             </Text>
             <Badge colorScheme={color} fontSize="md" px={3} py={1}>
               {rotation.scoreCount}
@@ -98,7 +100,7 @@ export const RotationDetailCard = ({
           </HStack>
           <HStack justify="space-between">
             <Text fontSize="sm" color="gray.500">
-              Total:
+              {t("components.user.rotationDetailCard.labelTotal")}
             </Text>
             <Text fontWeight="semibold" fontSize="lg">
               {rotation.totalScore.toLocaleString()}
