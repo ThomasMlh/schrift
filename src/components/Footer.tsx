@@ -1,31 +1,47 @@
-import { Box, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Box, Flex, Text, useColorMode } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 
 export const Footer = () => {
   const { t } = useTranslation();
-  const bgColor = useColorModeValue("gray.100", "gray.900");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const textColor = useColorModeValue("gray.600", "gray.400");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === 'dark';
 
   return (
     <Box
       as="footer"
       w="100%"
-      py={6}
-      px={4}
-      bg={bgColor}
+      py={5}
+      px={6}
+      bg={isDark ? 'gray.900' : 'white'}
       borderTop="1px solid"
-      borderColor={borderColor}
+      borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
       mt="auto"
     >
-      <VStack spacing={3} maxW="container.xl" mx="auto">
-        <Text fontSize="sm" fontWeight="semibold">
-          {t("footer.copyrights")}
+      <Flex
+        maxW="container.xl"
+        mx="auto"
+        direction={{ base: "column", md: "row" }}
+        justify="space-between"
+        align="center"
+        gap={3}
+      >
+        <Text
+          fontWeight="extrabold"
+          fontSize="lg"
+          letterSpacing="tight"
+          bgGradient={isDark ? "linear(to-r, #C4B5FD, #818CF8)" : "linear(to-r, #7C3AED, #4F46E5)"}
+          bgClip="text"
+          flexShrink={0}
+        >
+          Schrift BBS
         </Text>
-        <Text fontSize="xs" textAlign="center" lineHeight="tall" color={textColor}>
+        <Text fontSize="xs" textAlign="center" color={isDark ? 'gray.500' : 'gray.400'} maxW="md">
           {t("footer.disclaimer")}
         </Text>
-      </VStack>
+        <Text fontSize="xs" color={isDark ? 'gray.600' : 'gray.400'} flexShrink={0}>
+          {t("footer.copyrights")}
+        </Text>
+      </Flex>
     </Box>
   );
 };

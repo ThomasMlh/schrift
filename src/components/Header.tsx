@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   useColorMode,
   Button,
@@ -15,7 +15,6 @@ import {
   Text,
   useToast,
   Avatar,
-  useColorModeValue,
   Menu,
   MenuButton,
   MenuList,
@@ -30,9 +29,15 @@ import { useTranslation } from "react-i18next";
 const ColorModeSwitcher = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   return (
-    <Button onClick={toggleColorMode} variant="ghost" ml={2}>
-      {colorMode === "light" ? "🌙" : "☀️"}
-    </Button>
+    <IconButton
+      aria-label="Toggle color mode"
+      onClick={toggleColorMode}
+      variant="ghost"
+      colorScheme="purple"
+      borderRadius="full"
+      icon={<Text fontSize="md">{colorMode === "light" ? "🌙" : "☀️"}</Text>}
+      size="sm"
+    />
   );
 };
 
@@ -43,10 +48,8 @@ const LANGUAGES = [
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const hoverBg = useColorModeValue("gray.50", "gray.700");
-  const activeBg = useColorModeValue("blue.50", "blue.900");
-  const activeColor = useColorModeValue("blue.600", "blue.200");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === 'dark';
 
   const current = LANGUAGES.find((l) => l.code === i18n.language) ?? LANGUAGES[0];
 
@@ -61,28 +64,37 @@ const LanguageSwitcher = () => {
         as={Button}
         variant="outline"
         size="sm"
-        borderColor={borderColor}
+        borderRadius="full"
+        borderColor={isDark ? 'whiteAlpha.200' : 'gray.200'}
         rightIcon={<ChevronDownIcon />}
         fontWeight="semibold"
         fontSize="sm"
         px={3}
-        _hover={{ bg: hoverBg }}
+        _hover={{ bg: isDark ? 'whiteAlpha.100' : 'gray.50' }}
       >
         <HStack spacing={1.5}>
           <img src={current.flagSrc} width={20} height={15} alt={current.short} style={{ borderRadius: 2 }} />
           <Text>{current.short}</Text>
         </HStack>
       </MenuButton>
-      <MenuList minW="140px" borderColor={borderColor} py={1} overflow="hidden">
+      <MenuList
+        minW="140px"
+        bg={isDark ? 'gray.800' : 'white'}
+        borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
+        py={1}
+        overflow="hidden"
+        borderRadius="xl"
+        boxShadow={isDark ? '0 8px 32px rgba(0,0,0,0.5)' : '0 4px 16px rgba(0,0,0,0.1)'}
+      >
         {LANGUAGES.map((lang) => (
           <MenuItem
             key={lang.code}
             onClick={() => handleSelect(lang.code)}
             fontSize="sm"
-            fontWeight={lang.code === current.code ? "bold" : "normal"}
-            bg={lang.code === current.code ? activeBg : undefined}
-            color={lang.code === current.code ? activeColor : undefined}
-            _hover={{ bg: hoverBg }}
+            fontWeight={lang.code === current.code ? "semibold" : "normal"}
+            bg={lang.code === current.code ? (isDark ? 'rgba(124,58,237,0.15)' : 'purple.50') : undefined}
+            color={lang.code === current.code ? (isDark ? 'purple.300' : 'purple.600') : undefined}
+            _hover={{ bg: isDark ? 'whiteAlpha.100' : 'gray.50' }}
             px={4}
           >
             <HStack spacing={2}>
@@ -101,94 +113,20 @@ export const Header = () => {
   const { currentUser, isLoggedIn, isAdmin, isGuildManager, logout: authLogout } = useAuth();
   const toast = useToast();
   const { t } = useTranslation();
-  const placement = "left";
-
-  // Tous les hooks de couleur en haut
-  const homeHoverBg = useColorModeValue("blue.50", "blue.900");
-  const homeHoverColor = useColorModeValue("blue.600", "blue.200");
-  const charactersHoverBg = useColorModeValue("green.50", "green.900");
-  const charactersHoverColor = useColorModeValue("green.600", "green.200");
-  const cyclesHoverBg = useColorModeValue("purple.50", "purple.900");
-  const cyclesHoverColor = useColorModeValue("purple.600", "purple.200");
-  const adminHoverBg = useColorModeValue("orange.50", "orange.900");
-  const adminHoverColor = useColorModeValue("orange.600", "orange.200");
-  const usersHoverBg = useColorModeValue("teal.50", "teal.900");
-  const usersHoverColor = useColorModeValue("teal.600", "teal.200");
-  const podiumHoverBg = useColorModeValue("pink.50", "pink.900");
-  const podiumHoverColor = useColorModeValue("pink.600", "pink.200");
-  const comparatorHoverBg = useColorModeValue("cyan.50", "cyan.900");
-  const comparatorHoverColor = useColorModeValue("cyan.600", "cyan.200");
-  const guidesHoverBg = useColorModeValue("orange.50", "orange.900");
-  const guidesHoverColor = useColorModeValue("orange.600", "orange.200");
-  const guildsHoverBg = useColorModeValue("yellow.50", "yellow.900");
-  const guildsHoverColor = useColorModeValue("yellow.600", "yellow.200");
-  const bgColor = useColorModeValue("white", "gray.800");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === 'dark';
+  const location = useLocation();
 
   const menuItems = [
-    {
-      name: t("nav.home"),
-      path: "/",
-      icon: "🏠",
-      hoverBg: homeHoverBg,
-      hoverColor: homeHoverColor
-    },
-    {
-      name: t("nav.guilds"),
-      path: "/guildes",
-      icon: "🛡️",
-      hoverBg: guildsHoverBg,
-      hoverColor: guildsHoverColor
-    },
-    {
-      name: t("nav.characters"),
-      path: "/personnages",
-      icon: "📖",
-      hoverBg: charactersHoverBg,
-      hoverColor: charactersHoverColor
-    },
-    {
-      name: t("nav.cycles"),
-      path: "/cycles",
-      icon: "🔄",
-      hoverBg: cyclesHoverBg,
-      hoverColor: cyclesHoverColor
-    },
-    {
-      name: t("nav.players"),
-      path: "/joueurs",
-      icon: "👥",
-      hoverBg: usersHoverBg,
-      hoverColor: usersHoverColor
-    },
-    {
-      name: t("nav.podium"),
-      path: "/podium",
-      icon: "🏆",
-      hoverBg: podiumHoverBg,
-      hoverColor: podiumHoverColor
-    },
-    {
-      name: t("nav.comparator"),
-      path: "/comparateur",
-      icon: "⚔️",
-      hoverBg: comparatorHoverBg,
-      hoverColor: comparatorHoverColor
-    },
-    {
-      name: t("nav.guides"),
-      path: "/guides",
-      icon: "📚",
-      hoverBg: guidesHoverBg,
-      hoverColor: guidesHoverColor
-    },
-    {
-      name: t("nav.admin"),
-      path: "/admin",
-      icon: "⚙️",
-      hoverBg: adminHoverBg,
-      hoverColor: adminHoverColor,
-      adminOrGuildManagerOnly: true
-    }
+    { name: t("nav.home"), path: "/", icon: "🏠" },
+    { name: t("nav.guilds"), path: "/guildes", icon: "🛡️" },
+    { name: t("nav.characters"), path: "/personnages", icon: "📖" },
+    { name: t("nav.cycles"), path: "/cycles", icon: "🔄" },
+    { name: t("nav.players"), path: "/joueurs", icon: "👥" },
+    { name: t("nav.podium"), path: "/podium", icon: "🏆" },
+    { name: t("nav.comparator"), path: "/comparateur", icon: "⚔️" },
+    { name: t("nav.guides"), path: "/guides", icon: "📚" },
+    { name: t("nav.admin"), path: "/admin", icon: "⚙️", adminOrGuildManagerOnly: true },
   ];
 
   // Fonction pour initier l'authentification Discord
@@ -223,6 +161,11 @@ export const Header = () => {
     });
   };
 
+  const isActive = (path: string) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
+
   const renderAuthButton = () => {
     if (isLoggedIn) {
       return (
@@ -241,13 +184,19 @@ export const Header = () => {
                 requireAuth={true}
               />
               {isAdmin && (
-                <Text fontSize="xs" color="orange.500" lineHeight="short">
+                <Text fontSize="xs" color={isDark ? 'purple.400' : 'purple.500'} lineHeight="short">
                   Admin
                 </Text>
               )}
             </VStack>
           </HStack>
-          <Button size="sm" variant="outline" onClick={handleLogout}>
+          <Button
+            size="sm"
+            variant="outline"
+            colorScheme="purple"
+            borderRadius="full"
+            onClick={handleLogout}
+          >
             {t("auth.logout")}
           </Button>
         </HStack>
@@ -257,8 +206,12 @@ export const Header = () => {
         <Button
           leftIcon={<FaDiscord />}
           colorScheme="purple"
-          variant="ghost"
+          variant="solid"
+          borderRadius="full"
+          size="sm"
           onClick={handleDiscordAuth}
+          bgGradient="linear(to-r, #7C3AED, #4F46E5)"
+          _hover={{ bgGradient: "linear(to-r, #6D28D9, #4338CA)" }}
         >
           {t("auth.login")}
         </Button>
@@ -270,26 +223,42 @@ export const Header = () => {
     <Box
       as="nav"
       w="100%"
-      px={{ base: 2, md: 4 }}
+      px={{ base: 3, md: 5 }}
       py={2}
       id="main-navbar"
-      boxShadow={"lg"}
       zIndex={10}
       position="sticky"
       top={0}
-      bg={bgColor}
+      bg={isDark ? 'rgba(17,24,39,0.95)' : 'rgba(255,255,255,0.95)'}
+      sx={{ backdropFilter: 'blur(12px)' }}
+      borderBottom="1px solid"
+      borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
     >
+      {/* Desktop nav */}
       <Flex
         display={{ base: "none", xl: "flex" }}
         justify="space-between"
         align="center"
         w="100%"
-        maxW="100%"
       >
-        <Flex gap={1} align="center" flexWrap="wrap" flex={1}>
+        {/* Logo */}
+        <Box
+          as={Link}
+          to="/"
+          fontWeight="extrabold"
+          fontSize="xl"
+          letterSpacing="tight"
+          bgGradient={isDark ? "linear(to-r, #C4B5FD, #818CF8)" : "linear(to-r, #7C3AED, #4F46E5)"}
+          bgClip="text"
+          flexShrink={0}
+          mr={4}
+        >
+          Schrift
+        </Box>
+        <Flex gap={1} align="center" flex={1}>
           {menuItems.map((item) => {
-            if (item.adminOrGuildManagerOnly && !isAdmin && !isGuildManager)
-              return null;
+            if (item.adminOrGuildManagerOnly && !isAdmin && !isGuildManager) return null;
+            const active = isActive(item.path);
             return (
               <Button
                 key={item.name}
@@ -297,66 +266,95 @@ export const Header = () => {
                 to={item.path}
                 variant="ghost"
                 onClick={onClose}
-                justifyContent="flex-start"
                 px={3}
                 py={2}
                 fontSize="sm"
-                fontWeight="medium"
-                borderRadius="lg"
-                leftIcon={item.icon ? <Text>{item.icon}</Text> : undefined}
+                fontWeight={active ? "semibold" : "medium"}
+                borderRadius="full"
+                color={active ? (isDark ? 'purple.300' : 'purple.600') : undefined}
+                bg={active ? (isDark ? 'rgba(124,58,237,0.15)' : 'purple.50') : undefined}
                 _hover={{
-                  bg: item.hoverBg,
-                  color: item.hoverColor
+                  bg: isDark ? 'rgba(124,58,237,0.12)' : 'purple.50',
+                  color: isDark ? 'purple.300' : 'purple.600',
                 }}
               >
-                {item.name}
+                <Text as="span" mr={1.5}>{item.icon}</Text>{item.name}
               </Button>
             );
           })}
         </Flex>
-        <Flex gap={1} align="center" flexShrink={0}>
+        <Flex gap={2} align="center" flexShrink={0}>
           {renderAuthButton()}
           <LanguageSwitcher />
           <ColorModeSwitcher />
         </Flex>
       </Flex>
-      <Flex
-        display={{ base: "flex", xl: "none" }}
-        align="center"
-        justify="space-between"
-      >
-        <Box fontWeight="bold">Schrift</Box>
-        <HStack>
+
+      {/* Mobile nav */}
+      <Flex display={{ base: "flex", xl: "none" }} align="center" justify="space-between">
+        <Box
+          as={Link}
+          to="/"
+          fontWeight="extrabold"
+          fontSize="lg"
+          bgGradient={isDark ? "linear(to-r, #C4B5FD, #818CF8)" : "linear(to-r, #7C3AED, #4F46E5)"}
+          bgClip="text"
+        >
+          Schrift
+        </Box>
+        <HStack spacing={1}>
           <LanguageSwitcher />
           <ColorModeSwitcher />
           <IconButton
             aria-label={t("nav.openMenu")}
             icon={<HamburgerIcon />}
-            variant="outline"
+            variant="ghost"
+            colorScheme="purple"
+            borderRadius="full"
             onClick={onOpen}
           />
         </HStack>
       </Flex>
-      <Drawer placement={placement} onClose={onClose} isOpen={isOpen}>
-        <DrawerOverlay />
-        <DrawerContent>
+
+      {/* Mobile drawer */}
+      <Drawer placement="left" onClose={onClose} isOpen={isOpen}>
+        <DrawerOverlay sx={{ backdropFilter: 'blur(4px)' }} />
+        <DrawerContent
+          bg={isDark ? 'gray.900' : 'white'}
+          borderRight="1px solid"
+          borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
+        >
           <DrawerBody p={0}>
-            <Flex justify="flex-end" p={2}>
+            <Flex
+              justify="space-between"
+              align="center"
+              px={4} py={3}
+              borderBottom="1px solid"
+              borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
+            >
+              <Box
+                fontWeight="extrabold"
+                fontSize="lg"
+                bgGradient={isDark ? "linear(to-r, #C4B5FD, #818CF8)" : "linear(to-r, #7C3AED, #4F46E5)"}
+                bgClip="text"
+              >
+                Schrift
+              </Box>
               <IconButton
                 aria-label={t("nav.closeMenu")}
                 icon={<CloseIcon />}
                 variant="ghost"
+                colorScheme="purple"
+                borderRadius="full"
+                size="sm"
                 onClick={onClose}
               />
             </Flex>
-            <VStack spacing={3} align="stretch" p={4}>
+
+            <VStack spacing={1} align="stretch" p={3}>
               {menuItems.map((item) => {
-                if (
-                  item.adminOrGuildManagerOnly &&
-                  !isAdmin &&
-                  !isGuildManager
-                )
-                  return null;
+                if (item.adminOrGuildManagerOnly && !isAdmin && !isGuildManager) return null;
+                const active = isActive(item.path);
                 return (
                   <Button
                     key={item.name}
@@ -364,33 +362,35 @@ export const Header = () => {
                     to={item.path}
                     variant="ghost"
                     onClick={onClose}
-                    leftIcon={
-                      item.icon ? <Text>{item.icon}</Text> : undefined
-                    }
                     justifyContent="flex-start"
                     px={4}
                     py={3}
                     fontSize="sm"
-                    fontWeight="medium"
-                    borderRadius="lg"
+                    fontWeight={active ? "semibold" : "medium"}
+                    borderRadius="xl"
+                    color={active ? (isDark ? 'purple.300' : 'purple.600') : undefined}
+                    bg={active ? (isDark ? 'rgba(124,58,237,0.15)' : 'purple.50') : undefined}
                     _hover={{
-                      bg: item.hoverBg,
-                      color: item.hoverColor
+                      bg: isDark ? 'rgba(124,58,237,0.12)' : 'purple.50',
+                      color: isDark ? 'purple.300' : 'purple.600',
                     }}
                   >
-                    {item.name}
+                    <Text as="span" mr={2}>{item.icon}</Text>{item.name}
                   </Button>
                 );
               })}
+            </VStack>
+
+            <Box
+              px={4} py={4}
+              borderTop="1px solid"
+              borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
+            >
               {isLoggedIn ? (
                 <VStack spacing={3}>
-                  <HStack spacing={2}>
-                    <Avatar
-                      size="sm"
-                      src={currentUser?.avatar}
-                      name={currentUser?.username}
-                    />
-                    <VStack spacing={0} align="start">
+                  <HStack spacing={2} w="100%">
+                    <Avatar size="sm" src={currentUser?.avatar} name={currentUser?.username} />
+                    <VStack spacing={0} align="start" flex={1}>
                       <CustomLink
                         to={`/joueur/${currentUser?._id}`}
                         text={`${currentUser?.global_name}`}
@@ -398,7 +398,7 @@ export const Header = () => {
                         requireAuth={true}
                       />
                       {isAdmin && (
-                        <Text fontSize="xs" color="orange.500">
+                        <Text fontSize="xs" color={isDark ? 'purple.400' : 'purple.500'}>
                           Admin
                         </Text>
                       )}
@@ -406,10 +406,10 @@ export const Header = () => {
                   </HStack>
                   <Button
                     variant="outline"
-                    onClick={() => {
-                      handleLogout();
-                      onClose();
-                    }}
+                    colorScheme="purple"
+                    borderRadius="full"
+                    w="100%"
+                    onClick={() => { handleLogout(); onClose(); }}
                   >
                     {t("auth.logout")}
                   </Button>
@@ -418,7 +418,10 @@ export const Header = () => {
                 <Button
                   leftIcon={<FaDiscord />}
                   colorScheme="purple"
-                  variant="ghost"
+                  w="100%"
+                  borderRadius="full"
+                  bgGradient="linear(to-r, #7C3AED, #4F46E5)"
+                  _hover={{ bgGradient: "linear(to-r, #6D28D9, #4338CA)" }}
                   onClick={() => {
                     handleDiscordAuth();
                     onClose();
@@ -427,7 +430,7 @@ export const Header = () => {
                   {t("auth.login")}
                 </Button>
               )}
-            </VStack>
+            </Box>
           </DrawerBody>
         </DrawerContent>
       </Drawer>

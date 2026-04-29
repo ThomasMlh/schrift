@@ -1,4 +1,4 @@
-import { Box, Container, VStack, Heading, Text, Badge, useColorModeValue } from "@chakra-ui/react";
+import { Box, Container, VStack, Heading, Text, Badge, useColorMode } from "@chakra-ui/react";
 
 interface HeroSectionProps {
   title: string;
@@ -16,10 +16,8 @@ export const HeroSection = ({
   badge,
   size = "md" 
 }: HeroSectionProps) => {
-  const gradientBg = useColorModeValue(
-    'linear(135deg, #667eea 0%, #764ba2 100%)',
-    'linear(135deg, #4a5568 0%, #2d3748 100%)'
-  );
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === 'dark';
 
   const paddingY = {
     sm: { base: 8, md: 12 },
@@ -30,57 +28,61 @@ export const HeroSection = ({
   return (
     <Box
       w="100%"
-      bgGradient={gradientBg}
       py={paddingY[size]}
       px={4}
       position="relative"
       overflow="hidden"
+      bg={isDark
+        ? 'linear-gradient(135deg, rgba(124,58,237,0.18) 0%, rgba(79,70,229,0.12) 100%)'
+        : 'linear-gradient(135deg, rgba(124,58,237,0.07) 0%, rgba(79,70,229,0.04) 100%)'
+      }
+      borderBottom="1px solid"
+      borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
     >
-      {/* Pattern overlay */}
+      {/* Decorative blobs */}
       <Box
-        position="absolute"
-        top="0"
-        left="0"
-        right="0"
-        bottom="0"
-        opacity="0.1"
-        bgImage="radial-gradient(circle, white 1px, transparent 1px)"
-        bgSize="40px 40px"
+        position="absolute" top="-80px" right="-80px"
+        w="320px" h="320px" borderRadius="full"
+        bg={isDark ? 'rgba(124,58,237,0.12)' : 'rgba(124,58,237,0.06)'}
+        sx={{ filter: 'blur(70px)' }}
+        pointerEvents="none"
       />
-      
+      <Box
+        position="absolute" bottom="-50px" left="-50px"
+        w="240px" h="240px" borderRadius="full"
+        bg={isDark ? 'rgba(79,70,229,0.10)' : 'rgba(79,70,229,0.04)'}
+        sx={{ filter: 'blur(60px)' }}
+        pointerEvents="none"
+      />
+
       <Container maxW="container.xl" position="relative" zIndex={1}>
         <VStack spacing={4} textAlign="center">
           {badge && (
-            <Badge 
-              colorScheme="purple" 
-              variant="solid" 
-              fontSize="sm" 
-              px={4} 
-              py={2} 
-              borderRadius="full"
-              textTransform="uppercase"
-              letterSpacing="wide"
+            <Badge
+              px={4} py={1.5} borderRadius="full"
+              bg="linear-gradient(135deg, #7C3AED, #4F46E5)"
+              color="white" fontWeight="bold" fontSize="xs"
+              textTransform="uppercase" letterSpacing="widest"
             >
               {badge.icon && `${badge.icon} `}{badge.text}
             </Badge>
           )}
-          
+
           <Heading
             as="h1"
             size={{ base: "xl", md: "2xl" }}
-            color="white"
-            fontWeight="bold"
-            textShadow="0 2px 10px rgba(0,0,0,0.2)"
+            bgGradient={isDark ? "linear(to-r, #C4B5FD, #818CF8)" : "linear(to-r, #7C3AED, #4F46E5)"}
+            bgClip="text"
+            fontWeight="extrabold"
           >
             {title}
           </Heading>
-          
+
           {description && (
             <Text
               fontSize={{ base: "md", md: "lg" }}
-              color="whiteAlpha.900"
+              color={isDark ? 'gray.300' : 'gray.600'}
               maxW="2xl"
-              textShadow="0 1px 3px rgba(0,0,0,0.3)"
             >
               {description}
             </Text>
