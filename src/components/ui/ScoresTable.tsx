@@ -5,10 +5,8 @@ import {
   Text,
   Badge,
   IconButton,
-  Card,
-  CardBody,
   Flex,
-  useColorModeValue,
+  useColorMode,
   Tooltip,
   Icon
 } from "@chakra-ui/react";
@@ -39,10 +37,14 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
   onEditScore,
   onDeleteScore
 }) => {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const cardHoverBg = useColorModeValue("gray.50", "gray.700");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const headerBg = useColorModeValue("gray.100", "gray.700");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === 'dark';
+
+  const containerBg = isDark ? 'gray.800' : 'white';
+  const borderColor = isDark ? 'whiteAlpha.100' : 'gray.200';
+  const headerBg = isDark ? 'rgba(255,255,255,0.03)' : 'gray.50';
+  const rowHoverBg = isDark ? 'rgba(124,58,237,0.06)' : 'purple.50';
+  const rowDivider = isDark ? 'whiteAlpha.60' : 'gray.100';
 
   // Obtenir les informations d'un utilisateur
   const getUserInfo = (userId: string) => {
@@ -63,61 +65,52 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
   };
 
   return (
-    <Box>
+    <Box
+      borderRadius="xl"
+      border="1px solid"
+      borderColor={borderColor}
+      bg={containerBg}
+      overflow="hidden"
+      boxShadow={isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.06)'}
+    >
       {/* En-têtes (masqué sur mobile) */}
       <Box
         display={{ base: "none", lg: "block" }}
         bg={headerBg}
         px={4}
         py={3}
-        borderRadius="md"
-        mb={3}
+        borderBottom="1px solid"
+        borderColor={borderColor}
       >
         <Flex align="center" gap={4}>
           <Box w="200px">
-            <Text
-              fontSize="xs"
-              fontWeight="bold"
-              textTransform="uppercase"
-            >
+            <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
+              textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
               Joueur
             </Text>
           </Box>
           <Box w="180px">
-            <Text
-              fontSize="xs"
-              fontWeight="bold"
-              textTransform="uppercase"
-            >
-              <Icon as={CalendarIcon} mr={1} />
-              Cycle
+            <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
+              textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
+              <Icon as={CalendarIcon} mr={1} />Cycle
             </Text>
           </Box>
           <Box flex={1}>
-            <Text
-              fontSize="xs"
-              fontWeight="bold"
-              textTransform="uppercase"
-            >
+            <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
+              textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
               Rotation
             </Text>
           </Box>
           <Box w="140px" textAlign="center">
-            <Text
-              fontSize="xs"
-              fontWeight="bold"
-              textTransform="uppercase"
-            >
+            <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
+              textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
               Score
             </Text>
           </Box>
           {(isAdmin || isGuildManager) && (
             <Box w="100px" textAlign="center">
-              <Text
-                fontSize="xs"
-                fontWeight="bold"
-                textTransform="uppercase"
-              >
+              <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
+                textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
                 Actions
               </Text>
             </Box>
@@ -126,26 +119,23 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
       </Box>
 
       {/* Liste des scores */}
-      <VStack spacing={2} align="stretch">
-        {scores.map((score) => {
+      <VStack spacing={0} align="stretch">
+        {scores.map((score, idx) => {
           const user = getUserInfo(score.user_id);
           const cycle = getCycleInfo(score.cycle_id);
           const rotation = getRotationInfo(score.cycle_id, score.rotation_id);
 
           return (
-            <Card
+            <Box
               key={score._id}
-              bg={cardBg}
-              borderWidth="1px"
-              borderColor={borderColor}
-              _hover={{
-                bg: cardHoverBg,
-                transform: "translateY(-1px)",
-                shadow: "md"
-              }}
-              transition="all 0.2s"
+              px={4}
+              py={3}
+              borderBottom={idx < scores.length - 1 ? "1px solid" : "none"}
+              borderColor={rowDivider}
+              bg={idx % 2 === 1 ? (isDark ? 'rgba(255,255,255,0.015)' : 'gray.50/40') : 'transparent'}
+              _hover={{ bg: rowHoverBg }}
+              transition="background 0.15s"
             >
-              <CardBody p={4}>
                 <Flex
                   direction={{ base: "column", lg: "row" }}
                   gap={{ base: 3, lg: 4 }}
@@ -155,12 +145,14 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                   <Box w={{ base: "full", lg: "200px" }}>
                     <Text
                       display={{ base: "block", lg: "none" }}
-                      fontSize="xs"
-                      color="gray.500"
+                      fontSize="2xs"
+                      color={isDark ? 'gray.500' : 'gray.400'}
                       mb={1}
-                      fontWeight="medium"
+                      fontWeight="semibold"
+                      letterSpacing="widest"
+                      textTransform="uppercase"
                     >
-                      JOUEUR
+                      Joueur
                     </Text>
                     <UserDisplay user={user} />
                   </Box>
@@ -169,13 +161,14 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                   <Box w={{ base: "full", lg: "180px" }}>
                     <Text
                       display={{ base: "block", lg: "none" }}
-                      fontSize="xs"
-                      color="gray.500"
+                      fontSize="2xs"
+                      color={isDark ? 'gray.500' : 'gray.400'}
                       mb={1}
-                      fontWeight="medium"
+                      fontWeight="semibold"
+                      letterSpacing="widest"
+                      textTransform="uppercase"
                     >
-                      <Icon as={CalendarIcon} mr={1} />
-                      CYCLE
+                      <Icon as={CalendarIcon} mr={1} />Cycle
                     </Text>
                     <VStack spacing={1} align="start">
                       <CustomLink
@@ -195,12 +188,14 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                   <Box flex={{ base: "1", lg: "1" }}>
                     <Text
                       display={{ base: "block", lg: "none" }}
-                      fontSize="xs"
-                      color="gray.500"
+                      fontSize="2xs"
+                      color={isDark ? 'gray.500' : 'gray.400'}
                       mb={1}
-                      fontWeight="medium"
+                      fontWeight="semibold"
+                      letterSpacing="widest"
+                      textTransform="uppercase"
                     >
-                      ROTATION
+                      Rotation
                     </Text>
                     {rotation ? (
                       <VStack spacing={1} align="start">
@@ -242,12 +237,14 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                   >
                     <Text
                       display={{ base: "block", lg: "none" }}
-                      fontSize="xs"
-                      color="gray.500"
+                      fontSize="2xs"
+                      color={isDark ? 'gray.500' : 'gray.400'}
                       mb={1}
-                      fontWeight="medium"
+                      fontWeight="semibold"
+                      letterSpacing="widest"
+                      textTransform="uppercase"
                     >
-                      SCORE
+                      Score
                     </Text>
                     <VStack spacing={1}>
                       <ScoreBadge score={score.score} fontSize="lg"/>
@@ -287,8 +284,9 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                           <IconButton
                             size="sm"
                             icon={<EditIcon />}
-                            colorScheme="blue"
+                            colorScheme="purple"
                             variant="ghost"
+                            borderRadius="full"
                             aria-label="Modifier le score"
                             onClick={() => onEditScore(score)}
                           />
@@ -299,6 +297,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                             icon={<DeleteIcon />}
                             colorScheme="red"
                             variant="ghost"
+                            borderRadius="full"
                             aria-label="Supprimer le score"
                             onClick={() => onDeleteScore(score)}
                           />
@@ -307,8 +306,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                     </Box>
                   )}
                 </Flex>
-              </CardBody>
-            </Card>
+            </Box>
           );
         })}
       </VStack>

@@ -1,7 +1,7 @@
 import {
     Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
     Text, Input, InputGroup, InputLeftElement, Spinner,
-    useColorModeValue, Badge, Flex, IconButton, useDisclosure, Tooltip
+    useColorMode, Badge, Flex, IconButton, useDisclosure, Tooltip
 } from "@chakra-ui/react";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -47,11 +47,12 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const { users, pagination, isLoading, mutate } = useUsers(apiOptions);
 
     // Hooks UI
-    const bgColor = useColorModeValue('white', 'gray.800');
-    const borderColor = useColorModeValue('gray.200', 'gray.600');
-    const hoverBg = useColorModeValue('gray.50', 'gray.700');
-    const badgeVariant = useColorModeValue('subtle', 'solid');
-    const filterBg = useColorModeValue('blue.50', 'blue.900');
+    const { colorMode } = useColorMode();
+    const isDark = colorMode === 'dark';
+    const bgColor = isDark ? 'gray.800' : 'white';
+    const borderColor = isDark ? 'whiteAlpha.100' : 'gray.200';
+    const hoverBg = isDark ? 'rgba(124,58,237,0.06)' : 'purple.50';
+    const badgeVariant = isDark ? 'solid' : 'subtle';
     const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure();
     const { isOpen: isBanModalOpen, onOpen: onBanModalOpen, onClose: onBanModalClose } = useDisclosure();
     const { isOpen: isUnbanModalOpen, onOpen: onUnbanModalOpen, onClose: onUnbanModalClose } = useDisclosure();
@@ -232,22 +233,31 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
 
             {/* Filtres actifs */}
             {(searchTerm || selectedGuildId || selectedRole) && (
-                <Box p={3} bg={filterBg} borderRadius="md">
+                <Box
+                    p={3}
+                    borderRadius="lg"
+                    bg={isDark ? 'rgba(124,58,237,0.08)' : 'purple.50'}
+                    border="1px solid"
+                    borderColor={isDark ? 'purple.700' : 'purple.200'}
+                >
                     <HStack spacing={2} flexWrap="wrap">
-                        <Text fontSize="sm" fontWeight="medium">Filtres actifs:</Text>
+                        <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
+                            textTransform="uppercase" color={isDark ? 'purple.400' : 'purple.600'}>
+                            Filtres actifs :
+                        </Text>
                         {searchTerm && (
-                            <Badge colorScheme="blue" variant={badgeVariant}>
-                                Recherche: {searchTerm}
+                            <Badge colorScheme="purple" variant={badgeVariant}>
+                                {searchTerm}
                             </Badge>
                         )}
                         {selectedGuildId && (
-                            <Badge colorScheme="green" variant={badgeVariant}>
-                                Guilde: {getGuildName(selectedGuildId)}
+                            <Badge colorScheme="purple" variant={badgeVariant}>
+                                {getGuildName(selectedGuildId)}
                             </Badge>
                         )}
                         {selectedRole && (
                             <Badge colorScheme={getRoleBadgeColor(selectedRole)} variant={badgeVariant}>
-                                Rôle: {selectedRole}
+                                {selectedRole}
                             </Badge>
                         )}
                     </HStack>
@@ -264,27 +274,34 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
             )}
 
             {/* Tableau des utilisateurs */}
-            <Box overflowX="auto" bg={bgColor} borderRadius="lg" borderWidth="1px" borderColor={borderColor}>
+            <Box
+                overflowX="auto"
+                bg={bgColor}
+                borderRadius="xl"
+                border="1px solid"
+                borderColor={borderColor}
+                boxShadow={isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.06)'}
+            >
                 {isLoading ? (
                     <Flex justify="center" p={8}>
-                        <Spinner size="lg" />
+                        <Spinner size="lg" color={isDark ? 'purple.400' : 'purple.500'} />
                     </Flex>
                 ) : (
                     <Table variant="simple">
                         <Thead>
-                            <Tr>
-                                <Th>Utilisateur</Th>
-                                <Th>Guilde</Th>
-                                <Th>Rôle</Th>
-                                {isAdminMode && <Th>BBS ID</Th>}
-                                {isAdminMode && <Th>BBS Name</Th>}
-                                {isAdminMode && <Th>Dernière connexion</Th>}
-                                {isAdminMode && <Th>Actions</Th>}
+                            <Tr bg={isDark ? 'rgba(255,255,255,0.03)' : 'gray.50'}>
+                                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>Utilisateur</Th>
+                                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>Guilde</Th>
+                                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>Rôle</Th>
+                                {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>BBS ID</Th>}
+                                {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>BBS Name</Th>}
+                                {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>Dernière connexion</Th>}
+                                {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>Actions</Th>}
                             </Tr>
                         </Thead>
                         <Tbody>
                             {users.map((user: IUser) => (
-                                <Tr key={user._id} _hover={{ bg: hoverBg }} opacity={user.is_banned ? 0.6 : 1}>
+                                <Tr key={user._id} _hover={{ bg: hoverBg }} opacity={user.is_banned ? 0.5 : 1} transition="background 0.15s">
                                     <Td>
                                         <HStack spacing={3}>
                                             <UserDisplay user={user} />
@@ -343,8 +360,9 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                                                         aria-label="Modifier l'utilisateur"
                                                         icon={<EditIcon />}
                                                         size="sm"
-                                                        colorScheme="blue"
-                                                        variant="outline"
+                                                        colorScheme="purple"
+                                                        variant="ghost"
+                                                        borderRadius="full"
                                                         onClick={() => handleEditUser(user)}
                                                     />
                                                 </Tooltip>
@@ -356,7 +374,8 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                                                                 icon={<CheckCircleIcon />}
                                                                 size="sm"
                                                                 colorScheme="green"
-                                                                variant="outline"
+                                                                variant="ghost"
+                                                                borderRadius="full"
                                                                 onClick={() => handleUnbanUser(user)}
                                                             />
                                                         </Tooltip>
@@ -367,7 +386,8 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                                                                 icon={<NotAllowedIcon />}
                                                                 size="sm"
                                                                 colorScheme="red"
-                                                                variant="outline"
+                                                                variant="ghost"
+                                                                borderRadius="full"
                                                                 onClick={() => handleBanUser(user)}
                                                             />
                                                         </Tooltip>
