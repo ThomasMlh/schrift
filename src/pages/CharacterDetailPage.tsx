@@ -370,10 +370,10 @@ const CharacterDetailPage = () => {
                           <HStack
                             key={index} spacing={1}
                             bg={isDark ? 'whiteAlpha.50' : 'purple.50'}
-                            px={2} py={1} borderRadius="full"
+                            px={3} py={1} borderRadius="full"
                           >
-                            <CategoryIcon category={category} size="14px" showLabel={false} />
-                            <Text fontSize="xs" color={isDark ? 'purple.300' : 'purple.700'}>
+                            <CategoryIcon category={category} size="16px" showLabel={false} />
+                            <Text fontSize="sm" color={isDark ? 'purple.300' : 'purple.700'}>
                               {t(`factions.${category}`, category)}
                             </Text>
                           </HStack>
@@ -393,10 +393,10 @@ const CharacterDetailPage = () => {
                           <HStack
                             key={index} spacing={1}
                             bg={isDark ? 'whiteAlpha.50' : 'orange.50'}
-                            px={2} py={1} borderRadius="full"
+                            px={3} py={1} borderRadius="full"
                           >
-                            <KillerIcon killer={killer} size="18px" showLabel={false} />
-                            <Text fontSize="xs" color={isDark ? 'orange.300' : 'orange.700'}>
+                            <KillerIcon killer={killer} size="20px" showLabel={false} />
+                            <Text fontSize="sm" color={isDark ? 'orange.300' : 'orange.700'}>
                               {t(`factions.${killer}`, killer)}
                             </Text>
                           </HStack>
@@ -414,7 +414,7 @@ const CharacterDetailPage = () => {
                       <Flex wrap="wrap" gap={2}>
                         {character.soul_traits.map((trait: string, index: number) => (
                           <Badge key={index} colorScheme="pink" variant="subtle"
-                            borderRadius="full" px={3} py={1}>
+                            borderRadius="full" px={3} py={1} fontSize="sm">
                             {trait}
                           </Badge>
                         ))}
@@ -435,8 +435,8 @@ const CharacterDetailPage = () => {
                         {character.stats.end && (
                           <HStack justify="space-between">
                             <HStack spacing={2}>
-                              <Image src={getStatIcon("end")!} alt={t("stats.end")} boxSize="18px" />
-                              <Text fontSize="sm" fontWeight="medium">{t("stats.end")}</Text>
+                              <Image src={getStatIcon("end")!} alt={t("stats.end")} boxSize="20px" />
+                              <Text fontSize="md" fontWeight="medium">{t("stats.end")}</Text>
                             </HStack>
                             <Badge colorScheme="green" variant="solid" borderRadius="full" px={3}>
                               {character.stats.end}
@@ -446,8 +446,8 @@ const CharacterDetailPage = () => {
                         {character.stats.atk && (
                           <HStack justify="space-between">
                             <HStack spacing={2}>
-                              <Image src={getStatIcon("atk")!} alt={t("stats.atk")} boxSize="18px" />
-                              <Text fontSize="sm" fontWeight="medium">{t("stats.atk")}</Text>
+                              <Image src={getStatIcon("atk")!} alt={t("stats.atk")} boxSize="20px" />
+                              <Text fontSize="md" fontWeight="medium">{t("stats.atk")}</Text>
                             </HStack>
                             <Badge colorScheme="red" variant="solid" borderRadius="full" px={3}>
                               {character.stats.atk}
@@ -457,8 +457,8 @@ const CharacterDetailPage = () => {
                         {character.stats.def && (
                           <HStack justify="space-between">
                             <HStack spacing={2}>
-                              <Image src={getStatIcon("def")!} alt={t("stats.def")} boxSize="18px" />
-                              <Text fontSize="sm" fontWeight="medium">{t("stats.def")}</Text>
+                              <Image src={getStatIcon("def")!} alt={t("stats.def")} boxSize="20px" />
+                              <Text fontSize="md" fontWeight="medium">{t("stats.def")}</Text>
                             </HStack>
                             <Badge colorScheme="blue" variant="solid" borderRadius="full" px={3}>
                               {character.stats.def}
@@ -468,8 +468,8 @@ const CharacterDetailPage = () => {
                         {character.stats.cct && (
                           <HStack justify="space-between">
                             <HStack spacing={2}>
-                              <Image src={getStatIcon("cct")!} alt={t("stats.cct")} boxSize="18px" />
-                              <Text fontSize="sm" fontWeight="medium">{t("stats.cct")}</Text>
+                              <Image src={getStatIcon("cct")!} alt={t("stats.cct")} boxSize="20px" />
+                              <Text fontSize="md" fontWeight="medium">{t("stats.cct")}</Text>
                             </HStack>
                             <Badge colorScheme="yellow" variant="solid" borderRadius="full" px={3}>
                               {character.stats.cct}
@@ -479,8 +479,8 @@ const CharacterDetailPage = () => {
                         {character.stats.pre && (
                           <HStack justify="space-between">
                             <HStack spacing={2}>
-                              <Image src={getStatIcon("pre")!} alt={t("stats.pre")} boxSize="18px" />
-                              <Text fontSize="sm" fontWeight="medium">{t("stats.pre")}</Text>
+                              <Image src={getStatIcon("pre")!} alt={t("stats.pre")} boxSize="20px" />
+                              <Text fontSize="md" fontWeight="medium">{t("stats.pre")}</Text>
                             </HStack>
                             <Badge colorScheme="purple" variant="solid" borderRadius="full" px={3}>
                               {character.stats.pre}
@@ -500,7 +500,7 @@ const CharacterDetailPage = () => {
                       <Flex wrap="wrap" gap={2}>
                         {character.immunities.map((immunity: string, index: number) => (
                           <Badge key={index} colorScheme="teal" variant="subtle"
-                            borderRadius="full" px={3} py={1}>
+                            borderRadius="full" px={3} py={1} fontSize="sm">
                             {immunity}
                           </Badge>
                         ))}
@@ -516,18 +516,18 @@ const CharacterDetailPage = () => {
                     <VStack spacing={2} align="stretch">
                       {character.created_at && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>
+                          <Text fontSize="md" color={isDark ? 'gray.400' : 'gray.500'}>
                             {t("pages.characterDetail.labelCreatedAt")}
                           </Text>
-                          <Text fontSize="sm" fontWeight="medium">{character.release_date}</Text>
+                          <Text fontSize="md" fontWeight="medium">{character.release_date}</Text>
                         </HStack>
                       )}
                       {character.resurrection_release && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>
+                          <Text fontSize="md" color={isDark ? 'gray.400' : 'gray.500'}>
                             {t("pages.characterDetail.labelResurrection")}
                           </Text>
-                          <Text fontSize="sm" fontWeight="medium">{character.resurrection_release}</Text>
+                          <Text fontSize="md" fontWeight="medium">{character.resurrection_release}</Text>
                         </HStack>
                       )}
                     </VStack>
