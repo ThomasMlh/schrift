@@ -101,6 +101,9 @@ const GuildesPage = () => {
                     bg="purple.500"
                     borderRadius="lg"
                     p={2}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
                   >
                     <Icon as={FiGrid} color="white" boxSize={5} />
                   </Box>
@@ -125,6 +128,9 @@ const GuildesPage = () => {
                     bgGradient="linear(to-br, violet.500, indigo.500)"
                     borderRadius="lg"
                     p={2}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
                   >
                     <Icon as={FiUsers} color="white" boxSize={5} />
                   </Box>

@@ -363,7 +363,7 @@ const CycleDetailPage = () => {
                             {t("pages.cycleDetail.fieldKiller")}
                           </Text>
                           <Text fontSize="md" fontWeight="bold" color="green.500">
-                            {rotation.killer}
+                            {t(`factions.${rotation.killer}`, rotation.killer)}
                           </Text>
                         </Box>
 
