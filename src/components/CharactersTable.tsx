@@ -1,7 +1,7 @@
 import {
   Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
   Text, Input, InputGroup, InputLeftElement, Spinner,
-  useColorModeValue, Badge, Flex, Avatar
+  useColorMode, Badge, Flex, Avatar
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -46,11 +46,12 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
   const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
   // Hooks UI
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-  const hoverBg = useColorModeValue('gray.50', 'gray.700');
-  const badgeVariant = useColorModeValue('subtle', 'solid');
-  const filterBg = useColorModeValue('blue.50', 'blue.900');
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === 'dark';
+  const bgColor = isDark ? 'gray.800' : 'white';
+  const borderColor = isDark ? 'whiteAlpha.100' : 'gray.200';
+  const hoverBg = isDark ? 'rgba(124,58,237,0.06)' : 'purple.50';
+  const badgeVariant = isDark ? 'solid' : 'subtle';
 
   // Fonction pour mettre à jour l'URL avec les filtres actuels
   const updateURLParams = (search = "", affinity = "", category = "", killer = "", attackType = "", limit = itemsPerPage, page = 1) => {
@@ -229,8 +230,17 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
 
       {/* Affichage des filtres actifs */}
       {(searchTerm || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType) && (
-        <Box p={3} bg={filterBg} borderRadius="md">
-          <Text fontSize="sm" fontWeight="semibold" mb={2}>{t("components.charactersTable.activeFilters")}:</Text>
+        <Box
+          p={3}
+          borderRadius="lg"
+          bg={isDark ? 'rgba(124,58,237,0.08)' : 'purple.50'}
+          border="1px solid"
+          borderColor={isDark ? 'purple.700' : 'purple.200'}
+      >
+          <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest" textTransform="uppercase"
+              color={isDark ? 'purple.400' : 'purple.600'} mb={2}>
+              {t("components.charactersTable.activeFilters")}
+          </Text>
           <HStack spacing={2} flexWrap="wrap">
             {searchTerm && (
               <Badge colorScheme="blue" variant={badgeVariant}>
@@ -283,7 +293,15 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
       )}
 
       {/* Tableau des personnages */}
-      <Box overflowX="auto" bg={bgColor} borderRadius="lg" borderWidth="1px" borderColor={borderColor}>
+      <Box
+          overflowX="auto"
+          bg={bgColor}
+          borderRadius="xl"
+          border="1px solid"
+          borderColor={borderColor}
+          boxShadow={isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.06)'}
+          overflow="hidden"
+      >
         {isLoading ? (
           <Flex justify="center" p={8}>
             <Spinner size="lg" />
@@ -291,17 +309,17 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
         ) : (
           <Table variant="simple">
             <Thead>
-              <Tr>
-                <Th>{t("components.charactersTable.colCharacter")}</Th>
-                <Th>{t("components.charactersTable.colAffinity")}</Th>
-                <Th>{t("components.charactersTable.colCategories")}</Th>
-                <Th>{t("components.charactersTable.colKillers")}</Th>
-                <Th>{t("components.charactersTable.colAttackType")}</Th>
+              <Tr bg={isDark ? 'rgba(255,255,255,0.03)' : 'gray.50'}>
+                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.charactersTable.colCharacter")}</Th>
+                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.charactersTable.colAffinity")}</Th>
+                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.charactersTable.colCategories")}</Th>
+                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.charactersTable.colKillers")}</Th>
+                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.charactersTable.colAttackType")}</Th>
               </Tr>
             </Thead>
             <Tbody>
               {characters.map((character) => (
-                <Tr key={character._id} _hover={{ bg: hoverBg }}>
+                <Tr key={character._id} _hover={{ bg: hoverBg }} transition="background 0.15s">
                   <Td>
                     <HStack spacing={3}>
                       {character._id ? (

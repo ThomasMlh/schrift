@@ -8,13 +8,14 @@ import {
   Avatar,
   Badge,
   Spinner,
-  useColorModeValue,
+  useColorMode,
   Button,
   Flex,
-  Divider,
   useToast,
-  Image
+  Image,
+  SimpleGrid
 } from "@chakra-ui/react";
+import type { ReactNode } from "react";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import { ArrowBackIcon } from "@chakra-ui/icons";
@@ -28,6 +29,37 @@ import { SEOHead } from "../components/SEOHead";
 import { useCharacter } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
 
+interface SectionCardProps {
+  label: string;
+  accentColor: string;
+  isDark: boolean;
+  children: ReactNode;
+}
+
+const SectionCard = ({ label, accentColor, isDark, children }: SectionCardProps) => (
+  <Box
+    p={4}
+    borderRadius="xl"
+    bg={isDark ? 'rgba(255,255,255,0.03)' : 'gray.50'}
+    border="1px solid"
+    borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
+    borderLeftWidth="3px"
+    borderLeftColor={accentColor}
+  >
+    <Text
+      fontSize="2xs"
+      fontWeight="semibold"
+      letterSpacing="widest"
+      textTransform="uppercase"
+      color={accentColor}
+      mb={3}
+    >
+      {label}
+    </Text>
+    {children}
+  </Box>
+);
+
 const CharacterDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -40,11 +72,8 @@ const CharacterDetailPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Hooks UI
-  const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const shadowColor = useColorModeValue("lg", "dark-lg");
-  const buttonColor = useColorModeValue("black", "white");
-  const textSecondary = useColorModeValue("gray.700", "gray.300");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === 'dark';
 
   useEffect(() => {
     if (fetchError) {
@@ -62,7 +91,7 @@ const CharacterDetailPage = () => {
     return (
       <Container maxW="container.lg" py={8}>
         <Flex justify="center" align="center" minH="200px">
-          <Spinner size="xl" />
+          <Spinner size="xl" color={isDark ? 'purple.400' : 'purple.500'} />
         </Flex>
       </Container>
     );
@@ -77,7 +106,9 @@ const CharacterDetailPage = () => {
           </Text>
           <Button
             leftIcon={<ArrowBackIcon />}
-            colorScheme="blue"
+            colorScheme="purple"
+            variant="outline"
+            borderRadius="full"
             onClick={() => navigate("/personnages")}
           >
             {t("pages.characterDetail.backToCharacters")}
@@ -180,522 +211,362 @@ const CharacterDetailPage = () => {
       />
       <Container maxW="container.lg" py={8}>
         <VStack spacing={6} align="stretch">
-          {/* Bouton de retour */}
+          {/* Back button */}
           <Button
             leftIcon={<ArrowBackIcon />}
-            variant="outline"
+            variant="ghost"
+            colorScheme="purple"
             alignSelf="flex-start"
+            borderRadius="full"
             onClick={() => navigate("/personnages")}
           >
             {t("pages.characterDetail.backToCharacters")}
           </Button>
 
-          {/* Carte principale du personnage */}
+          {/* Main card */}
           <Box
-            bg={bgColor}
-            borderRadius="lg"
-            borderWidth="1px"
-            borderColor={borderColor}
-            boxShadow={shadowColor}
-            p={8}
+            bg={isDark ? 'gray.800' : 'white'}
+            borderRadius="2xl"
+            border="1px solid"
+            borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
+            overflow="hidden"
+            boxShadow={isDark ? '0 4px 24px rgba(0,0,0,0.4)' : '0 4px 16px rgba(0,0,0,0.08)'}
           >
-            <VStack spacing={8} align="stretch">
-              {/* En-tête avec image et informations principales */}
-              <Flex
-                direction={{ base: "column", md: "row" }}
-                gap={8}
-                align={{ base: "center", md: "flex-start" }}
-              >
-                {/* Image du personnage */}
-                <VStack flexShrink={0}>
+            {/* Hero */}
+            <Box
+              position="relative"
+              overflow="hidden"
+              py={10}
+              px={8}
+              bg={isDark ? 'rgba(124,58,237,0.10)' : 'purple.50'}
+              borderBottom="1px solid"
+              borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
+            >
+              {/* Blurred artwork background */}
+              {character._id && (
+                <Box
+                  position="absolute"
+                  top={0} left={0} right={0} bottom={0}
+                  backgroundImage={`url(${bucketUrl}/characters/artwork/${character._id}.png)`}
+                  backgroundSize="cover"
+                  backgroundPosition="center top"
+                  opacity={isDark ? 0.06 : 0.08}
+                  sx={{ filter: 'blur(24px)' }}
+                />
+              )}
+              <VStack spacing={4} position="relative">
+                {/* Avatar with gradient ring */}
+                <Box
+                  p="3px"
+                  borderRadius="full"
+                  bg="linear-gradient(135deg, #7C3AED, #4F46E5)"
+                  boxShadow="0 0 30px rgba(124,58,237,0.35)"
+                >
                   {character._id ? (
                     <Avatar
                       size="2xl"
                       src={`${bucketUrl}/characters/thumb/${character._id}.png`}
                       name={character.name}
-                      borderWidth="2px"
-                      borderColor={borderColor}
+                      border="3px solid"
+                      borderColor={isDark ? 'gray.800' : 'white'}
                     />
                   ) : (
                     <Box
-                      w="128px"
-                      h="128px"
-                      bg="gray.200"
-                      _dark={{ bg: "gray.600" }}
+                      w="96px" h="96px"
+                      bg={isDark ? 'gray.700' : 'gray.200'}
                       borderRadius="full"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
+                      display="flex" alignItems="center" justifyContent="center"
                       fontSize="2xl"
-                      color={textSecondary}
-                      borderWidth="2px"
-                      borderColor={borderColor}
+                      border="3px solid"
+                      borderColor={isDark ? 'gray.800' : 'white'}
                     >
                       ?
                     </Box>
                   )}
-                  <Badge
-                    mt={2}
-                    colorScheme="purple"
-                    fontSize="xs"
-                    fontWeight="bold"
-                    px={3}
-                    py={1}
-                    borderRadius="full"
-                    textAlign="center"
-                    variant="solid"
-                    boxShadow="sm"
-                  >
-                    {character.rarity}
-                  </Badge>
-                </VStack>
+                </Box>
 
-                {/* Informations principales */}
-                <VStack
-                  spacing={4}
-                  align={{ base: "center", md: "flex-start" }}
-                  flex={1}
+                {/* Name */}
+                <Heading
+                  size="xl"
+                  textAlign="center"
+                  bgGradient={isDark ? "linear(to-r, #C4B5FD, #818CF8)" : "linear(to-r, #7C3AED, #4F46E5)"}
+                  bgClip="text"
                 >
-                  <Heading size="xl" textAlign={{ base: "center", md: "left" }}>
-                    {character.name}
-                  </Heading>
+                  {character.name}
+                </Heading>
 
-                  {/* Grille des informations principales */}
-                  <Box w="100%">
-                    <VStack
-                      spacing={4}
-                      align={{ base: "center", md: "stretch" }}
+                {/* Badges row */}
+                <Flex flexWrap="wrap" gap={2} justify="center" align="center">
+                  {character.rarity && (
+                    <Badge
+                      px={3} py={1} borderRadius="full"
+                      bg="linear-gradient(135deg, #7C3AED, #4F46E5)"
+                      color="white" fontWeight="bold" fontSize="xs"
                     >
-                      {/* Affinité */}
-                      {character.affinity && (
-                        <Flex
-                          direction={{ base: "column", md: "row" }}
-                          justify={{ base: "center", md: "flex-start" }}
-                          align="center"
-                          gap={{ base: 2, md: 3 }}
-                        >
-                          <Text
-                            fontWeight="semibold"
-                            color={textSecondary}
-                            fontSize={{ base: "sm", md: "md" }}
-                            minW={{ base: "auto", md: "100px" }}
-                          >
-                            {t("pages.characterDetail.labelAffinity")}
-                            {/* Ajout des deux points uniquement sur desktop */}
-                            <Text
-                              as="span"
-                              display={{ base: "none", md: "inline" }}
-                            >
-                              :
-                            </Text>
-                          </Text>
-                          <AffinityIcon
-                            affinity={character.affinity}
-                            size="24px"
-                            showLabel={true}
-                          />
-                        </Flex>
-                      )}
-
-                      {/* Type d'attaque */}
-                      {character.attack_type && (
-                        <Flex
-                          direction={{ base: "column", md: "row" }}
-                          justify={{ base: "center", md: "flex-start" }}
-                          align="center"
-                          gap={{ base: 2, md: 3 }}
-                        >
-                          <Text
-                            fontWeight="semibold"
-                            color={textSecondary}
-                            fontSize={{ base: "sm", md: "md" }}
-                            minW={{ base: "auto", md: "100px" }}
-                          >
-                            {t("pages.characterDetail.labelType")}
-                            <Text
-                              as="span"
-                              display={{ base: "none", md: "inline" }}
-                            >
-                              :
-                            </Text>
-                          </Text>
-                          <AttackTypeBadge
-                            attackType={character.attack_type}
-                            size="24px"
-                          />
-                        </Flex>
-                      )}
-
-                      {/* Nom de recherche */}
-                      {character.search_name && (
-                        <Flex
-                          direction={{ base: "column", md: "row" }}
-                          justify={{ base: "center", md: "flex-start" }}
-                          align="center"
-                          gap={{ base: 2, md: 3 }}
-                        >
-                          <Text
-                            fontWeight="semibold"
-                            color={textSecondary}
-                            fontSize={{ base: "sm", md: "md" }}
-                            minW={{ base: "auto", md: "100px" }}
-                          >
-                            {t("pages.characterDetail.labelSearch")}
-                            <Text
-                              as="span"
-                              display={{ base: "none", md: "inline" }}
-                            >
-                              :
-                            </Text>
-                          </Text>
-                          <Text
-                            fontFamily="mono"
-                            fontSize="sm"
-                            color={textSecondary}
-                            textAlign={{ base: "center", md: "left" }}
-                          >
-                            {character.search_name}
-                          </Text>
-                        </Flex>
-                      )}
-                    </VStack>
-                  </Box>
-                </VStack>
-              </Flex>
-
-              <Divider />
-
-              {/* Grille des caractéristiques détaillées */}
-              <Flex
-                direction={{ base: "column", lg: "row" }}
-                gap={8}
-                align="stretch"
-              >
-                {/* Colonne gauche */}
-                <VStack spacing={6} flex={1} align="stretch">
-                  {/* Catégories */}
-                  {character.categories && character.categories.length > 0 && (
-                    <Box>
-                      <Heading size="md" color="purple.500" mb={4}>
-                        {t("pages.characterDetail.headingCategories")} ({character.categories.length})
-                      </Heading>
-                      <VStack spacing={1} align="left">
-                        {character.categories.map((category, index) => (
-                          <Box key={index}>
-                            <HStack spacing={2}>
-                              <CategoryIcon
-                                category={category}
-                                size="20px"
-                                showLabel={false}
-                              />
-                              <Badge colorScheme="purple" variant="subtle">
-                                {t(`factions.${category}`, category)}
-                              </Badge>
-                            </HStack>
-                          </Box>
-                        ))}
-                      </VStack>
-                    </Box>
+                      {character.rarity}
+                    </Badge>
                   )}
+                  {character.affinity && (
+                    <AffinityIcon affinity={character.affinity} size="20px" showLabel={true} />
+                  )}
+                  {character.attack_type && (
+                    <AttackTypeBadge attackType={character.attack_type} size="20px" />
+                  )}
+                  {character.search_name && (
+                    <Badge px={3} py={1} borderRadius="full" variant="outline"
+                      colorScheme="gray" fontFamily="mono" fontSize="xs">
+                      {character.search_name}
+                    </Badge>
+                  )}
+                </Flex>
+              </VStack>
+            </Box>
 
-                  {/* Tueurs */}
-                  {character.killers && character.killers.length > 0 && (
-                    <Box>
-                      <Heading size="md" color="orange.500" mb={4}>
-                        {t("pages.characterDetail.headingKillers")} ({character.killers.length})
-                      </Heading>
-                      <VStack spacing={1} align="left">
-                        {character.killers.map((killer, index) => (
-                          <HStack key={index} spacing={2}>
-                            <KillerIcon
-                              killer={killer}
-                              size="24px"
-                              showLabel={false}
-                            />
-                            <Badge colorScheme="orange" variant="subtle">
-                              {t(`factions.${killer}`, killer)}
-                            </Badge>
+            {/* Body */}
+            <Box p={6}>
+              <Flex direction={{ base: "column", lg: "row" }} gap={5} align="stretch">
+                {/* Left column */}
+                <VStack spacing={4} flex={1} align="stretch">
+                  {character.categories && character.categories.length > 0 && (
+                    <SectionCard
+                      label={`${t("pages.characterDetail.headingCategories")} (${character.categories.length})`}
+                      accentColor="purple.400"
+                      isDark={isDark}
+                    >
+                      <Flex wrap="wrap" gap={2}>
+                        {character.categories.map((category, index) => (
+                          <HStack
+                            key={index} spacing={1}
+                            bg={isDark ? 'whiteAlpha.50' : 'purple.50'}
+                            px={2} py={1} borderRadius="full"
+                          >
+                            <CategoryIcon category={category} size="14px" showLabel={false} />
+                            <Text fontSize="xs" color={isDark ? 'purple.300' : 'purple.700'}>
+                              {t(`factions.${category}`, category)}
+                            </Text>
                           </HStack>
                         ))}
-                      </VStack>
-                    </Box>
+                      </Flex>
+                    </SectionCard>
                   )}
 
-                  {/* Traits d'âme */}
-                  {character.soul_traits &&
-                    character.soul_traits.length > 0 && (
-                      <Box>
-                        <Heading size="md" color="pink.500" mb={4}>
-                          {t("pages.characterDetail.headingSoulTraits")} ({character.soul_traits.length})
-                        </Heading>
-                        <VStack spacing={1} align="left">
-                          {character.soul_traits.map(
-                            (trait: string, index: number) => (
-                              <Badge
-                                key={index}
-                                colorScheme="pink"
-                                variant="subtle"
-                                fontSize="sm"
-                                px={3}
-                                py={1}
-                                width="fit-content"
-                              >
-                                {trait}
-                              </Badge>
-                            )
-                          )}
-                        </VStack>
-                      </Box>
-                    )}
+                  {character.killers && character.killers.length > 0 && (
+                    <SectionCard
+                      label={`${t("pages.characterDetail.headingKillers")} (${character.killers.length})`}
+                      accentColor="orange.400"
+                      isDark={isDark}
+                    >
+                      <Flex wrap="wrap" gap={2}>
+                        {character.killers.map((killer, index) => (
+                          <HStack
+                            key={index} spacing={1}
+                            bg={isDark ? 'whiteAlpha.50' : 'orange.50'}
+                            px={2} py={1} borderRadius="full"
+                          >
+                            <KillerIcon killer={killer} size="18px" showLabel={false} />
+                            <Text fontSize="xs" color={isDark ? 'orange.300' : 'orange.700'}>
+                              {t(`factions.${killer}`, killer)}
+                            </Text>
+                          </HStack>
+                        ))}
+                      </Flex>
+                    </SectionCard>
+                  )}
+
+                  {character.soul_traits && character.soul_traits.length > 0 && (
+                    <SectionCard
+                      label={`${t("pages.characterDetail.headingSoulTraits")} (${character.soul_traits.length})`}
+                      accentColor="pink.400"
+                      isDark={isDark}
+                    >
+                      <Flex wrap="wrap" gap={2}>
+                        {character.soul_traits.map((trait: string, index: number) => (
+                          <Badge key={index} colorScheme="pink" variant="subtle"
+                            borderRadius="full" px={3} py={1}>
+                            {trait}
+                          </Badge>
+                        ))}
+                      </Flex>
+                    </SectionCard>
+                  )}
                 </VStack>
 
-                {/* Colonne droite */}
-                <VStack spacing={6} flex={1} align="stretch">
-                  {/* Statistiques */}
+                {/* Right column */}
+                <VStack spacing={4} flex={1} align="stretch">
                   {character.stats && (
-                    <Box>
-                      <Heading size="md" color="blue.500" mb={4}>
-                        {t("pages.characterDetail.headingStats")}
-                      </Heading>
+                    <SectionCard
+                      label={t("pages.characterDetail.headingStats")}
+                      accentColor="blue.400"
+                      isDark={isDark}
+                    >
                       <VStack spacing={3} align="stretch">
                         {character.stats.end && (
                           <HStack justify="space-between">
-                            <HStack>
-                              <Image
-                                src={getStatIcon("end")!}
-                                alt={t("stats.end")}
-                                boxSize="20px"
-                              />
-                              <Text fontWeight="medium">{t("stats.end")}:</Text>
+                            <HStack spacing={2}>
+                              <Image src={getStatIcon("end")!} alt={t("stats.end")} boxSize="18px" />
+                              <Text fontSize="sm" fontWeight="medium">{t("stats.end")}</Text>
                             </HStack>
-                            <Badge colorScheme="green" variant="solid">
+                            <Badge colorScheme="green" variant="solid" borderRadius="full" px={3}>
                               {character.stats.end}
                             </Badge>
                           </HStack>
                         )}
                         {character.stats.atk && (
                           <HStack justify="space-between">
-                            <HStack>
-                              <Image
-                                src={getStatIcon("atk")!}
-                                alt={t("stats.atk")}
-                                boxSize="20px"
-                              />
-                              <Text fontWeight="medium">{t("stats.atk")}:</Text>
+                            <HStack spacing={2}>
+                              <Image src={getStatIcon("atk")!} alt={t("stats.atk")} boxSize="18px" />
+                              <Text fontSize="sm" fontWeight="medium">{t("stats.atk")}</Text>
                             </HStack>
-                            <Badge colorScheme="red" variant="solid">
+                            <Badge colorScheme="red" variant="solid" borderRadius="full" px={3}>
                               {character.stats.atk}
                             </Badge>
                           </HStack>
                         )}
                         {character.stats.def && (
                           <HStack justify="space-between">
-                            <HStack>
-                              <Image
-                                src={getStatIcon("def")!}
-                                alt={t("stats.def")}
-                                boxSize="20px"
-                              />
-                              <Text fontWeight="medium">{t("stats.def")}:</Text>
+                            <HStack spacing={2}>
+                              <Image src={getStatIcon("def")!} alt={t("stats.def")} boxSize="18px" />
+                              <Text fontSize="sm" fontWeight="medium">{t("stats.def")}</Text>
                             </HStack>
-                            <Badge colorScheme="blue" variant="solid">
+                            <Badge colorScheme="blue" variant="solid" borderRadius="full" px={3}>
                               {character.stats.def}
                             </Badge>
                           </HStack>
                         )}
                         {character.stats.cct && (
                           <HStack justify="space-between">
-                            <HStack>
-                              <Image
-                                src={getStatIcon("cct")!}
-                                alt={t("stats.cct")}
-                                boxSize="20px"
-                              />
-                              <Text fontWeight="medium">{t("stats.cct")}:</Text>
+                            <HStack spacing={2}>
+                              <Image src={getStatIcon("cct")!} alt={t("stats.cct")} boxSize="18px" />
+                              <Text fontSize="sm" fontWeight="medium">{t("stats.cct")}</Text>
                             </HStack>
-                            <Badge colorScheme="yellow" variant="solid">
+                            <Badge colorScheme="yellow" variant="solid" borderRadius="full" px={3}>
                               {character.stats.cct}
                             </Badge>
                           </HStack>
                         )}
                         {character.stats.pre && (
                           <HStack justify="space-between">
-                            <HStack>
-                              <Image
-                                src={getStatIcon("pre")!}
-                                alt={t("stats.pre")}
-                                boxSize="20px"
-                              />
-                              <Text fontWeight="medium">
-                                {t("stats.pre")}:
-                              </Text>
+                            <HStack spacing={2}>
+                              <Image src={getStatIcon("pre")!} alt={t("stats.pre")} boxSize="18px" />
+                              <Text fontSize="sm" fontWeight="medium">{t("stats.pre")}</Text>
                             </HStack>
-                            <Badge colorScheme="purple" variant="solid">
+                            <Badge colorScheme="purple" variant="solid" borderRadius="full" px={3}>
                               {character.stats.pre}
                             </Badge>
                           </HStack>
                         )}
                       </VStack>
-                    </Box>
+                    </SectionCard>
                   )}
 
-                  {/* Immunités */}
                   {character.immunities && character.immunities.length > 0 && (
-                    <Box>
-                      <Heading size="md" color="teal.500" mb={4}>
-                        {t("pages.characterDetail.headingImmunities")}
-                      </Heading>
+                    <SectionCard
+                      label={t("pages.characterDetail.headingImmunities")}
+                      accentColor="teal.400"
+                      isDark={isDark}
+                    >
                       <Flex wrap="wrap" gap={2}>
-                        {character.immunities.map(
-                          (immunity: string, index: number) => (
-                            <Badge
-                              key={index}
-                              colorScheme="teal"
-                              variant="outline"
-                            >
-                              {immunity}
-                            </Badge>
-                          )
-                        )}
+                        {character.immunities.map((immunity: string, index: number) => (
+                          <Badge key={index} colorScheme="teal" variant="subtle"
+                            borderRadius="full" px={3} py={1}>
+                            {immunity}
+                          </Badge>
+                        ))}
                       </Flex>
-                    </Box>
+                    </SectionCard>
                   )}
 
-                  {/* Autres informations */}
-                  <Box>
-                    <Heading size="md" color={textSecondary} mb={4}>
-                      {t("pages.characterDetail.headingInfo")}
-                    </Heading>
-                    <VStack spacing={3} align="stretch">
+                  <SectionCard
+                    label={t("pages.characterDetail.headingInfo")}
+                    accentColor="gray.400"
+                    isDark={isDark}
+                  >
+                    <VStack spacing={2} align="stretch">
                       {character.created_at && (
                         <HStack justify="space-between">
-                          <Text fontWeight="medium">{t("pages.characterDetail.labelCreatedAt")}:</Text>
-                          <Text fontSize="sm" color={textSecondary}>
-                            {character.release_date}
+                          <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>
+                            {t("pages.characterDetail.labelCreatedAt")}
                           </Text>
+                          <Text fontSize="sm" fontWeight="medium">{character.release_date}</Text>
                         </HStack>
                       )}
                       {character.resurrection_release && (
                         <HStack justify="space-between">
-                          <Text fontWeight="medium">{t("pages.characterDetail.labelResurrection")}:</Text>
-                          <Text fontSize="sm" color={textSecondary}>
-                            {character.resurrection_release}
+                          <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>
+                            {t("pages.characterDetail.labelResurrection")}
                           </Text>
+                          <Text fontSize="sm" fontWeight="medium">{character.resurrection_release}</Text>
                         </HStack>
                       )}
                     </VStack>
-                  </Box>
+                  </SectionCard>
                 </VStack>
               </Flex>
-
-              <>
-                <Divider />
-                <Box>
-                  <Heading size="md" color="cyan.500" mb={4}>
-                    {t("pages.characterDetail.headingVisuals")}
-                  </Heading>
-
-                  {/* Bannière */}
-                  {character.banner_id && (
-                    <Box mb={6}>
-                      <Text fontWeight="medium" mb={3}>
-                        {t("pages.characterDetail.labelBanner")}:
-                      </Text>
-                      <Box
-                        borderRadius="lg"
-                        overflow="hidden"
-                        borderWidth="1px"
-                        borderColor={borderColor}
-                        maxW="400px"
-                      >
-                        <Image
-                          src={`${bucketUrl}/banners/${character.banner_id}.png`}
-                          alt={`Bannière de ${character.name}`}
-                          w="100%"
-                          h="auto"
-                          objectFit="cover"
-                        />
-                      </Box>
-                    </Box>
-                  )}
-
-                  {/* Attack URL */}
-                  <Box mb={6}>
-                    <Text fontWeight="medium" mb={3}>
-                      {t("pages.characterDetail.labelSpecialAttack")}:
-                    </Text>
-                    <Box
-                      borderRadius="lg"
-                      overflow="hidden"
-                      borderWidth="1px"
-                      borderColor={borderColor}
-                      maxW="300px"
-                    >
-                      <Image
-                        src={`${bucketUrl}/characters/attack/${character._id}.png`}
-                        alt={`Attaque de ${character.name}`}
-                        w="100%"
-                        h="auto"
-                        objectFit="cover"
-                      />
-                    </Box>
-                  </Box>
-                  {/* Artwork */}
-                  <Box mb={6}>
-                    <Text fontWeight="medium" mb={3}>
-                      {t("pages.characterDetail.labelArtwork")}:
-                    </Text>
-                    <Box
-                      borderRadius="lg"
-                      overflow="hidden"
-                      borderWidth="1px"
-                      borderColor={borderColor}
-                      maxW="100%"
-                    >
-                      <Image
-                        src={`${bucketUrl}/characters/artwork/${character._id}.png`}
-                        alt={`Image de ${character.name}`}
-                        w="100%"
-                        h="auto"
-                        objectFit="cover"
-                      />
-                    </Box>
-                  </Box>
-                  <Box mb={6}>
-                    <Text fontWeight="medium" mb={3}>
-                      {t("pages.characterDetail.labelPhrase")}:
-                    </Text>
-                    <Box
-                      borderRadius="lg"
-                      overflow="hidden"
-                      borderWidth="1px"
-                      borderColor={borderColor}
-                      maxW="100%"
-                    >
-                      <Image
-                        src={`${bucketUrl}/characters/phrase/${character._id}.png`}
-                        alt={`Image de ${character.name}`}
-                        w="100%"
-                        h="auto"
-                        objectFit="cover"
-                      />
-                    </Box>
-                  </Box>
-                </Box>
-              </>
-            </VStack>
+            </Box>
           </Box>
-          <Flex justify="center" gap={4}>
+
+          {/* Visuals */}
+          <Box>
+            <Text
+              fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
+              textTransform="uppercase"
+              color={isDark ? 'purple.400' : 'purple.600'}
+              mb={4}
+            >
+              {t("pages.characterDetail.headingVisuals")}
+            </Text>
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+              {character.banner_id && (
+                <Box borderRadius="xl" overflow="hidden" border="1px solid"
+                  borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
+                  bg={isDark ? 'gray.800' : 'white'}>
+                  <Box px={4} pt={3} pb={2} borderBottom="1px solid"
+                    borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}>
+                    <Text fontSize="xs" fontWeight="semibold" letterSpacing="widest"
+                      textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
+                      {t("pages.characterDetail.labelBanner")}
+                    </Text>
+                  </Box>
+                  <Image
+                    src={`${bucketUrl}/banners/${character.banner_id}.png`}
+                    alt={`Bannière de ${character.name}`}
+                    w="100%" h="auto"
+                  />
+                </Box>
+              )}
+              {[
+                { path: "characters/attack", label: t("pages.characterDetail.labelSpecialAttack") },
+                { path: "characters/artwork", label: t("pages.characterDetail.labelArtwork") },
+                { path: "characters/phrase", label: t("pages.characterDetail.labelPhrase") },
+              ].map(({ path, label }) => (
+                <Box key={path} borderRadius="xl" overflow="hidden" border="1px solid"
+                  borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
+                  bg={isDark ? 'gray.800' : 'white'}>
+                  <Box px={4} pt={3} pb={2} borderBottom="1px solid"
+                    borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}>
+                    <Text fontSize="xs" fontWeight="semibold" letterSpacing="widest"
+                      textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
+                      {label}
+                    </Text>
+                  </Box>
+                  <Image
+                    src={`${bucketUrl}/${path}/${character._id}.png`}
+                    alt={label}
+                    w="100%" h="auto"
+                  />
+                </Box>
+              ))}
+            </SimpleGrid>
+          </Box>
+
+          {/* Bottom navigation */}
+          <Flex justify="center">
             <Button
               as={RouterLink}
               to="/personnages"
-              colorScheme={buttonColor}
+              colorScheme="purple"
               variant="outline"
-              border={"1px"}
-              _hover={{
-                color: buttonColor === "black" ? "white" : "gray.300",
-                bgColor: "gray.700"
-              }}
+              borderRadius="full"
             >
               {t("pages.characterDetail.viewAllCharacters")}
             </Button>
@@ -707,3 +578,4 @@ const CharacterDetailPage = () => {
 };
 
 export default CharacterDetailPage;
+
