@@ -1,12 +1,11 @@
-import { Container, Flex, Box, VStack } from "@chakra-ui/react";
+import { Container, VStack, Flex } from "@chakra-ui/react";
 import { CurrentInfoSection } from "../components/CurrentInfoSection";
 import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "../components/SEOHead";
 import { useTranslation } from "react-i18next";
-// const imageSchrift = new URL('../assets/logo.png', import.meta.url).href;
 
 const HomePage = () => {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -97,24 +96,19 @@ const HomePage = () => {
         url="https://bbs-schrift.fr"
         structuredData={structuredData}
       />
-      <Flex w="100%" align="center" justify="center" flexDir="column">
-        <HeroSection
-          title={t("pages.home.heroTitle")}
-          description={t("pages.home.heroDescription")}
-        />
 
-        <Container
-          maxW="container.xl"
-          px={{ base: 4, md: 6 }}
-          py={8}
-        >
-          <VStack spacing={8} w="100%">
-            <Box w="100%">
-              <CurrentInfoSection />
-            </Box>
-          </VStack>
-        </Container>
-      </Flex>
+      <HeroSection
+        title={t("pages.home.heroTitle")}
+        description={t("pages.home.heroDescription")}
+      />
+
+      <Container maxW="container.xl" px={{ base: 4, md: 6 }} py={10}>
+        <VStack spacing={10} w="100%">
+          <Flex w="100%" direction="column">
+            <CurrentInfoSection />
+          </Flex>
+        </VStack>
+      </Container>
     </>
   );
 }
