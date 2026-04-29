@@ -17,17 +17,18 @@ import {
     NumberIncrementStepper,
     NumberDecrementStepper,
     useToast,
-    Divider,
     Box,
-    Grid,
     Spinner,
     Center,
-    Alert,
-    AlertIcon,
-    useColorModeValue
+    useColorMode,
+    Badge,
+    Flex,
+    Stat,
+    StatLabel,
+    StatNumber,
 } from "@chakra-ui/react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import type { IUser, ICycle, IGuild, IScoreFormData, ICycleRotation } from "../../interfaces";
 import { useGuildMembers, useScores } from "@/hooks/useAPI";
 import { AttackTypeBadge } from "./AttackTypeBadge";
@@ -46,6 +47,76 @@ interface BulkScoreModalProps {
     userGuildId?: string;
 }
 
+interface ScoreRowProps {
+    member: IUser;
+    index: number;
+    score: number;
+    onChange: (userId: string, value: number) => void;
+    isDisabled: boolean;
+    isDark: boolean;
+    rowBg: string;
+    rowBorder: string;
+    rowActiveBg: string;
+    rowActiveBorder: string;
+    formatNumber: (v: string | number) => string;
+    parseNumber: (v: string) => string;
+}
+
+const ScoreRow = memo(({
+    member, index, score, onChange, isDisabled,
+    isDark, rowBg, rowBorder, rowActiveBg, rowActiveBorder,
+    formatNumber, parseNumber
+}: ScoreRowProps) => {
+    const hasScore = score > 0;
+    return (
+        <Flex
+            align="center"
+            gap={3}
+            px={3} py={2.5}
+            borderRadius="lg"
+            border="1px solid"
+            bg={hasScore ? rowActiveBg : rowBg}
+            borderColor={hasScore ? rowActiveBorder : rowBorder}
+            transition="background 0.1s, border-color 0.1s"
+        >
+            <Text
+                fontSize="2xs" fontWeight="bold" minW="18px" textAlign="right"
+                color={isDark ? 'whiteAlpha.300' : 'gray.300'}
+            >
+                {index + 1}
+            </Text>
+            <Box flex={1} minW={0}>
+                <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />
+            </Box>
+            <NumberInput
+                size="sm"
+                min={0}
+                max={9999999999}
+                step={10000000}
+                value={score}
+                onChange={(_, value) => onChange(member._id, value)}
+                isDisabled={isDisabled}
+                w="160px"
+                flexShrink={0}
+                format={formatNumber}
+                parse={parseNumber}
+            >
+                <NumberInputField
+                    borderRadius="lg"
+                    textAlign="right"
+                    sx={{ fontVariantNumeric: 'tabular-nums' }}
+                    borderColor={hasScore ? (isDark ? 'purple.600' : 'purple.300') : undefined}
+                    _focus={{ borderColor: 'purple.500', boxShadow: '0 0 0 1px var(--chakra-colors-purple-500)' }}
+                />
+                <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                </NumberInputStepper>
+            </NumberInput>
+        </Flex>
+    );
+});
+
 const BulkScoreModal = ({
     isOpen,
     onClose,
@@ -58,11 +129,20 @@ const BulkScoreModal = ({
     userGuildId
 }: BulkScoreModalProps) => {
     const toast = useToast();
-    
-    // Déplacer useColorModeValue au niveau du composant pour éviter les appels conditionnels
-    const guildBoxBg = useColorModeValue("blue.50", "blue.900");
-    const guildTextColor = useColorModeValue("blue.700", "blue.200");
-    const modalBg = useColorModeValue("white", "gray.800");
+    const { colorMode } = useColorMode();
+    const isDark = colorMode === 'dark';
+
+    const modalBg        = isDark ? '#1a1b2e' : 'white';
+    const sectionBg      = isDark ? 'rgba(255,255,255,0.04)' : 'gray.50';
+    const sectionBorder  = isDark ? 'whiteAlpha.100' : 'gray.200';
+    const rowBg          = isDark ? 'rgba(255,255,255,0.03)' : 'white';
+    const rowBorder      = isDark ? 'whiteAlpha.80' : 'gray.100';
+    const rowActiveBg    = isDark ? 'rgba(124,58,237,0.08)' : 'purple.50';
+    const rowActiveBorder = isDark ? 'purple.700' : 'purple.200';
+    const summaryBg      = isDark ? 'rgba(124,58,237,0.12)' : 'purple.50';
+    const summaryBorder  = isDark ? 'purple.700' : 'purple.200';
+    const guildBoxBg     = isDark ? 'blue.900' : 'blue.50';
+    const guildTextColor = isDark ? 'blue.200' : 'blue.700';
 
     const [selectedGuildId, setSelectedGuildId] = useState<string>(isGuildRestricted ? userGuildId || "" : "");
     const [selectedCycleId, setSelectedCycleId] = useState<string>("");
@@ -152,12 +232,12 @@ const BulkScoreModal = ({
     const selectedCycle = cycles.find(cycle => cycle._id === selectedCycleId);
     const selectedGuild = guilds.find(guild => guild._id === selectedGuildId);
 
-    const handleScoreChange = (userId: string, score: number) => {
+    const handleScoreChange = useCallback((userId: string, score: number) => {
         setScores(prev => ({
             ...prev,
             [userId]: score
         }));
-    };
+    }, []);
 
     const handleSubmit = () => {
         if (!selectedGuildId || !selectedCycleId || !selectedRotationId) {
@@ -208,214 +288,300 @@ const BulkScoreModal = ({
 
     const canSubmit = selectedGuildId && selectedCycleId && selectedRotationId && displayedMembers.length > 0;
 
-    // Fonction pour formater les nombres avec des virgules
-    const formatNumber = (value: string | number): string => {
+    const totalScore = useMemo(() => Object.values(scores).reduce((acc, v) => acc + (v || 0), 0), [scores]);
+    const scoredCount = useMemo(() => Object.values(scores).filter(v => v > 0).length, [scores]);
+
+    const formatNumber = useCallback((value: string | number): string => {
         const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
         return numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    };
+    }, []);
 
-    // Fonction pour parser les nombres formatés
-    const parseNumber = (value: string): string => {
+    const parseNumber = useCallback((value: string): string => {
         return value.replace(/,/g, '');
-    };
+    }, []);
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} size="6xl" scrollBehavior="inside">
-            <ModalOverlay />
-            <ModalContent minH="80dvh" bg={modalBg}>
-                <ModalHeader>Saisie groupée des scores</ModalHeader>
-                <ModalBody>
-                    <VStack spacing={6} align="stretch">
-                        {/* Sélection de la guilde */}
-                        {!isGuildRestricted && (
-                            <FormControl>
-                                <FormLabel>Guilde</FormLabel>
-                                <CustomSelect
-                                    placeholder="Sélectionnez une guilde"
-                                    value={selectedGuildId}
-                                    onChange={setSelectedGuildId}
-                                    isDisabled={isSubmitting}
-                                    options={guilds.map((guild: IGuild) => ({
-                                        value: guild._id,
-                                        label: guild.name
-                                    }))}
-                                    allowDeselect={false}
-                                    size="md"
-                                />
-                            </FormControl>
-                        )}
+        <Modal isOpen={isOpen} onClose={handleClose} size="4xl" scrollBehavior="inside">
+            <ModalOverlay bg="blackAlpha.700" />
+            <ModalContent bg={modalBg} borderRadius="2xl" overflow="hidden" border="1px solid" borderColor={sectionBorder}>
 
-                        {/* Affichage de la guilde pour les utilisateurs restreints */}
-                        {isGuildRestricted && selectedGuild && (
-                            <Box p={4} bg={guildBoxBg} borderRadius="md">
-                                <Text fontSize="sm" color={guildTextColor} mb={1}>
-                                    Guilde assignée
-                                </Text>
-                                <Text fontSize="lg" fontWeight="bold">
-                                    {selectedGuild.name}
-                                </Text>
-                            </Box>
-                        )}
+                {/* ── Header ── */}
+                <ModalHeader px={6} pt={6} pb={4} borderBottom="1px solid" borderColor={sectionBorder}>
+                    <HStack spacing={3} align="center">
+                        <Box
+                            w={9} h={9} borderRadius="xl"
+                            bgGradient="linear(135deg, #7C3AED, #4F46E5)"
+                            display="flex" alignItems="center" justifyContent="center"
+                            fontSize="lg" flexShrink={0}
+                        >
+                            📊
+                        </Box>
+                        <Box>
+                            <Text
+                                fontSize="lg" fontWeight="bold"
+                                sx={{
+                                    background: isDark
+                                        ? 'linear-gradient(135deg, #C4B5FD, #818CF8)'
+                                        : 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    backgroundClip: 'text',
+                                }}
+                            >
+                                Saisie groupée des scores
+                            </Text>
+                            <Text fontSize="xs" color={isDark ? 'gray.400' : 'gray.500'} fontWeight="normal">
+                                Saisissez les scores de tous les membres en une seule opération
+                            </Text>
+                        </Box>
+                    </HStack>
+                </ModalHeader>
 
-                        {/* Sélection du cycle */}
-                        <FormControl>
-                            <FormLabel>Cycle</FormLabel>
-                            <CycleSelect
-                                cycles={cycles}
-                                value={selectedCycleId}
-                                onChange={setSelectedCycleId}
-                                placeholder="Sélectionnez un cycle"
-                                isDisabled={isSubmitting}
-                                allowDeselect={true}
-                                showActiveBadge={true}
-                                size="md"
-                            />
-                        </FormControl>
+                <ModalBody px={6} py={5}>
+                    <VStack spacing={5} align="stretch">
 
-                        {/* Sélection de la rotation */}
-                        {selectedCycle && (
-                            <FormControl>
-                                <FormLabel>Rotation</FormLabel>
-                                <CustomSelect
-                                    placeholder="Sélectionnez une rotation"
-                                    value={selectedRotationId}
-                                    onChange={setSelectedRotationId}
-                                    isDisabled={isSubmitting}
-                                    size="md"
-                                    options={selectedCycle.rotations.map((rotation: ICycleRotation) => ({
-                                        value: rotation.rotation_id,
-                                        label: `Rotation #${rotation.position} - ${rotation.killer} ${rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : "🟠 Mêlée"}`,
-                                        content: (
-                                            <VStack align="start" spacing={1} w="100%">
-                                                <HStack spacing={2} w="100%">
-                                                    <Text fontWeight="medium">
-                                                        Rotation #{rotation.position} - {rotation.killer}
-                                                    </Text>
-                                                    <AttackTypeBadge attackType={rotation.attack} />
-                                                </HStack>
-                                                <Text fontSize="sm" color="gray.500">
-                                                    {rotation.start_date} - {rotation.end_date} • {rotation.period}
-                                                </Text>
-                                            </VStack>
-                                        )
-                                    }))}
-                                    renderSelected={(option) => {
-                                        const rotation = selectedCycle.rotations.find((r: ICycleRotation) => r._id === option.value);
-                                        const index = selectedCycle.rotations.findIndex((r: ICycleRotation) => r._id === option.value);
-                                        return rotation ? (
-                                            <HStack spacing={2} w="100%">
-                                                <Text>Rotation #{index + 1} - {rotation.killer}</Text>
-                                                <AttackTypeBadge attackType={rotation.attack} />
-                                                <Text>({rotation.start_date} - {rotation.end_date})</Text>
-                                            </HStack>
-                                        ) : <Text>{option.label}</Text>;
-                                    }}
-                                    allowDeselect={false}
-                                />
-                            </FormControl>
-                        )}                        {/* Informations de la sélection */}
+                        {/* ── Config card ── */}
+                        <Box
+                            p={4} borderRadius="xl" bg={sectionBg}
+                            border="1px solid" borderColor={sectionBorder}
+                        >
+                            <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
+                                textTransform="uppercase" color={isDark ? 'purple.400' : 'purple.600'} mb={3}>
+                                Configuration
+                            </Text>
+                            <VStack spacing={3} align="stretch">
+                                {/* Guilde */}
+                                {!isGuildRestricted ? (
+                                    <FormControl>
+                                        <FormLabel fontSize="xs" color={isDark ? 'gray.400' : 'gray.500'} mb={1}>Guilde</FormLabel>
+                                        <CustomSelect
+                                            placeholder="Sélectionnez une guilde"
+                                            value={selectedGuildId}
+                                            onChange={setSelectedGuildId}
+                                            isDisabled={isSubmitting}
+                                            options={guilds.map((guild: IGuild) => ({
+                                                value: guild._id,
+                                                label: guild.name
+                                            }))}
+                                            allowDeselect={false}
+                                            size="md"
+                                        />
+                                    </FormControl>
+                                ) : selectedGuild && (
+                                    <Box px={3} py={2} bg={guildBoxBg} borderRadius="lg">
+                                        <Text fontSize="2xs" color={guildTextColor} fontWeight="semibold" letterSpacing="wide" textTransform="uppercase" mb={0.5}>
+                                            Guilde assignée
+                                        </Text>
+                                        <Text fontWeight="bold">{selectedGuild.name}</Text>
+                                    </Box>
+                                )}
+
+                                {/* Cycle */}
+                                <FormControl>
+                                    <FormLabel fontSize="xs" color={isDark ? 'gray.400' : 'gray.500'} mb={1}>Cycle</FormLabel>
+                                    <CycleSelect
+                                        cycles={cycles}
+                                        value={selectedCycleId}
+                                        onChange={setSelectedCycleId}
+                                        placeholder="Sélectionnez un cycle"
+                                        isDisabled={isSubmitting}
+                                        allowDeselect={true}
+                                        showActiveBadge={true}
+                                        size="md"
+                                    />
+                                </FormControl>
+
+                                {/* Rotation */}
+                                {selectedCycle && (
+                                    <FormControl>
+                                        <FormLabel fontSize="xs" color={isDark ? 'gray.400' : 'gray.500'} mb={1}>Rotation</FormLabel>
+                                        <CustomSelect
+                                            placeholder="Sélectionnez une rotation"
+                                            value={selectedRotationId}
+                                            onChange={setSelectedRotationId}
+                                            isDisabled={isSubmitting}
+                                            size="md"
+                                            options={selectedCycle.rotations.map((rotation: ICycleRotation) => ({
+                                                value: rotation.rotation_id,
+                                                label: `Rotation #${rotation.position} - ${rotation.killer} ${rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : "🟠 Mêlée"}`,
+                                                content: (
+                                                    <VStack align="start" spacing={1} w="100%">
+                                                        <HStack spacing={2} w="100%">
+                                                            <Text fontWeight="medium">
+                                                                Rotation #{rotation.position} - {rotation.killer}
+                                                            </Text>
+                                                            <AttackTypeBadge attackType={rotation.attack} />
+                                                        </HStack>
+                                                        <Text fontSize="sm" color="gray.500">
+                                                            {rotation.start_date} - {rotation.end_date} • {rotation.period}
+                                                        </Text>
+                                                    </VStack>
+                                                )
+                                            }))}
+                                            renderSelected={(option) => {
+                                                const rotation = selectedCycle.rotations.find((r: ICycleRotation) => r._id === option.value);
+                                                const index = selectedCycle.rotations.findIndex((r: ICycleRotation) => r._id === option.value);
+                                                return rotation ? (
+                                                    <HStack spacing={2} w="100%">
+                                                        <Text>Rotation #{index + 1} - {rotation.killer}</Text>
+                                                        <AttackTypeBadge attackType={rotation.attack} />
+                                                        <Text>({rotation.start_date} - {rotation.end_date})</Text>
+                                                    </HStack>
+                                                ) : <Text>{option.label}</Text>;
+                                            }}
+                                            allowDeselect={false}
+                                        />
+                                    </FormControl>
+                                )}
+                            </VStack>
+                        </Box>
+
+                        {/* ── Summary strip ── */}
                         {selectedGuild && selectedCycle && selectedRotationId && (() => {
                             const rotation = selectedCycle.rotations.find((r: ICycleRotation) => r.rotation_id === selectedRotationId);
                             return (
-                                <Alert status="info">
-                                    <AlertIcon />
-                                    <VStack align="start" spacing={1}>
-                                        <Text><strong>Guilde:</strong> {selectedGuild.name}</Text>
-                                        <Text><strong>Cycle:</strong> {selectedCycle.name} {selectedCycle.year ? `(${selectedCycle.year})` : ''}</Text>
+                                <Box
+                                    px={4} py={3} borderRadius="xl"
+                                    bg={summaryBg} border="1px solid" borderColor={summaryBorder}
+                                >
+                                    <HStack spacing={4} flexWrap="wrap">
+                                        <HStack spacing={1.5}>
+                                            <Text fontSize="xs" color={isDark ? 'purple.300' : 'purple.500'} fontWeight="semibold">🏰</Text>
+                                            <Text fontSize="xs" fontWeight="semibold">{selectedGuild.name}</Text>
+                                        </HStack>
+                                        <Text fontSize="xs" color={isDark ? 'whiteAlpha.400' : 'gray.300'}>•</Text>
+                                        <HStack spacing={1.5}>
+                                            <Text fontSize="xs" color={isDark ? 'purple.300' : 'purple.500'} fontWeight="semibold">🔄</Text>
+                                            <Text fontSize="xs" fontWeight="semibold">{selectedCycle.name} {selectedCycle.year ? `(${selectedCycle.year})` : ''}</Text>
+                                        </HStack>
                                         {rotation && (
-                                            <Text>
-                                                <strong>Rotation:</strong> #{rotation.position} - {rotation.killer} {rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : "🟠"} ({rotation.start_date} → {rotation.end_date})
-                                            </Text>
+                                            <>
+                                                <Text fontSize="xs" color={isDark ? 'whiteAlpha.400' : 'gray.300'}>•</Text>
+                                                <HStack spacing={1.5}>
+                                                    <Text fontSize="xs" fontWeight="semibold">
+                                                        Rot. #{rotation.position} — {rotation.killer}
+                                                    </Text>
+                                                    <AttackTypeBadge attackType={rotation.attack} />
+                                                </HStack>
+                                            </>
                                         )}
-                                    </VStack>
-                                </Alert>
+                                        {hasExistingScores && (
+                                            <Badge colorScheme="green" borderRadius="full" fontSize="2xs" ml="auto">
+                                                ✓ Scores existants
+                                            </Badge>
+                                        )}
+                                    </HStack>
+                                </Box>
                             );
                         })()}
 
-                        <Divider />
-
-                        {/* Liste des membres et saisie des scores */}
-                        {isLoading ? (
-                            <Center p={8}>
-                                <VStack>
-                                    <Spinner size="lg" />
-                                    <Text>Chargement des membres...</Text>
-                                </VStack>
-                            </Center>
-                        ) : isLoadingScores ? (
-                            <Center p={8}>
-                                <VStack>
-                                    <Spinner size="lg" />
-                                    <Text>Chargement des scores existants...</Text>
+                        {/* ── Score rows ── */}
+                        {isLoading || isLoadingScores ? (
+                            <Center p={10}>
+                                <VStack spacing={3}>
+                                    <Spinner size="lg" color="purple.400" />
+                                    <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>
+                                        {isLoading ? 'Chargement des membres…' : 'Chargement des scores existants…'}
+                                    </Text>
                                 </VStack>
                             </Center>
                         ) : displayedMembers.length > 0 ? (
                             <Box>
-                                <HStack justify="space-between" align="center" mb={4}>
-                                    <Text fontSize="lg" fontWeight="bold">
-                                        Saisie des scores ({displayedMembers.length} membres)
+                                <HStack justify="space-between" align="center" mb={3}>
+                                    <Text fontSize="xs" fontWeight="semibold" letterSpacing="widest"
+                                        textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
+                                        Membres — {displayedMembers.length}
                                     </Text>
-                                    {hasExistingScores && (
-                                        <Text fontSize="sm" color="green.500" fontStyle="italic">
-                                            ✓ Scores existants chargés automatiquement
-                                        </Text>
-                                    )}
+                                    <Text fontSize="xs" color={isDark ? 'purple.300' : 'purple.600'}>
+                                        {scoredCount} / {displayedMembers.length} saisis
+                                    </Text>
                                 </HStack>
-                                <Grid templateColumns="repeat(auto-fill, minmax(240px, 1fr))" gap={2}>
-                                    {displayedMembers.map((member: IUser) => (
-                                        <VStack 
+                                <VStack spacing={1.5} align="stretch">
+                                    {displayedMembers.map((member: IUser, idx: number) => (
+                                        <ScoreRow
                                             key={member._id}
-                                            p={2}
-                                            borderWidth="1px"
-                                            borderRadius="md"
-                                            spacing={2}
-                                        >
-                                            <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />
-                                            <NumberInput
-                                                size="sm"
-                                                min={0}
-                                                max={9999999999}
-                                                step={10000000}
-                                                value={scores[member._id] || 0}
-                                                onChange={(_, value) => handleScoreChange(member._id, value)}
-                                                isDisabled={isSubmitting || isLoadingScores}
-                                                flex={1}
-                                                format={formatNumber}
-                                                parse={parseNumber}
-                                            >
-                                                <NumberInputField />
-                                                <NumberInputStepper>
-                                                    <NumberIncrementStepper />
-                                                    <NumberDecrementStepper />
-                                                </NumberInputStepper>
-                                            </NumberInput>
-                                        </VStack>
+                                            member={member}
+                                            index={idx}
+                                            score={scores[member._id] || 0}
+                                            onChange={handleScoreChange}
+                                            isDisabled={isSubmitting || isLoadingScores}
+                                            isDark={isDark}
+                                            rowBg={rowBg}
+                                            rowBorder={rowBorder}
+                                            rowActiveBg={rowActiveBg}
+                                            rowActiveBorder={rowActiveBorder}
+                                            formatNumber={formatNumber}
+                                            parseNumber={parseNumber}
+                                        />
                                     ))}
-                                </Grid>
+                                </VStack>
                             </Box>
                         ) : selectedGuildId ? (
                             <Center p={8}>
-                                <Text color="gray.500">Aucun membre trouvé pour cette guilde</Text>
+                                <Text color="gray.500" fontSize="sm">Aucun membre trouvé pour cette guilde</Text>
                             </Center>
                         ) : null}
+
                     </VStack>
                 </ModalBody>
 
-                <ModalFooter>
-                    <HStack spacing={3}>
-                        <Button variant="ghost" onClick={handleClose} isDisabled={isSubmitting}>
-                            Annuler
-                        </Button>
-                        <Button
-                            colorScheme="blue"
-                            onClick={handleSubmit}
-                            isLoading={isSubmitting}
-                            loadingText="Envoi en cours..."
-                            isDisabled={!canSubmit}
-                        >
-                            Enregistrer les scores ({displayedMembers.length})
-                        </Button>
-                    </HStack>
+                {/* ── Footer ── */}
+                <ModalFooter
+                    px={6} py={4}
+                    borderTop="1px solid" borderColor={sectionBorder}
+                    bg={sectionBg}
+                >
+                    <Flex w="100%" align="center" justify="space-between" gap={4} wrap="wrap">
+                        {/* Live total */}
+                        {displayedMembers.length > 0 ? (
+                            <Stat flex="unset">
+                                <StatLabel fontSize="2xs" letterSpacing="widest" textTransform="uppercase"
+                                    color={isDark ? 'gray.400' : 'gray.500'}>
+                                    Total cumulé
+                                </StatLabel>
+                                <StatNumber
+                                    fontSize="lg"
+                                    sx={{
+                                        background: isDark
+                                            ? 'linear-gradient(135deg, #C4B5FD, #818CF8)'
+                                            : 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent',
+                                        backgroundClip: 'text',
+                                    }}
+                                >
+                                    {totalScore.toLocaleString()}
+                                </StatNumber>
+                            </Stat>
+                        ) : <Box />}
+
+                        <HStack spacing={2}>
+                            <Button
+                                variant="ghost" size="sm" borderRadius="full"
+                                onClick={handleClose} isDisabled={isSubmitting}
+                            >
+                                Annuler
+                            </Button>
+                            <Button
+                                size="sm"
+                                borderRadius="full"
+                                sx={{
+                                    background: canSubmit
+                                        ? 'linear-gradient(135deg, #7C3AED, #4F46E5)'
+                                        : undefined,
+                                    color: canSubmit ? 'white' : undefined,
+                                    _hover: canSubmit ? { background: 'linear-gradient(135deg, #6D28D9, #4338CA)' } : undefined,
+                                }}
+                                colorScheme={canSubmit ? undefined : "gray"}
+                                onClick={handleSubmit}
+                                isLoading={isSubmitting}
+                                loadingText="Envoi…"
+                                isDisabled={!canSubmit}
+                            >
+                                Enregistrer {displayedMembers.length > 0 ? `(${displayedMembers.length})` : ''}
+                            </Button>
+                        </HStack>
+                    </Flex>
                 </ModalFooter>
             </ModalContent>
         </Modal>

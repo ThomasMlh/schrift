@@ -119,7 +119,7 @@ const ScoresSection = () => {
     <Container maxW="container.xl" py={8}>
       <VStack spacing={6} align="stretch">
         {/* En-tête */}
-        <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
+        <Flex justify="space-between" align={{ base: "flex-start", md: "center" }} direction={{ base: "column", md: "row" }} gap={4}>
           <Box>
             <Heading size="lg" mb={1}>
               {t("components.scoresSection.heading")}
@@ -131,12 +131,13 @@ const ScoresSection = () => {
             )}
           </Box>
           {(isAdmin || isGuildManager) && (
-            <HStack spacing={3}>
+            <Flex direction={{ base: "column", md: "row" }} gap={2} w={{ base: "100%", md: "auto" }}>
               <Button
                 colorScheme="blue"
                 onClick={() => scoreManagement.setIsOCRModalOpen(true)}
                 isDisabled={!currentUser}
-                size="lg"
+                size={{ base: "md", md: "lg" }}
+                w={{ base: "100%", md: "auto" }}
               >
                 {t("components.scoresSection.buttonAutoEntry")}
               </Button>
@@ -144,7 +145,8 @@ const ScoresSection = () => {
                 colorScheme="green"
                 onClick={() => scoreManagement.setIsBulkModalOpen(true)}
                 isDisabled={!currentUser}
-                size="lg"
+                size={{ base: "md", md: "lg" }}
+                w={{ base: "100%", md: "auto" }}
               >
                 {t("components.scoresSection.buttonManualEntry")}
               </Button>
@@ -157,12 +159,13 @@ const ScoresSection = () => {
                     aria-label="OCR Debug"
                     icon={<FiTool />}
                     variant="outline"
-                    size="lg"
+                    size={{ base: "md", md: "lg" }}
                     onClick={() => navigate("/ocr-debug")}
+                    w={{ base: "100%", md: "auto" }}
                   />
                 </Tooltip>
               )}
-            </HStack>
+            </Flex>
           )}
         </Flex>
 
