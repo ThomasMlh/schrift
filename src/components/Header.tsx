@@ -246,16 +246,16 @@ export const Header = () => {
           as={Link}
           to="/"
           fontWeight="extrabold"
-          fontSize="xl"
+          fontSize={{ xl: "md", "2xl": "xl" }}
           letterSpacing="tight"
           bgGradient={isDark ? "linear(to-r, #C4B5FD, #818CF8)" : "linear(to-r, #7C3AED, #4F46E5)"}
           bgClip="text"
           flexShrink={0}
-          mr={4}
+          mr={{ xl: 2, "2xl": 4 }}
         >
           Schrift
         </Box>
-        <Flex gap={1} align="center" flex={1}>
+        <Flex gap={{ xl: 0, "2xl": 1 }} align="center" flex={1} minW={0}>
           {menuItems.map((item) => {
             if (item.adminOrGuildManagerOnly && !isAdmin && !isGuildManager) return null;
             const active = isActive(item.path);
@@ -266,9 +266,9 @@ export const Header = () => {
                 to={item.path}
                 variant="ghost"
                 onClick={onClose}
-                px={3}
+                px={{ xl: 2, "2xl": 3 }}
                 py={2}
-                fontSize="sm"
+                fontSize={{ xl: "xs", "2xl": "sm" }}
                 fontWeight={active ? "semibold" : "medium"}
                 borderRadius="full"
                 color={active ? (isDark ? 'purple.300' : 'purple.600') : undefined}
@@ -278,12 +278,12 @@ export const Header = () => {
                   color: isDark ? 'purple.300' : 'purple.600',
                 }}
               >
-                <Text as="span" mr={1.5}>{item.icon}</Text>{item.name}
+                <span style={{ marginRight: '4px', color: 'initial', display: 'inline-block' }}>{item.icon}</span>{item.name}
               </Button>
             );
           })}
         </Flex>
-        <Flex gap={2} align="center" flexShrink={0}>
+        <Flex gap={1} align="center" flexShrink={0}>
           {renderAuthButton()}
           <LanguageSwitcher />
           <ColorModeSwitcher />
@@ -375,7 +375,7 @@ export const Header = () => {
                       color: isDark ? 'purple.300' : 'purple.600',
                     }}
                   >
-                    <Text as="span" mr={2}>{item.icon}</Text>{item.name}
+                    <span style={{ marginRight: '8px', color: 'initial' }}>{item.icon}</span>{item.name}
                   </Button>
                 );
               })}

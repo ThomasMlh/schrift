@@ -56,7 +56,7 @@ export const HeroSection = ({
       />
 
       <Container maxW="container.xl" position="relative" zIndex={1}>
-        <VStack spacing={4} textAlign="center">
+        <VStack spacing={4} textAlign="center" align="center">
           {badge && (
             <Badge
               px={4} py={1.5} borderRadius="full"
@@ -71,11 +71,27 @@ export const HeroSection = ({
           <Heading
             as="h1"
             size={{ base: "xl", md: "2xl" }}
-            bgGradient={isDark ? "linear(to-r, #C4B5FD, #818CF8)" : "linear(to-r, #7C3AED, #4F46E5)"}
-            bgClip="text"
             fontWeight="extrabold"
+            pb={2}
           >
-            {title}
+            {(() => {
+              const emojiMatch = title.match(/^([\p{Emoji_Presentation}\p{Extended_Pictographic}\s]+)/u);
+              const emoji = emojiMatch ? emojiMatch[0] : '';
+              const text = emoji ? title.slice(emoji.length) : title;
+              return (
+                <>
+                  {emoji && <span style={{ color: 'initial' }}>{emoji}</span>}
+                  <span style={{
+                    background: isDark
+                      ? 'linear-gradient(to right, #C4B5FD, #818CF8)'
+                      : 'linear-gradient(to right, #7C3AED, #4F46E5)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}>{text}</span>
+                </>
+              );
+            })()}
           </Heading>
 
           {description && (
