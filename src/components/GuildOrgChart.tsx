@@ -5,6 +5,7 @@ import {
   Flex,
   useColorModeValue
 } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import type { IUser } from "../interfaces";
 import { UserDisplay } from "./ui/UserDisplay";
 
@@ -38,6 +39,7 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
   const cardBorder = useColorModeValue("gray.200", "whiteAlpha.100");
   const connectorColor = useColorModeValue("gray.300", "whiteAlpha.200");
   const subtleText = useColorModeValue("gray.500", "whiteAlpha.600");
+  const { t } = useTranslation();
 
   const chef = members.find((m) => m.role === "chef");
   const sousChefs = members.filter((m) => m.role === "sous-chef");
@@ -206,7 +208,7 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
           color={subtleText}
           mb={2}
         >
-          Membres · {regularMembers.length}
+          {t("pages.guilds.orgSectionMembers")} · {regularMembers.length}
         </Text>
       )}
 
@@ -221,7 +223,7 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
 
       {members.length === 0 && (
         <Text color="gray.500" fontSize="lg">
-          Aucun membre dans cette guilde
+          {t("pages.guilds.orgNoMembers")}
         </Text>
       )}
     </Flex>

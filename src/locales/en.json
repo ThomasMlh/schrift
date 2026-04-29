@@ -189,9 +189,16 @@
       "seoTitle": "Guilds - Schrift BBS",
       "seoDescription": "Discover the organisation of Schrift guilds A, B, C and D for Bleach Brave Souls. Browse the hierarchy and members of each guild.",
       "heading": "Ṣčhrīft Guilds",
+      "heroTitle": "Ṣčhrīft Guilds",
+      "heroDescription": "Explore the hierarchy and members of each guild",
+      "heroBadge": "Guilds",
       "memberSingular": "player",
       "memberPlural": "players",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "statsGuilds": "Guilds",
+      "statsMembers": "Total Members",
+      "orgNoMembers": "No members in this guild",
+      "orgSectionMembers": "Members"
     },
     "user": {
       "loadingProfile": "Loading profile...",
