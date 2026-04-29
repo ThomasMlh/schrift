@@ -1,6 +1,6 @@
 import {
   Box, Button, VStack, FormControl, FormLabel, Input, Stack, Text,
-  useBreakpointValue, useColorModeValue, useToast
+  useBreakpointValue, useColorMode, useToast
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { CustomSelect } from "./ui/CustomSelect";
@@ -41,17 +41,20 @@ const MobileFormWrapper: React.FC<MobileFormWrapperProps> = ({
   const isOpen = openForm === formName;
 
   return (
-    <VStack spacing={4} align="stretch" w="100%">
+    <VStack spacing={3} align="stretch" w="100%">
       <Button
         colorScheme={colorScheme}
         onClick={() => toggleForm(formName)}
-        size="lg"
-        variant={isOpen ? "solid" : "outline"}
+        size="md"
+        variant={isOpen ? "solid" : "ghost"}
+        borderRadius="full"
+        justifyContent="space-between"
+        rightIcon={<Text as="span" fontSize="xs">{isOpen ? "▲" : "▼"}</Text>}
       >
-        {title} {isOpen ? "▲" : "▼"}
+        {title}
       </Button>
       {isOpen && (
-        <Box p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
+        <Box p={4} borderRadius="xl" boxShadow={boxShadow} bg={bgColor} borderWidth="1px" borderColor="whiteAlpha.100">
           {children}
         </Box>
       )}
@@ -95,10 +98,11 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
   // Hooks UI
   const toast = useToast();
   const isMobile = useBreakpointValue({ base: true, md: false });
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const boxShadow = useColorModeValue('md', 'md');
-  const deleteButtonBg = useColorModeValue('red.500', 'red.600');
-  const deleteButtonHoverBg = useColorModeValue('red.600', 'red.700');
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === 'dark';
+  const bgColor = isDark ? 'gray.800' : 'white';
+  const boxShadow = isDark ? '0 2px 16px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.08)';
+  const borderColor = isDark ? 'whiteAlpha.100' : 'gray.200';
 
   // Guildes triées
   const sortedGuilds = [...guilds].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
@@ -171,80 +175,96 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
     }
   };
 
+  // Helper: styled form card
+  const FormCard = ({
+    children,
+    accentColor,
+    label,
+    formName,
+    mobileColorScheme = "purple",
+  }: {
+    children: React.ReactNode;
+    accentColor: string;
+    label: string;
+    formName: string;
+    mobileColorScheme?: string;
+  }) => (
+    <MobileFormWrapper
+      title={label}
+      formName={formName}
+      colorScheme={mobileColorScheme}
+      isMobile={isMobile}
+      openForm={openForm}
+      toggleForm={toggleForm}
+      bgColor={bgColor}
+      boxShadow={boxShadow}
+    >
+      <Box
+        p={5}
+        borderRadius="xl"
+        bg={bgColor}
+        boxShadow={boxShadow}
+        borderWidth="1px"
+        borderColor={borderColor}
+        borderLeftWidth="3px"
+        borderLeftColor={accentColor}
+        minW={{ md: "220px" }}
+        maxW={{ md: "280px" }}
+        w="100%"
+        transition="box-shadow 0.2s"
+        _hover={{ boxShadow: isDark ? '0 4px 24px rgba(124,58,237,0.18)' : '0 4px 16px rgba(0,0,0,0.1)' }}
+      >
+        <Text
+          fontSize="2xs"
+          fontWeight="semibold"
+          letterSpacing="widest"
+          textTransform="uppercase"
+          color={accentColor}
+          mb={4}
+        >
+          {label}
+        </Text>
+        {children}
+      </Box>
+    </MobileFormWrapper>
+  );
+
   return (
-    <Stack 
-      direction={{ base: "column", md: "row" }} 
-      spacing={6}
+    <Stack
+      direction={{ base: "column", md: "row" }}
+      spacing={4}
       mb={8}
       justify="center"
       w="100%"
       wrap="wrap"
     >
-      {/* Formulaire création guilde */}
-      <MobileFormWrapper
-        title="Créer une guilde"
-        formName="create"
-        colorScheme="green"
-        isMobile={isMobile}
-        openForm={openForm}
-        toggleForm={toggleForm}
-        bgColor={bgColor}
-        boxShadow={boxShadow}
-      >
-        <Box
-          as="form"
-          onSubmit={handleCreateGuild}
-          p={isMobile ? 0 : 4}
-          borderWidth={isMobile ? 0 : 1}
-          borderRadius="lg"
-          boxShadow={isMobile ? "none" : boxShadow}
-          bg={isMobile ? "transparent" : bgColor}
-          minW={{ md: "220px" }}
-          maxW={{ md: "280px" }}
-          w="100%"
-        >
-          <VStack spacing={4} align="stretch">
+      {/* Créer une guilde */}
+      <FormCard label="Créer une guilde" accentColor="green.400" formName="create" mobileColorScheme="green">
+        <Box as="form" onSubmit={handleCreateGuild}>
+          <VStack spacing={3} align="stretch">
             <FormControl>
-              <FormLabel>Créer une guilde</FormLabel>
               <Input
                 placeholder="Nom de la nouvelle guilde"
                 value={newGuildName}
                 onChange={e => setNewGuildName(e.target.value)}
+                borderRadius="lg"
               />
             </FormControl>
-            <Button colorScheme="green" type="submit">
+            <Button colorScheme="green" type="submit" borderRadius="lg" size="sm">
               Créer
             </Button>
           </VStack>
         </Box>
-      </MobileFormWrapper>
+      </FormCard>
 
-      {/* Formulaire ajout membre */}
-      <MobileFormWrapper
-        title="Ajouter un membre"
-        formName="addMember"
-        colorScheme="blue"
-        isMobile={isMobile}
-        openForm={openForm}
-        toggleForm={toggleForm}
-        bgColor={bgColor}
-        boxShadow={boxShadow}
-      >
-        <Box
-          as="form"
-          onSubmit={handleAddMember}
-          p={isMobile ? 0 : 4}
-          borderWidth={isMobile ? 0 : 1}
-          borderRadius="lg"
-          boxShadow={isMobile ? "none" : boxShadow}
-          bg={isMobile ? "transparent" : bgColor}
-          minW={{ md: "220px" }}
-          maxW={{ md: "280px" }}
-          w="100%"
-        >
-          <VStack spacing={4} align="stretch">
+      {/* Ajouter un membre */}
+      <FormCard label="Ajouter un membre" accentColor="purple.400" formName="addMember" mobileColorScheme="purple">
+        <Box as="form" onSubmit={handleAddMember}>
+          <VStack spacing={3} align="stretch">
             <FormControl>
-              <FormLabel>Rechercher et sélectionner un utilisateur</FormLabel>
+              <FormLabel fontSize="xs" color={isDark ? 'gray.400' : 'gray.500'} mb={1}>
+                Utilisateur
+              </FormLabel>
               <UserSearchSelect
                 users={users}
                 guilds={guilds}
@@ -254,12 +274,14 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
                 onSearchChange={setUserSearchQuery}
                 placeholder="Choisir un utilisateur"
               />
-              <Text fontSize="xs" color="gray.500" mt={1}>
+              <Text fontSize="2xs" color="gray.500" mt={1}>
                 {users.length} utilisateurs chargés
               </Text>
             </FormControl>
             <FormControl>
-              <FormLabel>Rôle</FormLabel>
+              <FormLabel fontSize="xs" color={isDark ? 'gray.400' : 'gray.500'} mb={1}>
+                Rôle
+              </FormLabel>
               <CustomSelect value={newMemberRole} onChange={(val) => setNewMemberRole(val as Role)} options={[
                 { value: "membre", label: "Membre" },
                 { value: "sous-chef", label: "Sous-Chef" },
@@ -272,83 +294,41 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
                 label: g.name,
               }))} />
             </FormControl>
-            <Button colorScheme="blue" type="submit">
+            <Button colorScheme="purple" type="submit" borderRadius="lg" size="sm">
               Ajouter membre
             </Button>
           </VStack>
         </Box>
-      </MobileFormWrapper>
+      </FormCard>
 
-      {/* Formulaire suppression guilde */}
-      <MobileFormWrapper
-        title="Supprimer une guilde"
-        formName="delete"
-        colorScheme="red"
-        isMobile={isMobile}
-        openForm={openForm}
-        toggleForm={toggleForm}
-        bgColor={bgColor}
-        boxShadow={boxShadow}
-      >
-        <Box
-          as="form"
-          onSubmit={handleDeleteGuild}
-          p={isMobile ? 0 : 4}
-          borderWidth={isMobile ? 0 : 1}
-          borderRadius="lg"
-          boxShadow={isMobile ? "none" : boxShadow}
-          bg={isMobile ? "transparent" : bgColor}
-          minW={{ md: "220px" }}
-          maxW={{ md: "280px" }}
-          w="100%"
-        >
-          <VStack spacing={4} align="stretch">
+      {/* Supprimer une guilde */}
+      <FormCard label="Supprimer une guilde" accentColor="red.400" formName="delete" mobileColorScheme="red">
+        <Box as="form" onSubmit={handleDeleteGuild}>
+          <VStack spacing={3} align="stretch">
             <FormControl>
-              <FormLabel>Supprimer une guilde</FormLabel>
               <CustomSelect value={deleteGuildId} onChange={(val) => setDeleteGuildId(val)} placeholder="Sélectionner une guilde" options={sortedGuilds.map((g: IGuild) => ({
                 value: g._id,
                 label: g.name,
               }))} />
             </FormControl>
             <Button
-              bg={deleteButtonBg}
-              color="white"
-              _hover={{ bg: deleteButtonHoverBg }}
+              colorScheme="red"
               type="submit"
               isDisabled={!deleteGuildId}
+              borderRadius="lg"
+              size="sm"
             >
               Supprimer
             </Button>
           </VStack>
         </Box>
-      </MobileFormWrapper>
+      </FormCard>
 
-      {/* Formulaire renommage guilde */}
-      <MobileFormWrapper
-        title="Renommer une guilde"
-        formName="rename"
-        colorScheme="orange"
-        isMobile={isMobile}
-        openForm={openForm}
-        toggleForm={toggleForm}
-        bgColor={bgColor}
-        boxShadow={boxShadow}
-      >
-        <Box
-          as="form"
-          onSubmit={handleRenameGuild}
-          p={isMobile ? 0 : 4}
-          borderWidth={isMobile ? 0 : 1}
-          borderRadius="lg"
-          boxShadow={isMobile ? "none" : boxShadow}
-          bg={isMobile ? "transparent" : bgColor}
-          minW={{ md: "220px" }}
-          maxW={{ md: "280px" }}
-          w="100%"
-        >
-          <VStack spacing={4} align="stretch">
+      {/* Renommer une guilde */}
+      <FormCard label="Renommer une guilde" accentColor="orange.400" formName="rename" mobileColorScheme="orange">
+        <Box as="form" onSubmit={handleRenameGuild}>
+          <VStack spacing={3} align="stretch">
             <FormControl>
-              <FormLabel>Renommer une guilde</FormLabel>
               <CustomSelect value={renameGuildId} onChange={(val) => setRenameGuildId(val)} placeholder="Sélectionner une guilde" options={sortedGuilds.map((g: IGuild) => ({
                 value: g._id,
                 label: g.name,
@@ -359,56 +339,38 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
                 placeholder="Nouveau nom"
                 value={renameGuildName}
                 onChange={e => setRenameGuildName(e.target.value)}
+                borderRadius="lg"
               />
             </FormControl>
-            <Button colorScheme="orange" type="submit">
+            <Button colorScheme="orange" type="submit" borderRadius="lg" size="sm">
               Renommer
             </Button>
           </VStack>
         </Box>
-      </MobileFormWrapper>
+      </FormCard>
 
-      {/* Formulaire désactivation/réactivation guilde */}
-      <MobileFormWrapper
-        title="Désactiver/Réactiver"
-        formName="disable"
-        colorScheme="yellow"
-        isMobile={isMobile}
-        openForm={openForm}
-        toggleForm={toggleForm}
-        bgColor={bgColor}
-        boxShadow={boxShadow}
-      >
-        <Box
-          as="form"
-          onSubmit={handleDisableGuild}
-          p={isMobile ? 0 : 4}
-          borderWidth={isMobile ? 0 : 1}
-          borderRadius="lg"
-          boxShadow={isMobile ? "none" : boxShadow}
-          bg={isMobile ? "transparent" : bgColor}
-          minW={{ md: "220px" }}
-          maxW={{ md: "280px" }}
-          w="100%"
-        >
-          <VStack spacing={4} align="stretch">
+      {/* Désactiver / Réactiver */}
+      <FormCard label="Désactiver / Réactiver" accentColor="yellow.400" formName="disable" mobileColorScheme="yellow">
+        <Box as="form" onSubmit={handleDisableGuild}>
+          <VStack spacing={3} align="stretch">
             <FormControl>
-              <FormLabel>Désactiver / Réactiver une guilde</FormLabel>
               <CustomSelect value={disableGuildId} onChange={(val) => setDisableGuildId(val)} placeholder="Sélectionner une guilde" options={sortedGuilds.map((g: IGuild) => ({
                 value: g._id,
                 label: `${g.name} ${g.disabled ? "(❌ désactivée)" : "(✅ active)"}`,
               }))} />
             </FormControl>
             <Button
-              colorScheme={guilds.find(g => g._id === disableGuildId)?.disabled ? "green" : "orange"}
+              colorScheme={guilds.find(g => g._id === disableGuildId)?.disabled ? "green" : "yellow"}
               type="submit"
               isDisabled={!disableGuildId}
+              borderRadius="lg"
+              size="sm"
             >
               {guilds.find(g => g._id === disableGuildId)?.disabled ? "Réactiver" : "Désactiver"}
             </Button>
           </VStack>
         </Box>
-      </MobileFormWrapper>
+      </FormCard>
     </Stack>
   );
 }

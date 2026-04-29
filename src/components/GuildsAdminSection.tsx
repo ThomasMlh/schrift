@@ -1,4 +1,4 @@
-import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button, Container, Flex, Heading, Text, useColorModeValue, useToast } from "@chakra-ui/react";
+import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button, Container, Flex, Text, useColorModeValue, useToast } from "@chakra-ui/react";
 import { GuildTabsList } from "./GuildTabsList";
 import AdminFormsSection from "./AdminFormsSection";
 import { useEffect, useRef, useState } from "react";
@@ -127,10 +127,8 @@ const GuildsAdminSection = () => {
 
   return (
     <Container maxW="100vw" w="100%" px={0} py={8}>
-      <Heading mb={8} textAlign="center">Administration des Guildes</Heading>
-      
       {/* Formulaires d'administration */}
-      <Flex justify="center" w="100%" px={4}>
+      <Flex justify="center" w="100%" px={0}>
         <AdminFormsSection
           guilds={guilds}
           onDataChange={refreshData}

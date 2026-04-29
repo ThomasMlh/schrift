@@ -1,4 +1,4 @@
-import { Container, Heading, Flex, useColorModeValue, Button, useToast, SimpleGrid, VStack } from "@chakra-ui/react";
+import { Box, Flex, Heading, HStack, Text, Button, useToast, useColorMode } from "@chakra-ui/react";
 import GuildsAdminSection from "../components/GuildsAdminSection";
 import DraftSection from "../components/DraftSection";
 import CyclesSection from "../components/CyclesSection";
@@ -10,9 +10,20 @@ import { useState, useMemo } from "react";
 import type { AdminPage as IAdminPage } from "../interfaces";
 import { useAuth } from "../providers/AuthProvider";
 
+const tabConfig: { key: IAdminPage; label: string; icon: string }[] = [
+  { key: 'guilds',  label: 'Guildes',  icon: '🏰' },
+  { key: 'draft',   label: 'Draft',    icon: '🔀' },
+  { key: 'cycles',  label: 'Cycles',   icon: '🔄' },
+  { key: 'scores',  label: 'Scores',   icon: '📊' },
+  { key: 'users',   label: 'Joueurs',  icon: '👥' },
+  { key: 'banned',  label: 'Bannis',   icon: '🚫' },
+  { key: 'guides',  label: 'Guides',   icon: '📚' },
+];
+
 const AdminPage = () => {
   // Détection des permissions utilisateur
   const { isAdmin: isFullAdmin, isGuildManager, token } = useAuth();
+  const { colorMode } = useColorMode();
   
   // Pages autorisées selon le rôle
   const allowedPages = useMemo(() => {
@@ -29,10 +40,19 @@ const AdminPage = () => {
   );
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const bgAdminPage = useColorModeValue('gray.50', 'gray.900')
   const toast = useToast();
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const isDark = colorMode === 'dark';
+  const pageBg       = isDark ? 'gray.900'       : 'gray.50';
+  const headerBg     = isDark ? 'gray.800'       : 'white';
+  const headerBorder = isDark ? 'whiteAlpha.100' : 'gray.200';
+  const tabInactiveColor  = isDark ? 'gray.400' : 'gray.500';
+  const tabInactiveBorder = isDark ? 'whiteAlpha.200' : 'gray.200';
+  const tabInactiveHoverBg = isDark ? 'whiteAlpha.100' : 'gray.100';
+  const separatorColor = isDark ? 'whiteAlpha.100' : 'gray.200';
+
+  const visibleTabs = tabConfig.filter(t => allowedPages.includes(t.key));
 
   const handleUpdateCharacters = () => {
     // En utilisant Toast pour les notifications
@@ -110,136 +130,171 @@ const AdminPage = () => {
   };
 
   return (
-    <Flex w="100%" align="center" justify="center" bg={bgAdminPage}>
-      <Container
-        maxW="100vw"
-        w="100%"
-        px={0}
-        py={8}
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="flex-start"
-        bg={bgColor}
-        boxShadow="none"
+    <Box minH="calc(100vh - 60px)" bg={pageBg} position="relative">
+
+      {/* Decorative gradient blob */}
+      <Box
+        position="absolute"
+        top={0} left={0} right={0}
+        h="220px"
+        bgGradient="linear(to-b, purple.900, transparent)"
+        opacity={isDark ? 0.45 : 0.15}
+        pointerEvents="none"
+        zIndex={0}
+      />
+
+      {/* Header card */}
+      <Box
+        position="relative"
+        zIndex={1}
+        bg={headerBg}
+        borderBottom="1px solid"
+        borderColor={headerBorder}
+        px={{ base: 4, md: 8 }}
+        pt={7}
+        pb={0}
+        boxShadow={isDark ? '0 1px 20px rgba(0,0,0,0.4)' : '0 1px 8px rgba(0,0,0,0.06)'}
       >
-        {/* En-tête */}
-        <Heading mb={6} textAlign="center">
-          {isFullAdmin ? "Administration Ṣčhrīft" : "Gestion des Scores"}
-        </Heading>
-        
-        {/* Navigation */}
-        <VStack spacing={4} mb={6} w="100%" maxW="800px" px={4}>
-          {/* Navigation principale - seulement les sections autorisées */}
-          <SimpleGrid 
-            columns={{ base: Math.min(allowedPages.length, 2), md: Math.min(allowedPages.length, 7) }} 
-            spacing={3} 
-            w="100%"
-          >
-            {allowedPages.includes('guilds') && (
-              <Button
-                variant={currentPage === "guilds" ? "solid" : "outline"}
-                colorScheme="orange"
-                onClick={() => setCurrentPage("guilds")}
-                size={{ base: "sm", md: "md" }}
-              >
-                🏰 Guildes
-              </Button>
-            )}
-            {allowedPages.includes('draft') && (
-              <Button
-                variant={currentPage === "draft" ? "solid" : "outline"}
-                colorScheme="orange"
-                onClick={() => setCurrentPage("draft")}
-                size={{ base: "sm", md: "md" }}
-              >
-                🔀 Draft
-              </Button>
-            )}
-            {allowedPages.includes('cycles') && (
-              <Button
-                variant={currentPage === "cycles" ? "solid" : "outline"}
-                colorScheme="orange"
-                onClick={() => setCurrentPage("cycles")}
-                size={{ base: "sm", md: "md" }}
-              >
-                🔄 Cycles
-              </Button>
-            )}
-            {allowedPages.includes('scores') && (
-              <Button
-                variant={currentPage === "scores" ? "solid" : "outline"}
-                colorScheme="orange"
-                onClick={() => setCurrentPage("scores")}
-                size={{ base: "sm", md: "md" }}
-              >
-                📊 Scores
-              </Button>
-            )}
-            {allowedPages.includes('users') && (
-              <Button
-                variant={currentPage === "users" ? "solid" : "outline"}
-                colorScheme="orange"
-                onClick={() => setCurrentPage("users")}
-                size={{ base: "sm", md: "md" }}
-              >
-                👥 Joueurs
-              </Button>
-            )}
-            {allowedPages.includes('banned') && (
-              <Button
-                variant={currentPage === "banned" ? "solid" : "outline"}
-                colorScheme="red"
-                onClick={() => setCurrentPage("banned")}
-                size={{ base: "sm", md: "md" }}
-              >
-                🚫 Bannis
-              </Button>
-            )}
-            {allowedPages.includes('guides') && (
-              <Button
-                variant={currentPage === "guides" ? "solid" : "outline"}
-                colorScheme="orange"
-                onClick={() => setCurrentPage("guides")}
-                size={{ base: "sm", md: "md" }}
-              >
-                📚 Guides
-              </Button>
-            )}
-          </SimpleGrid>
-          
-          {/* Actions admin - seulement pour les vrais admins */}
+        {/* Top row: title + actions */}
+        <Flex align="flex-start" justify="space-between" mb={5} wrap="wrap" gap={3}>
+          <Box>
+            {/* Badge label */}
+            <Box
+              display="inline-flex"
+              alignItems="center"
+              gap={1}
+              px={3}
+              py={0.5}
+              mb={2}
+              borderRadius="full"
+              bg={isDark ? 'purple.900' : 'purple.50'}
+              border="1px solid"
+              borderColor={isDark ? 'purple.700' : 'purple.200'}
+              fontSize="2xs"
+              color={isDark ? 'purple.300' : 'purple.600'}
+              fontWeight="semibold"
+              letterSpacing="widest"
+              textTransform="uppercase"
+            >
+              ⚙ Panel d'administration
+            </Box>
+            <Heading
+              size="xl"
+              sx={{
+                background: isDark
+                  ? 'linear-gradient(135deg, #C4B5FD, #818CF8)'
+                  : 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              {isFullAdmin ? "Ṣčhrīft Admin" : "Gestion des Scores"}
+            </Heading>
+          </Box>
+
+          {/* Admin utility buttons */}
           {isFullAdmin && (
-            <>
+            <HStack spacing={2} flexWrap="wrap" pt={1}>
               <Button
+                size="sm"
                 variant="outline"
-                colorScheme="orange"
+                borderColor={isDark ? 'purple.600' : 'purple.300'}
+                color={isDark ? 'purple.300' : 'purple.600'}
+                _hover={{ bg: isDark ? 'purple.900' : 'purple.50' }}
                 onClick={handleUpdateCharacters}
                 isLoading={isUpdatingCharacters}
-                loadingText="Mise à jour..."
-                size={{ base: "sm", md: "md" }}
-                w={{ base: "100%", md: "auto" }}
+                loadingText="Sync…"
+                borderRadius="full"
               >
-                🔄 Mettre à jour les personnages
+                🔄 Sync personnages
               </Button>
               <Button
+                size="sm"
                 variant="outline"
-                colorScheme="teal"
+                borderColor={isDark ? 'teal.600' : 'teal.400'}
+                color={isDark ? 'teal.300' : 'teal.600'}
+                _hover={{ bg: isDark ? 'teal.900' : 'teal.50' }}
                 onClick={handleUploadImages}
                 isLoading={isUploadingImages}
-                loadingText="Upload en cours..."
-                size={{ base: "sm", md: "md" }}
-                w={{ base: "100%", md: "auto" }}
+                loadingText="Upload…"
+                borderRadius="full"
               >
-                🖼️ Upload images (batch)
+                🖼️ Upload images
               </Button>
-            </>
+            </HStack>
           )}
-        </VStack>
+        </Flex>
 
+        {/* Tab navigation */}
+        <HStack
+          spacing={1}
+          overflowX="auto"
+          py="4px"
+          mx="-2px"
+          px="2px"
+          sx={{ '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}
+        >
+          {visibleTabs.map(tab => {
+            const isActive = currentPage === tab.key;
+            const isBanned = tab.key === 'banned';
+            return (
+              <Button
+                key={tab.key}
+                onClick={() => setCurrentPage(tab.key)}
+                size="sm"
+                px={4}
+                h="36px"
+                borderRadius="full"
+                flexShrink={0}
+                mb={0}
+                transition="all 0.18s ease"
+                sx={isActive ? {
+                  background: isBanned
+                    ? 'linear-gradient(135deg, #DC2626, #9B1C1C)'
+                    : 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+                  color: 'white',
+                  boxShadow: isBanned
+                    ? '0 0 16px rgba(220,38,38,0.35)'
+                    : '0 0 16px rgba(124,58,237,0.35)',
+                  border: 'none',
+                  _hover: {
+                    background: isBanned
+                      ? 'linear-gradient(135deg, #B91C1C, #7F1D1D)'
+                      : 'linear-gradient(135deg, #6D28D9, #4338CA)',
+                  },
+                } : {
+                  background: 'transparent',
+                  color: tabInactiveColor,
+                  border: '1px solid',
+                  borderColor: tabInactiveBorder,
+                  _hover: {
+                    background: tabInactiveHoverBg,
+                    color: isDark ? 'gray.100' : 'gray.700',
+                    borderColor: isDark ? 'whiteAlpha.300' : 'gray.300',
+                  },
+                }}
+              >
+                <HStack spacing={1.5}>
+                  <Text as="span" fontSize="sm">{tab.icon}</Text>
+                  <Text as="span" fontSize="sm" fontWeight={isActive ? 'semibold' : 'normal'}>
+                    {tab.label}
+                  </Text>
+                </HStack>
+              </Button>
+            );
+          })}
+        </HStack>
+
+        {/* Active tab underline indicator */}
+        <Box h="2px" bg={separatorColor} />
+      </Box>
+
+      {/* Page content */}
+      <Box position="relative" zIndex={1} pt={6} px={{ base: 3, md: 6 }}>
         {renderPage()}
-      </Container>
-    </Flex>
+      </Box>
+    </Box>
   );
 }
 
