@@ -2,13 +2,13 @@ import {
   Container,
   VStack,
   HStack,
-  Heading,
   Text,
   Box,
   Spinner,
   useColorModeValue,
   Button,
   Flex,
+  Divider,
   Table,
   Thead,
   Tbody,
@@ -41,6 +41,7 @@ import { useGuilds, useRotationScores } from "@/hooks/useAPI";
 import { RankBadge } from "@/components/ui/RankBadge";
 import { AlterationImage } from "@/components/ui/AlterationImage";
 import { SEOHead } from "@/components/SEOHead";
+import { HeroSection } from "@/components/HeroSection";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useTranslation } from "react-i18next";
 
@@ -75,10 +76,13 @@ const RotationDetailPage = () => {
   const hasInitialData = useRef(false);
 
   // Hooks UI
-  const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const textSecondary = useColorModeValue("gray.700", "gray.300");
-  const shadowColor = useColorModeValue("lg", "dark-lg");
+  const cardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.7)");
+  const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
+  const subTextColor = useColorModeValue("gray.500", "whiteAlpha.600");
+  const labelColor = useColorModeValue("gray.700", "whiteAlpha.900");
+  const statBg = useColorModeValue("white", "rgba(26, 32, 44, 0.6)");
+  const tableHeaderBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const rowHoverBg = useColorModeValue("blue.50", "whiteAlpha.100");
 
   // Fonction pour obtenir le nom de la guilde à partir de l'ID
   const getGuildNameFromId = (guildId?: string): string | undefined => {
@@ -244,294 +248,293 @@ const RotationDetailPage = () => {
         description={cycle ? `Détails de la rotation ${position} du cycle ${cycle.name} (${cycle.year})` : `Détails de la rotation ${position} du cycle ${cycleId}`}
         noIndex={true}
       />
-      <Container maxW="container.xl" py={8}>
-      <VStack spacing={6} align="stretch">
-        {/* Header */}
-        <VStack spacing={4} align="stretch">
-          <HStack
-            justify="space-between"
-            align="center"
-            flexWrap="wrap"
-            gap={2}
-          >
-            <Button
-              leftIcon={<ArrowBackIcon />}
-              variant="outline"
-              size="sm"
-              onClick={() => navigate(-1)}
-            >
-              {t("pages.rotationDetail.buttonBack")}
-            </Button>
+      <Box w="100%">
+        <HeroSection
+          title={`Rotation #${position}`}
+          description={cycle ? `${cycle.name} — ${cycle.year}` : ""}
+          badge={{ text: `${position} / ${totalRotations}`, icon: "⚡" }}
+          size="sm"
+        />
 
-            <HStack spacing={2}>
-              <Button
-                leftIcon={<ChevronLeftIcon />}
-                variant="outline"
-                size="sm"
-                onClick={handlePreviousRotation}
-                isDisabled={parseInt(position || "1") <= 1}
-              >
-                {t("pages.rotationDetail.buttonPrevious")}
-              </Button>
-              <Button
-                rightIcon={<ChevronRightIcon />}
-                variant="outline"
-                size="sm"
-                onClick={handleNextRotation}
-                isDisabled={parseInt(position || "1") >= totalRotations}
-              >
-                {t("pages.rotationDetail.buttonNext")}
-              </Button>
-            </HStack>
-          </HStack>
+        <Container maxW="container.xl" py={8}>
+          <VStack spacing={6} align="stretch">
 
-          <VStack align="start" spacing={2}>
-            <Heading size={{ base: "md", md: "lg" }}>
-              <VStack spacing={2} align="start">
-                <HStack spacing={2} align="center" flexWrap="wrap">
-                  <Text as="span">
-                    {cycle?.name} - {cycle?.year}
-                  </Text>
-                </HStack>
-                <Text as="span">Rotation #{position}</Text>
-                <HStack spacing={2} align="center" justify="center" flexWrap="wrap">
-                  <Text as="span">{rotation?.killer ? t(`factions.${rotation.killer}`, rotation.killer) : ""}</Text>
-                  {rotation?.attack && (
-                    <AttackTypeBadge attackType={rotation.attack} size="24px" />
-                  )}
-                  {rotation?.alteration && (
-                    <AlterationImage alteration={rotation.alteration} size="30px" />
-                  )}
-                </HStack>
-              </VStack>
-            </Heading>
-            <Text color={textSecondary} fontSize="sm">
-              {totalItems} score{totalItems > 1 ? "s" : ""} {t("pages.rotationDetail.scoreTotalSuffix")}
-              {selectedGuild && (
-                <Text as="span" ml={2} fontSize="xs" color="blue.500">
-                  ({t("pages.rotationDetail.filteredOnPrefix")}{" "}
-                  {guilds.find((g) => g._id === selectedGuild)?.name})
+            {/* Nav bar */}
+            <Flex justify="space-between" align="center" flexWrap="wrap" gap={3}>
+              <Button
+                leftIcon={<ArrowBackIcon />}
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(-1)}
+                _hover={{ transform: "translateX(-4px)" }}
+                transition="all 0.2s"
+              >
+                {t("pages.rotationDetail.buttonBack")}
+              </Button>
+              <HStack spacing={2}>
+                <IconButton
+                  aria-label={t("pages.rotationDetail.buttonPrevious")}
+                  icon={<ChevronLeftIcon />}
+                  variant="ghost"
+                  size="sm"
+                  onClick={handlePreviousRotation}
+                  isDisabled={parseInt(position || "1") <= 1}
+                />
+                <Text fontSize="sm" fontWeight="semibold" color={subTextColor}>
+                  {position} / {totalRotations}
                 </Text>
-              )}
-            </Text>
-          </VStack>
-        </VStack>
-
-        {/* Filtre des guildes */}
-        <Box
-          bg={bgColor}
-          borderRadius="lg"
-          borderWidth="1px"
-          borderColor={borderColor}
-          p={4}
-        >
-          <Flex
-            direction={{ base: "column", md: "row" }}
-            gap={4}
-            align="center"
-            justify="space-between"
-          >
-            <HStack spacing={4} align="center" flex={1}>
-              <Text fontSize="sm" fontWeight="medium" minW="max-content">
-                {t("pages.rotationDetail.filterGuildLabel")}
-              </Text>
-              <CustomSelect
-                value={selectedGuild}
-                onChange={handleGuildChange}
-                placeholder={t("pages.rotationDetail.allGuilds")}
-                size="sm"
-                maxW="300px"
-                isDisabled={isLoadingGuilds}
-                options={guilds.map((guild) => ({
-                  value: guild._id,
-                  label: guild.name,
-                }))}
-              />
-            </HStack>
-            <Box>
-              <ScoreLegend />
-            </Box>
-          </Flex>
-        </Box>
-
-        {/* Scores Table */}
-        <Box
-          bg={bgColor}
-          borderRadius="lg"
-          borderWidth="1px"
-          borderColor={borderColor}
-          boxShadow={shadowColor}
-          overflow="hidden"
-          position="relative"
-        >
-          {isLoading && hasInitialData.current && (
-            <Flex
-              position="absolute"
-              inset={0}
-              zIndex={1}
-              justify="center"
-              align="center"
-              bg="blackAlpha.200"
-              borderRadius="lg"
-            >
-              <Spinner size="lg" />
+                <IconButton
+                  aria-label={t("pages.rotationDetail.buttonNext")}
+                  icon={<ChevronRightIcon />}
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNextRotation}
+                  isDisabled={parseInt(position || "1") >= totalRotations}
+                />
+              </HStack>
             </Flex>
-          )}
-          {scores.length === 0 && !isLoading ? (
-            <Flex justify="center" align="center" py={12}>
-              <Text fontSize="lg" color={textSecondary}>
-                {selectedGuild
-                  ? `${t("pages.rotationDetail.noScoreForGuild")} ${guilds.find((g) => g._id === selectedGuild)?.name}`
-                  : t("pages.rotationDetail.noScoreForRotation")}
-              </Text>
-            </Flex>
-          ) : (
-            <>
-              <TableContainer>
-                <Table variant="simple" size={{ base: "sm", md: "md" }}>
-                  <Thead>
-                    <Tr>
-                      <Th>{t("pages.rotationDetail.tableRank")}</Th>
-                      <Th>{t("pages.rotationDetail.tablePlayer")}</Th>
-                      {!selectedGuild && (
-                        <Th display={{ base: "none", md: "table-cell" }}>
-                          {t("pages.rotationDetail.tableGuild")}
-                        </Th>
+
+            {/* Rotation info strip */}
+            {rotation && (
+              <Box
+                bg={statBg}
+                borderRadius="xl"
+                borderWidth={1}
+                borderColor={borderColor}
+                boxShadow="md"
+                overflow="hidden"
+              >
+                <Flex justify="center" align="center" px={6} py={5} gap={{ base: 4, md: 8 }} wrap="wrap">
+                  <VStack spacing={1} align="center">
+                    <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider">
+                      {t("pages.cycleDetail.fieldKiller")}
+                    </Text>
+                    <Text fontSize="md" fontWeight="bold" color={labelColor}>
+                      {t(`factions.${rotation.killer}`, rotation.killer)}
+                    </Text>
+                  </VStack>
+
+                  <Divider orientation="vertical" h="36px" display={{ base: "none", md: "block" }} />
+
+                  <VStack spacing={1} align="center">
+                    <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider">
+                      {t("pages.cycleDetail.fieldAttack")}
+                    </Text>
+                    <HStack spacing={2}>
+                      <AttackTypeBadge attackType={rotation.attack} size="16px" />
+                      <Text fontSize="sm" color={subTextColor}>
+                        {t(`attackTypes.${rotation.attack}`, rotation.attack)}
+                      </Text>
+                    </HStack>
+                  </VStack>
+
+                  <Divider orientation="vertical" h="36px" display={{ base: "none", md: "block" }} />
+
+                  <VStack spacing={1} align="center">
+                    <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider">
+                      {t("pages.cycleDetail.fieldAlteration")}
+                    </Text>
+                    <AlterationImage alteration={rotation.alteration} size="20px" showLabel={true} />
+                  </VStack>
+
+                  <Divider orientation="vertical" h="36px" display={{ base: "none", md: "block" }} />
+
+                  <VStack spacing={1} align="center">
+                    <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider">
+                      {t("pages.rotationDetail.tableScore")}s
+                    </Text>
+                    <Text fontSize="md" fontWeight="bold" bgGradient="linear(to-r, blue.400, purple.500)" bgClip="text">
+                      {totalItems}
+                      {selectedGuild && (
+                        <Text as="span" fontSize="xs" color="blue.500" ml={1} fontWeight="normal">
+                          ({guilds.find((g) => g._id === selectedGuild)?.name})
+                        </Text>
                       )}
-                      <Th isNumeric>{t("pages.rotationDetail.tableScore")}</Th>
-                      <Th display={{ base: "none", sm: "table-cell" }}>{t("pages.rotationDetail.tableDate")}</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {scores.map((score) => {
-                      const rankInfo = getRankInfo(score.rank);
-
-                      return (
-                        <Tr
-                          key={score._id}
-                          borderLeft={rankInfo.rank <= 3 ? "4px solid" : "none"}
-                          borderLeftColor={rankInfo.borderColor}
-                        >
-                          <Td>
-                            <RankBadge rank={rankInfo.rank} variant="compact" />
-                          </Td>
-                          <Td>
-                            <UserDisplay
-                              user={score.user}
-                              rainbowText={score.rank === 1}
-                            />
-                          </Td>
-                          {!selectedGuild && (
-                            <Td display={{ base: "none", md: "table-cell" }}>
-                              {score.user.guilde_id && (
-                                <Badge colorScheme="blue" fontSize="xs">
-                                  {getGuildNameFromId(score.user.guilde_id)}
-                                </Badge>
-                              )}
-                            </Td>
-                          )}
-                          <Td isNumeric>
-                            <ScoreBadge score={score.score} />
-                          </Td>
-                          <Td display={{ base: "none", sm: "table-cell" }}>
-                            <Text fontSize="sm" color={textSecondary}>
-                              {new Date(score.created_at).toLocaleDateString(
-                                "fr-FR"
-                              )}
-                            </Text>
-                          </Td>
-                        </Tr>
-                      );
-                    })}
-                  </Tbody>
-                </Table>
-              </TableContainer>
-
-              {/* Pagination */}
-              <VStack
-                spacing={4}
-                p={4}
-                borderTop="1px solid"
-                borderTopColor={borderColor}
-              >
-                {/* Controls row */}
-                <Flex
-                  justify="space-between"
-                  align="center"
-                  w="100%"
-                  flexWrap="wrap"
-                  gap={4}
-                >
-                  <HStack spacing={2}>
-                    <Text fontSize="sm" color={textSecondary}>
-                      {t("pages.rotationDetail.paginationShow")}
                     </Text>
-                    <CustomSelect
-                      size="sm"
-                      value={String(itemsPerPage)}
-                      onChange={handleItemsPerPageChange}
-                      w="auto"
-                      options={[
-                        { value: "10", label: "10" },
-                        { value: "20", label: "20" },
-                        { value: "50", label: "50" },
-                        { value: "100", label: "100" },
-                      ]}
-                      allowDeselect={false}
-                    />
-                    <Text
-                      fontSize="sm"
-                      color={textSecondary}
-                      display={{ base: "none", sm: "block" }}
-                    >
-                      {t("pages.rotationDetail.paginationPerPage")}
-                    </Text>
-                  </HStack>
-
-                  <HStack spacing={2}>
-                    <IconButton
-                      aria-label={t("pages.rotationDetail.ariaPreviousPage")}
-                      icon={<ChevronLeftIcon />}
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      isDisabled={currentPage <= 1}
-                    />
-                    <Text
-                      fontSize="sm"
-                      color={textSecondary}
-                      whiteSpace="nowrap"
-                    >
-                      {currentPage}/{totalPages}
-                    </Text>
-                    <IconButton
-                      aria-label="Page suivante"
-                      icon={<ChevronRightIcon />}
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      isDisabled={currentPage >= totalPages}
-                    />
-                  </HStack>
+                  </VStack>
                 </Flex>
+              </Box>
+            )}
 
-                {/* Info row - hidden on very small screens */}
-                <Text
-                  fontSize="sm"
-                  color={textSecondary}
-                  textAlign="center"
-                  display={{ base: "none", md: "block" }}
+            {/* Filter bar */}
+            <Box
+              bg={cardBg}
+              backdropFilter="blur(12px)"
+              borderRadius="xl"
+              borderWidth={1}
+              borderColor={borderColor}
+              p={4}
+            >
+              <Flex direction={{ base: "column", md: "row" }} gap={4} align="center" justify="space-between">
+                <HStack spacing={4} align="center" flex={1}>
+                  <Text fontSize="sm" fontWeight="medium" color={labelColor} minW="max-content">
+                    {t("pages.rotationDetail.filterGuildLabel")}
+                  </Text>
+                  <CustomSelect
+                    value={selectedGuild}
+                    onChange={handleGuildChange}
+                    placeholder={t("pages.rotationDetail.allGuilds")}
+                    size="sm"
+                    maxW="300px"
+                    isDisabled={isLoadingGuilds}
+                    options={guilds.map((guild) => ({ value: guild._id, label: guild.name }))}
+                  />
+                </HStack>
+                <ScoreLegend />
+              </Flex>
+            </Box>
+
+            {/* Scores table */}
+            <Box
+              bg={cardBg}
+              backdropFilter="blur(12px)"
+              borderRadius="xl"
+              borderWidth={1}
+              borderColor={borderColor}
+              overflow="hidden"
+              position="relative"
+            >
+              {isLoading && hasInitialData.current && (
+                <Flex
+                  position="absolute"
+                  inset={0}
+                  zIndex={1}
+                  justify="center"
+                  align="center"
+                  bg="blackAlpha.200"
+                  borderRadius="xl"
                 >
-                  {selectedGuild
-                    ? `Affichage de ${totalItems} résultat${totalItems > 1 ? "s" : ""} pour ${guilds.find((g) => g._id === selectedGuild)?.name}`
-                    : `${(currentPage - 1) * itemsPerPage + 1} - ${Math.min(currentPage * itemsPerPage, totalItems)} sur ${totalItems}`}
-                </Text>
-              </VStack>
-            </>
-          )}
-        </Box>
-      </VStack>
-    </Container>
+                  <Spinner size="lg" />
+                </Flex>
+              )}
+              {scores.length === 0 && !isLoading ? (
+                <Flex justify="center" align="center" py={12}>
+                  <Text fontSize="lg" color={subTextColor}>
+                    {selectedGuild
+                      ? `${t("pages.rotationDetail.noScoreForGuild")} ${guilds.find((g) => g._id === selectedGuild)?.name}`
+                      : t("pages.rotationDetail.noScoreForRotation")}
+                  </Text>
+                </Flex>
+              ) : (
+                <>
+                  <TableContainer>
+                    <Table variant="simple" size={{ base: "sm", md: "md" }}>
+                      <Thead bg={tableHeaderBg}>
+                        <Tr>
+                          <Th borderColor={borderColor}>{t("pages.rotationDetail.tableRank")}</Th>
+                          <Th borderColor={borderColor}>{t("pages.rotationDetail.tablePlayer")}</Th>
+                          {!selectedGuild && (
+                            <Th display={{ base: "none", md: "table-cell" }} borderColor={borderColor}>
+                              {t("pages.rotationDetail.tableGuild")}
+                            </Th>
+                          )}
+                          <Th isNumeric borderColor={borderColor}>{t("pages.rotationDetail.tableScore")}</Th>
+                          <Th display={{ base: "none", sm: "table-cell" }} borderColor={borderColor}>
+                            {t("pages.rotationDetail.tableDate")}
+                          </Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {scores.map((score) => {
+                          const rankInfo = getRankInfo(score.rank);
+                          return (
+                            <Tr
+                              key={score._id}
+                              borderLeft={rankInfo.rank <= 3 ? "3px solid" : "none"}
+                              borderLeftColor={rankInfo.borderColor}
+                              _hover={{ bg: rowHoverBg }}
+                              transition="background 0.15s"
+                            >
+                              <Td borderColor={borderColor}>
+                                <RankBadge rank={rankInfo.rank} variant="compact" />
+                              </Td>
+                              <Td borderColor={borderColor}>
+                                <UserDisplay user={score.user} rainbowText={score.rank === 1} />
+                              </Td>
+                              {!selectedGuild && (
+                                <Td display={{ base: "none", md: "table-cell" }} borderColor={borderColor}>
+                                  {score.user.guilde_id && (
+                                    <Badge colorScheme="blue" fontSize="xs">
+                                      {getGuildNameFromId(score.user.guilde_id)}
+                                    </Badge>
+                                  )}
+                                </Td>
+                              )}
+                              <Td isNumeric borderColor={borderColor}>
+                                <ScoreBadge score={score.score} />
+                              </Td>
+                              <Td display={{ base: "none", sm: "table-cell" }} borderColor={borderColor}>
+                                <Text fontSize="sm" color={subTextColor}>
+                                  {new Date(score.created_at).toLocaleDateString("fr-FR")}
+                                </Text>
+                              </Td>
+                            </Tr>
+                          );
+                        })}
+                      </Tbody>
+                    </Table>
+                  </TableContainer>
+
+                  {/* Pagination */}
+                  <VStack spacing={4} p={4} borderTop="1px solid" borderTopColor={borderColor}>
+                    <Flex justify="space-between" align="center" w="100%" flexWrap="wrap" gap={4}>
+                      <HStack spacing={2}>
+                        <Text fontSize="sm" color={subTextColor}>
+                          {t("pages.rotationDetail.paginationShow")}
+                        </Text>
+                        <CustomSelect
+                          size="sm"
+                          value={String(itemsPerPage)}
+                          onChange={handleItemsPerPageChange}
+                          w="auto"
+                          options={[
+                            { value: "10", label: "10" },
+                            { value: "20", label: "20" },
+                            { value: "50", label: "50" },
+                            { value: "100", label: "100" },
+                          ]}
+                          allowDeselect={false}
+                        />
+                        <Text fontSize="sm" color={subTextColor} display={{ base: "none", sm: "block" }}>
+                          {t("pages.rotationDetail.paginationPerPage")}
+                        </Text>
+                      </HStack>
+
+                      <HStack spacing={2}>
+                        <IconButton
+                          aria-label={t("pages.rotationDetail.ariaPreviousPage")}
+                          icon={<ChevronLeftIcon />}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          isDisabled={currentPage <= 1}
+                        />
+                        <Text fontSize="sm" color={subTextColor} whiteSpace="nowrap">
+                          {currentPage} / {totalPages}
+                        </Text>
+                        <IconButton
+                          aria-label="Page suivante"
+                          icon={<ChevronRightIcon />}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          isDisabled={currentPage >= totalPages}
+                        />
+                      </HStack>
+                    </Flex>
+
+                    <Text fontSize="sm" color={subTextColor} textAlign="center" display={{ base: "none", md: "block" }}>
+                      {selectedGuild
+                        ? `${totalItems} résultat${totalItems > 1 ? "s" : ""} — ${guilds.find((g) => g._id === selectedGuild)?.name}`
+                        : `${(currentPage - 1) * itemsPerPage + 1} – ${Math.min(currentPage * itemsPerPage, totalItems)} / ${totalItems}`}
+                    </Text>
+                  </VStack>
+                </>
+              )}
+            </Box>
+          </VStack>
+        </Container>
+      </Box>
     </>
   );
 };
