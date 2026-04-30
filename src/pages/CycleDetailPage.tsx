@@ -5,27 +5,24 @@ import {
   VStack,
   HStack,
   Text,
-  Heading,
   Button,
   Spinner,
   Alert,
   AlertIcon,
   Box,
   Badge,
-  Card,
-  CardBody,
-  SimpleGrid,
   useColorModeValue,
   Flex,
   Icon,
   Divider,
 } from "@chakra-ui/react";
-import { ArrowBackIcon, CalendarIcon } from "@chakra-ui/icons";
-import { FiActivity } from "react-icons/fi";
+import { ArrowBackIcon } from "@chakra-ui/icons";
+import { FiCalendar, FiLayers } from "react-icons/fi";
 
-import { handleAttackType } from "../utils/attackTypes";
 import { AlterationImage } from "../components/ui/AlterationImage";
+import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
 import CustomLink from "@/components/ui/CustomLink";
+import { HeroSection } from "@/components/HeroSection";
 import { useCycle } from "@/hooks/useAPI";
 import { SEOHead } from "@/components/SEOHead";
 import { useTranslation } from "react-i18next";
@@ -39,16 +36,13 @@ const CycleDetailPage = () => {
   const { cycle, isLoading, error: fetchError } = useCycle(id);
   const [error, setError] = useState<string | null>(null);
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const textSecondary = useColorModeValue("gray.600", "gray.400");
-  const headerBg = useColorModeValue(
-    "linear(to-r, blue.500, purple.600)",
-    "linear(to-r, blue.600, purple.700)"
-  );
-  const infoBg = useColorModeValue("gray.50", "gray.900");
-  const rotationHoverBg = useColorModeValue("blue.50", "gray.700");
-  const shadowColor = useColorModeValue("md", "dark-lg");
+  const cardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.7)");
+  const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
+  const subTextColor = useColorModeValue("gray.500", "whiteAlpha.600");
+  const labelColor = useColorModeValue("gray.700", "whiteAlpha.900");
+  const statBg = useColorModeValue("white", "rgba(26, 32, 44, 0.6)");
+  const rowBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const rowHoverBg = useColorModeValue("blue.50", "whiteAlpha.100");
 
   useEffect(() => {
     if (fetchError) {
@@ -91,377 +85,217 @@ const CycleDetailPage = () => {
   return (
     <>
       <SEOHead
-        title={`Cycle ${id} - Schrift BBS`}
-        description={`Détails du cycle ${id} de la Guilde War Schrift`}
+        title={cycle ? `${cycle.name} - ${cycle.year} - Schrift BBS` : `Cycle ${id} - Schrift BBS`}
+        description={cycle ? `Détails du cycle ${cycle.name} (${cycle.year}) de la Guilde War Schrift` : `Détails du cycle ${id} de la Guilde War Schrift`}
         noIndex={true}
       />
-      <Box minH="100vh" py={8}>
-      <Container maxW="container.xl">
-        <VStack spacing={8} align="stretch">
-          {/* Header avec bouton retour */}
-          <HStack justify="space-between" align="center">
-            <Button
-              leftIcon={<ArrowBackIcon />}
-              variant="ghost"
-              onClick={() => navigate("/cycles")}
-              size="lg"
-              _hover={{ bg: rotationHoverBg, transform: "translateX(-4px)" }}
-              transition="all 0.2s"
-            >
-              {t("pages.cycleDetail.backToCycles")}
-            </Button>
-            <Badge
-              colorScheme="blue"
-              fontSize="lg"
-              px={4}
-              py={2}
-              borderRadius="full"
-              boxShadow="sm"
-            >
-              <Icon as={FiActivity} mr={2} />
-              {cycle.rotations?.length || 0} rotations
-            </Badge>
-          </HStack>
 
-          {/* Titre du cycle - Hero Section */}
-          <Box
-            bgGradient={headerBg}
-            borderRadius="2xl"
-            p={8}
-            textAlign="center"
-            color="white"
-            boxShadow="2xl"
-            position="relative"
-            overflow="hidden"
-            _before={{
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              bgGradient: "linear(to-br, transparent, blackAlpha.300)",
-              zIndex: 0,
-            }}
-          >
-            <VStack spacing={3} position="relative" zIndex={1}>
-              <Heading size="2xl" fontWeight="extrabold" letterSpacing="tight">
-                {cycle.name} - {cycle.year}
-              </Heading>
-              <Text fontSize="lg" opacity={0.9} fontWeight="medium">
-                {t("pages.cycleDetail.subtitle")}
-              </Text>
-            </VStack>
-          </Box>
+      <Box w="100%">
+        <HeroSection
+          title={`${cycle.name} — ${cycle.year}`}
+          description={t("pages.cycleDetail.subtitle")}
+          badge={{ text: `${cycle.rotations?.length || 0} rotations`, icon: "⚔️" }}
+          size="md"
+        />
 
-        {/* Informations générales */}
-        {cycle.rotations && cycle.rotations.length > 0 && (
-          <Card
-            bg={cardBg}
-            borderColor={borderColor}
-            borderRadius="xl"
-            boxShadow={shadowColor}
-            border="none"
-          >
-            <CardBody p={6}>
-              <VStack spacing={6} align="stretch">
-                <Heading size="md" fontWeight="bold" color="blue.500">
-                  {t("pages.cycleDetail.infoHeading")}
-                </Heading>
-                <Divider />
-                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-                  <Box
-                    bg={infoBg}
-                    p={5}
-                    borderRadius="lg"
-                    transition="all 0.3s"
-                    _hover={{ transform: "translateY(-4px)", boxShadow: "lg" }}
-                  >
-                    <HStack spacing={2} mb={3}>
-                      <CalendarIcon color="green.500" boxSize={5} />
-                      <Text
-                        fontSize="sm"
-                        fontWeight="semibold"
-                        color={textSecondary}
-                        textTransform="uppercase"
-                        letterSpacing="wide"
-                      >
+        <Container maxW="container.xl" py={8}>
+          <VStack spacing={8} align="stretch">
+
+            {/* Bouton retour */}
+            <Box>
+              <Button
+                leftIcon={<ArrowBackIcon />}
+                variant="ghost"
+                onClick={() => navigate("/cycles")}
+                size="sm"
+                _hover={{ transform: "translateX(-4px)" }}
+                transition="all 0.2s"
+              >
+                {t("pages.cycleDetail.backToCycles")}
+              </Button>
+            </Box>
+
+            {/* Stats strip */}
+            {cycle.rotations && cycle.rotations.length > 0 && (
+              <Box
+                bg={statBg}
+                borderRadius="xl"
+                borderWidth={1}
+                borderColor={borderColor}
+                boxShadow="md"
+                overflow="hidden"
+              >
+                <Flex
+                  justify="center"
+                  align="center"
+                  px={6}
+                  py={5}
+                  gap={12}
+                  wrap="wrap"
+                >
+                  <HStack spacing={3}>
+                    <Box bg="green.500" borderRadius="lg" p={2} display="flex" alignItems="center" justifyContent="center">
+                      <Icon as={FiCalendar} color="white" boxSize={4} />
+                    </Box>
+                    <VStack align="start" spacing={0}>
+                      <Text fontSize="lg" fontWeight="extrabold" color="green.500">
+                        {cycle.rotations[0].start_date || "—"}
+                      </Text>
+                      <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wide">
                         {t("pages.cycleDetail.labelStartDate")}
                       </Text>
-                    </HStack>
-                    <Text fontSize="xl" fontWeight="bold" color="green.500">
-                      {cycle.rotations[0].start_date || t("pages.cycleDetail.notDefined")}
-                    </Text>
-                  </Box>
-                  <Box
-                    bg={infoBg}
-                    p={5}
-                    borderRadius="lg"
-                    transition="all 0.3s"
-                    _hover={{ transform: "translateY(-4px)", boxShadow: "lg" }}
-                  >
-                    <HStack spacing={2} mb={3}>
-                      <CalendarIcon color="red.500" boxSize={5} />
-                      <Text
-                        fontSize="sm"
-                        fontWeight="semibold"
-                        color={textSecondary}
-                        textTransform="uppercase"
-                        letterSpacing="wide"
-                      >
+                    </VStack>
+                  </HStack>
+
+                  <Divider orientation="vertical" h="40px" />
+
+                  <HStack spacing={3}>
+                    <Box bg="red.500" borderRadius="lg" p={2} display="flex" alignItems="center" justifyContent="center">
+                      <Icon as={FiCalendar} color="white" boxSize={4} />
+                    </Box>
+                    <VStack align="start" spacing={0}>
+                      <Text fontSize="lg" fontWeight="extrabold" color="red.500">
+                        {cycle.rotations[cycle.rotations.length - 1].end_date || "—"}
+                      </Text>
+                      <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wide">
                         {t("pages.cycleDetail.labelEndDate")}
                       </Text>
-                    </HStack>
-                    <Text fontSize="xl" fontWeight="bold" color="red.500">
-                      {cycle.rotations[cycle.rotations.length - 1].end_date ||
-                        t("pages.cycleDetail.notDefined")}
-                    </Text>
-                  </Box>
-                  <Box
-                    bg={infoBg}
-                    p={5}
-                    borderRadius="lg"
-                    transition="all 0.3s"
-                    _hover={{ transform: "translateY(-4px)", boxShadow: "lg" }}
-                  >
-                    <HStack spacing={2} mb={3}>
-                      <Icon as={FiActivity} color="purple.500" boxSize={5} />
-                      <Text
-                        fontSize="sm"
-                        fontWeight="semibold"
-                        color={textSecondary}
-                        textTransform="uppercase"
-                        letterSpacing="wide"
-                      >
+                    </VStack>
+                  </HStack>
+
+                  <Divider orientation="vertical" h="40px" />
+
+                  <HStack spacing={3}>
+                    <Box bgGradient="linear(to-br, purple.500, blue.500)" borderRadius="lg" p={2} display="flex" alignItems="center" justifyContent="center">
+                      <Icon as={FiLayers} color="white" boxSize={4} />
+                    </Box>
+                    <VStack align="start" spacing={0}>
+                      <Text fontSize="lg" fontWeight="extrabold" bgGradient="linear(to-r, purple.500, blue.400)" bgClip="text">
+                        {cycle.rotations.length}
+                      </Text>
+                      <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wide">
                         {t("pages.cycleDetail.labelRotations")}
                       </Text>
-                    </HStack>
-                    <Text fontSize="xl" fontWeight="bold" color="purple.500">
-                      {cycle.rotations.length}
-                    </Text>
-                  </Box>
-                </SimpleGrid>
-              </VStack>
-            </CardBody>
-          </Card>
-        )}
+                    </VStack>
+                  </HStack>
+                </Flex>
+              </Box>
+            )}
 
-        {/* Liste détaillée des rotations */}
-        {cycle.rotations && cycle.rotations.length > 0 && (
-          <Box>
-            <VStack spacing={4} align="stretch" mb={6}>
-              <Heading size="md" fontWeight="bold" color="purple.500">
-                {t("pages.cycleDetail.rotationsHeading")}
-              </Heading>
-              <Alert
-                status="info"
-                variant="left-accent"
-                borderRadius="lg"
-                bg={infoBg}
-                boxShadow="sm"
-              >
-                <AlertIcon />
-                <Text fontSize="sm" fontWeight="medium">
-                  {t("pages.cycleDetail.rotationsClickTip")}
+            {/* Liste des rotations */}
+            {cycle.rotations && cycle.rotations.length > 0 && (
+              <VStack spacing={2} align="stretch">
+                <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wider" mb={1}>
+                  {t("pages.cycleDetail.rotationsHeading")}
                 </Text>
-              </Alert>
-            </VStack>
-            
-            <VStack spacing={4} align="stretch">
-              {cycle.rotations.map((rotation, index) => (
-                <Box
-                  key={index}
-                  bg={cardBg}
-                  borderRadius="xl"
-                  boxShadow={shadowColor}
-                  border="2px solid"
-                  borderColor={borderColor}
-                  transition="all 0.3s"
-                  _hover={{
-                    transform: "translateX(8px)",
-                    boxShadow: "2xl",
-                    borderColor: "purple.400",
-                    bg: rotationHoverBg,
-                          _before: {
-                      width: "12px",
-                    },
-                  }}
-                  cursor="pointer"
-                  position="relative"
-                  overflow="hidden"
-                  _before={{
-                    content: '""',
-                    position: "absolute",
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: "6px",
-                    bgGradient: "linear(to-b, purple.400, blue.500)",
-                    transition: "width 0.3s",
-                  }}
-                >
-                  <Box p={6} pl={8}>
-                    <Flex
-                      direction={{ base: "column", lg: "row" }}
-                      gap={6}
-                      align={{ base: "stretch", lg: "center" }}
-                    >
-                      {/* Section principale - Titre et période */}
-                      <Box flex="0 0 auto" minW={{ lg: "200px" }}>
-                        <VStack align="start" spacing={2}>
+
+                {cycle.rotations.map((rotation, index) => (
+                  <Box
+                    key={index}
+                    bg={cardBg}
+                    backdropFilter="blur(12px)"
+                    borderRadius="xl"
+                    borderWidth={1}
+                    borderColor={borderColor}
+                    overflow="hidden"
+                    position="relative"
+                    transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                    _hover={{
+                      transform: "translateX(4px)",
+                      borderColor: "purple.400",
+                      _dark: { borderColor: "purple.600" },
+                      bg: rowHoverBg,
+                    }}
+                  >
+                    {/* Accent bar */}
+                    <Box
+                      position="absolute"
+                      left={0}
+                      top={0}
+                      bottom={0}
+                      w="3px"
+                      bgGradient="linear(to-b, purple.400, blue.500)"
+                    />
+
+                    <Box pl={5} pr={4} py={3}>
+                      {/* Ligne 1 : position + lien + badge période */}
+                      <Flex justify="space-between" align="center" mb={2}>
+                        <HStack spacing={2}>
+                          <Text fontSize="xs" fontWeight="bold" color="purple.500" minW="24px" textAlign="right">
+                            #{rotation.position}
+                          </Text>
                           <CustomLink
                             to={`/cycle/${id}/rotation/${rotation.position}`}
                             text={`Rotation #${rotation.position}`}
                           />
-                          <Badge
-                            colorScheme="purple"
-                            fontSize="sm"
-                            px={4}
-                            py={1}
-                            borderRadius="full"
-                            fontWeight="bold"
-                          >
-                            {t(`periods.${rotation.period}`, rotation.period)}
-                          </Badge>
-                        </VStack>
-                      </Box>
-
-                      {/* Divider horizontal pour mobile */}
-                      <Divider display={{ base: "block", lg: "none" }} />
-                      
-                      {/* Divider vertical pour desktop */}
-                      <Divider
-                        orientation="vertical"
-                        h="80px"
-                        display={{ base: "none", lg: "block" }}
-                      />
-
-                      {/* Infos de la rotation */}
-                      <Flex
-                        flex={1}
-                        gap={4}
-                        wrap="wrap"
-                        align="center"
-                        justify="space-between"
-                      >
-                        {/* Killer */}
-                        <Box
-                          bg={infoBg}
-                          px={4}
-                          py={2}
-                          borderRadius="lg"
-                          minW="150px"
+                        </HStack>
+                        <Badge
+                          fontSize="xs"
+                          px={2.5}
+                          py={1}
+                          borderRadius="full"
+                          colorScheme={rotation.period?.includes("Vendredi") ? "pink" : "blue"}
+                          fontWeight="bold"
+                          flexShrink={0}
                         >
-                          <Text
-                            fontSize="xs"
-                            color={textSecondary}
-                            mb={1}
-                            fontWeight="semibold"
-                            textTransform="uppercase"
-                            letterSpacing="wide"
-                          >
+                          {t(`periodsShort.${rotation.period}`, rotation.period?.includes("Vendredi") ? "V–D" : "M–J")}
+                        </Badge>
+                      </Flex>
+
+                      {/* Ligne 2 : infos */}
+                      <Flex gap={2} flexWrap="wrap">
+                        {/* Killer */}
+                        <Box flex={1} minW="110px" bg={rowBg} px={3} py={1.5} borderRadius="lg">
+                          <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide">
                             {t("pages.cycleDetail.fieldKiller")}
                           </Text>
-                          <Text fontSize="md" fontWeight="bold" color="green.500">
+                          <Text fontSize="sm" fontWeight="bold" color={labelColor} noOfLines={1}>
                             {t(`factions.${rotation.killer}`, rotation.killer)}
                           </Text>
                         </Box>
 
-                        {/* Type d'attaque */}
-                        <Box
-                          bg={infoBg}
-                          px={4}
-                          py={2}
-                          borderRadius="lg"
-                          minW="150px"
-                        >
-                          <Text
-                            fontSize="xs"
-                            color={textSecondary}
-                            mb={1}
-                            fontWeight="semibold"
-                            textTransform="uppercase"
-                            letterSpacing="wide"
-                          >
+                        {/* Attack */}
+                        <Box flexShrink={0} bg={rowBg} px={3} py={1.5} borderRadius="lg">
+                          <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" mb={1}>
                             {t("pages.cycleDetail.fieldAttack")}
                           </Text>
-                          <Badge
-                            colorScheme={
-                              rotation.attack === "R"
-                                ? "red"
-                                : rotation.attack === "B"
-                                ? "blue"
-                                : "orange"
-                            }
-                            fontSize="sm"
-                            fontWeight="bold"
-                            px={3}
-                            py={1}
-                            borderRadius="md"
-                          >
-                            {t(`attackTypes.${rotation.attack}`, handleAttackType(rotation))}
-                          </Badge>
+                          <HStack spacing={1.5}>
+                            <AttackTypeBadge attackType={rotation.attack} size="15px" />
+                            <Text fontSize="xs" color={subTextColor} w="46px">
+                              {t(`attackTypes.${rotation.attack}`, rotation.attack)}
+                            </Text>
+                          </HStack>
                         </Box>
 
-                        {/* Altération */}
-                        <Box
-                          bg={infoBg}
-                          px={4}
-                          py={2}
-                          borderRadius="lg"
-                          minW="150px"
-                        >
-                          <Text
-                            fontSize="xs"
-                            color={textSecondary}
-                            mb={1}
-                            fontWeight="semibold"
-                            textTransform="uppercase"
-                            letterSpacing="wide"
-                          >
+                        {/* Alteration */}
+                        <Box flexShrink={0} bg={rowBg} px={3} py={1.5} borderRadius="lg">
+                          <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" mb={1}>
                             {t("pages.cycleDetail.fieldAlteration")}
                           </Text>
-                          <AlterationImage
-                            alteration={rotation.alteration}
-                            size="28px"
-                            showLabel={true}
-                          />
+                          <AlterationImage alteration={rotation.alteration} size="20px" showLabel={true} />
                         </Box>
 
                         {/* Dates */}
-                        <Box
-                          bg={infoBg}
-                          px={4}
-                          py={2}
-                          borderRadius="lg"
-                          minW="200px"
-                        >
-                          <VStack spacing={1} align="start">
-                            <HStack spacing={2}>
-                              <CalendarIcon color="green.500" boxSize={3} />
-                              <Text fontSize="xs" color={textSecondary} fontWeight="medium">
-                                {rotation.start_date || t("pages.cycleDetail.notDefined")}
-                              </Text>
-                            </HStack>
-                            <HStack spacing={2}>
-                              <CalendarIcon color="red.500" boxSize={3} />
-                              <Text fontSize="xs" color={textSecondary} fontWeight="medium">
-                                {rotation.end_date || t("pages.cycleDetail.notDefined")}
-                              </Text>
-                            </HStack>
-                          </VStack>
+                        <Box flexShrink={0} bg={rowBg} px={3} py={1.5} borderRadius="lg">
+                          <HStack spacing={1.5} mb={0.5}>
+                            <Icon as={FiCalendar} boxSize={3} color="green.500" />
+                            <Text fontSize="xs" color={subTextColor}>{rotation.start_date || "—"}</Text>
+                          </HStack>
+                          <HStack spacing={1.5}>
+                            <Icon as={FiCalendar} boxSize={3} color="red.500" />
+                            <Text fontSize="xs" color={subTextColor}>{rotation.end_date || "—"}</Text>
+                          </HStack>
                         </Box>
                       </Flex>
-                    </Flex>
+                    </Box>
                   </Box>
-                </Box>
-              ))}
-            </VStack>
-          </Box>
-        )}
-        </VStack>
-      </Container>
-    </Box>
+                ))}
+              </VStack>
+            )}
+
+          </VStack>
+        </Container>
+      </Box>
     </>
   );
 };
