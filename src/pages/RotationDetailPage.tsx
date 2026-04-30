@@ -240,8 +240,8 @@ const RotationDetailPage = () => {
   return (
     <>
       <SEOHead
-        title={`Rotation ${position} - Cycle ${cycleId} - Schrift BBS`}
-        description={`Détails de la rotation ${position} du cycle ${cycleId}`}
+        title={cycle ? `Rotation ${position} - ${cycle.name} ${cycle.year} - Schrift BBS` : `Rotation ${position} - Cycle ${cycleId} - Schrift BBS`}
+        description={cycle ? `Détails de la rotation ${position} du cycle ${cycle.name} (${cycle.year})` : `Détails de la rotation ${position} du cycle ${cycleId}`}
         noIndex={true}
       />
       <Container maxW="container.xl" py={8}>
