@@ -1,72 +1,95 @@
-import {
-  Card,
-  CardBody,
-  VStack,
-  Badge,
-  Stack
-} from "@chakra-ui/react";
-import { UserDisplay } from "./UserDisplay";
-import type { IPodiumPlayer, IUser } from "@/interfaces";
+import { Box, HStack, VStack, Text, Avatar, Badge, useColorModeValue } from "@chakra-ui/react";
+import type { IPodiumPlayer } from "@/interfaces";
 import { ScoreBadge } from "./ScoreBadge";
-import { RankBadge } from "./RankBadge";
+import { getUserAvatarUrl } from "@/utils/discord";
+import CustomLink from "./CustomLink";
 
-const PlayerCard = (
-  player: IPodiumPlayer,
+interface PlayerCardProps {
+  player: IPodiumPlayer;
+  showGuildName?: boolean;
+  podiumType?: "individual_scores" | "average_scores" | "max_scores";
+}
+
+const PlayerCard = ({
+  player,
   showGuildName = false,
-  podiumType: "individual_scores" | "average_scores" | "max_scores" =
-    "average_scores"
-) => {
-  // Si player.score est défini, c'est une rotation individuelle (respecter code couleur)
-  // Sinon c'est une moyenne de cycle (forcer bleu)
+  podiumType = "average_scores",
+}: PlayerCardProps) => {
+  const cardBg = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const hoverBorderColor = useColorModeValue("blue.400", "blue.500");
+  const rankColor = useColorModeValue("gray.500", "gray.400");
+
   const isRotationMode = player.score !== undefined;
   const cycleScore =
     podiumType === "max_scores"
       ? player.totalScore ?? player.averageScore ?? 0
       : player.averageScore ?? player.totalScore ?? 0;
-  
+
+  const avatarUrl =
+    player.avatar && player.discord_id
+      ? getUserAvatarUrl({ discord_id: player.discord_id, avatar: player.avatar }) || undefined
+      : undefined;
+
   return (
-    <Card key={player.user_id} variant="outline">
-      <CardBody p={{ base: 3, md: 4 }}>
-        <Stack
-          direction={{ base: "column", md: "row" }}
-          justify="space-between"
-          align="center"
+    <Box
+      bg={cardBg}
+      borderWidth="1px"
+      borderColor={borderColor}
+      borderRadius="lg"
+      px={3}
+      py={2}
+      transition="all 0.15s ease"
+      _hover={{ borderColor: hoverBorderColor, transform: "translateX(2px)" }}
+    >
+      <HStack spacing={3} justify="space-between">
+        {/* Rang */}
+        <Text
+          fontWeight="bold"
+          fontSize="sm"
+          color={rankColor}
+          minW="32px"
+          textAlign="center"
+          flexShrink={0}
         >
-          <Stack direction={{ base: "column", md: "row" }} spacing={4} flex={1} align="center">
-            <RankBadge rank={player.rank} />
-            <UserDisplay
-              user={
-                {
-                  _id: player.user_id,
-                  username: player.global_name || player.bbs_name || "Joueur",
-                  global_name:
-                    player.global_name || player.bbs_name || "Joueur",
-                  discord_id: player.discord_id || "",
-                  bbs_name: player.bbs_name,
-                  avatar: player.avatar,
-                  guilde_id: "",
-                  role: "membre"
-                } as IUser
-              }
-              avatarSize="sm"
-              textSize="sm"
-              rainbowText={player.rank === 1}
-            />
-            {showGuildName && player.guild_name && (
-              <Badge colorScheme="blue" fontSize="xs">
-                {player.guild_name}
-              </Badge>
-            )}
-          </Stack>
-          <VStack spacing={1} align={{ base: "center", md: "flex-end" }}>
-            <ScoreBadge
-              score={isRotationMode ? player.score || 0 : cycleScore}
-              forceBlue={!isRotationMode}
-            />
-          </VStack>
-        </Stack>
-      </CardBody>
-    </Card>
+          #{player.rank}
+        </Text>
+
+        {/* Avatar */}
+        <Avatar
+          size="sm"
+          src={avatarUrl}
+          name={player.bbs_name || player.global_name}
+          flexShrink={0}
+        />
+
+        {/* Nom + Guilde */}
+        <VStack spacing={0} align="start" flex={1} overflow="hidden" minW={0}>
+          <CustomLink
+            to={`/joueur/${player.user_id}`}
+            text={player.bbs_name || player.global_name || "Joueur"}
+            textSize="sm"
+            requireAuth
+            rainbow={player.rank === 1}
+            sx={{ fontWeight: player.rank === 1 ? "semibold" : "medium", noOfLines: 1 }}
+          />
+          {showGuildName && player.guild_name && (
+            <Badge colorScheme="purple" variant="subtle" fontSize="xs" px={2} borderRadius="full">
+              {player.guild_name}
+            </Badge>
+          )}
+        </VStack>
+
+        {/* Score */}
+        <Box flexShrink={0}>
+          <ScoreBadge
+            score={isRotationMode ? player.score || 0 : cycleScore}
+            forceBlue={!isRotationMode}
+            fontSize={{ base: "xs", md: "sm" }}
+          />
+        </Box>
+      </HStack>
+    </Box>
   );
 };
 

@@ -55,8 +55,6 @@ const PodiumPage = () => {
   const { fetchPodium, isLoading, error } = usePodiumFetch();
 
   // UI
-  const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
   const filterBg = useColorModeValue("blue.50", "blue.900");
 
   // Structured Data
@@ -368,17 +366,7 @@ const PodiumPage = () => {
         />
 
         <Container maxW="container.xl" py={8}>
-          <Box
-            bg={bgColor}
-            borderRadius="lg"
-            borderWidth="1px"
-            borderColor={borderColor}
-            boxShadow="lg"
-            p={{ base: 4, md: 6 }}
-            w={{ base: "100%", md: "90%" }}
-            mx="auto"
-          >
-            <VStack spacing={6} align="stretch">
+          <VStack spacing={5} align="stretch">
               {/* Filtres */}
               <PodiumFilters
                 displayMode={displayMode}
@@ -423,8 +411,7 @@ const PodiumPage = () => {
                 selectedGuildName={selectedGuildName}
                 onPageChange={handlePageChange}
               />
-            </VStack>
-          </Box>
+          </VStack>
         </Container>
       </Box>
     </>

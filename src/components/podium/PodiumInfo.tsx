@@ -1,4 +1,4 @@
-import { Box, VStack, Text, HStack } from "@chakra-ui/react";
+import { Box, HStack, Text, useColorModeValue } from "@chakra-ui/react";
 import type {
   IPodiumResponse,
   IPodiumWeeklyResponse,
@@ -18,24 +18,17 @@ interface PodiumInfoProps {
   filterBg: string;
 }
 
-// Type guards
 const isWeeklyResponse = (
   data: IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse
-): data is IPodiumWeeklyResponse => {
-  return "rotationsInfo" in data.meta;
-};
+): data is IPodiumWeeklyResponse => "rotationsInfo" in data.meta;
 
 const isMissesResponse = (
   data: IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse
-): data is IPodiumMissesResponse => {
-  return "totalMissesInCycle" in data.meta;
-};
+): data is IPodiumMissesResponse => "totalMissesInCycle" in data.meta;
 
 const isPodiumResponse = (
   data: IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse
-): data is IPodiumResponse => {
-  return !isWeeklyResponse(data) && !isMissesResponse(data);
-};
+): data is IPodiumResponse => !isWeeklyResponse(data) && !isMissesResponse(data);
 
 export const PodiumInfo = ({
   displayMode,
@@ -44,98 +37,104 @@ export const PodiumInfo = ({
   filterBg,
 }: PodiumInfoProps) => {
   const { t } = useTranslation();
-  return (
-    <>
-      {/* Informations sur la rotation (mode rotation) */}
-      {displayMode === "rotation" &&
-        isPodiumResponse(podiumData) &&
-        podiumData.meta?.rotationInfo && (
-          <Box p={4} bg={filterBg} borderRadius="md">
-            <VStack spacing={2}>
-              <Box
-                fontSize="lg"
-                fontWeight="bold"
-                flexWrap="wrap"
-                display="flex"
-                alignItems="center"
-                gap={2}
-              >
-                <CustomLink
-                  to={`/cycle/${selectedCycle?._id}/rotation/${podiumData.meta.rotationInfo.position}`}
-                  text={t(`factions.${podiumData.meta.rotationInfo.killer}`, podiumData.meta.rotationInfo.killer)}
-                  textSize="md"
-                />
-                <AttackTypeBadge
-                  attackType={podiumData.meta.rotationInfo.attack}
-                />
-              </Box>
-              <Text fontSize="sm">
-                {podiumData.meta.rotationInfo.start_date} →{" "}
-                {podiumData.meta.rotationInfo.end_date}
-              </Text>
-              <Text fontSize="md" fontWeight="bold">
-                {t("components.podiumInfo.rotationScore")}:{" "}
-                {podiumData.meta.averageScore?.toLocaleString("fr-FR")}
-              </Text>
-              <Text fontSize="sm">
-                {t("components.podiumInfo.totalPlayers", { count: podiumData.meta.totalPlayers })}
-              </Text>
-            </VStack>
-          </Box>
-        )}
+  const mutedText = useColorModeValue("gray.600", "gray.400");
+  const accentColor = useColorModeValue("blue.600", "blue.300");
+  const redAccent = useColorModeValue("red.600", "red.400");
 
-      {/* Informations sur la semaine (mode weekly) */}
-      {displayMode === "weekly" && isWeeklyResponse(podiumData) && (
-        <Box p={4} bg={filterBg} borderRadius="md">
-          <VStack spacing={3} align="center">
-            <Text fontSize="lg" fontWeight="bold">
-              {t("components.podiumInfo.weekLabel")} {podiumData.meta.weekNumber}
+  /* ─── Rotation mode ─── */
+  if (
+    displayMode === "rotation" &&
+    isPodiumResponse(podiumData) &&
+    podiumData.meta?.rotationInfo
+  ) {
+    const info = podiumData.meta.rotationInfo;
+    return (
+      <Box px={4} py={3} bg={filterBg} borderRadius="lg">
+        <HStack spacing={4} flexWrap="wrap" justify="center">
+          <CustomLink
+            to={`/cycle/${selectedCycle?._id}/rotation/${info.position}`}
+            text={t(`factions.${info.killer}`, info.killer)}
+            textSize="sm"
+            sx={{ fontWeight: "semibold" }}
+          />
+          <AttackTypeBadge attackType={info.attack} />
+          <Text fontSize="sm" color={mutedText}>
+            {info.start_date} → {info.end_date}
+          </Text>
+          {podiumData.meta.averageScore != null && (
+            <Text fontSize="sm" fontWeight="semibold" color={accentColor}>
+              ø {podiumData.meta.averageScore.toLocaleString("fr-FR")}
             </Text>
-            <HStack spacing={6} wrap="wrap" justify="center">
-              {podiumData.meta.rotationsInfo.map((rotation, idx) => (
-                <VStack key={idx} spacing={1}>
-                  <CustomLink
-                    to={`/cycle/${selectedCycle?._id}/rotation/${rotation.position}`}
-                    text={`${t("components.podiumInfo.rotationLabel")} ${rotation.position}`}
-                    textSize="sm"
-                  />
-                  <Text fontSize="xs">
-                    {t(`factions.${rotation.killer}`, rotation.killer)}
-                  </Text>
-                  <AttackTypeBadge attackType={rotation.attack} />
-                </VStack>
-              ))}
+          )}
+          <Text fontSize="xs" color={mutedText}>
+            {t("components.podiumInfo.totalPlayers", { count: podiumData.meta.totalPlayers })}
+          </Text>
+        </HStack>
+      </Box>
+    );
+  }
+
+  /* ─── Weekly mode ─── */
+  if (displayMode === "weekly" && isWeeklyResponse(podiumData)) {
+    return (
+      <Box px={4} py={3} bg={filterBg} borderRadius="lg">
+        <HStack spacing={5} flexWrap="wrap" justify="center" align="center">
+          <Text fontSize="sm" fontWeight="bold">
+            {t("components.podiumInfo.weekLabel")} {podiumData.meta.weekNumber}
+          </Text>
+          {podiumData.meta.rotationsInfo.map((rotation, idx) => (
+            <HStack key={idx} spacing={2}>
+              <CustomLink
+                to={`/cycle/${selectedCycle?._id}/rotation/${rotation.position}`}
+                text={`R${rotation.position}`}
+                textSize="xs"
+              />
+              <Text fontSize="xs" color={mutedText}>
+                {t(`factions.${rotation.killer}`, rotation.killer)}
+              </Text>
+              <AttackTypeBadge attackType={rotation.attack} />
             </HStack>
-            <Text fontSize="md" fontWeight="bold">
-              {t("components.podiumInfo.weeklyScore")}:{" "}
-              {podiumData.meta.averageWeekScore?.toLocaleString("fr-FR")}
-            </Text>
-            <Text fontSize="sm">
-              {t("components.podiumInfo.totalPlayers", { count: podiumData.meta.totalPlayers })}
-            </Text>
-          </VStack>
-        </Box>
-      )}
+          ))}
+          <Text fontSize="sm" fontWeight="semibold" color={accentColor}>
+            ø {podiumData.meta.averageWeekScore?.toLocaleString("fr-FR")}
+          </Text>
+          <Text fontSize="xs" color={mutedText}>
+            {t("components.podiumInfo.totalPlayers", { count: podiumData.meta.totalPlayers })}
+          </Text>
+        </HStack>
+      </Box>
+    );
+  }
 
-      {/* Informations sur les miss (mode misses) */}
-      {displayMode === "misses" && isMissesResponse(podiumData) && (
-        <Box p={4} bg={filterBg} borderRadius="md">
-          <VStack spacing={2}>
-            <Text fontSize="lg" fontWeight="bold" color="red.500">
-              📉 {t("components.podiumInfo.missTitle")}
-            </Text>
-            <Text fontSize="md">
-              {t("components.podiumInfo.missPlayers", { count: podiumData.meta.totalPlayersWithMisses })}
-            </Text>
-            <Text fontSize="sm">
-              {t("components.podiumInfo.missTotal", { count: podiumData.meta.totalMissesInCycle })}
-            </Text>
-            <Text fontSize="sm">
-              {t("components.podiumInfo.missAverage", { avg: podiumData.meta.averageMissesPerPlayer })}
-            </Text>
-          </VStack>
-        </Box>
-      )}
-    </>
-  );
+  /* ─── Misses mode ─── */
+  if (displayMode === "misses" && isMissesResponse(podiumData)) {
+    return (
+      <Box px={4} py={3} bg={filterBg} borderRadius="lg">
+        <HStack spacing={5} flexWrap="wrap" justify="center" align="center">
+          <Text fontSize="sm" fontWeight="bold" color={redAccent}>
+            📉 {t("components.podiumInfo.missTitle")}
+          </Text>
+          <Text fontSize="sm" color={mutedText}>
+            {t("components.podiumInfo.missPlayers", {
+              count: podiumData.meta.totalPlayersWithMisses,
+            })}
+          </Text>
+          <Text fontSize="sm" color={redAccent} fontWeight="semibold">
+            {podiumData.meta.totalMissesInCycle}{" "}
+            {t("components.podiumInfo.missTotal", {
+              count: podiumData.meta.totalMissesInCycle,
+            })}
+          </Text>
+          <Text fontSize="xs" color={mutedText}>
+            ø {podiumData.meta.averageMissesPerPlayer}{" "}
+            {t("components.podiumInfo.missAverage", {
+              avg: podiumData.meta.averageMissesPerPlayer,
+            })}
+          </Text>
+        </HStack>
+      </Box>
+    );
+  }
+
+  return null;
 };
