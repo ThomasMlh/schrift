@@ -263,12 +263,6 @@ const ComparatorPage: React.FC = () => {
     setSearchParams(new URLSearchParams({ type: newType }));
   };
 
-  const handleTabChange = (index: number) => {
-    const newType = index === 0 ? "players" : "guilds";
-    setComparisonType(newType);
-    setSearchParams(new URLSearchParams({ type: newType }));
-  };
-
   // Préparer les données pour les graphiques
   const playersData = selectedPlayers.map((player, index) => ({
     name: player.user.bbs_name || player.user.global_name || "Joueur",

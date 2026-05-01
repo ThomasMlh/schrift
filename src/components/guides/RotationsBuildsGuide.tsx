@@ -25,7 +25,7 @@ import {
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { AddIcon, InfoIcon, EditIcon, CalendarIcon } from "@chakra-ui/icons";
+import { AddIcon, EditIcon, CalendarIcon } from "@chakra-ui/icons";
 import { useBuilds, useRotations } from "../../hooks/useAPI";
 import BuildCreationModal from "../ui/BuildCreationModal";
 import { BuildDetailModal } from "../ui/BuildDetailModal";
@@ -51,7 +51,6 @@ const RotationsBuildsGuide = () => {
   const isDark = colorMode === "dark";
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
-  const cardHeaderBg = useColorModeValue("gray.50", "gray.750");
   const mutedText = useColorModeValue("gray.500", "gray.400");
 
   const { t } = useTranslation();

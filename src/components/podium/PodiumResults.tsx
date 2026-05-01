@@ -1,12 +1,15 @@
-import { Box, VStack, HStack, Text, Flex, Spinner, Alert, AlertIcon } from "@chakra-ui/react";
+import { Box, VStack, HStack, Text, Flex, Spinner, Alert, AlertIcon, Divider } from "@chakra-ui/react";
 import type {
   IPodiumResponse,
   IPodiumWeeklyResponse,
   IPodiumMissesResponse,
+  IPodiumPlayer,
 } from "@/interfaces";
 import PlayerCard from "@/components/ui/PlayerCard";
 import PlayerCardWeekly from "@/components/ui/PlayerCardWeekly";
 import PlayerCardMiss from "@/components/ui/PlayerCardMiss";
+import { PodiumPedestal } from "./PodiumPedestal";
+import type { PodiumPedestalPlayer } from "./PodiumPedestal";
 import { Pagination as PaginationComponent } from "@/components/ui/Pagination";
 import { useTranslation } from "react-i18next";
 
@@ -19,7 +22,7 @@ interface PodiumResultsProps {
   selectedCycleId: string;
   selectedWeekNumber: string;
   onPageChange: (page: number) => void;
-  selectedGuildName?: string; // Ajouter pour savoir si une guilde est filtrée
+  selectedGuildName?: string;
 }
 
 // Type guards
@@ -41,6 +44,115 @@ const isPodiumResponse = (
   return !isWeeklyResponse(data) && !isMissesResponse(data);
 };
 
+// Extrait les joueurs top 3 normalisés pour le PodiumPedestal
+const extractTop3ForPedestal = (
+  data: IPodiumResponse | IPodiumWeeklyResponse,
+  podiumType?: "individual_scores" | "average_scores" | "max_scores",
+  isFirstPage = true
+): PodiumPedestalPlayer[] => {
+  if (!isFirstPage) return [];
+
+  const top3 = data.data
+    ? (data.data as (typeof data.data[number])[]).filter((p) => p.rank <= 3)
+    : [];
+
+  if (isWeeklyResponse(data)) {
+    return top3.map((p) => {
+      const wp = p as IPodiumWeeklyResponse["data"][number];
+      return {
+        rank: wp.rank,
+        user_id: wp.user_id,
+        bbs_name: wp.bbs_name,
+        global_name: wp.global_name,
+        discord_id: wp.discord_id,
+        avatar: wp.avatar,
+        guild_name: wp.guild_name,
+        displayScore: wp.week_total_score,
+        forceBlueScore: true,
+      };
+    });
+  }
+
+  if (isPodiumResponse(data)) {
+    return top3.map((p) => {
+      const pp = p as IPodiumPlayer;
+      if (!pp) return null;
+      const isRotation = pp.score !== undefined;
+      const score =
+        podiumType === "max_scores"
+          ? pp.totalScore ?? pp.averageScore ?? 0
+          : isRotation
+          ? pp.score ?? 0
+          : pp.averageScore ?? pp.totalScore ?? 0;
+      return {
+        rank: pp.rank,
+        user_id: pp.user_id,
+        bbs_name: pp.bbs_name,
+        global_name: pp.global_name,
+        discord_id: pp.discord_id,
+        avatar: pp.avatar,
+        guild_name: pp.guild_name,
+        displayScore: score,
+        forceBlueScore: !isRotation,
+      };
+    }).filter(Boolean) as PodiumPedestalPlayer[];
+  }
+
+  return [];
+};
+
+const PlayerList = ({
+  displayMode,
+  podiumData,
+  showGuildName,
+}: {
+  displayMode: DisplayMode;
+  podiumData: IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse;
+  showGuildName: boolean;
+}) => {
+  // Exclure le top 3 de la liste si on est en mode avec podium visuel (page 1)
+  const isFirstPage = !podiumData.pagination || podiumData.pagination.currentPage === 1;
+  const showPedestal =
+    (displayMode === "cycle" || displayMode === "rotation" || displayMode === "weekly") &&
+    isFirstPage;
+  const listData = showPedestal
+    ? (podiumData.data ?? []).filter((p) => p.rank > 3)
+    : (podiumData.data ?? []);
+
+  if (listData.length === 0) return null;
+
+  return (
+    <VStack spacing={2} align="stretch">
+      {displayMode === "weekly" && isWeeklyResponse(podiumData)
+        ? listData.map((player) => (
+            <PlayerCardWeekly
+              key={player.user_id}
+              player={player as IPodiumWeeklyResponse["data"][number]}
+              showGuildName={showGuildName}
+            />
+          ))
+        : displayMode === "misses" && isMissesResponse(podiumData)
+        ? listData.map((player) => (
+            <PlayerCardMiss
+              key={player.user_id}
+              player={player as IPodiumMissesResponse["data"][number]}
+              showGuildName={showGuildName}
+            />
+          ))
+        : isPodiumResponse(podiumData)
+        ? listData.map((player) => (
+            <PlayerCard
+              key={player.user_id}
+              player={player as IPodiumPlayer}
+              showGuildName={showGuildName}
+              podiumType={podiumData.meta.podiumType}
+            />
+          ))
+        : null}
+    </VStack>
+  );
+};
+
 export const PodiumResults = ({
   displayMode,
   isLoading,
@@ -51,13 +163,14 @@ export const PodiumResults = ({
   selectedGuildName = "",
 }: PodiumResultsProps) => {
   const { t } = useTranslation();
-  const showGuildName = !selectedGuildName; // Afficher la guilde si aucune n'est filtrée
+  const showGuildName = !selectedGuildName;
+
   if (isLoading) {
     return (
-      <Flex justify="center" align="center" py={8}>
+      <Flex justify="center" align="center" py={12}>
         <VStack spacing={3}>
-          <Spinner size="lg" />
-          <Text>{t("components.podiumResults.loading")}</Text>
+          <Spinner size="xl" thickness="3px" color="blue.400" />
+          <Text color="gray.500">{t("components.podiumResults.loading")}</Text>
         </VStack>
       </Flex>
     );
@@ -78,105 +191,142 @@ export const PodiumResults = ({
     );
   }
 
+  const isFirstPage = !podiumData.pagination || podiumData.pagination.currentPage === 1;
+  const showPedestal =
+    (displayMode === "cycle" || displayMode === "rotation" || displayMode === "weekly") &&
+    isFirstPage &&
+    podiumData.data.some((p) => p.rank === 1);
+
+  const pedestalPlayers =
+    showPedestal && !isMissesResponse(podiumData)
+      ? extractTop3ForPedestal(
+          podiumData,
+          isPodiumResponse(podiumData) ? podiumData.meta.podiumType : undefined,
+          isFirstPage
+        )
+      : [];
+
+  const hasListPlayers = showPedestal
+    ? podiumData.data.some((p) => p.rank > 3)
+    : true;
+
   return (
-    <>
-      {/* Informations sur les résultats */}
-      {podiumData.pagination && (
-        <Text fontSize="sm" color="gray.600">
-          {t("components.podiumResults.paginationInfo", {
-            current: podiumData.pagination.currentPage,
-            total: podiumData.pagination.totalPages,
-            count: podiumData.pagination.itemsOnPage,
-          })}
-        </Text>
+    <VStack spacing={4} align="stretch">
+      {/* Podium visuel Top 3 */}
+      {showPedestal && pedestalPlayers.length > 0 && (
+        <PodiumPedestal players={pedestalPlayers} showGuildName={showGuildName} />
       )}
 
-      {/* Affichage mobile : toujours en colonne unique */}
-      <Box display={{ base: "block", lg: "none" }}>
-        <VStack spacing={3} align="stretch">
-          {displayMode === "weekly" && isWeeklyResponse(podiumData)
-            ? podiumData.data.map((player) =>
-                PlayerCardWeekly(player, showGuildName)
-              )
-            : displayMode === "misses" && isMissesResponse(podiumData)
-            ? podiumData.data.map((player) => PlayerCardMiss(player, showGuildName))
-            : isPodiumResponse(podiumData)
-            ? podiumData.data.map((player) =>
-                PlayerCard(player, showGuildName, podiumData.meta.podiumType)
-              )
-            : null}
-        </VStack>
-      </Box>
+      {/* Info pagination */}
+      {podiumData.pagination && (
+        <Flex justify="space-between" align="center" px={1}>
+          <Text fontSize="sm" color="gray.500">
+            {t("components.podiumResults.paginationInfo", {
+              current: podiumData.pagination.currentPage,
+              total: podiumData.pagination.totalPages,
+              count: podiumData.pagination.itemsOnPage,
+            })}
+          </Text>
+          <Text fontSize="xs" color="gray.400">
+            {isMissesResponse(podiumData)
+              ? t("components.podiumResults.playersWithMiss", { count: podiumData.meta.totalPlayersWithMisses })
+              : t("components.podiumResults.playersTotal", { count: podiumData.meta.totalPlayers })}
+          </Text>
+        </Flex>
+      )}
 
-      {/* Affichage desktop */}
-      <Box display={{ base: "none", lg: "block" }}>
-        {podiumData.data.length >= 10 ? (
-          // 2 colonnes pour 10+ joueurs
-          <HStack spacing={4} align="start">
-            <VStack spacing={3} align="stretch" flex={1}>
-              {displayMode === "weekly" && isWeeklyResponse(podiumData)
-                ? podiumData.data
-                    .slice(0, Math.ceil(podiumData.data.length / 2))
-                    .map((player) => PlayerCardWeekly(player, showGuildName))
-                : displayMode === "misses" && isMissesResponse(podiumData)
-                ? podiumData.data
-                    .slice(0, Math.ceil(podiumData.data.length / 2))
-                    .map((player) => PlayerCardMiss(player, showGuildName))
-                : isPodiumResponse(podiumData)
-                ? podiumData.data
-                    .slice(0, Math.ceil(podiumData.data.length / 2))
-                  .map((player) =>
-                    PlayerCard(player, showGuildName, podiumData.meta.podiumType)
-                  )
-                : null}
-            </VStack>
-            <VStack spacing={3} align="stretch" flex={1}>
-              {displayMode === "weekly" && isWeeklyResponse(podiumData)
-                ? podiumData.data
-                    .slice(Math.ceil(podiumData.data.length / 2))
-                    .map((player) => PlayerCardWeekly(player, showGuildName))
-                : displayMode === "misses" && isMissesResponse(podiumData)
-                ? podiumData.data
-                    .slice(Math.ceil(podiumData.data.length / 2))
-                    .map((player) => PlayerCardMiss(player, showGuildName))
-                : isPodiumResponse(podiumData)
-                ? podiumData.data
-                    .slice(Math.ceil(podiumData.data.length / 2))
-                    .map((player) =>
-                      PlayerCard(player, showGuildName, podiumData.meta.podiumType)
-                    )
-                : null}
-            </VStack>
-          </HStack>
-        ) : (
-          // Colonne unique pour moins de 10 joueurs
-          <VStack spacing={3} align="stretch">
-            {displayMode === "weekly" && isWeeklyResponse(podiumData)
-              ? podiumData.data.map((player) =>
-                  PlayerCardWeekly(player, showGuildName)
-                )
-              : displayMode === "misses" && isMissesResponse(podiumData)
-              ? podiumData.data.map((player) =>
-                  PlayerCardMiss(player, showGuildName)
-                )
-              : isPodiumResponse(podiumData)
-              ? podiumData.data.map((player) =>
-                  PlayerCard(player, showGuildName, podiumData.meta.podiumType)
-                )
-              : null}
-          </VStack>
-        )}
-      </Box>
+      {/* Séparateur si on a le podium ET la liste */}
+      {showPedestal && hasListPlayers && pedestalPlayers.length > 0 && (
+        <HStack spacing={3} align="center">
+          <Divider />
+          <Text fontSize="xs" color="gray.500" whiteSpace="nowrap" flexShrink={0}>
+            {t("components.podiumResults.restOfRanking", "Classement complet")}
+          </Text>
+          <Divider />
+        </HStack>
+      )}
 
-      {/* Stats supplémentaires */}
-      {podiumData && (
-        <Text fontSize="xs" color="gray.500" textAlign="center">
-          {isMissesResponse(podiumData)
-            ? t("components.podiumResults.playersWithMiss", { count: podiumData.meta.totalPlayersWithMisses })
-            : isPodiumResponse(podiumData) || isWeeklyResponse(podiumData)
-            ? t("components.podiumResults.playersTotal", { count: podiumData.meta.totalPlayers })
-            : ""}
-        </Text>
+      {/* Liste des joueurs (desktop 2 colonnes, mobile 1) */}
+      {hasListPlayers && (
+        <>
+          {/* Mobile */}
+          <Box display={{ base: "block", lg: "none" }}>
+            <PlayerList
+              displayMode={displayMode}
+              podiumData={podiumData}
+              showGuildName={showGuildName}
+            />
+          </Box>
+
+          {/* Desktop */}
+          <Box display={{ base: "none", lg: "block" }}>
+            {(() => {
+              const allData = showPedestal
+                ? podiumData.data.filter((p) => p.rank > 3)
+                : podiumData.data;
+
+              if (allData.length === 0) return null;
+
+              if (allData.length >= 10) {
+                const mid = Math.ceil(allData.length / 2);
+                const leftData = allData.slice(0, mid);
+                const rightData = allData.slice(mid);
+
+                const renderList = (items: typeof allData) => {
+                  if (displayMode === "weekly" && isWeeklyResponse(podiumData)) {
+                    return items.map((p) => (
+                      <PlayerCardWeekly
+                        key={p.user_id}
+                        player={p as IPodiumWeeklyResponse["data"][number]}
+                        showGuildName={showGuildName}
+                      />
+                    ));
+                  }
+                  if (displayMode === "misses" && isMissesResponse(podiumData)) {
+                    return items.map((p) => (
+                      <PlayerCardMiss
+                        key={p.user_id}
+                        player={p as IPodiumMissesResponse["data"][number]}
+                        showGuildName={showGuildName}
+                      />
+                    ));
+                  }
+                  if (isPodiumResponse(podiumData)) {
+                    return items.map((p) => (
+                      <PlayerCard
+                        key={p.user_id}
+                        player={p as IPodiumPlayer}
+                        showGuildName={showGuildName}
+                        podiumType={podiumData.meta.podiumType}
+                      />
+                    ));
+                  }
+                  return null;
+                };
+
+                return (
+                  <HStack spacing={4} align="start">
+                    <VStack spacing={2} align="stretch" flex={1}>
+                      {renderList(leftData)}
+                    </VStack>
+                    <VStack spacing={2} align="stretch" flex={1}>
+                      {renderList(rightData)}
+                    </VStack>
+                  </HStack>
+                );
+              }
+
+              // Moins de 10 joueurs : colonne unique
+              return (
+                <PlayerList
+                  displayMode={displayMode}
+                  podiumData={podiumData}
+                  showGuildName={showGuildName}
+                />
+              );
+            })()}
+          </Box>
+        </>
       )}
 
       {/* Pagination */}
@@ -191,6 +341,6 @@ export const PodiumResults = ({
           itemsOnPage={podiumData.pagination.itemsOnPage}
         />
       )}
-    </>
+    </VStack>
   );
 };
