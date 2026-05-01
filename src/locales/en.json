@@ -56,7 +56,10 @@
       "searchPlaceholder": "Search a character...",
       "seoTitle": "Schrift BBS - Complete Database",
       "seoDescription": "Discover all Bleach Brave Souls characters with their stats, affinities, attack types and detailed information. Regularly updated database.",
-      "heading": "Ṣčhrīft Character Database"
+      "heading": "Ṣčhrīft Character Database",
+      "heroTitle": "BBS Database",
+      "heroDescription": "Discover all Bleach Brave Souls characters with their stats, affinities and detailed information",
+      "heroBadge": "Database"
     },
     "cycles": {
       "title": "Cycles",
@@ -287,8 +290,9 @@
       "filterCategory": "Category",
       "filterKiller": "Killer",
       "filterType": "Type",
-      "attackRed": "Red",
-      "attackBlue": "Blue",
+      "attackRed": "Melee",
+      "attackBlue": "Ranged",
+      "attackAll": "All types",
       "paginationCharacters": "character(s) found",
       "paginationPage": "Page",
       "paginationOf": "of",
@@ -300,7 +304,10 @@
       "colKillers": "Killers",
       "colAttackType": "Attack type",
       "buttonReset": "Reset",
-      "noResults": "No character found"
+      "noResults": "No character found",
+      "noResultsHint": "Try adjusting your filters or search term",
+      "loading": "Loading characters...",
+      "perPage": "Per page"
     },
     "guildTabsList": {
       "guildDisabled": "disabled",

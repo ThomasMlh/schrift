@@ -1,13 +1,12 @@
-import { Box, Container, Flex, Text, VStack, Badge, useColorMode } from "@chakra-ui/react";
+import { Box, Container, VStack } from "@chakra-ui/react";
 import { CharactersTable } from "../components/CharactersTable";
 import { SEOHead } from "../components/SEOHead";
+import { HeroSection } from "../components/HeroSection";
 import { useTranslation } from "react-i18next";
 
 const CharactersPage = () => {
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const { t } = useTranslation();
-  const { colorMode } = useColorMode();
-  const isDark = colorMode === 'dark';
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -52,31 +51,20 @@ const CharactersPage = () => {
         url="https://bbs-schrift.fr/personnages"
         structuredData={structuredData}
       />
-      <Container maxW="container.xl" py={8}>
-        <VStack spacing={8} align="stretch">
-          {/* Header */}
-          <Box>
-            <Flex align="center" gap={3} mb={1}>
-              <Text
-                fontSize={{ base: "2xl", md: "3xl" }}
-                fontWeight="bold"
-                bgGradient={isDark ? "linear(to-r, #C4B5FD, #818CF8)" : "linear(to-r, #7C3AED, #4F46E5)"}
-                bgClip="text"
-              >
-                {t("pages.characters.heading")}
-              </Text>
-              <Badge colorScheme="purple" variant="solid" borderRadius="full" px={3} fontSize="xs">
-                BBS
-              </Badge>
-            </Flex>
-            <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>
-              {t("pages.characters.seoDescription")}
-            </Text>
-          </Box>
-
-          <CharactersTable apiUrl={apiUrl} />
-        </VStack>
-      </Container>
+      <Box mb="150px">
+        <Box w="100%">
+          <HeroSection
+            title={t("pages.characters.heroTitle")}
+            description={t("pages.characters.heroDescription")}
+            badge={{ text: t("pages.characters.heroBadge"), icon: "⚔️" }}
+          />
+          <Container maxW="container.xl" py={8}>
+            <VStack spacing={6} align="stretch">
+              <CharactersTable apiUrl={apiUrl} />
+            </VStack>
+          </Container>
+        </Box>
+      </Box>
     </>
   );
 }

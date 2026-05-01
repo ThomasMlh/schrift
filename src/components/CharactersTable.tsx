@@ -1,7 +1,7 @@
 import {
   Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
   Text, Input, InputGroup, InputLeftElement, Spinner,
-  useColorMode, Badge, Flex, Avatar
+  useColorMode, Badge, Flex, Avatar, Tooltip, SimpleGrid
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -48,10 +48,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
   // Hooks UI
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
-  const bgColor = isDark ? 'gray.800' : 'white';
   const borderColor = isDark ? 'whiteAlpha.100' : 'gray.200';
-  const hoverBg = isDark ? 'rgba(124,58,237,0.06)' : 'purple.50';
-  const badgeVariant = isDark ? 'solid' : 'subtle';
 
   // Fonction pour mettre à jour l'URL avec les filtres actuels
   const updateURLParams = (search = "", affinity = "", category = "", killer = "", attackType = "", limit = itemsPerPage, page = 1) => {
@@ -154,253 +151,301 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
   };
 
   return (
-    <VStack spacing={6} align="stretch" w="100%">
-      {/* Contrôles de filtrage */}
-      <VStack spacing={4} align="stretch">
-        {/* Première ligne - Recherche */}
-        <Flex justify="center">
-          <InputGroup maxW="500px">
+    <VStack spacing={5} align="stretch" w="100%">
+
+      {/* ── Filtres ── */}
+      <Box
+        bg={isDark ? 'rgba(255,255,255,0.03)' : 'white'}
+        borderRadius="xl"
+        borderWidth="1px"
+        borderColor={borderColor}
+        p={5}
+      >
+        <VStack spacing={4} align="stretch">
+          {/* Recherche */}
+          <InputGroup>
             <InputLeftElement pointerEvents="none">
-              <SearchIcon color="gray.300" />
+              <SearchIcon color={isDark ? 'gray.500' : 'gray.400'} />
             </InputLeftElement>
             <Input
               placeholder={t("components.charactersTable.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              bg={isDark ? 'rgba(255,255,255,0.04)' : 'gray.50'}
+              borderColor={borderColor}
+              _hover={{ borderColor: isDark ? 'whiteAlpha.300' : 'gray.300' }}
+              _focus={{ borderColor: 'purple.400', boxShadow: '0 0 0 1px var(--chakra-colors-purple-400)' }}
+              borderRadius="lg"
             />
           </InputGroup>
-        </Flex>
 
-        {/* Deuxième ligne - Filtres */}
-        <Flex direction={{ base: "column", md: "row" }} gap={3} align="center" justify="center" flexWrap="wrap">
-          {/* Filtre par affinité */}
-          <AffinityFilter
-            selectedAffinity={selectedAffinity}
-            affinities={affinities}
-            onAffinityChange={setSelectedAffinity}
-          />
+          {/* Filtres avancés */}
+          <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 5 }} spacing={3}>
+            <Box>
+              <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={isDark ? 'gray.500' : 'gray.400'} mb={1.5}>
+                {t("components.charactersTable.filterAffinity")}
+              </Text>
+              <AffinityFilter
+                selectedAffinity={selectedAffinity}
+                affinities={affinities}
+                onAffinityChange={setSelectedAffinity}
+              />
+            </Box>
+            <Box>
+              <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={isDark ? 'gray.500' : 'gray.400'} mb={1.5}>
+                {t("components.charactersTable.filterCategory")}
+              </Text>
+              <CategoryFilter
+                selectedCategory={selectedCategory}
+                categories={categories}
+                onCategoryChange={setSelectedCategory}
+              />
+            </Box>
+            <Box>
+              <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={isDark ? 'gray.500' : 'gray.400'} mb={1.5}>
+                {t("components.charactersTable.filterKiller")}
+              </Text>
+              <KillerFilter
+                selectedKiller={selectedKiller}
+                killers={killers}
+                onKillerChange={setSelectedKiller}
+              />
+            </Box>
+            <Box>
+              <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={isDark ? 'gray.500' : 'gray.400'} mb={1.5}>
+                {t("components.charactersTable.filterType")}
+              </Text>
+              <AttackTypeFilter
+                selectedAttackType={selectedAttackType}
+                onAttackTypeChange={setSelectedAttackType}
+              />
+            </Box>
+            <Box>
+              <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={isDark ? 'gray.500' : 'gray.400'} mb={1.5}>
+                {t("components.charactersTable.perPage")}
+              </Text>
+              <CustomSelect
+                value={String(itemsPerPage)}
+                onChange={(val) => setItemsPerPage(Number(val))}
+                options={[
+                  { value: "10", label: "10 / page" },
+                  { value: "20", label: "20 / page" },
+                  { value: "50", label: "50 / page" },
+                  { value: "100", label: "100 / page" },
+                ]}
+                allowDeselect={false}
+              />
+            </Box>
+          </SimpleGrid>
 
-          {/* Filtre par catégorie */}
-          <CategoryFilter
-            selectedCategory={selectedCategory}
-            categories={categories}
-            onCategoryChange={setSelectedCategory}
-          />
-
-          {/* Filtre par tueur */}
-          <KillerFilter
-            selectedKiller={selectedKiller}
-            killers={killers}
-            onKillerChange={setSelectedKiller}
-          />
-
-          {/* Filtre par type d'attaque */}
-          <AttackTypeFilter
-            selectedAttackType={selectedAttackType}
-            onAttackTypeChange={setSelectedAttackType}
-          />
-
-          {/* Items par page */}
-          <CustomSelect
-            maxW="120px"
-            value={String(itemsPerPage)}
-            onChange={(val) => setItemsPerPage(Number(val))}
-            options={[
-              { value: "10", label: "10 / page" },
-              { value: "20", label: "20 / page" },
-              { value: "50", label: "50 / page" },
-              { value: "100", label: "100 / page" },
-            ]}
-            allowDeselect={false}
-          />
-
-          {/* Bouton reset */}
+          {/* Barre d'actions + filtres actifs */}
           {(searchTerm || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType) && (
-            <Button
-              size="md"
-              colorScheme="red"
-              variant="outline"
-              onClick={resetFilters}
+            <Flex align="center" justify="space-between" flexWrap="wrap" gap={3}
+              pt={3} borderTopWidth="1px" borderTopColor={borderColor}
             >
-              Reset
-            </Button>
+              <HStack spacing={2} flexWrap="wrap">
+                <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest"
+                  color={isDark ? 'purple.400' : 'purple.600'}>
+                  {t("components.charactersTable.activeFilters")}
+                </Text>
+                {searchTerm && (
+                  <Badge colorScheme="blue" variant={isDark ? 'solid' : 'subtle'} borderRadius="md">
+                    {t("components.charactersTable.filterSearch")}: {searchTerm}
+                  </Badge>
+                )}
+                {selectedAffinity && (
+                  <HStack spacing={1}>
+                    <AffinityIcon affinity={selectedAffinity} size="16px" />
+                    <Badge colorScheme="green" variant={isDark ? 'solid' : 'subtle'} borderRadius="md">
+                      {selectedAffinity}
+                    </Badge>
+                  </HStack>
+                )}
+                {selectedCategory && (
+                  <HStack spacing={1}>
+                    <CategoryIcon category={selectedCategory} size="16px" />
+                    <Badge colorScheme="purple" variant={isDark ? 'solid' : 'subtle'} borderRadius="md">
+                      {selectedCategory}
+                    </Badge>
+                  </HStack>
+                )}
+                {selectedKiller && (
+                  <HStack spacing={1}>
+                    <KillerIcon killer={selectedKiller} size="16px" />
+                    <Badge colorScheme="orange" variant={isDark ? 'solid' : 'subtle'} borderRadius="md">
+                      {selectedKiller}
+                    </Badge>
+                  </HStack>
+                )}
+                {selectedAttackType && (
+                  <HStack spacing={1}>
+                    <AttackTypeBadge attackType={selectedAttackType} size="14px" />
+                    <Badge colorScheme="cyan" variant={isDark ? 'solid' : 'subtle'} borderRadius="md">
+                      {selectedAttackType === 'R'
+                        ? t("components.charactersTable.attackRed")
+                        : t("components.charactersTable.attackBlue")}
+                    </Badge>
+                  </HStack>
+                )}
+              </HStack>
+              <Button size="sm" colorScheme="red" variant="ghost" onClick={resetFilters} borderRadius="lg">
+                Reset
+              </Button>
+            </Flex>
           )}
-        </Flex>
-      </VStack>
+        </VStack>
+      </Box>
 
-      {/* Affichage des filtres actifs */}
-      {(searchTerm || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType) && (
-        <Box
-          p={3}
-          borderRadius="lg"
-          bg={isDark ? 'rgba(124,58,237,0.08)' : 'purple.50'}
-          border="1px solid"
-          borderColor={isDark ? 'purple.700' : 'purple.200'}
-      >
-          <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest" textTransform="uppercase"
-              color={isDark ? 'purple.400' : 'purple.600'} mb={2}>
-              {t("components.charactersTable.activeFilters")}
-          </Text>
-          <HStack spacing={2} flexWrap="wrap">
-            {searchTerm && (
-              <Badge colorScheme="blue" variant={badgeVariant}>
-                {t("components.charactersTable.filterSearch")}: {searchTerm}
-              </Badge>
-            )}
-            {selectedAffinity && (
-              <HStack spacing={1}>
-                <AffinityIcon affinity={selectedAffinity} size="20px" />
-                <Badge colorScheme="green" variant={badgeVariant}>
-                  {t("components.charactersTable.filterAffinity")}: {selectedAffinity}
-                </Badge>
-              </HStack>
-            )}
-            {selectedCategory && (
-              <HStack spacing={1}>
-                <CategoryIcon category={selectedCategory} size="20px" />
-                <Badge colorScheme="purple" variant={badgeVariant}>
-                  {t("components.charactersTable.filterCategory")}: {selectedCategory}
-                </Badge>
-              </HStack>
-            )}
-            {selectedKiller && (
-              <HStack spacing={1}>
-                <KillerIcon killer={selectedKiller} size="20px" />
-                <Badge colorScheme="orange" variant={badgeVariant}>
-                  {t("components.charactersTable.filterKiller")}: {selectedKiller}
-                </Badge>
-              </HStack>
-            )}
-            {selectedAttackType && (
-              <HStack spacing={1}>
-                <AttackTypeBadge attackType={selectedAttackType} size="16px" />
-                <Badge colorScheme="cyan" variant={badgeVariant}>
-                  {t("components.charactersTable.filterType")}: {selectedAttackType === 'R' ? t("components.charactersTable.attackRed") : t("components.charactersTable.attackBlue")}
-                </Badge>
-              </HStack>
-            )}
-          </HStack>
-        </Box>
-      )}
-
-      {/* Informations sur les résultats */}
+      {/* ── Infos résultats ── */}
       {pagination && (
-        <Text fontSize="sm" color="gray.600">
-          {pagination.totalCount} {t("components.charactersTable.paginationCharacters")} - 
-          {t("components.charactersTable.paginationPage")} {pagination.currentPage} {t("components.charactersTable.paginationOf")} {pagination.totalPages} - 
-          {t("components.charactersTable.paginationShowing")} {pagination.itemsOnPage} {t("components.charactersTable.paginationResults")}
-        </Text>
+        <Flex justify="space-between" align="center" px={1}>
+          <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>
+            <Text as="span" fontWeight="semibold" color={isDark ? 'purple.300' : 'purple.600'}>
+              {pagination.totalCount}
+            </Text>{' '}
+            {t("components.charactersTable.paginationCharacters")}
+          </Text>
+          <Text fontSize="xs" color={isDark ? 'gray.500' : 'gray.400'}>
+            {t("components.charactersTable.paginationPage")} {pagination.currentPage} {t("components.charactersTable.paginationOf")} {pagination.totalPages}
+          </Text>
+        </Flex>
       )}
 
-      {/* Tableau des personnages */}
+      {/* ── Tableau ── */}
       <Box
-          overflowX="auto"
-          bg={bgColor}
-          borderRadius="xl"
-          border="1px solid"
-          borderColor={borderColor}
-          boxShadow={isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.06)'}
-          overflow="hidden"
+        bg={isDark ? 'gray.800' : 'white'}
+        borderRadius="xl"
+        borderWidth="1px"
+        borderColor={borderColor}
+        overflow="hidden"
       >
         {isLoading ? (
-          <Flex justify="center" p={8}>
-            <Spinner size="lg" />
+          <Flex justify="center" align="center" py={16}>
+            <VStack spacing={3}>
+              <Spinner size="xl" color="purple.500" thickness="3px" />
+              <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>
+                {t("components.charactersTable.loading")}
+              </Text>
+            </VStack>
+          </Flex>
+        ) : characters.length === 0 ? (
+          <Flex justify="center" align="center" py={16} direction="column" gap={3}>
+            <Text fontSize="3xl">⚔️</Text>
+            <Text fontWeight="semibold" color={isDark ? 'gray.300' : 'gray.600'}>
+              {t("components.charactersTable.noResults")}
+            </Text>
+            <Text fontSize="sm" color={isDark ? 'gray.500' : 'gray.400'}>
+              {t("components.charactersTable.noResultsHint")}
+            </Text>
           </Flex>
         ) : (
-          <Table variant="simple">
-            <Thead>
-              <Tr bg={isDark ? 'rgba(255,255,255,0.03)' : 'gray.50'}>
-                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.charactersTable.colCharacter")}</Th>
-                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.charactersTable.colAffinity")}</Th>
-                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.charactersTable.colCategories")}</Th>
-                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.charactersTable.colKillers")}</Th>
-                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.charactersTable.colAttackType")}</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {characters.map((character) => (
-                <Tr key={character._id} _hover={{ bg: hoverBg }} transition="background 0.15s">
-                  <Td>
-                    <HStack spacing={3}>
-                      {character._id ? (
+          <Box overflowX="auto">
+            <Table variant="simple" size="sm">
+              <Thead>
+                <Tr bg={isDark ? 'rgba(255,255,255,0.04)' : 'gray.50'}>
+                  <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'} py={3}>
+                    {t("components.charactersTable.colCharacter")}
+                  </Th>
+                  <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'} py={3}>
+                    {t("components.charactersTable.colAffinity")}
+                  </Th>
+                  <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'} py={3}>
+                    {t("components.charactersTable.colCategories")}
+                  </Th>
+                  <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'} py={3}>
+                    {t("components.charactersTable.colKillers")}
+                  </Th>
+                  <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'} py={3}>
+                    {t("components.charactersTable.colAttackType")}
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {characters.map((character) => (
+                  <Tr
+                    key={character._id}
+                    borderLeftWidth="2px"
+                    borderLeftColor="transparent"
+                    transition="all 0.15s ease"
+                    _hover={{
+                      bg: isDark ? 'rgba(124,58,237,0.07)' : 'purple.50',
+                      borderLeftColor: 'purple.400',
+                    }}
+                  >
+                    {/* Personnage */}
+                    <Td py={3} minW="200px">
+                      <HStack spacing={3}>
                         <Avatar
                           size="sm"
-                          src={`${bucketUrl}/characters/thumb/${character._id}.png`}
+                          src={character._id ? `${bucketUrl}/characters/thumb/${character._id}.png` : undefined}
                           name={character.name}
-                        />
-                      ) : (
-                        <Box
-                          w="32px"
-                          h="32px"
-                          bg="gray.200"
-                          _dark={{ bg: "gray.600", color: "gray.400" }}
                           borderRadius="md"
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="center"
-                          fontSize="xs"
-                          color="gray.500"
-                        >
-                          ?
-                        </Box>
+                          bg={isDark ? 'gray.700' : 'gray.200'}
+                        />
+                        <CustomLink to={`/personnage/${character._id}`} text={character.name} />
+                      </HStack>
+                    </Td>
+
+                    {/* Affinité */}
+                    <Td py={3}>
+                      {character.affinity && (
+                        <Tooltip label={character.affinity} hasArrow placement="top">
+                          <Box display="inline-block">
+                            <AffinityIcon affinity={character.affinity} size="22px" showLabel={false} />
+                          </Box>
+                        </Tooltip>
                       )}
-                      <CustomLink to={`/personnage/${character._id}`} text={character.name} />
-                    </HStack>
-                  </Td>
-                  <Td>
-                    {character.affinity && (
-                      <AffinityIcon 
-                        affinity={character.affinity} 
-                        size="20px" 
-                        showLabel={true} 
-                      />
-                    )}
-                  </Td>
-                  <Td>
-                    {character.categories && character.categories.length > 0 && (
-                      <VStack spacing={1} align="start">
-                        {character.categories.slice(0, 3).map((category, index) => (
-                          <CategoryIcon 
-                            key={index} 
-                            category={category} 
-                            size="20px"
-                            showLabel={true}
-                          />
-                        ))}
-                        {character.categories.length > 3 && (
-                          <Text fontSize="xs" color="gray.500">
-                            +{character.categories.length - 3}
-                          </Text>
-                        )}
-                      </VStack>
-                    )}
-                  </Td>
-                  <Td>
-                    {character.killers && character.killers.length > 0 && (
-                      <VStack spacing={1} align="start">
-                        {character.killers.slice(0, 3).map((killer, index) => (
-                          <KillerIcon 
-                            key={index} 
-                            killer={killer} 
-                            size="24px"
-                            showLabel={true}
-                          />
-                        ))}
-                        {character.killers.length > 3 && (
-                          <Text fontSize="xs" color="gray.500">
-                            +{character.killers.length - 3}
-                          </Text>
-                        )}
-                      </VStack>
-                    )}
-                  </Td>
-                  <Td>
-                    <AttackTypeBadge attackType={character.attack_type} size="20px" />
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+                    </Td>
+
+                    {/* Catégories */}
+                    <Td py={3} minW="120px">
+                      {character.categories && character.categories.length > 0 && (
+                        <Flex gap={1.5} flexWrap="wrap" maxW="160px">
+                          {character.categories.slice(0, 4).map((category, index) => (
+                            <Tooltip key={index} label={category} hasArrow placement="top">
+                              <Box>
+                                <CategoryIcon category={category} size="20px" showLabel={false} />
+                              </Box>
+                            </Tooltip>
+                          ))}
+                          {character.categories.length > 4 && (
+                            <Text fontSize="2xs" color={isDark ? 'gray.400' : 'gray.500'} alignSelf="center">
+                              +{character.categories.length - 4}
+                            </Text>
+                          )}
+                        </Flex>
+                      )}
+                    </Td>
+
+                    {/* Killers */}
+                    <Td py={3} minW="120px">
+                      {character.killers && character.killers.length > 0 && (
+                        <Flex gap={1.5} flexWrap="wrap" maxW="160px">
+                          {character.killers.slice(0, 4).map((killer, index) => (
+                            <Tooltip key={index} label={killer} hasArrow placement="top">
+                              <Box>
+                                <KillerIcon killer={killer} size="20px" showLabel={false} />
+                              </Box>
+                            </Tooltip>
+                          ))}
+                          {character.killers.length > 4 && (
+                            <Text fontSize="2xs" color={isDark ? 'gray.400' : 'gray.500'} alignSelf="center">
+                              +{character.killers.length - 4}
+                            </Text>
+                          )}
+                        </Flex>
+                      )}
+                    </Td>
+
+                    {/* Type d'attaque */}
+                    <Td py={3}>
+                      <AttackTypeBadge attackType={character.attack_type} size="18px" />
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
         )}
       </Box>
 
@@ -415,13 +460,6 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
           totalCount={pagination.totalCount}
           itemsOnPage={pagination.itemsOnPage}
         />
-      )}
-
-      {/* Message si aucun résultat */}
-      {!isLoading && characters.length === 0 && (
-        <Text textAlign="center" color="gray.500" py={8}>
-          {t("components.charactersTable.noResults")}
-        </Text>
       )}
     </VStack>
   );

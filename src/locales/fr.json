@@ -56,7 +56,10 @@
       "searchPlaceholder": "Rechercher un personnage...",
       "seoTitle": "Schrift BBS - Base de données complète",
       "seoDescription": "Découvrez tous les personnages de Bleach Brave Souls avec leurs statistiques, affinités, types d'attaque et informations détaillées. Base de données mise à jour régulièrement.",
-      "heading": "Base de données des personnages Ṣčhrīft"
+      "heading": "Base de données des personnages Ṣčhrīft",
+      "heroTitle": "Base de données BBS",
+      "heroDescription": "Découvrez tous les personnages de Bleach Brave Souls avec leurs statistiques, affinités et informations détaillées",
+      "heroBadge": "Base de données"
     },
     "cycles": {
       "title": "Cycles",
@@ -289,6 +292,7 @@
       "filterType": "Type",
       "attackRed": "Rouge",
       "attackBlue": "Bleu",
+      "attackAll": "Tous types",
       "paginationCharacters": "personnage(s) trouvé(s)",
       "paginationPage": "Page",
       "paginationOf": "sur",
@@ -300,7 +304,10 @@
       "colKillers": "Tueurs",
       "colAttackType": "Type d'attaque",
       "buttonReset": "Reset",
-      "noResults": "Aucun personnage trouvé"
+      "noResults": "Aucun personnage trouvé",
+      "noResultsHint": "Essayez de modifier vos filtres ou votre recherche",
+      "loading": "Chargement des personnages...",
+      "perPage": "Par page"
     },
     "guildTabsList": {
       "guildDisabled": "désactivée",

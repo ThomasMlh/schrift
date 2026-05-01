@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { AttackTypeBadge } from "./AttackTypeBadge";
+import { useTranslation } from "react-i18next";
 
 interface AttackTypeFilterProps {
   selectedAttackType: string;
@@ -19,14 +20,16 @@ export const AttackTypeFilter = ({
   selectedAttackType,
   onAttackTypeChange
 }: AttackTypeFilterProps) => {
+  const { t } = useTranslation();
+
   const getDisplayText = (type: string) => {
     switch (type) {
       case "R":
-        return "Rouge";
+        return t("components.charactersTable.attackRed");
       case "B":
-        return "Bleu";
+        return t("components.charactersTable.attackBlue");
       default:
-        return "Tous types";
+        return t("components.charactersTable.attackAll");
     }
   };
 
@@ -56,36 +59,27 @@ export const AttackTypeFilter = ({
         }}
       >
         <HStack spacing={2}>
-          {selectedAttackType ? (
-            <>
-              <AttackTypeBadge attackType={selectedAttackType} size="16px" />
-              <Text fontSize="sm">{getDisplayText(selectedAttackType)}</Text>
-            </>
-          ) : (
-            <>
-              <AttackTypeBadge attackType={selectedAttackType} size="16px" />
-              <Text fontSize="sm">Tous types</Text>
-            </>
-          )}
+          <AttackTypeBadge attackType={selectedAttackType} size="16px" />
+          <Text fontSize="sm">{getDisplayText(selectedAttackType)}</Text>
         </HStack>
       </MenuButton>
       <MenuList maxH="200px" overflowY="auto">
         <MenuItem onClick={() => onAttackTypeChange("")}>
           <HStack spacing={2}>
-            <AttackTypeBadge attackType={selectedAttackType} size="16px" />
-            <Text fontSize="sm">Tous types</Text>
+            <AttackTypeBadge attackType="" size="16px" />
+            <Text fontSize="sm">{t("components.charactersTable.attackAll")}</Text>
           </HStack>
         </MenuItem>
         <MenuItem onClick={() => onAttackTypeChange("R")}>
           <HStack spacing={2}>
             <AttackTypeBadge attackType="R" size="16px" />
-            <Text fontSize="sm">Rouge</Text>
+            <Text fontSize="sm">{t("components.charactersTable.attackRed")}</Text>
           </HStack>
         </MenuItem>
         <MenuItem onClick={() => onAttackTypeChange("B")}>
           <HStack spacing={2}>
             <AttackTypeBadge attackType="B" size="16px" />
-            <Text fontSize="sm">Bleu</Text>
+            <Text fontSize="sm">{t("components.charactersTable.attackBlue")}</Text>
           </HStack>
         </MenuItem>
       </MenuList>
