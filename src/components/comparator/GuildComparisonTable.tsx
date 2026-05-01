@@ -1,7 +1,5 @@
 import {
   Box,
-  Card,
-  CardBody,
   Text,
   HStack,
   VStack,
@@ -13,8 +11,9 @@ import {
   Td,
   Badge,
   useColorModeValue,
+  useColorMode,
   Icon,
-  Flex
+  Flex,
 } from "@chakra-ui/react";
 import { FiTrendingUp, FiTrendingDown, FiMinus } from "react-icons/fi";
 import type { IGuildStats } from "@/hooks/useAPI";
@@ -31,10 +30,11 @@ interface GuildComparisonTableProps {
 export const GuildComparisonTable = ({
   guildsData
 }: GuildComparisonTableProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const tableBg = useColorModeValue("gray.50", "gray.700");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const bgColor = useColorModeValue("purple.50", "gray.700");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  const bgColor = useColorModeValue("white", "gray.800");
+  const tableBg = useColorModeValue("gray.50", "gray.750");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
   const { t } = useTranslation();
 
   // Trouver le meilleur pour chaque métrique
@@ -121,9 +121,8 @@ export const GuildComparisonTable = ({
   ];
 
   return (
-    <Card bg={cardBg} borderRadius="xl" boxShadow="lg">
-      <CardBody>
-        <VStack spacing={4} align="stretch">
+    <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={5}>
+      <VStack spacing={4} align="stretch">
           <Text fontSize="lg" fontWeight="bold">
             {t("components.comparatorCharts.tableHeadingGuilds")}
           </Text>
@@ -217,14 +216,13 @@ export const GuildComparisonTable = ({
           <Box
             p={3}
             borderRadius="lg"
-            bg={bgColor}
+            bg={isDark ? "rgba(159,122,234,0.08)" : "purple.50"}
           >
             <Text fontSize="xs" color="gray.600" _dark={{ color: "gray.400" }}>
               💡 {t("components.comparatorCharts.tableFooterPrefix")} <Badge colorScheme="green" fontSize="2xs">{t("components.comparatorCharts.badgeBest")}</Badge> {t("components.comparatorCharts.tableFooterSuffix")}
             </Text>
           </Box>
-        </VStack>
-      </CardBody>
-    </Card>
+      </VStack>
+    </Box>
   );
 };

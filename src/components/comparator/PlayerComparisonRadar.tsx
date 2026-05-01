@@ -1,11 +1,10 @@
 import {
   Box,
-  Card,
-  CardBody,
   Text,
   HStack,
   VStack,
-  useColorModeValue
+  useColorModeValue,
+  useColorMode,
 } from "@chakra-ui/react";
 import {
   Radar,
@@ -31,9 +30,42 @@ interface PlayerComparisonRadarProps {
 export const PlayerComparisonRadar = ({
   playersData
 }: PlayerComparisonRadarProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const textColor = useColorModeValue("gray.700", "white");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  const bgColor = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const textColor = useColorModeValue("#2D3748", "#E2E8F0");
+  const haloColor = useColorModeValue("rgba(255,255,255,0.9)", "rgba(26,32,44,0.85)");
+  const gridColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)";
   const { t } = useTranslation();
+
+  const CustomAxisTick = ({ x, y, payload }: any) => (
+    <g>
+      <text
+        x={x} y={y}
+        textAnchor="middle"
+        dominantBaseline="central"
+        stroke={haloColor}
+        strokeWidth={5}
+        strokeLinejoin="round"
+        fontSize={12}
+        fontWeight="600"
+        paintOrder="stroke"
+      >
+        {payload.value}
+      </text>
+      <text
+        x={x} y={y}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill={textColor}
+        fontSize={12}
+        fontWeight="600"
+      >
+        {payload.value}
+      </text>
+    </g>
+  );
 
 
   // Normaliser les données pour le radar (échelle 0-100)
@@ -129,12 +161,12 @@ export const PlayerComparisonRadar = ({
     if (active && payload && payload.length) {
       return (
         <Box
-          bg={cardBg}
+          bg={bgColor}
           p={3}
           borderRadius="md"
           boxShadow="lg"
           borderWidth="1px"
-          borderColor="gray.200"
+          borderColor={borderColor}
         >
           <Text fontWeight="bold" fontSize="sm" mb={2}>
             {payload[0].payload.metric}
@@ -154,8 +186,7 @@ export const PlayerComparisonRadar = ({
   };
 
   return (
-    <Card bg={cardBg} borderRadius="xl" boxShadow="lg">
-      <CardBody>
+    <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={5}>
         <VStack spacing={4} align="stretch">
           <HStack justify="space-between">
             <Text fontSize="lg" fontWeight="bold">
@@ -169,12 +200,12 @@ export const PlayerComparisonRadar = ({
           <Box w="100%" h="400px">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData}>
-                <PolarGrid strokeDasharray="3 3" />
+                <PolarGrid stroke={gridColor} strokeDasharray="3 3" />
                 <PolarAngleAxis
                   dataKey="metric"
-                  tick={{ fill: textColor, fontSize: 12 }}
+                  tick={<CustomAxisTick />}
                 />
-                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
+                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: textColor, fontSize: 10 }} />
                 {playersData.map((player, index) => (
                   <Radar
                     key={index}
@@ -198,14 +229,13 @@ export const PlayerComparisonRadar = ({
           <Box
             p={3}
             borderRadius="lg"
-            bg={useColorModeValue("blue.50", "gray.700")}
+            bg={isDark ? "rgba(49,130,206,0.08)" : "blue.50"}
           >
             <Text fontSize="xs" color="gray.600" _dark={{ color: "gray.400" }}>
               💡 <Text as="span" fontWeight="semibold">{t("components.comparatorCharts.radarTip")}</Text> {t("components.comparatorCharts.radarTipText")}
             </Text>
           </Box>
         </VStack>
-      </CardBody>
-    </Card>
+    </Box>
   );
 };

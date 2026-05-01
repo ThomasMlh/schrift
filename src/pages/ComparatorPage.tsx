@@ -3,24 +3,19 @@ import {
   VStack,
   Text,
   Box,
-  Card,
-  CardBody,
   HStack,
   Button,
   Alert,
   AlertIcon,
   useToast,
   useColorModeValue,
+  useColorMode,
   SimpleGrid,
   Spinner,
   Center,
   Badge,
   Icon,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel
+  Flex,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -36,7 +31,7 @@ import { GuildComparisonTable } from "@/components/comparator/GuildComparisonTab
 import { useUsers, useCycles, useGuilds, fetchUserStats, fetchGuildStats } from "@/hooks/useAPI";
 import type { IUser, IGuild } from "@/interfaces";
 import type { IUserStats, IGuildStats } from "@/hooks/useAPI";
-import { FiRefreshCw, FiBarChart2, FiUsers } from "react-icons/fi";
+import { FiRefreshCw, FiBarChart2, FiUsers, FiShield } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 
 interface SelectedPlayer {
@@ -87,8 +82,11 @@ const ComparatorPage: React.FC = () => {
   ];
 
   // UI Colors
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
   const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const mutedText = useColorModeValue("gray.500", "gray.400");
 
   // Charger depuis l'URL au montage
   useEffect(() => {
@@ -260,6 +258,11 @@ const ComparatorPage: React.FC = () => {
     setSearchParams(new URLSearchParams({ type: comparisonType }));
   };
 
+  const handleSwitchType = (newType: "players" | "guilds") => {
+    setComparisonType(newType);
+    setSearchParams(new URLSearchParams({ type: newType }));
+  };
+
   const handleTabChange = (index: number) => {
     const newType = index === 0 ? "players" : "guilds";
     setComparisonType(newType);
@@ -290,8 +293,33 @@ const ComparatorPage: React.FC = () => {
     url: "https://bbs-schrift.fr/comparateur"
   };
 
+  const COMPARISON_TYPES = [
+    {
+      id: "players" as const,
+      icon: FiUsers,
+      label: t("pages.comparator.tabPlayers"),
+      description: t("pages.comparator.navPlayersDesc"),
+      accentColor: isDark ? "blue.300" : "blue.500",
+      glowColor: "rgba(49,130,206,0.15)",
+      gradient: "linear(90deg, blue.500, blue.300)",
+      colorScheme: "blue",
+      selectedCount: selectedPlayers.length,
+    },
+    {
+      id: "guilds" as const,
+      icon: FiShield,
+      label: t("pages.comparator.tabGuilds"),
+      description: t("pages.comparator.navGuildsDesc"),
+      accentColor: isDark ? "purple.300" : "purple.500",
+      glowColor: "rgba(159,122,234,0.15)",
+      gradient: "linear(90deg, purple.500, purple.300)",
+      colorScheme: "purple",
+      selectedCount: selectedGuilds.length,
+    },
+  ];
+
   return (
-    <Box mb={"150px"}>
+    <Box mb="150px">
       <SEOHead
         title={t("pages.comparator.seoTitle")}
         description={t("pages.comparator.seoDescription")}
@@ -307,206 +335,205 @@ const ComparatorPage: React.FC = () => {
           badge={{ text: t("pages.comparator.heroBadge"), icon: "⚔️" }}
         />
 
-        <Container maxW="container.xl" py={8} >
-          <VStack spacing={6} align="stretch">
-            {/* Configuration générale */}
-            <Card
+        <Container maxW="container.xl" py={8}>
+          <VStack spacing={5} align="stretch">
+
+            {/* Type nav cards */}
+            <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3}>
+              {COMPARISON_TYPES.map((type) => {
+                const isActive = comparisonType === type.id;
+                return (
+                  <Box
+                    key={type.id}
+                    onClick={() => handleSwitchType(type.id)}
+                    cursor="pointer"
+                    borderRadius="xl"
+                    borderWidth="1px"
+                    borderColor={isActive
+                      ? (isDark ? "whiteAlpha.300" : "gray.300")
+                      : (isDark ? "whiteAlpha.100" : "gray.200")
+                    }
+                    bg={isActive
+                      ? (isDark ? "rgba(255,255,255,0.06)" : "white")
+                      : (isDark ? "rgba(255,255,255,0.02)" : "gray.50")
+                    }
+                    boxShadow={isActive ? `0 0 20px ${type.glowColor}, 0 4px 12px rgba(0,0,0,0.15)` : "none"}
+                    transition="all 0.2s ease"
+                    _hover={{
+                      borderColor: isDark ? "whiteAlpha.300" : "gray.300",
+                      boxShadow: `0 0 16px ${type.glowColor}`,
+                      transform: "translateY(-2px)",
+                    }}
+                    p={4}
+                    position="relative"
+                    overflow="hidden"
+                  >
+                    {isActive && (
+                      <Box
+                        position="absolute" top={0} left={0} right={0} h="2px"
+                        bgGradient={type.gradient}
+                      />
+                    )}
+                    <HStack spacing={4} align="center">
+                      <Box
+                        p={2.5}
+                        borderRadius="lg"
+                        bg={isActive
+                          ? (type.id === "guilds"
+                            ? (isDark ? "purple.900" : "purple.50")
+                            : (isDark ? "blue.900" : "blue.50"))
+                          : (isDark ? "whiteAlpha.100" : "gray.100")
+                        }
+                        flexShrink={0}
+                      >
+                        <Icon
+                          as={type.icon}
+                          color={isActive ? type.accentColor : (isDark ? "gray.400" : "gray.500")}
+                          boxSize={5}
+                        />
+                      </Box>
+                      <VStack spacing={0.5} align="start" flex={1}>
+                        <HStack spacing={2}>
+                          <Text
+                            fontWeight="bold"
+                            fontSize="sm"
+                            color={isActive ? type.accentColor : (isDark ? "gray.300" : "gray.600")}
+                          >
+                            {type.label}
+                          </Text>
+                          {isActive && type.selectedCount > 0 && (
+                            <Badge colorScheme={type.colorScheme} variant="subtle" fontSize="2xs" borderRadius="full">
+                              {type.selectedCount} sélectionné{type.selectedCount > 1 ? "s" : ""}
+                            </Badge>
+                          )}
+                        </HStack>
+                        <Text fontSize="xs" color={mutedText} noOfLines={1}>
+                          {type.description}
+                        </Text>
+                      </VStack>
+                    </HStack>
+                  </Box>
+                );
+              })}
+            </SimpleGrid>
+
+            {/* Config bar */}
+            <Box
               bg={bgColor}
               borderRadius="xl"
-              boxShadow="lg"
               borderWidth="1px"
               borderColor={borderColor}
+              p={4}
             >
-              <Box
-                bgGradient="linear(to-r, blue.500, purple.500)"
-                p={4}
-                color="white"
-                borderTopRadius="xl"
-              >
-                <HStack spacing={2}>
-                  <Icon as={FiBarChart2} boxSize={6} />
-                  <Text fontSize="lg" fontWeight="bold">
-                    {t("pages.comparator.configHeading")}
+              <Flex gap={4} align="flex-end" wrap="wrap">
+                <Box flex="1" minW="200px">
+                  <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={mutedText} mb={2}>
+                    {t("pages.comparator.cycleFilterLabel")}
                   </Text>
+                  <CycleSelect
+                    cycles={cycles}
+                    value={selectedCycleId}
+                    onChange={handleCycleChange}
+                    placeholder={t("pages.comparator.cycleAllPlaceholder")}
+                    allowDeselect={true}
+                    size="md"
+                  />
+                </Box>
+                <HStack spacing={2} flexShrink={0}>
+                  <Button
+                    variant="ghost"
+                    size="md"
+                    onClick={handleReset}
+                    leftIcon={<Icon as={FiRefreshCw} />}
+                    color={mutedText}
+                  >
+                    {t("pages.comparator.buttonReset")}
+                  </Button>
+                  <Button
+                    colorScheme={comparisonType === "players" ? "blue" : "purple"}
+                    size="md"
+                    onClick={comparisonType === "players" ? loadPlayersStats : loadGuildsStats}
+                    isDisabled={
+                      comparisonType === "players"
+                        ? selectedPlayers.length < 2
+                        : selectedGuilds.length < 2
+                    }
+                    isLoading={isLoadingStats}
+                    leftIcon={<Icon as={FiBarChart2} />}
+                  >
+                    {t("pages.comparator.buttonCompare")}{" "}
+                    {comparisonType === "players" ? selectedPlayers.length : selectedGuilds.length}{" "}
+                    {comparisonType === "players"
+                      ? (selectedPlayers.length > 1 ? t("pages.comparator.wordPlayers") : t("pages.comparator.wordPlayer"))
+                      : (selectedGuilds.length > 1 ? t("pages.comparator.wordGuilds") : t("pages.comparator.wordGuild"))}
+                  </Button>
                 </HStack>
-              </Box>
+              </Flex>
+            </Box>
 
-              <CardBody>
-                <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-                  {/* Sélecteur de cycle */}
-                  <Box>
-                    <Text fontSize="sm" fontWeight="medium" mb={2}>
-                      {t("pages.comparator.cycleFilterLabel")}
-                    </Text>
-                    <CycleSelect
-                      cycles={cycles}
-                      value={selectedCycleId}
-                      onChange={handleCycleChange}
-                      placeholder={t("pages.comparator.cycleAllPlaceholder")}
-                      allowDeselect={true}
-                      size="md"
-                    />
-                    {selectedCycleId && (
-                      <Badge mt={2} colorScheme="blue">
-                        {t("pages.comparator.badgeCycleSelected")}
-                      </Badge>
-                    )}
-                  </Box>
+            {/* Selector */}
+            {comparisonType === "players" ? (
+              <MultiPlayerSelector
+                selectedPlayers={selectedPlayers}
+                onAddPlayer={handleAddPlayer}
+                onRemovePlayer={handleRemovePlayer}
+                availableUsers={users}
+                maxPlayers={5}
+                entityColors={entityColors}
+              />
+            ) : (
+              <MultiGuildSelector
+                selectedGuilds={selectedGuilds}
+                onAddGuild={handleAddGuild}
+                onRemoveGuild={handleRemoveGuild}
+                availableGuilds={guilds}
+                maxGuilds={5}
+                entityColors={entityColors}
+              />
+            )}
 
-                  {/* Actions */}
-                  <VStack align="stretch" justify="flex-end" spacing={3}>
-                    <Button
-                      colorScheme="blue"
-                      size="lg"
-                      onClick={comparisonType === "players" ? loadPlayersStats : loadGuildsStats}
-                      isDisabled={
-                        comparisonType === "players" 
-                          ? selectedPlayers.length < 2 
-                          : selectedGuilds.length < 2
-                      }
-                      isLoading={isLoadingStats}
-                      leftIcon={<Icon as={FiBarChart2} />}
-                    >
-                      {t("pages.comparator.buttonCompare")} {comparisonType === "players" ? selectedPlayers.length : selectedGuilds.length}{" "}
-                      {comparisonType === "players"
-                        ? (selectedPlayers.length > 1 ? t("pages.comparator.wordPlayers") : t("pages.comparator.wordPlayer"))
-                        : (selectedGuilds.length > 1 ? t("pages.comparator.wordGuilds") : t("pages.comparator.wordGuild"))}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleReset}
-                      leftIcon={<Icon as={FiRefreshCw} />}
-                    >
-                      {t("pages.comparator.buttonReset")}
-                    </Button>
-                  </VStack>
-                </SimpleGrid>
-              </CardBody>
-            </Card>
+            {/* Min 2 alert */}
+            {!isLoadingStats && comparisonType === "players" && selectedPlayers.length < 2 && (
+              <Alert status="info" borderRadius="xl" fontSize="sm" py={2}>
+                <AlertIcon />
+                {t("pages.comparator.alertMin2Players")}
+              </Alert>
+            )}
+            {!isLoadingStats && comparisonType === "guilds" && selectedGuilds.length < 2 && (
+              <Alert status="info" borderRadius="xl" fontSize="sm" py={2}>
+                <AlertIcon />
+                {t("pages.comparator.alertMin2Guilds")}
+              </Alert>
+            )}
 
-            {/* Tabs pour joueurs vs guildes */}
-            <Card bg={bgColor} borderRadius="xl" boxShadow="lg">
-              <CardBody>
-                <Tabs
-                  index={comparisonType === "players" ? 0 : 1}
-                  onChange={handleTabChange}
-                  colorScheme="blue"
-                  variant="enclosed"
-                >
-                  <TabList>
-                    <Tab fontSize="md" fontWeight="semibold">
-                      <Icon as={FiUsers} mr={2} />
-                      {t("pages.comparator.tabPlayers")}
-                    </Tab>
-                    <Tab fontSize="md" fontWeight="semibold">
-                      <Icon as={FiUsers} mr={2} />
-                      {t("pages.comparator.tabGuilds")}
-                    </Tab>
-                  </TabList>
+            {/* Loading */}
+            {isLoadingStats && (
+              <Center py={12}>
+                <VStack spacing={4}>
+                  <Spinner
+                    size="xl"
+                    color={comparisonType === "players" ? "blue.500" : "purple.500"}
+                    thickness="4px"
+                  />
+                  <Text color={mutedText} fontSize="sm">{t("pages.comparator.loadingStats")}</Text>
+                </VStack>
+              </Center>
+            )}
 
-                  <TabPanels>
-                    {/* Tab Joueurs */}
-                    <TabPanel p={0} pt={6}>
-                      <VStack spacing={6} align="stretch">
-                        {/* Sélecteur de joueurs */}
-                        <MultiPlayerSelector
-                          selectedPlayers={selectedPlayers}
-                          onAddPlayer={handleAddPlayer}
-                          onRemovePlayer={handleRemovePlayer}
-                          availableUsers={users}
-                          maxPlayers={5}
-                        />
+            {/* Results */}
+            {!isLoadingStats && hasPlayersStats && comparisonType === "players" && (
+              <VStack spacing={5} align="stretch">
+                <PlayerComparisonRadar playersData={playersData} />
+                <PlayerComparisonTable playersData={playersData} />
+              </VStack>
+            )}
+            {!isLoadingStats && hasGuildsStats && comparisonType === "guilds" && (
+              <VStack spacing={5} align="stretch">
+                <GuildComparisonRadar guildsData={guildsData} />
+                <GuildComparisonTable guildsData={guildsData} />
+              </VStack>
+            )}
 
-                        {selectedPlayers.length < 2 && (
-                          <Alert status="info" borderRadius="xl">
-                            <AlertIcon />
-                            {t("pages.comparator.alertMin2Players")}
-                          </Alert>
-                        )}
-
-                        {isLoadingStats && (
-                          <Center py={20}>
-                            <VStack spacing={4}>
-                              <Spinner size="xl" color="blue.500" thickness="4px" />
-                              <Text>{t("pages.comparator.loadingStats")}</Text>
-                            </VStack>
-                          </Center>
-                        )}
-
-                        {!isLoadingStats && hasPlayersStats && (
-                          <VStack spacing={6} align="stretch">
-                            <PlayerComparisonRadar playersData={playersData} />
-                            <PlayerComparisonTable playersData={playersData} />
-
-                            <Alert status="success" borderRadius="xl" variant="subtle">
-                              <AlertIcon />
-                              <VStack align="start" spacing={1}>
-                                <Text fontWeight="bold">{t("pages.comparator.comparisonSuccessTitle")}</Text>
-                                <Text fontSize="sm">
-                                  {selectedPlayers.length} joueur{selectedPlayers.length > 1 ? "s" : ""} comparé
-                                  {selectedPlayers.length > 1 ? "s" : ""}{" "}
-                                  {selectedCycleId ? t("pages.comparator.comparisonOnSelectedCycle") : t("pages.comparator.comparisonOnAllCycles")}
-                                </Text>
-                              </VStack>
-                            </Alert>
-                          </VStack>
-                        )}
-                      </VStack>
-                    </TabPanel>
-
-                    {/* Tab Guildes */}
-                    <TabPanel p={0} pt={6}>
-                      <VStack spacing={6} align="stretch">
-                        {/* Sélecteur de guildes */}
-                        <MultiGuildSelector
-                          selectedGuilds={selectedGuilds}
-                          onAddGuild={handleAddGuild}
-                          onRemoveGuild={handleRemoveGuild}
-                          availableGuilds={guilds}
-                          maxGuilds={5}
-                        />
-
-                        {selectedGuilds.length < 2 && (
-                          <Alert status="info" borderRadius="xl">
-                            <AlertIcon />
-                            {t("pages.comparator.alertMin2Guilds")}
-                          </Alert>
-                        )}
-
-                        {isLoadingStats && (
-                          <Center py={20}>
-                            <VStack spacing={4}>
-                              <Spinner size="xl" color="purple.500" thickness="4px" />
-                              <Text>{t("pages.comparator.loadingStats")}</Text>
-                            </VStack>
-                          </Center>
-                        )}
-
-                        {!isLoadingStats && hasGuildsStats && (
-                          <VStack spacing={6} align="stretch">
-                            <GuildComparisonRadar guildsData={guildsData} />
-                            <GuildComparisonTable guildsData={guildsData} />
-
-                            <Alert status="success" borderRadius="xl" variant="subtle">
-                              <AlertIcon />
-                              <VStack align="start" spacing={1}>
-                                <Text fontWeight="bold">{t("pages.comparator.comparisonSuccessTitle")}</Text>
-                                <Text fontSize="sm">
-                                  {selectedGuilds.length} guilde{selectedGuilds.length > 1 ? "s" : ""} comparée
-                                  {selectedGuilds.length > 1 ? "s" : ""}{" "}
-                                  {selectedCycleId ? t("pages.comparator.comparisonOnSelectedCycle") : t("pages.comparator.comparisonOnAllCycles")}
-                                </Text>
-                              </VStack>
-                            </Alert>
-                          </VStack>
-                        )}
-                      </VStack>
-                    </TabPanel>
-                  </TabPanels>
-                </Tabs>
-              </CardBody>
-            </Card>
           </VStack>
         </Container>
       </Box>

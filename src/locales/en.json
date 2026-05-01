@@ -162,6 +162,8 @@
       "wordGuilds": "guilds",
       "tabPlayers": "Players",
       "tabGuilds": "Guilds",
+      "navPlayersDesc": "Compare statistics of individual players",
+      "navGuildsDesc": "Compare performance of guilds",
       "alertMin2Players": "Select at least 2 players to start the comparison",
       "alertMin2Guilds": "Select at least 2 guilds to start the comparison",
       "loadingStats": "Loading statistics...",

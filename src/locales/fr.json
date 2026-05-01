@@ -162,6 +162,8 @@
       "wordGuilds": "guildes",
       "tabPlayers": "Joueurs",
       "tabGuilds": "Guildes",
+      "navPlayersDesc": "Comparez les statistiques de joueurs individuels",
+      "navGuildsDesc": "Comparez les performances de guildes",
       "alertMin2Players": "Sélectionnez au moins 2 joueurs pour commencer la comparaison",
       "alertMin2Guilds": "Sélectionnez au moins 2 guildes pour commencer la comparaison",
       "loadingStats": "Chargement des statistiques...",

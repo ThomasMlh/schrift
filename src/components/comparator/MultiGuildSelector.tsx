@@ -4,16 +4,17 @@ import {
   Box,
   Text,
   IconButton,
-  Card,
-  CardBody,
   useColorModeValue,
-  Badge
+  useColorMode,
+  Badge,
 } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CustomSelect } from "../ui/CustomSelect";
 import type { IGuild } from "@/interfaces";
+
+const DEFAULT_COLORS = ["#3182CE", "#38A169", "#DD6B20", "#9F7AEA", "#E53E3E"];
 
 interface SelectedGuild {
   id: string;
@@ -26,6 +27,7 @@ interface MultiGuildSelectorProps {
   onRemoveGuild: (id: string) => void;
   maxGuilds?: number;
   availableGuilds: IGuild[];
+  entityColors?: string[];
 }
 
 export const MultiGuildSelector = ({
@@ -33,11 +35,14 @@ export const MultiGuildSelector = ({
   onAddGuild,
   onRemoveGuild,
   maxGuilds = 5,
-  availableGuilds
+  availableGuilds,
+  entityColors = DEFAULT_COLORS,
 }: MultiGuildSelectorProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const bgColor = useColorModeValue("gray.50", "gray.700");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  const bgColor = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const mutedText = useColorModeValue("gray.500", "gray.400");
   const [selectedGuildId, setSelectedGuildId] = useState("");
   const { t } = useTranslation();
 
@@ -55,100 +60,108 @@ export const MultiGuildSelector = ({
 
   const guildOptions = availableGuildsFiltered.map((guild) => ({
     value: guild._id,
-    label: guild.name
+    label: guild.name,
   }));
 
   return (
-    <Card bg={cardBg} borderRadius="xl" boxShadow="lg">
-      <CardBody>
-        <VStack spacing={4} align="stretch">
-          <HStack justify="space-between">
-            <HStack spacing={2}>
-              <Text fontSize="lg" fontWeight="bold">
-                {t("components.multiGuildSelector.heading")}
-              </Text>
-              <Badge colorScheme="purple" fontSize="sm">
-                {selectedGuilds.length}/{maxGuilds}
-              </Badge>
-            </HStack>
-          </HStack>
+    <Box
+      bg={bgColor}
+      borderRadius="xl"
+      borderWidth="1px"
+      borderColor={borderColor}
+      p={4}
+    >
+      <VStack spacing={4} align="stretch">
+        <HStack justify="space-between">
+          <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={mutedText}>
+            {t("components.multiGuildSelector.heading")}
+          </Text>
+          <Badge
+            colorScheme={selectedGuilds.length >= maxGuilds ? "red" : "purple"}
+            variant="subtle"
+            fontSize="xs"
+            borderRadius="full"
+          >
+            {selectedGuilds.length}/{maxGuilds}
+          </Badge>
+        </HStack>
 
-          {/* Liste des guildes sélectionnées */}
-          <VStack spacing={3} align="stretch">
-            {selectedGuilds.map((selected, index) => (
+        {/* Selected guilds */}
+        <VStack spacing={2} align="stretch">
+          {selectedGuilds.map((selected, index) => {
+            const color = entityColors[index % entityColors.length];
+            return (
               <Box
                 key={selected.id}
-                p={3}
+                px={3}
+                py={2}
                 borderRadius="lg"
                 borderWidth="1px"
                 borderColor={borderColor}
-                bg={bgColor}
-                transition="all 0.2s"
-                _hover={{
-                  borderColor: "purple.400",
-                  transform: "translateX(4px)"
-                }}
+                borderLeftWidth="3px"
+                borderLeftColor={color}
+                bg={isDark ? "rgba(255,255,255,0.03)" : "gray.50"}
+                transition="all 0.15s ease"
+                _hover={{ transform: "translateX(3px)", borderColor }}
               >
                 <HStack justify="space-between">
                   <HStack spacing={3}>
-                    <Badge colorScheme="purple" fontSize="sm">
-                      #{index + 1}
-                    </Badge>
-                    <Text fontWeight="medium">{selected.guild.name}</Text>
+                    <Box w={2} h={2} borderRadius="full" bg={color} flexShrink={0} />
+                    <Text fontWeight="medium" fontSize="sm">{selected.guild.name}</Text>
                   </HStack>
                   <IconButton
-                    icon={<CloseIcon />}
+                    icon={<CloseIcon boxSize={2.5} />}
                     aria-label={t("components.multiGuildSelector.ariaRemove")}
-                    size="sm"
+                    size="xs"
                     colorScheme="red"
                     variant="ghost"
                     onClick={() => onRemoveGuild(selected.id)}
                   />
                 </HStack>
               </Box>
-            ))}
+            );
+          })}
 
-            {selectedGuilds.length === 0 && (
-              <Box
-                p={6}
-                textAlign="center"
-                borderRadius="lg"
-                borderWidth="2px"
-                borderStyle="dashed"
-                borderColor={borderColor}
-              >
-                <Text color="gray.500" fontSize="sm">
-                  {t("components.multiGuildSelector.empty")}
-                </Text>
-                <Text color="gray.400" fontSize="xs" mt={1}>
-                  {t("components.multiGuildSelector.emptyHint", { max: maxGuilds })}
-                </Text>
-              </Box>
-            )}
-          </VStack>
-
-          {/* Sélecteur d'ajout */}
-          {selectedGuilds.length < maxGuilds && (
-            <Box>
-              <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.600">
-                {t("components.multiGuildSelector.addLabel")}
+          {selectedGuilds.length === 0 && (
+            <Box
+              p={5}
+              textAlign="center"
+              borderRadius="lg"
+              borderWidth="2px"
+              borderStyle="dashed"
+              borderColor={borderColor}
+            >
+              <Text color={mutedText} fontSize="sm">
+                {t("components.multiGuildSelector.empty")}
               </Text>
-              <CustomSelect
-                options={guildOptions}
-                value={selectedGuildId}
-                onChange={handleGuildSelect}
-                placeholder={t("components.multiGuildSelector.placeholder")}
-              />
+              <Text color={mutedText} fontSize="xs" mt={1} opacity={0.7}>
+                {t("components.multiGuildSelector.emptyHint", { max: maxGuilds })}
+              </Text>
             </Box>
           )}
-
-          {selectedGuilds.length >= maxGuilds && (
-            <Text fontSize="xs" color="orange.500" textAlign="center">
-              {t("components.multiGuildSelector.limitReached", { max: maxGuilds })}
-            </Text>
-          )}
         </VStack>
-      </CardBody>
-    </Card>
+
+        {/* Add guild */}
+        {selectedGuilds.length < maxGuilds && (
+          <Box>
+            <Text fontSize="xs" fontWeight="medium" mb={2} color={mutedText}>
+              {t("components.multiGuildSelector.addLabel")}
+            </Text>
+            <CustomSelect
+              options={guildOptions}
+              value={selectedGuildId}
+              onChange={handleGuildSelect}
+              placeholder={t("components.multiGuildSelector.placeholder")}
+            />
+          </Box>
+        )}
+
+        {selectedGuilds.length >= maxGuilds && (
+          <Text fontSize="xs" color="orange.400" textAlign="center">
+            {t("components.multiGuildSelector.limitReached", { max: maxGuilds })}
+          </Text>
+        )}
+      </VStack>
+    </Box>
   );
 };

@@ -4,10 +4,9 @@ import {
   Box,
   Text,
   IconButton,
-  Card,
-  CardBody,
   useColorModeValue,
-  Badge
+  useColorMode,
+  Badge,
 } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
 import { useState } from "react";
@@ -15,6 +14,8 @@ import { useTranslation } from "react-i18next";
 import { UserSearchSelect } from "../ui/UserSearchSelect";
 import { UserDisplay } from "../ui/UserDisplay";
 import type { IUser } from "@/interfaces";
+
+const DEFAULT_COLORS = ["#3182CE", "#38A169", "#DD6B20", "#9F7AEA", "#E53E3E"];
 
 interface SelectedPlayer {
   id: string;
@@ -27,6 +28,7 @@ interface MultiPlayerSelectorProps {
   onRemovePlayer: (id: string) => void;
   maxPlayers?: number;
   availableUsers: IUser[];
+  entityColors?: string[];
 }
 
 export const MultiPlayerSelector = ({
@@ -34,11 +36,14 @@ export const MultiPlayerSelector = ({
   onAddPlayer,
   onRemovePlayer,
   maxPlayers = 5,
-  availableUsers
+  availableUsers,
+  entityColors = DEFAULT_COLORS,
 }: MultiPlayerSelectorProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-    const bgColor = useColorModeValue("gray.50", "gray.700");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  const bgColor = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const mutedText = useColorModeValue("gray.500", "gray.400");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
   const { t } = useTranslation();
@@ -57,102 +62,106 @@ export const MultiPlayerSelector = ({
   );
 
   return (
-    <Card bg={cardBg} borderRadius="xl" boxShadow="lg">
-      <CardBody>
-        <VStack spacing={4} align="stretch">
-          <HStack justify="space-between">
-            <HStack spacing={2}>
-              <Text fontSize="lg" fontWeight="bold">
-                {t("components.multiPlayerSelector.heading")}
-              </Text>
-              <Badge colorScheme="blue" fontSize="sm">
-                {selectedPlayers.length}/{maxPlayers}
-              </Badge>
-            </HStack>
-          </HStack>
+    <Box
+      bg={bgColor}
+      borderRadius="xl"
+      borderWidth="1px"
+      borderColor={borderColor}
+      p={4}
+    >
+      <VStack spacing={4} align="stretch">
+        <HStack justify="space-between">
+          <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={mutedText}>
+            {t("components.multiPlayerSelector.heading")}
+          </Text>
+          <Badge
+            colorScheme={selectedPlayers.length >= maxPlayers ? "red" : "blue"}
+            variant="subtle"
+            fontSize="xs"
+            borderRadius="full"
+          >
+            {selectedPlayers.length}/{maxPlayers}
+          </Badge>
+        </HStack>
 
-          {/* Liste des joueurs sélectionnés */}
-          <VStack spacing={3} align="stretch">
-            {selectedPlayers.map((player, index) => (
+        {/* Selected players */}
+        <VStack spacing={2} align="stretch">
+          {selectedPlayers.map((player, index) => {
+            const color = entityColors[index % entityColors.length];
+            return (
               <Box
                 key={player.id}
-                p={3}
+                px={3}
+                py={2}
                 borderRadius="lg"
                 borderWidth="1px"
                 borderColor={borderColor}
-                bg={bgColor}
-                transition="all 0.2s"
-                _hover={{
-                  borderColor: "blue.400",
-                  transform: "translateX(4px)"
-                }}
+                borderLeftWidth="3px"
+                borderLeftColor={color}
+                bg={isDark ? "rgba(255,255,255,0.03)" : "gray.50"}
+                transition="all 0.15s ease"
+                _hover={{ transform: "translateX(3px)", borderColor }}
               >
                 <HStack justify="space-between">
                   <HStack spacing={3}>
-                    <Badge colorScheme="purple" fontSize="sm">
-                      #{index + 1}
-                    </Badge>
-                    <UserDisplay
-                      user={player.user}
-                      avatarSize="sm"
-                      textSize="sm"
-                    />
+                    <Box w={2} h={2} borderRadius="full" bg={color} flexShrink={0} />
+                    <UserDisplay user={player.user} avatarSize="sm" textSize="sm" />
                   </HStack>
                   <IconButton
-                    icon={<CloseIcon />}
+                    icon={<CloseIcon boxSize={2.5} />}
                     aria-label={t("components.multiPlayerSelector.ariaRemove")}
-                    size="sm"
+                    size="xs"
                     colorScheme="red"
                     variant="ghost"
                     onClick={() => onRemovePlayer(player.id)}
                   />
                 </HStack>
               </Box>
-            ))}
+            );
+          })}
 
-            {selectedPlayers.length === 0 && (
-              <Box
-                p={6}
-                textAlign="center"
-                borderRadius="lg"
-                borderWidth="2px"
-                borderStyle="dashed"
-                borderColor={borderColor}
-              >
-                <Text color="gray.500" fontSize="sm">
-                  {t("components.multiPlayerSelector.empty")}
-                </Text>
-                <Text color="gray.400" fontSize="xs" mt={1}>
-                  {t("components.multiPlayerSelector.emptyHint", { max: maxPlayers })}
-                </Text>
-              </Box>
-            )}
-          </VStack>
-
-          {/* Sélecteur d'ajout */}
-          {selectedPlayers.length < maxPlayers && (
-            <Box>
-              <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.600">
-                {t("components.multiPlayerSelector.addLabel")}
+          {selectedPlayers.length === 0 && (
+            <Box
+              p={5}
+              textAlign="center"
+              borderRadius="lg"
+              borderWidth="2px"
+              borderStyle="dashed"
+              borderColor={borderColor}
+            >
+              <Text color={mutedText} fontSize="sm">
+                {t("components.multiPlayerSelector.empty")}
               </Text>
-              <UserSearchSelect
-                users={availableUsersFiltered}
-                selectedUserId={selectedUserId}
-                onUserSelect={handleUserSelect}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                placeholder={t("components.multiPlayerSelector.searchPlaceholder")}
-              />
+              <Text color={mutedText} fontSize="xs" mt={1} opacity={0.7}>
+                {t("components.multiPlayerSelector.emptyHint", { max: maxPlayers })}
+              </Text>
             </Box>
           )}
-
-          {selectedPlayers.length >= maxPlayers && (
-            <Text fontSize="xs" color="orange.500" textAlign="center">
-              {t("components.multiPlayerSelector.limitReached", { max: maxPlayers })}
-            </Text>
-          )}
         </VStack>
-      </CardBody>
-    </Card>
+
+        {/* Add player */}
+        {selectedPlayers.length < maxPlayers && (
+          <Box>
+            <Text fontSize="xs" fontWeight="medium" mb={2} color={mutedText}>
+              {t("components.multiPlayerSelector.addLabel")}
+            </Text>
+            <UserSearchSelect
+              users={availableUsersFiltered}
+              selectedUserId={selectedUserId}
+              onUserSelect={handleUserSelect}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              placeholder={t("components.multiPlayerSelector.searchPlaceholder")}
+            />
+          </Box>
+        )}
+
+        {selectedPlayers.length >= maxPlayers && (
+          <Text fontSize="xs" color="orange.400" textAlign="center">
+            {t("components.multiPlayerSelector.limitReached", { max: maxPlayers })}
+          </Text>
+        )}
+      </VStack>
+    </Box>
   );
 };

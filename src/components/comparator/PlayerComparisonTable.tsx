@@ -1,7 +1,5 @@
 import {
   Box,
-  Card,
-  CardBody,
   Text,
   HStack,
   VStack,
@@ -13,8 +11,9 @@ import {
   Td,
   Badge,
   useColorModeValue,
+  useColorMode,
   Icon,
-  Flex
+  Flex,
 } from "@chakra-ui/react";
 import { FiTrendingUp, FiTrendingDown, FiMinus } from "react-icons/fi";
 import type { IUserStats } from "@/hooks/useAPI";
@@ -31,9 +30,11 @@ interface PlayerComparisonTableProps {
 export const PlayerComparisonTable = ({
   playersData
 }: PlayerComparisonTableProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const tableBg = useColorModeValue("gray.50", "gray.700");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  const bgColor = useColorModeValue("white", "gray.800");
+  const tableBg = useColorModeValue("gray.50", "gray.750");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
   const { t } = useTranslation();
 
   // Trouver le meilleur pour chaque métrique
@@ -132,9 +133,8 @@ export const PlayerComparisonTable = ({
   ];
 
   return (
-    <Card bg={cardBg} borderRadius="xl" boxShadow="lg">
-      <CardBody>
-        <VStack spacing={4} align="stretch">
+    <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={5}>
+      <VStack spacing={4} align="stretch">
           <Text fontSize="lg" fontWeight="bold">
             {t("components.comparatorCharts.tableHeadingPlayers")}
           </Text>
@@ -248,14 +248,13 @@ export const PlayerComparisonTable = ({
           <Box
             p={3}
             borderRadius="lg"
-            bg={useColorModeValue("purple.50", "gray.700")}
+            bg={isDark ? "rgba(49,130,206,0.08)" : "blue.50"}
           >
             <Text fontSize="xs" color="gray.600" _dark={{ color: "gray.400" }}>
               💡 {t("components.comparatorCharts.tableFooterPrefix")} <Badge colorScheme="green" fontSize="2xs">{t("components.comparatorCharts.badgeBest")}</Badge> {t("components.comparatorCharts.tableFooterSuffix")}
             </Text>
           </Box>
-        </VStack>
-      </CardBody>
-    </Card>
+      </VStack>
+    </Box>
   );
 };
