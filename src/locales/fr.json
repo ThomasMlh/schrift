@@ -180,8 +180,13 @@
       "seoDescription": "Guides complets pour Bleach Brave Souls : rotations, équipes recommandées, farming d'orbes et plus encore.",
       "heroTitle": "📚 Guides BBS",
       "heroDescription": "Découvrez nos guides complets pour améliorer votre expérience de jeu",
+      "heroBadge": "Guides complets",
       "tabRotationsBuilds": "🔄 Rotations & Builds",
+      "tabRotationsBuildsDescription": "Builds validés par la communauté pour chaque rotation",
+      "tabRotationsBuildsBadge": "Communauté",
       "tabOrbs": "Farm d'Orbes",
+      "tabOrbsDescription": "Guide complet pour maximiser vos orbes en jeu",
+      "tabOrbsBadge": "Ressources",
       "orbIconAlt": "Icône Orbe"
     },
     "guilds": {

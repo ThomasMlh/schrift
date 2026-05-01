@@ -5,7 +5,6 @@ import {
   Text,
   SimpleGrid,
   Card,
-  CardHeader,
   CardBody,
   Badge,
   useColorModeValue,
@@ -14,7 +13,11 @@ import {
   Alert,
   AlertIcon,
   AlertTitle,
-  AlertDescription
+  AlertDescription,
+  Progress,
+  HStack,
+  Image,
+  useColorMode,
 } from "@chakra-ui/react";
 import { useOrbGuide } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
@@ -25,34 +28,33 @@ interface OrbSource {
   amount: number;
 }
 
+const CATEGORY_COLORS = [
+  "purple", "blue", "green", "orange", "cyan",
+  "red", "pink", "teal", "yellow", "gray",
+];
+
+const PROGRESS_TRACK_COLORS: Record<string, string> = {
+  purple: "rgba(168,85,247,0.15)",
+  blue: "rgba(59,130,246,0.15)",
+  green: "rgba(34,197,94,0.15)",
+  orange: "rgba(251,146,60,0.15)",
+  cyan: "rgba(6,182,212,0.15)",
+  red: "rgba(239,68,68,0.15)",
+  pink: "rgba(236,72,153,0.15)",
+  teal: "rgba(20,184,166,0.15)",
+  yellow: "rgba(234,179,8,0.15)",
+  gray: "rgba(156,163,175,0.15)",
+};
+
 const OrbFarmingGuide = () => {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const cardBorder = useColorModeValue("gray.200", "gray.700");
-  const accentColor = useColorModeValue("purple.500", "purple.300");
-  const textColor = useColorModeValue("gray.700", "gray.300");
-  const totalBoxBg = useColorModeValue("purple.50", "purple.900");
-  const totalBoxBorder = useColorModeValue("purple.200", "purple.600");
-  const totalTextColor = useColorModeValue("gray.700", "gray.200");
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
+  const bgColor = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const mutedText = useColorModeValue("gray.500", "gray.400");
 
   const { t } = useTranslation();
   const { orbData, isLoading: loading, error } = useOrbGuide();
-
-  const colorSchemes = [
-    "purple",
-    "blue",
-    "green",
-    "orange",
-    "cyan",
-    "red",
-    "pink",
-    "teal",
-    "purple",
-    "yellow",
-    "red",
-    "green",
-    "blue",
-    "gray"
-  ];
 
   if (loading) {
     return (
@@ -87,67 +89,153 @@ const OrbFarmingGuide = () => {
     return null;
   }
 
+  const maxAmount = Math.max(...orbData.data.map((s: OrbSource) => s.amount));
+
   return (
     <VStack spacing={6} align="stretch">
-      <Flex align="center" gap={4}>
-        <Box flex={1}>
-          <Heading size="lg" mb={2} color={accentColor}>
+
+      {/* Header */}
+      <Flex align="center" justify="space-between" wrap="wrap" gap={3}>
+        <Box>
+          <Heading size="sm" mb={1} color={isDark ? "purple.300" : "purple.600"}>
             {t("components.orbFarmingGuide.heading")}
           </Heading>
-          <Text fontSize="sm" color={textColor}>
+          <Text fontSize="xs" color={mutedText}>
             {t("components.orbFarmingGuide.description", {
               total: orbData.totalOrbes.toLocaleString()
             })}
           </Text>
         </Box>
+        <Badge
+          colorScheme="purple"
+          variant={isDark ? "subtle" : "solid"}
+          fontSize="lg"
+          px={4}
+          py={2}
+          borderRadius="xl"
+        >
+          {orbData.totalOrbes.toLocaleString()} {t("components.orbFarmingGuide.orbsUnit")}
+        </Badge>
       </Flex>
 
+      {/* Cards */}
       <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-        {orbData.data.map((source: OrbSource, index: number) => (
-          <Card
-            key={index}
-            bg={cardBg}
-            borderWidth="1px"
-            borderColor={cardBorder}
-            shadow="md"
-          >
-            <CardHeader pb={2}>
-              <Flex justify="space-between" align="center">
-                <Heading size="sm">{source.title}</Heading>
-                <Badge colorScheme={colorSchemes[index]} fontSize="md">
-                  {source.amount}
-                </Badge>
-              </Flex>
-            </CardHeader>
-            <CardBody pt={2}>
-              <Text fontSize="sm">{source.description}</Text>
-            </CardBody>
-          </Card>
-        ))}
+        {orbData.data.map((source: OrbSource, index: number) => {
+          const color = CATEGORY_COLORS[index % CATEGORY_COLORS.length];
+          const progressBg = PROGRESS_TRACK_COLORS[color] ?? "rgba(168,85,247,0.1)";
+          const pct = Math.round((source.amount / maxAmount) * 100);
+
+          return (
+            <Card
+              key={index}
+              bg={bgColor}
+              borderWidth="1px"
+              borderColor={borderColor}
+              borderRadius="xl"
+              overflow="hidden"
+              transition="all 0.15s ease"
+              _hover={{
+                borderColor: isDark ? "whiteAlpha.300" : "gray.300",
+                boxShadow: `0 0 16px ${progressBg}, 0 4px 12px rgba(0,0,0,0.08)`,
+                transform: "translateY(-2px)",
+              }}
+            >
+              {/* Color accent bar */}
+              <Box h="3px" bgGradient={`linear(90deg, ${color}.500, ${color}.300)`} />
+              <CardBody p={4}>
+                <VStack align="stretch" spacing={3}>
+                  <Flex justify="space-between" align="flex-start" gap={2}>
+                    <Text fontWeight="semibold" fontSize="sm" lineHeight="short" flex={1}>
+                      {source.title}
+                    </Text>
+                    <Badge
+                      colorScheme={color}
+                      variant="subtle"
+                      fontSize="sm"
+                      fontWeight="bold"
+                      px={2}
+                      borderRadius="lg"
+                      flexShrink={0}
+                    >
+                      {source.amount}
+                    </Badge>
+                  </Flex>
+
+                  {/* Progress bar */}
+                  <Box>
+                    <Box
+                      bg={progressBg}
+                      borderRadius="full"
+                      h="4px"
+                      overflow="hidden"
+                    >
+                      <Box
+                        h="100%"
+                        w={`${pct}%`}
+                        bgGradient={`linear(90deg, ${color}.500, ${color}.300)`}
+                        borderRadius="full"
+                        transition="width 0.4s ease"
+                      />
+                    </Box>
+                  </Box>
+
+                  <Text fontSize="xs" color={mutedText} lineHeight="short">
+                    {source.description}
+                  </Text>
+                </VStack>
+              </CardBody>
+            </Card>
+          );
+        })}
       </SimpleGrid>
 
-      {/* Total */}
+      {/* Total banner */}
       <Box
-        mt={6}
-        p={6}
-        bg={totalBoxBg}
-        borderRadius="lg"
-        borderWidth="2px"
-        borderColor={totalBoxBorder}
+        p={5}
+        borderRadius="xl"
+        borderWidth="1px"
+        borderColor={isDark ? "purple.700" : "purple.200"}
+        bg={isDark ? "rgba(168,85,247,0.08)" : "purple.50"}
+        boxShadow={isDark ? "0 0 24px rgba(168,85,247,0.12)" : "none"}
       >
-        <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
+        <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
           <Box>
-            <Heading size="md" mb={2}>
+            <Text fontWeight="bold" fontSize="sm" color={isDark ? "purple.300" : "purple.700"} mb={1}>
               {t("components.orbFarmingGuide.totalHeading")}
-            </Heading>
-            <Text fontSize="sm" color={totalTextColor}>
+            </Text>
+            <Text fontSize="xs" color={mutedText}>
               {t("components.orbFarmingGuide.totalDescription")}
             </Text>
           </Box>
-          <Badge colorScheme="purple" fontSize="3xl" px={6} py={3}>
-            {orbData.totalOrbes.toLocaleString()} {t("components.orbFarmingGuide.orbsUnit")}
-          </Badge>
+          <HStack spacing={2}>
+            <Image src="/orb.png" alt={t("components.orbFarmingGuide.orbsUnit")} boxSize="36px" />
+            <Heading size="lg" color={isDark ? "purple.300" : "purple.600"}>
+              {orbData.totalOrbes.toLocaleString()}
+            </Heading>
+            <Text fontSize="sm" color={mutedText} alignSelf="flex-end" pb={1}>
+              {t("components.orbFarmingGuide.orbsUnit")}
+            </Text>
+          </HStack>
         </Flex>
+
+        {/* Progress global */}
+        <Box mt={4}>
+          <Flex justify="space-between" mb={1}>
+            <Text fontSize="2xs" color={mutedText} textTransform="uppercase" letterSpacing="widest">
+              {t("components.orbFarmingGuide.heading")}
+            </Text>
+            <Text fontSize="2xs" color={isDark ? "purple.300" : "purple.600"} fontWeight="bold">
+              {orbData.data.length} sources
+            </Text>
+          </Flex>
+          <Progress
+            value={100}
+            colorScheme="purple"
+            size="sm"
+            borderRadius="full"
+            bg={isDark ? "whiteAlpha.100" : "purple.100"}
+          />
+        </Box>
       </Box>
     </VStack>
   );

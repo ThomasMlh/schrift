@@ -19,11 +19,13 @@ import {
   CardBody,
   IconButton,
   Tooltip,
+  Badge,
+  useColorMode,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { AddIcon, InfoIcon, EditIcon } from "@chakra-ui/icons";
+import { AddIcon, InfoIcon, EditIcon, CalendarIcon } from "@chakra-ui/icons";
 import { useBuilds, useRotations } from "../../hooks/useAPI";
 import BuildCreationModal from "../ui/BuildCreationModal";
 import { BuildDetailModal } from "../ui/BuildDetailModal";
@@ -45,8 +47,12 @@ const RotationsBuildsGuide = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isDetailOpen, onOpen: onDetailOpen, onClose: onDetailClose } = useDisclosure();
 
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === "dark";
   const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const cardHeaderBg = useColorModeValue("gray.50", "gray.750");
+  const mutedText = useColorModeValue("gray.500", "gray.400");
 
   const { t } = useTranslation();
   const bucketUrl = import.meta.env.VITE_BUCKET_URL;
@@ -178,146 +184,121 @@ const RotationsBuildsGuide = () => {
   };
 
   return (
-    <VStack spacing={6} align="stretch">
-      <Box>
-        <Heading size="md" mb={4}>
-          {t("components.rotationsBuildsGuide.heading")}
-        </Heading>
-        <Text color="gray.600" mb={4}>
-          {t("components.rotationsBuildsGuide.description")}
-        </Text>
+    <VStack spacing={5} align="stretch">
 
-        {!isAuthenticated && (
-          <Alert status="info" borderRadius="md" mb={4}>
-            <AlertIcon />
-            <Text fontSize="sm">
-              {t("components.rotationsBuildsGuide.loginAlert")}
-            </Text>
-          </Alert>
-        )}
-      </Box>
-
-      {/* Filtres et création */}
-      <Box
-        bg={bgColor}
-        p={4}
-        borderRadius="md"
-        borderWidth="1px"
-        borderColor={borderColor}
-      >
-        <Flex
-          direction={{ base: "column", md: "row" }}
-          gap={4}
-          align={{ base: "stretch", md: "flex-end" }}
-          justify="space-between"
-        >
-          <Box flex={1} maxW={{ base: "100%", md: "500px" }}>
-            <Text fontSize="sm" fontWeight="medium" mb={2}>
-              {t("components.rotationsBuildsGuide.filterLabel")}
-            </Text>
-            <CustomSelect
-              placeholder={t("components.rotationsBuildsGuide.filterPlaceholder")}
-              value={selectedRotation}
-              onChange={(value) => {
-                setSelectedRotation(value);
-                setCurrentPage(1);
-              }}
-              isDisabled={isLoadingRotations}
-              bg={bgColor}
-              options={rotations.map((rotation) => ({
-                value: rotation._id || '',
-                label: `${rotation.killer} - ${rotation.attack}`,
-                content: (
-                  <HStack spacing={2} w="100%">
-                    <Text fontWeight="medium">
-                      {rotation.killer}
-                    </Text>
-                    <AttackTypeBadge attackType={rotation.attack} />
-                    <AlterationImage alteration={rotation.alteration} size="16px" />
-                  </HStack>
-                )
-              }))}
-              renderSelected={(option) => {
-                const rotation = rotations.find((r) => r._id === option.value);
-                return rotation ? (
-                  <HStack spacing={2}>
-                    <Text>{rotation.killer}</Text>
-                    <AttackTypeBadge attackType={rotation.attack} />
-                    <AlterationImage alteration={rotation.alteration} size="16px" />
-                  </HStack>
-                ) : <Text>{option.label}</Text>;
-              }}
-              allowDeselect={true}
-            />
-          </Box>
-
-          {isAuthenticated && (
+      {/* Header: title + create button */}
+      <Flex justify="space-between" align="center" wrap="wrap" gap={3}>
+        <Box>
+          <Heading size="sm" mb={1}>
+            {t("components.rotationsBuildsGuide.heading")}
+          </Heading>
+          <Text fontSize="xs" color={mutedText}>
+            {t("components.rotationsBuildsGuide.description")}
+          </Text>
+        </Box>
+        {isAuthenticated && (
+          <Tooltip
+            label={!selectedRotation ? t("components.rotationsBuildsGuide.selectRotationHint") : ""}
+            placement="top"
+            hasArrow
+            isDisabled={!!selectedRotation}
+          >
             <Button
               leftIcon={<AddIcon />}
               colorScheme="orange"
               onClick={handleCreateBuild}
               isDisabled={!selectedRotation}
-              size="md"
+              size="sm"
               flexShrink={0}
             >
               {t("components.rotationsBuildsGuide.buttonCreate")}
             </Button>
-          )}
-        </Flex>
-
-        {!selectedRotation && isAuthenticated && (
-          <Flex align="center" gap={2} mt={3} color="orange.500">
-            <Icon as={InfoIcon} />
-            <Text fontSize="xs">
-              {t("components.rotationsBuildsGuide.selectRotationHint")}
-            </Text>
-          </Flex>
+          </Tooltip>
         )}
-      </Box>
+      </Flex>
 
-      {/* Titre de la section */}
+      {!isAuthenticated && (
+        <Alert status="info" borderRadius="lg" fontSize="sm" py={2}>
+          <AlertIcon />
+          {t("components.rotationsBuildsGuide.loginAlert")}
+        </Alert>
+      )}
+
+      {/* Filtre rotation */}
       <Box
         bg={bgColor}
         p={4}
-        borderRadius="md"
+        borderRadius="xl"
         borderWidth="1px"
         borderColor={borderColor}
       >
-        {selectedRotation ? (
-          <HStack spacing={3} justify="center">
-            <Heading size="md">
+        <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={mutedText} mb={3}>
+          {t("components.rotationsBuildsGuide.filterLabel")}
+        </Text>
+        <CustomSelect
+          placeholder={t("components.rotationsBuildsGuide.filterPlaceholder")}
+          value={selectedRotation}
+          onChange={(value) => {
+            setSelectedRotation(value);
+            setCurrentPage(1);
+          }}
+          isDisabled={isLoadingRotations}
+          bg={bgColor}
+          options={rotations.map((rotation) => ({
+            value: rotation._id || '',
+            label: `${rotation.killer} - ${rotation.attack}`,
+            content: (
+              <HStack spacing={2} w="100%">
+                <Text fontWeight="medium">{rotation.killer}</Text>
+                <AttackTypeBadge attackType={rotation.attack} />
+                <AlterationImage alteration={rotation.alteration} size="16px" />
+              </HStack>
+            )
+          }))}
+          renderSelected={(option) => {
+            const rotation = rotations.find((r) => r._id === option.value);
+            return rotation ? (
+              <HStack spacing={2}>
+                <Text>{rotation.killer}</Text>
+                <AttackTypeBadge attackType={rotation.attack} />
+                <AlterationImage alteration={rotation.alteration} size="16px" />
+              </HStack>
+            ) : <Text>{option.label}</Text>;
+          }}
+          allowDeselect={true}
+        />
+        {selectedRotation && (
+          <HStack spacing={3} mt={3} pt={3} borderTopWidth="1px" borderTopColor={borderColor}>
+            <Heading size="sm">
               {rotations.find(r => r._id === selectedRotation)?.killer || 'Rotation'}
             </Heading>
-            <AttackTypeBadge 
-              attackType={rotations.find(r => r._id === selectedRotation)?.attack || ''} 
+            <AttackTypeBadge
+              attackType={rotations.find(r => r._id === selectedRotation)?.attack || ''}
             />
-            <AlterationImage 
-              alteration={rotations.find(r => r._id === selectedRotation)?.alteration || ''} 
-              size="24px" 
+            <AlterationImage
+              alteration={rotations.find(r => r._id === selectedRotation)?.alteration || ''}
+              size="20px"
             />
           </HStack>
-        ) : (
-          <Heading size="md" textAlign="center">
-            {t("components.rotationsBuildsGuide.titleAllBuilds")}
-          </Heading>
         )}
       </Box>
 
       {/* Liste des builds */}
       {isLoading ? (
-        <Flex justify="center" py={8}>
-          <Spinner size="xl" color="orange.500" />
+        <Flex justify="center" py={12}>
+          <Spinner size="xl" color="orange.500" thickness="4px" />
         </Flex>
       ) : builds.length === 0 ? (
         <Box
           bg={bgColor}
           p={8}
-          borderRadius="md"
+          borderRadius="xl"
           borderWidth="1px"
           borderColor={borderColor}
           textAlign="center"
         >
-          <Text color="gray.500">
+          <Text fontSize="2xl" mb={3}>🔍</Text>
+          <Text color={mutedText} fontSize="sm">
             {selectedRotation
               ? t("components.rotationsBuildsGuide.noBuildsForRotation")
               : t("components.rotationsBuildsGuide.noBuildsAvailable")}
@@ -325,111 +306,113 @@ const RotationsBuildsGuide = () => {
         </Box>
       ) : (
         <>
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-            {builds.map((build) => (
-              <Card
-                key={build._id}
-                bg={bgColor}
-                borderWidth="1px"
-                borderColor={borderColor}
-                _hover={{
-                  boxShadow: "lg",
-                  transform: "translateY(-2px)",
-                  transition: "all 0.2s"
-                }}
-                cursor="pointer"
-                onClick={() => handleOpenBuild(build)}
-              >
-                <CardBody>
-                  <VStack align="stretch" spacing={4}>
-                    {/* Rotation (seulement si aucun filtre) */}
-                    {!selectedRotation && build.rotation && (
-                      <Box>
-                        <HStack spacing={2} justify="center">
-                          <Text fontSize="sm" fontWeight="bold">
-                            {rotations.find(r => r._id === build.rotation_id)?.killer || 'Rotation'}
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+            {builds.map((build) => {
+              const rotation = rotations.find(r => r._id === build.rotation_id);
+              return (
+                <Card
+                  key={build._id}
+                  bg={bgColor}
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                  borderRadius="xl"
+                  overflow="hidden"
+                  transition="all 0.2s ease"
+                  _hover={{
+                    borderColor: isDark ? "orange.700" : "orange.300",
+                    boxShadow: `0 0 16px rgba(251,146,60,0.15), 0 4px 12px rgba(0,0,0,0.1)`,
+                    transform: "translateY(-2px)",
+                  }}
+                  cursor="pointer"
+                  onClick={() => handleOpenBuild(build)}
+                >
+                  {/* Header card — rotation info */}
+                  <Box
+                    px={4}
+                    py={3}
+                    bg={isDark ? "rgba(251,146,60,0.06)" : "orange.50"}
+                    borderBottomWidth="1px"
+                    borderBottomColor={isDark ? "whiteAlpha.100" : "orange.100"}
+                  >
+                    {rotation ? (
+                      <HStack spacing={2} justify="space-between">
+                        <HStack spacing={2} minW={0}>
+                          <Text fontSize="sm" fontWeight="bold" noOfLines={1} color={isDark ? "orange.300" : "orange.600"}>
+                            {rotation.killer}
                           </Text>
-                          <AttackTypeBadge 
-                            attackType={rotations.find(r => r._id === build.rotation_id)?.attack || ''} 
-                          />
-                          <AlterationImage 
-                            alteration={rotations.find(r => r._id === build.rotation_id)?.alteration || ''} 
-                            size="16px" 
-                          />
+                          <AttackTypeBadge attackType={rotation.attack} />
+                          <AlterationImage alteration={rotation.alteration} size="16px" />
                         </HStack>
-                        <Divider mt={3} />
-                      </Box>
-                    )}
-
-                    {/* En-tête avec créateur */}
-                    <HStack justify="space-between">
-                      {build.user ? (
-                        <>
-                          <UserDisplay user={build.user} />
-                          <HStack spacing={2}>
-                            <Text fontSize="xs" color="gray.500">
-                              {formatDate(build.created_at)}
-                            </Text>
-                            {canEditBuild(build) && (
+                        {canEditBuild(build) && (
                           <Tooltip label={t("common.edit")} placement="top">
-                                <IconButton
-                                  aria-label="Modifier le build"
-                                  icon={<EditIcon />}
-                                  size="xs"
-                                  colorScheme="blue"
-                                  variant="ghost"
-                                  onClick={(e) => handleEditBuild(build, e)}
-                                />
-                              </Tooltip>
-                            )}
-                          </HStack>
-                        </>
-                      ) : (
-                        <Text fontSize="sm" color="gray.500">
-                          Anonyme
-                        </Text>
-                      )}
-                    </HStack>
+                            <IconButton
+                              aria-label="Modifier le build"
+                              icon={<EditIcon />}
+                              size="xs"
+                              colorScheme="orange"
+                              variant="ghost"
+                              onClick={(e) => handleEditBuild(build, e)}
+                              flexShrink={0}
+                            />
+                          </Tooltip>
+                        )}
+                      </HStack>
+                    ) : (
+                      <Text fontSize="sm" color={mutedText} fontStyle="italic">
+                        {t("components.rotationsBuildsGuide.titleAllBuilds")}
+                      </Text>
+                    )}
+                  </Box>
 
-                    {/* Description */}
-                    {build.description && (
-                      <Box>
-                        <Text fontSize="sm" whiteSpace="pre-wrap" noOfLines={3}>
+                  <CardBody p={4}>
+                    <VStack align="stretch" spacing={4}>
+                      {/* Auteur + date */}
+                      <HStack justify="space-between" align="center">
+                        {build.user ? (
+                          <UserDisplay user={build.user} />
+                        ) : (
+                          <Badge colorScheme="gray" variant="subtle" fontSize="xs">Anonyme</Badge>
+                        )}
+                        <HStack spacing={1} color={mutedText} flexShrink={0}>
+                          <Icon as={CalendarIcon} boxSize={3} />
+                          <Text fontSize="xs">{formatDate(build.created_at)}</Text>
+                        </HStack>
+                      </HStack>
+
+                      {/* Description */}
+                      {build.description && (
+                        <Text fontSize="sm" color={isDark ? "gray.300" : "gray.600"} noOfLines={3} lineHeight="short">
                           {build.description}
                         </Text>
+                      )}
+
+                      <Divider borderColor={borderColor} />
+
+                      {/* Team composition */}
+                      <Box>
+                        <Text fontSize="2xs" fontWeight="bold" textTransform="uppercase" letterSpacing="widest" color={mutedText} mb={2}>
+                          COMPOSITION
+                        </Text>
+                        <HStack spacing={2} justify="center">
+                          {build.team?.slice(0, 3).map((member, idx) => (
+                            <Tooltip key={idx} label={member.character?.name || "?"} placement="top" hasArrow>
+                              <Avatar
+                                size="lg"
+                                src={`${bucketUrl}/characters/thumb/${member.character?._id}.png`}
+                                name={member.character?.name || "?"}
+                                bg={isDark ? "gray.700" : "gray.200"}
+                                borderWidth="2px"
+                                borderColor={isDark ? "whiteAlpha.200" : "gray.300"}
+                              />
+                            </Tooltip>
+                          ))}
+                        </HStack>
                       </Box>
-                    )}
-
-                    <Divider />
-
-                    {/* Team - Avatars uniquement */}
-                    <Box>
-                      <Text
-                        fontSize="xs"
-                        fontWeight="bold"
-                        color="gray.500"
-                        mb={2}
-                      >
-                        COMPOSITION
-                      </Text>
-                      <HStack spacing={3} justify="center">
-                        {build.team?.slice(0, 3).map((member, idx) => (
-                          <Avatar
-                            key={idx}
-                            size="lg"
-                            src={
-                              `${bucketUrl}/characters/thumb/${member.character?._id}.png`
-                            }
-                            name={member.character?.name || "?"}
-                            bg="gray.200"
-                          />
-                        ))}
-                      </HStack>
-                    </Box>
-                  </VStack>
-                </CardBody>
-              </Card>
-            ))}
+                    </VStack>
+                  </CardBody>
+                </Card>
+              );
+            })}
           </SimpleGrid>
 
           {/* Pagination */}
@@ -447,8 +430,6 @@ const RotationsBuildsGuide = () => {
         </>
       )}
 
-      <Divider my={8} />
-
       {/* Modal de création/édition */}
       {(selectedRotation || buildToEdit) && (
         <BuildCreationModal
@@ -461,7 +442,7 @@ const RotationsBuildsGuide = () => {
       )}
 
       {/* Modal de détails */}
-      <BuildDetailModal 
+      <BuildDetailModal
         isOpen={isDetailOpen}
         onClose={handleCloseDetailModal}
         build={selectedBuild}
