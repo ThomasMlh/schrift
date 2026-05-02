@@ -379,6 +379,7 @@ const ComparatorPage: React.FC = () => {
                           : (isDark ? "whiteAlpha.100" : "gray.100")
                         }
                         flexShrink={0}
+                        display="flex" alignItems="center" justifyContent="center"
                       >
                         <Icon
                           as={type.icon}

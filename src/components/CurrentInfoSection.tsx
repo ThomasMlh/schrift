@@ -175,6 +175,7 @@ export const CurrentInfoSection = () => {
         <Box
           p={2} borderRadius="lg"
           bg="linear-gradient(135deg, #7C3AED, #4F46E5)"
+          display="flex" alignItems="center" justifyContent="center"
         >
           <Icon as={FaClock} boxSize={4} color="white" />
         </Box>
