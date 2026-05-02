@@ -21,6 +21,7 @@ import { UserDisplay } from "./UserDisplay";
 import { AffinityIcon } from "./AffinityIcon";
 import type { IBuild } from "../../interfaces";
 import { useAuth } from "@/providers/AuthProvider";
+import { useTranslation } from "react-i18next";
 
 interface BuildDetailModalProps {
   isOpen: boolean;
@@ -38,6 +39,7 @@ export const BuildDetailModal = ({
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const linkBgColor = useColorModeValue("gray.50", "gray.700");
   const { currentUser } = useAuth();
+  const { t } = useTranslation();
 
   const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
@@ -68,7 +70,7 @@ export const BuildDetailModal = ({
     <Modal isOpen={isOpen} onClose={onClose} size="6xl" scrollBehavior="inside">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Détails du Build</ModalHeader>
+        <ModalHeader>{t("components.buildDetailModal.title")}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           {build && (
@@ -76,12 +78,12 @@ export const BuildDetailModal = ({
               {/* Utilisateur */}
               <Box>
                 <Text fontWeight="bold" mb={2}>
-                  Créé par :
+                  {t("components.buildDetailModal.createdBy")}
                 </Text>
                 {build.user ? (
                   <UserDisplay user={build.user} />
                 ) : (
-                  <Text color="gray.500">Utilisateur anonyme</Text>
+                  <Text color="gray.500">{t("components.buildDetailModal.anonymousUser")}</Text>
                 )}
               </Box>
 
@@ -89,13 +91,13 @@ export const BuildDetailModal = ({
               {build.rotation && (
                 <Box>
                   <Text fontWeight="bold" mb={2}>
-                    Rotation :
+                    {t("components.buildDetailModal.rotation")}
                   </Text>
                   <HStack spacing={2}>
-                    <Badge colorScheme="blue">{build.rotation.killer}</Badge>
-                    <Badge colorScheme="green">{build.rotation.attack}</Badge>
+                    <Badge colorScheme="blue">{t(`factions.${build.rotation.killer}`, build.rotation.killer)}</Badge>
+                    <Badge colorScheme="green">{t(`attackTypes.${build.rotation.attack}`, build.rotation.attack)}</Badge>
                     <Badge colorScheme="orange">
-                      {build.rotation.alteration}
+                      {t(`alterations.${build.rotation.alteration}`, build.rotation.alteration)}
                     </Badge>
                   </HStack>
                 </Box>
@@ -104,10 +106,10 @@ export const BuildDetailModal = ({
               {/* Description */}
               <Box>
                 <Text fontWeight="bold" mb={2}>
-                  Description :
+                  {t("components.buildDetailModal.description")}
                 </Text>
                 <Text whiteSpace="pre-wrap">
-                  {build.description || "Aucune description"}
+                  {build.description || t("components.buildDetailModal.noDescription")}
                 </Text>
               </Box>
 
@@ -115,14 +117,14 @@ export const BuildDetailModal = ({
               {build.isValid !== undefined && build.user?.is_admin && (
                 <Box>
                   <Text fontWeight="bold" mb={2}>
-                    Statut :
+                    {t("components.buildDetailModal.status")}
                   </Text>
                   <Badge
                     colorScheme={build.isValid ? "green" : "gray"}
                     fontSize="md"
                     p={2}
                   >
-                    {build.isValid ? "✓ Validé" : "⏱ En attente de validation"}
+                    {build.isValid ? t("components.buildDetailModal.statusValid") : t("components.buildDetailModal.statusPending")}
                   </Badge>
                 </Box>
               )}
@@ -130,7 +132,7 @@ export const BuildDetailModal = ({
               {/* Team */}
               <Box>
                 <Text fontWeight="bold" mb={2}>
-                  Composition de la team :
+                  {t("components.buildDetailModal.teamComposition")}
                 </Text>
                 <Stack
                   direction={{ base: "column", xl: "row" }}
@@ -148,7 +150,7 @@ export const BuildDetailModal = ({
                     >
                       <VStack spacing={3} mb={2} justify="flex-start">
                         <Badge colorScheme="purple">
-                          Position {member.position}
+                          {t("components.buildDetailModal.position", { pos: member.position })}
                         </Badge>
                         <HStack spacing={3}>
                           <Avatar
@@ -159,7 +161,7 @@ export const BuildDetailModal = ({
                           />
                           <Text fontWeight="medium">
                             {member.character?.name ||
-                              `Personnage ${member.id_character}`}
+                              t("components.buildDetailModal.characterFallback", { id: member.id_character })}
                           </Text>
                           {member.character?.affinity && (
                             <AffinityIcon
@@ -174,7 +176,7 @@ export const BuildDetailModal = ({
                       {member.skills && member.skills.length > 0 && (
                         <Box ml={4} mt={2}>
                           <Text fontSize="sm" fontWeight="medium" mb={1}>
-                            Compétences :
+                            {t("components.buildDetailModal.skills")}
                           </Text>
                           <HStack spacing={2} flexWrap="wrap">
                             {member.skills.map((skill, skillIndex) => {
@@ -201,7 +203,7 @@ export const BuildDetailModal = ({
                       {member.accessories && member.accessories.length > 0 && (
                         <Box ml={4} mt={2}>
                           <Text fontSize="sm" fontWeight="medium" mb={1}>
-                            Accessoires :
+                            {t("components.buildDetailModal.accessories")}
                           </Text>
                           <VStack align="stretch" spacing={2}>
                             {member.accessories.map((acc, accIndex) => (
@@ -249,7 +251,7 @@ export const BuildDetailModal = ({
                       {member.links && member.links.length > 0 && (
                         <Box ml={4} mt={2}>
                           <Text fontSize="sm" fontWeight="medium" mb={2}>
-                            Links :
+                            {t("components.buildDetailModal.links")}
                           </Text>
                           <VStack align="stretch" spacing={2}>
                             {member.links.map((link, linkIndex) => (
@@ -270,7 +272,7 @@ export const BuildDetailModal = ({
                                     <HStack spacing={2} align="center">
                                       <Text fontSize="sm" fontWeight="medium">
                                         {link.character?.name ||
-                                          `Personnage ${link.id_character}`}
+                                          t("components.buildDetailModal.characterFallback", { id: link.id_character })}
                                       </Text>
                                       {link.character?.affinity && (
                                         <AffinityIcon
@@ -308,20 +310,20 @@ export const BuildDetailModal = ({
               {/* Dates */}
               <Box>
                 <Text fontWeight="bold" mb={2}>
-                  Dates :
+                  {t("components.buildDetailModal.dates")}
                 </Text>
                 <VStack align="start" spacing={1}>
                   <Text fontSize="sm">
-                    <strong>Créé :</strong> {formatDate(build.created_at)}
+                    <strong>{t("components.buildDetailModal.dateCreated")}</strong> {formatDate(build.created_at)}
                   </Text>
                   {build.updated_at && (
                     <Text fontSize="sm">
-                      <strong>Modifié :</strong> {formatDate(build.updated_at)}
+                      <strong>{t("components.buildDetailModal.dateModified")}</strong> {formatDate(build.updated_at)}
                     </Text>
                   )}
                   {build.isValid && (
                     <Text fontSize="sm">
-                      <strong>Validé :</strong> {formatDate(build.validated_at)}
+                      <strong>{t("components.buildDetailModal.dateValidated")}</strong> {formatDate(build.validated_at)}
                     </Text>
                   )}
                 </VStack>
@@ -337,10 +339,10 @@ export const BuildDetailModal = ({
                 colorScheme="blue"
                 onClick={handleEdit}
               >
-                Modifier
+                {t("components.buildDetailModal.buttonEdit")}
               </Button>
             )}
-            <Button onClick={onClose}>Fermer</Button>
+            <Button onClick={onClose}>{t("components.buildDetailModal.buttonClose")}</Button>
           </HStack>
         </ModalFooter>
       </ModalContent>

@@ -44,7 +44,8 @@
     "yes": "Oui",
     "no": "Non",
     "pageOf": "Page {{current}} sur {{total}}",
-    "itemsOnPageOfTotal": "({{itemsOnPage}} éléments sur {{totalCount}} au total)"
+    "itemsOnPageOfTotal": "({{itemsOnPage}} éléments sur {{totalCount}} au total)",
+    "noSelection": "Aucune sélection"
   },
   "pages": {
     "home": {
@@ -478,7 +479,63 @@
       "titleAllBuilds": "Tous les Builds",
       "selectRotationHint": "Sélectionnez une rotation pour créer un build",
       "noBuildsForRotation": "Aucun build trouvé pour cette rotation",
-      "noBuildsAvailable": "Aucun build disponible. Sélectionnez une rotation pour voir les builds."
+      "noBuildsAvailable": "Aucun build disponible. Sélectionnez une rotation pour voir les builds.",
+      "anonymous": "Anonyme",
+      "composition": "COMPOSITION",
+      "ariaEditBuild": "Modifier le build"
+    },
+    "buildDetailModal": {
+      "title": "Détails du Build",
+      "createdBy": "Créé par :",
+      "anonymousUser": "Utilisateur anonyme",
+      "rotation": "Rotation :",
+      "description": "Description :",
+      "noDescription": "Aucune description",
+      "status": "Statut :",
+      "statusValid": "✓ Validé",
+      "statusPending": "⏱ En attente de validation",
+      "teamComposition": "Composition de la team :",
+      "position": "Position {{pos}}",
+      "characterFallback": "Personnage {{id}}",
+      "skills": "Compétences :",
+      "accessories": "Accessoires :",
+      "links": "Links :",
+      "dates": "Dates :",
+      "dateCreated": "Créé :",
+      "dateModified": "Modifié :",
+      "dateValidated": "Validé :",
+      "buttonEdit": "Modifier",
+      "buttonClose": "Fermer"
+    },
+    "buildCreationModal": {
+      "titleCreate": "Créer un Build",
+      "titleEdit": "Modifier le Build",
+      "alertCreate": "Votre build sera soumis pour validation par un administrateur avant d'être visible publiquement.",
+      "alertEdit": "Après modification, votre build sera re-soumis pour validation par un administrateur.",
+      "teamComposition": "Composition de la Team",
+      "buttonCancel": "Annuler",
+      "buttonCreate": "Créer le Build",
+      "buttonEdit": "Modifier le Build",
+      "loadingCreate": "Création...",
+      "loadingEdit": "Modification...",
+      "toastCharUsedTitle": "Personnage déjà utilisé",
+      "toastCharUsedDesc": "Ce personnage est déjà utilisé dans une autre position ou comme link.",
+      "toastAuthTitle": "Erreur d'authentification",
+      "toastAuthDescCreate": "Vous devez être connecté pour créer un build",
+      "toastAuthDescEdit": "Vous devez être connecté pour modifier un build",
+      "toastValidationTitle": "Erreur",
+      "toastValidationDesc": "Vous devez sélectionner au moins un personnage",
+      "toastSuccessCreateTitle": "Build créé !",
+      "toastSuccessCreateDesc": "Votre build a été soumis et sera validé par un administrateur.",
+      "toastSuccessEditTitle": "Build modifié !",
+      "toastSuccessEditDesc": "Votre build a été modifié et sera re-validé par un administrateur.",
+      "toastErrorTitle": "Erreur",
+      "toastErrorDescCreate": "Impossible de créer le build",
+      "toastErrorDescEdit": "Impossible de modifier le build"
+    },
+    "descriptionTextarea": {
+      "label": "Description (optionnel)",
+      "placeholder": "Décrivez votre stratégie, les atouts de cette team..."
     },
     "orbFarmingGuide": {
       "heading": "Guide du Farm d'Orbes",

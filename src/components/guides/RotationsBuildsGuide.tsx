@@ -245,10 +245,10 @@ const RotationsBuildsGuide = () => {
           bg={bgColor}
           options={rotations.map((rotation) => ({
             value: rotation._id || '',
-            label: `${rotation.killer} - ${rotation.attack}`,
+            label: `${t(`factions.${rotation.killer}`, rotation.killer)} - ${t(`attackTypes.${rotation.attack}`, rotation.attack)}`,
             content: (
               <HStack spacing={2} w="100%">
-                <Text fontWeight="medium">{rotation.killer}</Text>
+                <Text fontWeight="medium">{t(`factions.${rotation.killer}`, rotation.killer)}</Text>
                 <AttackTypeBadge attackType={rotation.attack} />
                 <AlterationImage alteration={rotation.alteration} size="16px" />
               </HStack>
@@ -258,7 +258,7 @@ const RotationsBuildsGuide = () => {
             const rotation = rotations.find((r) => r._id === option.value);
             return rotation ? (
               <HStack spacing={2}>
-                <Text>{rotation.killer}</Text>
+                <Text>{t(`factions.${rotation.killer}`, rotation.killer)}</Text>
                 <AttackTypeBadge attackType={rotation.attack} />
                 <AlterationImage alteration={rotation.alteration} size="16px" />
               </HStack>
@@ -269,7 +269,7 @@ const RotationsBuildsGuide = () => {
         {selectedRotation && (
           <HStack spacing={3} mt={3} pt={3} borderTopWidth="1px" borderTopColor={borderColor}>
             <Heading size="sm">
-              {rotations.find(r => r._id === selectedRotation)?.killer || 'Rotation'}
+              {t(`factions.${rotations.find(r => r._id === selectedRotation)?.killer}`, rotations.find(r => r._id === selectedRotation)?.killer || 'Rotation')}
             </Heading>
             <AttackTypeBadge
               attackType={rotations.find(r => r._id === selectedRotation)?.attack || ''}
@@ -337,7 +337,7 @@ const RotationsBuildsGuide = () => {
                       <HStack spacing={2} justify="space-between">
                         <HStack spacing={2} minW={0}>
                           <Text fontSize="sm" fontWeight="bold" noOfLines={1} color={isDark ? "orange.300" : "orange.600"}>
-                            {rotation.killer}
+                            {t(`factions.${rotation.killer}`, rotation.killer)}
                           </Text>
                           <AttackTypeBadge attackType={rotation.attack} />
                           <AlterationImage alteration={rotation.alteration} size="16px" />
@@ -345,7 +345,7 @@ const RotationsBuildsGuide = () => {
                         {canEditBuild(build) && (
                           <Tooltip label={t("common.edit")} placement="top">
                             <IconButton
-                              aria-label="Modifier le build"
+                              aria-label={t("components.rotationsBuildsGuide.ariaEditBuild")}
                               icon={<EditIcon />}
                               size="xs"
                               colorScheme="orange"
@@ -370,7 +370,7 @@ const RotationsBuildsGuide = () => {
                         {build.user ? (
                           <UserDisplay user={build.user} />
                         ) : (
-                          <Badge colorScheme="gray" variant="subtle" fontSize="xs">Anonyme</Badge>
+                          <Badge colorScheme="gray" variant="subtle" fontSize="xs">{t("components.rotationsBuildsGuide.anonymous")}</Badge>
                         )}
                         <HStack spacing={1} color={mutedText} flexShrink={0}>
                           <Icon as={CalendarIcon} boxSize={3} />
@@ -390,7 +390,7 @@ const RotationsBuildsGuide = () => {
                       {/* Team composition */}
                       <Box>
                         <Text fontSize="2xs" fontWeight="bold" textTransform="uppercase" letterSpacing="widest" color={mutedText} mb={2}>
-                          COMPOSITION
+                          {t("components.rotationsBuildsGuide.composition")}
                         </Text>
                         <HStack spacing={2} justify="center">
                           {build.team?.slice(0, 3).map((member, idx) => (

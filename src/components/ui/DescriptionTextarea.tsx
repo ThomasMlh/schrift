@@ -1,5 +1,6 @@
 import { FormControl, FormLabel, Textarea } from "@chakra-ui/react";
 import { memo } from "react";
+import { useTranslation } from "react-i18next";
 
 interface DescriptionTextareaProps {
   value: string;
@@ -7,13 +8,14 @@ interface DescriptionTextareaProps {
 }
 
 export const DescriptionTextarea = memo(({ value, onChange }: DescriptionTextareaProps) => {
+  const { t } = useTranslation();
   return (
     <FormControl>
-      <FormLabel>Description (optionnel)</FormLabel>
+      <FormLabel>{t("components.descriptionTextarea.label")}</FormLabel>
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Décrivez votre stratégie, les atouts de cette team..."
+        placeholder={t("components.descriptionTextarea.placeholder")}
         rows={3}
         minH="150px"
       />

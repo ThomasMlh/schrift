@@ -19,6 +19,7 @@ import { useAPIMutations } from "../../hooks/useAPIMutations";
 import { DescriptionTextarea } from "./DescriptionTextarea";
 import { TeamMemberCard } from "./TeamMemberCard";
 import { useAuth } from "@/providers/AuthProvider";
+import { useTranslation } from "react-i18next";
 
 interface BuildCreationModalProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ interface TeamMember {
 const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdit }: BuildCreationModalProps) => {
   const { createBuild, updateBuild } = useAPIMutations();
   const { token } = useAuth();
+  const { t } = useTranslation();
   const [description, setDescription] = useState("");
   const [team, setTeam] = useState<TeamMember[]>([
     { id_character: "", position: 1, links: [], skills: [], accessories: [] },
@@ -139,8 +141,8 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
       
       if (characterId && usedIds.has(characterId)) {
         toast({
-          title: "Personnage déjà utilisé",
-          description: "Ce personnage est déjà utilisé dans une autre position ou comme link.",
+          title: t("components.buildCreationModal.toastCharUsedTitle"),
+          description: t("components.buildCreationModal.toastCharUsedDesc"),
           status: "warning",
           duration: 3000,
         });
@@ -197,8 +199,8 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
       
       if (characterId && usedIds.has(characterId)) {
         toast({
-          title: "Personnage déjà utilisé",
-          description: "Ce personnage est déjà utilisé dans une autre position ou comme link.",
+          title: t("components.buildCreationModal.toastCharUsedTitle"),
+          description: t("components.buildCreationModal.toastCharUsedDesc"),
           status: "warning",
           duration: 3000,
         });
@@ -293,8 +295,8 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     // Vérifier que l'utilisateur est connecté
     if (!token) {
       toast({
-        title: "Erreur d'authentification",
-        description: `Vous devez être connecté pour ${isEditMode ? 'modifier' : 'créer'} un build`,
+        title: t("components.buildCreationModal.toastAuthTitle"),
+        description: t(isEditMode ? "components.buildCreationModal.toastAuthDescEdit" : "components.buildCreationModal.toastAuthDescCreate"),
         status: "error",
         duration: 5000,
       });
@@ -305,8 +307,8 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     const hasAtLeastOneCharacter = team.some((member) => member.id_character !== "");
     if (!hasAtLeastOneCharacter) {
       toast({
-        title: "Erreur",
-        description: "Vous devez sélectionner au moins un personnage",
+        title: t("components.buildCreationModal.toastValidationTitle"),
+        description: t("components.buildCreationModal.toastValidationDesc"),
         status: "error",
         duration: 5000,
       });
@@ -340,8 +342,8 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
         });
 
         toast({
-          title: "Build modifié !",
-          description: "Votre build a été modifié et sera re-validé par un administrateur.",
+          title: t("components.buildCreationModal.toastSuccessEditTitle"),
+          description: t("components.buildCreationModal.toastSuccessEditDesc"),
           status: "success",
           duration: 5000,
         });
@@ -354,8 +356,8 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
         });
 
         toast({
-          title: "Build créé !",
-          description: "Votre build a été soumis et sera validé par un administrateur.",
+          title: t("components.buildCreationModal.toastSuccessCreateTitle"),
+          description: t("components.buildCreationModal.toastSuccessCreateDesc"),
           status: "success",
           duration: 5000,
         });
@@ -366,8 +368,8 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     } catch (error) {
       const err = error as Error;
       toast({
-        title: "Erreur",
-        description: err.message || `Impossible de ${isEditMode ? 'modifier' : 'créer'} le build`,
+        title: t("components.buildCreationModal.toastErrorTitle"),
+        description: err.message || t(isEditMode ? "components.buildCreationModal.toastErrorDescEdit" : "components.buildCreationModal.toastErrorDescCreate"),
         status: "error",
         duration: 5000,
       });
@@ -380,7 +382,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     <Modal isOpen={isOpen} onClose={onClose} size="4xl" scrollBehavior="inside">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader boxShadow={"lg"}>{isEditMode ? 'Modifier le Build' : 'Créer un Build'}</ModalHeader>
+        <ModalHeader boxShadow={"lg"}>{isEditMode ? t("components.buildCreationModal.titleEdit") : t("components.buildCreationModal.titleCreate")}</ModalHeader>
         <ModalCloseButton />
         <ModalBody py={4}>
           <VStack spacing={6} align="stretch">
@@ -388,8 +390,8 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
               <AlertIcon />
               <Text fontSize="sm">
                 {isEditMode 
-                  ? "Après modification, votre build sera re-soumis pour validation par un administrateur."
-                  : "Votre build sera soumis pour validation par un administrateur avant d'être visible publiquement."
+                  ? t("components.buildCreationModal.alertEdit")
+                  : t("components.buildCreationModal.alertCreate")
                 }
               </Text>
             </Alert>
@@ -401,7 +403,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
 
             <Box>
               <Text fontWeight="bold" mb={3}>
-                Composition de la Team
+                {t("components.buildCreationModal.teamComposition")}
               </Text>
 
               <VStack spacing={4} align="stretch">
@@ -428,15 +430,15 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
 
         <ModalFooter boxShadow={"0 -6px 12px -4px rgba(0,0,0,0.15)"}>
           <Button variant="ghost" mr={3} onClick={onClose} isDisabled={isSubmitting}>
-            Annuler
+            {t("components.buildCreationModal.buttonCancel")}
           </Button>
           <Button
             colorScheme="orange"
             onClick={handleSubmit}
             isLoading={isSubmitting}
-            loadingText={isEditMode ? "Modification..." : "Création..."}
+            loadingText={isEditMode ? t("components.buildCreationModal.loadingEdit") : t("components.buildCreationModal.loadingCreate")}
           >
-            {isEditMode ? 'Modifier le Build' : 'Créer le Build'}
+            {isEditMode ? t("components.buildCreationModal.buttonEdit") : t("components.buildCreationModal.buttonCreate")}
           </Button>
         </ModalFooter>
       </ModalContent>

@@ -44,7 +44,8 @@
     "yes": "Yes",
     "no": "No",
     "pageOf": "Page {{current}} of {{total}}",
-    "itemsOnPageOfTotal": "({{itemsOnPage}} items of {{totalCount}} total)"
+    "itemsOnPageOfTotal": "({{itemsOnPage}} item(s) out of {{totalCount}} total)",
+    "noSelection": "No selection"
   },
   "pages": {
     "home": {
@@ -478,7 +479,63 @@
       "titleAllBuilds": "All Builds",
       "selectRotationHint": "Select a rotation to create a build",
       "noBuildsForRotation": "No build found for this rotation",
-      "noBuildsAvailable": "No builds available. Select a rotation to see builds."
+      "noBuildsAvailable": "No builds available. Select a rotation to see builds.",
+      "anonymous": "Anonymous",
+      "composition": "COMPOSITION",
+      "ariaEditBuild": "Edit build"
+    },
+    "buildDetailModal": {
+      "title": "Build Details",
+      "createdBy": "Created by:",
+      "anonymousUser": "Anonymous user",
+      "rotation": "Rotation:",
+      "description": "Description:",
+      "noDescription": "No description",
+      "status": "Status:",
+      "statusValid": "✓ Validated",
+      "statusPending": "⏱ Awaiting validation",
+      "teamComposition": "Team composition:",
+      "position": "Position {{pos}}",
+      "characterFallback": "Character {{id}}",
+      "skills": "Skills:",
+      "accessories": "Accessories:",
+      "links": "Links:",
+      "dates": "Dates:",
+      "dateCreated": "Created:",
+      "dateModified": "Modified:",
+      "dateValidated": "Validated:",
+      "buttonEdit": "Edit",
+      "buttonClose": "Close"
+    },
+    "buildCreationModal": {
+      "titleCreate": "Create a Build",
+      "titleEdit": "Edit Build",
+      "alertCreate": "Your build will be submitted for validation by an administrator before being publicly visible.",
+      "alertEdit": "After modification, your build will be re-submitted for validation by an administrator.",
+      "teamComposition": "Team Composition",
+      "buttonCancel": "Cancel",
+      "buttonCreate": "Create Build",
+      "buttonEdit": "Edit Build",
+      "loadingCreate": "Creating...",
+      "loadingEdit": "Editing...",
+      "toastCharUsedTitle": "Character already used",
+      "toastCharUsedDesc": "This character is already used in another position or as a link.",
+      "toastAuthTitle": "Authentication error",
+      "toastAuthDescCreate": "You must be logged in to create a build",
+      "toastAuthDescEdit": "You must be logged in to edit a build",
+      "toastValidationTitle": "Error",
+      "toastValidationDesc": "You must select at least one character",
+      "toastSuccessCreateTitle": "Build created!",
+      "toastSuccessCreateDesc": "Your build has been submitted and will be validated by an administrator.",
+      "toastSuccessEditTitle": "Build updated!",
+      "toastSuccessEditDesc": "Your build has been modified and will be re-validated by an administrator.",
+      "toastErrorTitle": "Error",
+      "toastErrorDescCreate": "Unable to create the build",
+      "toastErrorDescEdit": "Unable to edit the build"
+    },
+    "descriptionTextarea": {
+      "label": "Description (optional)",
+      "placeholder": "Describe your strategy, the strengths of this team..."
     },
     "orbFarmingGuide": {
       "heading": "Orb Farming Guide",

@@ -5,6 +5,7 @@ import {
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface SelectOption {
     value: string;
@@ -52,6 +53,7 @@ export const CustomSelect = ({
     w,
     flex
 }: CustomSelectProps) => {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -205,7 +207,7 @@ export const CustomSelect = ({
         const all: SelectOption[] = [];
         // Options de déselection en premier si allowDeselect
         if (allowDeselect) {
-            all.push({ value: '', label: 'Aucune sélection' });
+            all.push({ value: '', label: t('common.noSelection') });
         }
         // Options non groupées
         const ug: SelectOption[] = [];
@@ -506,7 +508,7 @@ export const CustomSelect = ({
                                     color={placeholderColor}
                                     fontSize={currentSizeProps.fontSize}
                                 >
-                                    <Text>Aucune sélection</Text>
+                                    <Text>{t('common.noSelection')}</Text>
                                 </Flex>
                             )}
                             
