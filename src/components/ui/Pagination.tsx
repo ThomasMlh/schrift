@@ -1,4 +1,5 @@
 import { HStack, Button, Text, VStack } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 
 interface PaginationProps {
     currentPage: number;
@@ -19,6 +20,7 @@ export const Pagination = ({
     totalCount,
     itemsOnPage
 }: PaginationProps) => {
+    const { t } = useTranslation();
     if (totalPages <= 1) return null;
 
     const renderPaginationButtons = () => {
@@ -32,7 +34,7 @@ export const Pagination = ({
                 onClick={() => onPageChange(currentPage - 1)}
                 isDisabled={!hasPrevPage}
             >
-                ← Précédent
+                ← {t("common.previous")}
             </Button>
         );
 
@@ -104,7 +106,7 @@ export const Pagination = ({
                 onClick={() => onPageChange(currentPage + 1)}
                 isDisabled={!hasNextPage}
             >
-                Suivant →
+                {t("common.next")} →
             </Button>
         );
 
@@ -119,10 +121,10 @@ export const Pagination = ({
         <VStack spacing={4}>
             {renderPaginationButtons()}
             <Text fontSize="sm" color="gray.500" textAlign="center">
-                Page {currentPage} sur {totalPages}
+            {t("common.pageOf", { current: currentPage, total: totalPages })}
                 {totalCount && itemsOnPage && (
                     <Text as="span" ml={2}>
-                        ({itemsOnPage} éléments sur {totalCount} au total)
+                        {t("common.itemsOnPageOfTotal", { itemsOnPage, totalCount })}
                     </Text>
                 )}
             </Text>

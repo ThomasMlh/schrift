@@ -14,12 +14,14 @@ import UnbanUserModal from "./UnbanUserModal";
 import { UserDisplay } from "./ui/UserDisplay";
 import { CustomSelect } from "./ui/CustomSelect";
 import { useGuilds, useUsers } from "@/hooks/useAPI";
+import { useTranslation } from "react-i18next";
 
 interface UsersTableProps {
     isAdminMode?: boolean;
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
+    const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
 
     // États - Initialiser avec les paramètres URL
@@ -120,7 +122,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     // Obtenir le nom de la guilde
     const getGuildName = (guildId: string) => {
         const guild = guilds.find(g => g._id === guildId);
-        return guild?.name || "Pas de guilde";
+        return guild?.name || t("pages.user.noGuild");
     };
 
     // Obtenir la couleur du badge selon le rôle
@@ -130,6 +132,15 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
             case "sous-chef": return "orange";
             case "membre": return "blue";
             default: return "gray";
+        }
+    };
+
+    const getRoleLabel = (role: string) => {
+        switch (role) {
+            case "chef": return t("components.guildTabsList.roleChef");
+            case "sous-chef": return t("components.guildTabsList.roleSousChef");
+            case "membre": return t("components.guildTabsList.roleMembre");
+            default: return role;
         }
     };
 
@@ -171,7 +182,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                             )}
                         </InputLeftElement>
                         <Input
-                            placeholder="Rechercher un joueur..."
+                            placeholder={t("pages.players.searchPlaceholder")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -188,7 +199,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                 >
                     {/* Filtre par guilde */}
                     <CustomSelect
-                        placeholder="Toutes les guildes"
+                        placeholder={t("components.usersTable.filterAllGuilds")}
                         value={selectedGuildId}
                         onChange={(value) => handleGuildChange(value)}
                         options={guilds.map((guild) => ({
@@ -200,13 +211,13 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
 
                     {/* Filtre par rôle */}
                     <CustomSelect
-                        placeholder="Tous les rôles"
+                        placeholder={t("components.usersTable.filterAllRoles")}
                         value={selectedRole}
                         onChange={(value) => handleRoleChange(value)}
                         options={[
-                            { value: "chef", label: "Chef" },
-                            { value: "sous-chef", label: "Sous-chef" },
-                            { value: "membre", label: "Membre" }
+                            { value: "chef", label: t("components.guildTabsList.roleChef") },
+                            { value: "sous-chef", label: t("components.guildTabsList.roleSousChef") },
+                            { value: "membre", label: t("components.guildTabsList.roleMembre") }
                         ]}
                         maxW="150px"
                     />
@@ -216,17 +227,17 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                         value={String(itemsPerPage)}
                         onChange={(value) => handleItemsPerPageChange(parseInt(value))}
                         options={[
-                            { value: "10", label: "10 / page" },
-                            { value: "20", label: "20 / page" },
-                            { value: "50", label: "50 / page" },
-                            { value: "100", label: "100 / page" }
+                            { value: "10", label: t("components.usersTable.perPage", { count: 10 }) },
+                            { value: "20", label: t("components.usersTable.perPage", { count: 20 }) },
+                            { value: "50", label: t("components.usersTable.perPage", { count: 50 }) },
+                            { value: "100", label: t("components.usersTable.perPage", { count: 100 }) }
                         ]}
                         allowDeselect={false}
                         maxW="150px"
                     />
 
                     <Button onClick={resetFilters} variant="outline" minW="120px">
-                        Réinitialiser
+                        {t("common.reset")}
                     </Button>
                 </Flex>
             </VStack>
@@ -243,7 +254,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                     <HStack spacing={2} flexWrap="wrap">
                         <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
                             textTransform="uppercase" color={isDark ? 'purple.400' : 'purple.600'}>
-                            Filtres actifs :
+                            {t("components.usersTable.activeFilters")}
                         </Text>
                         {searchTerm && (
                             <Badge colorScheme="purple" variant={badgeVariant}>
@@ -257,7 +268,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                         )}
                         {selectedRole && (
                             <Badge colorScheme={getRoleBadgeColor(selectedRole)} variant={badgeVariant}>
-                                {selectedRole}
+                                {getRoleLabel(selectedRole)}
                             </Badge>
                         )}
                     </HStack>
@@ -267,9 +278,12 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
             {/* Informations sur les résultats */}
             {pagination && (
                 <Text fontSize="sm" color="gray.600">
-                    {pagination.totalCount} utilisateur(s) trouvé(s) -
-                    Page {pagination.currentPage} sur {pagination.totalPages} -
-                    Affichage de {pagination.itemsOnPage} résultat(s)
+                    {t("components.usersTable.paginationInfo", {
+                        totalCount: pagination.totalCount,
+                        currentPage: pagination.currentPage,
+                        totalPages: pagination.totalPages,
+                        itemsOnPage: pagination.itemsOnPage
+                    })}
                 </Text>
             )}
 
@@ -290,13 +304,13 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                     <Table variant="simple">
                         <Thead>
                             <Tr bg={isDark ? 'rgba(255,255,255,0.03)' : 'gray.50'}>
-                                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>Utilisateur</Th>
-                                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>Guilde</Th>
-                                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>Rôle</Th>
+                                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colPlayer")}</Th>
+                                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colGuild")}</Th>
+                                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colRole")}</Th>
                                 {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>BBS ID</Th>}
                                 {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>BBS Name</Th>}
-                                {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>Dernière connexion</Th>}
-                                {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>Actions</Th>}
+                                {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colLastLogin")}</Th>}
+                                {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colActions")}</Th>}
                             </Tr>
                         </Thead>
                         <Tbody>
@@ -306,20 +320,19 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                                         <HStack spacing={3}>
                                             <UserDisplay user={user} />
                                             {user.is_banned && (
-                                                <Badge colorScheme="red" fontSize="xs">Banni</Badge>
+                                                <Badge colorScheme="red" fontSize="xs">{t("components.usersTable.badgeBanned")}</Badge>
                                             )}
                                         </HStack>
                                     </Td>
                                     <Td>
-                                        <Text>{user.guilde_id ? getGuildName(user.guilde_id) : 'Aucune guilde'}</Text>
+                                        <Text>{user.guilde_id ? getGuildName(user.guilde_id) : t('pages.user.noGuild')}</Text>
                                     </Td>
                                     <Td>
                                         <Badge
                                             colorScheme={getRoleBadgeColor(user.role)}
                                             variant={badgeVariant}
-                                            textTransform="capitalize"
                                         >
-                                            {user.role}
+                                            {getRoleLabel(user.role)}
                                         </Badge>
                                     </Td>
                                     {isAdminMode && (
@@ -355,9 +368,9 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                                     {isAdminMode && (
                                         <Td>
                                             <HStack spacing={2}>
-                                                <Tooltip label="Modifier">
+                                                <Tooltip label={t("components.usersTable.tooltipEdit")}>
                                                     <IconButton
-                                                        aria-label="Modifier l'utilisateur"
+                                                        aria-label={t("components.usersTable.ariaLabelEdit")}
                                                         icon={<EditIcon />}
                                                         size="sm"
                                                         colorScheme="purple"
@@ -368,9 +381,9 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                                                 </Tooltip>
                                                 {!user.is_admin && (
                                                     user.is_banned ? (
-                                                        <Tooltip label="Débannir">
+                                                        <Tooltip label={t("components.usersTable.tooltipUnban")}>
                                                             <IconButton
-                                                                aria-label="Débannir l'utilisateur"
+                                                                aria-label={t("components.usersTable.ariaLabelUnban")}
                                                                 icon={<CheckCircleIcon />}
                                                                 size="sm"
                                                                 colorScheme="green"
@@ -380,9 +393,9 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                                                             />
                                                         </Tooltip>
                                                     ) : (
-                                                        <Tooltip label="Bannir">
+                                                        <Tooltip label={t("components.usersTable.tooltipBan")}>
                                                             <IconButton
-                                                                aria-label="Bannir l'utilisateur"
+                                                                aria-label={t("components.usersTable.ariaLabelBan")}
                                                                 icon={<NotAllowedIcon />}
                                                                 size="sm"
                                                                 colorScheme="red"
@@ -419,7 +432,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
             {/* Message si aucun résultat */}
             {!isLoading && users.length === 0 && (
                 <Text textAlign="center" color="gray.500" py={8}>
-                    Aucun utilisateur trouvé
+                    {t("components.usersTable.noResults")}
                 </Text>
             )}
 

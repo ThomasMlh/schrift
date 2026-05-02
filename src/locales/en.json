@@ -42,7 +42,9 @@
     "edit": "Edit",
     "delete": "Delete",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "pageOf": "Page {{current}} of {{total}}",
+    "itemsOnPageOfTotal": "({{itemsOnPage}} items of {{totalCount}} total)"
   },
   "pages": {
     "home": {
@@ -282,6 +284,26 @@
     }
   },
   "components": {
+    "usersTable": {
+      "filterAllGuilds": "All guilds",
+      "filterAllRoles": "All roles",
+      "perPage": "{{count}} / page",
+      "activeFilters": "Active filters:",
+      "paginationInfo": "{{totalCount}} player(s) found - Page {{currentPage}} of {{totalPages}} - Showing {{itemsOnPage}} result(s)",
+      "colPlayer": "Player",
+      "colGuild": "Guild",
+      "colRole": "Role",
+      "colLastLogin": "Last login",
+      "colActions": "Actions",
+      "badgeBanned": "Banned",
+      "tooltipEdit": "Edit",
+      "tooltipBan": "Ban",
+      "tooltipUnban": "Unban",
+      "ariaLabelEdit": "Edit player",
+      "ariaLabelBan": "Ban player",
+      "ariaLabelUnban": "Unban player",
+      "noResults": "No player found"
+    },
     "charactersTable": {
       "searchPlaceholder": "Search for a character...",
       "activeFilters": "Active filters",

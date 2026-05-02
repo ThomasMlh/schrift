@@ -42,7 +42,9 @@
     "edit": "Modifier",
     "delete": "Supprimer",
     "yes": "Oui",
-    "no": "Non"
+    "no": "Non",
+    "pageOf": "Page {{current}} sur {{total}}",
+    "itemsOnPageOfTotal": "({{itemsOnPage}} éléments sur {{totalCount}} au total)"
   },
   "pages": {
     "home": {
@@ -282,6 +284,26 @@
     }
   },
   "components": {
+    "usersTable": {
+      "filterAllGuilds": "Toutes les guildes",
+      "filterAllRoles": "Tous les rôles",
+      "perPage": "{{count}} / page",
+      "activeFilters": "Filtres actifs :",
+      "paginationInfo": "{{totalCount}} joueur(s) trouvé(s) - Page {{currentPage}} sur {{totalPages}} - Affichage de {{itemsOnPage}} résultat(s)",
+      "colPlayer": "Joueur",
+      "colGuild": "Guilde",
+      "colRole": "Rôle",
+      "colLastLogin": "Dernière connexion",
+      "colActions": "Actions",
+      "badgeBanned": "Banni",
+      "tooltipEdit": "Modifier",
+      "tooltipBan": "Bannir",
+      "tooltipUnban": "Débannir",
+      "ariaLabelEdit": "Modifier le joueur",
+      "ariaLabelBan": "Bannir le joueur",
+      "ariaLabelUnban": "Débannir le joueur",
+      "noResults": "Aucun joueur trouvé"
+    },
     "charactersTable": {
       "searchPlaceholder": "Rechercher un personnage...",
       "activeFilters": "Filtres actifs",

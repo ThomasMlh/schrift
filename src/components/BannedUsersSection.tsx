@@ -10,8 +10,10 @@ import { Pagination as PaginationComponent } from "./ui/Pagination";
 import UnbanUserModal from "./UnbanUserModal";
 import { UserDisplay } from "./ui/UserDisplay";
 import { useGuilds, useUsers } from "@/hooks/useAPI";
+import { useTranslation } from "react-i18next";
 
 const BannedUsersSection: React.FC = () => {
+    const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -47,7 +49,7 @@ const BannedUsersSection: React.FC = () => {
 
     const getGuildName = (guildId: string) => {
         const guild = guilds.find(g => g._id === guildId);
-        return guild?.name || "Pas de guilde";
+        return guild?.name || t("pages.user.noGuild");
     };
 
     const handleUnbanUser = (user: IUser) => {
@@ -114,7 +116,7 @@ const BannedUsersSection: React.FC = () => {
                                         </HStack>
                                     </Td>
                                     <Td>
-                                        <Text>{user.guilde_id ? getGuildName(user.guilde_id) : 'Aucune guilde'}</Text>
+                                        <Text>{user.guilde_id ? getGuildName(user.guilde_id) : t('pages.user.noGuild')}</Text>
                                     </Td>
                                     <Td>
                                         <Text fontSize="sm" maxW="300px" noOfLines={2}>
