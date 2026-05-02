@@ -189,6 +189,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
                 selectedAffinity={selectedAffinity}
                 affinities={affinities}
                 onAffinityChange={setSelectedAffinity}
+                variant="ghost"
               />
             </Box>
             <Box>
@@ -199,6 +200,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
                 selectedCategory={selectedCategory}
                 categories={categories}
                 onCategoryChange={setSelectedCategory}
+                variant="ghost"
               />
             </Box>
             <Box>
@@ -209,6 +211,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
                 selectedKiller={selectedKiller}
                 killers={killers}
                 onKillerChange={setSelectedKiller}
+                variant="ghost"
               />
             </Box>
             <Box>
@@ -218,6 +221,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
               <AttackTypeFilter
                 selectedAttackType={selectedAttackType}
                 onAttackTypeChange={setSelectedAttackType}
+                variant="ghost"
               />
             </Box>
             <Box>
@@ -234,6 +238,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
                   { value: "100", label: "100 / page" },
                 ]}
                 allowDeselect={false}
+                variant="ghost"
               />
             </Box>
           </SimpleGrid>

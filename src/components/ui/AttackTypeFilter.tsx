@@ -10,17 +10,21 @@ import {
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { AttackTypeBadge } from "./AttackTypeBadge";
 import { useTranslation } from "react-i18next";
+import { useSelectTheme, type SelectVariant } from "@/hooks/useSelectTheme";
 
 interface AttackTypeFilterProps {
   selectedAttackType: string;
   onAttackTypeChange: (attackType: string) => void;
+  variant?: SelectVariant;
 }
 
 export const AttackTypeFilter = ({
   selectedAttackType,
-  onAttackTypeChange
+  onAttackTypeChange,
+  variant = 'default'
 }: AttackTypeFilterProps) => {
   const { t } = useTranslation();
+  const theme = useSelectTheme(variant);
 
   const getDisplayText = (type: string) => {
     switch (type) {
@@ -43,16 +47,9 @@ export const AttackTypeFilter = ({
         w="auto"
         h="40px"
         justifyContent="space-between"
-        bg="white"
-        borderColor="gray.200"
-        _dark={{
-          bg: "gray.800",
-          borderColor: "gray.600"
-        }}
-        _hover={{
-          borderColor: "gray.300",
-          _dark: { borderColor: "gray.500" }
-        }}
+        bg={theme.buttonBg}
+        borderColor={theme.borderColor}
+        _hover={{ borderColor: theme.hoverBorderColor }}
         _focus={{
           borderColor: "blue.500",
           boxShadow: "0 0 0 1px #3182ce"
@@ -63,20 +60,20 @@ export const AttackTypeFilter = ({
           <Text fontSize="sm">{getDisplayText(selectedAttackType)}</Text>
         </HStack>
       </MenuButton>
-      <MenuList maxH="200px" overflowY="auto">
-        <MenuItem onClick={() => onAttackTypeChange("")}>
+      <MenuList maxH="200px" overflowY="auto" bg={theme.menuBg} borderColor={theme.menuBorderColor}>
+        <MenuItem bg={theme.menuBg} _hover={{ bg: theme.hoverItemBg }} onClick={() => onAttackTypeChange("")}>
           <HStack spacing={2}>
             <AttackTypeBadge attackType="" size="16px" />
             <Text fontSize="sm">{t("components.charactersTable.attackAll")}</Text>
           </HStack>
         </MenuItem>
-        <MenuItem onClick={() => onAttackTypeChange("R")}>
+        <MenuItem bg={theme.menuBg} _hover={{ bg: theme.hoverItemBg }} onClick={() => onAttackTypeChange("R")}>
           <HStack spacing={2}>
             <AttackTypeBadge attackType="R" size="16px" />
             <Text fontSize="sm">{t("components.charactersTable.attackRed")}</Text>
           </HStack>
         </MenuItem>
-        <MenuItem onClick={() => onAttackTypeChange("B")}>
+        <MenuItem bg={theme.menuBg} _hover={{ bg: theme.hoverItemBg }} onClick={() => onAttackTypeChange("B")}>
           <HStack spacing={2}>
             <AttackTypeBadge attackType="B" size="16px" />
             <Text fontSize="sm">{t("components.charactersTable.attackBlue")}</Text>

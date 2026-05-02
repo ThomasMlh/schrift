@@ -3,6 +3,7 @@ import { CustomSelect } from "./CustomSelect";
 import type { ICycle } from "../../interfaces";
 import type { ReactNode } from "react";
 import { isCycleActive } from "../../utils/cycleHelpers";
+import type { SelectVariant } from "@/hooks/useSelectTheme";
 
 interface SelectOption {
     value: string;
@@ -21,6 +22,7 @@ interface CycleSelectProps {
     valueKey?: '_id' | 'name';
     showActiveBadge?: boolean;
     size?: 'sm' | 'md' | 'lg';
+    variant?: SelectVariant;
 }
 
 export const CycleSelect = ({
@@ -32,7 +34,8 @@ export const CycleSelect = ({
     allowDeselect = true,
     valueKey = '_id',
     showActiveBadge = false,
-    size = 'md'
+    size = 'md',
+    variant = 'default'
 }: CycleSelectProps) => {
     // Grouper les cycles par année
     const cyclesByYear = cycles.reduce((acc, cycle) => {
@@ -127,6 +130,7 @@ export const CycleSelect = ({
             allowDeselect={allowDeselect}
             renderSelected={renderSelected}
             size={size}
+            variant={variant}
         />
     );
 };

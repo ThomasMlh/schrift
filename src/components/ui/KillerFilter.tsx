@@ -10,19 +10,23 @@ import {
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { KillerIcon } from "./KillerIcon";
 import { useTranslation } from "react-i18next";
+import { useSelectTheme, type SelectVariant } from "@/hooks/useSelectTheme";
 
 interface KillerFilterProps {
   selectedKiller: string;
   killers: string[];
   onKillerChange: (killer: string) => void;
+  variant?: SelectVariant;
 }
 
 export const KillerFilter = ({ 
   selectedKiller, 
   killers, 
-  onKillerChange 
+  onKillerChange,
+  variant = 'default'
 }: KillerFilterProps) => {
   const { t } = useTranslation();
+  const theme = useSelectTheme(variant);
   return (
     <Menu>
       <MenuButton 
@@ -33,16 +37,9 @@ export const KillerFilter = ({
         w="auto"
         h="40px"
         justifyContent="space-between"
-        bg="white"
-        borderColor="gray.200"
-        _dark={{ 
-          bg: "gray.800", 
-          borderColor: "gray.600" 
-        }}
-        _hover={{ 
-          borderColor: "gray.300", 
-          _dark: { borderColor: "gray.500" } 
-        }}
+        bg={theme.buttonBg}
+        borderColor={theme.borderColor}
+        _hover={{ borderColor: theme.hoverBorderColor }}
         _focus={{ 
           borderColor: "blue.500", 
           boxShadow: "0 0 0 1px #3182ce" 
@@ -62,15 +59,15 @@ export const KillerFilter = ({
           )}
         </HStack>
       </MenuButton>
-      <MenuList maxH="200px" overflowY="auto">
-        <MenuItem onClick={() => onKillerChange("")}>
+      <MenuList maxH="200px" overflowY="auto" bg={theme.menuBg} borderColor={theme.menuBorderColor}>
+        <MenuItem bg={theme.menuBg} _hover={{ bg: theme.hoverItemBg }} onClick={() => onKillerChange("")}>
         <HStack spacing={2}>
           <KillerIcon killer={"Toutes"} size="20px" />
           <Text fontSize="sm">{t("factions.allKillers")}</Text>
           </HStack>
         </MenuItem>
         {killers.map(killer => (
-          <MenuItem key={killer} onClick={() => onKillerChange(killer)}>
+          <MenuItem key={killer} bg={theme.menuBg} _hover={{ bg: theme.hoverItemBg }} onClick={() => onKillerChange(killer)}>
             <HStack spacing={2}>
               <KillerIcon killer={killer} size="20px" />
               <Text fontSize="sm">{t(`factions.${killer}`, killer)}</Text>

@@ -133,8 +133,8 @@ const BulkScoreModal = ({
     const isDark = colorMode === 'dark';
 
     const modalBg        = isDark ? '#1a1b2e' : 'white';
-    const sectionBg      = isDark ? 'rgba(255,255,255,0.04)' : 'gray.50';
-    const sectionBorder  = isDark ? 'whiteAlpha.100' : 'gray.200';
+    const sectionBg      = isDark ? 'rgba(124,58,237,0.08)' : 'purple.50';
+    const sectionBorder  = isDark ? 'rgba(124,58,237,0.25)' : 'purple.100';
     const rowBg          = isDark ? 'rgba(255,255,255,0.03)' : 'white';
     const rowBorder      = isDark ? 'whiteAlpha.80' : 'gray.100';
     const rowActiveBg    = isDark ? 'rgba(124,58,237,0.08)' : 'purple.50';
@@ -365,6 +365,7 @@ const BulkScoreModal = ({
                                             }))}
                                             allowDeselect={false}
                                             size="md"
+                                            variant="modal"
                                         />
                                     </FormControl>
                                 ) : selectedGuild && (
@@ -388,6 +389,7 @@ const BulkScoreModal = ({
                                         allowDeselect={true}
                                         showActiveBadge={true}
                                         size="md"
+                                        variant="modal"
                                     />
                                 </FormControl>
 
@@ -401,6 +403,7 @@ const BulkScoreModal = ({
                                             onChange={setSelectedRotationId}
                                             isDisabled={isSubmitting}
                                             size="md"
+                                            variant="modal"
                                             options={selectedCycle.rotations.map((rotation: ICycleRotation) => ({
                                                 value: rotation.rotation_id,
                                                 label: `Rotation #${rotation.position} - ${rotation.killer} ${rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : "🟠 Mêlée"}`,

@@ -2,6 +2,7 @@ import {
     Box, Button, Text, Flex,
     useColorModeValue, Input, Portal
 } from "@chakra-ui/react";
+import { useSelectTheme, type SelectVariant } from "@/hooks/useSelectTheme";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { ReactNode } from "react";
@@ -32,6 +33,7 @@ interface CustomSelectProps {
     minW?: string | object;
     w?: string | object;
     flex?: string | number;
+    variant?: SelectVariant;
 }
 
 export const CustomSelect = ({
@@ -51,7 +53,8 @@ export const CustomSelect = ({
     maxW,
     minW = "120px",
     w,
-    flex
+    flex,
+    variant = 'default'
 }: CustomSelectProps) => {
     const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
@@ -312,17 +315,17 @@ export const CustomSelect = ({
           )
         : options;
 
-    const defaultBgColor = useColorModeValue('white', 'gray.800');
-    const bgColor = bg || defaultBgColor;
-    const borderColor = useColorModeValue('gray.200', 'gray.600');
-    const hoverBg = useColorModeValue('gray.50', 'gray.600');
-    const menuBg = useColorModeValue('white', 'gray.800');
+    const theme = useSelectTheme(variant);
+    const bgColor = bg || theme.buttonBg;
+    const borderColor = theme.borderColor;
+    const hoverBg = theme.hoverItemBg;
+    const menuBg = theme.menuBg;
     const textColor = useColorModeValue('gray.900', 'white');
     const placeholderColor = useColorModeValue('gray.600', 'gray.400');
-    const groupHeaderBg = useColorModeValue('gray.100', 'gray.700');
+    const groupHeaderBg = theme.groupHeaderBg;
     const groupHeaderColor = useColorModeValue('blue.600', 'blue.300');
-    const backgroundOption = useColorModeValue('gray.300', 'gray.600');
-    const backgroundOptionHover = useColorModeValue('gray.400', 'gray.500');
+    const backgroundOption = theme.scrollbarThumb;
+    const backgroundOptionHover = theme.scrollbarThumbHover;
 
     // Tailles selon le size prop
     const sizeProps = {
