@@ -1,5 +1,6 @@
 import {
   Box,
+  Image,
   Input,
   InputGroup,
   InputLeftElement,
@@ -124,6 +125,16 @@ export const AccessorySearchSelect = ({
               spacing={2}
               _hover={{ borderColor: "gray.300" }}
             >
+              {selectedAccessory.code && (
+                <Image
+                  src={`${import.meta.env.VITE_BUCKET_URL}/accessories/${selectedAccessory.code}/thumb.png`}
+                  alt={selectedAccessory.name}
+                  boxSize="20px"
+                  borderRadius="sm"
+                  objectFit="contain"
+                  fallback={<Box w="20px" />}
+                />
+              )}
               <Badge colorScheme="cyan" fontSize="xs" px={2} py={1}>
                 {selectedAccessory.name}
               </Badge>
@@ -183,6 +194,16 @@ export const AccessorySearchSelect = ({
                       borderColor={borderColor}
                       _last={{ borderBottom: "none" }}
                     >
+                      {accessory.code && (
+                        <Image
+                          src={`${import.meta.env.VITE_BUCKET_URL}/accessories/${accessory.code}/thumb.png`}
+                          alt={accessory.name}
+                          boxSize="22px"
+                          borderRadius="sm"
+                          objectFit="contain"
+                          fallback={<Box w="22px" />}
+                        />
+                      )}
                       <Text fontSize="sm">{accessory.name}</Text>
                     </HStack>
                   ))}

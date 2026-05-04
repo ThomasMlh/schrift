@@ -592,6 +592,33 @@ export const useAccessories = (search?: string) => {
   };
 }
 
+// Hook pour lister les codes d'accessoires disponibles sur le bucket (via FTP côté API)
+export const useAccessoryCodes = (token: string | null) => {
+  const [codes, setCodes] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCodes = useCallback(async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${apiUrl}/api/accessories/codes`, {
+        headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+      });
+      if (!res.ok) throw new Error('Impossible de récupérer les codes');
+      const data = await res.json();
+      setCodes(data.codes || []);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token, isLoading]);
+
+  return { codes, isLoading, error, fetchCodes };
+};
+
 // Hook pour récupérer les accessories subeffects avec recherche optionnelle
 export const useAccessoriesSubeffects = (search?: string) => {
   let url = `${apiUrl}/api/accessories-subeffect`;
@@ -615,6 +642,25 @@ export const useAccessoriesSubeffects = (search?: string) => {
     mutate,
   };
 }
+
+// Hook pour récupérer les métadonnées des personnages (killers, catégories, affinités distincts)
+export const useCharacterMeta = () => {
+  const url = `${apiUrl}/api/characters/meta`;
+  const { data, error, isLoading } = useSWR<{
+    success: boolean;
+    killers: string[];
+    categories: string[];
+    affinities: string[];
+  }>(url, fetcher, { revalidateOnFocus: false, dedupingInterval: 300000 });
+
+  return {
+    killers: data?.killers || [],
+    categories: data?.categories || [],
+    affinities: data?.affinities || [],
+    isLoading,
+    error,
+  };
+};
 
 // Hook pour récupérer le podium (tous les modes) - version fetch
 export const usePodiumFetch = () => {

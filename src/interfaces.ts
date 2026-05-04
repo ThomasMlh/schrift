@@ -1,6 +1,6 @@
 // Types généraux
 export type Page = "guilds" | "characters";
-export type AdminPage = "guilds" | "draft" | "cycles" | "scores" | "users" | "guides" | "banned";
+export type AdminPage = "guilds" | "draft" | "cycles" | "scores" | "users" | "guides" | "banned" | "images";
 export type Role = "chef" | "sous-chef" | "membre";
 
 export interface IGuild {
@@ -421,6 +421,7 @@ export interface ISkill {
 export interface IAccessory {
   _id: string;
   name: string;
+  code?: string;
 }
 
 export interface IAccessorySubeffect {

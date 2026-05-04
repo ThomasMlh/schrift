@@ -48,7 +48,6 @@ const ScoresSection = () => {
     scores,
     pagination,
     isLoading: isLoadingScores,
-    mutate: mutateScores
   } = useScores({
     page: currentPage,
     limit: 20,
@@ -172,8 +171,6 @@ const ScoresSection = () => {
         <ScoresStatsCards
           pagination={pagination}
           activeFiltersCount={activeFiltersCount}
-          isLoadingScores={isLoadingScores}
-          onRefresh={mutateScores}
         />
 
         {/* Section Filtres */}

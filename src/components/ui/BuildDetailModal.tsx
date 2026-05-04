@@ -13,6 +13,7 @@ import {
   HStack,
   Badge,
   Avatar,
+  Image,
   useColorModeValue,
   Stack
 } from "@chakra-ui/react";
@@ -212,15 +213,27 @@ export const BuildDetailModal = ({
                                 key={accIndex}
                                 spacing={1}
                               >
-                                <Badge
-                                  colorScheme="cyan"
-                                  fontSize="xs"
-                                  px={2}
-                                  py={1}
-                                  w={"max-content"}
-                                >
-                                  {acc.accessory?.name}
-                                </Badge>
+                                <HStack spacing={1.5}>
+                                  {acc.accessory?.code && (
+                                    <Image
+                                      src={`${bucketUrl}/accessories/${acc.accessory.code}/thumb.png`}
+                                      alt={acc.accessory.name}
+                                      boxSize="22px"
+                                      borderRadius="sm"
+                                      objectFit="contain"
+                                      fallback={<Box boxSize="22px" />}
+                                    />
+                                  )}
+                                  <Badge
+                                    colorScheme="cyan"
+                                    fontSize="xs"
+                                    px={2}
+                                    py={1}
+                                    w={"max-content"}
+                                  >
+                                    {acc.accessory?.name}
+                                  </Badge>
+                                </HStack>
                                 {acc.subeffect && (
                                   <>
                                     <Text
