@@ -107,6 +107,7 @@ const ScoreRow = memo(({
                     sx={{ fontVariantNumeric: 'tabular-nums' }}
                     borderColor={hasScore ? (isDark ? 'purple.600' : 'purple.300') : undefined}
                     _focus={{ borderColor: 'purple.500', boxShadow: '0 0 0 1px var(--chakra-colors-purple-500)' }}
+                    onFocus={(e) => e.target.select()}
                 />
                 <NumberInputStepper>
                     <NumberIncrementStepper />
