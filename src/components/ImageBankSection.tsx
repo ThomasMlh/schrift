@@ -74,6 +74,7 @@ const AccessoryFormModal = ({
   const browseBg = useColorModeValue("gray.50", "gray.900");
   const browseBorder = useColorModeValue("gray.200", "gray.700");
   const codeHoverBg = useColorModeValue("purple.50", "purple.900");
+  const codeFallbackBg = useColorModeValue("gray.200", "gray.700");
 
   const { codes, isLoading: isLoadingCodes, fetchCodes } = useAccessoryCodes(token);
 
@@ -204,7 +205,7 @@ const AccessoryFormModal = ({
                 border="1px solid"
                 borderColor={browseBorder}
                 borderRadius="md"
-                maxH="260px"
+                maxH="420px"
                 overflowY="auto"
               >
                 {isLoadingCodes ? (
@@ -214,7 +215,7 @@ const AccessoryFormModal = ({
                     Aucune image trouvée dans le bucket
                   </Text>
                 ) : (
-                  <Grid templateColumns="repeat(auto-fill, minmax(72px, 1fr))" gap={1.5}>
+                  <Grid templateColumns="repeat(auto-fill, minmax(96px, 1fr))" gap={2}>
                     {codes.map((c) => (
                       <Flex
                         key={c}
@@ -233,14 +234,14 @@ const AccessoryFormModal = ({
                         <Image
                           src={`${bucketUrl}/accessories/${c}/thumb.png`}
                           alt={c}
-                          boxSize="40px"
+                          boxSize="56px"
                           objectFit="contain"
                           borderRadius="sm"
                           fallback={
                             <Flex
-                              boxSize="40px"
+                              boxSize="56px"
                               borderRadius="sm"
-                              bg={useColorModeValue("gray.200", "gray.700")}
+                              bg={codeFallbackBg}
                               align="center"
                               justify="center"
                             >
