@@ -26,9 +26,12 @@ import {
     Stat,
     StatLabel,
     StatNumber,
+    SimpleGrid,
+    IconButton,
+    Tooltip,
 } from "@chakra-ui/react";
 
-import { useState, useEffect, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useCallback, useMemo, memo, type SVGProps } from "react";
 import type { IUser, ICycle, IGuild, IScoreFormData, ICycleRotation } from "../../interfaces";
 import { useGuildMembers, useScores } from "@/hooks/useAPI";
 import { AttackTypeBadge } from "./AttackTypeBadge";
@@ -47,9 +50,25 @@ interface BulkScoreModalProps {
     userGuildId?: string;
 }
 
+type ViewMode = 'list' | 'grid';
+
 interface ScoreRowProps {
     member: IUser;
     index: number;
+    score: number;
+    onChange: (userId: string, value: number) => void;
+    isDisabled: boolean;
+    isDark: boolean;
+    rowBg: string;
+    rowBorder: string;
+    rowActiveBg: string;
+    rowActiveBorder: string;
+    formatNumber: (v: string | number) => string;
+    parseNumber: (v: string) => string;
+}
+
+interface ScoreCardProps {
+    member: IUser;
     score: number;
     onChange: (userId: string, value: number) => void;
     isDisabled: boolean;
@@ -118,6 +137,69 @@ const ScoreRow = memo(({
     );
 });
 
+const ScoreCard = memo(({
+    member, score, onChange, isDisabled,
+    isDark, rowBg, rowBorder, rowActiveBg, rowActiveBorder,
+    formatNumber, parseNumber
+}: ScoreCardProps) => {
+    const hasScore = score > 0;
+    return (
+        <Box
+            p={3}
+            borderRadius="lg"
+            border="1px solid"
+            bg={hasScore ? rowActiveBg : rowBg}
+            borderColor={hasScore ? rowActiveBorder : rowBorder}
+            transition="background 0.1s, border-color 0.1s"
+        >
+            <VStack spacing={2} align="stretch">
+                <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />
+                <NumberInput
+                    size="sm"
+                    min={0}
+                    max={9999999999}
+                    step={10000000}
+                    value={score}
+                    onChange={(_, value) => onChange(member._id, value)}
+                    isDisabled={isDisabled}
+                    format={formatNumber}
+                    parse={parseNumber}
+                >
+                    <NumberInputField
+                        borderRadius="lg"
+                        textAlign="right"
+                        sx={{ fontVariantNumeric: 'tabular-nums' }}
+                        borderColor={hasScore ? (isDark ? 'purple.600' : 'purple.300') : undefined}
+                        _focus={{ borderColor: 'purple.500', boxShadow: '0 0 0 1px var(--chakra-colors-purple-500)' }}
+                        onFocus={(e) => e.target.select()}
+                    />
+                    <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                    </NumberInputStepper>
+                </NumberInput>
+            </VStack>
+        </Box>
+    );
+});
+
+const ListIcon = (props: SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" {...props}>
+        <rect x="0" y="2" width="16" height="2.5" rx="1" />
+        <rect x="0" y="6.75" width="16" height="2.5" rx="1" />
+        <rect x="0" y="11.5" width="16" height="2.5" rx="1" />
+    </svg>
+);
+
+const GridIcon = (props: SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" {...props}>
+        <rect x="0" y="0" width="6.5" height="6.5" rx="1" />
+        <rect x="9.5" y="0" width="6.5" height="6.5" rx="1" />
+        <rect x="0" y="9.5" width="6.5" height="6.5" rx="1" />
+        <rect x="9.5" y="9.5" width="6.5" height="6.5" rx="1" />
+    </svg>
+);
+
 const BulkScoreModal = ({
     isOpen,
     onClose,
@@ -151,6 +233,7 @@ const BulkScoreModal = ({
     const [scores, setScores] = useState<{ [userId: string]: number }>({});
     const [hasExistingScores, setHasExistingScores] = useState(false);
     const [displayedMembers, setDisplayedMembers] = useState<IUser[]>([]);
+    const [viewMode, setViewMode] = useState<ViewMode>('list');
     
     // Charger les membres avec le hook
     const { members: guildMembers = [], isLoading } = useGuildMembers(
@@ -496,29 +579,76 @@ const BulkScoreModal = ({
                                         textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
                                         Membres — {displayedMembers.length}
                                     </Text>
-                                    <Text fontSize="xs" color={isDark ? 'purple.300' : 'purple.600'}>
-                                        {scoredCount} / {displayedMembers.length} saisis
-                                    </Text>
+                                    <HStack spacing={2}>
+                                        <Text fontSize="xs" color={isDark ? 'purple.300' : 'purple.600'}>
+                                            {scoredCount} / {displayedMembers.length} saisis
+                                        </Text>
+                                        <HStack spacing={0.5}>
+                                            <Tooltip label="Vue liste" placement="top" hasArrow openDelay={400}>
+                                                <IconButton
+                                                    aria-label="Vue liste"
+                                                    icon={<ListIcon />}
+                                                    size="xs"
+                                                    variant={viewMode === 'list' ? 'solid' : 'ghost'}
+                                                    colorScheme={viewMode === 'list' ? 'purple' : 'gray'}
+                                                    borderRadius="md"
+                                                    onClick={() => setViewMode('list')}
+                                                />
+                                            </Tooltip>
+                                            <Tooltip label="Vue grille" placement="top" hasArrow openDelay={400}>
+                                                <IconButton
+                                                    aria-label="Vue grille"
+                                                    icon={<GridIcon />}
+                                                    size="xs"
+                                                    variant={viewMode === 'grid' ? 'solid' : 'ghost'}
+                                                    colorScheme={viewMode === 'grid' ? 'purple' : 'gray'}
+                                                    borderRadius="md"
+                                                    onClick={() => setViewMode('grid')}
+                                                />
+                                            </Tooltip>
+                                        </HStack>
+                                    </HStack>
                                 </HStack>
-                                <VStack spacing={1.5} align="stretch">
-                                    {displayedMembers.map((member: IUser, idx: number) => (
-                                        <ScoreRow
-                                            key={member._id}
-                                            member={member}
-                                            index={idx}
-                                            score={scores[member._id] || 0}
-                                            onChange={handleScoreChange}
-                                            isDisabled={isSubmitting || isLoadingScores}
-                                            isDark={isDark}
-                                            rowBg={rowBg}
-                                            rowBorder={rowBorder}
-                                            rowActiveBg={rowActiveBg}
-                                            rowActiveBorder={rowActiveBorder}
-                                            formatNumber={formatNumber}
-                                            parseNumber={parseNumber}
-                                        />
-                                    ))}
-                                </VStack>
+                                {viewMode === 'list' ? (
+                                    <VStack spacing={1.5} align="stretch">
+                                        {displayedMembers.map((member: IUser, idx: number) => (
+                                            <ScoreRow
+                                                key={member._id}
+                                                member={member}
+                                                index={idx}
+                                                score={scores[member._id] || 0}
+                                                onChange={handleScoreChange}
+                                                isDisabled={isSubmitting || isLoadingScores}
+                                                isDark={isDark}
+                                                rowBg={rowBg}
+                                                rowBorder={rowBorder}
+                                                rowActiveBg={rowActiveBg}
+                                                rowActiveBorder={rowActiveBorder}
+                                                formatNumber={formatNumber}
+                                                parseNumber={parseNumber}
+                                            />
+                                        ))}
+                                    </VStack>
+                                ) : (
+                                    <SimpleGrid columns={4} spacing={2}>
+                                        {displayedMembers.map((member: IUser) => (
+                                            <ScoreCard
+                                                key={member._id}
+                                                member={member}
+                                                score={scores[member._id] || 0}
+                                                onChange={handleScoreChange}
+                                                isDisabled={isSubmitting || isLoadingScores}
+                                                isDark={isDark}
+                                                rowBg={rowBg}
+                                                rowBorder={rowBorder}
+                                                rowActiveBg={rowActiveBg}
+                                                rowActiveBorder={rowActiveBorder}
+                                                formatNumber={formatNumber}
+                                                parseNumber={parseNumber}
+                                            />
+                                        ))}
+                                    </SimpleGrid>
+                                )}
                             </Box>
                         ) : selectedGuildId ? (
                             <Center p={8}>
