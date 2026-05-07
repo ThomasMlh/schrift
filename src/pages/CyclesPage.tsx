@@ -18,9 +18,11 @@ import {
   Button,
   Icon,
   Divider,
+  IconButton,
+  Tooltip,
 } from "@chakra-ui/react";
 import { ChevronRightIcon } from "@chakra-ui/icons";
-import { FiCalendar, FiLayers, FiRefreshCw } from "react-icons/fi";
+import { FiCalendar, FiLayers, FiRefreshCw, FiList } from "react-icons/fi";
 
 import { AlterationImage } from "../components/ui/AlterationImage";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
@@ -30,10 +32,12 @@ import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "../components/SEOHead";
 import { useCycles } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
+import RotationCalendar from "../components/cycles/RotationCalendar";
 
 const CyclesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(6);
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const { t } = useTranslation();
 
   const { cycles = [], pagination, isLoading, mutate: mutateCycles } = useCycles({ page: currentPage, limit: itemsPerPage });
@@ -152,36 +156,66 @@ const CyclesPage = () => {
                 </HStack>
 
                 <HStack spacing={3} flexWrap="wrap" justify={{ base: "center", md: "flex-end" }}>
-                  <CustomSelect
-                    value={String(itemsPerPage)}
-                    onChange={(val) => handleItemsPerPageChange(parseInt(val))}
-                    w={{ base: "full", sm: "140px" }}
-                    options={[
-                      { value: "3", label: t("pages.cycles.select3") },
-                      { value: "6", label: t("pages.cycles.select6") },
-                      { value: "9", label: t("pages.cycles.select9") },
-                      { value: "12", label: t("pages.cycles.select12") },
-                    ]}
-                    allowDeselect={false}
-                  />
-                  <Button
-                    leftIcon={<Icon as={FiRefreshCw} />}
-                    size="md"
-                    colorScheme="blue"
-                    variant="ghost"
-                    onClick={() => mutateCycles()}
-                    isLoading={isLoading}
-                    loadingText="…"
-                    borderRadius="lg"
-                  >
-                    {t("pages.cycles.buttonRefresh")}
-                  </Button>
+                  {viewMode === "list" && (
+                    <>
+                      <CustomSelect
+                        value={String(itemsPerPage)}
+                        onChange={(val) => handleItemsPerPageChange(parseInt(val))}
+                        w={{ base: "full", sm: "140px" }}
+                        options={[
+                          { value: "3", label: t("pages.cycles.select3") },
+                          { value: "6", label: t("pages.cycles.select6") },
+                          { value: "9", label: t("pages.cycles.select9") },
+                          { value: "12", label: t("pages.cycles.select12") },
+                        ]}
+                        allowDeselect={false}
+                      />
+                      <Button
+                        leftIcon={<Icon as={FiRefreshCw} />}
+                        size="md"
+                        colorScheme="blue"
+                        variant="ghost"
+                        onClick={() => mutateCycles()}
+                        isLoading={isLoading}
+                        loadingText="…"
+                        borderRadius="lg"
+                      >
+                        {t("pages.cycles.buttonRefresh")}
+                      </Button>
+                    </>
+                  )}
+                  <HStack spacing={1}>
+                    <Tooltip label={t("pages.cycles.buttonListView")} placement="top" hasArrow openDelay={400}>
+                      <IconButton
+                        aria-label={t("pages.cycles.buttonListView")}
+                        icon={<Icon as={FiList} />}
+                        size="sm"
+                        variant={viewMode === "list" ? "solid" : "ghost"}
+                        colorScheme={viewMode === "list" ? "blue" : "gray"}
+                        onClick={() => setViewMode("list")}
+                        borderRadius="lg"
+                      />
+                    </Tooltip>
+                    <Tooltip label={t("pages.cycles.buttonCalendarView")} placement="top" hasArrow openDelay={400}>
+                      <IconButton
+                        aria-label={t("pages.cycles.buttonCalendarView")}
+                        icon={<Icon as={FiCalendar} />}
+                        size="sm"
+                        variant={viewMode === "calendar" ? "solid" : "ghost"}
+                        colorScheme={viewMode === "calendar" ? "blue" : "gray"}
+                        onClick={() => setViewMode("calendar")}
+                        borderRadius="lg"
+                      />
+                    </Tooltip>
+                  </HStack>
                 </HStack>
               </Flex>
             </Box>
 
             {/* Contenu */}
-            {isLoading ? (
+            {viewMode === "calendar" ? (
+              <RotationCalendar />
+            ) : isLoading ? (
               <Flex justify="center" p={16}>
                 <VStack spacing={4}>
                   <Spinner size="xl" color="blue.500" thickness="4px" />

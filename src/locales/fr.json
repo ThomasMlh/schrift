@@ -89,7 +89,12 @@
       "moreRotations": "autres rotations disponibles",
       "seeAllDetails": "Voir tous les détails",
       "dateStart": "Début",
-      "dateEnd": "Fin"
+      "dateEnd": "Fin",
+      "buttonListView": "Vue liste",
+      "buttonCalendarView": "Vue calendrier",
+      "calendarToday": "Aujourd'hui",
+      "calendarPrevMonth": "Mois précédent",
+      "calendarNextMonth": "Mois suivant"
     },
     "cycleDetail": {
       "backToCycles": "Retour aux cycles",
