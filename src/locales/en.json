@@ -131,7 +131,8 @@
       "tableDate": "Date",
       "paginationShow": "Show",
       "paginationPerPage": "per page",
-      "ariaPreviousPage": "Previous page"
+      "ariaPreviousPage": "Previous page",
+      "buttonViewCharacters": "View characters"
     },
     "players": {
       "title": "Players",

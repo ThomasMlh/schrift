@@ -25,7 +25,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowBackIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  ExternalLinkIcon
 } from "@chakra-ui/icons";
 import type {
   IRotationTemplate,
@@ -271,6 +272,21 @@ const RotationDetailPage = () => {
               >
                 {t("pages.rotationDetail.buttonBack")}
               </Button>
+              {rotation && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  colorScheme="purple"
+                  rightIcon={<ExternalLinkIcon />}
+                  onClick={() =>
+                    navigate(
+                      `/personnages?killer=${encodeURIComponent(rotation.killer)}&attack_type=${encodeURIComponent(rotation.attack)}`
+                    )
+                  }
+                >
+                  {t("pages.rotationDetail.buttonViewCharacters")}
+                </Button>
+              )}
               <HStack spacing={2}>
                 <IconButton
                   aria-label={t("pages.rotationDetail.buttonPrevious")}

@@ -131,7 +131,8 @@
       "tableDate": "Date",
       "paginationShow": "Afficher",
       "paginationPerPage": "par page",
-      "ariaPreviousPage": "Page précédente"
+      "ariaPreviousPage": "Page précédente",
+      "buttonViewCharacters": "Voir les personnages"
     },
     "players": {
       "title": "Joueurs",
