@@ -42,6 +42,7 @@ const AdminPage = () => {
   );
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [isCheckingBot, setIsCheckingBot] = useState(false);
   const toast = useToast();
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -77,6 +78,36 @@ const AdminPage = () => {
     })
     .finally(() => setIsUpdatingCharacters(false));
   }
+
+  const handleBotHealth = () => {
+    setIsCheckingBot(true);
+    fetch(`${apiUrl}/api/admin/bot-health`, {
+      headers: { ...(token && { 'Authorization': `Bearer ${token}` }) },
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) throw new Error(data.message || 'Erreur serveur');
+      if (data.online) {
+        toast({
+          title: '🤖 Bot en ligne',
+          description: `status: ${data.data?.status ?? '?'} · bot: ${data.data?.bot ?? '?'}`,
+          status: 'success',
+          duration: 4000,
+        });
+      } else {
+        toast({
+          title: '🤖 Bot hors ligne',
+          description: data.error === 'timeout' ? 'Timeout (5s)' : data.error || 'Aucune réponse',
+          status: 'error',
+          duration: 4000,
+        });
+      }
+    })
+    .catch(err => {
+      toast({ title: err.message || 'Erreur vérification bot', status: 'error' });
+    })
+    .finally(() => setIsCheckingBot(false));
+  };
 
   const handleUploadImages = async () => {
     setIsUploadingImages(true);
@@ -225,6 +256,19 @@ const AdminPage = () => {
                 borderRadius="full"
               >
                 🖼️ Upload images
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor={isDark ? 'green.600' : 'green.400'}
+                color={isDark ? 'green.300' : 'green.600'}
+                _hover={{ bg: isDark ? 'green.900' : 'green.50' }}
+                onClick={handleBotHealth}
+                isLoading={isCheckingBot}
+                loadingText="Ping…"
+                borderRadius="full"
+              >
+                🤖 Bot health
               </Button>
             </HStack>
           )}
