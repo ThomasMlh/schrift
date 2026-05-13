@@ -141,7 +141,6 @@ const GuildesPage = () => {
                 >
                   {guilds.map((guild) => {
                     const isSelected = selectedGuild?._id === guild._id;
-                    const memberCount = guildMemberCounts?.[guild._id] || 0;
                     return (
                       <Box
                         key={guild._id}
