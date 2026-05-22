@@ -24,9 +24,12 @@ import {
   TagLabel,
   Progress,
   Tooltip,
-  SimpleGrid
+  Grid,
+  GridItem,
+  Avatar,
+  Divider,
 } from "@chakra-ui/react";
-import { ArrowForwardIcon, AddIcon } from "@chakra-ui/icons";
+import { AddIcon, ArrowForwardIcon, CheckIcon, DeleteIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import type { IGuild, IUser } from "../interfaces";
 import {
@@ -35,8 +38,14 @@ import {
   useGuildlessUsers
 } from "@/hooks/useAPI";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
-import { UserDisplay } from "./ui/UserDisplay";
 import { CustomSelect } from "./ui/CustomSelect";
+
+// Palette de couleurs Chakra assignées par index de guilde
+const GUILD_COLORS = ["purple", "blue", "teal", "green", "orange", "pink", "cyan", "red"] as const;
+type GuildColor = typeof GUILD_COLORS[number];
+
+const getGuildColor = (index: number): GuildColor =>
+  GUILD_COLORS[index % GUILD_COLORS.length];
 
 interface DraftMove {
   id: string;
@@ -66,16 +75,18 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   const { users: guildlessUsers, isLoading: guildlessLoading } =
     useGuildlessUsers(selectedSourceGuild === "__no_guild__");
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const subtleBg = useColorModeValue("gray.50", "gray.750");
-  const selectBg = useColorModeValue("orange.50", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const mutedText = useColorModeValue("gray.500", "gray.400");
-  const moveHoverBg = useColorModeValue("gray.50", "gray.650");
-  const accentGradient = "linear(to-r, orange.400, pink.400)";
-  const modalBg = useColorModeValue("white", "gray.800");
-  const progressBg = useColorModeValue("gray.200", "gray.600");
+  // ── Couleurs ────────────────────────────────────────────────────────────────
+  const cardBg        = useColorModeValue("white", "gray.800");
+  const sidebarBg     = useColorModeValue("gray.50", "gray.850");
+  const borderColor   = useColorModeValue("gray.200", "gray.700");
+  const mutedText     = useColorModeValue("gray.500", "gray.400");
+  const progressBg    = useColorModeValue("gray.200", "gray.600");
+  const rowHoverBg    = useColorModeValue("gray.50", "gray.700");
+  const modalBg       = useColorModeValue("white", "gray.800");
+  const emptyBg       = useColorModeValue("gray.50", "gray.750");
+  const guildCardBg   = useColorModeValue("white", "gray.750");
 
+  // ── Données dérivées ────────────────────────────────────────────────────────
   const allMembers = useMemo(() => {
     const members: (IUser & { guildId: string })[] = [];
     for (const [guildId, guildMembers] of Object.entries(membersByGuild)) {
@@ -83,7 +94,6 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
         members.push({ ...member, guildId });
       }
     }
-    // Include guildless users with empty guildId
     for (const user of guildlessUsers) {
       members.push({ ...user, guildId: "" });
     }
@@ -107,12 +117,8 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
       counts[guild._id] = membersByGuild[guild._id]?.length || 0;
     }
     for (const move of draftMoves) {
-      if (move.fromGuild) {
-        counts[move.fromGuild._id] = (counts[move.fromGuild._id] || 0) - 1;
-      }
-      if (move.toGuild) {
-        counts[move.toGuild._id] = (counts[move.toGuild._id] || 0) + 1;
-      }
+      if (move.fromGuild) counts[move.fromGuild._id] = (counts[move.fromGuild._id] || 0) - 1;
+      if (move.toGuild)   counts[move.toGuild._id]   = (counts[move.toGuild._id]   || 0) + 1;
     }
     return counts;
   }, [guilds, membersByGuild, draftMoves]);
@@ -122,78 +128,54 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     [guilds, projectedCounts]
   );
 
-  useEffect(() => {
-    setSelectedUser("");
-  }, [selectedSourceGuild]);
-
   const guildMap = useMemo(() => {
     const map: Record<string, IGuild> = {};
     guilds.forEach((g) => (map[g._id] = g));
     return map;
   }, [guilds]);
 
+  const guildColorMap = useMemo(() => {
+    const map: Record<string, GuildColor> = {};
+    guilds.forEach((g, i) => (map[g._id] = getGuildColor(i)));
+    return map;
+  }, [guilds]);
+
+  // Joueur sélectionné (pour affichage avatar)
+  const selectedUserData = useMemo(
+    () => availableUsers.find((u) => u._id === selectedUser) ?? null,
+    [availableUsers, selectedUser]
+  );
+
+  useEffect(() => { setSelectedUser(""); }, [selectedSourceGuild]);
+
+  // ── Actions ─────────────────────────────────────────────────────────────────
   const addMove = useCallback(() => {
     if (!selectedUser || !selectedTargetGuild) return;
-
     const user = allMembers.find((m) => m._id === selectedUser);
     if (!user) return;
 
-    const isRemoval = selectedTargetGuild === "__none__";
+    const isRemoval    = selectedTargetGuild === "__none__";
     const isFromNoGuild = selectedSourceGuild === "__no_guild__";
-    const fromGuild = isFromNoGuild
-      ? null
-      : user.guildId
-        ? guildMap[user.guildId] || null
-        : null;
-    const toGuild = isRemoval ? null : guildMap[selectedTargetGuild] || null;
+    const fromGuild    = isFromNoGuild ? null : user.guildId ? guildMap[user.guildId] || null : null;
+    const toGuild      = isRemoval ? null : guildMap[selectedTargetGuild] || null;
 
     if (!isRemoval && !toGuild) return;
-
     if (!isRemoval && fromGuild && fromGuild._id === toGuild!._id) {
-      toast({
-        title: "Même guilde",
-        description: "Le joueur est déjà dans cette guilde",
-        status: "warning",
-        duration: 2000
-      });
+      toast({ title: "Même guilde", description: "Le joueur est déjà dans cette guilde", status: "warning", duration: 2000 });
       return;
     }
-
     if (isRemoval && isFromNoGuild) {
-      toast({
-        title: "Action inutile",
-        description: "Ce joueur n'a déjà pas de guilde",
-        status: "warning",
-        duration: 2000
-      });
+      toast({ title: "Action inutile", description: "Ce joueur n'a déjà pas de guilde", status: "warning", duration: 2000 });
       return;
     }
 
-    setDraftMoves((prev) => [
-      ...prev,
-      {
-        id: `${user._id}-${Date.now()}`,
-        user,
-        fromGuild,
-        toGuild
-      }
-    ]);
+    setDraftMoves((prev) => [...prev, { id: `${user._id}-${Date.now()}`, user, fromGuild, toGuild }]);
     setSelectedUser("");
     setSelectedTargetGuild("");
-  }, [
-    selectedUser,
-    selectedTargetGuild,
-    selectedSourceGuild,
-    allMembers,
-    guildMap,
-    toast
-  ]);
+  }, [selectedUser, selectedTargetGuild, selectedSourceGuild, allMembers, guildMap, toast]);
 
-  const removeMove = (moveId: string) => {
-    setDraftMoves((prev) => prev.filter((m) => m.id !== moveId));
-  };
-
-  const clearDraft = () => {
+  const removeMove  = (moveId: string) => setDraftMoves((prev) => prev.filter((m) => m.id !== moveId));
+  const clearDraft  = () => {
     setDraftMoves([]);
     setSelectedSourceGuild("");
     setSelectedUser("");
@@ -203,556 +185,480 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   const handleExecuteDraft = async () => {
     setIsExecuting(true);
     try {
-      const moves = draftMoves.map((m) => ({
-        userId: m.user._id,
-        toGuildId: m.toGuild?._id || null
-      }));
-
-      await executeDraft(moves);
-
-      toast({
-        title: "Draft exécuté",
-        description: `${draftMoves.length} joueur(s) déplacé(s) avec succès`,
-        status: "success",
-        duration: 3000
-      });
-
+      await executeDraft(draftMoves.map((m) => ({ userId: m.user._id, toGuildId: m.toGuild?._id || null })));
+      toast({ title: "Draft exécuté", description: `${draftMoves.length} joueur(s) déplacé(s)`, status: "success", duration: 3000 });
       clearDraft();
       onClose();
       onDraftComplete();
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Erreur lors de l'exécution du draft",
-        status: "error",
-        duration: 5000
-      });
+      toast({ title: "Erreur", description: error instanceof Error ? error.message : "Erreur lors de l'exécution", status: "error", duration: 5000 });
     } finally {
       setIsExecuting(false);
     }
   };
 
+  // ── Helper avatar ────────────────────────────────────────────────────────────
+  const getAvatarUrl = (user: IUser) =>
+    user.avatar && user.discord_id
+      ? `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.webp?size=64`
+      : undefined;
+
+  // ── Chargement ───────────────────────────────────────────────────────────────
   if (membersLoading) {
     return (
-      <Box textAlign="center" py={8}>
+      <Box textAlign="center" py={12}>
         <Spinner size="lg" color="orange.500" />
-        <Text mt={2} color={mutedText}>
-          Chargement des données...
-        </Text>
+        <Text mt={2} color={mutedText}>Chargement…</Text>
       </Box>
     );
   }
 
+  // ── Rendu ────────────────────────────────────────────────────────────────────
   return (
-    <Box w="100%" maxW="960px" mx="auto">
-      <VStack spacing={5} align="stretch">
-        {/* Header with gradient accent */}
-        <Box
-          position="relative"
-          overflow="hidden"
-          borderRadius="xl"
-          bg={cardBg}
-          borderWidth="1px"
-          borderColor={borderColor}
-        >
-          <Box h="3px" bgGradient={accentGradient} />
-          <Box p={5}>
-            <HStack spacing={3} mb={1}>
-              <Text fontSize="xl" fontWeight="bold">
-                Draft de Guildes
-              </Text>
-              {draftMoves.length > 0 && (
-                <Badge
-                  colorScheme="orange"
-                  borderRadius="full"
-                  px={2.5}
-                  py={0.5}
-                  fontSize="xs"
-                >
-                  {draftMoves.length}
-                </Badge>
-              )}
-            </HStack>
-            <Text fontSize="sm" color={mutedText}>
-              Préparez vos transferts puis validez en une seule opération.
-            </Text>
-          </Box>
-        </Box>
-
-        {/* Form */}
-        <Box
-          bg={cardBg}
-          borderRadius="xl"
-          borderWidth="1px"
-          borderColor={borderColor}
-          p={5}
-        >
-          <Text
-            fontSize="sm"
-            fontWeight="semibold"
-            textTransform="uppercase"
-            letterSpacing="wide"
-            color={mutedText}
-            mb={4}
-          >
-            Nouveau transfert
-          </Text>
-          <Flex
-            gap={3}
-            direction={{ base: "column", md: "row" }}
-            align={{ md: "flex-end" }}
-          >
-            <Box flex={1}>
-              <Text
-                fontSize="xs"
-                fontWeight="medium"
-                mb={1.5}
-                color={mutedText}
-              >
-                Depuis
-              </Text>
-              <CustomSelect
-                placeholder="Guilde source"
-                value={selectedSourceGuild}
-                onChange={(val) => setSelectedSourceGuild(val)}
-                size="sm"
-                bg={selectBg}
-                allowDeselect={false}
-                accentColor="orange.400"
-                options={[
-                  { value: "__no_guild__", label: "Sans guilde" },
-                  ...guilds.map((guild) => ({
-                    value: guild._id,
-                    label: `${guild.name} (${membersByGuild[guild._id]?.length || 0})`
-                  }))
-                ]}
-              />
-            </Box>
-
-            <Box flex={1}>
-              <Text
-                fontSize="xs"
-                fontWeight="medium"
-                mb={1.5}
-                color={mutedText}
-              >
-                Joueur
-              </Text>
-              <CustomSelect
-                placeholder="Sélectionner"
-                value={selectedUser}
-                onChange={(val) => setSelectedUser(val)}
-                size="sm"
-                bg={selectBg}
-                allowDeselect={false}
-                enableSearch
-                accentColor="orange.400"
-                isDisabled={!selectedSourceGuild}
-                isLoading={guildlessLoading}
-                options={availableUsers.map((user) => ({
-                  value: user._id,
-                  label: user.bbs_name || user.global_name || user.username
-                }))}
-              />
-            </Box>
-
-            <Box flex={1}>
-              <Text
-                fontSize="xs"
-                fontWeight="medium"
-                mb={1.5}
-                color={mutedText}
-              >
-                Vers
-              </Text>
-              <CustomSelect
-                placeholder="Guilde cible"
-                value={selectedTargetGuild}
-                onChange={(val) => setSelectedTargetGuild(val)}
-                size="sm"
-                bg={selectBg}
-                allowDeselect={false}
-                accentColor="orange.400"
-                isDisabled={!selectedUser}
-                options={[
-                  ...(selectedSourceGuild !== "__no_guild__"
-                    ? [{ value: "__none__", label: "✕ Retirer de la guilde" }]
-                    : []),
-                  ...guilds
-                    .filter((g) => g._id !== selectedSourceGuild)
-                    .map((guild) => {
-                      const count = projectedCounts[guild._id] || 0;
-                      return {
-                        value: guild._id,
-                        label: `${guild.name} (${count}/20)${count >= 20 ? " — pleine" : ""}`
-                      };
-                    })
-                ]}
-              />
-            </Box>
-
-            <Tooltip
-              label={
-                !selectedUser || !selectedTargetGuild
-                  ? "Remplissez tous les champs"
-                  : "Ajouter ce transfert"
-              }
-              hasArrow
-            >
-              <IconButton
-                aria-label="Ajouter"
-                icon={<AddIcon />}
-                colorScheme="orange"
-                size="sm"
-                borderRadius="lg"
-                onClick={addMove}
-                isDisabled={!selectedUser || !selectedTargetGuild}
-              />
-            </Tooltip>
-          </Flex>
-        </Box>
-
-        {/* Move list */}
-        {draftMoves.length > 0 ? (
+    <Box w="100%" maxW="1100px" mx="auto">
+      <Grid
+        templateColumns={{ base: "1fr", lg: "280px 1fr" }}
+        gap={5}
+        alignItems="start"
+      >
+        {/* ── Colonne gauche : Guildes ──────────────────────────────────────── */}
+        <GridItem>
           <Box
-            bg={cardBg}
+            bg={sidebarBg}
             borderRadius="xl"
             borderWidth="1px"
             borderColor={borderColor}
             overflow="hidden"
+            position={{ lg: "sticky" }}
+            top={{ lg: "20px" }}
           >
-            <Flex justify="space-between" align="center" px={5} pt={4} pb={2}>
-              <Text
-                fontSize="sm"
-                fontWeight="semibold"
-                textTransform="uppercase"
-                letterSpacing="wide"
-                color={mutedText}
-              >
-                Transferts
+            <Box px={4} py={3} borderBottomWidth="1px" borderColor={borderColor}>
+              <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText}>
+                Effectifs
+                {draftMoves.length > 0 && (
+                  <Text as="span" color="orange.400" ml={2}>après draft</Text>
+                )}
               </Text>
-              <Button
-                size="xs"
-                variant="ghost"
-                colorScheme="red"
-                fontWeight="normal"
-                onClick={clearDraft}
-              >
-                Tout effacer
-              </Button>
-            </Flex>
-
-            <VStack spacing={0} align="stretch" px={3} pb={2}>
-              {draftMoves.map((move, index) => (
-                <Flex
-                  key={move.id}
-                  align="center"
-                  gap={3}
-                  px={3}
-                  py={2.5}
-                  borderRadius="lg"
-                  transition="background 0.15s"
-                  _hover={{ bg: moveHoverBg }}
-                  borderBottomWidth={index < draftMoves.length - 1 ? "1px" : 0}
-                  borderColor={borderColor}
-                >
-                  <Box flex={1} minW={0}>
-                    <UserDisplay
-                      user={move.user}
-                      avatarSize="xs"
-                      textSize="sm"
-                      asLink={false}
-                    />
-                  </Box>
-
-                  <HStack spacing={2} flexShrink={0}>
-                    <Tag
-                      size="sm"
-                      borderRadius="full"
-                      variant="subtle"
-                      colorScheme="red"
-                    >
-                      <TagLabel>{move.fromGuild?.name || "—"}</TagLabel>
-                    </Tag>
-                    <ArrowForwardIcon boxSize={3} color={mutedText} />
-                    <Tag
-                      size="sm"
-                      borderRadius="full"
-                      variant="subtle"
-                      colorScheme={move.toGuild ? "green" : "gray"}
-                    >
-                      <TagLabel>{move.toGuild?.name || "Retrait"}</TagLabel>
-                    </Tag>
-                  </HStack>
-
-                  <IconButton
-                    aria-label="Retirer"
-                    icon={<Text fontSize="sm">✕</Text>}
-                    size="xs"
-                    variant="ghost"
-                    borderRadius="full"
-                    color={mutedText}
-                    _hover={{
-                      bg: "red.50",
-                      color: "red.500",
-                      _dark: { bg: "red.900", color: "red.300" }
-                    }}
-                    onClick={() => removeMove(move.id)}
-                  />
-                </Flex>
-              ))}
-            </VStack>
-
-            {/* Guild capacity overview */}
-            <Box px={5} pb={4} pt={2}>
-              <Text
-                fontSize="xs"
-                fontWeight="semibold"
-                textTransform="uppercase"
-                letterSpacing="wide"
-                color={mutedText}
-                mb={3}
-              >
-                Effectifs après draft
-              </Text>
-              <SimpleGrid
-                columns={{ base: 1, sm: 2, md: guilds.length }}
-                spacing={3}
-              >
-                {guilds.map((guild) => {
-                  const current = membersByGuild[guild._id]?.length || 0;
-                  const projected = projectedCounts[guild._id] || 0;
-                  const diff = projected - current;
-                  const pct = (projected / 20) * 100;
-                  const isOver = projected > 20;
-                  const barScheme = isOver
-                    ? "red"
-                    : projected === 20
-                      ? "orange"
-                      : "green";
-
-                  return (
-                    <Box key={guild._id} bg={subtleBg} borderRadius="lg" p={3}>
-                      <Flex justify="space-between" mb={1.5}>
-                        <Text fontSize="xs" fontWeight="bold">
-                          {guild.name}
-                        </Text>
-                        <HStack spacing={1}>
-                          <Text
-                            fontSize="xs"
-                            fontWeight="bold"
-                            color={isOver ? "red.400" : undefined}
-                          >
-                            {projected}
-                          </Text>
-                          <Text fontSize="xs" color={mutedText}>
-                            /20
-                          </Text>
-                          {diff !== 0 && (
-                            <Text
-                              fontSize="xs"
-                              fontWeight="semibold"
-                              color={
-                                diff > 0
-                                  ? isOver
-                                    ? "red.400"
-                                    : "orange.400"
-                                  : "green.400"
-                              }
-                            >
-                              {diff > 0 ? `+${diff}` : diff}
-                            </Text>
-                          )}
-                        </HStack>
-                      </Flex>
-                      <Progress
-                        value={Math.min(pct, 100)}
-                        size="xs"
-                        borderRadius="full"
-                        colorScheme={barScheme}
-                        bg={progressBg}
-                      />
-                    </Box>
-                  );
-                })}
-              </SimpleGrid>
-
-              {hasOverflow && (
-                <Alert
-                  status="error"
-                  mt={3}
-                  borderRadius="lg"
-                  py={2}
-                  fontSize="sm"
-                >
-                  <AlertIcon />
-                  Des guildes dépassent 20 membres — déplacez ou retirez des
-                  joueurs avant de valider.
-                </Alert>
-              )}
             </Box>
 
-            {/* Actions */}
-            <Flex justify="flex-end" gap={3} px={5} pb={5}>
-              <Button
-                variant="ghost"
-                onClick={clearDraft}
-                size="sm"
-                borderRadius="lg"
-              >
-                Annuler
-              </Button>
-              <Button
-                colorScheme="orange"
-                size="sm"
-                borderRadius="lg"
-                onClick={onOpen}
-                isDisabled={hasOverflow}
-                title={
-                  hasOverflow
-                    ? "Des guildes dépassent la limite de 20 membres"
-                    : undefined
-                }
-                leftIcon={<Text fontSize="sm">✓</Text>}
-              >
-                Valider ({draftMoves.length})
-              </Button>
-            </Flex>
-          </Box>
-        ) : (
-          <Box
-            bg={cardBg}
-            borderRadius="xl"
-            borderWidth="1px"
-            borderColor={borderColor}
-            borderStyle="dashed"
-            p={8}
-            textAlign="center"
-          >
-            <Text color={mutedText} fontSize="sm">
-              Aucun transfert prévu — utilisez le formulaire ci-dessus pour
-              commencer.
-            </Text>
-          </Box>
-        )}
-      </VStack>
+            <VStack spacing={0} align="stretch" p={3}>
+              {guilds.map((guild, index) => {
+                const color     = guildColorMap[guild._id];
+                const current   = membersByGuild[guild._id]?.length || 0;
+                const projected = projectedCounts[guild._id] || 0;
+                const diff      = projected - current;
+                const pct       = Math.min((projected / 20) * 100, 100);
+                const isOver    = projected > 20;
+                const barColor  = isOver ? "red" : projected >= 18 ? "orange" : color;
 
-      {/* Confirmation modal */}
+                return (
+                  <Box
+                    key={guild._id}
+                    bg={guildCardBg}
+                    borderRadius="lg"
+                    p={3}
+                    mb={2}
+                    borderWidth="1px"
+                    borderColor={borderColor}
+                    borderLeftWidth="3px"
+                    borderLeftColor={`${color}.400`}
+                  >
+                    <Flex justify="space-between" align="center" mb={2}>
+                      <Text fontSize="sm" fontWeight="semibold" noOfLines={1}>{guild.name}</Text>
+                      <HStack spacing={1}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="bold"
+                          color={isOver ? "red.400" : `${color}.400`}
+                        >
+                          {projected}
+                        </Text>
+                        <Text fontSize="xs" color={mutedText}>/20</Text>
+                        {diff !== 0 && (
+                          <Badge
+                            colorScheme={diff > 0 ? (isOver ? "red" : "orange") : "green"}
+                            fontSize="2xs"
+                            borderRadius="full"
+                            px={1.5}
+                          >
+                            {diff > 0 ? `+${diff}` : diff}
+                          </Badge>
+                        )}
+                      </HStack>
+                    </Flex>
+                    <Progress
+                      value={pct}
+                      size="xs"
+                      borderRadius="full"
+                      colorScheme={barColor}
+                      bg={progressBg}
+                    />
+                  </Box>
+                );
+              })}
+
+              {/* Sans guilde */}
+              <Box
+                bg={guildCardBg}
+                borderRadius="lg"
+                p={3}
+                borderWidth="1px"
+                borderColor={borderColor}
+                borderLeftWidth="3px"
+                borderLeftColor="gray.400"
+              >
+                <Flex justify="space-between" align="center">
+                  <Text fontSize="sm" fontWeight="semibold" color={mutedText}>Sans guilde</Text>
+                  <Text fontSize="sm" fontWeight="bold" color={mutedText}>
+                    {guildlessUsers.length}
+                  </Text>
+                </Flex>
+              </Box>
+            </VStack>
+          </Box>
+        </GridItem>
+
+        {/* ── Colonne droite : Formulaire + Transferts ─────────────────────── */}
+        <GridItem>
+          <VStack spacing={4} align="stretch">
+
+            {/* Header */}
+            <Flex align="center" justify="space-between">
+              <HStack spacing={3}>
+                <Text fontSize="xl" fontWeight="bold">Draft de Guildes</Text>
+                {draftMoves.length > 0 && (
+                  <Badge colorScheme="orange" borderRadius="full" px={2.5} fontSize="xs">
+                    {draftMoves.length}
+                  </Badge>
+                )}
+              </HStack>
+              {draftMoves.length > 0 && (
+                <Button size="xs" variant="ghost" colorScheme="red" onClick={clearDraft}>
+                  Tout effacer
+                </Button>
+              )}
+            </Flex>
+
+            {/* ── Formulaire de transfert ───────────────────────────────────── */}
+            <Box
+              bg={cardBg}
+              borderRadius="xl"
+              borderWidth="1px"
+              borderColor={borderColor}
+              p={5}
+            >
+              <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={4}>
+                Nouveau transfert
+              </Text>
+
+              {/* 3 étapes visuelles */}
+              <Grid
+                templateColumns={{ base: "1fr", md: "1fr auto 1fr auto 1fr auto" }}
+                gap={3}
+                alignItems="end"
+              >
+                {/* Étape 1 : Depuis */}
+                <Box>
+                  <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>
+                    Depuis
+                  </Text>
+                  <CustomSelect
+                    placeholder="Guilde source"
+                    value={selectedSourceGuild}
+                    onChange={setSelectedSourceGuild}
+                    size="sm"
+                    allowDeselect={false}
+                    accentColor="orange.400"
+                    options={[
+                      { value: "__no_guild__", label: "Sans guilde" },
+                      ...guilds.map((g) => ({
+                        value: g._id,
+                        label: `${g.name} (${membersByGuild[g._id]?.length || 0})`
+                      }))
+                    ]}
+                  />
+                </Box>
+
+                {/* Flèche */}
+                <Box display={{ base: "none", md: "flex" }} alignItems="center" pb={1}>
+                  <ArrowForwardIcon color={selectedSourceGuild ? "orange.400" : "gray.300"} boxSize={4} />
+                </Box>
+
+                {/* Étape 2 : Joueur */}
+                <Box>
+                  <HStack spacing={2} mb={1.5}>
+                    <Text fontSize="xs" fontWeight="medium" color={mutedText}>Joueur</Text>
+                    {selectedUserData && (
+                      <Avatar
+                        size="2xs"
+                        src={getAvatarUrl(selectedUserData)}
+                        name={selectedUserData.bbs_name || selectedUserData.global_name}
+                      />
+                    )}
+                  </HStack>
+                  <CustomSelect
+                    placeholder="Sélectionner"
+                    value={selectedUser}
+                    onChange={setSelectedUser}
+                    size="sm"
+                    allowDeselect={false}
+                    enableSearch
+                    accentColor="orange.400"
+                    isDisabled={!selectedSourceGuild}
+                    isLoading={guildlessLoading}
+                    options={availableUsers.map((u) => ({
+                      value: u._id,
+                      label: u.bbs_name || u.global_name || u.username
+                    }))}
+                  />
+                </Box>
+
+                {/* Flèche */}
+                <Box display={{ base: "none", md: "flex" }} alignItems="center" pb={1}>
+                  <ArrowForwardIcon color={selectedUser ? "orange.400" : "gray.300"} boxSize={4} />
+                </Box>
+
+                {/* Étape 3 : Vers */}
+                <Box>
+                  <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>Vers</Text>
+                  <CustomSelect
+                    placeholder="Guilde cible"
+                    value={selectedTargetGuild}
+                    onChange={setSelectedTargetGuild}
+                    size="sm"
+                    allowDeselect={false}
+                    accentColor="orange.400"
+                    isDisabled={!selectedUser}
+                    options={[
+                      ...(selectedSourceGuild !== "__no_guild__"
+                        ? [{ value: "__none__", label: "✕ Retirer de la guilde" }]
+                        : []),
+                      ...guilds
+                        .filter((g) => g._id !== selectedSourceGuild)
+                        .map((g) => {
+                          const count = projectedCounts[g._id] || 0;
+                          return {
+                            value: g._id,
+                            label: `${g.name} (${count}/20)${count >= 20 ? " — pleine" : ""}`
+                          };
+                        })
+                    ]}
+                  />
+                </Box>
+
+                {/* Bouton ajouter */}
+                <Tooltip label={!selectedUser || !selectedTargetGuild ? "Remplissez tous les champs" : "Ajouter ce transfert"} hasArrow>
+                  <Button
+                    leftIcon={<AddIcon boxSize={3} />}
+                    colorScheme="orange"
+                    size="sm"
+                    borderRadius="lg"
+                    onClick={addMove}
+                    isDisabled={!selectedUser || !selectedTargetGuild}
+                    px={4}
+                    alignSelf="flex-end"
+                    mb={{ base: 0, md: 0 }}
+                  >
+                    Ajouter
+                  </Button>
+                </Tooltip>
+              </Grid>
+            </Box>
+
+            {/* ── Liste des transferts ──────────────────────────────────────── */}
+            {draftMoves.length > 0 ? (
+              <Box
+                bg={cardBg}
+                borderRadius="xl"
+                borderWidth="1px"
+                borderColor={borderColor}
+                overflow="hidden"
+              >
+                <Box px={5} pt={4} pb={3}>
+                  <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText}>
+                    Transferts planifiés
+                  </Text>
+                </Box>
+
+                <Divider borderColor={borderColor} />
+
+                <VStack spacing={0} align="stretch">
+                  {draftMoves.map((move, index) => {
+                    const fromColor = move.fromGuild ? guildColorMap[move.fromGuild._id] : "gray";
+                    const toColor   = move.toGuild   ? guildColorMap[move.toGuild._id]   : "gray";
+
+                    return (
+                      <Flex
+                        key={move.id}
+                        align="center"
+                        gap={3}
+                        px={5}
+                        py={3}
+                        transition="background 0.15s"
+                        _hover={{ bg: rowHoverBg }}
+                        borderBottomWidth={index < draftMoves.length - 1 ? "1px" : 0}
+                        borderColor={borderColor}
+                      >
+                        {/* Avatar + nom */}
+                        <HStack spacing={3} flex={1} minW={0}>
+                          <Avatar
+                            size="sm"
+                            src={getAvatarUrl(move.user)}
+                            name={move.user.bbs_name || move.user.global_name || move.user.username}
+                          />
+                          <Text fontSize="sm" fontWeight="medium" noOfLines={1}>
+                            {move.user.bbs_name || move.user.global_name || move.user.username}
+                          </Text>
+                        </HStack>
+
+                        {/* From → To */}
+                        <HStack spacing={2} flexShrink={0}>
+                          <Tag size="sm" borderRadius="full" colorScheme={fromColor} variant="subtle">
+                            <TagLabel>{move.fromGuild?.name || "—"}</TagLabel>
+                          </Tag>
+                          <ArrowForwardIcon boxSize={3} color="orange.400" />
+                          <Tag size="sm" borderRadius="full" colorScheme={move.toGuild ? toColor : "gray"} variant={move.toGuild ? "subtle" : "outline"}>
+                            <TagLabel>{move.toGuild?.name || "Retrait"}</TagLabel>
+                          </Tag>
+                        </HStack>
+
+                        {/* Supprimer */}
+                        <IconButton
+                          aria-label="Retirer"
+                          icon={<DeleteIcon boxSize={3} />}
+                          size="xs"
+                          variant="ghost"
+                          borderRadius="full"
+                          color={mutedText}
+                          _hover={{ bg: "red.50", color: "red.500", _dark: { bg: "red.900", color: "red.300" } }}
+                          onClick={() => removeMove(move.id)}
+                        />
+                      </Flex>
+                    );
+                  })}
+                </VStack>
+
+                {/* Overflow warning */}
+                {hasOverflow && (
+                  <Box px={5} pb={3} pt={2}>
+                    <Alert status="error" borderRadius="lg" py={2} fontSize="sm">
+                      <AlertIcon />
+                      Des guildes dépassent 20 membres — corrigez avant de valider.
+                    </Alert>
+                  </Box>
+                )}
+
+                {/* Actions */}
+                <Flex justify="flex-end" gap={3} px={5} pb={5} pt={2}>
+                  <Button variant="ghost" size="sm" borderRadius="lg" onClick={clearDraft}>
+                    Annuler
+                  </Button>
+                  <Button
+                    colorScheme="orange"
+                    size="sm"
+                    borderRadius="lg"
+                    leftIcon={<CheckIcon boxSize={3} />}
+                    onClick={onOpen}
+                    isDisabled={hasOverflow}
+                  >
+                    Valider ({draftMoves.length})
+                  </Button>
+                </Flex>
+              </Box>
+            ) : (
+              <Box
+                bg={emptyBg}
+                borderRadius="xl"
+                borderWidth="1px"
+                borderColor={borderColor}
+                borderStyle="dashed"
+                p={10}
+                textAlign="center"
+              >
+                <Text fontSize="2xl" mb={2}>🏟️</Text>
+                <Text color={mutedText} fontSize="sm">
+                  Aucun transfert planifié
+                </Text>
+                <Text color={mutedText} fontSize="xs" mt={1}>
+                  Utilisez le formulaire ci-dessus pour commencer.
+                </Text>
+              </Box>
+            )}
+          </VStack>
+        </GridItem>
+      </Grid>
+
+      {/* ── Modal de confirmation ─────────────────────────────────────────────── */}
       <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
         <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
         <ModalContent borderRadius="xl" bg={modalBg} mx={4}>
-          <Box h="3px" bgGradient={accentGradient} borderTopRadius="xl" />
+          <Box h="3px" bgGradient="linear(to-r, orange.400, pink.400)" borderTopRadius="xl" />
           <ModalHeader pb={2}>Confirmer le draft</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Alert status="warning" mb={5} borderRadius="lg" fontSize="sm">
               <AlertIcon />
-              Les joueurs seront d'abord retirés de leur guilde, puis
-              réassignés. Cette opération est irréversible.
+              Les joueurs seront retirés de leur guilde puis réassignés. Opération irréversible.
             </Alert>
 
-            <Text
-              fontSize="xs"
-              fontWeight="semibold"
-              textTransform="uppercase"
-              letterSpacing="wide"
-              color={mutedText}
-              mb={3}
-            >
+            <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={3}>
               {draftMoves.length} transfert{draftMoves.length > 1 ? "s" : ""}
             </Text>
 
-            <VStack
-              spacing={0}
-              align="stretch"
-              borderWidth="1px"
-              borderColor={borderColor}
-              borderRadius="lg"
-              overflow="hidden"
-            >
-              {draftMoves.map((move, index) => (
-                <Flex
-                  key={move.id}
-                  py={3}
-                  px={4}
-                  align="center"
-                  gap={3}
-                  borderBottomWidth={index < draftMoves.length - 1 ? "1px" : 0}
-                  borderColor={borderColor}
-                >
-                  <Text fontSize="sm" fontWeight="medium" flex={1}>
-                    {move.user.bbs_name ||
-                      move.user.global_name ||
-                      move.user.username}
-                  </Text>
-                  <HStack spacing={2}>
-                    <Tag
-                      size="sm"
-                      borderRadius="full"
-                      variant="subtle"
-                      colorScheme="red"
-                    >
-                      <TagLabel>{move.fromGuild?.name || "—"}</TagLabel>
-                    </Tag>
-                    <ArrowForwardIcon boxSize={3} color={mutedText} />
-                    <Tag
-                      size="sm"
-                      borderRadius="full"
-                      variant="subtle"
-                      colorScheme={move.toGuild ? "green" : "gray"}
-                    >
-                      <TagLabel>{move.toGuild?.name || "Retrait"}</TagLabel>
-                    </Tag>
-                  </HStack>
-                </Flex>
-              ))}
+            <VStack spacing={0} align="stretch" borderWidth="1px" borderColor={borderColor} borderRadius="lg" overflow="hidden">
+              {draftMoves.map((move, index) => {
+                const fromColor = move.fromGuild ? guildColorMap[move.fromGuild._id] : "gray";
+                const toColor   = move.toGuild   ? guildColorMap[move.toGuild._id]   : "gray";
+                return (
+                  <Flex
+                    key={move.id}
+                    py={3} px={4}
+                    align="center"
+                    gap={3}
+                    borderBottomWidth={index < draftMoves.length - 1 ? "1px" : 0}
+                    borderColor={borderColor}
+                  >
+                    <Avatar
+                      size="xs"
+                      src={getAvatarUrl(move.user)}
+                      name={move.user.bbs_name || move.user.global_name || move.user.username}
+                    />
+                    <Text fontSize="sm" fontWeight="medium" flex={1}>
+                      {move.user.bbs_name || move.user.global_name || move.user.username}
+                    </Text>
+                    <HStack spacing={2}>
+                      <Tag size="sm" borderRadius="full" colorScheme={fromColor} variant="subtle">
+                        <TagLabel>{move.fromGuild?.name || "—"}</TagLabel>
+                      </Tag>
+                      <ArrowForwardIcon boxSize={3} color="orange.400" />
+                      <Tag size="sm" borderRadius="full" colorScheme={move.toGuild ? toColor : "gray"} variant={move.toGuild ? "subtle" : "outline"}>
+                        <TagLabel>{move.toGuild?.name || "Retrait"}</TagLabel>
+                      </Tag>
+                    </HStack>
+                  </Flex>
+                );
+              })}
             </VStack>
 
-            {/* Impact summary - only guilds that change */}
-            {guilds.some(
-              (g) =>
-                (membersByGuild[g._id]?.length || 0) !==
-                (projectedCounts[g._id] || 0)
-            ) && (
+            {/* Impact guildes */}
+            {guilds.some((g) => (membersByGuild[g._id]?.length || 0) !== (projectedCounts[g._id] || 0)) && (
               <Box mt={4}>
-                <Text
-                  fontSize="xs"
-                  fontWeight="semibold"
-                  textTransform="uppercase"
-                  letterSpacing="wide"
-                  color={mutedText}
-                  mb={2}
-                >
+                <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={2}>
                   Impact
                 </Text>
                 <Flex gap={2} flexWrap="wrap">
                   {guilds
-                    .filter(
-                      (g) =>
-                        (membersByGuild[g._id]?.length || 0) !==
-                        (projectedCounts[g._id] || 0)
-                    )
+                    .filter((g) => (membersByGuild[g._id]?.length || 0) !== (projectedCounts[g._id] || 0))
                     .map((guild) => {
-                      const current = membersByGuild[guild._id]?.length || 0;
+                      const current   = membersByGuild[guild._id]?.length || 0;
                       const projected = projectedCounts[guild._id] || 0;
-                      const diff = projected - current;
+                      const diff      = projected - current;
+                      const color     = guildColorMap[guild._id];
                       return (
-                        <Tag
-                          key={guild._id}
-                          size="sm"
-                          borderRadius="full"
-                          variant="outline"
-                        >
+                        <Tag key={guild._id} size="sm" borderRadius="full" colorScheme={color} variant="outline">
                           <TagLabel>
                             {guild.name} {current}→{projected}{" "}
-                            <Text
-                              as="span"
-                              color={diff > 0 ? "orange.400" : "green.400"}
-                              fontWeight="bold"
-                            >
+                            <Text as="span" fontWeight="bold" color={diff > 0 ? "orange.400" : "green.400"}>
                               ({diff > 0 ? `+${diff}` : diff})
                             </Text>
                           </TagLabel>
@@ -765,15 +671,14 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
           </ModalBody>
 
           <ModalFooter pt={2}>
-            <Button variant="ghost" mr={3} onClick={onClose} borderRadius="lg">
-              Annuler
-            </Button>
+            <Button variant="ghost" mr={3} onClick={onClose} borderRadius="lg">Annuler</Button>
             <Button
               colorScheme="orange"
               onClick={handleExecuteDraft}
               isLoading={isExecuting}
-              loadingText="Exécution..."
+              loadingText="Exécution…"
               borderRadius="lg"
+              leftIcon={<CheckIcon />}
             >
               Confirmer et exécuter
             </Button>
