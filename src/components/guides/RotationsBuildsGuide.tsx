@@ -353,19 +353,61 @@ const RotationsBuildsGuide = () => {
                         >
                           {t("components.rotationsBuildsGuide.composition")}
                         </Text>
-                        <HStack spacing={2} justify="center">
-                          {build.team?.slice(0, 3).map((member, idx) => (
-                            <Tooltip key={idx} label={member.character?.name || "?"} placement="top" hasArrow>
-                              <Avatar
-                                size="lg"
-                                src={`${bucketUrl}/characters/thumb/${member.character?._id}.png`}
-                                name={member.character?.name || "?"}
-                                bg={isDark ? "gray.700" : "gray.200"}
-                                borderWidth="2px"
-                                borderColor={isDark ? "whiteAlpha.200" : "gray.300"}
-                              />
-                            </Tooltip>
-                          ))}
+                        <HStack spacing={2} align="flex-start">
+                          {build.team?.slice(0, 3).map((member, idx) => {
+                            const positionColors = ["purple", "blue", "teal"] as const;
+                            const posColor = positionColors[idx % 3];
+                            return (
+                              <VStack key={idx} spacing={1} flex={1} align="center" minW={0}>
+                                <Box position="relative">
+                                  <Tooltip label={member.character?.name || "?"} placement="top" hasArrow>
+                                    <Avatar
+                                      size="md"
+                                      src={`${bucketUrl}/characters/thumb/${member.character?._id}.png`}
+                                      name={member.character?.name || "?"}
+                                      bg={isDark ? "gray.700" : "gray.200"}
+                                      borderWidth="2px"
+                                      borderColor={`${posColor}.400`}
+                                    />
+                                  </Tooltip>
+                                  <Badge
+                                    position="absolute"
+                                    top="-4px"
+                                    left="-4px"
+                                    colorScheme={posColor}
+                                    borderRadius="full"
+                                    fontSize="2xs"
+                                    px={1}
+                                    lineHeight="16px"
+                                    minW="16px"
+                                    textAlign="center"
+                                    zIndex={1}
+                                  >
+                                    {member.position}
+                                  </Badge>
+                                </Box>
+                                <Text fontSize="2xs" fontWeight="medium" noOfLines={1} textAlign="center" w="full">
+                                  {member.character?.name || "?"}
+                                </Text>
+                                {member.links && member.links.length > 0 && (
+                                  <HStack spacing={0.5} flexWrap="wrap" justify="center">
+                                    {member.links.slice(0, 3).map((link, lIdx) => (
+                                      <Tooltip key={lIdx} label={link.character?.name || "?"} placement="top" hasArrow>
+                                        <Avatar
+                                          size="xs"
+                                          src={`${bucketUrl}/characters/thumb/${link.character?._id}.png`}
+                                          name={link.character?.name || "?"}
+                                          bg={isDark ? "gray.700" : "gray.200"}
+                                          borderWidth="1px"
+                                          borderColor={isDark ? "whiteAlpha.200" : "gray.300"}
+                                        />
+                                      </Tooltip>
+                                    ))}
+                                  </HStack>
+                                )}
+                              </VStack>
+                            );
+                          })}
                         </HStack>
                       </Box>
                     </VStack>

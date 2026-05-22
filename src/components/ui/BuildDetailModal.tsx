@@ -12,12 +12,15 @@ import {
   Text,
   HStack,
   Badge,
-  Avatar,
   Image,
   useColorModeValue,
-  Stack
+  Divider,
+  Grid,
+  GridItem,
+  Tooltip,
+  Icon,
 } from "@chakra-ui/react";
-import { EditIcon } from "@chakra-ui/icons";
+import { EditIcon, CalendarIcon, CheckCircleIcon, TimeIcon } from "@chakra-ui/icons";
 import { UserDisplay } from "./UserDisplay";
 import { AffinityIcon } from "./AffinityIcon";
 import type { IBuild } from "../../interfaces";
@@ -31,14 +34,20 @@ interface BuildDetailModalProps {
   onEdit?: (build: IBuild) => void;
 }
 
+const POSITION_COLORS = ["purple", "blue", "teal"] as const;
+
 export const BuildDetailModal = ({
   isOpen,
   onClose,
   build,
-  onEdit
+  onEdit,
 }: BuildDetailModalProps) => {
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const linkBgColor = useColorModeValue("gray.50", "gray.700");
+  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBorder = useColorModeValue("gray.100", "gray.700");
+  const sectionBg = useColorModeValue("gray.50", "gray.750");
+  const headerBg = useColorModeValue("gray.50", "gray.900");
+  const linkCardBg = useColorModeValue("gray.50", "gray.700");
+  const mutedText = useColorModeValue("gray.500", "gray.400");
   const { currentUser } = useAuth();
   const { t } = useTranslation();
 
@@ -51,14 +60,14 @@ export const BuildDetailModal = ({
       month: "2-digit",
       year: "numeric",
       hour: "2-digit",
-      minute: "2-digit"
+      minute: "2-digit",
     });
   };
 
-  // Vérifier si l'utilisateur peut éditer ce build
-  const canEdit = build && currentUser && (
-    build.user_id === currentUser._id || currentUser.is_admin
-  );
+  const canEdit =
+    build &&
+    currentUser &&
+    (build.user_id === currentUser._id || currentUser.is_admin);
 
   const handleEdit = () => {
     if (build && onEdit) {
@@ -69,293 +78,334 @@ export const BuildDetailModal = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="6xl" scrollBehavior="inside">
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>{t("components.buildDetailModal.title")}</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
+      <ModalOverlay backdropFilter="blur(4px)" />
+      <ModalContent borderRadius="xl" overflow="hidden">
+        {/* Header with rotation info */}
+        <ModalHeader bg={headerBg} borderBottomWidth="1px" borderColor={cardBorder} pb={4}>
+          <VStack align="stretch" spacing={3}>
+            <HStack justify="space-between" align="flex-start" pr={8}>
+              <VStack align="start" spacing={1}>
+                <Text fontSize="lg" fontWeight="bold">
+                  {t("components.buildDetailModal.title")}
+                </Text>
+                {build?.user && <UserDisplay user={build.user} />}
+              </VStack>
+              {build?.isValid !== undefined && build.user?.is_admin && (
+                <Badge
+                  colorScheme={build.isValid ? "green" : "yellow"}
+                  fontSize="sm"
+                  px={3}
+                  py={1}
+                  borderRadius="full"
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                >
+                  <Icon as={build.isValid ? CheckCircleIcon : TimeIcon} boxSize={3} />
+                  {build.isValid
+                    ? t("components.buildDetailModal.statusValid")
+                    : t("components.buildDetailModal.statusPending")}
+                </Badge>
+              )}
+            </HStack>
+
+            {build?.rotation && (
+              <HStack spacing={2} flexWrap="wrap">
+                <Badge colorScheme="blue" px={3} py={1} borderRadius="full" fontSize="sm">
+                  {t(`factions.${build.rotation.killer}`, build.rotation.killer)}
+                </Badge>
+                <Badge colorScheme="green" px={3} py={1} borderRadius="full" fontSize="sm">
+                  {t(`attackTypes.${build.rotation.attack}`, build.rotation.attack)}
+                </Badge>
+                <Badge colorScheme="orange" px={3} py={1} borderRadius="full" fontSize="sm">
+                  {t(`alterations.${build.rotation.alteration}`, build.rotation.alteration)}
+                </Badge>
+              </HStack>
+            )}
+          </VStack>
+        </ModalHeader>
+        <ModalCloseButton top={4} right={4} />
+
+        <ModalBody p={5}>
           {build && (
-            <VStack align="stretch" spacing={4}>
-              {/* Utilisateur */}
-              <Box>
-                <Text fontWeight="bold" mb={2}>
-                  {t("components.buildDetailModal.createdBy")}
-                </Text>
-                {build.user ? (
-                  <UserDisplay user={build.user} />
-                ) : (
-                  <Text color="gray.500">{t("components.buildDetailModal.anonymousUser")}</Text>
-                )}
-              </Box>
-
-              {/* Rotation */}
-              {build.rotation && (
-                <Box>
-                  <Text fontWeight="bold" mb={2}>
-                    {t("components.buildDetailModal.rotation")}
-                  </Text>
-                  <HStack spacing={2}>
-                    <Badge colorScheme="blue">{t(`factions.${build.rotation.killer}`, build.rotation.killer)}</Badge>
-                    <Badge colorScheme="green">{t(`attackTypes.${build.rotation.attack}`, build.rotation.attack)}</Badge>
-                    <Badge colorScheme="orange">
-                      {t(`alterations.${build.rotation.alteration}`, build.rotation.alteration)}
-                    </Badge>
-                  </HStack>
-                </Box>
-              )}
-
+            <VStack align="stretch" spacing={5}>
               {/* Description */}
-              <Box>
-                <Text fontWeight="bold" mb={2}>
-                  {t("components.buildDetailModal.description")}
-                </Text>
-                <Text whiteSpace="pre-wrap">
-                  {build.description || t("components.buildDetailModal.noDescription")}
-                </Text>
-              </Box>
-
-              {/* Statut */}
-              {build.isValid !== undefined && build.user?.is_admin && (
-                <Box>
-                  <Text fontWeight="bold" mb={2}>
-                    {t("components.buildDetailModal.status")}
+              {build.description && (
+                <Box
+                  p={4}
+                  bg={sectionBg}
+                  borderRadius="lg"
+                  borderLeftWidth="3px"
+                  borderLeftColor="blue.400"
+                >
+                  <Text fontSize="sm" color={mutedText} mb={1} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide">
+                    {t("components.buildDetailModal.description")}
                   </Text>
-                  <Badge
-                    colorScheme={build.isValid ? "green" : "gray"}
-                    fontSize="md"
-                    p={2}
-                  >
-                    {build.isValid ? t("components.buildDetailModal.statusValid") : t("components.buildDetailModal.statusPending")}
-                  </Badge>
+                  <Text whiteSpace="pre-wrap">{build.description}</Text>
                 </Box>
               )}
 
-              {/* Team */}
+              {/* Team composition */}
               <Box>
-                <Text fontWeight="bold" mb={2}>
+                <Text fontWeight="bold" fontSize="md" mb={3}>
                   {t("components.buildDetailModal.teamComposition")}
                 </Text>
-                <Stack
-                  direction={{ base: "column", xl: "row" }}
-                  justify="space-around"
-                  align="stretch"
-                  spacing={3}
+                <Grid
+                  templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }}
+                  gap={4}
                 >
-                  {build.team?.map((member, index) => (
-                    <Box
-                      key={index}
-                      p={3}
-                      borderWidth="1px"
-                      borderRadius="md"
-                      borderColor={borderColor}
-                    >
-                      <VStack spacing={3} mb={2} justify="flex-start">
-                        <Badge colorScheme="purple">
-                          {t("components.buildDetailModal.position", { pos: member.position })}
-                        </Badge>
-                        <HStack spacing={3}>
-                          <Avatar
-                            size="sm"
-                            src={`${bucketUrl}/characters/thumb/${member.character?._id}.png`}
-                            name={member.character?.name || "?"}
-                            bg="gray.200"
-                          />
-                          <Text fontWeight="medium">
-                            {member.character?.name ||
-                              t("components.buildDetailModal.characterFallback", { id: member.id_character })}
-                          </Text>
-                          {member.character?.affinity && (
-                            <AffinityIcon
-                              affinity={member.character.affinity}
-                              size="20px"
+                  {build.team?.map((member, index) => {
+                    const positionColor = POSITION_COLORS[(member.position - 1) % POSITION_COLORS.length];
+                    return (
+                      <GridItem key={index}>
+                        <Box
+                          bg={cardBg}
+                          borderWidth="1px"
+                          borderColor={cardBorder}
+                          borderRadius="xl"
+                          overflow="hidden"
+                          h="100%"
+                          boxShadow="sm"
+                          _hover={{ boxShadow: "md", borderColor: `${positionColor}.300` }}
+                          transition="all 0.2s"
+                        >
+                          {/* Character header */}
+                          <Box position="relative">
+                            <Image
+                              src={`${bucketUrl}/characters/full/${member.character?._id}.png`}
+                              alt={member.character?.name || ""}
+                              w="100%"
+                              h="200px"
+                              objectFit="cover"
+                              objectPosition="middle"
+                              fallbackSrc={`${bucketUrl}/characters/thumb/${member.character?._id}.png`}
+                              bg={sectionBg}
                             />
-                          )}
-                        </HStack>
-                      </VStack>
-
-                      {/* Skills */}
-                      {member.skills && member.skills.length > 0 && (
-                        <Box ml={4} mt={2}>
-                          <Text fontSize="sm" fontWeight="medium" mb={1}>
-                            {t("components.buildDetailModal.skills")}
-                          </Text>
-                          <HStack spacing={2} flexWrap="wrap">
-                            {member.skills.map((skill, skillIndex) => {
-                              const skillName =
-                                typeof skill === "string" ? skill : skill.name;
-                              return (
-                                <Badge
-                                  key={skillIndex}
-                                  colorScheme="purple"
-                                  fontSize="xs"
-                                  px={3}
-                                  py={1}
-                                  borderRadius="md"
-                                >
-                                  ⚡ {skillName}
-                                </Badge>
-                              );
-                            })}
-                          </HStack>
-                        </Box>
-                      )}
-
-                      {/* Accessories */}
-                      {member.accessories && member.accessories.length > 0 && (
-                        <Box ml={4} mt={2}>
-                          <Text fontSize="sm" fontWeight="medium" mb={1}>
-                            {t("components.buildDetailModal.accessories")}
-                          </Text>
-                          <VStack align="stretch" spacing={2}>
-                            {member.accessories.map((acc, accIndex) => (
-                              <Stack
-                                direction={{ base: "column", md: "row" }}
-                                key={accIndex}
-                                spacing={1}
+                            <Box
+                              position="absolute"
+                              bottom={0}
+                              left={0}
+                              right={0}
+                              h="70px"
+                              bgGradient="linear(to-t, blackAlpha.800, transparent)"
+                            />
+                            <Badge
+                              position="absolute"
+                              top={2}
+                              left={2}
+                              colorScheme={positionColor}
+                              borderRadius="full"
+                              px={2}
+                              py={0.5}
+                              fontSize="xs"
+                              fontWeight="bold"
+                            >
+                              #{member.position}
+                            </Badge>
+                            <HStack
+                              position="absolute"
+                              bottom={2}
+                              left={3}
+                              right={3}
+                              spacing={2}
+                            >
+                              <Text
+                                color="white"
+                                fontWeight="bold"
+                                fontSize="sm"
+                                noOfLines={1}
+                                flex={1}
+                                textShadow="0 1px 3px rgba(0,0,0,0.8)"
                               >
-                                <HStack spacing={1.5}>
-                                  {acc.accessory?.code && (
-                                    <Image
-                                      src={`${bucketUrl}/accessories/${acc.accessory.code}/thumb.png`}
-                                      alt={acc.accessory.name}
-                                      boxSize="22px"
-                                      borderRadius="sm"
-                                      objectFit="contain"
-                                      fallback={<Box boxSize="22px" />}
-                                    />
-                                  )}
-                                  <Badge
-                                    colorScheme="cyan"
-                                    fontSize="xs"
-                                    px={2}
-                                    py={1}
-                                    w={"max-content"}
-                                  >
-                                    {acc.accessory?.name}
-                                  </Badge>
-                                </HStack>
-                                {acc.subeffect && (
-                                  <>
-                                    <Text
-                                      fontSize="xs"
-                                      color="gray.500"
-                                      display={{ base: "none", md: "block" }}
-                                    >
-                                      →
-                                    </Text>
-                                    <Badge
-                                      colorScheme="teal"
-                                      fontSize="xs"
-                                      px={2}
-                                      py={1}
-                                      w={"max-content"}
-                                    >
-                                      {acc.subeffect.name}
-                                    </Badge>
-                                  </>
-                                )}
-                              </Stack>
-                            ))}
-                          </VStack>
-                        </Box>
-                      )}
+                                {member.character?.name ||
+                                  t("components.buildDetailModal.characterFallback", {
+                                    id: member.id_character,
+                                  })}
+                              </Text>
+                              {member.character?.affinity && (
+                                <AffinityIcon affinity={member.character.affinity} size="18px" />
+                              )}
+                            </HStack>
+                          </Box>
 
-                      {/* Links */}
-                      {member.links && member.links.length > 0 && (
-                        <Box ml={4} mt={2}>
-                          <Text fontSize="sm" fontWeight="medium" mb={2}>
-                            {t("components.buildDetailModal.links")}
-                          </Text>
-                          <VStack align="stretch" spacing={2}>
-                            {member.links.map((link, linkIndex) => (
-                              <Box
-                                key={linkIndex}
-                                p={2}
-                                borderRadius="md"
-                                bg={linkBgColor}
-                              >
-                                <HStack spacing={2} align="start">
-                                  <Avatar
-                                    size="xs"
-                                    src={`${bucketUrl}/characters/thumb/${link.character?._id}.png`}
-                                    name={link.character?.name || "?"}
-                                    bg="gray.200"
-                                  />
-                                  <VStack align="start" spacing={0} flex={1}>
-                                    <HStack spacing={2} align="center">
-                                      <Text fontSize="sm" fontWeight="medium">
-                                        {link.character?.name ||
-                                          t("components.buildDetailModal.characterFallback", { id: link.id_character })}
-                                      </Text>
-                                      {link.character?.affinity && (
-                                        <AffinityIcon
-                                          affinity={link.character.affinity}
-                                          size="14px"
-                                        />
-                                      )}
-                                    </HStack>
-                                    {link.character?.soul_traits &&
-                                      link.character.soul_traits.map(
-                                        (trait, traitIdx) => (
-                                          <Text
-                                            key={traitIdx}
-                                            fontSize="xs"
-                                            color="gray.500"
-                                            mt={1}
-                                            noOfLines={2}
-                                          >
-                                            {trait}
-                                          </Text>
-                                        )
-                                      )}
-                                  </VStack>
+                          <VStack align="stretch" spacing={0} divider={<Divider />}>
+                            {/* Skills */}
+                            {member.skills && member.skills.length > 0 && (
+                              <Box p={3}>
+                                <Text fontSize="xs" fontWeight="semibold" color={mutedText} textTransform="uppercase" letterSpacing="wide" mb={2}>
+                                  {t("components.buildDetailModal.skills")}
+                                </Text>
+                                <HStack spacing={1.5} flexWrap="wrap">
+                                  {member.skills.map((skill, skillIndex) => {
+                                    const skillName =
+                                      typeof skill === "string" ? skill : skill.name;
+                                    return (
+                                      <Badge
+                                        key={skillIndex}
+                                        colorScheme="purple"
+                                        fontSize="xs"
+                                        px={2}
+                                        py={0.5}
+                                        borderRadius="md"
+                                      >
+                                        ⚡ {skillName}
+                                      </Badge>
+                                    );
+                                  })}
                                 </HStack>
                               </Box>
-                            ))}
+                            )}
+
+                            {/* Accessories */}
+                            {member.accessories && member.accessories.length > 0 && (
+                              <Box p={3}>
+                                <Text fontSize="xs" fontWeight="semibold" color={mutedText} textTransform="uppercase" letterSpacing="wide" mb={2}>
+                                  {t("components.buildDetailModal.accessories")}
+                                </Text>
+                                <VStack align="stretch" spacing={1.5}>
+                                  {member.accessories.map((acc, accIndex) => (
+                                    <HStack key={accIndex} spacing={2} align="center">
+                                      <Box flexShrink={0}>
+                                        {acc.accessory?.code ? (
+                                          <Image
+                                            src={`${bucketUrl}/accessories/${acc.accessory.code}/thumb.png`}
+                                            alt={acc.accessory?.name}
+                                            boxSize="28px"
+                                            borderRadius="md"
+                                            objectFit="contain"
+                                            fallback={<Box boxSize="28px" borderRadius="md" bg={sectionBg} />}
+                                          />
+                                        ) : (
+                                          <Box boxSize="28px" borderRadius="md" bg={sectionBg} />
+                                        )}
+                                      </Box>
+                                      <VStack align="start" spacing={0} flex={1} minW={0}>
+                                        <Text fontSize="md" fontWeight="medium" noOfLines={1}>
+                                          {acc.accessory?.name ?? "—"}
+                                        </Text>
+                                        {acc.subeffect && (
+                                          <Text fontSize="sm" color={mutedText} noOfLines={1}>
+                                            ↳ {acc.subeffect.name}
+                                          </Text>
+                                        )}
+                                      </VStack>
+                                    </HStack>
+                                  ))}
+                                </VStack>
+                              </Box>
+                            )}
+
+                            {/* Links */}
+                            {member.links && member.links.length > 0 && (
+                              <Box p={3}>
+                                <Text fontSize="xs" fontWeight="semibold" color={mutedText} textTransform="uppercase" letterSpacing="wide" mb={2}>
+                                  {t("components.buildDetailModal.links")}
+                                </Text>
+                                <VStack align="stretch" spacing={1.5}>
+                                  {member.links.map((link, linkIndex) => (
+                                    <HStack
+                                      key={linkIndex}
+                                      p={2}
+                                      bg={linkCardBg}
+                                      borderRadius="md"
+                                      spacing={2}
+                                    >
+                                      <Image
+                                        src={`${bucketUrl}/characters/thumb/${link.character?._id}.png`}
+                                        alt={link.character?.name || ""}
+                                        boxSize="28px"
+                                        borderRadius="full"
+                                        objectFit="cover"
+                                        bg="gray.200"
+                                        fallback={<Box boxSize="28px" borderRadius="full" bg="gray.200" />}
+                                      />
+                                      <VStack align="start" spacing={0} flex={1} minW={0}>
+                                        <HStack spacing={1}>
+                                          <Text fontSize="md" fontWeight="semibold" noOfLines={1}>
+                                            {link.character?.name ||
+                                              t("components.buildDetailModal.characterFallback", {
+                                                id: link.id_character,
+                                              })}
+                                          </Text>
+                                          {link.character?.affinity && (
+                                            <AffinityIcon affinity={link.character.affinity} size="12px" />
+                                          )}
+                                        </HStack>
+                                        {link.character?.soul_traits?.slice(0, 1).map((trait, traitIdx) => (
+                                          <Tooltip key={traitIdx} label={trait} hasArrow placement="top">
+                                            <Text fontSize="sm" color={mutedText} noOfLines={1}>
+                                              {trait}
+                                            </Text>
+                                          </Tooltip>
+                                        ))}
+                                      </VStack>
+                                    </HStack>
+                                  ))}
+                                </VStack>
+                              </Box>
+                            )}
                           </VStack>
                         </Box>
-                      )}
-                    </Box>
-                  ))}
-                </Stack>
+                      </GridItem>
+                    );
+                  })}
+                </Grid>
               </Box>
 
               {/* Dates */}
-              <Box>
-                <Text fontWeight="bold" mb={2}>
-                  {t("components.buildDetailModal.dates")}
-                </Text>
-                <VStack align="start" spacing={1}>
-                  <Text fontSize="sm">
-                    <strong>{t("components.buildDetailModal.dateCreated")}</strong> {formatDate(build.created_at)}
+              <HStack
+                spacing={4}
+                p={3}
+                bg={sectionBg}
+                borderRadius="lg"
+                flexWrap="wrap"
+              >
+                <HStack spacing={1.5} color={mutedText}>
+                  <CalendarIcon boxSize={3} />
+                  <Text fontSize="md">
+                    <Text as="span" fontWeight="semibold">
+                      {t("components.buildDetailModal.dateCreated")}
+                    </Text>{" "}
+                    {formatDate(build.created_at)}
                   </Text>
-                  {build.updated_at && (
-                    <Text fontSize="sm">
-                      <strong>{t("components.buildDetailModal.dateModified")}</strong> {formatDate(build.updated_at)}
+                </HStack>
+                {build.updated_at && (
+                  <HStack spacing={1.5} color={mutedText}>
+                    <TimeIcon boxSize={3} />
+                    <Text fontSize="md">
+                      <Text as="span" fontWeight="semibold">
+                        {t("components.buildDetailModal.dateModified")}
+                      </Text>{" "}
+                      {formatDate(build.updated_at)}
                     </Text>
-                  )}
-                  {build.isValid && (
-                    <Text fontSize="sm">
-                      <strong>{t("components.buildDetailModal.dateValidated")}</strong> {formatDate(build.validated_at)}
+                  </HStack>
+                )}
+                {build.isValid && build.validated_at && (
+                  <HStack spacing={1.5} color="green.500">
+                    <CheckCircleIcon boxSize={3} />
+                    <Text fontSize="md">
+                      <Text as="span" fontWeight="semibold">
+                        {t("components.buildDetailModal.dateValidated")}
+                      </Text>{" "}
+                      {formatDate(build.validated_at)}
                     </Text>
-                  )}
-                </VStack>
-              </Box>
+                  </HStack>
+                )}
+              </HStack>
             </VStack>
           )}
         </ModalBody>
-        <ModalFooter>
+
+        <ModalFooter borderTopWidth="1px" borderColor={cardBorder} bg={headerBg}>
           <HStack spacing={3}>
             {canEdit && onEdit && (
-              <Button
-                leftIcon={<EditIcon />}
-                colorScheme="blue"
-                onClick={handleEdit}
-              >
+              <Button leftIcon={<EditIcon />} colorScheme="blue" onClick={handleEdit} size="sm">
                 {t("components.buildDetailModal.buttonEdit")}
               </Button>
             )}
-            <Button onClick={onClose}>{t("components.buildDetailModal.buttonClose")}</Button>
+            <Button onClick={onClose} size="sm" variant="ghost">
+              {t("components.buildDetailModal.buttonClose")}
+            </Button>
           </HStack>
         </ModalFooter>
       </ModalContent>
