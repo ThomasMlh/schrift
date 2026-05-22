@@ -34,39 +34,45 @@ const legendItems: ScoreLegendItem[] = [
     isRainbow: true
   },
   {
-    labelKey: "beforeBuff",
-    minScore: 566000000,
+    labelKey: "clearExtraWave56",
+    minScore: 580000000,
     maxScore: 599999999,
     colorScheme: "blue"
   },
   {
     labelKey: "clearExtraWave34",
-    minScore: 400000000,
-    maxScore: 565999999,
+    minScore: 540000000,
+    maxScore: 579999999,
     colorScheme: "purple"
   },
   {
     labelKey: "clearExtraWave12",
-    minScore: 300000000,
-    maxScore: 399999999,
+    minScore: 430000000,
+    maxScore: 539999999,
     colorScheme: "green"
   },
   {
-    labelKey: "clearVeryHardToNoClearNightmare",
+    labelKey: "clearNightmare",
+    minScore: 350000000,
+    maxScore: 429999999,
+    colorScheme: "teal"
+  },
+  {
+    labelKey: "clearVeryHard",
     minScore: 210000000,
-    maxScore: 299999999,
+    maxScore: 349999999,
     colorScheme: "yellow"
   },
   {
-    labelKey: "clearHardToNoClearVeryHard",
-    minScore: 72000000,
+    labelKey: "clearHard",
+    minScore: 100000000,
     maxScore: 209999999,
     colorScheme: "orange"
   },
   {
-    labelKey: "clearNormalToNoClearHard",
+    labelKey: "clearNormal",
     minScore: 22500000,
-    maxScore: 71999999,
+    maxScore: 99999999,
     colorScheme: "red"
   },
   {

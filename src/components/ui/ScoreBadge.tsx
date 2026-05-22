@@ -36,50 +36,57 @@ export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" }, for
                 fontWeight: "bold",
                 isRainbow: true
             };
-        } else if (value >= 566000000) {
-            // Bleu (avant buff)
+        } else if (value >= 580000000) {
+            // Bleu (Clear Vague Extra 5 et 6)
             return {
                 colorScheme: "blue",
                 variant: "solid",
                 isRainbow: false
             };
-        } else if (value >= 400000000) {
+        } else if (value >= 540000000) {
             // Violet (Clear Vague Extra 3 et 4)
             return {
                 colorScheme: "purple",
                 variant: "solid",
                 isRainbow: false
             };
-        } else if (value >= 300000000) {
+        } else if (value >= 430000000) {
             // Vert (Clear Vague Extra 1 et 2)
             return {
                 colorScheme: "green",
                 variant: "solid",
                 isRainbow: false
             };
+        } else if (value >= 350000000) {
+            // Teal (Clear Cauchemar)
+            return {
+                colorScheme: "teal",
+                variant: "solid",
+                isRainbow: false
+            };
         } else if (value >= 210000000) {
-            // Jaune (clear très diff à non clear cauchemar)
+            // Jaune (Clear Très Difficile)
             return {
                 colorScheme: "yellow",
                 variant: "solid",
                 isRainbow: false
             };
-        } else if (value >= 72000000) {
-            // Orange (clear diff à non clear très diff)
+        } else if (value >= 100000000) {
+            // Orange (Clear Difficile)
             return {
                 colorScheme: "orange",
                 variant: "solid",
                 isRainbow: false
             };
         } else if (value >= 22500000) {
-            // Rouge (clear normal à non clear diff)
+            // Rouge (Clear Normal)
             return {
                 colorScheme: "red",
                 variant: "solid",
                 isRainbow: false
             };
         } else {
-            // Marron (non clear normal)
+            // Marron (Non clear normal)
             return {
                 bg: "#8B4513",
                 color: "white",
