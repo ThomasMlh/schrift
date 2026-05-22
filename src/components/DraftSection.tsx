@@ -242,7 +242,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
             </Box>
 
             <VStack spacing={0} align="stretch" p={3}>
-              {guilds.map((guild, index) => {
+              {guilds.map((guild) => {
                 const color     = guildColorMap[guild._id];
                 const current   = membersByGuild[guild._id]?.length || 0;
                 const projected = projectedCounts[guild._id] || 0;

@@ -16,7 +16,6 @@ import {
   AlertIcon,
 } from "@chakra-ui/react";
 import { FiTool } from "react-icons/fi";
-import { SearchIcon } from "@chakra-ui/icons";
 import type { IScore } from "../interfaces";
 import { useAuth } from "@/providers/AuthProvider";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
