@@ -1,27 +1,36 @@
 import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    ModalCloseButton,
+    Avatar,
+    Badge,
+    Box,
+    Button,
+    Divider,
+    Flex,
     FormControl,
     FormLabel,
+    HStack,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
     NumberInput,
     NumberInputField,
     NumberInputStepper,
     NumberIncrementStepper,
     NumberDecrementStepper,
-    Button,
+    Text,
+    useColorModeValue,
     VStack,
-    Box,
-    Text
 } from "@chakra-ui/react";
+import { LockIcon } from "@chakra-ui/icons";
 import { CycleSelect } from "./CycleSelect";
 import { CustomSelect } from "./CustomSelect";
-import type { IUser, ICycle } from "../../interfaces";
 import { UserSearchSelect } from "./UserSearchSelect";
+import { ScoreBadge } from "./ScoreBadge";
+import { getUserAvatarUrl } from "@/utils/discord";
+import type { IUser, ICycle } from "../../interfaces";
 
 interface ScoreModalProps {
     isOpen: boolean;
@@ -68,21 +77,27 @@ export const ScoreModal = ({
     title,
     submitButtonText,
     submitButtonColor = "blue",
-    isEdit = false
+    isEdit = false,
 }: ScoreModalProps) => {
-    const selectedCycle = cycles.find(cycle => cycle._id === selectedCycleId);
-    const selectedUser = users.find(u => u._id === selectedUserId);
+    // ── Données dérivées ─────────────────────────────────────────────────────
+    const selectedCycle    = cycles.find((c) => c._id === selectedCycleId);
+    const selectedUser     = users.find((u) => u._id === selectedUserId);
+    const selectedRotation = selectedCycle?.rotations.find(
+        (r) => (r._id ?? r.rotation_id) === selectedRotationId
+    );
 
-    // Fonction pour formater les nombres avec des virgules
+    const canSubmit =
+        !!selectedUserId &&
+        !!selectedCycleId &&
+        !!selectedRotationId &&
+        scoreValue >= 0;
+
+    // ── Formatage ────────────────────────────────────────────────────────────
     const formatNumber = (value: string | number): string => {
-        const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
-        return numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        const num = typeof value === "string" ? parseFloat(value) || 0 : value;
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
-
-    // Fonction pour parser les nombres formatés
-    const parseNumber = (value: string): string => {
-        return value.replace(/,/g, '');
-    };
+    const parseNumber = (value: string): string => value.replace(/,/g, "");
 
     const handleClose = () => {
         setSelectedCycleId("");
@@ -93,33 +108,78 @@ export const ScoreModal = ({
         onClose();
     };
 
+    // ── Couleurs ─────────────────────────────────────────────────────────────
+    const modalBg       = useColorModeValue("white", "gray.800");
+    const borderColor   = useColorModeValue("gray.200", "gray.700");
+    const mutedText     = useColorModeValue("gray.500", "gray.400");
+    const lockedBg      = useColorModeValue("gray.50", "gray.750");
+    const previewBg     = useColorModeValue("gray.50", "gray.750");
+    const accentColor   = isEdit ? "orange" : submitButtonColor;
+    const avatarUrl     = selectedUser
+        ? getUserAvatarUrl(selectedUser) ?? undefined
+        : undefined;
+
+    // Label de la rotation
+    const rotationLabel = selectedRotation
+        ? `#${selectedRotation.position} — ${selectedRotation.killer}`
+        : null;
+
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} size="md">
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>{title}</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>
-                    <VStack spacing={4}>
+        <Modal isOpen={isOpen} onClose={handleClose} size="md" isCentered>
+            <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+            <ModalContent borderRadius="xl" bg={modalBg} mx={4} overflow="hidden">
+
+                {/* Barre accent */}
+                <Box
+                    h="3px"
+                    bgGradient={
+                        isEdit
+                            ? "linear(to-r, orange.400, yellow.400)"
+                            : "linear(to-r, blue.400, purple.400)"
+                    }
+                />
+
+                <ModalHeader pb={1} pt={4}>
+                    <HStack spacing={2}>
+                        <Text>{isEdit ? "✏️" : "➕"}</Text>
+                        <Text>{title}</Text>
+                    </HStack>
+                </ModalHeader>
+                <ModalCloseButton top={4} />
+
+                <ModalBody pb={4}>
+                    <VStack spacing={4} align="stretch">
+
+                        {/* ── Joueur ─────────────────────────────────────── */}
                         <FormControl isRequired>
-                            <FormLabel>Joueur</FormLabel>
+                            <FormLabel fontSize="sm" color={mutedText} mb={1.5}>Joueur</FormLabel>
                             {isEdit && selectedUser ? (
-                                <Box
+                                <Flex
+                                    align="center"
+                                    gap={3}
                                     p={3}
+                                    bg={lockedBg}
+                                    borderRadius="lg"
                                     borderWidth="1px"
-                                    borderRadius="md"
-                                    bg="gray.50"
-                                    _dark={{ bg: "gray.700" }}
+                                    borderColor={borderColor}
                                 >
-                                    <Text fontWeight="medium">
-                                        {selectedUser.bbs_name || selectedUser.global_name}
-                                    </Text>
-                                    {selectedUser.discord_id && (
-                                        <Text fontSize="sm" color="gray.500">
-                                            Discord: {selectedUser.discord_id}
+                                    <Avatar
+                                        size="sm"
+                                        src={avatarUrl}
+                                        name={selectedUser.bbs_name || selectedUser.global_name}
+                                    />
+                                    <Box flex={1} minW={0}>
+                                        <Text fontWeight="semibold" fontSize="sm" noOfLines={1}>
+                                            {selectedUser.bbs_name || selectedUser.global_name}
                                         </Text>
-                                    )}
-                                </Box>
+                                        {selectedUser.global_name && selectedUser.bbs_name && (
+                                            <Text fontSize="xs" color={mutedText} noOfLines={1}>
+                                                {selectedUser.global_name}
+                                            </Text>
+                                        )}
+                                    </Box>
+                                    <LockIcon boxSize={3} color={mutedText} />
+                                </Flex>
                             ) : (
                                 <UserSearchSelect
                                     users={users}
@@ -127,58 +187,103 @@ export const ScoreModal = ({
                                     onUserSelect={setSelectedUserId}
                                     searchQuery={userSearchQuery}
                                     onSearchChange={setUserSearchQuery}
-                                    placeholder="Rechercher et sélectionner un joueur"
+                                    placeholder="Rechercher un joueur…"
                                 />
                             )}
                         </FormControl>
 
-                        <FormControl isRequired>
-                            <FormLabel>Cycle</FormLabel>
-                            <CycleSelect
-                                cycles={cycles}
-                                value={selectedCycleId}
-                                onChange={(value) => {
-                                    setSelectedCycleId(value);
-                                    setSelectedRotationId(""); // Reset rotation selection
-                                }}
-                                placeholder="Sélectionner un cycle"
-                                isDisabled={isLoadingCycles || isEdit}
-                                allowDeselect={false}
-                                showActiveBadge={true}
-                                size="md"
-                            />
-                        </FormControl>
+                        {/* ── Cycle + Rotation ───────────────────────────── */}
+                        <Box
+                            bg={isEdit ? lockedBg : undefined}
+                            borderRadius={isEdit ? "lg" : undefined}
+                            borderWidth={isEdit ? "1px" : undefined}
+                            borderColor={isEdit ? borderColor : undefined}
+                            p={isEdit ? 3 : 0}
+                        >
+                            {isEdit && (
+                                <HStack spacing={1} mb={3}>
+                                    <LockIcon boxSize={2.5} color={mutedText} />
+                                    <Text fontSize="2xs" color={mutedText} textTransform="uppercase" letterSpacing="wide" fontWeight="semibold">
+                                        Contexte verrouillé
+                                    </Text>
+                                </HStack>
+                            )}
+                            <VStack spacing={3} align="stretch">
+                                <FormControl isRequired>
+                                    <FormLabel fontSize="sm" color={mutedText} mb={1.5}>Cycle</FormLabel>
+                                    {isEdit && selectedCycle ? (
+                                        <Flex align="center" justify="space-between">
+                                            <Text fontSize="sm" fontWeight="medium">{selectedCycle.name}</Text>
+                                            {selectedCycle.year && (
+                                                <Badge colorScheme="purple" fontSize="xs">{selectedCycle.year}</Badge>
+                                            )}
+                                        </Flex>
+                                    ) : (
+                                        <CycleSelect
+                                            cycles={cycles}
+                                            value={selectedCycleId}
+                                            onChange={(val) => { setSelectedCycleId(val); setSelectedRotationId(""); }}
+                                            placeholder="Sélectionner un cycle"
+                                            isDisabled={isLoadingCycles}
+                                            allowDeselect={false}
+                                            showActiveBadge={true}
+                                            size="md"
+                                        />
+                                    )}
+                                </FormControl>
 
-                        <FormControl isRequired>
-                            <FormLabel>Rotation</FormLabel>
-                            <CustomSelect
-                                placeholder="Sélectionner une rotation"
-                                value={selectedRotationId}
-                                onChange={setSelectedRotationId}
-                                isDisabled={!selectedCycle || isEdit}
-                                options={(selectedCycle?.rotations || [])
-                                    .filter(rotation => rotation._id)
-                                    .map((rotation, index) => ({
-                                        value: rotation._id as string,
-                                        label: `#${index + 1} - ${rotation.killer} (${rotation.period})`
-                                    }))}
-                                allowDeselect={false}
-                                size="md"
-                            />
-                        </FormControl>
+                                <FormControl isRequired>
+                                    <FormLabel fontSize="sm" color={mutedText} mb={1.5}>Rotation</FormLabel>
+                                    {isEdit && selectedRotation ? (
+                                        <HStack spacing={2}>
+                                            <Text fontSize="sm" fontWeight="medium">{rotationLabel}</Text>
+                                            {selectedRotation.period && (
+                                                <Badge colorScheme="blue" fontSize="xs">{selectedRotation.period}</Badge>
+                                            )}
+                                        </HStack>
+                                    ) : (
+                                        <CustomSelect
+                                            placeholder="Sélectionner une rotation"
+                                            value={selectedRotationId}
+                                            onChange={setSelectedRotationId}
+                                            isDisabled={!selectedCycle}
+                                            options={(selectedCycle?.rotations || [])
+                                                .filter((r) => r._id)
+                                                .map((r, i) => ({
+                                                    value: r._id as string,
+                                                    label: `#${i + 1} - ${r.killer} (${r.period})`,
+                                                }))}
+                                            allowDeselect={false}
+                                            size="md"
+                                        />
+                                    )}
+                                </FormControl>
+                            </VStack>
+                        </Box>
 
+                        <Divider borderColor={borderColor} />
+
+                        {/* ── Score ──────────────────────────────────────── */}
                         <FormControl isRequired>
-                            <FormLabel>Score</FormLabel>
+                            <FormLabel fontSize="sm" color={mutedText} mb={1.5}>Score</FormLabel>
                             <NumberInput
                                 value={scoreValue}
-                                onChange={(_, value) => setScoreValue(value || 0)}
+                                onChange={(_, val) => setScoreValue(val || 0)}
                                 min={0}
-                                max={9999999999}
+                                max={9_999_999_999}
                                 step={1000}
                                 format={formatNumber}
                                 parse={parseNumber}
+                                size="lg"
                             >
-                                <NumberInputField placeholder="Saisir le score" />
+                                <NumberInputField
+                                    placeholder="0"
+                                    textAlign="center"
+                                    fontSize="xl"
+                                    fontWeight="bold"
+                                    letterSpacing="wide"
+                                    borderRadius="lg"
+                                />
                                 <NumberInputStepper>
                                     <NumberIncrementStepper />
                                     <NumberDecrementStepper />
@@ -186,36 +291,68 @@ export const ScoreModal = ({
                             </NumberInput>
                         </FormControl>
 
-                        {selectedUser && (
-                            <Box 
-                                w="full" 
-                                p={3} 
-                                bg={isEdit ? "yellow.50" : "blue.50"} 
-                                _dark={{ bg: isEdit ? "yellow.900" : "blue.900" }} 
-                                borderRadius="md"
+                        {/* ── Prévisualisation ───────────────────────────── */}
+                        {canSubmit && (
+                            <Box
+                                bg={previewBg}
+                                borderRadius="lg"
+                                borderWidth="1px"
+                                borderColor={borderColor}
+                                borderLeftWidth="3px"
+                                borderLeftColor={`${accentColor}.400`}
+                                p={3}
                             >
-                                <Text 
-                                    fontSize="sm" 
-                                    color={isEdit ? "yellow.700" : "blue.600"} 
-                                    _dark={{ color: isEdit ? "yellow.200" : "blue.200" }}
+                                <Text
+                                    fontSize="2xs"
+                                    fontWeight="semibold"
+                                    textTransform="uppercase"
+                                    letterSpacing="wide"
+                                    color={mutedText}
+                                    mb={2}
                                 >
-                                    <strong>{isEdit ? "Modification pour:" : "Score pour:"}</strong> {selectedUser.bbs_name || selectedUser.global_name}
+                                    {isEdit ? "Modification" : "Récapitulatif"}
                                 </Text>
+                                <Flex align="center" justify="space-between" gap={3}>
+                                    <HStack spacing={2} minW={0} flex={1}>
+                                        <Avatar
+                                            size="xs"
+                                            src={avatarUrl}
+                                            name={selectedUser?.bbs_name || selectedUser?.global_name}
+                                        />
+                                        <VStack spacing={0} align="start" minW={0}>
+                                            <Text fontSize="sm" fontWeight="semibold" noOfLines={1}>
+                                                {selectedUser?.bbs_name || selectedUser?.global_name}
+                                            </Text>
+                                            {rotationLabel && (
+                                                <Text fontSize="xs" color={mutedText} noOfLines={1}>
+                                                    {rotationLabel}
+                                                </Text>
+                                            )}
+                                        </VStack>
+                                    </HStack>
+                                    <ScoreBadge score={scoreValue} fontSize="md" />
+                                </Flex>
                             </Box>
                         )}
                     </VStack>
                 </ModalBody>
 
-                <ModalFooter>
-                    <Button variant="ghost" mr={3} onClick={handleClose}>
+                <ModalFooter
+                    borderTopWidth="1px"
+                    borderColor={borderColor}
+                    gap={2}
+                >
+                    <Button variant="ghost" borderRadius="lg" onClick={handleClose} size="sm">
                         Annuler
                     </Button>
                     <Button
-                        colorScheme={submitButtonColor}
+                        colorScheme={accentColor}
+                        borderRadius="lg"
+                        size="sm"
                         onClick={onSubmit}
                         isLoading={isSubmitting}
-                        loadingText={`${isEdit ? "Modification" : "Ajout"}...`}
-                        isDisabled={!selectedUserId || !selectedCycleId || !selectedRotationId || scoreValue < 0}
+                        loadingText={isEdit ? "Modification…" : "Ajout…"}
+                        isDisabled={!canSubmit}
                     >
                         {submitButtonText}
                     </Button>
