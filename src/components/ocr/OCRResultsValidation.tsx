@@ -96,6 +96,16 @@ export const OCRResultsValidation = ({
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
+  // Formatage des scores avec virgules (ex: 1234567 → 1,234,567)
+  const formatNumber = (value: string | number): string => {
+    const numValue = typeof value === "string" ? parseFloat(value) || 0 : value;
+    return numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  const parseNumber = (value: string): string => {
+    return value.replace(/,/g, "");
+  };
+
   const totalPlayers = results.reduce((sum, r) => sum + (r.players?.length || 0), 0);
   const needsReview = results.reduce(
     (sum, r) => sum + (r.players?.filter(p => p.needsReview).length || 0),
@@ -221,7 +231,7 @@ export const OCRResultsValidation = ({
               {results.map((screenshot) => (
                 <AccordionItem key={screenshot.index} borderColor={borderColor}>
                   <AccordionButton>
-                    <HStack flex="1" spacing={4}>
+                    <HStack flex="1" spacing={4} wrap={"wrap"}>
                       {screenshot.thumbnail && (
                         <Image
                           src={screenshot.thumbnail}
@@ -255,74 +265,174 @@ export const OCRResultsValidation = ({
                   </AccordionButton>
 
                   <AccordionPanel pb={4} overflow="visible">
-                    <Table variant="simple" size="sm">
-                      <Thead>
-                        <Tr>
-                          <Th>Nom détecté</Th>
-                          <Th>Joueur</Th>
-                          <Th>Score</Th>
-                          <Th>Confiance</Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        {screenshot.players.map((player) => {
-                          const data = getPlayerData(screenshot, player);
-                          return (
-                            <Tr key={player.lineNumber}>
-                              <Td>
-                                <Text fontFamily="mono" fontSize="sm">
-                                  {player.detectedName || "???"}
-                                </Text>
-                              </Td>
-                              <Td>
-                                <CustomSelect
-                                  value={data.user_id}
-                                  onChange={(value) => handleUserChange(screenshot, player, value)}
-                                  options={memberOptions}
-                                  placeholder="Choisir un joueur"
-                                  size="sm"
-                                />
-                              </Td>
-                              <Td>
-                                <NumberInput
-                                  value={data.score}
-                                  onChange={(_, value) => handleScoreChange(screenshot, player, value)}
-                                  min={0}
-                                  size="sm"
+                    {/* Layout mobile : cartes empilées */}
+                    <Box display={{ base: "flex", md: "none" }} flexDirection="column" gap={3}>
+                      {screenshot.players.map((player) => {
+                        const data = getPlayerData(screenshot, player);
+                        return (
+                          <Box
+                            key={player.lineNumber}
+                            borderWidth="1px"
+                            borderColor={borderColor}
+                            borderRadius="md"
+                            p={3}
+                            bg={player.needsReview ? "orange.900" : undefined}
+                          >
+                            <HStack justify="space-between" mb={2}>
+                              <Text fontFamily="mono" fontSize="sm" fontWeight="bold">
+                                {player.detectedName || "???"}
+                              </Text>
+                              {player.matching.bestMatch ? (
+                                <Badge
+                                  colorScheme={
+                                    player.matching.bestMatch.confidence > 0.90
+                                      ? "green"
+                                      : player.matching.bestMatch.confidence > 0.70
+                                      ? "yellow"
+                                      : "red"
+                                  }
+                                  fontSize="xs"
                                 >
-                                  <NumberInputField />
-                                </NumberInput>
-                              </Td>
-                              <Td>
-                                {player.matching.bestMatch && (
-                                  <Badge
-                                    colorScheme={
-                                      player.matching.bestMatch.confidence > 0.90
-                                        ? "green"
-                                        : player.matching.bestMatch.confidence > 0.70
-                                        ? "yellow"
-                                        : "red"
-                                    }
+                                  {Math.round(player.matching.bestMatch.confidence * 100)}%
+                                </Badge>
+                              ) : (
+                                <Badge colorScheme="red" fontSize="xs">Aucun match</Badge>
+                              )}
+                            </HStack>
+                            <VStack spacing={2} align="stretch">
+                              <CustomSelect
+                                value={data.user_id}
+                                onChange={(value) => handleUserChange(screenshot, player, value)}
+                                options={memberOptions}
+                                placeholder="Choisir un joueur"
+                                size="sm"
+                              />
+                              <NumberInput
+                                value={data.score}
+                                onChange={(_, value) => handleScoreChange(screenshot, player, value)}
+                                min={0}
+                                size="sm"
+                                format={formatNumber}
+                                parse={parseNumber}
+                              >
+                                <NumberInputField placeholder="Score" />
+                              </NumberInput>
+                            </VStack>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+
+                    {/* Layout desktop : tableau */}
+                    <Box display={{ base: "none", md: "block" }} overflowX="auto">
+                      <Table variant="simple" size="sm">
+                        <Thead>
+                          <Tr>
+                            <Th>Nom détecté</Th>
+                            <Th>Joueur</Th>
+                            <Th>Score</Th>
+                            <Th>Confiance</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          {screenshot.players.map((player) => {
+                            const data = getPlayerData(screenshot, player);
+                            return (
+                              <Tr key={player.lineNumber}>
+                                <Td>
+                                  <Text fontFamily="mono" fontSize="sm">
+                                    {player.detectedName || "???"}
+                                  </Text>
+                                </Td>
+                                <Td>
+                                  <CustomSelect
+                                    value={data.user_id}
+                                    onChange={(value) => handleUserChange(screenshot, player, value)}
+                                    options={memberOptions}
+                                    placeholder="Choisir un joueur"
+                                    size="sm"
+                                  />
+                                </Td>
+                                <Td>
+                                  <NumberInput
+                                    value={data.score}
+                                    onChange={(_, value) => handleScoreChange(screenshot, player, value)}
+                                    min={0}
+                                    size="sm"
+                                    format={formatNumber}
+                                    parse={parseNumber}
                                   >
-                                    {Math.round(player.matching.bestMatch.confidence * 100)}%
-                                  </Badge>
-                                )}
-                                {!player.matching.bestMatch && (
-                                  <Badge colorScheme="red">Aucun match</Badge>
-                                )}
-                              </Td>
-                            </Tr>
-                          );
-                        })}
-                      </Tbody>
-                    </Table>
+                                    <NumberInputField />
+                                  </NumberInput>
+                                </Td>
+                                <Td>
+                                  {player.matching.bestMatch && (
+                                    <Badge
+                                      colorScheme={
+                                        player.matching.bestMatch.confidence > 0.90
+                                          ? "green"
+                                          : player.matching.bestMatch.confidence > 0.70
+                                          ? "yellow"
+                                          : "red"
+                                      }
+                                    >
+                                      {Math.round(player.matching.bestMatch.confidence * 100)}%
+                                    </Badge>
+                                  )}
+                                  {!player.matching.bestMatch && (
+                                    <Badge colorScheme="red">Aucun match</Badge>
+                                  )}
+                                </Td>
+                              </Tr>
+                            );
+                          })}
+                        </Tbody>
+                      </Table>
+                    </Box>
                   </AccordionPanel>
                 </AccordionItem>
               ))}
             </Accordion>
 
             {/* Actions */}
-            <HStack justify="space-between">
+            <VStack spacing={2} align="stretch" display={{ base: "flex", md: "none" }}>
+              <Button
+                colorScheme="green"
+                size="lg"
+                leftIcon={<Icon as={FiCheck} />}
+                onClick={handleSubmit}
+                isDisabled={!canSubmit()}
+                isLoading={isSubmitting}
+                loadingText="Soumission..."
+                w="full"
+              >
+                Soumettre {totalPlayers} score{totalPlayers > 1 ? "s" : ""}
+              </Button>
+              <HStack spacing={2}>
+                <Button
+                  leftIcon={<Icon as={FiArrowLeft} />}
+                  onClick={onBack}
+                  isDisabled={isSubmitting}
+                  flex={1}
+                  size="sm"
+                >
+                  Retour
+                </Button>
+                <Button
+                  leftIcon={<Icon as={FiRefreshCw} />}
+                  onClick={onReset}
+                  variant="outline"
+                  colorScheme="red"
+                  isDisabled={isSubmitting}
+                  flex={1}
+                  size="sm"
+                >
+                  Recommencer
+                </Button>
+              </HStack>
+            </VStack>
+
+            <HStack justify="space-between" display={{ base: "none", md: "flex" }}>
               <HStack>
                 <Button
                   leftIcon={<Icon as={FiArrowLeft} />}

@@ -196,13 +196,13 @@ const OCRScoreModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="6xl" scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={handleClose} size={{ base: "full", md: "6xl" }} scrollBehavior="inside">
       <ModalOverlay />
-      <ModalContent bg={modalBg} maxH="90vh">
-        <ModalHeader>📸 Saisie automatique par OCR</ModalHeader>
+      <ModalContent bg={modalBg} maxH={{ base: "100dvh", md: "90vh" }} mx={{ base: 0, md: 4 }} my={{ base: 0, md: "auto" }} borderRadius={{ base: 0, md: "xl" }}>
+        <ModalHeader fontSize={{ base: "md", md: "xl" }} pr={10}>📸 Saisie automatique par OCR</ModalHeader>
         <ModalCloseButton />
-        <ModalBody pb={6}>
-          <VStack spacing={6} align="stretch">
+        <ModalBody pb={6} px={{ base: 3, md: 6 }}>
+          <VStack spacing={{ base: 4, md: 6 }} align="stretch">
             {/* Stepper */}
             <Stepper index={currentStep} colorScheme="blue" size="sm">
               {steps.map((step, index) => (
@@ -216,7 +216,7 @@ const OCRScoreModal = ({
                   </StepIndicator>
                   <Box flexShrink="0">
                     <StepTitle>{step.title}</StepTitle>
-                    <StepDescription>{step.description}</StepDescription>
+                    <StepDescription display={{ base: "none", md: "block" }}>{step.description}</StepDescription>
                   </Box>
                   <StepSeparator />
                 </Step>
