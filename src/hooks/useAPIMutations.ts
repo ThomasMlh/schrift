@@ -328,6 +328,39 @@ export const useAPIMutations = () => {
     return true;
   };
 
+  // Fonction pour transférer les scores d'une rotation vers une autre
+  const transferRotation = async (params: {
+    cycle_id: string;
+    source_rotation_id: string;
+    target_rotation_id: string;
+    guild_id?: string;
+    dry_run?: boolean;
+  }) => {
+    const response = await fetch(`${apiUrl}/api/scores/transfer-rotation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+      },
+      body: JSON.stringify(params),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // On attache les données à l'erreur (ex: conflicts array sur 409)
+      const err = new Error(data.message || 'Erreur lors du transfert');
+      (err as any).data = data;
+      throw err;
+    }
+
+    if (!params.dry_run) {
+      await mutate((key) => typeof key === 'string' && key.startsWith(`${apiUrl}/api/scores`));
+    }
+
+    return data;
+  };
+
   // Fonction pour créer des scores en bulk
   const createBulkScores = async (scoresData: IScoreFormData[]) => {
     const response = await fetch(`${apiUrl}/api/scores/bulk`, {
@@ -662,6 +695,7 @@ export const useAPIMutations = () => {
     updateScore,
     deleteScore,
     createBulkScores,
+    transferRotation,
     createBuild,
     updateBuild,
     validateBuild,

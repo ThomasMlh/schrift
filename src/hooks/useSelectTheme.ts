@@ -1,6 +1,6 @@
 import { useColorModeValue } from "@chakra-ui/react";
 
-export type SelectVariant = "default" | "ghost" | "modal";
+export type SelectVariant = "default" | "ghost" | "modal" | "modal-orange";
 
 export interface SelectTheme {
   buttonBg: string;
@@ -52,6 +52,16 @@ export const useSelectTheme = (variant: SelectVariant = "default"): SelectTheme 
   const modalScrollbarThumb = useColorModeValue("purple.200", "rgba(124,58,237,0.3)");
   const modalScrollbarThumbHover = useColorModeValue("purple.300", "rgba(124,58,237,0.5)");
 
+  // ── modal-orange ─────────────────────────────────────────────────────────
+  // Matches TransferRotationModal: accent orange #EA580C / #F59E0B
+  const orangeButtonBg        = useColorModeValue("orange.50",  "rgba(234,88,12,0.12)");
+  const orangeBorderColor     = useColorModeValue("orange.200", "rgba(234,88,12,0.35)");
+  const orangeMenuBg          = useColorModeValue("white",      "#1a1b2e");
+  const orangeHoverItemBg     = useColorModeValue("orange.50",  "rgba(234,88,12,0.15)");
+  const orangeGroupHeaderBg   = useColorModeValue("orange.100", "rgba(234,88,12,0.10)");
+  const orangeScrollbarThumb  = useColorModeValue("orange.200", "rgba(234,88,12,0.30)");
+  const orangeScrollbarThumbHover = useColorModeValue("orange.300", "rgba(234,88,12,0.50)");
+
   if (variant === "ghost") {
     return {
       buttonBg: ghostButtonBg,
@@ -77,6 +87,20 @@ export const useSelectTheme = (variant: SelectVariant = "default"): SelectTheme 
       groupHeaderBg: modalGroupHeaderBg,
       scrollbarThumb: modalScrollbarThumb,
       scrollbarThumbHover: modalScrollbarThumbHover,
+    };
+  }
+
+  if (variant === "modal-orange") {
+    return {
+      buttonBg: orangeButtonBg,
+      borderColor: orangeBorderColor,
+      hoverBorderColor: orangeBorderColor,
+      menuBg: orangeMenuBg,
+      menuBorderColor: orangeBorderColor,
+      hoverItemBg: orangeHoverItemBg,
+      groupHeaderBg: orangeGroupHeaderBg,
+      scrollbarThumb: orangeScrollbarThumb,
+      scrollbarThumbHover: orangeScrollbarThumbHover,
     };
   }
 
