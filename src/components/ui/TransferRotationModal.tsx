@@ -23,11 +23,10 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import type { ICycle, IGuild, ICycleRotation, IUser } from "../../interfaces";
+import type { ICycle, IGuild, ICycleRotation } from "../../interfaces";
 import { CycleSelect } from "./CycleSelect";
 import { CustomSelect } from "./CustomSelect";
 import { AttackTypeBadge } from "./AttackTypeBadge";
-import { UserDisplay } from "./UserDisplay";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
 
 interface TransferRotationModalProps {
