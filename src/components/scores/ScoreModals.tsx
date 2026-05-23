@@ -3,6 +3,7 @@ import { ScoreModal } from "@/components/ui/ScoreModal";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import BulkScoreModal from "@/components/ui/BulkScoreModal";
 import OCRScoreModal from "@/components/ui/OCRScoreModal";
+import TransferRotationModal from "@/components/ui/TransferRotationModal";
 import type { IScore, IUser, ICycle, IGuild } from "@/interfaces";
 
 interface ScoreModalsProps {
@@ -32,6 +33,10 @@ interface ScoreModalsProps {
     // Modal OCR
     isOCRModalOpen: boolean;
     onOCRModalClose: () => void;
+
+    // Modal transfert de rotation
+    isTransferModalOpen: boolean;
+    onTransferModalClose: () => void;
 
     // Données communes
     users: IUser[];
@@ -80,6 +85,8 @@ export const ScoreModals = ({
     userGuildId,
     isOCRModalOpen,
     onOCRModalClose,
+    isTransferModalOpen,
+    onTransferModalClose,
     users,
     cycles,
     guilds,
@@ -190,6 +197,14 @@ export const ScoreModals = ({
                 guilds={guilds}
                 isGuildRestricted={isGuildRestricted}
                 userGuildId={userGuildId}
+            />
+
+            {/* Modal transfert de rotation */}
+            <TransferRotationModal
+                isOpen={isTransferModalOpen}
+                onClose={onTransferModalClose}
+                cycles={cycles}
+                guilds={guilds}
             />
         </>
     );

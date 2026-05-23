@@ -50,6 +50,7 @@ const ScoresSection = () => {
   });
 
   const { isOpen, onClose }                     = useDisclosure();
+  const { isOpen: isTransferModalOpen, onOpen: onTransferModalOpen, onClose: onTransferModalClose } = useDisclosure();
   const { currentUser, isAdmin, isGuildManager } = useAuth();
   const scoreManagement = useScoreManagement({ users, cycles, onClose });
 
@@ -130,16 +131,27 @@ const ScoresSection = () => {
                   {t("components.scoresSection.buttonManualEntry")}
                 </Button>
                 {isAdmin && (
-                  <Tooltip label="Outils de debug OCR" hasArrow>
-                    <IconButton
-                      aria-label="OCR Debug"
-                      icon={<FiTool />}
+                  <>
+                    <Button
                       size="sm"
-                      variant="outline"
+                      colorScheme="orange"
                       borderRadius="lg"
-                      onClick={() => navigate("/ocr-debug")}
-                    />
-                  </Tooltip>
+                      leftIcon={<Text fontSize="sm">🔄</Text>}
+                      onClick={onTransferModalOpen}
+                    >
+                      Transférer rotation
+                    </Button>
+                    <Tooltip label="Outils de debug OCR" hasArrow>
+                      <IconButton
+                        aria-label="OCR Debug"
+                        icon={<FiTool />}
+                        size="sm"
+                        variant="outline"
+                        borderRadius="lg"
+                        onClick={() => navigate("/ocr-debug")}
+                      />
+                    </Tooltip>
+                  </>
                 )}
               </HStack>
             )}
@@ -264,6 +276,8 @@ const ScoresSection = () => {
           userGuildId={currentUser?.guilde_id}
           isOCRModalOpen={scoreManagement.isOCRModalOpen}
           onOCRModalClose={() => scoreManagement.setIsOCRModalOpen(false)}
+          isTransferModalOpen={isTransferModalOpen}
+          onTransferModalClose={onTransferModalClose}
           users={users}
           cycles={cycles}
           guilds={guilds}
