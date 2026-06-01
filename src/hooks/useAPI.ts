@@ -1,7 +1,7 @@
 import useSWR from 'swr';
-import type { ICycle, IGuild, IUser, ICharactersResponse, ICharacter, IRotationTemplate, IScoresResponse, IPodiumResponse, IPodiumWeeklyResponse, IPodiumMissesResponse, IOrbGuideResponse, IPagination, IScoreDetailApiResponse } from '../interfaces';
+import type { ICycle, IGuild, IUser, ICharactersResponse, ICharacter, IRotationTemplate, IScoresResponse, IPodiumResponse, IPodiumWeeklyResponse, IPodiumMissesResponse, IOrbGuideResponse, IPagination, IScoreDetailApiResponse, IBuild, IBuildsResponse, ISkill, IAccessory, IAccessorySubeffect } from '../interfaces';
 import { useAuth } from '../providers/AuthProvider';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -15,22 +15,32 @@ const fetcher = async (url: string) => {
   return data;
 };
 
-// Hook pour créer un fetcher authentifié
+/** Normalise une réponse API qui peut être un tableau direct ou un objet avec une clé de liste. */
+function normalizeList<T>(
+  data: unknown,
+  extraKeys: string[] = []
+): { items: T[]; pagination: IPagination | null } {
+  if (!data) return { items: [], pagination: null };
+  if (Array.isArray(data)) return { items: data as T[], pagination: null };
+  const obj = data as Record<string, unknown>;
+  for (const key of ['data', ...extraKeys]) {
+    if (Array.isArray(obj[key])) {
+      return { items: obj[key] as T[], pagination: (obj.pagination as IPagination) || null };
+    }
+  }
+  return { items: [], pagination: null };
+}
+
 const useAuthenticatedFetcher = () => {
   const { token } = useAuth();
-  
-  return async (url: string) => {
+
+  return useCallback(async (url: string) => {
     const response = await fetch(url, {
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-      },
+      headers: { Authorization: token ? `Bearer ${token}` : '' },
     });
-    if (!response.ok) {
-      throw new Error('Erreur lors de la récupération des données');
-    }
-    const data = await response.json();
-    return data;
-  };
+    if (!response.ok) throw new Error('Erreur lors de la récupération des données');
+    return response.json();
+  }, [token]);
 };
 
 // Hook pour récupérer les cycles
@@ -53,25 +63,9 @@ export const useCycles = (options?: { limit?: number; page?: number; authenticat
     }
   );
 
-  // Normaliser la réponse (peut être un tableau ou un objet avec data)
-  let cycles: ICycle[] = [];
-  let pagination = null;
-  if (data) {
-    if (Array.isArray(data)) {
-      cycles = data;
-    } else if (data.data) {
-      cycles = data.data;
-      pagination = data.pagination || null;
-    }
-  }
+  const { items: cycles, pagination } = normalizeList<ICycle>(data);
 
-  return {
-    cycles,
-    pagination,
-    isLoading,
-    error,
-    mutate,
-  };
+  return { cycles, pagination, isLoading, error, mutate };
 }
 
 // Hook pour récupérer un cycle spécifique
@@ -108,24 +102,9 @@ export const useGuilds = (authenticated: boolean = false, includeDisabled: boole
     }
   );
 
-  // Normaliser la réponse
-  let guilds: IGuild[] = [];
-  if (data) {
-    if (Array.isArray(data)) {
-      guilds = data;
-    } else if (data.guilds) {
-      guilds = data.guilds;
-    } else if (data.data) {
-      guilds = data.data;
-    }
-  }
+  const { items: guilds } = normalizeList<IGuild>(data, ['guilds']);
 
-  return {
-    guilds,
-    isLoading,
-    error,
-    mutate,
-  };
+  return { guilds, isLoading, error, mutate };
 }
 
 // Hook pour récupérer les membres d'une guilde
@@ -141,22 +120,9 @@ export const useGuildMembers = (guildId?: string, authenticated: boolean = true)
     }
   );
 
-  // Normaliser la réponse
-  let members: IUser[] = [];
-  if (data) {
-    if (Array.isArray(data)) {
-      members = data;
-    } else if (data.data) {
-      members = data.data;
-    }
-  }
+  const { items: members } = normalizeList<IUser>(data);
 
-  return {
-    members,
-    isLoading,
-    error,
-    mutate,
-  };
+  return { members, isLoading, error, mutate };
 }
 
 // Hook pour récupérer le nombre de membres pour toutes les guildes
@@ -167,8 +133,13 @@ export const useAllGuildsMemberCounts = (guilds: IGuild[], authenticated: boolea
   const [error, setError] = useState<Error | null>(null);
   const { token } = useAuth();
 
+  // Deps stables : on ne refetch que si la liste d'IDs change réellement
+  const guildIds = useMemo(() => guilds.map(g => g._id).join(','), [guilds]);
+  const guildsRef = useRef(guilds);
+  useEffect(() => { guildsRef.current = guilds; });
+
   useEffect(() => {
-    if (guilds.length === 0) {
+    if (!guildIds) {
       setIsLoading(false);
       return;
     }
@@ -180,29 +151,23 @@ export const useAllGuildsMemberCounts = (guilds: IGuild[], authenticated: boolea
       const members: Record<string, IUser[]> = {};
 
       try {
-        // Fetch tous les membres en parallèle
-        const promises = guilds.map(guild =>
-          fetch(`${apiUrl}/api/guildes/${guild._id}/membres`, {
-            headers: authenticated && token ? { 'Authorization': `Bearer ${token}` } : {},
-          })
-            .then(res => res.ok ? res.json() : null)
-            .then(data => {
-              if (data) {
-                const guildMembers = Array.isArray(data) ? data : (data.data || []);
+        await Promise.all(
+          guildsRef.current.map(guild =>
+            fetch(`${apiUrl}/api/guildes/${guild._id}/membres`, {
+              headers: authenticated && token ? { Authorization: `Bearer ${token}` } : {},
+            })
+              .then(res => res.ok ? res.json() : null)
+              .then(data => {
+                const guildMembers = normalizeList<IUser>(data).items;
                 counts[guild._id] = guildMembers.length;
                 members[guild._id] = guildMembers;
-              } else {
+              })
+              .catch(() => {
                 counts[guild._id] = 0;
                 members[guild._id] = [];
-              }
-            })
-            .catch(() => {
-              counts[guild._id] = 0;
-              members[guild._id] = [];
-            })
+              })
+          )
         );
-
-        await Promise.all(promises);
         setMemberCounts(counts);
         setMembersByGuild(members);
       } catch (err) {
@@ -213,14 +178,9 @@ export const useAllGuildsMemberCounts = (guilds: IGuild[], authenticated: boolea
     };
 
     fetchAllMembers();
-  }, [guilds, authenticated, token]);
+  }, [guildIds, authenticated, token]);
 
-  return {
-    memberCounts,
-    membersByGuild,
-    isLoading,
-    error,
-  };
+  return { memberCounts, membersByGuild, isLoading, error };
 }
 
 // Hook pour récupérer les utilisateurs sans guilde
@@ -370,24 +330,9 @@ export const useRotations = () => {
     }
   );
 
-  // Normaliser la réponse
-  let rotations: IRotationTemplate[] = [];
-  if (data) {
-    if (Array.isArray(data)) {
-      rotations = data;
-    } else if (data.data) {
-      rotations = data.data;
-    } else if (data.rotations) {
-      rotations = data.rotations;
-    }
-  }
+  const { items: rotations } = normalizeList<IRotationTemplate>(data, ['rotations']);
 
-  return {
-    rotations,
-    isLoading,
-    error,
-    mutate,
-  };
+  return { rotations, isLoading, error, mutate };
 }
 
 // Hook pour récupérer les scores avec pagination et filtres
@@ -504,7 +449,7 @@ export const useBuilds = (options?: {
   if (rotation_id) url += `&rotation_id=${encodeURIComponent(rotation_id)}`;
   if (isValid !== undefined) url += `&isValid=${isValid}`;
 
-  const { data, error, isLoading, mutate } = useSWR<import('../interfaces').IBuildsResponse>(
+  const { data, error, isLoading, mutate } = useSWR<IBuildsResponse>(
     url,
     authenticated ? authenticatedFetcher : fetcher,
     {
@@ -528,7 +473,7 @@ export const useBuild = (buildId?: string, authenticated: boolean = false) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const url = buildId ? `${apiUrl}/api/builds/${buildId}` : null;
   
-  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: import('../interfaces').IBuild }>(
+  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: IBuild }>(
     url,
     authenticated ? authenticatedFetcher : fetcher,
     {
@@ -551,7 +496,7 @@ export const useSkills = (search?: string) => {
     url += `?search=${encodeURIComponent(search.trim())}`;
   }
 
-  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: import('../interfaces').ISkill[] }>(
+  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: ISkill[] }>(
     url,
     fetcher,
     {
@@ -575,7 +520,7 @@ export const useAccessories = (search?: string) => {
     url += `?search=${encodeURIComponent(search.trim())}`;
   }
 
-  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: import('../interfaces').IAccessory[] }>(
+  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: IAccessory[] }>(
     url,
     fetcher,
     {
@@ -593,30 +538,31 @@ export const useAccessories = (search?: string) => {
 }
 
 // Hook pour lister les codes d'accessoires disponibles sur le bucket (via FTP côté API)
+// Lazy : le fetch ne démarre qu'après le premier appel à fetchCodes().
 export const useAccessoryCodes = (token: string | null) => {
-  const [codes, setCodes] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [enabled, setEnabled] = useState(false);
 
-  const fetchCodes = useCallback(async () => {
-    if (isLoading) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`${apiUrl}/api/accessories/codes`, {
-        headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+  const { data, error, isLoading } = useSWR<string[]>(
+    enabled ? `${apiUrl}/api/accessories/codes` : null,
+    async (url: string) => {
+      const res = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error('Impossible de récupérer les codes');
-      const data = await res.json();
-      setCodes(data.codes || []);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token, isLoading]);
+      const json = await res.json();
+      return (json.codes || []) as string[];
+    },
+    { revalidateOnFocus: false, dedupingInterval: 60000 }
+  );
 
-  return { codes, isLoading, error, fetchCodes };
+  const fetchCodes = useCallback(() => setEnabled(true), []);
+
+  return {
+    codes: data || [],
+    isLoading,
+    error: error instanceof Error ? error.message : null,
+    fetchCodes,
+  };
 };
 
 // Hook pour récupérer les accessories subeffects avec recherche optionnelle
@@ -626,7 +572,7 @@ export const useAccessoriesSubeffects = (search?: string) => {
     url += `?search=${encodeURIComponent(search.trim())}`;
   }
 
-  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: import('../interfaces').IAccessorySubeffect[] }>(
+  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: IAccessorySubeffect[] }>(
     url,
     fetcher,
     {

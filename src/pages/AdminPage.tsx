@@ -1,4 +1,5 @@
 import { Box, Flex, Heading, HStack, Text, Button, useToast, useColorMode } from "@chakra-ui/react";
+import { useAdminMutations } from "@/hooks/mutations/useAdminMutations";
 import GuildsAdminSection from "../components/GuildsAdminSection";
 import DraftSection from "../components/DraftSection";
 import CyclesSection from "../components/CyclesSection";
@@ -24,7 +25,8 @@ const tabConfig: { key: IAdminPage; label: string; icon: string }[] = [
 
 const AdminPage = () => {
   // Détection des permissions utilisateur
-  const { isAdmin: isFullAdmin, isGuildManager, token } = useAuth();
+  const { isAdmin: isFullAdmin, isGuildManager } = useAuth();
+  const { updateCharacters, checkBotHealth, uploadImages } = useAdminMutations();
   const { colorMode } = useColorMode();
   
   // Pages autorisées selon le rôle
@@ -44,7 +46,6 @@ const AdminPage = () => {
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isCheckingBot, setIsCheckingBot] = useState(false);
   const toast = useToast();
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
   const isDark = colorMode === 'dark';
   const pageBg       = isDark ? 'gray.900'       : 'gray.50';
@@ -57,36 +58,22 @@ const AdminPage = () => {
 
   const visibleTabs = tabConfig.filter(t => allowedPages.includes(t.key));
 
-  const handleUpdateCharacters = () => {
-    // En utilisant Toast pour les notifications
+  const handleUpdateCharacters = async () => {
     setIsUpdatingCharacters(true);
-
-    fetch(`${apiUrl}/api/characters/update`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` }),
-      },
-    })
-    .then(res => res.json().then(data => ({ ok: res.ok, data })))
-    .then(({ ok, data }) => {
-      if (!ok) throw new Error(data.message || "Erreur lors de la mise à jour des personnages");
-      toast({ title: data.message || "Personnages mis à jour", status: "success" });
-    })
-    .catch((error) => {
+    try {
+      const data = await updateCharacters();
+      toast({ title: (data as any).message || "Personnages mis à jour", status: "success" });
+    } catch (error: any) {
       toast({ title: error.message || "Erreur lors de la mise à jour des personnages", status: "error" });
-    })
-    .finally(() => setIsUpdatingCharacters(false));
-  }
+    } finally {
+      setIsUpdatingCharacters(false);
+    }
+  };
 
-  const handleBotHealth = () => {
+  const handleBotHealth = async () => {
     setIsCheckingBot(true);
-    fetch(`${apiUrl}/api/admin/bot-health`, {
-      headers: { ...(token && { 'Authorization': `Bearer ${token}` }) },
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (!data.success) throw new Error(data.message || 'Erreur serveur');
+    try {
+      const data = await checkBotHealth();
       if (data.online) {
         toast({
           title: '🤖 Bot en ligne',
@@ -102,45 +89,26 @@ const AdminPage = () => {
           duration: 4000,
         });
       }
-    })
-    .catch(err => {
+    } catch (err: any) {
       toast({ title: err.message || 'Erreur vérification bot', status: 'error' });
-    })
-    .finally(() => setIsCheckingBot(false));
+    } finally {
+      setIsCheckingBot(false);
+    }
   };
 
   const handleUploadImages = async () => {
     setIsUploadingImages(true);
-    let totalUploaded = 0;
-    let remaining = 1; // start with non-zero to enter loop
-
     try {
-      while (remaining > 0) {
-        const res = await fetch(`${apiUrl}/api/characters/update/images`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` }),
-          },
-          body: JSON.stringify({ batchSize: 100 }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Erreur upload images");
-        totalUploaded += data.statistics?.uploaded || 0;
-        remaining = data.statistics?.remaining || 0;
-        toast({
-          title: `Images: ${totalUploaded} uploadées, ${remaining} restants...`,
-          status: "info",
-          duration: 2000,
-        });
-      }
+      const { totalUploaded } = await uploadImages(100, (total, remaining) => {
+        toast({ title: `Images: ${total} uploadées, ${remaining} restants...`, status: "info", duration: 2000 });
+      });
       toast({ title: `Upload terminé: ${totalUploaded} images`, status: "success" });
     } catch (error: any) {
       toast({ title: error.message || "Erreur upload images", status: "error" });
     } finally {
       setIsUploadingImages(false);
     }
-  }
+  };
 
   const renderPage = () => {
     switch (currentPage) {
