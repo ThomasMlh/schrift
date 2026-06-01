@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import type { IScore, IScoreFormData, IUser, ICycle } from "../interfaces";
 import { useAPIMutations } from "./useAPIMutations";
 
@@ -12,6 +13,9 @@ interface UseScoreManagementProps {
 export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagementProps) => {
     const { createScore, updateScore, deleteScore, createBulkScores } = useAPIMutations();
     const toast = useToast();
+    const { t } = useTranslation();
+
+    const sm = (key: string) => `hooks.scoreManagement.${key}`;
 
     // États du formulaire
     const [selectedCycleId, setSelectedCycleId] = useState("");
@@ -28,13 +32,14 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [isOCRModalOpen, setIsOCRModalOpen] = useState(false);
 
-    // États de chargement
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [isUpdating, setIsUpdating] = useState(false);
-    const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
+    // État de chargement unifié — une seule action à la fois
+    type LoadingAction = 'submit' | 'delete' | 'update' | 'bulk' | null;
+    const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
+    const isSubmitting = loadingAction === 'submit';
+    const isDeleting = loadingAction === 'delete';
+    const isUpdating = loadingAction === 'update';
+    const isBulkSubmitting = loadingAction === 'bulk';
 
-    // Réinitialiser le formulaire
     const resetForm = () => {
         setSelectedCycleId("");
         setSelectedRotationId("");
@@ -43,13 +48,12 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
         setScoreValue(0);
     };
 
-    // Validation et récupération des données utilisateur
     const validateAndGetUserData = (userId: string) => {
         const selectedUser = users.find(user => user._id === userId);
         if (!selectedUser) {
             toast({
-                title: "Utilisateur introuvable",
-                description: "L'utilisateur sélectionné n'a pas été trouvé",
+                title: t(sm("toastUserNotFoundTitle")),
+                description: t(sm("toastUserNotFoundDesc")),
                 status: "error",
                 duration: 3000,
             });
@@ -59,8 +63,8 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
         const guildId = selectedUser.guilde_id;
         if (!guildId) {
             toast({
-                title: "Guilde manquante",
-                description: "L'utilisateur sélectionné n'a pas de guilde associée",
+                title: t(sm("toastNoGuildTitle")),
+                description: t(sm("toastNoGuildDesc")),
                 status: "error",
                 duration: 3000,
             });
@@ -70,12 +74,11 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
         return { selectedUser, guildId };
     };
 
-    // Ajouter un score
     const handleSubmitScore = async (currentUser: any) => {
         if (!currentUser) {
             toast({
-                title: "Erreur",
-                description: "Vous devez être connecté pour ajouter un score",
+                title: t(sm("toastNotLoggedTitle")),
+                description: t(sm("toastNotLoggedDesc")),
                 status: "error",
                 duration: 3000,
             });
@@ -84,8 +87,8 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
 
         if (!selectedCycleId || !selectedRotationId || !selectedUserId || scoreValue < 0) {
             toast({
-                title: "Données manquantes",
-                description: "Veuillez sélectionner un utilisateur, un cycle, une rotation et saisir un score valide",
+                title: t(sm("toastMissingDataTitle")),
+                description: t(sm("toastMissingDataDesc")),
                 status: "error",
                 duration: 3000,
             });
@@ -95,7 +98,7 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
         const userData = validateAndGetUserData(selectedUserId);
         if (!userData) return;
 
-        setIsSubmitting(true);
+        setLoadingAction('submit');
         try {
             const scoreData: IScoreFormData = {
                 user_id: selectedUserId,
@@ -106,89 +109,78 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
             };
 
             await createScore(scoreData);
-            
             toast({
-                title: "Score ajouté",
-                description: "Le score a été ajouté avec succès",
+                title: t(sm("toastScoreAddedTitle")),
+                description: t(sm("toastScoreAddedDesc")),
                 status: "success",
                 duration: 3000,
             });
-
             resetForm();
             onClose();
         } catch (error: unknown) {
             const err = error as Error;
             toast({
-                title: "Erreur",
-                description: err.message || "Erreur lors de l'ajout du score",
+                title: t(sm("toastScoreAddErrorTitle")),
+                description: err.message || t(sm("toastScoreAddErrorFallback")),
                 status: "error",
                 duration: 3000,
             });
         } finally {
-            setIsSubmitting(false);
+            setLoadingAction(null);
         }
     };
 
-    // Supprimer un score
     const handleDeleteScore = async () => {
         if (!scoreToDelete) return;
 
-        setIsDeleting(true);
+        setLoadingAction('delete');
         try {
             await deleteScore(scoreToDelete._id!);
-            
             toast({
-                title: "Score supprimé",
-                description: "Le score a été supprimé avec succès",
+                title: t(sm("toastScoreDeletedTitle")),
+                description: t(sm("toastScoreDeletedDesc")),
                 status: "success",
                 duration: 3000,
             });
-
             setIsDeleteModalOpen(false);
             setScoreToDelete(null);
         } catch (error: unknown) {
             const err = error as Error;
             toast({
-                title: "Erreur",
-                description: err.message || "Erreur lors de la suppression du score",
+                title: t(sm("toastScoreDeleteErrorTitle")),
+                description: err.message || t(sm("toastScoreDeleteErrorFallback")),
                 status: "error",
                 duration: 3000,
             });
         } finally {
-            setIsDeleting(false);
+            setLoadingAction(null);
         }
     };
 
-    // Ouvrir le modal d'édition
     const handleEditScore = (score: IScore) => {
         setEditingScore(score);
         setSelectedUserId(score.user_id);
         setSelectedCycleId(score.cycle_id);
-        
+
         const cycle = cycles.find(c => c._id === score.cycle_id);
         if (cycle) {
             const rotation = cycle.rotations.find(r => r.rotation_id === score.rotation_id);
-            if (rotation) {
-                setSelectedRotationId(rotation._id || "");
-            } else {
-                setSelectedRotationId("");
-            }
+            setSelectedRotationId(rotation?._id || "");
         } else {
             setSelectedRotationId("");
         }
-        
+
         setScoreValue(score.score);
         setIsEditModalOpen(true);
     };
 
-    // Modifier un score
     const handleUpdateScore = async () => {
         if (!editingScore) return;
 
         if (!selectedCycleId || !selectedRotationId || !selectedUserId || scoreValue < 0) {
             toast({
-                title: "Données manquantes",
-                description: "Veuillez sélectionner un utilisateur, un cycle, une rotation et saisir un score valide",
+                title: t(sm("toastMissingDataTitle")),
+                description: t(sm("toastMissingDataDesc")),
                 status: "error",
                 duration: 3000,
             });
@@ -198,22 +190,21 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
         const userData = validateAndGetUserData(selectedUserId);
         if (!userData) return;
 
-        setIsUpdating(true);
-        try {
-            const cycle = cycles.find(c => c._id === selectedCycleId);
-            const rotation = cycle?.rotations.find(r => r._id === selectedRotationId);
-            
-            if (!rotation) {
-                toast({
-                    title: "Rotation introuvable",
-                    description: "La rotation sélectionnée n'a pas été trouvée",
-                    status: "error",
-                    duration: 3000,
-                });
-                setIsUpdating(false);
-                return;
-            }
+        const cycle = cycles.find(c => c._id === selectedCycleId);
+        const rotation = cycle?.rotations.find(r => r._id === selectedRotationId);
 
+        if (!rotation) {
+            toast({
+                title: t(sm("toastRotationNotFoundTitle")),
+                description: t(sm("toastRotationNotFoundDesc")),
+                status: "error",
+                duration: 3000,
+            });
+            return;
+        }
+
+        setLoadingAction('update');
+        try {
             const scoreData: IScoreFormData = {
                 user_id: selectedUserId,
                 cycle_id: selectedCycleId,
@@ -223,54 +214,49 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
             };
 
             await updateScore(editingScore._id!, scoreData);
-            
             toast({
-                title: "Score modifié",
-                description: "Le score a été modifié avec succès",
+                title: t(sm("toastScoreEditedTitle")),
+                description: t(sm("toastScoreEditedDesc")),
                 status: "success",
                 duration: 3000,
             });
-
             resetForm();
             setIsEditModalOpen(false);
             setEditingScore(null);
         } catch (error: unknown) {
             const err = error as Error;
             toast({
-                title: "Erreur",
-                description: err.message || "Erreur lors de la modification du score",
+                title: t(sm("toastScoreEditErrorTitle")),
+                description: err.message || t(sm("toastScoreEditErrorFallback")),
                 status: "error",
                 duration: 3000,
             });
         } finally {
-            setIsUpdating(false);
+            setLoadingAction(null);
         }
     };
 
-    // Saisie groupée
     const handleBulkScoreSubmit = async (scoresData: IScoreFormData[]) => {
-        setIsBulkSubmitting(true);
+        setLoadingAction('bulk');
         try {
             await createBulkScores(scoresData);
-            
             toast({
-                title: "Scores enregistrés",
-                description: `${scoresData.length} scores ont été enregistrés avec succès`,
+                title: t(sm("toastBulkSuccessTitle")),
+                description: t(sm("toastBulkSuccessDesc"), { count: scoresData.length }),
                 status: "success",
                 duration: 3000,
             });
-
             setIsBulkModalOpen(false);
         } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : "Erreur lors de l'enregistrement des scores";
+            const errorMessage = error instanceof Error ? error.message : t(sm("toastBulkErrorFallback"));
             toast({
-                title: "Erreur",
+                title: t(sm("toastBulkErrorTitle")),
                 description: errorMessage,
                 status: "error",
                 duration: 3000,
             });
         } finally {
-            setIsBulkSubmitting(false);
+            setLoadingAction(null);
         }
     };
 
