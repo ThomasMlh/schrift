@@ -11,6 +11,7 @@ import UnbanUserModal from "./UnbanUserModal";
 import { UserDisplay } from "./ui/UserDisplay";
 import { useGuilds, useUsers } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "./ui/PageLoader";
 
 const BannedUsersSection: React.FC = () => {
     const { t } = useTranslation();
@@ -88,9 +89,7 @@ const BannedUsersSection: React.FC = () => {
 
             <Box overflowX="auto" bg={bgColor} borderRadius="lg" borderWidth="1px" borderColor={borderColor}>
                 {isLoading ? (
-                    <Flex justify="center" p={8}>
-                        <Spinner size="lg" />
-                    </Flex>
+                    <PageLoader height="150px" />
                 ) : users.length === 0 ? (
                     <Text textAlign="center" color="gray.500" py={8}>
                         Aucun joueur banni

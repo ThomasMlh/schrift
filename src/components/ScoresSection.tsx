@@ -6,7 +6,6 @@ import {
   Flex,
   HStack,
   IconButton,
-  Spinner,
   Text,
   Tooltip,
   useColorModeValue,
@@ -15,6 +14,7 @@ import {
   Alert,
   AlertIcon,
 } from "@chakra-ui/react";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { FiTool } from "react-icons/fi";
 import type { IScore } from "../interfaces";
 import { useAuth } from "@/providers/AuthProvider";
@@ -193,12 +193,7 @@ const ScoresSection = () => {
           overflow="hidden"
         >
           {isLoadingScores ? (
-            <Flex justify="center" align="center" py={16}>
-              <VStack spacing={3}>
-                <Spinner size="lg" color="purple.400" thickness="3px" />
-                <Text fontSize="sm" color={mutedText}>Chargement des scores…</Text>
-              </VStack>
-            </Flex>
+            <PageLoader label={t("components.scoresSection.loading")} color="purple.400" height="250px" />
           ) : !Array.isArray(scores) || scores.length === 0 ? (
             <Flex justify="center" align="center" py={16}>
               <VStack spacing={3}>

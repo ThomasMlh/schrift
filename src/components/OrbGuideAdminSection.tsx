@@ -28,13 +28,13 @@ import {
   HStack,
   NumberInput,
   NumberInputField,
-  Spinner,
   Alert,
   AlertIcon
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
 import { useAuth } from "@/providers/AuthProvider";
+import { PageLoader } from "./ui/PageLoader";
 
 interface OrbSource {
   _id?: string;
@@ -208,11 +208,7 @@ const OrbGuideAdminSection = () => {
   };
 
   if (loading) {
-    return (
-      <Flex justify="center" align="center" minH="400px">
-        <Spinner size="xl" color="purple.500" thickness="4px" />
-      </Flex>
-    );
+    return <PageLoader color="purple.500" height="400px" />;
   }
 
   if (error) {

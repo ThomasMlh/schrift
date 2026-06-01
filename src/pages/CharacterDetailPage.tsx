@@ -7,7 +7,6 @@ import {
   Box,
   Avatar,
   Badge,
-  Spinner,
   useColorMode,
   Button,
   Flex,
@@ -35,6 +34,7 @@ import { getStatIcon } from "@/utils/characterIcons";
 import { SEOHead } from "../components/SEOHead";
 import { useCharacter } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "@/components/ui/PageLoader";
 
 interface SectionCardProps {
   label: string;
@@ -122,9 +122,7 @@ const CharacterDetailPage = () => {
   if (isLoading) {
     return (
       <Container maxW="container.lg" py={8}>
-        <Flex justify="center" align="center" minH="200px">
-          <Spinner size="xl" color={isDark ? 'purple.400' : 'purple.500'} />
-        </Flex>
+        <PageLoader color="purple.500" height="200px" />
       </Container>
     );
   }

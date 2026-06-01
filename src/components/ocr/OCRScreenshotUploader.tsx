@@ -12,14 +12,13 @@ import {
   Image,
   IconButton,
   Badge,
-  Center,
-  Spinner,
   Alert,
   AlertIcon
 } from "@chakra-ui/react";
 import { useState, useRef } from "react";
 import { FiUpload, FiX, FiArrowLeft, FiArrowRight } from "react-icons/fi";
 import { compressImage } from "../../utils/imageCompression";
+import { PageLoader } from "../ui/PageLoader";
 
 interface OCRScreenshotUploaderProps {
   onUpload: (screenshots: Array<{ data: string; filename: string }>) => void;
@@ -229,17 +228,12 @@ export const OCRScreenshotUploader = ({
           )}
 
           {isProcessing && (
-            <Center py={8}>
-              <VStack spacing={4}>
-                <Spinner size="xl" color="blue.500" thickness="4px" />
-                <Text fontSize="lg" fontWeight="bold">
-                  🔍 Analyse des screenshots en cours...
-                </Text>
-                <Text color="gray.500">
-                  Détection des noms et scores par OCR
-                </Text>
-              </VStack>
-            </Center>
+            <PageLoader
+              label="🔍 Analyse des screenshots en cours..."
+              subtitle="Détection des noms et scores par OCR"
+              color="blue.500"
+              height="220px"
+            />
           )}
 
           <HStack justify="space-between">

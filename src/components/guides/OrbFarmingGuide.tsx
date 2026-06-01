@@ -9,7 +9,6 @@ import {
   Badge,
   useColorModeValue,
   Flex,
-  Spinner,
   Alert,
   AlertIcon,
   AlertTitle,
@@ -21,6 +20,7 @@ import {
 } from "@chakra-ui/react";
 import { useOrbGuide } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "../ui/PageLoader";
 
 interface OrbSource {
   title: string;
@@ -57,11 +57,7 @@ const OrbFarmingGuide = () => {
   const { orbData, isLoading: loading, error } = useOrbGuide();
 
   if (loading) {
-    return (
-      <Flex justify="center" align="center" minH="400px">
-        <Spinner size="xl" color="purple.500" thickness="4px" />
-      </Flex>
-    );
+    return <PageLoader color="purple.500" height="400px" />;
   }
 
   if (error) {

@@ -435,7 +435,12 @@
       "scoresCount": "scores registered",
       "buttonAutoEntry": "📸 Auto entry",
       "buttonManualEntry": "Manual entry",
-      "noScores": "No score registered yet."
+      "noScores": "No score registered yet.",
+      "loading": "Loading scores…"
+    },
+    "bulkScoreModal": {
+      "loadingMembers": "Loading members…",
+      "loadingScores": "Loading existing scores…"
     },
     "currentInfoSection": {
       "heading": "Current Information",
@@ -762,5 +767,35 @@
   "periodsShort": {
     "Mardi-Jeudi": "Tue-Thu",
     "Vendredi-Dimanche": "Fri-Sun"
+  },
+  "hooks": {
+    "scoreManagement": {
+      "toastUserNotFoundTitle": "User not found",
+      "toastUserNotFoundDesc": "The selected user was not found",
+      "toastNoGuildTitle": "Missing guild",
+      "toastNoGuildDesc": "The selected user has no associated guild",
+      "toastNotLoggedTitle": "Error",
+      "toastNotLoggedDesc": "You must be logged in to add a score",
+      "toastMissingDataTitle": "Missing data",
+      "toastMissingDataDesc": "Please select a user, cycle, rotation and enter a valid score",
+      "toastScoreAddedTitle": "Score added",
+      "toastScoreAddedDesc": "The score was successfully added",
+      "toastScoreAddErrorTitle": "Error",
+      "toastScoreAddErrorFallback": "Error adding score",
+      "toastScoreDeletedTitle": "Score deleted",
+      "toastScoreDeletedDesc": "The score was successfully deleted",
+      "toastScoreDeleteErrorTitle": "Error",
+      "toastScoreDeleteErrorFallback": "Error deleting score",
+      "toastRotationNotFoundTitle": "Rotation not found",
+      "toastRotationNotFoundDesc": "The selected rotation was not found",
+      "toastScoreEditedTitle": "Score updated",
+      "toastScoreEditedDesc": "The score was successfully updated",
+      "toastScoreEditErrorTitle": "Error",
+      "toastScoreEditErrorFallback": "Error updating score",
+      "toastBulkSuccessTitle": "Scores saved",
+      "toastBulkSuccessDesc": "{{count}} scores were successfully saved",
+      "toastBulkErrorTitle": "Error",
+      "toastBulkErrorFallback": "Error saving scores"
+    }
   }
 }

@@ -9,11 +9,11 @@ import {
   useColorMode,
   Alert,
   AlertIcon,
-  Spinner,
   Flex
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "./ui/PageLoader";
 import { FaClock, FaCalendarAlt } from "react-icons/fa";
 import { AttackTypeBadge } from "./ui/AttackTypeBadge";
 import { AlterationImage } from "./ui/AlterationImage";
@@ -205,14 +205,7 @@ export const CurrentInfoSection = () => {
             </Alert>
           </Box>
         ) : isLoading ? (
-          <Flex justify="center" align="center" py={12}>
-            <HStack spacing={3}>
-              <Spinner size="lg" color="purple.400" thickness="3px" />
-              <Text fontSize="md" color={isDark ? 'gray.400' : 'gray.500'}>
-                {t("components.currentInfoSection.loading")}
-              </Text>
-            </HStack>
-          </Flex>
+          <PageLoader label={t("components.currentInfoSection.loading")} color="purple.400" height="200px" />
         ) : !currentCycle && !nextCycle ? (
           <Flex justify="center" align="center" py={12}>
             <VStack spacing={3}>

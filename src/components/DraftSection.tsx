@@ -19,7 +19,6 @@ import {
   Alert,
   AlertIcon,
   Flex,
-  Spinner,
   Tag,
   TagLabel,
   Progress,
@@ -39,6 +38,7 @@ import {
 } from "@/hooks/useAPI";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
 import { CustomSelect } from "./ui/CustomSelect";
+import { PageLoader } from "./ui/PageLoader";
 
 // Palette de couleurs Chakra assignées par index de guilde
 const GUILD_COLORS = ["purple", "blue", "teal", "green", "orange", "pink", "cyan", "red"] as const;
@@ -205,12 +205,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
 
   // ── Chargement ───────────────────────────────────────────────────────────────
   if (membersLoading) {
-    return (
-      <Box textAlign="center" py={12}>
-        <Spinner size="lg" color="orange.500" />
-        <Text mt={2} color={mutedText}>Chargement…</Text>
-      </Box>
-    );
+    return <PageLoader color="orange.500" height="200px" />;
   }
 
   // ── Rendu ────────────────────────────────────────────────────────────────────

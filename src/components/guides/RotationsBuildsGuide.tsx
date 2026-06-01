@@ -8,7 +8,6 @@ import {
   Heading,
   Button,
   HStack,
-  Spinner,
   Avatar,
   useDisclosure,
   Alert,
@@ -36,6 +35,7 @@ import { CustomSelect } from "../ui/CustomSelect";
 import { AttackTypeBadge } from "../ui/AttackTypeBadge";
 import { AlterationImage } from "../ui/AlterationImage";
 import type { IBuild } from "../../interfaces";
+import { PageLoader } from "../ui/PageLoader";
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return "N/A";
@@ -240,9 +240,7 @@ const RotationsBuildsGuide = () => {
 
       {/* Build list */}
       {isLoading ? (
-        <Flex justify="center" py={12}>
-          <Spinner size="xl" color="orange.500" thickness="4px" />
-        </Flex>
+        <PageLoader color="orange.500" height="250px" />
       ) : builds.length === 0 ? (
         <Box
           bg={bgColor} p={8} borderRadius="xl" borderWidth="1px"

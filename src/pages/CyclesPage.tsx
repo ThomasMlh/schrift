@@ -10,7 +10,6 @@ import {
   Text,
   Badge,
   Flex,
-  Spinner,
   Alert,
   AlertIcon,
   useColorModeValue,
@@ -32,6 +31,7 @@ import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "../components/SEOHead";
 import { useCycles } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "@/components/ui/PageLoader";
 import RotationCalendar from "../components/cycles/RotationCalendar";
 
 const CyclesPage = () => {
@@ -216,12 +216,7 @@ const CyclesPage = () => {
             {viewMode === "calendar" ? (
               <RotationCalendar />
             ) : isLoading ? (
-              <Flex justify="center" p={16}>
-                <VStack spacing={4}>
-                  <Spinner size="xl" color="blue.500" thickness="4px" />
-                  <Text color={subTextColor}>{t("pages.cycles.loading")}</Text>
-                </VStack>
-              </Flex>
+              <PageLoader label={t("pages.cycles.loading")} color="blue.500" height="300px" />
             ) : !Array.isArray(cycles) || cycles.length === 0 ? (
               <Alert status="info" borderRadius="lg">
                 <AlertIcon />

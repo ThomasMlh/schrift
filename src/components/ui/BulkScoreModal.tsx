@@ -18,7 +18,6 @@ import {
     NumberDecrementStepper,
     useToast,
     Box,
-    Spinner,
     Center,
     useColorMode,
     Badge,
@@ -38,6 +37,8 @@ import { AttackTypeBadge } from "./AttackTypeBadge";
 import { CycleSelect } from "./CycleSelect";
 import { CustomSelect } from "./CustomSelect";
 import { UserDisplay } from "./UserDisplay";
+import { useTranslation } from "react-i18next";
+import { PageLoader } from "./PageLoader";
 
 interface BulkScoreModalProps {
     isOpen: boolean;
@@ -214,6 +215,7 @@ const BulkScoreModal = ({
     const toast = useToast();
     const { colorMode } = useColorMode();
     const isDark = colorMode === 'dark';
+    const { t } = useTranslation();
 
     const modalBg        = isDark ? '#1a1b2e' : 'white';
     const sectionBg      = isDark ? 'rgba(124,58,237,0.08)' : 'purple.50';
@@ -564,14 +566,14 @@ const BulkScoreModal = ({
 
                         {/* ── Score rows ── */}
                         {isLoading || isLoadingScores ? (
-                            <Center p={10}>
-                                <VStack spacing={3}>
-                                    <Spinner size="lg" color="purple.400" />
-                                    <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>
-                                        {isLoading ? 'Chargement des membres…' : 'Chargement des scores existants…'}
-                                    </Text>
-                                </VStack>
-                            </Center>
+                            <PageLoader
+                                label={isLoading
+                                    ? t("components.bulkScoreModal.loadingMembers")
+                                    : t("components.bulkScoreModal.loadingScores")
+                                }
+                                color="purple.400"
+                                height="200px"
+                            />
                         ) : displayedMembers.length > 0 ? (
                             <Box>
                                 <HStack justify="space-between" align="center" mb={3}>

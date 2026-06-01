@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Container,
-  Flex,
   Heading,
   Text,
   useToast,
@@ -17,7 +16,6 @@ import {
   useDisclosure,
   VStack,
   HStack,
-  Spinner,
   AlertDialog,
   AlertDialogBody,
   AlertDialogContent,
@@ -38,6 +36,7 @@ import { AffinityIcon } from "./ui/AffinityIcon";
 import { UserDisplay } from "./ui/UserDisplay";
 import { BuildDetailModal } from "./ui/BuildDetailModal";
 import { CustomSelect } from "./ui/CustomSelect";
+import { PageLoader } from "./ui/PageLoader";
 
 const BuildsAdminSection = () => {
   const { deleteBuild, validateBuild } = useAPIMutations();
@@ -154,9 +153,7 @@ const BuildsAdminSection = () => {
 
         {/* Table */}
         {isLoading ? (
-          <Flex justify="center" py={8}>
-            <Spinner size="xl" color="orange.500" />
-          </Flex>
+          <PageLoader color="orange.500" height="200px" />
         ) : builds.length === 0 ? (
           <Box bg={bgColor} p={8} borderRadius="md" borderWidth="1px" borderColor={borderColor} textAlign="center">
             <Text>Aucun build trouvé</Text>

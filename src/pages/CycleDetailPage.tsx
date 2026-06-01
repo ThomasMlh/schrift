@@ -6,7 +6,6 @@ import {
   HStack,
   Text,
   Button,
-  Spinner,
   Alert,
   AlertIcon,
   Box,
@@ -26,6 +25,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { useCycle } from "@/hooks/useAPI";
 import { SEOHead } from "@/components/SEOHead";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "@/components/ui/PageLoader";
 
 const CycleDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,9 +56,7 @@ const CycleDetailPage = () => {
   if (isLoading) {
     return (
       <Container maxW="container.xl" py={8}>
-        <Flex justify="center" align="center" minH="200px">
-          <Spinner size="lg" />
-        </Flex>
+        <PageLoader height="200px" />
       </Container>
     );
   }

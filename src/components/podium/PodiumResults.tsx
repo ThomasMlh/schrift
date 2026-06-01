@@ -1,4 +1,5 @@
-import { Box, VStack, HStack, Text, Flex, Spinner, Alert, AlertIcon, Divider } from "@chakra-ui/react";
+import { Box, VStack, HStack, Text, Flex, Alert, AlertIcon, Divider } from "@chakra-ui/react";
+import { PageLoader } from "@/components/ui/PageLoader";
 import type {
   IPodiumResponse,
   IPodiumWeeklyResponse,
@@ -167,12 +168,7 @@ export const PodiumResults = ({
 
   if (isLoading) {
     return (
-      <Flex justify="center" align="center" py={12}>
-        <VStack spacing={3}>
-          <Spinner size="xl" thickness="3px" color="blue.400" />
-          <Text color="gray.500">{t("components.podiumResults.loading")}</Text>
-        </VStack>
-      </Flex>
+      <PageLoader label={t("components.podiumResults.loading")} color="blue.400" height="300px" />
     );
   }
 

@@ -1,6 +1,6 @@
 import {
   Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
-  Text, Input, InputGroup, InputLeftElement, Spinner,
+  Text, Input, InputGroup, InputLeftElement,
   useColorMode, Badge, Flex, Avatar, Tooltip, SimpleGrid
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
@@ -20,6 +20,7 @@ import CustomLink from "./ui/CustomLink";
 import { CharactersKillers, CharactersCategories, CharactersAffinities } from "../utils/chractersData";
 import { CustomSelect } from "./ui/CustomSelect";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "./ui/PageLoader";
 
 interface CharactersTableProps {
   apiUrl: string;
@@ -325,14 +326,7 @@ export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
         overflow="hidden"
       >
         {isLoading ? (
-          <Flex justify="center" align="center" py={16}>
-            <VStack spacing={3}>
-              <Spinner size="xl" color="purple.500" thickness="3px" />
-              <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>
-                {t("components.charactersTable.loading")}
-              </Text>
-            </VStack>
-          </Flex>
+          <PageLoader label={t("components.charactersTable.loading")} color="purple.500" height="250px" />
         ) : characters.length === 0 ? (
           <Flex justify="center" align="center" py={16} direction="column" gap={3}>
             <Text fontSize="3xl">⚔️</Text>

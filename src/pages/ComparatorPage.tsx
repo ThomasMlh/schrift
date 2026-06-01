@@ -1,7 +1,6 @@
 import {
   Container,
   VStack,
-  Text,
   Box,
   HStack,
   Button,
@@ -12,13 +11,12 @@ import {
   useToast,
   useColorModeValue,
   useColorMode,
-  Spinner,
-  Center,
   Badge,
   Icon,
   Flex,
   Grid,
 } from "@chakra-ui/react";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { HeroSection } from "../components/HeroSection";
@@ -402,12 +400,11 @@ const ComparatorPage: React.FC = () => {
 
             {/* Loading */}
             {isLoadingStats && (
-              <Center py={12}>
-                <VStack spacing={4}>
-                  <Spinner size="xl" color={isPlayers ? "blue.500" : "purple.500"} thickness="4px" />
-                  <Text color={mutedText} fontSize="sm">{t("pages.comparator.loadingStats")}</Text>
-                </VStack>
-              </Center>
+              <PageLoader
+                label={t("pages.comparator.loadingStats")}
+                color={isPlayers ? "blue.500" : "purple.500"}
+                height="200px"
+              />
             )}
 
             {/* Results – side-by-side on xl+ */}

@@ -6,8 +6,6 @@ import {
   Text,
   Card,
   CardBody,
-  Flex,
-  Spinner,
   useColorModeValue,
   Alert,
   AlertIcon,
@@ -22,6 +20,7 @@ import { CustomSelect } from "./ui/CustomSelect";
 import type { ICycle, IPodiumPlayer } from "@/interfaces";
 import { useCycles, useGuilds, usePodium } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "./ui/PageLoader";
 
 export const PodiumSection: React.FC = () => {
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
@@ -190,12 +189,7 @@ export const PodiumSection: React.FC = () => {
             <Text>{error instanceof Error ? error.message : String(error)}</Text>
           </Alert>
         ) : isLoading ? (
-          <Flex justify="center" align="center" py={8}>
-            <VStack spacing={3}>
-              <Spinner size="lg" />
-              <Text>{t("components.podiumSection.loading")}</Text>
-            </VStack>
-          </Flex>
+          <PageLoader label={t("components.podiumSection.loading")} height="200px" />
         ) : podium && podium.length > 0 ? (
           <>
             {/* Affichage mobile : toujours en colonne unique */}

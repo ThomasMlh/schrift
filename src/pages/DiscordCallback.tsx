@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Flex, Spinner, Text, useToast } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import { useAuth } from "../providers/AuthProvider";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "@/components/ui/PageLoader";
 
 const DiscordCallback = () => {
   const navigate = useNavigate();
@@ -99,12 +100,7 @@ const DiscordCallback = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <Flex w="100%" h="60vh" align="center" justify="center" direction="column">
-      <Spinner size="xl" color="purple.500" mb={4} />
-      <Text>{t("pages.discordCallback.loading")}</Text>
-    </Flex>
-  );
+  return <PageLoader label={t("pages.discordCallback.loading")} color="purple.500" />;
 }
 
 export default DiscordCallback;

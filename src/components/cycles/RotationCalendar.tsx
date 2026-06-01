@@ -7,8 +7,6 @@ import {
   IconButton,
   Button,
   Tooltip,
-  Spinner,
-  Center,
   useColorMode,
 } from "@chakra-ui/react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
@@ -19,6 +17,7 @@ import { useCycles } from "@/hooks/useAPI";
 import { getRotationRealDates, isCycleActive } from "@/utils/cycleHelpers";
 import type { ICycle, ICycleRotation } from "@/interfaces";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "../ui/PageLoader";
 
 function toUTCKey(date: Date): string {
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
@@ -190,11 +189,7 @@ const RotationCalendar = () => {
     setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
 
   if (isLoading) {
-    return (
-      <Center p={12}>
-        <Spinner size="xl" color="blue.500" thickness="4px" />
-      </Center>
-    );
+    return <PageLoader color="blue.500" />;
   }
 
   return (

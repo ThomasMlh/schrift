@@ -3,7 +3,6 @@ import {
   HStack,
   Text,
   Button,
-  Spinner,
   Flex,
   Badge,
   Box,
@@ -40,6 +39,7 @@ import {
 import { useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "../ui/PageLoader";
 import type { ICycle } from "../../interfaces";
 import { AlterationImage } from "../ui/AlterationImage";
 
@@ -157,6 +157,7 @@ const ExistingCyclesList = ({
   onDownloadCycleEvents,
   onDeleteCycle,
 }: ExistingCyclesListProps) => {
+  const { t } = useTranslation();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [cycleToDelete, setCycleToDelete] = useState<ICycle | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -336,12 +337,7 @@ const ExistingCyclesList = ({
 
       {/* Content */}
       {isLoading ? (
-        <Flex justify="center" align="center" py={16} direction="column" gap={3}>
-          <Spinner size="lg" color="blue.400" thickness="3px" />
-          <Text fontSize="sm" color="gray.500">
-            Chargement des cycles...
-          </Text>
-        </Flex>
+        <PageLoader label={t("pages.cycles.loading")} color="blue.400" height="250px" />
       ) : !Array.isArray(cycles) || cycles.length === 0 ? (
         <Flex
           direction="column"

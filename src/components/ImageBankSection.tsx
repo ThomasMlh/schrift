@@ -34,6 +34,7 @@ import {
 } from "../utils/characterIcons";
 import { useAuth } from "../providers/AuthProvider";
 import type { IAccessory } from "../interfaces";
+import { PageLoader } from "./ui/PageLoader";
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 const bucketUrl = import.meta.env.VITE_BUCKET_URL;
@@ -387,7 +388,7 @@ const AccessoriesBank = ({ token }: { token: string | null }) => {
   };
 
   if (isLoading) {
-    return <Flex justify="center" py={10}><Spinner /></Flex>;
+    return <PageLoader height="200px" />;
   }
 
   const withCode = accessories.filter((a) => a.code);
@@ -449,7 +450,7 @@ const MetaBank = ({
   iconFn: IconFn;
   isLoading: boolean;
 }) => {
-  if (isLoading) return <Flex justify="center" py={10}><Spinner /></Flex>;
+  if (isLoading) return <PageLoader height="200px" />;
   if (!items.length) return <Text color="gray.500">Aucune donnée</Text>;
 
   return (

@@ -15,6 +15,7 @@ import { UserDisplay } from "./ui/UserDisplay";
 import { CustomSelect } from "./ui/CustomSelect";
 import { useGuilds, useUsers } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "./ui/PageLoader";
 
 interface UsersTableProps {
     isAdminMode?: boolean;
@@ -297,9 +298,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                 boxShadow={isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.06)'}
             >
                 {isLoading ? (
-                    <Flex justify="center" p={8}>
-                        <Spinner size="lg" color={isDark ? 'purple.400' : 'purple.500'} />
-                    </Flex>
+                    <PageLoader color="purple.500" height="200px" />
                 ) : (
                     <Table variant="simple">
                         <Thead>

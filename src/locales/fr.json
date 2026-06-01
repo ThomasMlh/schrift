@@ -435,7 +435,12 @@
       "scoresCount": "scores enregistrés",
       "buttonAutoEntry": "📸 Saisie automatique",
       "buttonManualEntry": "Saisie manuelle",
-      "noScores": "Aucun score enregistré pour le moment."
+      "noScores": "Aucun score enregistré pour le moment.",
+      "loading": "Chargement des scores…"
+    },
+    "bulkScoreModal": {
+      "loadingMembers": "Chargement des membres…",
+      "loadingScores": "Chargement des scores existants…"
     },
     "currentInfoSection": {
       "heading": "Informations actuelles",
@@ -762,5 +767,35 @@
   "periodsShort": {
     "Mardi-Jeudi": "Mar-Jeu",
     "Vendredi-Dimanche": "Ven-Dim"
+  },
+  "hooks": {
+    "scoreManagement": {
+      "toastUserNotFoundTitle": "Utilisateur introuvable",
+      "toastUserNotFoundDesc": "L'utilisateur sélectionné n'a pas été trouvé",
+      "toastNoGuildTitle": "Guilde manquante",
+      "toastNoGuildDesc": "L'utilisateur sélectionné n'a pas de guilde associée",
+      "toastNotLoggedTitle": "Erreur",
+      "toastNotLoggedDesc": "Vous devez être connecté pour ajouter un score",
+      "toastMissingDataTitle": "Données manquantes",
+      "toastMissingDataDesc": "Veuillez sélectionner un utilisateur, un cycle, une rotation et saisir un score valide",
+      "toastScoreAddedTitle": "Score ajouté",
+      "toastScoreAddedDesc": "Le score a été ajouté avec succès",
+      "toastScoreAddErrorTitle": "Erreur",
+      "toastScoreAddErrorFallback": "Erreur lors de l'ajout du score",
+      "toastScoreDeletedTitle": "Score supprimé",
+      "toastScoreDeletedDesc": "Le score a été supprimé avec succès",
+      "toastScoreDeleteErrorTitle": "Erreur",
+      "toastScoreDeleteErrorFallback": "Erreur lors de la suppression du score",
+      "toastRotationNotFoundTitle": "Rotation introuvable",
+      "toastRotationNotFoundDesc": "La rotation sélectionnée n'a pas été trouvée",
+      "toastScoreEditedTitle": "Score modifié",
+      "toastScoreEditedDesc": "Le score a été modifié avec succès",
+      "toastScoreEditErrorTitle": "Erreur",
+      "toastScoreEditErrorFallback": "Erreur lors de la modification du score",
+      "toastBulkSuccessTitle": "Scores enregistrés",
+      "toastBulkSuccessDesc": "{{count}} scores ont été enregistrés avec succès",
+      "toastBulkErrorTitle": "Erreur",
+      "toastBulkErrorFallback": "Erreur lors de l'enregistrement des scores"
+    }
   }
 }

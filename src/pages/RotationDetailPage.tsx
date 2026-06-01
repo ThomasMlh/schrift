@@ -4,7 +4,6 @@ import {
   HStack,
   Text,
   Box,
-  Spinner,
   useColorModeValue,
   Button,
   Flex,
@@ -45,6 +44,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { HeroSection } from "@/components/HeroSection";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useTranslation } from "react-i18next";
+import { PageLoader } from "@/components/ui/PageLoader";
 
 const RotationDetailPage = () => {
   const { cycleId, position } = useParams<{
@@ -216,9 +216,7 @@ const RotationDetailPage = () => {
   if (isLoading && !hasInitialData.current) {
     return (
       <Container maxW="container.xl" py={8}>
-        <Flex justify="center" align="center" minH="200px">
-          <Spinner size="xl" />
-        </Flex>
+        <PageLoader height="200px" />
       </Container>
     );
   }
@@ -420,7 +418,7 @@ const RotationDetailPage = () => {
                   bg="blackAlpha.200"
                   borderRadius="xl"
                 >
-                  <Spinner size="lg" />
+                  <PageLoader height="auto" />
                 </Flex>
               )}
               {scores.length === 0 && !isLoading ? (

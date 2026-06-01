@@ -6,8 +6,6 @@ import {
   HStack,
   Text,
   Badge,
-  Spinner,
-  Center,
   Alert,
   AlertIcon,
   Card,
@@ -21,8 +19,10 @@ import {
   TabPanel,
   Icon,
   useColorModeValue,
-  Flex
+  Flex,
+  Center,
 } from "@chakra-ui/react";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { formatRoleName } from "@/utils/user";
 import { SEOHead } from "@/components/SEOHead";
 import { UserDisplay } from "@/components/ui/UserDisplay";
@@ -182,14 +182,7 @@ const UserPage = () => {
   };
 
   if (loading) {
-    return (
-      <Center h="50vh">
-        <VStack spacing={4}>
-          <Spinner size="xl" />
-          <Text>{t("pages.user.loadingProfile")}</Text>
-        </VStack>
-      </Center>
-    );
+    return <PageLoader label={t("pages.user.loadingProfile")} />;
   }
 
   if (error) {
@@ -355,12 +348,7 @@ const UserPage = () => {
         </Card>
 
         {statsLoading ? (
-          <Center mt={5}>
-            <VStack spacing={4}>
-              <Spinner size="xl" color="blue.500" thickness="4px" />
-              <Text>{t("pages.user.loadingStats")}</Text>
-            </VStack>
-          </Center>
+          <PageLoader label={t("pages.user.loadingStats")} height="20vh" />
         ) : stats && stats.totalScores > 0 ? (
           <VStack spacing={6}>
             {/* Statistiques principales */}
