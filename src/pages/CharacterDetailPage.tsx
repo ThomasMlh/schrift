@@ -13,11 +13,6 @@ import {
   useToast,
   Image,
   SimpleGrid,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalBody,
-  ModalCloseButton,
   IconButton,
   Tooltip
 } from "@chakra-ui/react";
@@ -25,6 +20,7 @@ import type { ReactNode } from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import { ArrowBackIcon, DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
 
 import { AffinityIcon } from "../components/ui/AffinityIcon";
 import { KillerIcon } from "../components/ui/KillerIcon";
@@ -82,15 +78,13 @@ const CharacterDetailPage = () => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
 
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [lightboxLabel, setLightboxLabel] = useState<string>("");
+  const [lightbox, setLightbox] = useState<{ src: string; label: string } | null>(null);
 
   const openLightbox = useCallback((src: string, label: string) => {
-    setLightboxSrc(src);
-    setLightboxLabel(label);
+    setLightbox({ src, label });
   }, []);
 
-  const closeLightbox = useCallback(() => setLightboxSrc(null), []);
+  const closeLightbox = useCallback(() => setLightbox(null), []);
 
   const handleDownload = useCallback(async (src: string, filename: string) => {
     try {
@@ -546,83 +540,49 @@ const CharacterDetailPage = () => {
               {t("pages.characterDetail.headingVisuals")}
             </Text>
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-              {character.banner_id && (() => {
-                const src = `${bucketUrl}/banners/${character.banner_id}.png`;
-                const label = t("pages.characterDetail.labelBanner");
-                return (
-                  <Box borderRadius="xl" overflow="hidden" border="1px solid"
-                    borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
-                    bg={isDark ? 'gray.800' : 'white'}>
-                    <Flex px={4} pt={3} pb={2} borderBottom="1px solid"
-                      borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
-                      justify="space-between" align="center">
-                      <Text fontSize="xs" fontWeight="semibold" letterSpacing="widest"
-                        textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
-                        {label}
-                      </Text>
-                      <HStack spacing={1}>
-                        <Tooltip label={t("pages.characterDetail.tooltipDownload")}>
-                          <IconButton aria-label={t("pages.characterDetail.tooltipDownload")} icon={<DownloadIcon />} size="xs"
-                            variant="ghost" borderRadius="full"
-                            onClick={() => handleDownload(src, `banniere-${character.name}.png`)} />
-                        </Tooltip>
-                        <Tooltip label={t("pages.characterDetail.tooltipExpand")}>
-                          <IconButton aria-label={t("pages.characterDetail.tooltipExpand")} icon={<ExternalLinkIcon />} size="xs"
-                            variant="ghost" borderRadius="full"
-                            onClick={() => openLightbox(src, label)} />
-                        </Tooltip>
-                      </HStack>
-                    </Flex>
-                    <Image
-                      src={src}
-                      alt={`Bannière de ${character.name}`}
-                      w="100%" h="auto"
-                      cursor="zoom-in"
-                      onClick={() => openLightbox(src, label)}
-                    />
-                  </Box>
-                );
-              })()}
               {[
-                { path: "characters/attack", label: t("pages.characterDetail.labelSpecialAttack"), filename: `attaque-${character.name}.png` },
-                { path: "characters/artwork", label: t("pages.characterDetail.labelArtwork"), filename: `artwork-${character.name}.png` },
-                { path: "characters/phrase", label: t("pages.characterDetail.labelPhrase"), filename: `phrase-${character.name}.png` },
-              ].map(({ path, label, filename }) => {
-                const src = `${bucketUrl}/${path}/${character._id}.png`;
-                return (
-                  <Box key={path} borderRadius="xl" overflow="hidden" border="1px solid"
-                    borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
-                    bg={isDark ? 'gray.800' : 'white'}>
-                    <Flex px={4} pt={3} pb={2} borderBottom="1px solid"
-                      borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
-                      justify="space-between" align="center">
-                      <Text fontSize="xs" fontWeight="semibold" letterSpacing="widest"
-                        textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
-                        {label}
-                      </Text>
-                      <HStack spacing={1}>
-                        <Tooltip label={t("pages.characterDetail.tooltipDownload")}>
-                          <IconButton aria-label={t("pages.characterDetail.tooltipDownload")} icon={<DownloadIcon />} size="xs"
-                            variant="ghost" borderRadius="full"
-                            onClick={() => handleDownload(src, filename)} />
-                        </Tooltip>
-                        <Tooltip label={t("pages.characterDetail.tooltipExpand")}>
-                          <IconButton aria-label={t("pages.characterDetail.tooltipExpand")} icon={<ExternalLinkIcon />} size="xs"
-                            variant="ghost" borderRadius="full"
-                            onClick={() => openLightbox(src, label)} />
-                        </Tooltip>
-                      </HStack>
-                    </Flex>
-                    <Image
-                      src={src}
-                      alt={label}
-                      w="100%" h="auto"
-                      cursor="zoom-in"
-                      onClick={() => openLightbox(src, label)}
-                    />
-                  </Box>
-                );
-              })}
+                ...(character.banner_id ? [{
+                  src: `${bucketUrl}/banners/${character.banner_id}.png`,
+                  label: t("pages.characterDetail.labelBanner"),
+                  filename: `banniere-${character.name}.png`,
+                  key: "banner",
+                }] : []),
+                { src: `${bucketUrl}/characters/attack/${character._id}.png`, label: t("pages.characterDetail.labelSpecialAttack"), filename: `attaque-${character.name}.png`, key: "attack" },
+                { src: `${bucketUrl}/characters/artwork/${character._id}.png`, label: t("pages.characterDetail.labelArtwork"), filename: `artwork-${character.name}.png`, key: "artwork" },
+                { src: `${bucketUrl}/characters/phrase/${character._id}.png`, label: t("pages.characterDetail.labelPhrase"), filename: `phrase-${character.name}.png`, key: "phrase" },
+              ].map(({ src, label, filename, key }) => (
+                <Box key={key} borderRadius="xl" overflow="hidden" border="1px solid"
+                  borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
+                  bg={isDark ? 'gray.800' : 'white'}>
+                  <Flex px={4} pt={3} pb={2} borderBottom="1px solid"
+                    borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
+                    justify="space-between" align="center">
+                    <Text fontSize="xs" fontWeight="semibold" letterSpacing="widest"
+                      textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
+                      {label}
+                    </Text>
+                    <HStack spacing={1}>
+                      <Tooltip label={t("pages.characterDetail.tooltipDownload")}>
+                        <IconButton aria-label={t("pages.characterDetail.tooltipDownload")} icon={<DownloadIcon />} size="xs"
+                          variant="ghost" borderRadius="full"
+                          onClick={() => handleDownload(src, filename)} />
+                      </Tooltip>
+                      <Tooltip label={t("pages.characterDetail.tooltipExpand")}>
+                        <IconButton aria-label={t("pages.characterDetail.tooltipExpand")} icon={<ExternalLinkIcon />} size="xs"
+                          variant="ghost" borderRadius="full"
+                          onClick={() => openLightbox(src, label)} />
+                      </Tooltip>
+                    </HStack>
+                  </Flex>
+                  <Image
+                    src={src}
+                    alt={label}
+                    w="100%" h="auto"
+                    cursor="zoom-in"
+                    onClick={() => openLightbox(src, label)}
+                  />
+                </Box>
+              ))}
             </SimpleGrid>
           </Box>
 
@@ -641,62 +601,13 @@ const CharacterDetailPage = () => {
         </VStack>
       </Container>
 
-      {/* Lightbox */}
-      <Modal isOpen={!!lightboxSrc} onClose={closeLightbox} size="6xl" isCentered>
-        <ModalOverlay bg="blackAlpha.800" />
-        <ModalContent bg="transparent" boxShadow="none" mx={4}>
-          <ModalCloseButton
-            color="white"
-            bg="blackAlpha.600"
-            borderRadius="full"
-            top={2}
-            right={2}
-            zIndex={10}
-            _hover={{ bg: 'blackAlpha.800' }}
-          />
-          <ModalBody p={0}>
-            <VStack spacing={0}>
-              {lightboxLabel && (
-                <Flex
-                  w="100%"
-                  justify="space-between"
-                  align="center"
-                  px={4} py={2}
-                  bg="blackAlpha.700"
-                  borderTopRadius="xl"
-                >
-                  <Text fontSize="xs" fontWeight="semibold" letterSpacing="widest"
-                    textTransform="uppercase" color="whiteAlpha.700">
-                    {lightboxLabel}
-                  </Text>
-                  <Tooltip label={t("pages.characterDetail.tooltipDownload")}>
-                    <IconButton
-                      aria-label={t("pages.characterDetail.tooltipDownload")}
-                      icon={<DownloadIcon />}
-                      size="sm"
-                      variant="ghost"
-                      colorScheme="whiteAlpha"
-                      borderRadius="full"
-                      onClick={() => lightboxSrc && handleDownload(lightboxSrc, `${character?.name ?? 'image'}-${lightboxLabel}.png`)}
-                    />
-                  </Tooltip>
-                </Flex>
-              )}
-              {lightboxSrc && (
-                <Image
-                  src={lightboxSrc}
-                  alt={lightboxLabel}
-                  maxH="85vh"
-                  w="auto"
-                  maxW="100%"
-                  objectFit="contain"
-                  borderBottomRadius="xl"
-                />
-              )}
-            </VStack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+      <ImageLightbox
+        src={lightbox?.src ?? null}
+        label={lightbox?.label ?? ""}
+        characterName={character?.name ?? ""}
+        onClose={closeLightbox}
+        onDownload={handleDownload}
+      />
     </>
   );
 };
