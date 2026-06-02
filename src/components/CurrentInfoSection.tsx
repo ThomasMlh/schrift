@@ -1,4 +1,3 @@
-import type { ICycleRotation, ICycle } from "@/interfaces";
 import {
   Box,
   VStack,
@@ -20,18 +19,12 @@ import { AlterationImage } from "./ui/AlterationImage";
 import CustomLink from "./ui/CustomLink";
 import { useCycles } from "@/hooks/useAPI";
 import { getRotationRealDates } from "@/utils/cycleHelpers";
+import { useCurrentRotation } from "@/hooks/useCurrentRotation";
 
 export const CurrentInfoSection = () => {
   const { t } = useTranslation();
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
-  const [currentCycle, setCurrentCycle] = useState<ICycle | null>(null);
-  const [nextCycle, setNextCycle] = useState<ICycle | null>(null);
-  const [isCycleActive, setIsCycleActive] = useState(false);
-  const [currentRotation, setCurrentRotation] = useState<ICycleRotation | null>(
-    null
-  );
-  const [isRotationActive, setIsRotationActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -40,118 +33,16 @@ export const CurrentInfoSection = () => {
     error: cyclesError
   } = useCycles({ limit: 5, authenticated: true });
 
+  const { currentCycle, nextCycle, currentRotation, isCycleActive, isRotationActive } =
+    useCurrentRotation(allCycles, isLoading);
+
   const cardBg = isDark ? 'gray.800' : 'white';
   const borderColor = isDark ? 'whiteAlpha.100' : 'gray.200';
   const innerBg = isDark ? 'rgba(255,255,255,0.03)' : 'gray.50';
 
   useEffect(() => {
-    if (!isLoading && allCycles.length > 0) {
-      const now = new Date();
-      let activeCycle = null;
-      let activeRotation = null;
-      let upcomingRotation = null;
-      let isRotationCurrentlyActive = false;
-      let isCycleCurrentlyActive = false;
-
-      for (const cycle of allCycles) {
-        if (cycle.rotations && cycle.rotations.length > 0) {
-          for (const rotation of cycle.rotations) {
-            if (rotation.start_date && rotation.end_date) {
-              const { realStartDate, realEndDate } = getRotationRealDates(
-                rotation.start_date,
-                rotation.end_date
-              );
-
-              if (now >= realStartDate && now <= realEndDate) {
-                activeCycle = cycle;
-                activeRotation = rotation;
-                isRotationCurrentlyActive = true;
-                isCycleCurrentlyActive = true;
-                break;
-              }
-            }
-          }
-          if (isRotationCurrentlyActive) break;
-
-          if (!activeCycle) {
-            for (const rotation of cycle.rotations) {
-              if (rotation.start_date && rotation.end_date) {
-                const { realStartDate } = getRotationRealDates(
-                  rotation.start_date,
-                  rotation.end_date
-                );
-
-                if (now < realStartDate) {
-                  activeCycle = cycle;
-                  upcomingRotation = rotation;
-                  isCycleCurrentlyActive = true;
-                  break;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if (activeCycle && isCycleCurrentlyActive) {
-        setCurrentCycle(activeCycle);
-        setIsCycleActive(true);
-        setNextCycle(null);
-
-        if (activeRotation && isRotationCurrentlyActive) {
-          setCurrentRotation(activeRotation);
-          setIsRotationActive(true);
-        } else if (upcomingRotation) {
-          setCurrentRotation(upcomingRotation);
-          setIsRotationActive(false);
-        } else {
-          setCurrentRotation(null);
-          setIsRotationActive(false);
-        }
-      }
-      else if (allCycles.length > 0) {
-        let futureNextCycle = null;
-        
-        for (const cycle of allCycles) {
-          if (cycle.rotations && cycle.rotations.length > 0) {
-            const hasFutureRotation = cycle.rotations.some(rotation => {
-              if (rotation.start_date && rotation.end_date) {
-                const { realStartDate } = getRotationRealDates(
-                  rotation.start_date,
-                  rotation.end_date
-                );
-                return now < realStartDate;
-              }
-              return false;
-            });
-            
-            if (hasFutureRotation) {
-              futureNextCycle = cycle;
-              break;
-            }
-          }
-        }
-        
-        if (futureNextCycle) {
-          setCurrentCycle(null);
-          setNextCycle(futureNextCycle);
-          setIsCycleActive(false);
-          setCurrentRotation(null);
-          setIsRotationActive(false);
-        } else {
-          setCurrentCycle(null);
-          setNextCycle(null);
-          setIsCycleActive(false);
-          setCurrentRotation(null);
-          setIsRotationActive(false);
-        }
-      }
-    }
-
-    if (cyclesError) {
-      setError(t("components.currentInfoSection.errorLoading"));
-    }
-  }, [allCycles, isLoading, cyclesError]);
+    if (cyclesError) setError(t("components.currentInfoSection.errorLoading"));
+  }, [cyclesError]);
 
   const formatRealDateTime = (date: Date) => {
     return (

@@ -15,6 +15,11 @@ import { ExistingCyclesList } from "./cycles/ExistingCyclesList";
 import { CycleCreationModal } from "./cycles/CycleCreationModal";
 import { useCycles, useRotations } from "@/hooks/useAPI";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
+import {
+  calculateRotationPeriod,
+  calculateAllRotationDates,
+  ensureCorrectRotationPositions,
+} from "@/utils/cycleHelpers";
 
 const CyclesSection = () => {
   const { deleteCycle, createCycle } = useAPIMutations();
@@ -83,7 +88,7 @@ const CyclesSection = () => {
 
     // Si on a 20 rotations et que la première rotation a une date de début, recalculer toutes les dates
     if (rotationsWithUpdatedPositions.length === 20 && rotationsWithUpdatedPositions[0]?.start_date) {
-      calculateAllDates(rotationsWithUpdatedPositions, rotationsWithUpdatedPositions[0].start_date);
+      calculateAllRotationDates(rotationsWithUpdatedPositions, rotationsWithUpdatedPositions[0].start_date);
     } else {
       // Sinon, recalculer seulement les périodes basées sur les positions
       rotationsWithUpdatedPositions.forEach((rotation, index) => {
@@ -101,12 +106,12 @@ const CyclesSection = () => {
 
     // Si on modifie la start_date de la première rotation et qu'on a 20 rotations
     if (field === 'start_date' && index === 0 && selectedRotations.length === 20 && value) {
-      calculateAllDates(newRotations, value);
+      calculateAllRotationDates(newRotations, value);
     } else if (field === 'start_date' || field === 'end_date') {
       // Pour les autres rotations, recalculer seulement la période de cette rotation
       const rotation = newRotations[index];
       if (rotation.start_date && rotation.end_date) {
-        const period = calculatePeriod(rotation.start_date, rotation.end_date);
+        const period = calculateRotationPeriod(rotation.start_date, rotation.end_date);
         newRotations[index].period = period;
       }
     }
@@ -114,112 +119,6 @@ const CyclesSection = () => {
     setSelectedRotations(newRotations);
   };
 
-  // Fonction pour calculer automatiquement toutes les dates à partir de la première
-  const calculateAllDates = (rotations: ICycleRotation[], firstStartDate: string) => {
-    try {
-      const [day, month, year] = firstStartDate.split('/');
-      let currentDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-
-      // S'assurer que la première date commence bien un mardi
-      const dayOfWeek = currentDate.getDay();
-      if (dayOfWeek !== 2) { // 2 = Mardi
-        console.warn('La première rotation devrait commencer un mardi pour respecter la logique');
-      }
-
-      for (let i = 0; i < rotations.length; i++) {
-        const isEvenPosition = (i + 1) % 2 === 0; // Position paire (2, 4, 6...)
-        
-        if (isEvenPosition) {
-          // Positions paires : Vendredi-Dimanche
-          // Trouver le prochain vendredi
-          while (currentDate.getDay() !== 5) { // 5 = Vendredi
-            currentDate.setDate(currentDate.getDate() + 1);
-          }
-          
-          const startDate = formatDate(currentDate);
-          
-          // Dimanche = +2 jours
-          const endDate = new Date(currentDate);
-          endDate.setDate(currentDate.getDate() + 2);
-          const formattedEndDate = formatDate(endDate);
-          
-          rotations[i].start_date = startDate;
-          rotations[i].end_date = formattedEndDate;
-          rotations[i].period = "Vendredi-Dimanche";
-          
-          // Préparer pour la prochaine rotation (Mardi suivant)
-          currentDate = new Date(endDate);
-          currentDate.setDate(endDate.getDate() + 2); // Mardi suivant
-        } else {
-          // Positions impaires : Mardi-Jeudi
-          // Trouver le prochain mardi (ou garder si on est déjà mardi)
-          while (currentDate.getDay() !== 2) { // 2 = Mardi
-            currentDate.setDate(currentDate.getDate() + 1);
-          }
-          
-          const startDate = formatDate(currentDate);
-          
-          // Jeudi = +2 jours
-          const endDate = new Date(currentDate);
-          endDate.setDate(currentDate.getDate() + 2);
-          const formattedEndDate = formatDate(endDate);
-          
-          rotations[i].start_date = startDate;
-          rotations[i].end_date = formattedEndDate;
-          rotations[i].period = "Mardi-Jeudi";
-          
-          // Préparer pour la prochaine rotation (Vendredi suivant)
-          currentDate = new Date(endDate);
-          currentDate.setDate(endDate.getDate() + 1); // Vendredi suivant
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors du calcul des dates:', error);
-    }
-  };
-
-  // Fonction utilitaire pour formater une date en DD/MM/YYYY
-  const formatDate = (date: Date): string => {
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
-  // Fonction pour calculer la période basée sur les dates
-  const calculatePeriod = (startDate: string, endDate: string): "Mardi-Jeudi" | "Vendredi-Dimanche" => {
-    try {
-      const [startDay, startMonth, startYear] = startDate.split('/');
-      const [endDay, endMonth, endYear] = endDate.split('/');
-
-      const start = new Date(parseInt(startYear), parseInt(startMonth) - 1, parseInt(startDay));
-      const end = new Date(parseInt(endYear), parseInt(endMonth) - 1, parseInt(endDay));
-
-      const startDayOfWeek = start.getDay();
-      const endDayOfWeek = end.getDay();
-
-      // Mardi = 2, Jeudi = 4, Vendredi = 5, Dimanche = 0
-      if (startDayOfWeek === 2 && endDayOfWeek === 4) {
-        return "Mardi-Jeudi" as const;
-      } else if (startDayOfWeek === 5 && endDayOfWeek === 0) {
-        return "Vendredi-Dimanche" as const;
-      }
-
-      // Par défaut, retourner Mardi-Jeudi
-      return "Mardi-Jeudi" as const;
-    } catch {
-      return "Mardi-Jeudi" as const;
-    }
-  };
-
-  // Fonction utilitaire pour s'assurer que toutes les positions et périodes sont correctes
-  const ensureCorrectPositions = (rotations: ICycleRotation[]): ICycleRotation[] => {
-    return rotations.map((rotation, index) => ({
-      ...rotation,
-      position: index + 1,
-      period: (index + 1) % 2 === 1 ? "Mardi-Jeudi" as const : "Vendredi-Dimanche" as const
-    }));
-  };
 
   // Soumettre le cycle
   const submitCycle = async () => {
@@ -258,7 +157,7 @@ const CyclesSection = () => {
     setIsSubmitting(true);
     try {
       // S'assurer que toutes les positions sont correctes avant la soumission
-      const rotationsWithCorrectPositions = ensureCorrectPositions(selectedRotations);
+      const rotationsWithCorrectPositions = ensureCorrectRotationPositions(selectedRotations);
       
       const cycleData: ICycleFormData = {
         name: cycleName.trim(),
