@@ -263,44 +263,69 @@ export const PodiumResults = ({
 
               if (allData.length === 0) return null;
 
-              if (allData.length >= 10) {
-                const mid = Math.ceil(allData.length / 2);
-                const leftData = allData.slice(0, mid);
-                const rightData = allData.slice(mid);
+              const renderList = (items: typeof allData) => {
+                if (displayMode === "weekly" && isWeeklyResponse(podiumData)) {
+                  return items.map((p) => (
+                    <PlayerCardWeekly
+                      key={p.user_id}
+                      player={p as IPodiumWeeklyResponse["data"][number]}
+                      showGuildName={showGuildName}
+                    />
+                  ));
+                }
+                if (displayMode === "misses" && isMissesResponse(podiumData)) {
+                  return items.map((p) => (
+                    <PlayerCardMiss
+                      key={p.user_id}
+                      player={p as IPodiumMissesResponse["data"][number]}
+                      showGuildName={showGuildName}
+                    />
+                  ));
+                }
+                if (isPodiumResponse(podiumData)) {
+                  return items.map((p) => (
+                    <PlayerCard
+                      key={p.user_id}
+                      player={p as IPodiumPlayer}
+                      showGuildName={showGuildName}
+                      podiumType={podiumData.meta.podiumType}
+                    />
+                  ));
+                }
+                return null;
+              };
 
-                const renderList = (items: typeof allData) => {
-                  if (displayMode === "weekly" && isWeeklyResponse(podiumData)) {
-                    return items.map((p) => (
-                      <PlayerCardWeekly
-                        key={p.user_id}
-                        player={p as IPodiumWeeklyResponse["data"][number]}
-                        showGuildName={showGuildName}
-                      />
-                    ));
-                  }
-                  if (displayMode === "misses" && isMissesResponse(podiumData)) {
-                    return items.map((p) => (
-                      <PlayerCardMiss
-                        key={p.user_id}
-                        player={p as IPodiumMissesResponse["data"][number]}
-                        showGuildName={showGuildName}
-                      />
-                    ));
-                  }
-                  if (isPodiumResponse(podiumData)) {
-                    return items.map((p) => (
-                      <PlayerCard
-                        key={p.user_id}
-                        player={p as IPodiumPlayer}
-                        showGuildName={showGuildName}
-                        podiumType={podiumData.meta.podiumType}
-                      />
-                    ));
-                  }
-                  return null;
-                };
+              // #4 pleine largeur quand le podium visuel est affiché, puis colonnes équilibrées
+              const showFeaturedFourth = showPedestal && allData[0]?.rank === 4;
+              const columnsData = showFeaturedFourth ? allData.slice(1) : allData;
+              const useColumns = columnsData.length >= 10;
 
+              if (!showFeaturedFourth && !useColumns) {
                 return (
+                  <PlayerList
+                    displayMode={displayMode}
+                    podiumData={podiumData}
+                    showGuildName={showGuildName}
+                  />
+                );
+              }
+
+              if (!useColumns) {
+                return (
+                  <VStack spacing={2} align="stretch">
+                    {showFeaturedFourth && renderList([allData[0]])}
+                    {renderList(columnsData)}
+                  </VStack>
+                );
+              }
+
+              const mid = Math.ceil(columnsData.length / 2);
+              const leftData = columnsData.slice(0, mid);
+              const rightData = columnsData.slice(mid);
+
+              return (
+                <VStack spacing={2} align="stretch">
+                  {showFeaturedFourth && renderList([allData[0]])}
                   <HStack spacing={4} align="start">
                     <VStack spacing={2} align="stretch" flex={1}>
                       {renderList(leftData)}
@@ -309,16 +334,7 @@ export const PodiumResults = ({
                       {renderList(rightData)}
                     </VStack>
                   </HStack>
-                );
-              }
-
-              // Moins de 10 joueurs : colonne unique
-              return (
-                <PlayerList
-                  displayMode={displayMode}
-                  podiumData={podiumData}
-                  showGuildName={showGuildName}
-                />
+                </VStack>
               );
             })()}
           </Box>
