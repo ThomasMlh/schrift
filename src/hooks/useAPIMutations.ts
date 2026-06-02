@@ -10,6 +10,8 @@ export { useBuildMutations } from './mutations/useBuildMutations';
 export { useOCRMutations } from './mutations/useOCRMutations';
 export { useDraftMutations } from './mutations/useDraftMutations';
 export { useAdminMutations } from './mutations/useAdminMutations';
+export { useOrbGuideMutations } from './mutations/useOrbGuideMutations';
+export { useAccessoryMutations } from './mutations/useAccessoryMutations';
 
 import { useCycleMutations } from './mutations/useCycleMutations';
 import { useGuildMutations } from './mutations/useGuildMutations';

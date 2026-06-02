@@ -131,6 +131,7 @@ export const useAllGuildsMemberCounts = (guilds: IGuild[], authenticated: boolea
   const [membersByGuild, setMembersByGuild] = useState<Record<string, IUser[]>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { token } = useAuth();
 
   // Deps stables : on ne refetch que si la liste d'IDs change réellement
@@ -178,9 +179,9 @@ export const useAllGuildsMemberCounts = (guilds: IGuild[], authenticated: boolea
     };
 
     fetchAllMembers();
-  }, [guildIds, authenticated, token]);
+  }, [guildIds, authenticated, token, refreshKey]);
 
-  return { memberCounts, membersByGuild, isLoading, error };
+  return { memberCounts, membersByGuild, isLoading, error, refresh: () => setRefreshKey(k => k + 1) };
 }
 
 // Hook pour récupérer les utilisateurs sans guilde
@@ -276,7 +277,7 @@ export const useCharacters = (options?: {
   if (affinity) url += `&affinity=${encodeURIComponent(affinity)}`;
   if (category) url += `&category=${encodeURIComponent(category)}`;
   if (killer) url += `&killer=${encodeURIComponent(killer)}`;
-  if (attackType) url += `&attackType=${encodeURIComponent(attackType)}`;
+  if (attackType) url += `&attack_type=${encodeURIComponent(attackType)}`;
   if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
 
   const { data, error, isLoading, mutate } = useSWR<ICharactersResponse>(

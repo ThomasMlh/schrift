@@ -42,5 +42,14 @@ export const useUserMutations = () => {
     return result;
   };
 
-  return { updateUserRole, moveUserToGuild, banUser, unbanUser };
+  const updateUser = async (userId: string, data: Record<string, unknown>) => {
+    const result = await request(`${apiUrl}/api/users/${userId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }, { fallbackError: "Erreur lors de la modification de l'utilisateur" });
+    await invalidateKeys(`${apiUrl}/api/users`);
+    return result;
+  };
+
+  return { updateUserRole, moveUserToGuild, banUser, unbanUser, updateUser };
 };
