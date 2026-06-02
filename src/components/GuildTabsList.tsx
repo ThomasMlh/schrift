@@ -21,36 +21,26 @@ import {
   useBreakpointValue,
   useColorModeValue
 } from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { CustomSelect } from "./ui/CustomSelect";
 import type { Role, IGuild, IUser } from "../interfaces";
 import { UserDisplay } from "./ui/UserDisplay";
-import { useGuilds } from "@/hooks/useAPI";
+import { useGuilds, useAllGuildsMemberCounts } from "@/hooks/useAPI";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
-import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 
 interface GuildTabsListProps {
   editable?: boolean;
-  refreshTrigger?: number;
 }
 
-const GuildTabsList: React.FC<GuildTabsListProps> = ({
-  editable = false,
-  refreshTrigger = 0
-}) => {
-  const { getAuthHeaders } = useAuth();
+const GuildTabsList: React.FC<GuildTabsListProps> = ({ editable = false }) => {
   const { t } = useTranslation();
   const { updateUserRole, moveUserToGuild, removeGuildMember } = useAPIMutations();
-  // Utiliser useSWR pour les guildes (cache automatique + déduplication)
-  const { guilds: allGuilds, mutate: mutateGuilds } = useGuilds(true, editable);
-  // En mode éditable (admin), afficher toutes les guildes ; sinon filtrer les désactivées
+  const { guilds: allGuilds } = useGuilds(true, editable);
   const guilds = editable ? allGuilds : allGuilds.filter(g => !g.disabled);
-  
-  // États
-  const [membersByGuild, setMembersByGuild] = useState<Record<string, IUser[]>>(
-    {}
-  );
+
+  const { membersByGuild, refresh: refreshMembers } = useAllGuildsMemberCounts(guilds, true);
+
   const [isDeleteMemberOpen, setIsDeleteMemberOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<{
     id: string;
@@ -60,93 +50,9 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
   const toast = useToast();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const orientation =
-    useBreakpointValue<"vertical" | "horizontal">({
-      base: "vertical",
-      md: "horizontal"
-    }) || "horizontal";
-
-  // API URL depuis les variables d'environnement
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+    useBreakpointValue<"vertical" | "horizontal">({ base: "vertical", md: "horizontal" }) || "horizontal";
 
   const shadowColor = useColorModeValue("lg", "dark-lg");
-
-  // Charger les membres quand les guildes changent
-  useEffect(() => {
-    if (!apiUrl || guilds.length === 0) return;
-
-    guilds.forEach((guild) => {
-      fetch(`${apiUrl}/api/guildes/${guild._id}/membres`, {
-        headers: getAuthHeaders()
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          // L'API retourne { success: true, membres: [...], count: number } ou { success: true, data: [...], count: number }
-          const membersList = data.data || data;
-          const members = Array.isArray(membersList) ? membersList : [];
-
-          setMembersByGuild((prev) => {
-            const updated = {
-              ...prev,
-              [guild._id]: members
-            };
-            return updated;
-          });
-        })
-        .catch((error) => {
-          setMembersByGuild((prev) => ({ ...prev, [guild._id]: [] }));
-          toast({
-            title: t("common.error"),
-            description:
-              error.message ||
-              `Impossible de recharger les membres de la guilde ${guild.name}`,
-            status: "error",
-            duration: 3000
-          });
-        });
-    });
-  }, [apiUrl, guilds, toast, getAuthHeaders]);
-
-  // Réagir aux changements externes (quand une guilde est modifiée depuis AdminPage)
-  useEffect(() => {
-    if (refreshTrigger > 0) {
-      // Recharger les guildes avec mutate
-      mutateGuilds();
-    }
-  }, [refreshTrigger, mutateGuilds]);
-
-  // Fonction pour recharger les membres
-  const loadMembers = () => {
-    if (!apiUrl || guilds.length === 0) return;
-
-    guilds.forEach((guild) => {
-      fetch(`${apiUrl}/api/guildes/${guild._id}/membres`, {
-        headers: getAuthHeaders()
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          // L'API retourne { success: true, membres: [...], count: number } ou { success: true, data: [...], count: number }
-          const membersList = data.data || data;
-          const members = Array.isArray(membersList) ? membersList : [];
-
-          setMembersByGuild((prev) => ({
-            ...prev,
-            [guild._id]: members
-          }));
-        })
-        .catch((error) => {
-          setMembersByGuild((prev) => ({ ...prev, [guild._id]: [] }));
-          toast({
-            title: t("common.error"),
-            description:
-              error instanceof Error
-                ? error.message
-                : `Impossible de recharger les membres de la guilde ${guild.name}`,
-            status: "error",
-            duration: 3000
-          });
-        });
-    });
-  };
 
   // Ouvrir la popup de confirmation pour supprimer un membre
   const handleRemoveMember = (member: IUser, guildId: string) => {
@@ -165,7 +71,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
     try {
       await removeGuildMember(memberToDelete.guildId, memberToDelete.id);
 
-      loadMembers();
+      refreshMembers();
       toast({
         title: t("components.guildTabsList.toastMemberRemovedTitle"),
         description: t("components.guildTabsList.toastMemberRemovedDesc"),
@@ -192,7 +98,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
     try {
       await updateUserRole(member._id, newRole);
 
-      loadMembers();
+      refreshMembers();
       toast({
         title: t("components.guildTabsList.toastRoleChangedTitle"),
         description: `${member.username} ${t("components.guildTabsList.toastRoleChangedDesc")} ${
@@ -228,7 +134,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({
     try {
       await moveUserToGuild(member._id, toGuildId);
 
-      loadMembers();
+      refreshMembers();
       toast({
         title: t("components.guildTabsList.toastMovedTitle"),
         description: `${member.username} ${t("components.guildTabsList.toastMovedDesc")} ${

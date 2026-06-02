@@ -27,6 +27,7 @@ import { AddIcon, EditIcon } from "@chakra-ui/icons";
 import { useState, useEffect } from "react";
 import { mutate as swrMutate } from "swr";
 import { useAccessories, useCharacterMeta, useAccessoryCodes } from "../hooks/useAPI";
+import { useAccessoryMutations } from "@/hooks/useAPIMutations";
 import {
   getAffinityIcon,
   getCategoryIcon,
@@ -71,6 +72,7 @@ const AccessoryFormModal = ({
   const [isBrowsing, setIsBrowsing] = useState(false);
   const toast = useToast();
   const isEdit = accessory !== null;
+  const { saveAccessory } = useAccessoryMutations();
   const previewBg = useColorModeValue("gray.100", "gray.700");
   const browseBg = useColorModeValue("gray.50", "gray.900");
   const browseBorder = useColorModeValue("gray.200", "gray.700");
@@ -104,21 +106,10 @@ const AccessoryFormModal = ({
     }
     setIsSaving(true);
     try {
-      const url = isEdit
-        ? `${apiUrl}/api/accessories/${accessory!._id}`
-        : `${apiUrl}/api/accessories`;
-      const res = await fetch(url, {
-        method: isEdit ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-        body: JSON.stringify({ name: name.trim(), code: code.trim() || null }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "Erreur serveur");
-      }
+      await saveAccessory(
+        { name: name.trim(), code: code.trim() || null },
+        isEdit && accessory!._id ? accessory!._id : undefined
+      );
       toast({
         title: isEdit ? "Accessoire mis à jour" : "Accessoire créé",
         status: "success",

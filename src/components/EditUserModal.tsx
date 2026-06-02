@@ -5,7 +5,7 @@ import {
 import { useState, useEffect } from "react";
 import type { IUser, IGuild, Role } from "../interfaces";
 import { getUserAvatarUrl } from "../utils/discord";
-import { useAuth } from "@/providers/AuthProvider";
+import { useUserMutations } from "@/hooks/useAPIMutations";
 import { CustomSelect } from "./ui/CustomSelect";
 
 interface EditUserModalProps {
@@ -17,7 +17,7 @@ interface EditUserModalProps {
 }
 
 const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, guilds, onUserUpdated }) => {
-    const { token } = useAuth();
+    const { updateUser } = useUserMutations();
     const [formData, setFormData] = useState({
         bbs_id: "",
         bbs_name: "",
@@ -26,7 +26,6 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, gu
     });
     const [isLoading, setIsLoading] = useState(false);
     const toast = useToast();
-    const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
     // Initialiser le formulaire avec les données de l'utilisateur
     useEffect(() => {
@@ -53,28 +52,10 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, gu
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${apiUrl}/api/users/${user._id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token && { 'Authorization': `Bearer ${token}` }),
-                },
-                body: JSON.stringify(formData)
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                toast({
-                    title: "Utilisateur modifié avec succès",
-                    status: "success",
-                    duration: 3000
-                });
-                onUserUpdated();
-                onClose();
-            } else {
-                throw new Error(data.message || "Erreur lors de la modification de l'utilisateur");
-            }
+            await updateUser(user._id, formData);
+            toast({ title: "Utilisateur modifié avec succès", status: "success", duration: 3000 });
+            onUserUpdated();
+            onClose();
         } catch (error) {
             toast({
                 title: "Erreur",

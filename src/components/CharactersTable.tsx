@@ -6,7 +6,8 @@ import {
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SearchIcon } from "@chakra-ui/icons";
-import type { ICharacter, IPagination as PaginationType, ICharactersResponse } from "../interfaces";
+import type { ICharacter } from "../interfaces";
+import { useCharacters } from "@/hooks/useAPI";
 import { AffinityIcon } from "./ui/AffinityIcon";
 import { KillerIcon } from "./ui/KillerIcon";
 import { CategoryIcon } from "./ui/CategoryIcon";
@@ -22,133 +23,71 @@ import { CustomSelect } from "./ui/CustomSelect";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "./ui/PageLoader";
 
-interface CharactersTableProps {
-  apiUrl: string;
-}
-
-export const CharactersTable = ({ apiUrl }: CharactersTableProps) => {
+export const CharactersTable = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
-  
-  // États - Initialiser avec les paramètres URL
-  const [characters, setCharacters] = useState<ICharacter[]>([]);
-  const [pagination, setPagination] = useState<PaginationType | null>(null);
+
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
   const [selectedAffinity, setSelectedAffinity] = useState(searchParams.get('affinity') || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || "");
   const [selectedKiller, setSelectedKiller] = useState(searchParams.get('killer') || "");
   const [selectedAttackType, setSelectedAttackType] = useState(searchParams.get('attack_type') || "");
+  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'));
   const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('limit') || '20'));
-  const [isLoading, setIsLoading] = useState(false);
-  const [affinities] = useState<string[]>(CharactersAffinities);
-  const [categories] = useState<string[]>(CharactersCategories);
-  const [killers] = useState<string[]>(CharactersKillers);
+
+  const affinities = CharactersAffinities;
+  const categories = CharactersCategories;
+  const killers = CharactersKillers;
 
   const bucketUrl = import.meta.env.VITE_BUCKET_URL;
-
-  // Hooks UI
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
   const borderColor = isDark ? 'whiteAlpha.100' : 'gray.200';
 
-  // Fonction pour mettre à jour l'URL avec les filtres actuels
-  const updateURLParams = (search = "", affinity = "", category = "", killer = "", attackType = "", limit = itemsPerPage, page = 1) => {
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(searchTerm), 500);
+    return () => clearTimeout(id);
+  }, [searchTerm]);
+
+  // Reset page when filters change
+  useEffect(() => { setCurrentPage(1); }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage]);
+
+  const { characters, pagination, isLoading } = useCharacters({
+    page: currentPage,
+    limit: itemsPerPage,
+    searchQuery: debouncedSearch,
+    affinity: selectedAffinity,
+    category: selectedCategory,
+    killer: selectedKiller,
+    attackType: selectedAttackType,
+  });
+
+  // Sync URL params
+  useEffect(() => {
     const params = new URLSearchParams();
-    
-    if (search.trim()) params.set('search', search.trim());
-    if (affinity) params.set('affinity', affinity);
-    if (category) params.set('category', category);
-    if (killer) params.set('killer', killer);
-    if (attackType) params.set('attack_type', attackType);
-    if (limit !== 20) params.set('limit', limit.toString());
-    if (page !== 1) params.set('page', page.toString());
-    
-    setSearchParams(params);
-  };
+    if (debouncedSearch.trim()) params.set('search', debouncedSearch.trim());
+    if (selectedAffinity) params.set('affinity', selectedAffinity);
+    if (selectedCategory) params.set('category', selectedCategory);
+    if (selectedKiller) params.set('killer', selectedKiller);
+    if (selectedAttackType) params.set('attack_type', selectedAttackType);
+    if (itemsPerPage !== 20) params.set('limit', itemsPerPage.toString());
+    if (currentPage !== 1) params.set('page', currentPage.toString());
+    setSearchParams(params, { replace: true });
+  }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage, currentPage]);
 
-  // Fonction principale pour charger les personnages
-  const loadCharacters = async (page = 1, search = "", affinity = "", category = "", killer = "", attackType = "") => {
-    setIsLoading(true);
-    try {
-      // Construction de l'URL avec tous les paramètres
-      let url = `${apiUrl}/api/characters?page=${page}&limit=${itemsPerPage}`;
-      
-      // Ajout des paramètres de filtrage s'ils sont présents
-      if (search && search.trim() !== "") {
-        url += `&search=${encodeURIComponent(search.trim())}`;
-      }
-      if (affinity && affinity.trim() !== "") {
-        url += `&affinity=${encodeURIComponent(affinity.trim())}`;
-      }
-      if (category && category.trim() !== "") {
-        url += `&category=${encodeURIComponent(category.trim())}`;
-      }
-      if (killer && killer.trim() !== "") {
-        url += `&killer=${encodeURIComponent(killer.trim())}`;
-      }
-      if (attackType && attackType.trim() !== "") {
-        url += `&attack_type=${encodeURIComponent(attackType.trim())}`;
-      }
-
-      const response = await fetch(url);
-
-      
-      if (response.ok) {
-        const data: ICharactersResponse = await response.json();
-        setCharacters(data.data);
-        setPagination(data.pagination);
-      } else {
-        setCharacters([]);
-        setPagination(null);
-      }
-    } catch {
-      setCharacters([]);
-      setPagination(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Effet pour charger les données initiales
-  useEffect(() => {
-    // Charger avec les paramètres de l'URL au montage
-    const currentPage = parseInt(searchParams.get('page') || '1');
-    loadCharacters(currentPage, searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType);
-  }, [apiUrl]);
-
-  // Fonction de recherche avec debounce et mise à jour URL
-  useEffect(() => {
-    // Ne déclencher que si au moins un filtre a une vraie valeur OU si on est au montage avec des paramètres URL
-    const hasFilters = searchTerm.trim() || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType;
-    const hasURLParams = searchParams.has('search') || searchParams.has('affinity') || searchParams.has('category') || searchParams.has('killer') || searchParams.has('attack_type');
-    
-    if (hasFilters || hasURLParams) {
-      const timeoutId = setTimeout(() => {
-        updateURLParams(searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage);
-        loadCharacters(1, searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType);
-      }, 500);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage]);
-
-    // Gestion du changement de page
   const handlePageChange = (page: number) => {
-    if (pagination && page >= 1 && page <= pagination.totalPages) {
-      updateURLParams(searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage, page);
-      loadCharacters(page, searchTerm, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType);
-    }
+    if (pagination && page >= 1 && page <= pagination.totalPages) setCurrentPage(page);
   };
 
-  // Fonction pour reset tous les filtres
   const resetFilters = () => {
     setSearchTerm("");
     setSelectedAffinity("");
     setSelectedCategory("");
     setSelectedKiller("");
     setSelectedAttackType("");
-    setSearchParams({}); 
-    loadCharacters(1);
+    setCurrentPage(1);
+    setSearchParams({});
   };
 
   return (

@@ -5,7 +5,6 @@ import { HeroSection } from "../components/HeroSection";
 import { useTranslation } from "react-i18next";
 
 const CharactersPage = () => {
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const { t } = useTranslation();
 
   const structuredData = {
@@ -60,7 +59,7 @@ const CharactersPage = () => {
           />
           <Container maxW="container.xl" py={8}>
             <VStack spacing={6} align="stretch">
-              <CharactersTable apiUrl={apiUrl} />
+              <CharactersTable />
             </VStack>
           </Container>
         </Box>
