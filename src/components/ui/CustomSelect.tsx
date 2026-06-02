@@ -7,6 +7,7 @@ import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { useDragToScroll } from "@/hooks/useDragToScroll";
 
 interface SelectOption {
     value: string;
@@ -65,42 +66,10 @@ export const CustomSelect = ({
     const triggerRef = useRef<HTMLDivElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
-    const isDragging = useRef(false);
-    const dragStartY = useRef(0);
-    const scrollStartTop = useRef(0);
-    const hasDragged = useRef(false);
 
     const selectedOption = options.find(option => option.value === value);
 
-    // Drag-to-scroll sur le dropdown
-    const handleDragStart = useCallback((e: React.MouseEvent) => {
-        if (!dropdownRef.current) return;
-        // Ne pas activer le drag si on clique sur l'input de recherche
-        if ((e.target as HTMLElement).tagName === 'INPUT') return;
-        isDragging.current = true;
-        hasDragged.current = false;
-        dragStartY.current = e.clientY;
-        scrollStartTop.current = dropdownRef.current.scrollTop;
-        e.preventDefault(); // empêche la sélection de texte
-    }, []);
-
-    useEffect(() => {
-        const handleDragMove = (e: MouseEvent) => {
-            if (!isDragging.current || !dropdownRef.current) return;
-            const delta = dragStartY.current - e.clientY;
-            if (Math.abs(delta) > 3) hasDragged.current = true;
-            dropdownRef.current.scrollTop = scrollStartTop.current + delta;
-        };
-        const handleDragEnd = () => {
-            isDragging.current = false;
-        };
-        document.addEventListener('mousemove', handleDragMove);
-        document.addEventListener('mouseup', handleDragEnd);
-        return () => {
-            document.removeEventListener('mousemove', handleDragMove);
-            document.removeEventListener('mouseup', handleDragEnd);
-        };
-    }, []);
+    const { onMouseDown: handleDragStart, consumedDrag } = useDragToScroll(dropdownRef);
 
     // Gérer le clic en dehors du composant
     useEffect(() => {
@@ -188,11 +157,7 @@ export const CustomSelect = ({
     }, [isOpen, onSearchChange]);
 
     const handleSelect = (optionValue: string) => {
-        // Ignorer le clic si l'utilisateur a fait un drag-scroll
-        if (hasDragged.current) {
-            hasDragged.current = false;
-            return;
-        }
+        if (consumedDrag()) return;
         onChange(optionValue);
         setIsOpen(false);
     };
@@ -479,7 +444,7 @@ export const CustomSelect = ({
                                 ref={searchInputRef}
                                 value={searchTerm}
                                 onChange={handleSearchChange}
-                                placeholder="Rechercher..."
+                                placeholder={t("components.customSelect.searchPlaceholder")}
                                 size="sm"
                                 autoComplete="off"
                             />
@@ -488,7 +453,7 @@ export const CustomSelect = ({
 
                     {isLoading ? (
                         <Text p={3} color={placeholderColor} textAlign="center">
-                            Chargement...
+                            {t("common.loading")}
                         </Text>
                     ) : (
                         <>
@@ -619,7 +584,7 @@ export const CustomSelect = ({
                             {/* Message si aucune option */}
                             {ungroupedOptions.length === 0 && Object.keys(groupedOptions).length === 0 && (
                                 <Text px={currentSizeProps.px} py={3} color={placeholderColor} textAlign="center" fontSize={currentSizeProps.fontSize}>
-                                    {searchTerm ? "Aucun résultat" : "Aucune option disponible"}
+                                    {searchTerm ? t("components.customSelect.noResults") : t("components.customSelect.noOptions")}
                                 </Text>
                             )}
                         </>
