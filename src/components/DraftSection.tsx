@@ -4,7 +4,6 @@ import {
   VStack,
   HStack,
   Text,
-  IconButton,
   useToast,
   Badge,
   Modal,
@@ -28,7 +27,8 @@ import {
   Avatar,
   Divider,
 } from "@chakra-ui/react";
-import { AddIcon, ArrowForwardIcon, CheckIcon, DeleteIcon } from "@chakra-ui/icons";
+import { AddIcon, ArrowForwardIcon, CheckIcon } from "@chakra-ui/icons";
+import { DraftMoveRow } from "./draft/DraftMoveRow";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import type { IGuild, IUser } from "../interfaces";
 import {
@@ -478,59 +478,20 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                 <Divider borderColor={borderColor} />
 
                 <VStack spacing={0} align="stretch">
-                  {draftMoves.map((move, index) => {
-                    const fromColor = move.fromGuild ? guildColorMap[move.fromGuild._id] : "gray";
-                    const toColor   = move.toGuild   ? guildColorMap[move.toGuild._id]   : "gray";
-
-                    return (
-                      <Flex
-                        key={move.id}
-                        align="center"
-                        gap={3}
-                        px={5}
-                        py={3}
-                        transition="background 0.15s"
-                        _hover={{ bg: rowHoverBg }}
-                        borderBottomWidth={index < draftMoves.length - 1 ? "1px" : 0}
-                        borderColor={borderColor}
-                      >
-                        {/* Avatar + nom */}
-                        <HStack spacing={3} flex={1} minW={0}>
-                          <Avatar
-                            size="sm"
-                            src={getAvatarUrl(move.user)}
-                            name={move.user.bbs_name || move.user.global_name || move.user.username}
-                          />
-                          <Text fontSize="sm" fontWeight="medium" noOfLines={1}>
-                            {move.user.bbs_name || move.user.global_name || move.user.username}
-                          </Text>
-                        </HStack>
-
-                        {/* From → To */}
-                        <HStack spacing={2} flexShrink={0}>
-                          <Tag size="sm" borderRadius="full" colorScheme={fromColor} variant="subtle">
-                            <TagLabel>{move.fromGuild?.name || "—"}</TagLabel>
-                          </Tag>
-                          <ArrowForwardIcon boxSize={3} color="orange.400" />
-                          <Tag size="sm" borderRadius="full" colorScheme={move.toGuild ? toColor : "gray"} variant={move.toGuild ? "subtle" : "outline"}>
-                            <TagLabel>{move.toGuild?.name || "Retrait"}</TagLabel>
-                          </Tag>
-                        </HStack>
-
-                        {/* Supprimer */}
-                        <IconButton
-                          aria-label="Retirer"
-                          icon={<DeleteIcon boxSize={3} />}
-                          size="xs"
-                          variant="ghost"
-                          borderRadius="full"
-                          color={mutedText}
-                          _hover={{ bg: "red.50", color: "red.500", _dark: { bg: "red.900", color: "red.300" } }}
-                          onClick={() => removeMove(move.id)}
-                        />
-                      </Flex>
-                    );
-                  })}
+                  {draftMoves.map((move, index) => (
+                    <DraftMoveRow
+                      key={move.id}
+                      move={move}
+                      fromColor={move.fromGuild ? guildColorMap[move.fromGuild._id] : "gray"}
+                      toColor={move.toGuild ? guildColorMap[move.toGuild._id] : "gray"}
+                      borderColor={borderColor}
+                      isLast={index === draftMoves.length - 1}
+                      getAvatarUrl={getAvatarUrl}
+                      onRemove={removeMove}
+                      hoverBg={rowHoverBg}
+                      mutedText={mutedText}
+                    />
+                  ))}
                 </VStack>
 
                 {/* Overflow warning */}
@@ -601,38 +562,18 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
             </Text>
 
             <VStack spacing={0} align="stretch" borderWidth="1px" borderColor={borderColor} borderRadius="lg" overflow="hidden">
-              {draftMoves.map((move, index) => {
-                const fromColor = move.fromGuild ? guildColorMap[move.fromGuild._id] : "gray";
-                const toColor   = move.toGuild   ? guildColorMap[move.toGuild._id]   : "gray";
-                return (
-                  <Flex
-                    key={move.id}
-                    py={3} px={4}
-                    align="center"
-                    gap={3}
-                    borderBottomWidth={index < draftMoves.length - 1 ? "1px" : 0}
-                    borderColor={borderColor}
-                  >
-                    <Avatar
-                      size="xs"
-                      src={getAvatarUrl(move.user)}
-                      name={move.user.bbs_name || move.user.global_name || move.user.username}
-                    />
-                    <Text fontSize="sm" fontWeight="medium" flex={1}>
-                      {move.user.bbs_name || move.user.global_name || move.user.username}
-                    </Text>
-                    <HStack spacing={2}>
-                      <Tag size="sm" borderRadius="full" colorScheme={fromColor} variant="subtle">
-                        <TagLabel>{move.fromGuild?.name || "—"}</TagLabel>
-                      </Tag>
-                      <ArrowForwardIcon boxSize={3} color="orange.400" />
-                      <Tag size="sm" borderRadius="full" colorScheme={move.toGuild ? toColor : "gray"} variant={move.toGuild ? "subtle" : "outline"}>
-                        <TagLabel>{move.toGuild?.name || "Retrait"}</TagLabel>
-                      </Tag>
-                    </HStack>
-                  </Flex>
-                );
-              })}
+              {draftMoves.map((move, index) => (
+                <DraftMoveRow
+                  key={move.id}
+                  move={move}
+                  fromColor={move.fromGuild ? guildColorMap[move.fromGuild._id] : "gray"}
+                  toColor={move.toGuild ? guildColorMap[move.toGuild._id] : "gray"}
+                  borderColor={borderColor}
+                  isLast={index === draftMoves.length - 1}
+                  getAvatarUrl={getAvatarUrl}
+                  compact
+                />
+              ))}
             </VStack>
 
             {/* Impact guildes */}
