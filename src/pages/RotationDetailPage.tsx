@@ -378,6 +378,8 @@ const RotationDetailPage = () => {
               borderWidth={1}
               borderColor={borderColor}
               p={4}
+              position="relative"
+              zIndex={2}
             >
               <Flex direction={{ base: "column", md: "row" }} gap={4} align="center" justify="space-between">
                 <HStack spacing={4} align="center" flex={1}>
