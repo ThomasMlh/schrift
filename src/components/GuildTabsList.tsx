@@ -127,7 +127,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({ editable = false }) => {
     member: IUser,
     toGuildId: string
   ) => {
-    if (fromGuildId === toGuildId || !apiUrl) return;
+    if (fromGuildId === toGuildId) return;
 
     const targetGuild = guilds.find((g) => g._id === toGuildId);
 

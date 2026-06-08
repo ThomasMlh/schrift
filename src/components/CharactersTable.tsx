@@ -6,7 +6,6 @@ import {
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SearchIcon } from "@chakra-ui/icons";
-import type { ICharacter } from "../interfaces";
 import { useCharacters } from "@/hooks/useAPI";
 import { AffinityIcon } from "./ui/AffinityIcon";
 import { KillerIcon } from "./ui/KillerIcon";
