@@ -945,6 +945,7 @@ export interface IGuildStats {
   totalScores: number;
   bestScore: number;
   totalPoints: number;
+  clearRate: number;
 }
 
 // Hook pour récupérer les statistiques d'une guilde

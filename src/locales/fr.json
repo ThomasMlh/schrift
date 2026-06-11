@@ -217,7 +217,14 @@
       "statsGuilds": "Guildes",
       "statsMembers": "Membres au total",
       "orgNoMembers": "Aucun membre dans cette guilde",
-      "orgSectionMembers": "Membres"
+      "orgSectionMembers": "Membres",
+      "statsSection": "Statistiques",
+      "statAvgScore": "Score Moyen",
+      "statBestScore": "Meilleur Score",
+      "statTotalParticipations": "Participations",
+      "statTotalPoints": "Points Totaux",
+      "statClearRate": "Taux de Clear",
+      "statClearRateTooltip": "% de scores ≥ 600M"
     },
     "user": {
       "loadingProfile": "Chargement du profil...",
@@ -577,6 +584,7 @@
       "metricMissRate": "Taux de Miss",
       "metricMemberCount": "Nombre de Membres",
       "metricTotalParticipations": "Total Participations",
+      "metricClearRate": "Taux de Clear",
       "radarAvg": "Moy. Score",
       "radarBest": "Meilleur",
       "radarParticipation": "Participation",

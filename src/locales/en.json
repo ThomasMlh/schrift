@@ -217,7 +217,14 @@
       "statsGuilds": "Guilds",
       "statsMembers": "Total Members",
       "orgNoMembers": "No members in this guild",
-      "orgSectionMembers": "Members"
+      "orgSectionMembers": "Members",
+      "statsSection": "Statistics",
+      "statAvgScore": "Average Score",
+      "statBestScore": "Best Score",
+      "statTotalParticipations": "Participations",
+      "statTotalPoints": "Total Points",
+      "statClearRate": "Clear Rate",
+      "statClearRateTooltip": "% of scores ≥ 600M"
     },
     "user": {
       "loadingProfile": "Loading profile...",
@@ -577,6 +584,7 @@
       "metricMissRate": "Miss Rate",
       "metricMemberCount": "Member Count",
       "metricTotalParticipations": "Total Participations",
+      "metricClearRate": "Clear Rate",
       "radarAvg": "Avg. Score",
       "radarBest": "Best",
       "radarParticipation": "Participation",
