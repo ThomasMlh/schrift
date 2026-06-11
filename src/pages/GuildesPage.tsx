@@ -51,7 +51,7 @@ const GuildesPage = () => {
   const { currentCycle } = useCurrentRotation(cycles, isLoadingCycles);
 
   useEffect(() => {
-    if (currentCycle && !selectedCycleId) {
+    if (currentCycle?._id && !selectedCycleId) {
       setSelectedCycleId(currentCycle._id);
     }
   }, [currentCycle, selectedCycleId]);
