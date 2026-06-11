@@ -108,7 +108,7 @@ const ComparatorPage: React.FC = () => {
     { key: "bestScore", label: t("components.comparatorCharts.radarBest"), getRawValue: (s) => s?.bestScore || 0 },
     { key: "totalMembers", label: t("components.comparatorCharts.radarMembers"), getRawValue: (s) => s?.totalMembers || 0 },
     { key: "totalScores", label: t("components.comparatorCharts.radarParticipation"), getRawValue: (s) => s?.totalScores || 0 },
-    { key: "totalPoints", label: t("components.comparatorCharts.radarTotalPoints"), getRawValue: (s) => s?.totalPoints || 0 },
+    { key: "clearRate", label: t("components.comparatorCharts.metricClearRate"), getRawValue: (s) => s?.clearRate || 0, absolute: true },
   ], [t]);
 
   // Table metrics
@@ -127,6 +127,7 @@ const ComparatorPage: React.FC = () => {
     { label: t("components.comparatorCharts.metricBestScore"), icon: "🏆", getDisplayValue: (s) => formatNumber(s?.bestScore), getRawValue: (s) => s?.bestScore || 0 },
     { label: t("components.comparatorCharts.metricTotalParticipations"), icon: "🎯", getDisplayValue: (s) => formatNumber(s?.totalScores), getRawValue: (s) => s?.totalScores || 0 },
     { label: t("components.comparatorCharts.metricTotalPoints"), icon: "💰", getDisplayValue: (s) => formatScore(s?.totalPoints), getRawValue: (s) => s?.totalPoints || 0 },
+    { label: t("components.comparatorCharts.metricClearRate"), icon: "✅", getDisplayValue: (s) => typeof s?.clearRate === "number" ? `${s.clearRate}%` : "N/A", getRawValue: (s) => s?.clearRate || 0 },
   ], [t]);
 
   // Load from URL on mount
