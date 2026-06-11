@@ -24,7 +24,8 @@ interface GuildScoreDistributionProps {
   cycleId?: string;
 }
 
-const CLEAR_THRESHOLD_INDEX = 3; // buckets index 3+ = ≥600M = clear
+const CLEAR_THRESHOLD_INDEX = 4; // index 4 = ≥600M = clear
+const MISS_INDEX = 0;
 
 export const GuildScoreDistribution = ({ guildId, cycleId }: GuildScoreDistributionProps) => {
   const { distribution, isLoading } = useGuildScoreDistribution(guildId, cycleId);
@@ -78,9 +79,13 @@ export const GuildScoreDistribution = ({ guildId, cycleId }: GuildScoreDistribut
                 {distribution.map((_, index) => (
                   <Cell
                     key={index}
-                    fill={index >= CLEAR_THRESHOLD_INDEX
-                      ? (isDark ? "#68D391" : "#38A169")
-                      : (isDark ? "#FC8181" : "#E53E3E")}
+                    fill={
+                      index === MISS_INDEX
+                        ? (isDark ? "#718096" : "#A0AEC0")
+                        : index >= CLEAR_THRESHOLD_INDEX
+                          ? (isDark ? "#68D391" : "#38A169")
+                          : (isDark ? "#FC8181" : "#E53E3E")
+                    }
                     fillOpacity={0.85}
                   />
                 ))}
@@ -90,7 +95,7 @@ export const GuildScoreDistribution = ({ guildId, cycleId }: GuildScoreDistribut
         </Box>
       )}
       <Text fontSize="2xs" color={subText} mt={1}>
-        🟢 ≥ 600M = clear &nbsp;·&nbsp; 🔴 &lt; 600M
+        🟢 ≥ 600M = clear &nbsp;·&nbsp; 🔴 &lt; 600M &nbsp;·&nbsp; ⚫ miss
       </Text>
     </Box>
   );
