@@ -993,6 +993,82 @@ export const fetchGuildStats = async (guildId: string, cycleId?: string): Promis
   }
 };
 
+// Classement de toutes les guildes
+export interface IGuildRanking extends IGuildStats {
+  _id: string;
+  name: string;
+  rank: number;
+}
+
+export const useGuildRankings = (cycleId?: string) => {
+  const url = `${apiUrl}/api/guildes/rankings${cycleId ? `?cycle_id=${cycleId}` : ''}`;
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: IGuildRanking[] }>(url, fetcher, { revalidateOnFocus: false });
+  return { rankings: data?.data || [], isLoading, error };
+};
+
+// Top membres d'une guilde
+export interface IGuildTopMember {
+  userId: string;
+  username: string;
+  avatar?: string;
+  discord_id?: string;
+  bestScore: number;
+  avgScore: number;
+  totalScores: number;
+}
+
+export const useGuildTopMembers = (guildId?: string, cycleId?: string, limit = 3) => {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (cycleId) params.set('cycle_id', cycleId);
+  const url = guildId ? `${apiUrl}/api/guildes/${guildId}/top-members?${params}` : null;
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: IGuildTopMember[] }>(url, fetcher, { revalidateOnFocus: false });
+  return { topMembers: data?.data || [], isLoading, error };
+};
+
+// Distribution des scores d'une guilde
+export interface IScoreBucket {
+  label: string;
+  count: number;
+}
+
+export const useGuildScoreDistribution = (guildId?: string, cycleId?: string) => {
+  const params = cycleId ? `?cycle_id=${cycleId}` : '';
+  const url = guildId ? `${apiUrl}/api/guildes/${guildId}/score-distribution${params}` : null;
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: IScoreBucket[] }>(url, fetcher, { revalidateOnFocus: false });
+  return { distribution: data?.data || [], isLoading, error };
+};
+
+// Évolution d'une guilde sur les derniers cycles
+export interface IGuildEvolutionPoint {
+  cycleId: string;
+  cycleName: string;
+  cycleYear: number;
+  averageScore: number;
+  totalScores: number;
+  clearRate: number;
+}
+
+export const useGuildEvolution = (guildId?: string, limit = 6) => {
+  const url = guildId ? `${apiUrl}/api/guildes/${guildId}/evolution?limit=${limit}` : null;
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: IGuildEvolutionPoint[] }>(url, fetcher, { revalidateOnFocus: false });
+  return { evolution: data?.data || [], isLoading, error };
+};
+
+// Statistiques globales de la communauté
+export interface ICommunityStats {
+  totalMembers: number;
+  totalGuilds: number;
+  totalScores: number;
+  globalClearRate: number;
+  avgScore: number;
+}
+
+export const useCommunityStats = (cycleId?: string) => {
+  const url = `${apiUrl}/api/stats/community${cycleId ? `?cycle_id=${cycleId}` : ''}`;
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: ICommunityStats }>(url, fetcher, { revalidateOnFocus: false });
+  return { stats: data?.data, isLoading, error };
+};
+
 // Hook pour récupérer la liste des screenshotters OCR (endpoint public)
 export const useScreenshotters = () => {
   const { data, error, isLoading } = useSWR<{ success: boolean; data: Array<{ id: string; label: string }> }>(

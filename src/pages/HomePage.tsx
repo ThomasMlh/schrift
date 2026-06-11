@@ -1,5 +1,6 @@
 import { Container, VStack, Flex } from "@chakra-ui/react";
 import { CurrentInfoSection } from "../components/CurrentInfoSection";
+import { CommunityStatsSection } from "../components/CommunityStatsSection";
 import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "../components/SEOHead";
 import { useTranslation } from "react-i18next";
@@ -104,6 +105,9 @@ const HomePage = () => {
 
       <Container maxW="container.xl" px={{ base: 4, md: 6 }} py={10}>
         <VStack spacing={10} w="100%">
+          <Flex w="100%" direction="column">
+            <CommunityStatsSection />
+          </Flex>
           <Flex w="100%" direction="column">
             <CurrentInfoSection />
           </Flex>

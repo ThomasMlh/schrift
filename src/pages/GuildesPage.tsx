@@ -12,13 +12,17 @@ import {
   Divider,
   Tooltip,
   Skeleton,
+  Badge,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { FiUsers, FiGrid, FiChevronRight } from "react-icons/fi";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
 import { GuildOrgChart } from "../components/GuildOrgChart";
-import { useGuilds, useAllGuildsMemberCounts, useGuildStats, useCycles } from "@/hooks/useAPI";
+import { useGuilds, useAllGuildsMemberCounts, useGuildStats, useCycles, useGuildRankings } from "@/hooks/useAPI";
+import { GuildTopMembers } from "@/components/guild/GuildTopMembers";
+import { GuildScoreDistribution } from "@/components/guild/GuildScoreDistribution";
+import { GuildEvolution } from "@/components/guild/GuildEvolution";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import type { IGuild } from "../interfaces";
@@ -61,6 +65,8 @@ const GuildesPage = () => {
   const totalMembers = Object.values(guildMemberCounts ?? {}).reduce((acc, n) => acc + n, 0);
 
   const { stats: guildStats, isLoading: isLoadingStats } = useGuildStats(selectedGuild?._id, selectedCycleId || undefined);
+  const { rankings } = useGuildRankings(selectedCycleId || undefined);
+  const currentGuildRank = selectedGuild ? rankings.find(r => r._id === selectedGuild._id) : null;
 
   const statCardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.7)");
   const statCardBorder = useColorModeValue("gray.100", "whiteAlpha.100");
@@ -296,9 +302,22 @@ const GuildesPage = () => {
                       />
                     )}
                     <VStack align="start" spacing={0}>
-                      <Text fontSize="md" fontWeight="bold">
-                        Schrift {selectedGuild.name}
-                      </Text>
+                      <HStack spacing={2}>
+                        <Text fontSize="md" fontWeight="bold">
+                          Schrift {selectedGuild.name}
+                        </Text>
+                        {currentGuildRank && rankings.length > 0 && (
+                          <Badge
+                            colorScheme={currentGuildRank.rank === 1 ? "yellow" : "purple"}
+                            variant="subtle"
+                            borderRadius="full"
+                            fontSize="2xs"
+                            px={2}
+                          >
+                            #{currentGuildRank.rank} / {rankings.length}
+                          </Badge>
+                        )}
+                      </HStack>
                       <Text fontSize="xs" color={countColor}>
                         {guildMemberCounts?.[selectedGuild._id] || 0}{" "}
                         {t("pages.guilds.memberPlural")}
@@ -383,6 +402,21 @@ const GuildesPage = () => {
                       </Tooltip>
                     ))}
                   </SimpleGrid>
+
+                  {/* Top membres + Distribution */}
+                  <SimpleGrid columns={{ base: 1, md: 2 }} gap={4} mt={2}>
+                    <GuildTopMembers
+                      guildId={selectedGuild._id}
+                      cycleId={selectedCycleId || undefined}
+                    />
+                    <GuildScoreDistribution
+                      guildId={selectedGuild._id}
+                      cycleId={selectedCycleId || undefined}
+                    />
+                  </SimpleGrid>
+
+                  {/* Évolution */}
+                  <GuildEvolution guildId={selectedGuild._id} />
                 </Box>
               )}
             </Box>

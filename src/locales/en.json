@@ -52,7 +52,13 @@
       "title": "Welcome to Schrift",
       "subtitle": "The Schrift guilds platform for Bleach Brave Souls",
       "heroTitle": "Ṣčhrīft Guilds",
-      "heroDescription": "Join our Bleach Brave Souls community and dominate the rankings with the best guilds"
+      "heroDescription": "Join our Bleach Brave Souls community and dominate the rankings with the best guilds",
+      "communityTitle": "Community by the Numbers",
+      "communitySubtitle": "Active cycle statistics",
+      "communityMembers": "Active members",
+      "communityGuilds": "Active guilds",
+      "communityAvgScore": "Average score",
+      "communityClearRate": "Clear rate"
     },
     "characters": {
       "title": "Characters",
@@ -224,7 +230,17 @@
       "statTotalParticipations": "Participations",
       "statTotalPoints": "Total Points",
       "statClearRate": "Clear Rate",
-      "statClearRateTooltip": "% of scores ≥ 600M"
+      "statClearRateTooltip": "% of scores ≥ 600M",
+      "topMembersTitle": "Top Members",
+      "topMembersNoData": "No scores for this cycle",
+      "memberBestScore": "Best",
+      "memberScores": "participation(s)",
+      "distributionTitle": "Score Distribution",
+      "distributionNoData": "No data for this cycle",
+      "evolutionTitle": "Evolution",
+      "evolutionNoData": "Not enough cycles to display",
+      "evolutionAvgScore": "Avg. score",
+      "evolutionClearRate": "Clear rate"
     },
     "user": {
       "loadingProfile": "Loading profile...",
