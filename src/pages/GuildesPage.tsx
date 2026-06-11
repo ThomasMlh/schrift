@@ -8,13 +8,19 @@ import {
   Image,
   Text,
   Icon,
+  SimpleGrid,
+  Divider,
+  Tooltip,
+  Skeleton,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { FiUsers, FiGrid, FiChevronRight } from "react-icons/fi";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
 import { GuildOrgChart } from "../components/GuildOrgChart";
-import { useGuilds, useAllGuildsMemberCounts } from "@/hooks/useAPI";
+import { useGuilds, useAllGuildsMemberCounts, useGuildStats, useCycles } from "@/hooks/useAPI";
+import { useCurrentRotation } from "@/hooks/useCurrentRotation";
+import { CycleSelect } from "@/components/ui/CycleSelect";
 import type { IGuild } from "../interfaces";
 import { useTranslation } from "react-i18next";
 
@@ -22,6 +28,7 @@ const GuildesPage = () => {
   const { guilds } = useGuilds(true);
   const [selectedGuild, setSelectedGuild] = useState<IGuild | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [selectedCycleId, setSelectedCycleId] = useState<string>("");
   const bucketUrl = import.meta.env.VITE_BUCKET_URL;
   const { t } = useTranslation();
 
@@ -40,9 +47,29 @@ const GuildesPage = () => {
     }
   }, [guilds, selectedGuild]);
 
+  const { cycles, isLoading: isLoadingCycles } = useCycles();
+  const { currentCycle } = useCurrentRotation(cycles, isLoadingCycles);
+
+  useEffect(() => {
+    if (currentCycle && !selectedCycleId) {
+      setSelectedCycleId(currentCycle._id);
+    }
+  }, [currentCycle, selectedCycleId]);
+
   const { memberCounts: guildMemberCounts, membersByGuild, isLoading } = useAllGuildsMemberCounts(guilds, true);
   const members = selectedGuild ? (membersByGuild[selectedGuild._id] || []) : [];
   const totalMembers = Object.values(guildMemberCounts ?? {}).reduce((acc, n) => acc + n, 0);
+
+  const { stats: guildStats, isLoading: isLoadingStats } = useGuildStats(selectedGuild?._id, selectedCycleId || undefined);
+
+  const statCardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.7)");
+  const statCardBorder = useColorModeValue("gray.100", "whiteAlpha.100");
+
+  const formatScore = (n: number) => {
+    if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`;
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
+    return n.toLocaleString("fr-FR");
+  };
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -293,6 +320,71 @@ const GuildesPage = () => {
                   <GuildOrgChart members={members} />
                 )}
               </Box>
+
+              {/* Guild stats */}
+              {selectedGuild && (
+                <Box px={6} pb={8}>
+                  <Divider mb={6} borderColor={dividerColor} />
+                  <HStack justify="space-between" align="center" mb={4}>
+                    <Text
+                      fontSize="xs"
+                      fontWeight="semibold"
+                      textTransform="uppercase"
+                      letterSpacing="wider"
+                      color={countColor}
+                    >
+                      {t("pages.guilds.statsSection")}
+                    </Text>
+                    <Box minW="180px">
+                      <CycleSelect
+                        cycles={cycles}
+                        value={selectedCycleId}
+                        onChange={setSelectedCycleId}
+                        allowDeselect
+                        size="sm"
+                        showActiveBadge
+                      />
+                    </Box>
+                  </HStack>
+                  <SimpleGrid columns={{ base: 2, sm: 3, md: 5 }} gap={3}>
+                    {[
+                      { label: t("pages.guilds.statAvgScore"), icon: "📊", value: guildStats ? formatScore(guildStats.averageScore) : null },
+                      { label: t("pages.guilds.statBestScore"), icon: "🏆", value: guildStats ? formatScore(guildStats.bestScore) : null },
+                      { label: t("pages.guilds.statTotalParticipations"), icon: "🎯", value: guildStats ? guildStats.totalScores.toLocaleString("fr-FR") : null },
+                      { label: t("pages.guilds.statTotalPoints"), icon: "💰", value: guildStats ? formatScore(guildStats.totalPoints) : null },
+                      {
+                        label: t("pages.guilds.statClearRate"),
+                        icon: "✅",
+                        value: guildStats ? `${guildStats.clearRate}%` : null,
+                        tooltip: t("pages.guilds.statClearRateTooltip"),
+                      },
+                    ].map(({ label, icon, value, tooltip }) => (
+                      <Tooltip key={label} label={tooltip} isDisabled={!tooltip} hasArrow placement="top">
+                        <Box
+                          bg={statCardBg}
+                          borderRadius="xl"
+                          borderWidth="1px"
+                          borderColor={statCardBorder}
+                          p={4}
+                          textAlign="center"
+                          boxShadow="sm"
+                          cursor={tooltip ? "default" : undefined}
+                        >
+                          <Text fontSize="lg" mb={1}>{icon}</Text>
+                          <Skeleton isLoaded={!isLoadingStats} fadeDuration={0.4}>
+                            <Text fontSize="xl" fontWeight="bold" lineHeight={1.2}>
+                              {value ?? "—"}
+                            </Text>
+                          </Skeleton>
+                          <Text fontSize="2xs" color={countColor} textTransform="uppercase" letterSpacing="wide" mt={1} fontWeight="semibold">
+                            {label}
+                          </Text>
+                        </Box>
+                      </Tooltip>
+                    ))}
+                  </SimpleGrid>
+                </Box>
+              )}
             </Box>
           </Flex>
         </Container>
