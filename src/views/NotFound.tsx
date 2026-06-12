@@ -1,10 +1,10 @@
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { Box, Button, Container } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 const NotFound = () => {
-    const navigate = useNavigate();
+    const router = useRouter();
     const { t } = useTranslation();
     return (
         <Box w="100%">
@@ -24,7 +24,7 @@ const NotFound = () => {
                     leftIcon={<ArrowBackIcon />}
                     variant="outline"
                     alignSelf="flex-start"
-                    onClick={() => navigate('/')}
+                    onClick={() => router.push('/')}
                 >
                     {t("pages.notFound.backHome")}
                 </Button>

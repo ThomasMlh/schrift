@@ -20,7 +20,7 @@ import {
   Badge
 } from "@chakra-ui/react";
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useRouter } from "next/navigation";
 import {
   ArrowBackIcon,
   ChevronLeftIcon,
@@ -47,11 +47,10 @@ import { useTranslation } from "react-i18next";
 import { PageLoader } from "@/components/ui/PageLoader";
 
 const RotationDetailPage = () => {
-  const { cycleId, position } = useParams<{
-    cycleId: string;
-    position: string;
-  }>();
-  const navigate = useNavigate();
+  const params = useParams();
+  const cycleId = params?.cycleId as string;
+  const position = params?.position as string;
+  const router = useRouter();
   const toast = useToast();
   const { t } = useTranslation();
 
@@ -202,14 +201,14 @@ const RotationDetailPage = () => {
   const handlePreviousRotation = () => {
     const currentPosition = parseInt(position || "1");
     if (currentPosition > 1) {
-      navigate(`/cycle/${cycleId}/rotation/${currentPosition - 1}`);
+      router.push(`/cycle/${cycleId}/rotation/${currentPosition - 1}`);
     }
   };
 
   const handleNextRotation = () => {
     const currentPosition = parseInt(position || "1");
     if (currentPosition < totalRotations) {
-      navigate(`/cycle/${cycleId}/rotation/${currentPosition + 1}`);
+      router.push(`/cycle/${cycleId}/rotation/${currentPosition + 1}`);
     }
   };
 
@@ -231,7 +230,7 @@ const RotationDetailPage = () => {
           <Button
             leftIcon={<ArrowBackIcon />}
             colorScheme="blue"
-            onClick={() => navigate(-1)}
+            onClick={() => router.back()}
           >
             Retour
           </Button>
@@ -264,7 +263,7 @@ const RotationDetailPage = () => {
                 leftIcon={<ArrowBackIcon />}
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate(-1)}
+                onClick={() => router.back()}
                 _hover={{ transform: "translateX(-4px)" }}
                 transition="all 0.2s"
               >
@@ -277,7 +276,7 @@ const RotationDetailPage = () => {
                   colorScheme="purple"
                   rightIcon={<ExternalLinkIcon />}
                   onClick={() =>
-                    navigate(
+                    router.push(
                       `/personnages?killer=${encodeURIComponent(rotation.killer)}&attack_type=${encodeURIComponent(rotation.attack)}`
                     )
                   }

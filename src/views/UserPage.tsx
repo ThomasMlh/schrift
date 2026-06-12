@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   Container,
@@ -44,8 +44,10 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 
 const UserPage = () => {
-  const { userId } = useParams<{ userId: string }>();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const params = useParams();
+  const userId = params?.userId as string;
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [selectedCycle, setSelectedCycle] = useState<string>("");
   const { isAdmin, currentUser } = useAuth();
   const { t } = useTranslation();
@@ -66,14 +68,14 @@ const UserPage = () => {
 
   // Handler pour changer d'onglet
   const handleTabChange = (index: number) => {
-    const newParams = new URLSearchParams(searchParams);
+    const newParams = new URLSearchParams(searchParams.toString());
     if (index === 0) {
-      // Retirer le paramètre tab pour l'onglet par défaut
       newParams.delete("tab");
     } else {
       newParams.set("tab", TAB_NAMES[index]);
     }
-    setSearchParams(newParams);
+    const qs = newParams.toString();
+    router.replace(qs ? `?${qs}` : window.location.pathname);
   };
 
   // Utilisation des hooks

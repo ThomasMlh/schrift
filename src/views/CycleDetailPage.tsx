@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useRouter } from "next/navigation";
 import {
   Container,
   VStack,
@@ -28,8 +28,9 @@ import { useTranslation } from "react-i18next";
 import { PageLoader } from "@/components/ui/PageLoader";
 
 const CycleDetailPage = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const params = useParams();
+  const id = params?.id as string;
+  const router = useRouter();
   const { t } = useTranslation();
   
   // Utiliser useSWR pour le cycle (cache automatique)
@@ -71,7 +72,7 @@ const CycleDetailPage = () => {
           </Alert>
           <Button
             leftIcon={<ArrowBackIcon />}
-            onClick={() => navigate("/cycles")}
+            onClick={() => router.push("/cycles")}
           >
             {t("pages.cycleDetail.backToCycles")}
           </Button>
@@ -104,7 +105,7 @@ const CycleDetailPage = () => {
               <Button
                 leftIcon={<ArrowBackIcon />}
                 variant="ghost"
-                onClick={() => navigate("/cycles")}
+                onClick={() => router.push("/cycles")}
                 size="sm"
                 _hover={{ transform: "translateX(-4px)" }}
                 transition="all 0.2s"

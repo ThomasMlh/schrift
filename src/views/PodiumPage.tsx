@@ -1,6 +1,6 @@
 import { Container, VStack, Box, useColorModeValue, useToast } from "@chakra-ui/react";
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNextSearchParams } from "@/hooks/useNextSearchParams";
 import { HeroSection } from "../components/HeroSection";
 import type {
   IPodiumResponse,
@@ -29,7 +29,7 @@ interface FilterOverrides {
 }
 
 const PodiumPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useNextSearchParams();
   const toast = useToast();
   const { t } = useTranslation();
   const hasLoadedFromURL = useRef(false);

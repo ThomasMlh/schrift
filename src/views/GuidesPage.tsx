@@ -7,7 +7,7 @@ import {
   Image,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
@@ -18,8 +18,9 @@ const SECTION_IDS = ["rotations-builds", "orbs"] as const;
 type SectionId = (typeof SECTION_IDS)[number];
 
 const GuidesPage = () => {
-  const { section } = useParams<{ section?: string }>();
-  const navigate = useNavigate();
+  const params = useParams();
+  const section = params?.section as string | undefined;
+  const router = useRouter();
   const { t } = useTranslation();
 
   const bgColor = useColorModeValue("white", "gray.800");
@@ -46,7 +47,7 @@ const GuidesPage = () => {
 
   const handleSectionChange = (id: SectionId) => {
     setActiveSection(id);
-    navigate(`/guides/${id}`, { replace: true });
+    router.replace(`/guides/${id}`);
   };
 
   return (

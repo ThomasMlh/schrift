@@ -1,6 +1,6 @@
 import { useState } from "react";
 import React from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import {
   Box,
   Container,
@@ -288,7 +288,7 @@ const CyclesPage = () => {
                                 <VStack align="start" spacing={1} flex={1} minW={0}>
                                   <Heading
                                     as={Link}
-                                    to={`/cycle/${cycle._id}`}
+                                    href={`/cycle/${cycle._id}`}
                                     size="md"
                                     noOfLines={2}
                                     color="inherit"
@@ -382,7 +382,7 @@ const CyclesPage = () => {
 
                                 <Button
                                   as={Link}
-                                  to={`/cycle/${cycle._id}`}
+                                  href={`/cycle/${cycle._id}`}
                                   rightIcon={<ChevronRightIcon />}
                                   colorScheme="blue"
                                   variant="ghost"

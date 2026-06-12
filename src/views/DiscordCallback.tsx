@@ -1,16 +1,16 @@
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useToast } from "@chakra-ui/react";
 import { useAuth } from "../providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "@/components/ui/PageLoader";
 
 const DiscordCallback = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const toast = useToast();
   const { login } = useAuth();
   const { t } = useTranslation();
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   const hasProcessed = useRef(false);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const DiscordCallback = () => {
 
         if (!savedState) {
           // Pas de flow OAuth en cours (URL obsolète ou restaurée par le navigateur)
-          navigate('/');
+          router.push('/');
           return;
         }
 
@@ -82,7 +82,7 @@ const DiscordCallback = () => {
         // Rediriger vers la page d'origine ou l'accueil
         const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
         sessionStorage.removeItem('redirectAfterLogin');
-        navigate(redirectPath);
+        router.push(redirectPath);
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
@@ -92,7 +92,7 @@ const DiscordCallback = () => {
           status: "error"
         });
         sessionStorage.removeItem('redirectAfterLogin');
-        navigate('/');
+        router.push('/');
       }
     };
 

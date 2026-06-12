@@ -18,7 +18,8 @@ import {
 } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
+import { useParams, useRouter } from "next/navigation";
+import NextLink from "next/link";
 import { ArrowBackIcon, DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 
@@ -64,11 +65,12 @@ const SectionCard = ({ label, accentColor, isDark, children }: SectionCardProps)
 );
 
 const CharacterDetailPage = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const params = useParams();
+  const id = params?.id as string;
+  const router = useRouter();
   const toast = useToast();
   const { t } = useTranslation();
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+  const bucketUrl = process.env.NEXT_PUBLIC_BUCKET_URL;
 
   // Utiliser useSWR pour le personnage (cache automatique)
   const { character, isLoading, error: fetchError } = useCharacter(id);
@@ -133,7 +135,7 @@ const CharacterDetailPage = () => {
             colorScheme="purple"
             variant="outline"
             borderRadius="full"
-            onClick={() => navigate("/personnages")}
+            onClick={() => router.push("/personnages")}
           >
             {t("pages.characterDetail.backToCharacters")}
           </Button>
@@ -242,7 +244,7 @@ const CharacterDetailPage = () => {
             colorScheme="purple"
             alignSelf="flex-start"
             borderRadius="full"
-            onClick={() => navigate("/personnages")}
+            onClick={() => router.push("/personnages")}
           >
             {t("pages.characterDetail.backToCharacters")}
           </Button>
@@ -589,8 +591,8 @@ const CharacterDetailPage = () => {
           {/* Bottom navigation */}
           <Flex justify="center">
             <Button
-              as={RouterLink}
-              to="/personnages"
+              as={NextLink}
+              href="/personnages"
               colorScheme="purple"
               variant="outline"
               borderRadius="full"

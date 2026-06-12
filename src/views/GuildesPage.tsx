@@ -33,7 +33,7 @@ const GuildesPage = () => {
   const [selectedGuild, setSelectedGuild] = useState<IGuild | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+  const bucketUrl = process.env.NEXT_PUBLIC_BUCKET_URL;
   const { t } = useTranslation();
 
   const sidebarBg = useColorModeValue("white", "rgba(26, 32, 44, 0.8)");

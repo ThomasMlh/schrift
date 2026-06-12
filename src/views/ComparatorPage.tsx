@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNextSearchParams } from "@/hooks/useNextSearchParams";
 import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "@/components/SEOHead";
 import { CycleSelect } from "@/components/ui/CycleSelect";
@@ -66,7 +66,7 @@ const formatScore = (score: number | undefined | null): string => {
 
 const ComparatorPage: React.FC = () => {
   const toast = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useNextSearchParams();
   const { t } = useTranslation();
 
   const [comparisonType, setComparisonType] = useState<"players" | "guilds">(
