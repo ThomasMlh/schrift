@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import NextLink from 'next/link';
 import { Link, useColorModeValue, Text } from '@chakra-ui/react';
 import type { SystemStyleObject } from '@chakra-ui/react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -48,9 +48,9 @@ const CustomLink: React.FC<CustomLinkProps> = ({ to, text, textSize = "sm", sx, 
         );
     }
 
-    return <Link 
-        as={RouterLink} 
-        to={to} 
+    return <Link
+        as={NextLink}
+        href={to}
         color={linkColor}
         _hover={rainbow ? {
             "&::after": { opacity: 1 }

@@ -4,7 +4,7 @@ import {
     useColorMode, Badge, Flex, IconButton, useDisclosure, Tooltip
 } from "@chakra-ui/react";
 import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNextSearchParams } from "@/hooks/useNextSearchParams";
 import { SearchIcon, EditIcon, NotAllowedIcon, CheckCircleIcon } from "@chakra-ui/icons";
 import type { IUser } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
@@ -23,7 +23,7 @@ interface UsersTableProps {
 
 const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const { t } = useTranslation();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useNextSearchParams();
 
     // États - Initialiser avec les paramètres URL
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");

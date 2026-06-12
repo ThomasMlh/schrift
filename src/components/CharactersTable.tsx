@@ -4,7 +4,7 @@ import {
   useColorMode, Badge, Flex, Avatar, Tooltip, SimpleGrid
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNextSearchParams } from "@/hooks/useNextSearchParams";
 import { SearchIcon } from "@chakra-ui/icons";
 import { useCharacters } from "@/hooks/useAPI";
 import { AffinityIcon } from "./ui/AffinityIcon";
@@ -23,7 +23,7 @@ import { useTranslation } from "react-i18next";
 import { PageLoader } from "./ui/PageLoader";
 
 export const CharactersTable = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useNextSearchParams();
   const { t } = useTranslation();
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
@@ -39,7 +39,7 @@ export const CharactersTable = () => {
   const categories = CharactersCategories;
   const killers = CharactersKillers;
 
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+  const bucketUrl = process.env.NEXT_PUBLIC_BUCKET_URL;
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
   const borderColor = isDark ? 'whiteAlpha.100' : 'gray.200';
@@ -72,7 +72,7 @@ export const CharactersTable = () => {
     if (selectedAttackType) params.set('attack_type', selectedAttackType);
     if (itemsPerPage !== 20) params.set('limit', itemsPerPage.toString());
     if (currentPage !== 1) params.set('page', currentPage.toString());
-    setSearchParams(params, { replace: true });
+    setSearchParams(params);
   }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage, currentPage]);
 
   const handlePageChange = (page: number) => {

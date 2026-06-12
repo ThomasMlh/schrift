@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import {
   Box,
   Button,
@@ -35,7 +35,7 @@ const ScoresSection = () => {
   const [currentPage, setCurrentPage]           = useState(1);
   const { t } = useTranslation();
 
-  const navigate = useNavigate();
+  const router = useRouter();
   const { cycles, isLoading: isLoadingCycles } = useCycles({ authenticated: true });
   const { users }  = useUsers({ authenticated: true, limit: 1000 });
   const { guilds } = useGuilds(true);
@@ -148,7 +148,7 @@ const ScoresSection = () => {
                         size="sm"
                         variant="outline"
                         borderRadius="lg"
-                        onClick={() => navigate("/ocr-debug")}
+                        onClick={() => router.push("/ocr-debug")}
                       />
                     </Tooltip>
                   </>

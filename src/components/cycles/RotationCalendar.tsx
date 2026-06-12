@@ -10,7 +10,7 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { AttackTypeBadge } from "../ui/AttackTypeBadge";
 import { AlterationImage } from "../ui/AlterationImage";
 import { useCycles } from "@/hooks/useAPI";
@@ -357,7 +357,7 @@ const RotationCalendar = () => {
                           <Box
                             key={trackIdx}
                             as={Link}
-                            to={`/cycle/${entry.cycle._id}`}
+                            href={`/cycle/${entry.cycle._id}`}
                             _hover={{ opacity: 0.75 }}
                             transition="opacity 0.15s"
                             {...sharedStyle}
@@ -417,7 +417,7 @@ const RotationCalendar = () => {
                         >
                           <Box
                             as={Link}
-                            to={`/cycle/${entry.cycle._id}`}
+                            href={`/cycle/${entry.cycle._id}`}
                             {...sharedStyle}
                           />
                         </Tooltip>
@@ -446,7 +446,7 @@ const RotationCalendar = () => {
               key={cycle._id}
               spacing={1.5}
               as={Link}
-              to={`/cycle/${cycle._id}`}
+              href={`/cycle/${cycle._id}`}
               _hover={{ opacity: 0.7 }}
               transition="opacity 0.15s"
               textDecoration="none"

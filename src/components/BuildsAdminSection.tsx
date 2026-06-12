@@ -53,7 +53,7 @@ const BuildsAdminSection = () => {
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+  const bucketUrl = process.env.NEXT_PUBLIC_BUCKET_URL;
 
   const { builds, pagination, isLoading, mutate } = useBuilds({
     page: currentPage,

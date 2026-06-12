@@ -3,7 +3,7 @@ import type { ICycle, IGuild, IUser, ICharactersResponse, ICharacter, IRotationT
 import { useAuth } from '../providers/AuthProvider';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 
-const apiUrl = import.meta.env.VITE_API_BASE_URL;
+const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Fonction fetcher générique
 const fetcher = async (url: string) => {

@@ -1,6 +1,6 @@
 import { mutate } from 'swr';
 
-export const apiUrl = import.meta.env.VITE_API_BASE_URL as string;
+export const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
 /**
  * Crée une fonction de requête authentifiée liée au token courant.

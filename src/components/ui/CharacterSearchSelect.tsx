@@ -51,7 +51,7 @@ export const CharacterSearchSelect = ({
   const hoverBg = useColorModeValue("gray.50", "gray.600");
   const menuBg = useColorModeValue("white", "gray.800");
 
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+  const bucketUrl = process.env.NEXT_PUBLIC_BUCKET_URL;
 
   // Récupérer les personnages avec recherche API
   const { characters, isLoading } = useCharacters({

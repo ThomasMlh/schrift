@@ -1,4 +1,5 @@
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   useColorMode,
   Button,
@@ -115,7 +116,7 @@ export const Header = () => {
   const { t } = useTranslation();
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
-  const location = useLocation();
+  const pathname = usePathname();
 
   const menuItems = [
     { name: t("nav.home"), path: "/", icon: "🏠" },
@@ -131,8 +132,8 @@ export const Header = () => {
 
   // Fonction pour initier l'authentification Discord
   const handleDiscordAuth = () => {
-    const discordClientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
-    const redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI || `${window.location.origin}/discord-callback`;
+    const discordClientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
+    const redirectUri = process.env.NEXT_PUBLIC_DISCORD_REDIRECT_URI || `${window.location.origin}/discord-callback`;
 
     // Générer un state anti-CSRF et le stocker en session
     const state = crypto.randomUUID();
@@ -162,8 +163,8 @@ export const Header = () => {
   };
 
   const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
+    if (path === '/') return pathname === '/';
+    return pathname?.startsWith(path) ?? false;
   };
 
   const renderAuthButton = () => {
@@ -244,7 +245,7 @@ export const Header = () => {
         {/* Logo */}
         <Box
           as={Link}
-          to="/"
+          href="/"
           fontWeight="extrabold"
           fontSize={{ xl: "md", "2xl": "xl" }}
           letterSpacing="tight"
@@ -263,7 +264,7 @@ export const Header = () => {
               <Button
                 key={item.name}
                 as={Link}
-                to={item.path}
+                href={item.path}
                 variant="ghost"
                 onClick={onClose}
                 px={{ xl: 2, "2xl": 3 }}
@@ -294,7 +295,7 @@ export const Header = () => {
       <Flex display={{ base: "flex", xl: "none" }} align="center" justify="space-between">
         <Box
           as={Link}
-          to="/"
+          href="/"
           fontWeight="extrabold"
           fontSize="lg"
           bgGradient={isDark ? "linear(to-r, #C4B5FD, #818CF8)" : "linear(to-r, #7C3AED, #4F46E5)"}
@@ -359,7 +360,7 @@ export const Header = () => {
                   <Button
                     key={item.name}
                     as={Link}
-                    to={item.path}
+                    href={item.path}
                     variant="ghost"
                     onClick={onClose}
                     justifyContent="flex-start"

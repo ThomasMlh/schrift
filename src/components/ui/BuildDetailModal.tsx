@@ -51,7 +51,7 @@ export const BuildDetailModal = ({
   const { currentUser } = useAuth();
   const { t } = useTranslation();
 
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+  const bucketUrl = process.env.NEXT_PUBLIC_BUCKET_URL;
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";

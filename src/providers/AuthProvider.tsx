@@ -32,7 +32,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const apiUrl = import.meta.env.VITE_API_BASE_URL;
+const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 async function tryRefreshToken(): Promise<string | null> {
   const refreshToken = getRefreshToken();

@@ -37,7 +37,7 @@ import {
   ExternalLinkIcon,
 } from "@chakra-ui/icons";
 import { useState, useRef, useMemo } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "../ui/PageLoader";
 import type { ICycle } from "../../interfaces";
@@ -407,7 +407,7 @@ const ExistingCyclesList = ({
                       <HStack spacing={2} align="center">
                         <Text
                           as={Link}
-                          to={`/cycle/${cycle._id}`}
+                          href={`/cycle/${cycle._id}`}
                           fontWeight="bold"
                           fontSize="lg"
                           _hover={{ color: "blue.400" }}
@@ -417,7 +417,7 @@ const ExistingCyclesList = ({
                           {cycle.name} - {cycle.year}
                         </Text>
                         <Tooltip label="Voir le détail" hasArrow>
-                          <Box as={Link} to={`/cycle/${cycle._id}`} color="gray.500" _hover={{ color: "blue.400" }}>
+                          <Box as={Link} href={`/cycle/${cycle._id}`} color="gray.500" _hover={{ color: "blue.400" }}>
                             <ExternalLinkIcon boxSize={3} />
                           </Box>
                         </Tooltip>

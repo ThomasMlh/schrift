@@ -22,7 +22,7 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNextSearchParams } from "@/hooks/useNextSearchParams";
 import { useTranslation } from "react-i18next";
 import { AddIcon, EditIcon, CalendarIcon } from "@chakra-ui/icons";
 import { useBuilds, useRotations } from "../../hooks/useAPI";
@@ -47,7 +47,7 @@ const formatDate = (dateString?: string) => {
 };
 
 const RotationsBuildsGuide = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useNextSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRotation, setSelectedRotation] = useState<string>("");
   const [selectedBuild, setSelectedBuild] = useState<IBuild | null>(null);
@@ -63,7 +63,7 @@ const RotationsBuildsGuide = () => {
   const mutedText = useColorModeValue("gray.500", "gray.400");
 
   const { t } = useTranslation();
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+  const bucketUrl = process.env.NEXT_PUBLIC_BUCKET_URL;
 
   const { currentUser } = useAuth();
   const isAuthenticated = !!currentUser;
@@ -117,7 +117,7 @@ const RotationsBuildsGuide = () => {
     if (currentPage > 1) params.set("page", currentPage.toString());
     if (selectedBuild?._id) params.set("build", selectedBuild._id);
     const newSearch = params.toString();
-    if (newSearch !== searchParams.toString()) setSearchParams(params, { replace: true });
+    if (newSearch !== searchParams.toString()) setSearchParams(params);
   }, [selectedRotation, currentPage, selectedBuild, setSearchParams, searchParams, isInitialLoad]);
 
   const handleBuildCreated = () => mutate();

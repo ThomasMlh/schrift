@@ -127,7 +127,7 @@ export const AccessorySearchSelect = ({
             >
               {selectedAccessory.code && (
                 <Image
-                  src={`${import.meta.env.VITE_BUCKET_URL}/accessories/${selectedAccessory.code}/thumb.png`}
+                  src={`${process.env.NEXT_PUBLIC_BUCKET_URL}/accessories/${selectedAccessory.code}/thumb.png`}
                   alt={selectedAccessory.name}
                   boxSize="20px"
                   borderRadius="sm"
@@ -196,7 +196,7 @@ export const AccessorySearchSelect = ({
                     >
                       {accessory.code && (
                         <Image
-                          src={`${import.meta.env.VITE_BUCKET_URL}/accessories/${accessory.code}/thumb.png`}
+                          src={`${process.env.NEXT_PUBLIC_BUCKET_URL}/accessories/${accessory.code}/thumb.png`}
                           alt={accessory.name}
                           boxSize="22px"
                           borderRadius="sm"
