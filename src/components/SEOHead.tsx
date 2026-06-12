@@ -1,4 +1,5 @@
-import { Helmet } from 'react-helmet-async';
+'use client';
+
 import { useEffect } from 'react';
 
 interface SEOHeadProps {
@@ -20,55 +21,56 @@ export const SEOHead = ({
   url = "https://bbs-schrift.fr",
   type = "website",
   structuredData,
-  noIndex = false
+  noIndex = false,
 }: SEOHeadProps) => {
-  // Keywords génériques appliqués à toutes les pages
   const baseKeywords = "Bleach Brave Souls, BBS, Schrift, guildes, scores, BBS-Schrift, BBS Schrift";
-  
-  // Combine les keywords de base avec les keywords spécifiques de la page
-  const allKeywords = keywords 
-    ? `${baseKeywords}, ${keywords}` 
-    : baseKeywords;
-  
-  // Force la mise à jour du titre lors des changements de route
+  const allKeywords = keywords ? `${baseKeywords}, ${keywords}` : baseKeywords;
+
   useEffect(() => {
     document.title = title;
-  }, [title]);
-  
-  return (
-    <Helmet key={url} prioritizeSeoTags defer={false}>
-      {/* Title */}
-      <title>{title}</title>
-      <meta property="og:title" content={title} />
-      <meta name="twitter:title" content={title} />
-      
-      {/* Basic meta tags */}
-      <meta name="description" content={description} />
-      <meta name="keywords" content={allKeywords} />
-      
-      {/* Robots meta - noindex pour pages privées */}
-      {noIndex && <meta name="robots" content="noindex, nofollow" />}
-      
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
-      <meta property="og:description" content={description} />
-      <meta property="og:url" content={url} />
-      <meta property="og:image" content={image} />
-      
-      {/* Twitter */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={image} />
-      
-      {/* Canonical URL */}
-      <link rel="canonical" href={url} />
-      
-      {/* Structured Data */}
-      {structuredData && (
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
-      )}
-    </Helmet>
-  );
+
+    const setMeta = (nameAttr: string, nameValue: string, content: string) => {
+      let el = document.querySelector<HTMLMetaElement>(`meta[${nameAttr}="${nameValue}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(nameAttr, nameValue);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    setMeta('name', 'description', description);
+    setMeta('name', 'keywords', allKeywords);
+    setMeta('property', 'og:title', title);
+    setMeta('property', 'og:description', description);
+    setMeta('property', 'og:url', url);
+    setMeta('property', 'og:image', image);
+    setMeta('property', 'og:type', type);
+    setMeta('name', 'twitter:card', 'summary_large_image');
+    setMeta('name', 'twitter:title', title);
+    setMeta('name', 'twitter:description', description);
+    setMeta('name', 'twitter:image', image);
+
+    if (noIndex) setMeta('name', 'robots', 'noindex, nofollow');
+
+    let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', url);
+
+    if (structuredData) {
+      let script = document.querySelector<HTMLScriptElement>('script[type="application/ld+json"]');
+      if (!script) {
+        script = document.createElement('script');
+        script.setAttribute('type', 'application/ld+json');
+        document.head.appendChild(script);
+      }
+      script.textContent = JSON.stringify(structuredData);
+    }
+  }, [title, description, allKeywords, image, url, type, noIndex, structuredData]);
+
+  return null;
 };
