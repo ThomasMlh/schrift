@@ -1,7 +1,4 @@
-'use client';
-export const dynamic = 'force-dynamic';
-import { Suspense } from 'react';
-import GuidesPage from '@/views/GuidesPage';
-export default function Page() {
-  return <Suspense><GuidesPage /></Suspense>;
-}
+import { Suspense } from "react";
+import GuidesPage from "@/views/GuidesPage";
+export function generateStaticParams() { return [{ section: "_" }]; }
+export default function Page() { return <Suspense><GuidesPage /></Suspense>; }

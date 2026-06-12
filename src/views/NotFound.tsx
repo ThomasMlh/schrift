@@ -1,3 +1,4 @@
+'use client';
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { Box, Button, Container } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";

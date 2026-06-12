@@ -1,3 +1,4 @@
+'use client';
 import { Container, VStack, Box, useColorModeValue, useToast } from "@chakra-ui/react";
 import { useState, useEffect, useRef } from "react";
 import { useNextSearchParams } from "@/hooks/useNextSearchParams";

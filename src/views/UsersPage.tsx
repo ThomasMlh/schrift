@@ -1,3 +1,4 @@
+'use client';
 import { Container, VStack, Box } from "@chakra-ui/react";
 import UsersTable from "../components/UsersTable";
 import { HeroSection } from "../components/HeroSection";

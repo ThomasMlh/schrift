@@ -1,3 +1,4 @@
+'use client';
 import { Box, Flex, Heading, HStack, Text, Button, useToast, useColorMode } from "@chakra-ui/react";
 import { useAdminMutations } from "@/hooks/mutations/useAdminMutations";
 import GuildsAdminSection from "../components/GuildsAdminSection";

@@ -1,3 +1,4 @@
+'use client';
 import { Box, Container, VStack } from "@chakra-ui/react";
 import { CharactersTable } from "../components/CharactersTable";
 import { SEOHead } from "../components/SEOHead";

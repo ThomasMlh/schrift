@@ -1,3 +1,3 @@
-'use client';
-export const dynamic = 'force-dynamic';
-export { default } from '@/views/CharacterDetailPage';
+import CharacterDetailPage from "@/views/CharacterDetailPage";
+export function generateStaticParams() { return [{ id: "_" }]; }
+export default function Page() { return <CharacterDetailPage />; }

@@ -1,3 +1,4 @@
+'use client';
 import { Container, VStack, Flex } from "@chakra-ui/react";
 import { CurrentInfoSection } from "../components/CurrentInfoSection";
 import { CommunityStatsSection } from "../components/CommunityStatsSection";

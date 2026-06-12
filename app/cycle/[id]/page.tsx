@@ -1,3 +1,3 @@
-'use client';
-export const dynamic = 'force-dynamic';
-export { default } from '@/views/CycleDetailPage';
+import CycleDetailPage from "@/views/CycleDetailPage";
+export function generateStaticParams() { return [{ id: "_" }]; }
+export default function Page() { return <CycleDetailPage />; }
