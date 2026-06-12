@@ -3,7 +3,7 @@ import { initReactI18next } from "react-i18next";
 import fr from "./locales/fr.json";
 import en from "./locales/en.json";
 
-const savedLang = localStorage.getItem("schrift-lang") || "fr";
+const savedLang = (typeof window !== 'undefined' ? localStorage.getItem("schrift-lang") : null) || "fr";
 
 i18n.use(initReactI18next).init({
   resources: {
