@@ -29,6 +29,7 @@ interface MultiPlayerSelectorProps {
   maxPlayers?: number;
   availableUsers: IUser[];
   entityColors?: string[];
+  onSearchChange?: (query: string) => void;
 }
 
 export const MultiPlayerSelector = ({
@@ -38,6 +39,7 @@ export const MultiPlayerSelector = ({
   maxPlayers = 5,
   availableUsers,
   entityColors = DEFAULT_COLORS,
+  onSearchChange,
 }: MultiPlayerSelectorProps) => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
@@ -45,6 +47,11 @@ export const MultiPlayerSelector = ({
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const mutedText = useColorModeValue("gray.500", "gray.400");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchChange = (q: string) => {
+    setSearchQuery(q);
+    onSearchChange?.(q);
+  };
   const [selectedUserId, setSelectedUserId] = useState("");
   const { t } = useTranslation();
 
@@ -150,7 +157,7 @@ export const MultiPlayerSelector = ({
               selectedUserId={selectedUserId}
               onUserSelect={handleUserSelect}
               searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
+              onSearchChange={handleSearchChange}
               placeholder={t("components.multiPlayerSelector.searchPlaceholder")}
             />
           </Box>

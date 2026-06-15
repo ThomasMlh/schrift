@@ -72,7 +72,6 @@ const CharacterDetailPage = () => {
 
   // Utiliser useSWR pour le personnage (cache automatique)
   const { character, isLoading, error: fetchError } = useCharacter(id);
-  const [error, setError] = useState<string | null>(null);
 
   // Hooks UI
   const { colorMode } = useColorMode();
@@ -103,7 +102,6 @@ const CharacterDetailPage = () => {
 
   useEffect(() => {
     if (fetchError) {
-      setError(t("pages.characterDetail.errorLoading"));
       toast({
         title: t("pages.characterDetail.errorTitle"),
         description: t("pages.characterDetail.errorDesc"),
@@ -111,7 +109,7 @@ const CharacterDetailPage = () => {
         duration: 5000
       });
     }
-  }, [fetchError, toast]);
+  }, [fetchError, toast, t]);
 
   if (isLoading) {
     return (
@@ -121,12 +119,12 @@ const CharacterDetailPage = () => {
     );
   }
 
-  if (error || !character) {
+  if (fetchError || !character) {
     return (
       <Container maxW="container.lg" py={8}>
         <VStack spacing={6} align="center">
           <Text fontSize="xl" color="red.500">
-            {error || t("pages.characterDetail.notFound")}
+            {fetchError ? t("pages.characterDetail.errorLoading") : t("pages.characterDetail.notFound")}
           </Text>
           <Button
             leftIcon={<ArrowBackIcon />}

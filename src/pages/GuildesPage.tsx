@@ -19,7 +19,8 @@ import { FiUsers, FiGrid, FiChevronRight } from "react-icons/fi";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
 import { GuildOrgChart } from "../components/GuildOrgChart";
-import { useGuilds, useAllGuildsMemberCounts, useGuildStats, useCycles, useGuildRankings } from "@/hooks/useAPI";
+import { useGuilds, useAllGuildsMemberCounts, useGuildMembers, useGuildStats, useCycles, useGuildRankings } from "@/hooks/useAPI";
+import { formatScore } from "@/utils/format";
 import { GuildTopMembers } from "@/components/guild/GuildTopMembers";
 import { GuildScoreDistribution } from "@/components/guild/GuildScoreDistribution";
 import { GuildEvolution } from "@/components/guild/GuildEvolution";
@@ -60,8 +61,8 @@ const GuildesPage = () => {
     }
   }, [currentCycle, selectedCycleId]);
 
-  const { memberCounts: guildMemberCounts, membersByGuild, isLoading } = useAllGuildsMemberCounts(guilds, true);
-  const members = selectedGuild ? (membersByGuild[selectedGuild._id] || []) : [];
+  const { memberCounts: guildMemberCounts, isLoading } = useAllGuildsMemberCounts(true);
+  const { members, isLoading: isLoadingMembers } = useGuildMembers(selectedGuild?._id, true);
   const totalMembers = Object.values(guildMemberCounts ?? {}).reduce((acc, n) => acc + n, 0);
 
   const { stats: guildStats, isLoading: isLoadingStats } = useGuildStats(selectedGuild?._id, selectedCycleId || undefined);
@@ -70,12 +71,6 @@ const GuildesPage = () => {
 
   const statCardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.7)");
   const statCardBorder = useColorModeValue("gray.100", "whiteAlpha.100");
-
-  const formatScore = (n: number) => {
-    if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`;
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
-    return n.toLocaleString("fr-FR");
-  };
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -329,7 +324,7 @@ const GuildesPage = () => {
 
               {/* Org chart */}
               <Box px={4} minH="500px">
-                {isLoading ? (
+                {isLoadingMembers ? (
                   <Flex justify="center" align="center" h="400px">
                     <Text fontSize="md" color="gray.500" fontWeight="medium">
                       {t("pages.guilds.loading")}

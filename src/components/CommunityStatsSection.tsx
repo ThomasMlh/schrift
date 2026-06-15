@@ -4,7 +4,6 @@ import {
   Text,
   Skeleton,
   HStack,
-  VStack,
   Icon,
   useColorMode,
 } from "@chakra-ui/react";

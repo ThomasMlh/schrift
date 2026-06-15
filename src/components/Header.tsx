@@ -42,8 +42,8 @@ const ColorModeSwitcher = () => {
 };
 
 const LANGUAGES = [
-  { code: "fr", label: "Français", flagSrc: "https://flagcdn.com/20x15/fr.png", short: "FR" },
-  { code: "en", label: "English",  flagSrc: "https://flagcdn.com/20x15/gb.png", short: "EN" },
+  { code: "fr", label: "Français", flagSrc: "/flags/fr.png", short: "FR" },
+  { code: "en", label: "English",  flagSrc: "/flags/gb.png", short: "EN" },
 ];
 
 const LanguageSwitcher = () => {

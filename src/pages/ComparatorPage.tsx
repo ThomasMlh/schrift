@@ -17,7 +17,7 @@ import {
   Grid,
 } from "@chakra-ui/react";
 import { PageLoader } from "@/components/ui/PageLoader";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "@/components/SEOHead";
@@ -29,6 +29,7 @@ import { ComparisonDataTable } from "@/components/comparator/ComparisonDataTable
 import type { RadarMetricDef } from "@/components/comparator/ComparisonRadarChart";
 import type { TableMetricDef } from "@/components/comparator/ComparisonDataTable";
 import { useUsers, useCycles, useGuilds, fetchUserStats, fetchGuildStats } from "@/hooks/useAPI";
+import { formatScore, formatNumber } from "@/utils/format";
 import type { IUser, IGuild } from "@/interfaces";
 import type { IUserStats, IGuildStats } from "@/hooks/useAPI";
 import { FiRefreshCw, FiBarChart2, FiUsers, FiShield } from "react-icons/fi";
@@ -52,18 +53,6 @@ const ENTITY_COLORS = [
   "#E53E3E",
 ];
 
-const formatNumber = (num: number | undefined | null): string => {
-  if (num === undefined || num === null) return "N/A";
-  return num.toLocaleString("fr-FR");
-};
-
-const formatScore = (score: number | undefined | null): string => {
-  if (score === undefined || score === null) return "N/A";
-  if (score >= 1_000_000_000) return `${(score / 1_000_000_000).toFixed(2)}B`;
-  if (score >= 1_000_000) return `${(score / 1_000_000).toFixed(2)}M`;
-  return formatNumber(score);
-};
-
 const ComparatorPage: React.FC = () => {
   const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -81,7 +70,8 @@ const ComparatorPage: React.FC = () => {
   );
   const [isLoadingStats, setIsLoadingStats] = useState(false);
 
-  const { users = [] } = useUsers({ authenticated: false, limit: 1000 });
+  const [userSearch, setUserSearch] = useState("");
+  const { users = [] } = useUsers({ authenticated: false, limit: 100, search: userSearch || undefined });
   const { guilds = [] } = useGuilds(false);
   const { cycles = [] } = useCycles();
 
@@ -130,10 +120,14 @@ const ComparatorPage: React.FC = () => {
     { label: t("components.comparatorCharts.metricClearRate"), icon: "✅", getDisplayValue: (s) => typeof s?.clearRate === "number" ? `${s.clearRate}%` : "N/A", getRawValue: (s) => s?.clearRate || 0 },
   ], [t]);
 
-  // Load from URL on mount
+  // Load from URL on mount — runs once when data first becomes available
+  const initializedRef = useRef(false);
   useEffect(() => {
+    if (initializedRef.current || (users.length === 0 && guilds.length === 0)) return;
+    initializedRef.current = true;
+
     if (comparisonType === "players") {
-      const ids = searchParams.get("players")?.split(",") || [];
+      const ids = searchParams.get("players")?.split(",").filter(Boolean) || [];
       const valid: SelectedPlayer[] = [];
       ids.forEach((id) => {
         const user = users.find((u) => u._id === id);
@@ -141,7 +135,7 @@ const ComparatorPage: React.FC = () => {
       });
       if (valid.length > 0) setSelectedPlayers(valid);
     } else {
-      const ids = searchParams.get("guilds")?.split(",") || [];
+      const ids = searchParams.get("guilds")?.split(",").filter(Boolean) || [];
       const valid: SelectedGuild[] = [];
       ids.forEach((id) => {
         const guild = guilds.find((g) => g._id === id);
@@ -149,8 +143,7 @@ const ComparatorPage: React.FC = () => {
       });
       if (valid.length > 0) setSelectedGuilds(valid);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [users, guilds, comparisonType]);
+  }, [users, guilds, comparisonType, searchParams]);
 
   // Sync URL
   useEffect(() => {
@@ -162,8 +155,7 @@ const ComparatorPage: React.FC = () => {
       params.set("guilds", selectedGuilds.map((g) => g.id).join(","));
     if (selectedCycleId) params.set("cycle_id", selectedCycleId);
     setSearchParams(params);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [comparisonType, selectedPlayers, selectedGuilds, selectedCycleId]);
+  }, [comparisonType, selectedPlayers, selectedGuilds, selectedCycleId, setSearchParams]);
 
   const loadPlayersStats = async () => {
     if (selectedPlayers.length < 2) {
@@ -377,6 +369,7 @@ const ComparatorPage: React.FC = () => {
                 availableUsers={users}
                 maxPlayers={5}
                 entityColors={ENTITY_COLORS}
+                onSearchChange={setUserSearch}
               />
             ) : (
               <MultiGuildSelector
