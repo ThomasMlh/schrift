@@ -68,9 +68,9 @@ export const GuildTopMembers = ({ guildId, cycleId }: GuildTopMembersProps) => {
                 bg={index === 0 ? firstPlaceBg : "transparent"}
               >
                 <Text fontSize="lg" w="24px" textAlign="center">{MEDALS[index]}</Text>
-                <Avatar size="sm" src={avatarUrl} name={member.username} />
+                <Avatar size="sm" src={avatarUrl} name={member.bbs_name || member.username} />
                 <VStack align="start" spacing={0} flex={1} minW={0}>
-                  <Text fontSize="sm" fontWeight="semibold" noOfLines={1}>{member.username}</Text>
+                  <Text fontSize="sm" fontWeight="semibold" noOfLines={1}>{member.bbs_name}</Text>
                   <Text fontSize="xs" color={subText}>
                     {member.totalScores} {t("pages.guilds.memberScores")}
                   </Text>
