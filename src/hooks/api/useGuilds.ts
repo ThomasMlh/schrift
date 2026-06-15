@@ -1,0 +1,165 @@
+import useSWR from 'swr';
+import type { IGuild, IUser, IPagination } from '../../interfaces';
+import { apiUrl, fetcher, normalizeList, useAuthenticatedFetcher } from './shared';
+
+export const useGuilds = (authenticated: boolean = false, includeDisabled: boolean = false) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const url = `${apiUrl}/api/guildes?include_disabled=${includeDisabled}`;
+
+  const { data, error, isLoading, mutate } = useSWR<IGuild[] | { guilds?: IGuild[]; data?: IGuild[]; success?: boolean }>(
+    url,
+    authenticated ? authenticatedFetcher : fetcher,
+    { revalidateOnFocus: false, dedupingInterval: 60000 }
+  );
+
+  const { items: guilds } = normalizeList<IGuild>(data, ['guilds']);
+  return { guilds, isLoading, error, mutate };
+};
+
+export const useGuildMembers = (guildId?: string, authenticated: boolean = true) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const url = guildId ? `${apiUrl}/api/guildes/${guildId}/membres` : null;
+
+  const { data, error, isLoading, mutate } = useSWR<IUser[] | { data?: IUser[]; success?: boolean }>(
+    url,
+    authenticated ? authenticatedFetcher : fetcher,
+    { revalidateOnFocus: false }
+  );
+
+  const { items: members } = normalizeList<IUser>(data);
+  return { members, isLoading, error, mutate };
+};
+
+export const useAllGuildsMemberCounts = (authenticated: boolean = true) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const url = `${apiUrl}/api/guildes/members-summary`;
+
+  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: Record<string, number> }>(
+    url,
+    authenticated ? authenticatedFetcher : fetcher,
+    { revalidateOnFocus: false, dedupingInterval: 60000 }
+  );
+
+  return { memberCounts: data?.data || {}, isLoading, error, refresh: mutate };
+};
+
+export const useGuildlessUsers = (enabled: boolean = false) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const url = enabled ? `${apiUrl}/api/users/without-guild?limit=1000` : null;
+  const { data, error, isLoading } = useSWR(url, authenticatedFetcher);
+
+  return {
+    users: (data?.users || []) as IUser[],
+    totalCount: (data?.pagination as IPagination | undefined)?.totalCount || 0,
+    isLoading,
+    error,
+  };
+};
+
+export const useGuild = (guildId: string | undefined) => {
+  const url = guildId ? `${apiUrl}/api/guildes/${guildId}` : null;
+  const { data, error, isLoading, mutate } = useSWR<{ name: string }>(url, fetcher, { revalidateOnFocus: false });
+  return { guildName: data?.name, isLoading, error, mutate };
+};
+
+export interface IGuildStats {
+  totalMembers: number;
+  averageScore: number;
+  totalScores: number;
+  bestScore: number;
+  totalPoints: number;
+  clearRate: number;
+}
+
+export const useGuildStats = (guildId: string | undefined, cycleId?: string) => {
+  const url = guildId
+    ? `${apiUrl}/api/guildes/${guildId}/stats${cycleId ? `?cycle_id=${cycleId}` : ''}`
+    : null;
+  const { data, error, isLoading, mutate } = useSWR<{ data: IGuildStats }>(url, fetcher, { revalidateOnFocus: false });
+  return { stats: data?.data, isLoading, error, mutate };
+};
+
+export const fetchGuildStats = async (guildId: string, cycleId?: string): Promise<IGuildStats | null> => {
+  try {
+    const url = `${apiUrl}/api/guildes/${guildId}/stats${cycleId ? `?cycle_id=${cycleId}` : ''}`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.data || null;
+  } catch (error) {
+    console.error(`Error fetching guild stats for ${guildId}:`, error);
+    return null;
+  }
+};
+
+export interface IGuildRanking extends IGuildStats {
+  _id: string;
+  name: string;
+  rank: number;
+}
+
+export const useGuildRankings = (cycleId?: string) => {
+  const url = `${apiUrl}/api/guildes/rankings${cycleId ? `?cycle_id=${cycleId}` : ''}`;
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: IGuildRanking[] }>(url, fetcher, { revalidateOnFocus: false });
+  return { rankings: data?.data || [], isLoading, error };
+};
+
+export interface IGuildTopMember {
+  userId: string;
+  username: string;
+  bbs_name?: string;
+  avatar?: string;
+  discord_id?: string;
+  bestScore: number;
+  avgScore: number;
+  totalScores: number;
+}
+
+export const useGuildTopMembers = (guildId?: string, cycleId?: string, limit = 3) => {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (cycleId) params.set('cycle_id', cycleId);
+  const url = guildId ? `${apiUrl}/api/guildes/${guildId}/top-members?${params}` : null;
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: IGuildTopMember[] }>(url, fetcher, { revalidateOnFocus: false });
+  return { topMembers: data?.data || [], isLoading, error };
+};
+
+export interface IScoreBucket {
+  label: string;
+  count: number;
+}
+
+export const useGuildScoreDistribution = (guildId?: string, cycleId?: string) => {
+  const params = cycleId ? `?cycle_id=${cycleId}` : '';
+  const url = guildId ? `${apiUrl}/api/guildes/${guildId}/score-distribution${params}` : null;
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: IScoreBucket[] }>(url, fetcher, { revalidateOnFocus: false });
+  return { distribution: data?.data || [], isLoading, error };
+};
+
+export interface IGuildEvolutionPoint {
+  cycleId: string;
+  cycleName: string;
+  cycleYear: number;
+  averageScore: number;
+  totalScores: number;
+  clearRate: number;
+}
+
+export const useGuildEvolution = (guildId?: string, limit = 6) => {
+  const url = guildId ? `${apiUrl}/api/guildes/${guildId}/evolution?limit=${limit}` : null;
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: IGuildEvolutionPoint[] }>(url, fetcher, { revalidateOnFocus: false });
+  return { evolution: data?.data || [], isLoading, error };
+};
+
+export interface ICommunityStats {
+  totalMembers: number;
+  totalGuilds: number;
+  totalScores: number;
+  globalClearRate: number;
+  avgScore: number;
+}
+
+export const useCommunityStats = (cycleId?: string) => {
+  const url = `${apiUrl}/api/stats/community${cycleId ? `?cycle_id=${cycleId}` : ''}`;
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: ICommunityStats }>(url, fetcher, { revalidateOnFocus: false });
+  return { stats: data?.data, isLoading, error };
+};
