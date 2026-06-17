@@ -22,14 +22,15 @@ import {
 } from "@/utils/cycleHelpers";
 
 const CyclesSection = () => {
-  const { deleteCycle, createCycle } = useAPIMutations();
-  // Utiliser useSWR pour les cycles et rotations (cache automatique + déduplication)
+  const { deleteCycle, createCycle, updateCycle } = useAPIMutations();
   const { cycles, mutate: mutateCycles, isLoading: isLoadingCycles } = useCycles({ authenticated: true });
   const { rotations: rotationTemplates = [] } = useRotations();
-  
+
   const [selectedRotations, setSelectedRotations] = useState<ICycleRotation[]>([]);
   const [cycleName, setCycleName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [editingCycleId, setEditingCycleId] = useState<string | null>(null);
 
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -37,8 +38,30 @@ const CyclesSection = () => {
   // Supprimer un cycle
   const handleDeleteCycle = async (cycleId: string): Promise<void> => {
     await deleteCycle(cycleId);
-    // Recharger la liste des cycles après suppression
     await mutateCycles();
+  };
+
+  // Ouvrir le modal en mode édition
+  const handleOpenEdit = (cycle: ICycle) => {
+    setEditingCycleId(cycle._id || null);
+    setCycleName(cycle.name);
+    setSelectedRotations(
+      (cycle.rotations || []).map((r, i) => ({
+        ...r,
+        position: i + 1,
+      }))
+    );
+    setModalMode('edit');
+    onOpen();
+  };
+
+  // Ouvrir le modal en mode création
+  const handleOpenCreate = () => {
+    setEditingCycleId(null);
+    setCycleName("");
+    setSelectedRotations([]);
+    setModalMode('create');
+    onOpen();
   };
 
   // Ajouter une rotation sélectionnée
@@ -120,69 +143,42 @@ const CyclesSection = () => {
   };
 
 
-  // Soumettre le cycle
+  // Soumettre le cycle (création ou édition)
   const submitCycle = async () => {
     if (!cycleName.trim()) {
-      toast({
-        title: "Nom requis",
-        description: "Veuillez saisir un nom pour le cycle",
-        status: "error",
-        duration: 3000,
-      });
+      toast({ title: "Nom requis", description: "Veuillez saisir un nom pour le cycle", status: "error", duration: 3000 });
       return;
     }
-
     if (selectedRotations.length !== 20) {
-      toast({
-        title: "Rotations incomplètes",
-        description: "Un cycle doit contenir exactement 20 rotations",
-        status: "error",
-        duration: 3000,
-      });
+      toast({ title: "Rotations incomplètes", description: "Un cycle doit contenir exactement 20 rotations", status: "error", duration: 3000 });
       return;
     }
-
-    // Vérifier que toutes les rotations ont des dates
     const incompleteRotations = selectedRotations.filter(r => !r.start_date || !r.end_date);
     if (incompleteRotations.length > 0) {
-      toast({
-        title: "Dates manquantes",
-        description: "Toutes les rotations doivent avoir des dates de début et de fin",
-        status: "error",
-        duration: 3000,
-      });
+      toast({ title: "Dates manquantes", description: "Toutes les rotations doivent avoir des dates de début et de fin", status: "error", duration: 3000 });
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // S'assurer que toutes les positions sont correctes avant la soumission
       const rotationsWithCorrectPositions = ensureCorrectRotationPositions(selectedRotations);
-      
-      const cycleData: ICycleFormData = {
-        name: cycleName.trim(),
-        rotations: rotationsWithCorrectPositions
-      };
+      const cycleData: ICycleFormData = { name: cycleName.trim(), rotations: rotationsWithCorrectPositions };
 
-      await createCycle(cycleData);
+      if (modalMode === 'edit' && editingCycleId) {
+        await updateCycle(editingCycleId, cycleData);
+        toast({ title: "Cycle modifié", description: "Le cycle a été mis à jour avec succès", status: "success", duration: 3000 });
+      } else {
+        await createCycle(cycleData);
+        toast({ title: "Cycle créé", description: "Le cycle a été créé avec succès", status: "success", duration: 3000 });
+      }
 
-      toast({
-        title: "Cycle créé",
-        description: "Le cycle a été créé avec succès",
-        status: "success",
-        duration: 3000,
-      });
-
-      // Réinitialiser le formulaire
       setCycleName("");
       setSelectedRotations([]);
-
-      // Recharger la liste des cycles
       mutateCycles();
     } catch (error) {
       toast({
         title: "Erreur",
-        description: error instanceof Error ? error.message : "Erreur lors de la création du cycle",
+        description: error instanceof Error ? error.message : `Erreur lors de la ${modalMode === 'edit' ? 'modification' : 'création'} du cycle`,
         status: "error",
         duration: 3000,
       });
@@ -301,7 +297,6 @@ const CyclesSection = () => {
     await submitCycle();
     if (!isSubmitting) {
       onClose();
-      // Réinitialiser le formulaire après fermeture
       setCycleName("");
       setSelectedRotations([]);
     }
@@ -335,7 +330,7 @@ const CyclesSection = () => {
             transition="all 0.2s"
             borderRadius="xl"
             px={6}
-            onClick={onOpen}
+            onClick={handleOpenCreate}
           >
             Créer un cycle
           </Button>
@@ -349,9 +344,10 @@ const CyclesSection = () => {
           onDownloadEvents={downloadEventsJson}
           onDownloadCycleEvents={downloadCycleEventsJson}
           onDeleteCycle={handleDeleteCycle}
+          onEditCycle={handleOpenEdit}
         />
 
-        {/* Modal de création de cycle */}
+        {/* Modal de création / édition de cycle */}
         <CycleCreationModal
           isOpen={isOpen}
           onClose={onClose}
@@ -365,6 +361,7 @@ const CyclesSection = () => {
           onDragEnd={handleDragEnd}
           onUpdateRotation={updateRotation}
           onRemoveRotation={removeRotation}
+          mode={modalMode}
         />
       </VStack>
     </Container>

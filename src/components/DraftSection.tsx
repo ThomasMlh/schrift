@@ -33,7 +33,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import type { IGuild, IUser } from "../interfaces";
 import {
   useGuilds,
-  useAllGuildsMemberCounts,
+  useAllGuildsMembers,
   useGuildlessUsers
 } from "@/hooks/useAPI";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
@@ -61,7 +61,7 @@ interface DraftSectionProps {
 const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   const { guilds } = useGuilds(true);
   const { membersByGuild, isLoading: membersLoading } =
-    useAllGuildsMemberCounts(guilds, true);
+    useAllGuildsMembers(guilds, true);
   const { executeDraft } = useAPIMutations();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();

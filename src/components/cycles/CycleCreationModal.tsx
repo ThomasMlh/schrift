@@ -31,6 +31,7 @@ interface CycleCreationModalProps {
   onDragEnd: (result: DropResult) => void;
   onUpdateRotation: (index: number, field: keyof ICycleRotation, value: string) => void;
   onRemoveRotation: (index: number) => void;
+  mode?: 'create' | 'edit';
 }
 
 export const CycleCreationModal = ({
@@ -45,10 +46,12 @@ export const CycleCreationModal = ({
   onAddRotation,
   onDragEnd,
   onUpdateRotation,
-  onRemoveRotation
+  onRemoveRotation,
+  mode = 'create'
 }: CycleCreationModalProps) => {
   const toast = useToast();
   const canSubmit = cycleName.trim() && selectedRotations.length === 20;
+  const isEdit = mode === 'edit';
 
   const handleSubmit = () => {
     if (!cycleName.trim()) {
@@ -90,7 +93,7 @@ export const CycleCreationModal = ({
     <Modal isOpen={isOpen} onClose={onClose} size="6xl" scrollBehavior="inside">
       <ModalOverlay />
       <ModalContent maxH="90vh">
-        <ModalHeader>Créer un nouveau cycle</ModalHeader>
+        <ModalHeader>{isEdit ? "Modifier le cycle" : "Créer un nouveau cycle"}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={6} align="stretch">
@@ -132,10 +135,10 @@ export const CycleCreationModal = ({
               colorScheme="blue"
               onClick={handleSubmit}
               isLoading={isSubmitting}
-              loadingText="Création..."
+              loadingText={isEdit ? "Enregistrement..." : "Création..."}
               isDisabled={!canSubmit}
             >
-              Créer le cycle
+              {isEdit ? "Enregistrer" : "Créer le cycle"}
             </Button>
           </HStack>
         </ModalFooter>

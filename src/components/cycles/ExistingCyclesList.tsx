@@ -35,6 +35,7 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   ExternalLinkIcon,
+  EditIcon,
 } from "@chakra-ui/icons";
 import { useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
@@ -50,6 +51,7 @@ interface ExistingCyclesListProps {
   onDownloadEvents: () => void;
   onDownloadCycleEvents: (cycle: ICycle) => void;
   onDeleteCycle: (cycleId: string) => Promise<void>;
+  onEditCycle: (cycle: ICycle) => void;
 }
 
 /** Mini timeline bar showing rotations as colored segments */
@@ -156,6 +158,7 @@ const ExistingCyclesList = ({
   onDownloadEvents,
   onDownloadCycleEvents,
   onDeleteCycle,
+  onEditCycle,
 }: ExistingCyclesListProps) => {
   const { t } = useTranslation();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -514,6 +517,19 @@ const ExistingCyclesList = ({
                         _hover={{ color: "green.400", bg: "whiteAlpha.100" }}
                         onClick={() => onDownloadCycleEvents(cycle)}
                         isDisabled={!cycle.rotations || cycle.rotations.length === 0}
+                      />
+                    </Tooltip>
+
+                    <Tooltip label="Modifier ce cycle" hasArrow>
+                      <IconButton
+                        size="xs"
+                        aria-label="Modifier"
+                        icon={<EditIcon />}
+                        variant="ghost"
+                        borderRadius="lg"
+                        color="gray.500"
+                        _hover={{ color: "blue.400", bg: "whiteAlpha.100" }}
+                        onClick={() => onEditCycle(cycle)}
                       />
                     </Tooltip>
 

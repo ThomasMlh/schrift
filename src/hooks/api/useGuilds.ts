@@ -43,6 +43,30 @@ export const useAllGuildsMemberCounts = (authenticated: boolean = true) => {
   return { memberCounts: data?.data || {}, isLoading, error, refresh: mutate };
 };
 
+export const useAllGuildsMembers = (guilds: IGuild[], authenticated: boolean = true) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const f = authenticated ? authenticatedFetcher : fetcher;
+
+  const guildIds = guilds.map(g => g._id).sort().join(',');
+
+  const { data, error, isLoading, mutate } = useSWR<Record<string, IUser[]>>(
+    guildIds ? ['all-guilds-members', guildIds] : null,
+    async () => {
+      const results = await Promise.all(
+        guilds.map(g => f(`${apiUrl}/api/guildes/${g._id}/membres`))
+      );
+      const membersByGuild: Record<string, IUser[]> = {};
+      guilds.forEach((g, i) => {
+        membersByGuild[g._id] = results[i]?.data || [];
+      });
+      return membersByGuild;
+    },
+    { revalidateOnFocus: false }
+  );
+
+  return { membersByGuild: data || {}, isLoading, error, refresh: mutate };
+};
+
 export const useGuildlessUsers = (enabled: boolean = false) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const url = enabled ? `${apiUrl}/api/users/without-guild?limit=1000` : null;

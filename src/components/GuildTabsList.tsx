@@ -25,7 +25,7 @@ import { useRef, useState } from "react";
 import { CustomSelect } from "./ui/CustomSelect";
 import type { Role, IGuild, IUser } from "../interfaces";
 import { UserDisplay } from "./ui/UserDisplay";
-import { useGuilds, useAllGuildsMemberCounts } from "@/hooks/useAPI";
+import { useGuilds, useAllGuildsMembers } from "@/hooks/useAPI";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
 import { useTranslation } from "react-i18next";
 
@@ -39,7 +39,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({ editable = false }) => {
   const { guilds: allGuilds } = useGuilds(true, editable);
   const guilds = editable ? allGuilds : allGuilds.filter(g => !g.disabled);
 
-  const { membersByGuild, refresh: refreshMembers } = useAllGuildsMemberCounts(guilds, true);
+  const { membersByGuild, refresh: refreshMembers } = useAllGuildsMembers(guilds, true);
 
   const [isDeleteMemberOpen, setIsDeleteMemberOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<{
