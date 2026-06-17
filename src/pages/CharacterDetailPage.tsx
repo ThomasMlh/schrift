@@ -21,6 +21,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import { ArrowBackIcon, DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
+import { BuildDetailModal } from "@/components/ui/BuildDetailModal";
+import type { IBuild } from "@/interfaces";
 
 import { AffinityIcon } from "../components/ui/AffinityIcon";
 import { KillerIcon } from "../components/ui/KillerIcon";
@@ -28,9 +30,9 @@ import { CategoryIcon } from "../components/ui/CategoryIcon";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
 import { getStatIcon } from "@/utils/characterIcons";
 import { SEOHead } from "../components/SEOHead";
-import { useCharacter } from "@/hooks/useAPI";
-import { useTranslation } from "react-i18next";
+import { useCharacter, useBuilds } from "@/hooks/useAPI";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { useTranslation } from "react-i18next";
 
 interface SectionCardProps {
   label: string;
@@ -72,12 +74,18 @@ const CharacterDetailPage = () => {
 
   // Utiliser useSWR pour le personnage (cache automatique)
   const { character, isLoading, error: fetchError } = useCharacter(id);
+  const { builds: characterBuilds, isLoading: buildsLoading } = useBuilds({
+    character_id: id,
+    isValid: true,
+    limit: 20
+  });
 
   // Hooks UI
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
 
   const [lightbox, setLightbox] = useState<{ src: string; label: string } | null>(null);
+  const [selectedBuild, setSelectedBuild] = useState<IBuild | null>(null);
 
   const openLightbox = useCallback((src: string, label: string) => {
     setLightbox({ src, label });
@@ -584,6 +592,66 @@ const CharacterDetailPage = () => {
             </SimpleGrid>
           </Box>
 
+          {/* Builds validés utilisant ce personnage */}
+          {(buildsLoading || characterBuilds.length > 0) && (
+            <Box>
+              <Text
+                fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
+                textTransform="uppercase"
+                color={isDark ? 'purple.400' : 'purple.600'}
+                mb={4}
+              >
+                Builds validés ({characterBuilds.length})
+              </Text>
+              {buildsLoading ? (
+                <PageLoader height="80px" />
+              ) : (
+                <SimpleGrid columns={{ base: 2, sm: 3, md: 4, lg: 5 }} spacing={3}>
+                  {characterBuilds.map((build) => (
+                    <Box
+                      key={build._id}
+                      p={3}
+                      bg={isDark ? 'gray.800' : 'white'}
+                      borderRadius="xl"
+                      border="1px solid"
+                      borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
+                      cursor="pointer"
+                      _hover={{ borderColor: "purple.400", transform: "translateY(-2px)", boxShadow: "md" }}
+                      transition="all 0.15s"
+                      onClick={() => setSelectedBuild(build)}
+                    >
+                      <HStack spacing={1} justify="center" mb={2}>
+                        {build.team.map((member, i) => (
+                          <Avatar
+                            key={i}
+                            size="sm"
+                            src={member.character?._id ? `${bucketUrl}/characters/thumb/${member.character._id}.png` : undefined}
+                            name={member.character?.name ?? "?"}
+                            border="2px solid"
+                            borderColor={["purple.400", "blue.400", "teal.400"][i]}
+                          />
+                        ))}
+                      </HStack>
+                      {build.rotation && (
+                        <HStack justify="center" spacing={1} mb={1}>
+                          <Text fontSize="xs" color={isDark ? 'gray.400' : 'gray.500'} noOfLines={1}>
+                            {build.rotation.killer}
+                          </Text>
+                          <AttackTypeBadge attackType={build.rotation.attack} size="12px" />
+                        </HStack>
+                      )}
+                      {build.user && (
+                        <Text fontSize="xs" color={isDark ? 'gray.500' : 'gray.400'} textAlign="center" noOfLines={1}>
+                          {build.user.bbs_name || build.user.global_name}
+                        </Text>
+                      )}
+                    </Box>
+                  ))}
+                </SimpleGrid>
+              )}
+            </Box>
+          )}
+
           {/* Bottom navigation */}
           <Flex justify="center">
             <Button
@@ -605,6 +673,12 @@ const CharacterDetailPage = () => {
         characterName={character?.name ?? ""}
         onClose={closeLightbox}
         onDownload={handleDownload}
+      />
+
+      <BuildDetailModal
+        isOpen={!!selectedBuild}
+        onClose={() => setSelectedBuild(null)}
+        build={selectedBuild}
       />
     </>
   );

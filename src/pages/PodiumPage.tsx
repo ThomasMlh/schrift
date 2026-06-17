@@ -1,4 +1,4 @@
-import { Container, VStack, Box, useColorModeValue, useToast } from "@chakra-ui/react";
+import { Container, VStack, Box, useColorModeValue, useToast, HStack, Button, Text } from "@chakra-ui/react";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { HeroSection } from "../components/HeroSection";
@@ -13,6 +13,7 @@ import { PodiumFilters } from "@/components/podium/PodiumFilters";
 import { PodiumInfo } from "@/components/podium/PodiumInfo";
 import { PodiumResults } from "@/components/podium/PodiumResults";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/providers/AuthProvider";
 
 type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
 type CycleRankingType = "average" | "max";
@@ -62,6 +63,7 @@ const PodiumPage = () => {
   const { cycles, isLoading: cyclesLoading } = useCycles();
   const { guilds } = useGuilds(false, true);
   const { fetchPodium, isLoading, error } = usePodiumFetch();
+  const { currentUser, isLoggedIn } = useAuth();
 
   const filterBg = useColorModeValue("blue.50", "blue.900");
 
@@ -294,6 +296,42 @@ const PodiumPage = () => {
 
         <Container maxW="container.xl" py={8}>
           <VStack spacing={5} align="stretch">
+            {/* Raccourcis */}
+            <HStack spacing={2} flexWrap="wrap">
+              <Text fontSize="xs" color="gray.500" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mr={1}>
+                Raccourcis :
+              </Text>
+              <Button
+                size="xs"
+                variant="outline"
+                colorScheme="blue"
+                borderRadius="full"
+                onClick={selectDefaultCycle}
+              >
+                Cycle en cours
+              </Button>
+              {isLoggedIn && currentUser?.guilde_id && (() => {
+                const userGuild = guilds.find(g => g._id === currentUser.guilde_id);
+                if (!userGuild) return null;
+                const isActive = selectedGuildName === userGuild.name;
+                return (
+                  <Button
+                    size="xs"
+                    variant={isActive ? "solid" : "outline"}
+                    colorScheme="purple"
+                    borderRadius="full"
+                    onClick={() => {
+                      const next = isActive ? "" : userGuild.name;
+                      setSelectedGuildName(next);
+                      applyFilters({ guildName: next });
+                    }}
+                  >
+                    Ma guilde
+                  </Button>
+                );
+              })()}
+            </HStack>
+
             <PodiumFilters
               displayMode={displayMode}
               cycleRankingType={cycleRankingType}

@@ -83,6 +83,7 @@ export const PodiumFilters = ({
             ]}
             allowDeselect={false}
             size="md"
+            w="190px"
           />
 
           {/* Type de podium (uniquement en mode cycle complet) */}
@@ -98,9 +99,10 @@ export const PodiumFilters = ({
               ]}
               allowDeselect={false}
               size="md"
+              w="190px"
             />
           )}
-          
+
           {/* Filtre par cycle */}
           <CycleSelect
             cycles={cycles}
@@ -111,8 +113,9 @@ export const PodiumFilters = ({
             allowDeselect={false}
             size="md"
             showActiveBadge={true}
+            w="190px"
           />
-          
+
           {/* Filtre par rotation (uniquement en mode rotation) */}
           {selectedCycle && displayMode === "rotation" && (
             <CustomSelect
@@ -124,11 +127,11 @@ export const PodiumFilters = ({
                 label: `#${rotation.position} - ${t(`factions.${rotation.killer}`, rotation.killer)} ${rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : `🟠 ${t("attackTypes.meleeFallback")}`}`
               }))}
               allowDeselect={false}
-              minW={"200px"}
               size="md"
+              w="190px"
             />
           )}
-          
+
           {/* Filtre par semaine (uniquement en mode weekly) */}
           {selectedCycle && displayMode === "weekly" && (
             <CustomSelect
@@ -143,9 +146,10 @@ export const PodiumFilters = ({
               )}
               allowDeselect={false}
               size="md"
+              w="190px"
             />
           )}
-          
+
           {/* Filtre par guilde */}
           <CustomSelect
             placeholder={t("components.podiumFilters.allGuilds")}
@@ -157,8 +161,9 @@ export const PodiumFilters = ({
             }))}
             allowDeselect={true}
             size="md"
+            w="190px"
           />
-          
+
           {/* Éléments par page */}
           <CustomSelect
             value={String(itemsPerPage)}
@@ -170,6 +175,7 @@ export const PodiumFilters = ({
             ]}
             allowDeselect={false}
             size="md"
+            w="190px"
           />
           
           <Button onClick={onReset} variant="outline" minW="120px">

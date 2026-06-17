@@ -23,6 +23,7 @@ interface CycleSelectProps {
     showActiveBadge?: boolean;
     size?: 'sm' | 'md' | 'lg';
     variant?: SelectVariant;
+    w?: string | object;
 }
 
 export const CycleSelect = ({
@@ -35,7 +36,8 @@ export const CycleSelect = ({
     valueKey = '_id',
     showActiveBadge = false,
     size = 'md',
-    variant = 'default'
+    variant = 'default',
+    w
 }: CycleSelectProps) => {
     // Grouper les cycles par année
     const cyclesByYear = cycles.reduce((acc, cycle) => {
@@ -131,6 +133,7 @@ export const CycleSelect = ({
             renderSelected={renderSelected}
             size={size}
             variant={variant}
+            w={w}
         />
     );
 };

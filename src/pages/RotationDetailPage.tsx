@@ -17,7 +17,10 @@ import {
   TableContainer,
   useToast,
   IconButton,
-  Badge
+  Badge,
+  SimpleGrid,
+  Avatar,
+  Heading
 } from "@chakra-ui/react";
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -31,13 +34,15 @@ import type {
   IRotationTemplate,
   IScoreWithUser,
   IRankInfo,
-  ICycle
+  ICycle,
+  IBuild
 } from "@/interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { UserDisplay } from "@/components/ui/UserDisplay";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { ScoreLegend } from "@/components/ui/ScoreLegend";
-import { useGuilds, useRotationScores } from "@/hooks/useAPI";
+import { BuildDetailModal } from "@/components/ui/BuildDetailModal";
+import { useGuilds, useRotationScores, useBuilds } from "@/hooks/useAPI";
 import { RankBadge } from "@/components/ui/RankBadge";
 import { AlterationImage } from "@/components/ui/AlterationImage";
 import { SEOHead } from "@/components/SEOHead";
@@ -58,6 +63,7 @@ const RotationDetailPage = () => {
   const [scores, setScores] = useState<IScoreWithUser[]>([]);
   const [cycle, setCycle] = useState<ICycle | null>(null);
   const [rotation, setRotation] = useState<IRotationTemplate | null>(null);
+  const [selectedBuild, setSelectedBuild] = useState<IBuild | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
@@ -73,6 +79,11 @@ const RotationDetailPage = () => {
     isLoading,
     error: apiError
   } = useRotationScores();
+  const { builds, isLoading: buildsLoading } = useBuilds({
+    rotation_id: rotation?._id,
+    isValid: true,
+    limit: 20
+  });
   const [selectedGuild, setSelectedGuild] = useState<string>(""); // ID de la guilde ou vide pour "toutes"
   const hasInitialData = useRef(false);
 
@@ -548,9 +559,65 @@ const RotationDetailPage = () => {
                 </>
               )}
             </Box>
+
+            {/* Builds validés pour cette rotation */}
+            {(buildsLoading || builds.length > 0) && (
+              <Box>
+                <Heading size="sm" mb={4} color={labelColor}>
+                  Builds validés ({builds.length})
+                </Heading>
+                {buildsLoading ? (
+                  <PageLoader height="80px" />
+                ) : (
+                  <SimpleGrid columns={{ base: 2, sm: 3, md: 4, lg: 5 }} spacing={3}>
+                    {builds.map((build) => {
+                      const bucketUrl = import.meta.env.VITE_BUCKET_URL;
+                      return (
+                        <Box
+                          key={build._id}
+                          p={3}
+                          bg={cardBg}
+                          borderRadius="xl"
+                          borderWidth={1}
+                          borderColor={borderColor}
+                          cursor="pointer"
+                          _hover={{ borderColor: "purple.400", transform: "translateY(-2px)", shadow: "md" }}
+                          transition="all 0.15s"
+                          onClick={() => setSelectedBuild(build)}
+                        >
+                          <HStack spacing={1} justify="center" mb={2}>
+                            {build.team.map((member, i) => (
+                              <Avatar
+                                key={i}
+                                size="sm"
+                                src={member.character?._id ? `${bucketUrl}/characters/thumb/${member.character._id}.png` : undefined}
+                                name={member.character?.name ?? "?"}
+                                border="2px solid"
+                                borderColor={["purple.400", "blue.400", "teal.400"][i]}
+                              />
+                            ))}
+                          </HStack>
+                          {build.user && (
+                            <Text fontSize="xs" color={subTextColor} textAlign="center" noOfLines={1}>
+                              {build.user.bbs_name || build.user.global_name}
+                            </Text>
+                          )}
+                        </Box>
+                      );
+                    })}
+                  </SimpleGrid>
+                )}
+              </Box>
+            )}
           </VStack>
         </Container>
       </Box>
+
+      <BuildDetailModal
+        isOpen={!!selectedBuild}
+        onClose={() => setSelectedBuild(null)}
+        build={selectedBuild}
+      />
     </>
   );
 };

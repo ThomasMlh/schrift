@@ -38,6 +38,7 @@ import { UserRivals } from "@/components/user/UserRivals";
 import { UserGuildContribution } from "@/components/user/UserGuildContribution";
 import { UserPositionPerformance } from "@/components/user/UserPositionPerformance";
 import { BanDetailsCard } from "@/components/user/BanDetailsCard";
+import { UserTypeAnalysis } from "@/components/user/UserTypeAnalysis";
 import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock } from "react-icons/fi";
 import { getDiscordBannerUrl } from "@/utils/discord";
 import { useAuth } from "@/providers/AuthProvider";
@@ -453,6 +454,11 @@ const UserPage = () => {
                           <UserPositionPerformance
                             performanceByQuartile={globalStats.performanceByQuartile}
                           />
+                        )}
+
+                        {/* Performance par type d'attaque / altération */}
+                        {(stats.performanceByAttack || stats.performanceByAlteration) && (
+                          <UserTypeAnalysis stats={stats} />
                         )}
                       </VStack>
                     </TabPanel>

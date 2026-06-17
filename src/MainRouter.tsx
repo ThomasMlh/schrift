@@ -43,7 +43,6 @@ const ProtectedRoute: React.FC<IProtectedRoute> = ({
   isLoading,
   children
 }) => {
-  // Pendant le chargement, ne pas rediriger
   const { t } = useTranslation();
 
   if (isLoading) {
@@ -55,6 +54,28 @@ const ProtectedRoute: React.FC<IProtectedRoute> = ({
   }
 
   if (!isAuthenticated || (!isAdmin && !isGuildManager)) {
+    return <Navigate to="/" replace />;
+  }
+  return <>{children}</>;
+};
+
+// Composant pour protéger les routes accessibles à tout utilisateur connecté
+const AuthenticatedRoute: React.FC<{ isAuthenticated: boolean; isLoading: boolean; children: React.ReactNode }> = ({
+  isAuthenticated,
+  isLoading,
+  children
+}) => {
+  const { t } = useTranslation();
+
+  if (isLoading) {
+    return (
+      <Flex w="100%" h="60vh" align="center" justify="center">
+        <Text>{t("auth.verifying")}</Text>
+      </Flex>
+    );
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
   return <>{children}</>;
@@ -95,14 +116,12 @@ const AppRoutes = () => {
         <Route
           path="/joueur/:userId"
           element={
-            <ProtectedRoute
+            <AuthenticatedRoute
               isAuthenticated={isLoggedIn}
-              isAdmin={isAdmin}
-              isGuildManager={isGuildManager}
               isLoading={isAuthLoading}
             >
               <UserPage />
-            </ProtectedRoute>
+            </AuthenticatedRoute>
           }
         />
         <Route path="/podium" element={<PodiumPage />} />
