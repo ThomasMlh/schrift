@@ -119,7 +119,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const refreshAuth = useCallback(async () => {
-    let currentToken = getToken();
+    const currentToken = getToken();
     
     if (currentToken && isTokenValid(currentToken)) {
       applyTokenState(currentToken);

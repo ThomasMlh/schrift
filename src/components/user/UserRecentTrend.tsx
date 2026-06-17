@@ -57,6 +57,7 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
       : t("components.user.recentTrend.trendStable");
 
   const scoreBg = useColorModeValue("gray.50", "gray.700");
+  const scoreItemBorderColor = useColorModeValue("gray.200", "gray.600");
 
   return (
     <VStack spacing={6} align="stretch">
@@ -169,7 +170,7 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
                 p={4}
                 borderRadius="lg"
                 borderWidth="1px"
-                borderColor={useColorModeValue("gray.200", "gray.600")}
+                borderColor={scoreItemBorderColor}
                 transition="all 0.2s"
                 _hover={{
                   transform: "translateX(4px)",

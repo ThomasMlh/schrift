@@ -64,6 +64,7 @@ const TypeRow = ({ label, averageScore, count, maxScore, badge }: TypeRowProps) 
 export const UserTypeAnalysis = ({ stats }: UserTypeAnalysisProps) => {
   const { t } = useTranslation();
   const cardBg = useColorModeValue("white", "gray.800");
+  const attackSummaryBg = useColorModeValue("blue.50", "blue.900");
 
   const maxAttackScore = stats.performanceByAttack && stats.performanceByAttack.length > 0
     ? stats.performanceByAttack[0].averageScore : 0;
@@ -113,7 +114,7 @@ export const UserTypeAnalysis = ({ stats }: UserTypeAnalysisProps) => {
               {stats.performanceByAttack!.length === 2 && (
                 <>
                   <Divider my={4} />
-                  <Box p={3} borderRadius="lg" bg={useColorModeValue("blue.50", "blue.900")}>
+                  <Box p={3} borderRadius="lg" bg={attackSummaryBg}>
                     {(() => {
                       const sorted = [...stats.performanceByAttack!].sort((a, b) => b.averageScore - a.averageScore);
                       const diff = sorted[0].averageScore - sorted[1].averageScore;
