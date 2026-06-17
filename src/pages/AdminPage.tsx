@@ -62,9 +62,9 @@ const AdminPage = () => {
     setIsUpdatingCharacters(true);
     try {
       const data = await updateCharacters();
-      toast({ title: (data as any).message || "Personnages mis à jour", status: "success" });
-    } catch (error: any) {
-      toast({ title: error.message || "Erreur lors de la mise à jour des personnages", status: "error" });
+      toast({ title: (data as { message?: string }).message || "Personnages mis à jour", status: "success" });
+    } catch (error: unknown) {
+      toast({ title: (error as Error).message || "Erreur lors de la mise à jour des personnages", status: "error" });
     } finally {
       setIsUpdatingCharacters(false);
     }
@@ -89,8 +89,8 @@ const AdminPage = () => {
           duration: 4000,
         });
       }
-    } catch (err: any) {
-      toast({ title: err.message || 'Erreur vérification bot', status: 'error' });
+    } catch (err: unknown) {
+      toast({ title: (err as Error).message || 'Erreur vérification bot', status: 'error' });
     } finally {
       setIsCheckingBot(false);
     }
@@ -103,8 +103,8 @@ const AdminPage = () => {
         toast({ title: `Images: ${total} uploadées, ${remaining} restants...`, status: "info", duration: 2000 });
       });
       toast({ title: `Upload terminé: ${totalUploaded} images`, status: "success" });
-    } catch (error: any) {
-      toast({ title: error.message || "Erreur upload images", status: "error" });
+    } catch (error: unknown) {
+      toast({ title: (error as Error).message || "Erreur upload images", status: "error" });
     } finally {
       setIsUploadingImages(false);
     }

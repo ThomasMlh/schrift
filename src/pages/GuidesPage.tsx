@@ -41,7 +41,6 @@ const GuidesPage = () => {
     if (section && (SECTION_IDS as readonly string[]).includes(section)) {
       setActiveSection(section as SectionId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section]);
 
   const handleSectionChange = (id: SectionId) => {

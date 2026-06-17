@@ -50,7 +50,7 @@ const OrbGuideAdminSection = () => {
         { title: selectedOrb.title, description: selectedOrb.description, amount: selectedOrb.amount },
         isEditing && selectedOrb._id ? selectedOrb._id : undefined
       );
-      toast({ title: (result as any).message, status: "success", duration: 3000 });
+      toast({ title: (result as { message: string }).message, status: "success", duration: 3000 });
       mutate();
       handleCloseModal();
     } catch {
@@ -65,7 +65,7 @@ const OrbGuideAdminSection = () => {
     setSaving(true);
     try {
       const result = await deleteOrbSource(id);
-      toast({ title: (result as any).message, status: "success", duration: 3000 });
+      toast({ title: (result as { message: string }).message, status: "success", duration: 3000 });
       mutate();
     } catch {
       toast({ title: "Erreur", description: "Impossible de supprimer l'entrée", status: "error", duration: 3000 });

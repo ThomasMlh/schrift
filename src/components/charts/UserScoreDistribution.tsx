@@ -48,7 +48,7 @@ export const UserScoreDistribution = ({ rotations }: UserScoreDistributionProps)
     default: "#9F7AEA"
   };
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number }> }) => {
     if (active && payload && payload.length) {
       return (
         <Box
@@ -81,7 +81,7 @@ export const UserScoreDistribution = ({ rotations }: UserScoreDistributionProps)
     innerRadius,
     outerRadius,
     percent
-  }: any) => {
+  }: { cx: number; cy: number; midAngle: number; innerRadius: number; outerRadius: number; percent: number }) => {
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);

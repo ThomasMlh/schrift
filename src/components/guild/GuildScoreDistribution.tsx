@@ -42,7 +42,7 @@ export const GuildScoreDistribution = ({ guildId, cycleId }: GuildScoreDistribut
 
   const hasData = distribution.some(b => b.count > 0);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
     if (!active || !payload?.length) return null;
     return (
       <Box bg={bg} p={2} borderRadius="md" boxShadow="md" borderWidth="1px" borderColor={border}>

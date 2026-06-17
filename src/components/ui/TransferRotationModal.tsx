@@ -23,11 +23,29 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import type { ICycle, IGuild, ICycleRotation } from "../../interfaces";
+import type { ICycle, IGuild, ICycleRotation, IUser } from "../../interfaces";
 import { CycleSelect } from "./CycleSelect";
 import { CustomSelect } from "./CustomSelect";
 import { AttackTypeBadge } from "./AttackTypeBadge";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
+
+interface TransferConflict {
+    user_id: string;
+    user?: Pick<IUser, 'global_name' | 'bbs_name' | 'discord_id' | 'avatar'>;
+    existing_raw_score?: number;
+}
+
+interface TransferPreviewItem {
+    user_id: string;
+    user?: Pick<IUser, 'global_name' | 'bbs_name' | 'discord_id' | 'avatar'>;
+    raw_score?: number;
+}
+
+interface TransferPreviewResult {
+    preview?: TransferPreviewItem[];
+    conflicts?: TransferConflict[];
+    message?: string;
+}
 
 interface TransferRotationModalProps {
     isOpen: boolean;
@@ -38,7 +56,7 @@ interface TransferRotationModalProps {
 
 const AVATAR_BASE = "https://cdn.discordapp.com/avatars";
 
-const userAvatarUrl = (user: any) =>
+const userAvatarUrl = (user: Pick<IUser, 'avatar' | 'discord_id'> | null | undefined) =>
     user?.avatar && user?.discord_id
         ? `${AVATAR_BASE}/${user.discord_id}/${user.avatar}.png?size=64`
         : undefined;
@@ -57,8 +75,8 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
 
     // ── Preview state ────────────────────────────────────────────────────────
     const [isPreviewLoading, setIsPreviewLoading] = useState(false);
-    const [preview, setPreview] = useState<any>(null);         // dry_run result
-    const [previewConflicts, setPreviewConflicts] = useState<any[] | null>(null); // avertissement écrasement
+    const [preview, setPreview] = useState<TransferPreviewResult | null>(null);
+    const [previewConflicts, setPreviewConflicts] = useState<TransferConflict[] | null>(null);
     const [previewGenericError, setPreviewGenericError] = useState<string | null>(null);
 
     // ── Transfer state ───────────────────────────────────────────────────────
@@ -120,9 +138,10 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                         setPreviewConflicts(result.conflicts);
                     }
                 }
-            } catch (err: any) {
+            } catch (err: unknown) {
                 if (cancelled) return;
-                setPreviewGenericError(err.data?.message || err.message);
+                const e = err as Error & { data?: { message?: string } };
+                setPreviewGenericError(e.data?.message || e.message);
             } finally {
                 if (!cancelled) setIsPreviewLoading(false);
             }
@@ -154,10 +173,10 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                 isClosable: true
             });
             handleClose();
-        } catch (err: any) {
+        } catch (err: unknown) {
             toast({
                 title: "Erreur lors du transfert",
-                description: err.message,
+                description: (err as Error).message,
                 status: "error",
                 duration: 5000,
                 isClosable: true
@@ -405,7 +424,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                                                     </Box>
                                                 </Alert>
                                                 <VStack spacing={1} align="stretch">
-                                                    {previewConflicts.map((c: any) => (
+                                                    {previewConflicts.map((c: TransferConflict) => (
                                                         <Flex key={c.user_id} align="center" gap={3}
                                                             px={3} py={2} borderRadius="lg"
                                                             border="1px solid" borderColor={rowConflictBorder}
@@ -428,7 +447,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
 
                                         {/* Liste des scores */}
                                         <VStack spacing={1.5} align="stretch">
-                                            {preview.preview?.map((p: any) => (
+                                            {preview.preview?.map((p: TransferPreviewItem) => (
                                                 <Flex key={p.user_id} align="center" gap={3}
                                                     px={3} py={2} borderRadius="lg"
                                                     border="1px solid" borderColor={rowOkBorder}

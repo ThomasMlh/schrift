@@ -74,7 +74,7 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
         return { selectedUser, guildId };
     };
 
-    const handleSubmitScore = async (currentUser: any) => {
+    const handleSubmitScore = async (currentUser: IUser | null) => {
         if (!currentUser) {
             toast({
                 title: t(sm("toastNotLoggedTitle")),

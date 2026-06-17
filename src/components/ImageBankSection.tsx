@@ -116,8 +116,8 @@ const AccessoryFormModal = ({
         duration: 2000,
       });
       onSaved();
-    } catch (err: any) {
-      toast({ title: err.message, status: "error", duration: 4000 });
+    } catch (err: unknown) {
+      toast({ title: (err as Error).message, status: "error", duration: 4000 });
     } finally {
       setIsSaving(false);
     }

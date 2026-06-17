@@ -73,7 +73,7 @@ export const CharactersTable = () => {
     if (itemsPerPage !== 20) params.set('limit', itemsPerPage.toString());
     if (currentPage !== 1) params.set('page', currentPage.toString());
     setSearchParams(params, { replace: true });
-  }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage, currentPage]);
+  }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage, currentPage, setSearchParams]);
 
   const handlePageChange = (page: number) => {
     if (pagination && page >= 1 && page <= pagination.totalPages) setCurrentPage(page);

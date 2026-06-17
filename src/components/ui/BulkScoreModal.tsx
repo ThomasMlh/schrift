@@ -31,7 +31,7 @@ import {
 } from "@chakra-ui/react";
 
 import { useState, useEffect, useCallback, useMemo, memo, type SVGProps } from "react";
-import type { IUser, ICycle, IGuild, IScoreFormData, ICycleRotation } from "../../interfaces";
+import type { IUser, ICycle, IGuild, IScore, IScoreFormData, ICycleRotation } from "../../interfaces";
 import { useGuildMembers, useScores } from "@/hooks/useAPI";
 import { AttackTypeBadge } from "./AttackTypeBadge";
 import { CycleSelect } from "./CycleSelect";
@@ -280,7 +280,7 @@ const BulkScoreModal = ({
         // Si des scores existent déjà, utiliser uniquement les joueurs de ces scores
         if (existingScoresData.length > 0) {
             // Extraire les utilisateurs des scores existants
-            existingScoresData.forEach((score: any) => {
+            existingScoresData.forEach((score: IScore & { user?: IUser | IUser[] }) => {
                 if (score.user) {
                     // score.user peut être un tableau ou un objet selon le pipeline MongoDB
                     const user = Array.isArray(score.user) ? score.user[0] : score.user;

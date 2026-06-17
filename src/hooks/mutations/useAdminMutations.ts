@@ -18,9 +18,9 @@ export const useAdminMutations = () => {
     data?: { status?: string; bot?: string };
     error?: string;
   }> => {
-    return request(`${apiUrl}/api/admin/bot-health`, {
+    return request<{ success: boolean; online: boolean; data?: { status?: string; bot?: string }; error?: string }>(`${apiUrl}/api/admin/bot-health`, {
       method: 'GET',
-    }, { fallbackError: 'Erreur vérification bot' }) as any;
+    }, { fallbackError: 'Erreur vérification bot' });
   };
 
   const uploadImages = async (

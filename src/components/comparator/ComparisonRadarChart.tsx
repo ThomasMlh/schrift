@@ -21,14 +21,14 @@ import { useTranslation } from "react-i18next";
 export interface RadarMetricDef {
   key: string;
   label: string;
-  getRawValue: (stats: any) => number;
+  getRawValue: (stats: Record<string, unknown>) => number;
   absolute?: boolean; // already 0-100, skip normalization
 }
 
 export interface RadarEntityDef {
   name: string;
   color: string;
-  stats: any;
+  stats: Record<string, unknown>;
 }
 
 interface ComparisonRadarChartProps {
@@ -79,7 +79,7 @@ export const ComparisonRadarChart = ({
     fullMark: 100,
   }));
 
-  const CustomAxisTick = ({ x, y, payload }: any) => (
+  const CustomAxisTick = ({ x, y, payload }: { x: number; y: number; payload: { value: string } }) => (
     <g>
       <text
         x={x} y={y} textAnchor="middle" dominantBaseline="central"
@@ -97,12 +97,12 @@ export const ComparisonRadarChart = ({
     </g>
   );
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; color?: string; payload: { metric: string } }> }) => {
     if (!active || !payload?.length) return null;
     return (
       <Box bg={bgColor} p={3} borderRadius="md" boxShadow="lg" borderWidth="1px" borderColor={borderColor}>
         <Text fontWeight="bold" fontSize="sm" mb={2}>{payload[0].payload.metric}</Text>
-        {payload.map((entry: any, i: number) => (
+        {payload.map((entry, i: number) => (
           <HStack key={i} spacing={2}>
             <Box w={3} h={3} borderRadius="full" bg={entry.color} />
             <Text fontSize="xs" color={textColor}>{entry.name}: {Math.round(entry.value)}%</Text>

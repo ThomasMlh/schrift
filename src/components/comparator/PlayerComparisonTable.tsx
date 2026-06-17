@@ -178,7 +178,7 @@ export const PlayerComparisonTable = ({
                     </Td>
                     {playersData.map((player, playerIndex) => {
                       const stats = player.stats;
-                      let value: any;
+                      let value: string;
                       let rawValue: number = 0;
 
                       if (metric.key === "bestScore") {
@@ -190,7 +190,7 @@ export const PlayerComparisonTable = ({
                       } else {
                         value =
                           typeof metric.format === "function"
-                            ? (metric.format as (v: any) => string)(
+                            ? (metric.format as (v: unknown) => string)(
                                 stats?.[metric.key]
                               )
                             : "N/A";

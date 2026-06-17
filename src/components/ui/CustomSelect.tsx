@@ -201,7 +201,7 @@ export const CustomSelect = ({
             })
             .forEach(([, groupOpts]) => all.push(...groupOpts));
         return all;
-    }, [options, allowDeselect, enableSearch, onSearchChange, searchTerm]);
+    }, [options, allowDeselect, enableSearch, onSearchChange, searchTerm, t]);
 
     // Scroll l'option highlighted dans la vue
     const scrollHighlightedIntoView = useCallback((index: number) => {

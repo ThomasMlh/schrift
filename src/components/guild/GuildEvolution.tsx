@@ -52,12 +52,12 @@ export const GuildEvolution = ({ guildId }: GuildEvolutionProps) => {
 
   const hasData = evolution.some(p => p.totalScores > 0);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string; color: string }>; label?: string }) => {
     if (!active || !payload?.length) return null;
     return (
       <Box bg={bg} p={3} borderRadius="md" boxShadow="md" borderWidth="1px" borderColor={border}>
         <Text fontSize="xs" fontWeight="semibold" mb={1}>{label}</Text>
-        {payload.map((p: any, i: number) => (
+        {payload.map((p, i: number) => (
           <HStack key={i} spacing={2}>
             <Box w={2} h={2} borderRadius="full" bg={p.color} />
             <Text fontSize="xs" color={subText}>

@@ -76,7 +76,7 @@ export const UserRotationsChart = ({ rotations, showAll = false }: UserRotations
     return name.substring(0, maxLength - 1) + "…";
   };
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { name: string; percentage: number } }> }) => {
     if (active && payload && payload.length) {
       const isTopPerformer = payload[0].payload.percentage === 100;
       return (
@@ -151,7 +151,7 @@ export const UserRotationsChart = ({ rotations, showAll = false }: UserRotations
             <LabelList 
               dataKey="percentage" 
               position="insideRight" 
-              formatter={(value: any) => `${value}%`}
+              formatter={(value: number) => `${value}%`}
               style={{ fontSize: labelFontSize, fontWeight: "bold", fill: "white" }}
             />
           </Bar>
@@ -190,8 +190,8 @@ export const UserRotationsChart = ({ rotations, showAll = false }: UserRotations
           ))}
           <LabelList 
             dataKey="percentage" 
-            position="top" 
-            formatter={(value: any) => `${value}%`}
+            position="top"
+            formatter={(value: number) => `${value}%`}
             style={{ fontSize: labelFontSize, fontWeight: "bold", fill: textColor }}
           />
         </Bar>

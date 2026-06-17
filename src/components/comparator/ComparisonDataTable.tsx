@@ -21,15 +21,15 @@ import { useTranslation } from "react-i18next";
 export interface TableMetricDef {
   label: string;
   icon: string;
-  getDisplayValue: (stats: any) => string;
-  getRawValue: (stats: any) => number;
+  getDisplayValue: (stats: Record<string, unknown>) => string;
+  getRawValue: (stats: Record<string, unknown>) => number;
   inverse?: boolean; // lower raw value = better
 }
 
 export interface TableEntityDef {
   name: string;
   color: string;
-  stats: any;
+  stats: Record<string, unknown>;
 }
 
 interface ComparisonDataTableProps {

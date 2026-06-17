@@ -84,7 +84,7 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
     cycleName: item.cycle_name // Garder le nom original pour le tooltip
   }));
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { cycleName?: string; name?: string }; value: number; name: string }> }) => {
     if (active && payload && payload.length) {
       return (
         <Box

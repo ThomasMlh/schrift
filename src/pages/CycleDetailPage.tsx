@@ -51,7 +51,7 @@ const CycleDetailPage = () => {
     if (!id) {
       setError(t("pages.cycleDetail.errorMissingId"));
     }
-  }, [fetchError, id]);
+  }, [fetchError, id, t]);
 
   if (isLoading) {
     return (

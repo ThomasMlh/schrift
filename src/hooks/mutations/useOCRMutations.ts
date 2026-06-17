@@ -17,7 +17,7 @@ export const useOCRMutations = () => {
       method: 'POST',
       body: JSON.stringify(params),
     }, { fallbackError: 'Erreur HTTP lors du traitement OCR' });
-    if (!(data as any).success) throw new Error((data as any).message || 'Erreur OCR');
+    if (!(data as { success: boolean; message?: string }).success) throw new Error((data as { message?: string }).message || 'Erreur OCR');
     return data;
   };
 
@@ -31,7 +31,7 @@ export const useOCRMutations = () => {
       method: 'POST',
       body: JSON.stringify(params),
     }, { fallbackError: 'Erreur lors de la soumission' });
-    if (!(data as any).success) throw new Error((data as any).message || 'Erreur soumission');
+    if (!(data as { success: boolean; message?: string }).success) throw new Error((data as { message?: string }).message || 'Erreur soumission');
     await invalidateKeys(`${apiUrl}/api/scores`);
     return data;
   };

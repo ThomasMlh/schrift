@@ -106,7 +106,7 @@ const UserPage = () => {
         setSelectedCycle(sorted[0]._id);
       }
     }
-  }, [cycles]);
+  }, [cycles, selectedCycle]);
 
   // Enrichir l'utilisateur avec l'avatar et le nom de guilde
   const user = userData

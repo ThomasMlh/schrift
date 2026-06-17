@@ -177,7 +177,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Vérifier l'authentification au chargement
   useEffect(() => {
     refreshAuth();
-  }, []);
+  }, [refreshAuth]);
 
   const value: AuthContextType = {
     currentUser,

@@ -39,7 +39,7 @@ export const PlayerComparisonRadar = ({
   const gridColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)";
   const { t } = useTranslation();
 
-  const CustomAxisTick = ({ x, y, payload }: any) => (
+  const CustomAxisTick = ({ x, y, payload }: { x: number; y: number; payload: { value: string } }) => (
     <g>
       <text
         x={x} y={y}
@@ -157,7 +157,7 @@ export const PlayerComparisonRadar = ({
     }
   ];
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; color?: string; payload: { metric: string } }> }) => {
     if (active && payload && payload.length) {
       return (
         <Box
@@ -171,7 +171,7 @@ export const PlayerComparisonRadar = ({
           <Text fontWeight="bold" fontSize="sm" mb={2}>
             {payload[0].payload.metric}
           </Text>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry, index: number) => (
             <HStack key={index} spacing={2}>
               <Box w={3} h={3} borderRadius="full" bg={entry.color} />
               <Text fontSize="xs" color={textColor}>

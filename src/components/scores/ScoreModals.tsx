@@ -4,7 +4,7 @@ import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal
 import BulkScoreModal from "@/components/ui/BulkScoreModal";
 import OCRScoreModal from "@/components/ui/OCRScoreModal";
 import TransferRotationModal from "@/components/ui/TransferRotationModal";
-import type { IScore, IUser, ICycle, IGuild } from "@/interfaces";
+import type { IScore, IUser, ICycle, IGuild, IScoreFormData } from "@/interfaces";
 
 interface ScoreModalsProps {
     // Modal d'ajout
@@ -25,7 +25,7 @@ interface ScoreModalsProps {
     // Modal de saisie groupée
     isBulkModalOpen: boolean;
     onBulkModalClose: () => void;
-    onBulkSubmit: (data: any[]) => void;
+    onBulkSubmit: (data: IScoreFormData[]) => void;
     isBulkSubmitting: boolean;
     isGuildRestricted: boolean;
     userGuildId: string | undefined;

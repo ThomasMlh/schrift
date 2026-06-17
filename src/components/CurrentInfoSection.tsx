@@ -42,7 +42,7 @@ export const CurrentInfoSection = () => {
 
   useEffect(() => {
     if (cyclesError) setError(t("components.currentInfoSection.errorLoading"));
-  }, [cyclesError]);
+  }, [cyclesError, t]);
 
   const formatRealDateTime = (date: Date) => {
     return (

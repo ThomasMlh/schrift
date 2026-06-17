@@ -20,13 +20,14 @@ import { DescriptionTextarea } from "./DescriptionTextarea";
 import { TeamMemberCard } from "./TeamMemberCard";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
+import type { IBuild, IBuildTeamMember, IBuildLink, ISkill } from "@/interfaces";
 
 interface BuildCreationModalProps {
   isOpen: boolean;
   onClose: () => void;
   rotationId: string;
   onSuccess: () => void;
-  buildToEdit?: any; // Build existant à modifier
+  buildToEdit?: IBuild;
 }
 
 interface TeamMember {
@@ -68,17 +69,17 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
         
         // Remplir avec les données du build
         if (buildToEdit.team && Array.isArray(buildToEdit.team)) {
-          buildToEdit.team.forEach((member: any) => {
+          buildToEdit.team.forEach((member: IBuildTeamMember) => {
             const position = member.position - 1; // Index 0-based
             if (position >= 0 && position < 3) {
               editTeam[position] = {
                 id_character: member.character?._id || member.id_character || "",
                 position: member.position,
-                links: member.links?.map((link: any) => ({
+                links: member.links?.map((link: IBuildLink) => ({
                   id_character: link.character?._id || link.id_character || ""
                 })) || [],
-                skills: member.skills?.map((skill: any) => skill._id || skill) || [],
-                accessories: member.accessories?.map((acc: any) => ({
+                skills: member.skills?.map((skill: string | ISkill) => typeof skill === 'string' ? skill : skill._id) || [],
+                accessories: member.accessories?.map((acc) => ({
                   id_accessory: acc.accessory?._id || acc.id_accessory || "",
                   id_subeffect: acc.subeffect?._id || acc.id_subeffect
                 })) || []
@@ -153,7 +154,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
         member.position === position ? { ...member, id_character: characterId } : member
       );
     });
-  }, [toast]);
+  }, [toast, t]);
 
   const handleAddLink = useCallback((position: number) => {
     setTeam((prev) =>
@@ -218,7 +219,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
           : member
       );
     });
-  }, [toast]);
+  }, [toast, t]);
 
   const handleSkillsChange = useCallback((position: number, skillIds: string[]) => {
     setTeam((prev) =>

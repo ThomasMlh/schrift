@@ -184,7 +184,7 @@ export const UserRivals = ({
                             bbs_name: rival.bbs_name,
                             avatar: rival.avatar,
                             guilde_id: rival.guilde_id
-                          } as any
+                          } as IUser
                         }
                         avatarSize="lg"
                         textSize="lg"

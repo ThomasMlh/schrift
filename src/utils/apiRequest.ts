@@ -8,7 +8,7 @@ export const apiUrl = import.meta.env.VITE_API_BASE_URL as string;
  */
 export const makeRequest =
   (token: string | null) =>
-  async <T = any>(
+  async <T = unknown>(
     url: string,
     init: RequestInit = {},
     opts: { fallbackError?: string; attachDataToError?: boolean } = {}
@@ -23,7 +23,7 @@ export const makeRequest =
     const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
     if (!res.ok) {
       const err = new Error((data.message as string) || opts.fallbackError || 'Erreur');
-      if (opts.attachDataToError) (err as any).data = data;
+      if (opts.attachDataToError) Object.assign(err, { data });
       throw err;
     }
     return data as T;
