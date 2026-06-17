@@ -69,16 +69,8 @@ export const GuildTopMembers = ({ guildId, cycleId }: GuildTopMembersProps) => {
               >
                 <Text fontSize="lg" w="24px" textAlign="center">{MEDALS[index]}</Text>
                 <Avatar size="sm" src={avatarUrl} name={member.bbs_name || member.username} />
-                <VStack align="start" spacing={0} flex={1} minW={0}>
-                  <Text fontSize="sm" fontWeight="semibold" noOfLines={1}>{member.bbs_name}</Text>
-                  <Text fontSize="xs" color={subText}>
-                    {member.totalScores} {t("pages.guilds.memberScores")}
-                  </Text>
-                </VStack>
-                <VStack align="end" spacing={0}>
-                  <Text fontSize="sm" fontWeight="bold">{formatScore(member.bestScore)}</Text>
-                  <Text fontSize="xs" color={subText}>{t("pages.guilds.memberBestScore")}</Text>
-                </VStack>
+                <Text fontSize="sm" fontWeight="semibold" noOfLines={1} flex={1} minW={0}>{member.bbs_name}</Text>
+                <Text fontSize="sm" fontWeight="bold">{formatScore(member.bestScore)}</Text>
               </HStack>
             );
           })}

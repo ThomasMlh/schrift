@@ -231,7 +231,7 @@
       "statTotalPoints": "Points Totaux",
       "statClearRate": "Taux de Clear",
       "statClearRateTooltip": "% de scores ≥ 600M",
-      "topMembersTitle": "Top Membres",
+      "topMembersTitle": "Top Scores",
       "topMembersNoData": "Aucun score sur ce cycle",
       "memberBestScore": "Meilleur",
       "memberScores": "participation(s)",
