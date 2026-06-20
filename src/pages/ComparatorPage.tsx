@@ -16,7 +16,6 @@ import {
   Flex,
   Grid,
   Text,
-  Select,
 } from "@chakra-ui/react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -24,6 +23,7 @@ import { useSearchParams } from "react-router-dom";
 import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "@/components/SEOHead";
 import { CycleSelect } from "@/components/ui/CycleSelect";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { MultiPlayerSelector } from "@/components/comparator/MultiPlayerSelector";
 import { MultiGuildSelector } from "@/components/comparator/MultiGuildSelector";
 import { ComparisonRadarChart } from "@/components/comparator/ComparisonRadarChart";
@@ -449,18 +449,17 @@ const ComparatorPage: React.FC = () => {
                       Par semaine
                     </Button>
                     {weeklyMode && (
-                      <Select
+                      <CustomSelect
                         size="sm"
                         w="130px"
-                        value={selectedWeek}
-                        onChange={(e) => setSelectedWeek(Number(e.target.value))}
-                      >
-                        {Array.from({ length: maxWeeks }, (_, i) => (
-                          <option key={i + 1} value={i + 1}>
-                            Semaine {i + 1}
-                          </option>
-                        ))}
-                      </Select>
+                        allowDeselect={false}
+                        value={String(selectedWeek)}
+                        onChange={(v) => setSelectedWeek(Number(v))}
+                        options={Array.from({ length: maxWeeks }, (_, i) => ({
+                          value: String(i + 1),
+                          label: `Semaine ${i + 1}`,
+                        }))}
+                      />
                     )}
                   </HStack>
                 )}

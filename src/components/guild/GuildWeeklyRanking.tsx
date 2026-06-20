@@ -4,13 +4,13 @@ import {
   HStack,
   Text,
   Badge,
-  Select,
   Avatar,
   Skeleton,
   SkeletonCircle,
   useColorModeValue,
   Divider,
 } from "@chakra-ui/react";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { Link as RouterLink } from "react-router-dom";
 import useSWR from "swr";
 import type { IPodiumWeeklyResponse } from "@/interfaces";
@@ -89,18 +89,17 @@ export const GuildWeeklyRanking = ({
               R{r.position} {r.killer}
             </Badge>
           ))}
-          <Select
-            size="xs"
-            w="120px"
-            value={weekNumber}
-            onChange={(e) => onWeekChange(Number(e.target.value))}
-          >
-            {Array.from({ length: maxWeeks }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                Semaine {i + 1}
-              </option>
-            ))}
-          </Select>
+          <CustomSelect
+            size="sm"
+            w="130px"
+            allowDeselect={false}
+            value={String(weekNumber)}
+            onChange={(v) => onWeekChange(Number(v))}
+            options={Array.from({ length: maxWeeks }, (_, i) => ({
+              value: String(i + 1),
+              label: `Semaine ${i + 1}`,
+            }))}
+          />
         </HStack>
       </HStack>
 
