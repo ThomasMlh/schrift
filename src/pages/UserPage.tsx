@@ -21,6 +21,7 @@ import {
   useColorModeValue,
   Flex,
   Center,
+  Skeleton,
 } from "@chakra-ui/react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { formatRoleName } from "@/utils/user";
@@ -39,6 +40,7 @@ import { UserGuildContribution } from "@/components/user/UserGuildContribution";
 import { UserPositionPerformance } from "@/components/user/UserPositionPerformance";
 import { BanDetailsCard } from "@/components/user/BanDetailsCard";
 import { UserTypeAnalysis } from "@/components/user/UserTypeAnalysis";
+import { UserWeeklySection } from "@/components/user/UserWeeklySection";
 import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock } from "react-icons/fi";
 import { getDiscordBannerUrl } from "@/utils/discord";
 import { useAuth } from "@/providers/AuthProvider";
@@ -349,7 +351,14 @@ const UserPage = () => {
         </Card>
 
         {statsLoading ? (
-          <PageLoader label={t("pages.user.loadingStats")} height="20vh" />
+          <VStack spacing={6}>
+            <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6} w="full">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} h="100px" borderRadius="xl" />
+              ))}
+            </SimpleGrid>
+            <Skeleton h="200px" w="full" borderRadius="xl" />
+          </VStack>
         ) : stats && stats.totalScores > 0 ? (
           <VStack spacing={6}>
             {/* Statistiques principales */}
@@ -391,6 +400,18 @@ const UserPage = () => {
                 valueColor="orange.500"
               />
             </SimpleGrid>
+
+            {/* Semaine en cours */}
+            {selectedCycle && (() => {
+              const cycleObj = cycles.find((c) => c._id === selectedCycle);
+              return cycleObj ? (
+                <UserWeeklySection
+                  cycle={cycleObj}
+                  cycleId={selectedCycle}
+                  allRotations={stats.allRotations}
+                />
+              ) : null;
+            })()}
 
             {/* Onglets pour les différentes visualisations */}
             <Card w="full" bg={tabBg} borderRadius="xl" boxShadow="lg">
