@@ -15,6 +15,8 @@ import {
   Icon,
   Flex,
   Grid,
+  Text,
+  Select,
 } from "@chakra-ui/react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -32,7 +34,7 @@ import { useUsers, useCycles, useGuilds, fetchUserStats, fetchGuildStats } from 
 import { formatScore, formatNumber } from "@/utils/format";
 import type { IUser, IGuild } from "@/interfaces";
 import type { IUserStats, IGuildStats } from "@/hooks/useAPI";
-import { FiRefreshCw, FiBarChart2, FiUsers, FiShield } from "react-icons/fi";
+import { FiRefreshCw, FiBarChart2, FiUsers, FiShield, FiCalendar } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 
 interface SelectedPlayer {
@@ -69,6 +71,8 @@ const ComparatorPage: React.FC = () => {
     searchParams.get("cycle_id") || ""
   );
   const [isLoadingStats, setIsLoadingStats] = useState(false);
+  const [weeklyMode, setWeeklyMode] = useState(false);
+  const [selectedWeek, setSelectedWeek] = useState(1);
 
   const [userSearch, setUserSearch] = useState("");
   const { users = [] } = useUsers({ authenticated: false, limit: 100, search: userSearch || undefined });
@@ -85,40 +89,52 @@ const ComparatorPage: React.FC = () => {
   const guildAccentBg = isDark ? "rgba(159,122,234,0.08)" : "purple.50";
 
   // Radar metrics
-  const playerRadarMetrics = useMemo<RadarMetricDef[]>(() => [
-    { key: "averageScore", label: t("components.comparatorCharts.radarAvg"), getRawValue: (s) => s?.averageScore || 0 },
-    { key: "bestScore", label: t("components.comparatorCharts.radarBest"), getRawValue: (s) => s?.bestScore?.score || 0 },
-    { key: "totalScores", label: t("components.comparatorCharts.radarParticipation"), getRawValue: (s) => s?.totalScores || 0 },
-    { key: "regularity", label: t("components.comparatorCharts.radarRegularity"), getRawValue: (s) => typeof s?.missRate === "number" ? 100 - s.missRate : 0, absolute: true },
-    { key: "totalPoints", label: t("components.comparatorCharts.radarTotalPoints"), getRawValue: (s) => s?.totalPoints || 0 },
-  ], [t]);
+  const playerRadarMetrics = useMemo<RadarMetricDef[]>(() => {
+    const P = (s: Record<string, unknown>) => s as unknown as IUserStats;
+    return [
+      { key: "averageScore", label: t("components.comparatorCharts.radarAvg"), getRawValue: (s) => P(s)?.averageScore || 0 },
+      { key: "bestScore", label: t("components.comparatorCharts.radarBest"), getRawValue: (s) => P(s)?.bestScore?.score || 0 },
+      { key: "totalScores", label: t("components.comparatorCharts.radarParticipation"), getRawValue: (s) => P(s)?.totalScores || 0 },
+      { key: "regularity", label: t("components.comparatorCharts.radarRegularity"), getRawValue: (s) => typeof P(s)?.missRate === "number" ? 100 - P(s).missRate! : 0, absolute: true },
+      { key: "totalPoints", label: t("components.comparatorCharts.radarTotalPoints"), getRawValue: (s) => P(s)?.totalPoints || 0 },
+    ];
+  }, [t]);
 
-  const guildRadarMetrics = useMemo<RadarMetricDef[]>(() => [
-    { key: "averageScore", label: t("components.comparatorCharts.radarAvg"), getRawValue: (s) => s?.averageScore || 0 },
-    { key: "bestScore", label: t("components.comparatorCharts.radarBest"), getRawValue: (s) => s?.bestScore || 0 },
-    { key: "totalMembers", label: t("components.comparatorCharts.radarMembers"), getRawValue: (s) => s?.totalMembers || 0 },
-    { key: "totalScores", label: t("components.comparatorCharts.radarParticipation"), getRawValue: (s) => s?.totalScores || 0 },
-    { key: "clearRate", label: t("components.comparatorCharts.metricClearRate"), getRawValue: (s) => s?.clearRate || 0, absolute: true },
-  ], [t]);
+  const guildRadarMetrics = useMemo<RadarMetricDef[]>(() => {
+    const G = (s: Record<string, unknown>) => s as unknown as IGuildStats;
+    return [
+      { key: "averageScore", label: t("components.comparatorCharts.radarAvg"), getRawValue: (s) => G(s)?.averageScore || 0 },
+      { key: "bestScore", label: t("components.comparatorCharts.radarBest"), getRawValue: (s) => G(s)?.bestScore || 0 },
+      { key: "totalMembers", label: t("components.comparatorCharts.radarMembers"), getRawValue: (s) => G(s)?.totalMembers || 0 },
+      { key: "totalScores", label: t("components.comparatorCharts.radarParticipation"), getRawValue: (s) => G(s)?.totalScores || 0 },
+      { key: "clearRate", label: t("components.comparatorCharts.metricClearRate"), getRawValue: (s) => G(s)?.clearRate || 0, absolute: true },
+    ];
+  }, [t]);
 
   // Table metrics
-  const playerTableMetrics = useMemo<TableMetricDef[]>(() => [
-    { label: t("components.comparatorCharts.metricAvgScore"), icon: "📊", getDisplayValue: (s) => formatScore(s?.averageScore), getRawValue: (s) => s?.averageScore || 0 },
-    { label: t("components.comparatorCharts.metricBestScore"), icon: "🏆", getDisplayValue: (s) => formatNumber(s?.bestScore?.score), getRawValue: (s) => s?.bestScore?.score || 0 },
-    { label: t("components.comparatorCharts.metricWorstScore"), icon: "📉", getDisplayValue: (s) => formatNumber(s?.worstScore?.score), getRawValue: (s) => s?.worstScore?.score || 0 },
-    { label: t("components.comparatorCharts.metricParticipations"), icon: "🎯", getDisplayValue: (s) => formatNumber(s?.totalScores), getRawValue: (s) => s?.totalScores || 0 },
-    { label: t("components.comparatorCharts.metricTotalPoints"), icon: "💰", getDisplayValue: (s) => formatScore(s?.totalPoints), getRawValue: (s) => s?.totalPoints || 0 },
-    { label: t("components.comparatorCharts.metricMissRate"), icon: "⚠️", getDisplayValue: (s) => typeof s?.missRate === "number" ? `${s.missRate}%` : "N/A", getRawValue: (s) => s?.missRate || 0, inverse: true },
-  ], [t]);
+  const playerTableMetrics = useMemo<TableMetricDef[]>(() => {
+    const P = (s: Record<string, unknown>) => s as unknown as IUserStats;
+    return [
+      { label: t("components.comparatorCharts.metricAvgScore"), icon: "📊", getDisplayValue: (s) => formatScore(P(s)?.averageScore), getRawValue: (s) => P(s)?.averageScore || 0 },
+      { label: t("components.comparatorCharts.metricBestScore"), icon: "🏆", getDisplayValue: (s) => formatNumber(P(s)?.bestScore?.score), getRawValue: (s) => P(s)?.bestScore?.score || 0 },
+      { label: t("components.comparatorCharts.metricWorstScore"), icon: "📉", getDisplayValue: (s) => formatNumber(P(s)?.worstScore?.score), getRawValue: (s) => P(s)?.worstScore?.score || 0 },
+      { label: t("components.comparatorCharts.metricParticipations"), icon: "🎯", getDisplayValue: (s) => formatNumber(P(s)?.totalScores), getRawValue: (s) => P(s)?.totalScores || 0 },
+      { label: t("components.comparatorCharts.metricTotalPoints"), icon: "💰", getDisplayValue: (s) => formatScore(P(s)?.totalPoints), getRawValue: (s) => P(s)?.totalPoints || 0 },
+      { label: t("components.comparatorCharts.metricMissRate"), icon: "⚠️", getDisplayValue: (s) => typeof P(s)?.missRate === "number" ? `${P(s).missRate}%` : "N/A", getRawValue: (s) => P(s)?.missRate || 0, inverse: true },
+    ];
+  }, [t]);
 
-  const guildTableMetrics = useMemo<TableMetricDef[]>(() => [
-    { label: t("components.comparatorCharts.metricMemberCount"), icon: "👥", getDisplayValue: (s) => formatNumber(s?.totalMembers), getRawValue: (s) => s?.totalMembers || 0 },
-    { label: t("components.comparatorCharts.metricAvgScore"), icon: "📊", getDisplayValue: (s) => formatScore(s?.averageScore), getRawValue: (s) => s?.averageScore || 0 },
-    { label: t("components.comparatorCharts.metricBestScore"), icon: "🏆", getDisplayValue: (s) => formatNumber(s?.bestScore), getRawValue: (s) => s?.bestScore || 0 },
-    { label: t("components.comparatorCharts.metricTotalParticipations"), icon: "🎯", getDisplayValue: (s) => formatNumber(s?.totalScores), getRawValue: (s) => s?.totalScores || 0 },
-    { label: t("components.comparatorCharts.metricTotalPoints"), icon: "💰", getDisplayValue: (s) => formatScore(s?.totalPoints), getRawValue: (s) => s?.totalPoints || 0 },
-    { label: t("components.comparatorCharts.metricClearRate"), icon: "✅", getDisplayValue: (s) => typeof s?.clearRate === "number" ? `${s.clearRate}%` : "N/A", getRawValue: (s) => s?.clearRate || 0 },
-  ], [t]);
+  const guildTableMetrics = useMemo<TableMetricDef[]>(() => {
+    const G = (s: Record<string, unknown>) => s as unknown as IGuildStats;
+    return [
+      { label: t("components.comparatorCharts.metricMemberCount"), icon: "👥", getDisplayValue: (s) => formatNumber(G(s)?.totalMembers), getRawValue: (s) => G(s)?.totalMembers || 0 },
+      { label: t("components.comparatorCharts.metricAvgScore"), icon: "📊", getDisplayValue: (s) => formatScore(G(s)?.averageScore), getRawValue: (s) => G(s)?.averageScore || 0 },
+      { label: t("components.comparatorCharts.metricBestScore"), icon: "🏆", getDisplayValue: (s) => formatNumber(G(s)?.bestScore), getRawValue: (s) => G(s)?.bestScore || 0 },
+      { label: t("components.comparatorCharts.metricTotalParticipations"), icon: "🎯", getDisplayValue: (s) => formatNumber(G(s)?.totalScores), getRawValue: (s) => G(s)?.totalScores || 0 },
+      { label: t("components.comparatorCharts.metricTotalPoints"), icon: "💰", getDisplayValue: (s) => formatScore(G(s)?.totalPoints), getRawValue: (s) => G(s)?.totalPoints || 0 },
+      { label: t("components.comparatorCharts.metricClearRate"), icon: "✅", getDisplayValue: (s) => typeof G(s)?.clearRate === "number" ? `${G(s).clearRate}%` : "N/A", getRawValue: (s) => G(s)?.clearRate || 0 },
+    ];
+  }, [t]);
 
   // Load from URL on mount — runs once when data first becomes available
   const initializedRef = useRef(false);
@@ -240,15 +256,99 @@ const ComparatorPage: React.FC = () => {
   // Derived data for charts
   const playersData = selectedPlayers.map((p, i) => ({
     name: p.user.bbs_name || p.user.global_name || "Joueur",
-    stats: playersStats.get(p.id) || null,
+    stats: (playersStats.get(p.id) ?? null) as unknown as Record<string, unknown>,
     color: ENTITY_COLORS[i % ENTITY_COLORS.length],
   }));
 
   const guildsData = selectedGuilds.map((g, i) => ({
     name: g.guild.name,
-    stats: guildsStats.get(g.id) || null,
+    stats: (guildsStats.get(g.id) ?? null) as unknown as Record<string, unknown>,
     color: ENTITY_COLORS[i % ENTITY_COLORS.length],
   }));
+
+  // Weekly mode helpers (players only)
+  const selectedCycleObj = cycles.find((c) => c._id === selectedCycleId);
+  const maxWeeks = selectedCycleObj
+    ? Math.floor(selectedCycleObj.rotations.length / 2)
+    : 0;
+
+  const getWeeklyStats = (
+    stats: IUserStats | null,
+    weekNum: number
+  ): Record<string, unknown> | null => {
+    if (!stats || !selectedCycleObj) return null;
+    const rot1 = selectedCycleObj.rotations[(weekNum - 1) * 2];
+    const rot2 = selectedCycleObj.rotations[(weekNum - 1) * 2 + 1];
+    const s1 = stats.allRotations.find(
+      (r) => r.rotation_id === rot1?.rotation_id
+    );
+    const s2 = stats.allRotations.find(
+      (r) => r.rotation_id === rot2?.rotation_id
+    );
+    return {
+      weekTotal: (s1?.averageScore ?? 0) + (s2?.averageScore ?? 0),
+      rotation1Score: s1?.averageScore ?? 0,
+      rotation2Score: s2?.averageScore ?? 0,
+    };
+  };
+
+  const weeklyPlayersData = useMemo(
+    () =>
+      selectedPlayers.map((p, i) => ({
+        name: p.user.bbs_name || p.user.global_name || "Joueur",
+        stats:
+          getWeeklyStats(playersStats.get(p.id) ?? null, selectedWeek) ??
+          ({} as Record<string, unknown>),
+        color: ENTITY_COLORS[i % ENTITY_COLORS.length],
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedPlayers, playersStats, selectedWeek, selectedCycleObj]
+  );
+
+  const weeklyRadarMetrics = useMemo<RadarMetricDef[]>(
+    () => [
+      {
+        key: "weekTotal",
+        label: "Total semaine",
+        getRawValue: (s) => (s.weekTotal as number) || 0,
+      },
+      {
+        key: "rotation1Score",
+        label: "Rotation 1",
+        getRawValue: (s) => (s.rotation1Score as number) || 0,
+      },
+      {
+        key: "rotation2Score",
+        label: "Rotation 2",
+        getRawValue: (s) => (s.rotation2Score as number) || 0,
+      },
+    ],
+    []
+  );
+
+  const weeklyTableMetrics = useMemo<TableMetricDef[]>(
+    () => [
+      {
+        label: "Total semaine",
+        icon: "📅",
+        getDisplayValue: (s) => formatScore((s.weekTotal as number) || 0),
+        getRawValue: (s) => (s.weekTotal as number) || 0,
+      },
+      {
+        label: "Rotation 1",
+        icon: "1️⃣",
+        getDisplayValue: (s) => formatScore((s.rotation1Score as number) || 0),
+        getRawValue: (s) => (s.rotation1Score as number) || 0,
+      },
+      {
+        label: "Rotation 2",
+        icon: "2️⃣",
+        getDisplayValue: (s) => formatScore((s.rotation2Score as number) || 0),
+        getRawValue: (s) => (s.rotation2Score as number) || 0,
+      },
+    ],
+    []
+  );
 
   const hasPlayersStats = playersStats.size > 0 && Array.from(playersStats.values()).some((s) => s !== null);
   const hasGuildsStats = guildsStats.size > 0 && Array.from(guildsStats.values()).some((s) => s !== null);
@@ -336,6 +436,35 @@ const ComparatorPage: React.FC = () => {
                   />
                 </Box>
 
+                {/* Weekly mode toggle (players only) */}
+                {isPlayers && selectedCycleId && maxWeeks > 0 && (
+                  <HStack spacing={2} flexShrink={0}>
+                    <Button
+                      size="sm"
+                      variant={weeklyMode ? "solid" : "outline"}
+                      colorScheme="purple"
+                      leftIcon={<Icon as={FiCalendar} />}
+                      onClick={() => setWeeklyMode((v) => !v)}
+                    >
+                      Par semaine
+                    </Button>
+                    {weeklyMode && (
+                      <Select
+                        size="sm"
+                        w="130px"
+                        value={selectedWeek}
+                        onChange={(e) => setSelectedWeek(Number(e.target.value))}
+                      >
+                        {Array.from({ length: maxWeeks }, (_, i) => (
+                          <option key={i + 1} value={i + 1}>
+                            Semaine {i + 1}
+                          </option>
+                        ))}
+                      </Select>
+                    )}
+                  </HStack>
+                )}
+
                 {/* Actions */}
                 <HStack spacing={2} flexShrink={0}>
                   <IconButton
@@ -403,30 +532,82 @@ const ComparatorPage: React.FC = () => {
 
             {/* Results – side-by-side on xl+ */}
             {!isLoadingStats && hasResults && (
-              <Grid
-                templateColumns={{ base: "1fr", xl: "repeat(2, 1fr)" }}
-                gap={5}
-                alignItems="stretch"
-              >
-                <ComparisonRadarChart
-                  entities={isPlayers ? playersData : guildsData}
-                  metrics={isPlayers ? playerRadarMetrics : guildRadarMetrics}
-                  heading={t(isPlayers
-                    ? "components.comparatorCharts.radarHeadingPlayers"
-                    : "components.comparatorCharts.radarHeadingGuilds"
-                  )}
-                  accentBg={isPlayers ? playerAccentBg : guildAccentBg}
-                />
-                <ComparisonDataTable
-                  entities={isPlayers ? playersData : guildsData}
-                  metrics={isPlayers ? playerTableMetrics : guildTableMetrics}
-                  heading={t(isPlayers
-                    ? "components.comparatorCharts.tableHeadingPlayers"
-                    : "components.comparatorCharts.tableHeadingGuilds"
-                  )}
-                  accentBg={isPlayers ? playerAccentBg : guildAccentBg}
-                />
-              </Grid>
+              <>
+                {weeklyMode && isPlayers && (
+                  <Box
+                    bg={isDark ? "rgba(159,122,234,0.08)" : "purple.50"}
+                    borderRadius="lg"
+                    px={4}
+                    py={2}
+                    borderLeft="3px solid"
+                    borderColor="purple.400"
+                  >
+                    <HStack spacing={2}>
+                      <Icon as={FiCalendar} color="purple.400" boxSize={4} />
+                      <Text fontSize="sm" fontWeight="semibold" color="purple.600" _dark={{ color: "purple.300" }}>
+                        Mode hebdomadaire — Semaine {selectedWeek}
+                      </Text>
+                      {selectedCycleObj && (() => {
+                        const r1 = selectedCycleObj.rotations[(selectedWeek - 1) * 2];
+                        const r2 = selectedCycleObj.rotations[(selectedWeek - 1) * 2 + 1];
+                        return r1 ? (
+                          <Text fontSize="xs" color="gray.500">
+                            R{r1.position} {r1.killer}{r2 ? ` + R${r2.position} ${r2.killer}` : ""}
+                          </Text>
+                        ) : null;
+                      })()}
+                    </HStack>
+                  </Box>
+                )}
+                <Grid
+                  templateColumns={{ base: "1fr", xl: "repeat(2, 1fr)" }}
+                  gap={5}
+                  alignItems="stretch"
+                >
+                  <ComparisonRadarChart
+                    entities={
+                      weeklyMode && isPlayers
+                        ? weeklyPlayersData
+                        : isPlayers
+                        ? playersData
+                        : guildsData
+                    }
+                    metrics={
+                      weeklyMode && isPlayers
+                        ? weeklyRadarMetrics
+                        : isPlayers
+                        ? playerRadarMetrics
+                        : guildRadarMetrics
+                    }
+                    heading={t(isPlayers
+                      ? "components.comparatorCharts.radarHeadingPlayers"
+                      : "components.comparatorCharts.radarHeadingGuilds"
+                    )}
+                    accentBg={isPlayers ? playerAccentBg : guildAccentBg}
+                  />
+                  <ComparisonDataTable
+                    entities={
+                      weeklyMode && isPlayers
+                        ? weeklyPlayersData
+                        : isPlayers
+                        ? playersData
+                        : guildsData
+                    }
+                    metrics={
+                      weeklyMode && isPlayers
+                        ? weeklyTableMetrics
+                        : isPlayers
+                        ? playerTableMetrics
+                        : guildTableMetrics
+                    }
+                    heading={t(isPlayers
+                      ? "components.comparatorCharts.tableHeadingPlayers"
+                      : "components.comparatorCharts.tableHeadingGuilds"
+                    )}
+                    accentBg={isPlayers ? playerAccentBg : guildAccentBg}
+                  />
+                </Grid>
+              </>
             )}
 
           </VStack>
