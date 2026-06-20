@@ -24,6 +24,7 @@ import { formatScore } from "@/utils/format";
 import { GuildTopMembers } from "@/components/guild/GuildTopMembers";
 import { GuildScoreDistribution } from "@/components/guild/GuildScoreDistribution";
 import { GuildEvolution } from "@/components/guild/GuildEvolution";
+import { GuildWeeklyRanking } from "@/components/guild/GuildWeeklyRanking";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import type { IGuild } from "../interfaces";
@@ -34,6 +35,7 @@ const GuildesPage = () => {
   const [selectedGuild, setSelectedGuild] = useState<IGuild | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
+  const [selectedWeeklyWeek, setSelectedWeeklyWeek] = useState(1);
   const bucketUrl = import.meta.env.VITE_BUCKET_URL;
   const { t } = useTranslation();
 
@@ -68,6 +70,9 @@ const GuildesPage = () => {
   const { stats: guildStats, isLoading: isLoadingStats } = useGuildStats(selectedGuild?._id, selectedCycleId || undefined);
   const { rankings } = useGuildRankings(selectedCycleId || undefined);
   const currentGuildRank = selectedGuild ? rankings.find(r => r._id === selectedGuild._id) : null;
+
+  const selectedCycleObj = cycles.find((c) => c._id === selectedCycleId);
+  const maxWeeks = selectedCycleObj ? Math.floor(selectedCycleObj.rotations.length / 2) : 0;
 
   const statCardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.7)");
   const statCardBorder = useColorModeValue("gray.100", "whiteAlpha.100");
@@ -412,6 +417,18 @@ const GuildesPage = () => {
 
                   {/* Évolution */}
                   <GuildEvolution guildId={selectedGuild._id} />
+
+                  {/* Classement hebdomadaire */}
+                  {selectedCycleObj && maxWeeks > 0 && (
+                    <GuildWeeklyRanking
+                      guildName={selectedGuild.name}
+                      cycleName={selectedCycleObj.name}
+                      cycleId={selectedCycleObj._id ?? ""}
+                      maxWeeks={maxWeeks}
+                      weekNumber={selectedWeeklyWeek}
+                      onWeekChange={setSelectedWeeklyWeek}
+                    />
+                  )}
                 </Box>
               )}
             </Box>
