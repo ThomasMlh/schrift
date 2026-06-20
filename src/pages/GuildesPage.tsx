@@ -416,18 +416,22 @@ const GuildesPage = () => {
                   </SimpleGrid>
 
                   {/* Évolution */}
-                  <GuildEvolution guildId={selectedGuild._id} />
+                  <Box mt={4}>
+                    <GuildEvolution guildId={selectedGuild._id} />
+                  </Box>
 
                   {/* Classement hebdomadaire */}
                   {selectedCycleObj && maxWeeks > 0 && (
-                    <GuildWeeklyRanking
-                      guildName={selectedGuild.name}
-                      cycleName={selectedCycleObj.name}
-                      cycleId={selectedCycleObj._id ?? ""}
-                      maxWeeks={maxWeeks}
-                      weekNumber={selectedWeeklyWeek}
-                      onWeekChange={setSelectedWeeklyWeek}
-                    />
+                    <Box mt={4}>
+                      <GuildWeeklyRanking
+                        guildName={selectedGuild.name}
+                        cycleName={selectedCycleObj.name}
+                        cycleId={selectedCycleObj._id ?? ""}
+                        maxWeeks={maxWeeks}
+                        weekNumber={selectedWeeklyWeek}
+                        onWeekChange={setSelectedWeeklyWeek}
+                      />
+                    </Box>
                   )}
                 </Box>
               )}

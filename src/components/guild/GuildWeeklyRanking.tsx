@@ -105,7 +105,7 @@ export const GuildWeeklyRanking = ({
       </HStack>
 
       {/* List */}
-      <VStack spacing={0} align="stretch" px={0}>
+      <VStack spacing={0} align="stretch" px={0} divider={<Divider borderColor={borderColor} />}>
         {isLoading
           ? Array.from({ length: 5 }).map((_, i) => (
               <HStack key={i} px={4} py={3} spacing={3}>
@@ -120,7 +120,7 @@ export const GuildWeeklyRanking = ({
               Aucun score pour cette semaine
             </Text>
           )
-          : players.map((player, idx) => {
+          : players.map((player) => {
               const avatarUrl =
                 player.avatar && player.discord_id
                   ? getUserAvatarUrl({ discord_id: player.discord_id, avatar: player.avatar }) || undefined
@@ -130,22 +130,22 @@ export const GuildWeeklyRanking = ({
               const displayName =
                 player.bbs_name || player.global_name || player.username;
               return (
-                <Box key={player.user_id}>
-                  {idx > 0 && <Divider borderColor={borderColor} />}
-                  <HStack
-                    px={4}
-                    py={2}
-                    spacing={3}
-                    _hover={{ bg: rowHover }}
-                    transition="background 0.1s"
-                  >
+                <HStack
+                  key={player.user_id}
+                  px={4}
+                  py={4}
+                  spacing={3}
+                  _hover={{ bg: rowHover }}
+                  transition="background 0.1s"
+                >
                     <Text
                       fontWeight="bold"
                       fontSize="sm"
                       color={rankColor}
-                      w="24px"
+                      minW="36px"
                       textAlign="center"
                       flexShrink={0}
+                      whiteSpace="nowrap"
                     >
                       #{player.rank}
                     </Text>
@@ -171,8 +171,7 @@ export const GuildWeeklyRanking = ({
                         {Math.round(player.rotation2_score).toLocaleString("fr-FR")}
                       </Text>
                     </VStack>
-                  </HStack>
-                </Box>
+                </HStack>
               );
             })}
       </VStack>
