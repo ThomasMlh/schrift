@@ -1,5 +1,4 @@
-import { Box, VStack, HStack, Text, Flex, Alert, AlertIcon, Divider } from "@chakra-ui/react";
-import { PageLoader } from "@/components/ui/PageLoader";
+import { Box, VStack, HStack, Text, Flex, Alert, AlertIcon, Divider, Skeleton, SkeletonCircle } from "@chakra-ui/react";
 import type {
   IPodiumResponse,
   IPodiumWeeklyResponse,
@@ -168,7 +167,23 @@ export const PodiumResults = ({
 
   if (isLoading) {
     return (
-      <PageLoader label={t("components.podiumResults.loading")} color="blue.400" height="300px" />
+      <VStack spacing={2} align="stretch" px={2} py={4}>
+        {/* Skeleton pedestal */}
+        <HStack justify="center" align="flex-end" spacing={4} mb={4}>
+          {[80, 110, 80].map((h, i) => (
+            <Skeleton key={i} h={`${h}px`} w="90px" borderRadius="lg" />
+          ))}
+        </HStack>
+        {/* Skeleton rows */}
+        {Array.from({ length: 7 }).map((_, i) => (
+          <HStack key={i} px={3} py={2} spacing={3}>
+            <Skeleton h="16px" w="28px" borderRadius="md" />
+            <SkeletonCircle size="8" />
+            <Skeleton h="16px" flex={1} borderRadius="md" />
+            <Skeleton h="16px" w="80px" borderRadius="md" />
+          </HStack>
+        ))}
+      </VStack>
     );
   }
 
