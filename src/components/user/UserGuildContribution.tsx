@@ -56,7 +56,9 @@ export const UserGuildContribution = ({
   const avg = guildContribution.averagePct;
   const color = avg >= 10 ? "#38A169" : avg >= 5 ? "#3182CE" : "#DD6B20";
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: Record<string, unknown> }> }) => {
+  type ChartItem = { name: string; pct: number; userTotal: number; guildTotal: number };
+
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: ChartItem }> }) => {
     if (active && payload && payload.length) {
       const d = payload[0].payload;
       return (

@@ -25,7 +25,7 @@ const GuildsAdminSection = () => {
 
   const handleDeleteGuild = async (guildId: string) => {
     try {
-      const data = await deleteGuild(guildId);
+      const data = await deleteGuild(guildId) as { message?: string };
       mutateGuilds();
       toast({ title: data.message || "Guilde supprimée", status: "success" });
     } catch (error) {
@@ -36,7 +36,7 @@ const GuildsAdminSection = () => {
   const handleRenameGuild = async (guildId: string, newName: string) => {
     if (!newName.trim()) return;
     try {
-      const data = await updateGuild(guildId, { name: newName.trim() });
+      const data = await updateGuild(guildId, { name: newName.trim() }) as { message?: string };
       mutateGuilds();
       toast({ title: data.message || "Guilde renommée", status: "success" });
     } catch (error) {
@@ -60,7 +60,7 @@ const GuildsAdminSection = () => {
   const confirmToggleDisable = async () => {
     if (disableGuildId) {
       try {
-        const data = await toggleGuildDisable(disableGuildId);
+        const data = await toggleGuildDisable(disableGuildId) as { message?: string };
         mutateGuilds();
         toast({ title: data.message || "Statut de la guilde modifié", status: "success" });
       } catch (error) {

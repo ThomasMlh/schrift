@@ -123,7 +123,7 @@ export const ComparisonRadarChart = ({
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={radarData}>
               <PolarGrid stroke={gridColor} strokeDasharray="3 3" />
-              <PolarAngleAxis dataKey="metric" tick={<CustomAxisTick />} />
+              <PolarAngleAxis dataKey="metric" tick={(props: { x: string | number; y: string | number; payload: { value: string } }) => <CustomAxisTick x={Number(props.x)} y={Number(props.y)} payload={props.payload} />} />
               <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: textColor, fontSize: 10 }} />
               {entities.map((entity, i) => (
                 <Radar

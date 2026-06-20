@@ -336,7 +336,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     try {
       if (isEditMode) {
         // Mode édition
-        await updateBuild(buildToEdit._id, {
+        await updateBuild(buildToEdit._id!, {
           rotation_id: rotationId,
           description: description.trim(),
           team: filteredTeam,

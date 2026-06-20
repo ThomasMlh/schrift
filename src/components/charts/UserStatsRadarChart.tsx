@@ -52,7 +52,7 @@ export const UserStatsRadarChart = ({
     }
   };
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; payload: Record<string, unknown> }> }) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; payload: { name: string; actualScore: number; attack: string } }> }) => {
     if (active && payload && payload.length) {
       return (
         <Box

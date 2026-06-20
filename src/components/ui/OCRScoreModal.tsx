@@ -116,13 +116,14 @@ const OCRScoreModal = ({
     setIsProcessing(true);
 
     try {
-      const data = await processOCRBatch({
+      const raw = await processOCRBatch({
         guild_id: selectedGuildId,
         cycle_id: selectedCycleId,
         rotation_id: selectedRotationId,
         screenshotter_id: selectedScreenshotterId,
         screenshots: uploadedScreenshots
       });
+      const data = raw as { data: { screenshots: ScreenshotOCRResult[]; summary: { totalPlayersDetected: number } } };
 
       setOcrResults(data.data.screenshots);
       setCurrentStep(2);
@@ -150,12 +151,13 @@ const OCRScoreModal = ({
     setIsSubmitting(true);
 
     try {
-      const data = await submitOCRBatch({
+      const raw = await submitOCRBatch({
         guild_id: selectedGuildId,
         cycle_id: selectedCycleId,
         rotation_id: selectedRotationId,
         scores: validatedScores
       });
+      const data = raw as { data: { inserted: number; rotation_info?: { is_differential?: boolean } } };
 
       const rotationInfo = data.data.rotation_info;
       const isDifferential = rotationInfo?.is_differential;

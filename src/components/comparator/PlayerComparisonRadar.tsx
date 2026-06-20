@@ -203,7 +203,7 @@ export const PlayerComparisonRadar = ({
                 <PolarGrid stroke={gridColor} strokeDasharray="3 3" />
                 <PolarAngleAxis
                   dataKey="metric"
-                  tick={<CustomAxisTick />}
+                  tick={(props: { x: string | number; y: string | number; payload: { value: string } }) => <CustomAxisTick x={Number(props.x)} y={Number(props.y)} payload={props.payload} />}
                 />
                 <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: textColor, fontSize: 10 }} />
                 {playersData.map((player, index) => (

@@ -33,18 +33,23 @@ interface TransferConflict {
     user_id: string;
     user?: Pick<IUser, 'global_name' | 'bbs_name' | 'discord_id' | 'avatar'>;
     existing_raw_score?: number;
+    source_raw_score?: number;
 }
 
 interface TransferPreviewItem {
     user_id: string;
     user?: Pick<IUser, 'global_name' | 'bbs_name' | 'discord_id' | 'avatar'>;
     raw_score?: number;
+    old_score?: number;
+    new_score?: number;
 }
 
 interface TransferPreviewResult {
     preview?: TransferPreviewItem[];
     conflicts?: TransferConflict[];
     message?: string;
+    scoreCount?: number;
+    parityChanged?: boolean;
 }
 
 interface TransferRotationModalProps {
@@ -132,10 +137,11 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                     dry_run: true
                 });
                 if (!cancelled) {
-                    setPreview(result);
+                    const typed = result as TransferPreviewResult;
+                    setPreview(typed);
                     // Les conflits sont maintenant des warnings (écrasement), pas des blockers
-                    if (result.conflicts?.length > 0) {
-                        setPreviewConflicts(result.conflicts);
+                    if (typed.conflicts?.length) {
+                        setPreviewConflicts(typed.conflicts);
                     }
                 }
             } catch (err: unknown) {
@@ -167,7 +173,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
 
             toast({
                 title: "Transfert réussi ✓",
-                description: result.message,
+                description: (result as TransferPreviewResult).message,
                 status: "success",
                 duration: 6000,
                 isClosable: true
@@ -390,7 +396,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                                             </HStack>
                                             <HStack spacing={2}>
                                                 <Badge colorScheme="orange" borderRadius="full">
-                                                    {preview.scoreCount} score{preview.scoreCount > 1 ? "s" : ""}
+                                                    {preview.scoreCount ?? 0} score{(preview.scoreCount ?? 0) > 1 ? "s" : ""}
                                                 </Badge>
                                                 {preview.parityChanged && (
                                                     <Badge colorScheme="yellow" borderRadius="full">

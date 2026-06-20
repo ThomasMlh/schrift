@@ -84,7 +84,7 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
     cycleName: item.cycle_name // Garder le nom original pour le tooltip
   }));
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { cycleName?: string; name?: string }; value: number; name: string }> }) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { cycleName?: string; name?: string; year?: number; scoreCount?: number }; value: number; name: string }> }) => {
     if (active && payload && payload.length) {
       return (
         <Box
@@ -107,8 +107,8 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
             {t("components.user.temporalEvolution.tooltipAvgScore")} {payload[0].value}M
           </Text>
           <Text color="gray.500" fontSize="xs">
-            {payload[0].payload.scoreCount} rotation
-            {payload[0].payload.scoreCount > 1 ? "s" : ""}
+            {payload[0].payload.scoreCount ?? 0} rotation
+            {(payload[0].payload.scoreCount ?? 0) > 1 ? "s" : ""}
           </Text>
         </Box>
       );

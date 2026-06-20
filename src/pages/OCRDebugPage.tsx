@@ -74,13 +74,14 @@ const OCRDebugPage = () => {
     setIsProcessing(true);
 
     try {
-      const data = await visualizeOCRZones({
+      const raw = await visualizeOCRZones({
         screenshot: {
           data: previewUrl,
           filename: selectedFile.name
         },
         screenshotter_id: screenshotterValue
       });
+      const data = raw as { data: { annotatedImage: string; extractedZones: typeof extractedZones; dimensions: { width: number; height: number; confidence: number } } };
 
       setAnnotatedImage(data.data.annotatedImage);
       setExtractedZones(data.data.extractedZones);

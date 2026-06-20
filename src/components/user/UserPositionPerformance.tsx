@@ -50,7 +50,9 @@ export const UserPositionPerformance = ({
   const worst = [...performanceByQuartile].sort((a, b) => a.averageScore - b.averageScore)[0];
   const trend = best.quartile.startsWith("Q1") || best.quartile.startsWith("Q2") ? "début" : "fin";
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: Record<string, unknown> }> }) => {
+  type ChartItem = { quartile: string; score: number; pct: number; count: number };
+
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: ChartItem }> }) => {
     if (active && payload && payload.length) {
       const d = payload[0].payload;
       return (

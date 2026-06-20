@@ -436,7 +436,7 @@ const RotationsBuildsGuide = () => {
           onClose={handleCloseModal}
           rotationId={buildToEdit?.rotation_id || selectedRotation}
           onSuccess={handleBuildCreated}
-          buildToEdit={buildToEdit}
+          buildToEdit={buildToEdit ?? undefined}
         />
       )}
 
