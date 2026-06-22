@@ -457,23 +457,28 @@ const UserPage = () => {
                           hasGuild={!!user?.guilde_id}
                         />
 
+                        {/* Contribution à la guilde */}
+                        {globalStats?.guildContribution && globalStats.guildContribution.byCycle.length > 0 && (
+                          <UserGuildContribution
+                            historicalContribution={globalStats.guildContribution}
+                            cycleContribution={selectedCycle ? (stats?.guildContribution ?? null) : undefined}
+                            cycleContributionLoading={!!selectedCycle && statsLoading}
+                            hasSelectedCycle={!!selectedCycle}
+                            selectedCycleId={selectedCycle}
+                            selectedCycleName={cycles.find((c) => c._id === selectedCycle)?.name}
+                            guildName={user?.guild_name}
+                            temporalEvolution={globalStats.temporalEvolution}
+                          />
+                        )}
+
                         {/* Rivaux */}
                         {stats.rivals && stats.rivals.length > 0 && user && (
-                          <UserRivals 
-                            rivals={stats.rivals} 
+                          <UserRivals
+                            rivals={stats.rivals}
                             currentUser={user}
                             currentUserRank={stats.ranking?.global || null}
                             currentUserAverage={stats.averageScore}
                             loggedInUserId={currentUser?._id}
-                          />
-                        )}
-
-                        {/* Contribution à la guilde */}
-                        {globalStats?.guildContribution && globalStats.guildContribution.byCycle.length > 0 && (
-                          <UserGuildContribution
-                            guildContribution={globalStats.guildContribution}
-                            guildName={user?.guild_name}
-                            temporalEvolution={globalStats.temporalEvolution}
                           />
                         )}
 
