@@ -118,7 +118,9 @@
       "fieldKiller": "Killer",
       "fieldAttack": "Attaque",
       "fieldAlteration": "Altération",
-      "labelPeriod": "Période"
+      "labelPeriod": "Période",
+      "showCalendar": "Voir dans le calendrier",
+      "hideCalendar": "Masquer le calendrier"
     },
     "rotationDetail": {
       "buttonBack": "Retour",
@@ -192,7 +194,11 @@
       "toastMin2Players": "Veuillez sélectionner au moins 2 joueurs pour comparer",
       "toastMin2Guilds": "Veuillez sélectionner au moins 2 guildes pour comparer",
       "toastComparisonLoadedTitle": "Comparaison chargée",
-      "toastErrorLoadingStats": "Erreur lors du chargement des statistiques"
+      "toastErrorLoadingStats": "Erreur lors du chargement des statistiques",
+      "tabCharacters": "Personnages",
+      "alertMin2Characters": "Sélectionnez au moins 2 personnages pour commencer la comparaison",
+      "wordCharacter": "personnage",
+      "wordCharacters": "personnages"
     },
     "guides": {
       "title": "Guides",
@@ -606,7 +612,19 @@
       "radarParticipation": "Participation",
       "radarRegularity": "Régularité",
       "radarTotalPoints": "Total Points",
-      "radarMembers": "Membres"
+      "radarMembers": "Membres",
+      "radarHeadingCharacters": "📊 Comparaison des Stats",
+      "tableHeadingCharacters": "📋 Tableau Comparatif",
+      "radarCharAtk": "Attaque",
+      "radarCharDef": "Défense",
+      "radarCharEnd": "Endurance",
+      "radarCharCct": "Critique",
+      "radarCharPre": "Précision",
+      "metricAffinity": "Affinité",
+      "metricAttackType": "Type d'attaque",
+      "metricKillers": "Killers",
+      "metricCategories": "Catégories",
+      "charAttributesHeading": "Attributs qualitatifs"
     },
     "user": {
       "banDetailsCard": {
@@ -744,6 +762,17 @@
       "searchPlaceholder": "Rechercher...",
       "noResults": "Aucun résultat",
       "noOptions": "Aucune option disponible"
+    },
+    "multiCharacterSelector": {
+      "heading": "📖 Personnages sélectionnés",
+      "empty": "Aucun personnage sélectionné",
+      "emptyHint": "Ajoutez jusqu'à {{max}} personnages à comparer",
+      "addLabel": "Ajouter un personnage",
+      "searchPlaceholder": "Rechercher un personnage...",
+      "ariaRemove": "Retirer le personnage",
+      "limitReached": "⚠️ Limite de {{max}} personnages atteinte",
+      "noResults": "Aucun personnage trouvé",
+      "typeToSearch": "Tapez pour rechercher..."
     }
   },
   "affinities": {

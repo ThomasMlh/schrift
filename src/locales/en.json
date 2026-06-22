@@ -118,7 +118,9 @@
       "fieldKiller": "Killer",
       "fieldAttack": "Attack",
       "fieldAlteration": "Alteration",
-      "labelPeriod": "Period"
+      "labelPeriod": "Period",
+      "showCalendar": "View in calendar",
+      "hideCalendar": "Hide calendar"
     },
     "rotationDetail": {
       "buttonBack": "Back",
@@ -192,7 +194,11 @@
       "toastMin2Players": "Please select at least 2 players to compare",
       "toastMin2Guilds": "Please select at least 2 guilds to compare",
       "toastComparisonLoadedTitle": "Comparison loaded",
-      "toastErrorLoadingStats": "Error loading statistics"
+      "toastErrorLoadingStats": "Error loading statistics",
+      "tabCharacters": "Characters",
+      "alertMin2Characters": "Select at least 2 characters to start the comparison",
+      "wordCharacter": "character",
+      "wordCharacters": "characters"
     },
     "guides": {
       "title": "Guides",
@@ -606,7 +612,19 @@
       "radarParticipation": "Participation",
       "radarRegularity": "Regularity",
       "radarTotalPoints": "Total Points",
-      "radarMembers": "Members"
+      "radarMembers": "Members",
+      "radarHeadingCharacters": "📊 Stats Comparison",
+      "tableHeadingCharacters": "📋 Comparison Table",
+      "radarCharAtk": "Attack",
+      "radarCharDef": "Defense",
+      "radarCharEnd": "Endurance",
+      "radarCharCct": "Critical",
+      "radarCharPre": "Precision",
+      "metricAffinity": "Affinity",
+      "metricAttackType": "Attack Type",
+      "metricKillers": "Killers",
+      "metricCategories": "Categories",
+      "charAttributesHeading": "Qualitative Attributes"
     },
     "user": {
       "banDetailsCard": {
@@ -744,6 +762,17 @@
       "searchPlaceholder": "Search...",
       "noResults": "No results",
       "noOptions": "No options available"
+    },
+    "multiCharacterSelector": {
+      "heading": "📖 Selected Characters",
+      "empty": "No character selected",
+      "emptyHint": "Add up to {{max}} characters to compare",
+      "addLabel": "Add a character",
+      "searchPlaceholder": "Search for a character...",
+      "ariaRemove": "Remove character",
+      "limitReached": "⚠️ Limit of {{max}} characters reached",
+      "noResults": "No character found",
+      "typeToSearch": "Type to search..."
     }
   },
   "affinities": {
