@@ -45,6 +45,7 @@ import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock } from "react-i
 import { getDiscordBannerUrl } from "@/utils/discord";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 const UserPage = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -221,6 +222,12 @@ const UserPage = () => {
         noIndex={true}
       />
       <Container maxW="container.xl" py={8}>
+        <Breadcrumbs items={[
+          { label: t("nav.home"), to: "/" },
+          { label: t("nav.players"), to: "/joueurs" },
+          { label: user.bbs_name || user.global_name },
+        ]} />
+
         {/* Header avec profil utilisateur */}
         <Card
           bgGradient={gradientBg}

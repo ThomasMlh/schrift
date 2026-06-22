@@ -33,6 +33,7 @@ import { SEOHead } from "../components/SEOHead";
 import { useCharacter, useBuilds } from "@/hooks/useAPI";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { useTranslation } from "react-i18next";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 interface SectionCardProps {
   label: string;
@@ -242,6 +243,11 @@ const CharacterDetailPage = () => {
       <Container maxW="container.lg" py={8}>
         <VStack spacing={6} align="stretch">
           {/* Back button */}
+          <Breadcrumbs items={[
+            { label: t("nav.home"), to: "/" },
+            { label: t("nav.characters"), to: "/personnages" },
+            { label: character.name },
+          ]} />
           <Button
             leftIcon={<ArrowBackIcon />}
             variant="ghost"

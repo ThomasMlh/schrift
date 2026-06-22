@@ -50,6 +50,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 const RotationDetailPage = () => {
   const { cycleId, position } = useParams<{
@@ -268,6 +269,16 @@ const RotationDetailPage = () => {
 
         <Container maxW="container.xl" py={8}>
           <VStack spacing={6} align="stretch">
+
+            {/* Breadcrumbs */}
+            {cycle && (
+              <Breadcrumbs items={[
+                { label: t("nav.home"), to: "/" },
+                { label: t("nav.cycles"), to: "/cycles" },
+                { label: cycle.name, to: `/cycle/${cycleId}` },
+                { label: `Rotation #${position}` },
+              ]} />
+            )}
 
             {/* Nav bar */}
             <Flex justify="space-between" align="center" flexWrap="wrap" gap={3}>

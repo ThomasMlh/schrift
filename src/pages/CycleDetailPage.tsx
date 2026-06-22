@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Container,
@@ -16,7 +16,7 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
-import { FiCalendar, FiLayers } from "react-icons/fi";
+import { FiCalendar, FiLayers, FiGrid } from "react-icons/fi";
 
 import { AlterationImage } from "../components/ui/AlterationImage";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
@@ -26,6 +26,8 @@ import { useCycle } from "@/hooks/useAPI";
 import { SEOHead } from "@/components/SEOHead";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import RotationCalendar from "@/components/cycles/RotationCalendar";
 
 const CycleDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +37,16 @@ const CycleDetailPage = () => {
   // Utiliser useSWR pour le cycle (cache automatique)
   const { cycle, isLoading, error: fetchError } = useCycle(id);
   const [error, setError] = useState<string | null>(null);
+  const [showCalendar, setShowCalendar] = useState(false);
+
+  const cycleInitialMonth = useMemo(() => {
+    const raw = cycle?.rotations?.[0]?.start_date;
+    if (!raw) return undefined;
+    const parts = raw.split("/");
+    if (parts.length !== 3) return undefined;
+    const [, m, y] = parts.map(Number);
+    return new Date(y, m - 1, 1);
+  }, [cycle]);
 
   const cardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.7)");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
@@ -99,8 +111,13 @@ const CycleDetailPage = () => {
         <Container maxW="container.xl" py={8}>
           <VStack spacing={8} align="stretch">
 
-            {/* Bouton retour */}
+            {/* Breadcrumbs + bouton retour */}
             <Box>
+              <Breadcrumbs items={[
+                { label: t("nav.home"), to: "/" },
+                { label: t("nav.cycles"), to: "/cycles" },
+                { label: cycle.name },
+              ]} />
               <Button
                 leftIcon={<ArrowBackIcon />}
                 variant="ghost"
@@ -179,6 +196,22 @@ const CycleDetailPage = () => {
                 </Flex>
               </Box>
             )}
+
+            {/* Calendrier */}
+            <Box>
+              <Button
+                leftIcon={<Icon as={FiGrid} />}
+                size="sm"
+                variant={showCalendar ? "solid" : "outline"}
+                colorScheme="blue"
+                borderRadius="lg"
+                onClick={() => setShowCalendar((v) => !v)}
+                mb={showCalendar ? 4 : 0}
+              >
+                {showCalendar ? t("pages.cycleDetail.hideCalendar") : t("pages.cycleDetail.showCalendar")}
+              </Button>
+              {showCalendar && <RotationCalendar initialMonth={cycleInitialMonth} />}
+            </Box>
 
             {/* Liste des rotations */}
             {cycle.rotations && cycle.rotations.length > 0 && (
