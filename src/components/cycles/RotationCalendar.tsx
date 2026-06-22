@@ -59,15 +59,20 @@ type DayTracks = [RotationEntry | null, RotationEntry | null];
 
 const BAR_H = "22px";
 
-const RotationCalendar = () => {
+interface RotationCalendarProps {
+  initialMonth?: Date;
+}
+
+const RotationCalendar = ({ initialMonth }: RotationCalendarProps) => {
   const { i18n, t } = useTranslation();
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
 
   const today = new Date();
-  const [viewDate, setViewDate] = useState(
-    new Date(today.getFullYear(), today.getMonth(), 1)
-  );
+  const [viewDate, setViewDate] = useState(() => {
+    if (initialMonth) return new Date(initialMonth.getFullYear(), initialMonth.getMonth(), 1);
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
 
   const { cycles = [], isLoading } = useCycles({ limit: 1000 });
 
@@ -459,7 +464,7 @@ const RotationCalendar = () => {
                 flexShrink={0}
               />
               <Text fontSize="xs" color={dayHeaderColor}>
-                {cycle.name}
+                {cycle.name} — {cycle.year}
               </Text>
             </HStack>
           ))}
