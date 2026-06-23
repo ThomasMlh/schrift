@@ -1,7 +1,7 @@
 import {
   Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
   Text, Input, InputGroup, InputLeftElement,
-  useColorMode, Badge, Flex, Avatar, Tooltip, SimpleGrid
+  useColorMode, Badge, Flex, Avatar, Tooltip, SimpleGrid, Skeleton
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -20,7 +20,6 @@ import CustomLink from "./ui/CustomLink";
 import { CharactersKillers, CharactersCategories, CharactersAffinities } from "../utils/chractersData";
 import { CustomSelect } from "./ui/CustomSelect";
 import { useTranslation } from "react-i18next";
-import { PageLoader } from "./ui/PageLoader";
 
 export const CharactersTable = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -263,20 +262,7 @@ export const CharactersTable = () => {
         borderColor={borderColor}
         overflow="hidden"
       >
-        {isLoading ? (
-          <PageLoader label={t("components.charactersTable.loading")} color="purple.500" height="250px" />
-        ) : characters.length === 0 ? (
-          <Flex justify="center" align="center" py={16} direction="column" gap={3}>
-            <Text fontSize="3xl">⚔️</Text>
-            <Text fontWeight="semibold" color={isDark ? 'gray.300' : 'gray.600'}>
-              {t("components.charactersTable.noResults")}
-            </Text>
-            <Text fontSize="sm" color={isDark ? 'gray.500' : 'gray.400'}>
-              {t("components.charactersTable.noResultsHint")}
-            </Text>
-          </Flex>
-        ) : (
-          <Box overflowX="auto">
+        <Box overflowX="auto">
             <Table variant="simple" size="sm">
               <Thead>
                 <Tr bg={isDark ? 'rgba(255,255,255,0.04)' : 'gray.50'}>
@@ -298,92 +284,132 @@ export const CharactersTable = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {characters.map((character) => (
-                  <Tr
-                    key={character._id}
-                    borderLeftWidth="2px"
-                    borderLeftColor="transparent"
-                    transition="all 0.15s ease"
-                    _hover={{
-                      bg: isDark ? 'rgba(124,58,237,0.07)' : 'purple.50',
-                      borderLeftColor: 'purple.400',
-                    }}
-                  >
-                    {/* Personnage */}
-                    <Td py={3} minW="200px">
-                      <HStack spacing={3}>
-                        <Avatar
-                          size="sm"
-                          src={character._id ? `${bucketUrl}/characters/thumb/${character._id}.png` : undefined}
-                          name={character.name}
-                          borderRadius="md"
-                          bg={isDark ? 'gray.700' : 'gray.200'}
-                        />
-                        <CustomLink to={`/personnage/${character._id}`} text={character.name} />
-                      </HStack>
-                    </Td>
-
-                    {/* Affinité */}
-                    <Td py={3}>
-                      {character.affinity && (
-                        <Tooltip label={character.affinity} hasArrow placement="top">
-                          <Box display="inline-block">
-                            <AffinityIcon affinity={character.affinity} size="22px" showLabel={false} />
-                          </Box>
-                        </Tooltip>
-                      )}
-                    </Td>
-
-                    {/* Catégories */}
-                    <Td py={3} minW="120px">
-                      {character.categories && character.categories.length > 0 && (
-                        <Flex gap={1.5} flexWrap="wrap" maxW="160px">
-                          {character.categories.slice(0, 4).map((category, index) => (
-                            <Tooltip key={index} label={category} hasArrow placement="top">
-                              <Box>
-                                <CategoryIcon category={category} size="20px" showLabel={false} />
-                              </Box>
-                            </Tooltip>
-                          ))}
-                          {character.categories.length > 4 && (
-                            <Text fontSize="2xs" color={isDark ? 'gray.400' : 'gray.500'} alignSelf="center">
-                              +{character.categories.length - 4}
-                            </Text>
-                          )}
-                        </Flex>
-                      )}
-                    </Td>
-
-                    {/* Killers */}
-                    <Td py={3} minW="120px">
-                      {character.killers && character.killers.length > 0 && (
-                        <Flex gap={1.5} flexWrap="wrap" maxW="160px">
-                          {character.killers.slice(0, 4).map((killer, index) => (
-                            <Tooltip key={index} label={killer} hasArrow placement="top">
-                              <Box>
-                                <KillerIcon killer={killer} size="20px" showLabel={false} />
-                              </Box>
-                            </Tooltip>
-                          ))}
-                          {character.killers.length > 4 && (
-                            <Text fontSize="2xs" color={isDark ? 'gray.400' : 'gray.500'} alignSelf="center">
-                              +{character.killers.length - 4}
-                            </Text>
-                          )}
-                        </Flex>
-                      )}
-                    </Td>
-
-                    {/* Type d'attaque */}
-                    <Td py={3}>
-                      <AttackTypeBadge attackType={character.attack_type} size="18px" />
+                {isLoading ? (
+                  Array.from({ length: 8 }).map((_, i) => (
+                    <Tr key={i}>
+                      <Td py={3} minW="200px">
+                        <HStack spacing={3}>
+                          <Skeleton boxSize="32px" borderRadius="md" />
+                          <Skeleton height="16px" width="120px" />
+                        </HStack>
+                      </Td>
+                      <Td py={3}><Skeleton boxSize="22px" borderRadius="full" /></Td>
+                      <Td py={3} minW="120px">
+                        <HStack spacing={1.5}>
+                          <Skeleton boxSize="20px" borderRadius="md" />
+                          <Skeleton boxSize="20px" borderRadius="md" />
+                        </HStack>
+                      </Td>
+                      <Td py={3} minW="120px">
+                        <HStack spacing={1.5}>
+                          <Skeleton boxSize="20px" borderRadius="md" />
+                          <Skeleton boxSize="20px" borderRadius="md" />
+                        </HStack>
+                      </Td>
+                      <Td py={3}><Skeleton height="20px" width="36px" borderRadius="md" /></Td>
+                    </Tr>
+                  ))
+                ) : characters.length === 0 ? (
+                  <Tr>
+                    <Td colSpan={5} py={16} textAlign="center">
+                      <Flex direction="column" align="center" gap={3}>
+                        <Text fontSize="3xl">⚔️</Text>
+                        <Text fontWeight="semibold" color={isDark ? 'gray.300' : 'gray.600'}>
+                          {t("components.charactersTable.noResults")}
+                        </Text>
+                        <Text fontSize="sm" color={isDark ? 'gray.500' : 'gray.400'}>
+                          {t("components.charactersTable.noResultsHint")}
+                        </Text>
+                      </Flex>
                     </Td>
                   </Tr>
-                ))}
+                ) : (
+                  characters.map((character) => (
+                    <Tr
+                      key={character._id}
+                      borderLeftWidth="2px"
+                      borderLeftColor="transparent"
+                      transition="all 0.15s ease"
+                      _hover={{
+                        bg: isDark ? 'rgba(124,58,237,0.07)' : 'purple.50',
+                        borderLeftColor: 'purple.400',
+                      }}
+                    >
+                      {/* Personnage */}
+                      <Td py={3} minW="200px">
+                        <HStack spacing={3}>
+                          <Avatar
+                            size="sm"
+                            src={character._id ? `${bucketUrl}/characters/thumb/${character._id}.png` : undefined}
+                            name={character.name}
+                            borderRadius="md"
+                            bg={isDark ? 'gray.700' : 'gray.200'}
+                          />
+                          <CustomLink to={`/personnage/${character._id}`} text={character.name} />
+                        </HStack>
+                      </Td>
+
+                      {/* Affinité */}
+                      <Td py={3}>
+                        {character.affinity && (
+                          <Tooltip label={character.affinity} hasArrow placement="top">
+                            <Box display="inline-block">
+                              <AffinityIcon affinity={character.affinity} size="22px" showLabel={false} />
+                            </Box>
+                          </Tooltip>
+                        )}
+                      </Td>
+
+                      {/* Catégories */}
+                      <Td py={3} minW="120px">
+                        {character.categories && character.categories.length > 0 && (
+                          <Flex gap={1.5} flexWrap="wrap" maxW="160px">
+                            {character.categories.slice(0, 4).map((category, index) => (
+                              <Tooltip key={index} label={category} hasArrow placement="top">
+                                <Box>
+                                  <CategoryIcon category={category} size="20px" showLabel={false} />
+                                </Box>
+                              </Tooltip>
+                            ))}
+                            {character.categories.length > 4 && (
+                              <Text fontSize="2xs" color={isDark ? 'gray.400' : 'gray.500'} alignSelf="center">
+                                +{character.categories.length - 4}
+                              </Text>
+                            )}
+                          </Flex>
+                        )}
+                      </Td>
+
+                      {/* Killers */}
+                      <Td py={3} minW="120px">
+                        {character.killers && character.killers.length > 0 && (
+                          <Flex gap={1.5} flexWrap="wrap" maxW="160px">
+                            {character.killers.slice(0, 4).map((killer, index) => (
+                              <Tooltip key={index} label={killer} hasArrow placement="top">
+                                <Box>
+                                  <KillerIcon killer={killer} size="20px" showLabel={false} />
+                                </Box>
+                              </Tooltip>
+                            ))}
+                            {character.killers.length > 4 && (
+                              <Text fontSize="2xs" color={isDark ? 'gray.400' : 'gray.500'} alignSelf="center">
+                                +{character.killers.length - 4}
+                              </Text>
+                            )}
+                          </Flex>
+                        )}
+                      </Td>
+
+                      {/* Type d'attaque */}
+                      <Td py={3}>
+                        <AttackTypeBadge attackType={character.attack_type} size="18px" />
+                      </Td>
+                    </Tr>
+                  ))
+                )}
               </Tbody>
             </Table>
           </Box>
-        )}
       </Box>
 
       {/* Pagination */}

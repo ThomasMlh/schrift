@@ -198,7 +198,9 @@
       "tabCharacters": "Personnages",
       "alertMin2Characters": "Sélectionnez au moins 2 personnages pour commencer la comparaison",
       "wordCharacter": "personnage",
-      "wordCharacters": "personnages"
+      "wordCharacters": "personnages",
+      "weeklyModeButton": "Par semaine",
+      "weeklyWeekOption": "Semaine {{n}}"
     },
     "guides": {
       "title": "Guides",
@@ -624,7 +626,10 @@
       "metricAttackType": "Type d'attaque",
       "metricKillers": "Killers",
       "metricCategories": "Catégories",
-      "charAttributesHeading": "Attributs qualitatifs"
+      "charAttributesHeading": "Attributs qualitatifs",
+      "weeklyTotal": "Total semaine",
+      "weeklyRotation1": "Rotation 1",
+      "weeklyRotation2": "Rotation 2"
     },
     "user": {
       "banDetailsCard": {

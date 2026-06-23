@@ -198,7 +198,9 @@
       "tabCharacters": "Characters",
       "alertMin2Characters": "Select at least 2 characters to start the comparison",
       "wordCharacter": "character",
-      "wordCharacters": "characters"
+      "wordCharacters": "characters",
+      "weeklyModeButton": "By week",
+      "weeklyWeekOption": "Week {{n}}"
     },
     "guides": {
       "title": "Guides",
@@ -624,7 +626,10 @@
       "metricAttackType": "Attack Type",
       "metricKillers": "Killers",
       "metricCategories": "Categories",
-      "charAttributesHeading": "Qualitative Attributes"
+      "charAttributesHeading": "Qualitative Attributes",
+      "weeklyTotal": "Weekly total",
+      "weeklyRotation1": "Rotation 1",
+      "weeklyRotation2": "Rotation 2"
     },
     "user": {
       "banDetailsCard": {
