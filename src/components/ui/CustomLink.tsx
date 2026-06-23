@@ -7,7 +7,7 @@ import { useAuth } from '@/providers/AuthProvider';
 const RAINBOW_GRADIENT = "linear-gradient(90deg, #ff6b6b, #ffa07a, #ffd966, #90ee90, #87ceeb, #9370db)";
 
 interface CustomLinkProps {
-    to: string;
+    to?: string;
     text: string;
     textSize?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
     sx?: SystemStyleObject;
@@ -19,7 +19,7 @@ const CustomLink: React.FC<CustomLinkProps> = ({ to, text, textSize = "sm", sx, 
     const linkColor = useColorModeValue("black", "white");
     const { isLoggedIn } = useAuth();
 
-    if (requireAuth && !isLoggedIn) {
+    if (!to || (requireAuth && !isLoggedIn)) {
         return (
             <Text
                 color={linkColor}

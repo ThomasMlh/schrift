@@ -178,7 +178,7 @@ export const Header = () => {
             />
             <VStack spacing={0} align="start">
               <CustomLink
-                to={`/joueur/${currentUser?._id}`}
+                to={currentUser?.bbs_name ? `/joueur/${currentUser.bbs_name}` : undefined}
                 text={`${currentUser?.global_name}`}
                 textSize="sm"
                 requireAuth={true}
@@ -392,7 +392,7 @@ export const Header = () => {
                     <Avatar size="sm" src={currentUser?.avatar} name={currentUser?.username} />
                     <VStack spacing={0} align="start" flex={1}>
                       <CustomLink
-                        to={`/joueur/${currentUser?._id}`}
+                        to={currentUser?.bbs_name ? `/joueur/${currentUser.bbs_name}` : undefined}
                         text={`${currentUser?.global_name}`}
                         textSize="sm"
                         requireAuth={true}

@@ -47,6 +47,12 @@ export const useUser = (userId: string | undefined) => {
   return { user: data?.user, isLoading, error, mutate };
 };
 
+export const useUserByBBSName = (bbs_name: string | undefined) => {
+  const { users, isLoading } = useUsers({ search: bbs_name, limit: 10, authenticated: false });
+  const user = bbs_name ? users.find(u => u.bbs_name === bbs_name) : undefined;
+  return { user, isLoading };
+};
+
 export interface IUserStats {
   totalScores: number;
   averageScore: number;

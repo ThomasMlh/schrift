@@ -61,7 +61,7 @@ const PlayerCardMiss = ({ player, showGuildName = false }: PlayerCardMissProps) 
         {/* Nom + Guilde */}
         <VStack spacing={0} align="start" flex={1} overflow="hidden" minW={0}>
           <CustomLink
-            to={`/joueur/${player.user_id}`}
+            to={player.bbs_name ? `/joueur/${player.bbs_name}` : undefined}
             text={player.bbs_name || player.global_name || "Joueur"}
             textSize="sm"
             requireAuth

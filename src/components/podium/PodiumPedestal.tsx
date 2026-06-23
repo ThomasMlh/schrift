@@ -105,7 +105,7 @@ const PedestalSlot = ({ player, showGuildName }: PedestalSlotProps) => {
         {/* Nom */}
         <VStack spacing={0} align="center" mt={1}>
           <CustomLink
-            to={`/joueur/${player.user_id}`}
+            to={player.bbs_name ? `/joueur/${player.bbs_name}` : undefined}
             text={player.bbs_name || player.global_name}
             textSize={player.rank === 1 ? "sm" : "xs"}
             requireAuth

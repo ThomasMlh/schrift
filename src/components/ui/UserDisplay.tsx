@@ -75,7 +75,7 @@ export const UserDisplay = ({
       <VStack spacing={0} align={direction === "row" ? "start" : "center"}>
         {asLink ? (
           <CustomLink
-            to={`/joueur/${user._id}`}
+            to={user.bbs_name ? `/joueur/${user.bbs_name}` : undefined}
             text={user.bbs_name || user.global_name}
             textSize={textSize}
             requireAuth={true}

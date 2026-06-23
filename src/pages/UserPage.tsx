@@ -28,7 +28,7 @@ import { formatRoleName } from "@/utils/user";
 import { SEOHead } from "@/components/SEOHead";
 import { UserDisplay } from "@/components/ui/UserDisplay";
 import { CycleSelect } from "@/components/ui/CycleSelect";
-import { useCycles, useUser, useUserStats, useGuild } from "@/hooks/useAPI";
+import { useCycles, useUser, useUserByBBSName, useUserStats, useGuild } from "@/hooks/useAPI";
 import { StatCard } from "@/components/user/StatCard";
 import { UserStatsOverview } from "@/components/user/UserStatsOverview";
 import { UserPerformances } from "@/components/user/UserPerformances";
@@ -46,9 +46,12 @@ import { getDiscordBannerUrl } from "@/utils/discord";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 
 const UserPage = () => {
-  const { userId } = useParams<{ userId: string }>();
+  const { bbs_name } = useParams<{ bbs_name: string }>();
+  const { user: resolvedUser, isLoading: resolvingUser } = useUserByBBSName(bbs_name);
+  const userId = resolvedUser?._id;
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCycle, setSelectedCycle] = useState<string>("");
   const { isAdmin, currentUser } = useAuth();
@@ -95,9 +98,19 @@ const UserPage = () => {
   // Stats sans filtre de cycle — uniquement pour l'évolution temporelle globale
   const { stats: globalStats } = useUserStats(userId);
 
-  // Sélectionner le cycle le plus récent par défaut
+  // Résolution du slug cycle depuis l'URL → _id (prioritaire sur le défaut)
   useEffect(() => {
-    if (cycles.length > 0 && !selectedCycle) {
+    if (!cycles.length) return;
+    const slug = searchParams.get("cycle_name");
+    if (!slug || selectedCycle) return;
+    const resolved = cycleFromSlug(cycles, slug)?._id ?? slug;
+    setSelectedCycle(resolved);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cycles]);
+
+  // Sélectionner le cycle le plus récent par défaut si rien dans l'URL
+  useEffect(() => {
+    if (cycles.length > 0 && !selectedCycle && !searchParams.get("cycle_name")) {
       const sorted = [...cycles].sort((a, b) => {
         if (a.year !== b.year) return b.year - a.year;
         if (a.created_at && b.created_at) {
@@ -109,7 +122,22 @@ const UserPage = () => {
         setSelectedCycle(sorted[0]._id);
       }
     }
-  }, [cycles, selectedCycle]);
+  }, [cycles, selectedCycle, searchParams]);
+
+  // Sync cycle sélectionné dans l'URL (par slug)
+  useEffect(() => {
+    const newParams = new URLSearchParams(searchParams);
+    const cycleObj = cycles.find(c => c._id === selectedCycle);
+    if (cycleObj) {
+      newParams.set("cycle_name", cycleSlug(cycleObj.name, cycleObj.year));
+    } else if (selectedCycle) {
+      newParams.set("cycle_name", selectedCycle);
+    } else {
+      newParams.delete("cycle_name");
+    }
+    setSearchParams(newParams, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCycle]);
 
   // Enrichir l'utilisateur avec l'avatar et le nom de guilde
   const user = userData
@@ -120,7 +148,7 @@ const UserPage = () => {
     : null;
 
   const bannerUrl = user?.discord_id && user?.banner ? getDiscordBannerUrl(user.discord_id, user.banner) : null;
-  const loading = userLoading || guildLoading;
+  const loading = resolvingUser || userLoading || guildLoading;
   const error = userError
     ? t("pages.user.errorLoadingProfile")
     : null;
@@ -218,7 +246,7 @@ const UserPage = () => {
         description={user.guild_name
           ? t("pages.user.seoDescriptionWithGuild", { name: user.bbs_name || user.global_name, guild: user.guild_name })
           : t("pages.user.seoDescriptionNoGuild", { name: user.bbs_name || user.global_name })}
-        url={`https://bbs-schrift.fr/joueur/${userId}`}
+        url={`https://bbs-schrift.fr/joueur/${bbs_name}`}
         noIndex={true}
       />
       <Container maxW="container.xl" py={8}>

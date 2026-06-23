@@ -114,7 +114,7 @@ const AppRoutes = () => {
         <Route path="/discord-callback" element={<DiscordCallback />} />
         <Route path="/joueurs" element={<UsersPage />} />
         <Route
-          path="/joueur/:userId"
+          path="/joueur/:bbs_name"
           element={
             <AuthenticatedRoute
               isAuthenticated={isLoggedIn}
