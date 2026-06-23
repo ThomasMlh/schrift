@@ -15,6 +15,7 @@ import {
   Badge,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FiUsers, FiGrid, FiChevronRight } from "react-icons/fi";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
@@ -29,8 +30,10 @@ import { useCurrentRotation } from "@/hooks/useCurrentRotation";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import type { IGuild } from "../interfaces";
 import { useTranslation } from "react-i18next";
+import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 
 const GuildesPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { guilds } = useGuilds(true);
   const [selectedGuild, setSelectedGuild] = useState<IGuild | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
@@ -48,20 +51,54 @@ const GuildesPage = () => {
   const countColor = useColorModeValue("gray.500", "whiteAlpha.600");
   const dividerColor = useColorModeValue("gray.100", "whiteAlpha.100");
 
+  // Sélectionner la guilde depuis l'URL (par nom) ou par défaut la première
   useEffect(() => {
     if (guilds.length > 0 && !selectedGuild) {
-      setSelectedGuild(guilds[0]);
+      const urlGuildName = searchParams.get("guild_name");
+      const target = urlGuildName ? guilds.find((g) => g.name === urlGuildName) : null;
+      setSelectedGuild(target ?? guilds[0]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guilds, selectedGuild]);
 
   const { cycles, isLoading: isLoadingCycles } = useCycles();
   const { currentCycle } = useCurrentRotation(cycles, isLoadingCycles);
 
+  // Résolution du slug cycle depuis l'URL → _id MongoDB (prioritaire sur currentCycle)
   useEffect(() => {
-    if (currentCycle?._id && !selectedCycleId) {
+    if (!cycles.length) return;
+    const slug = searchParams.get("cycle_name");
+    if (!slug || selectedCycleId) return;
+    const resolved = cycleFromSlug(cycles, slug)?._id ?? slug;
+    setSelectedCycleId(resolved);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cycles]);
+
+  useEffect(() => {
+    if (currentCycle?._id && !selectedCycleId && !searchParams.get("cycle_name")) {
       setSelectedCycleId(currentCycle._id);
     }
-  }, [currentCycle, selectedCycleId]);
+  }, [currentCycle, selectedCycleId, searchParams]);
+
+  // Sync guilde (par nom) et cycle (par slug) dans l'URL
+  useEffect(() => {
+    const newParams = new URLSearchParams(searchParams);
+    if (selectedGuild?.name) {
+      newParams.set("guild_name", selectedGuild.name);
+    } else {
+      newParams.delete("guild_name");
+    }
+    const cycleObj = cycles.find(c => c._id === selectedCycleId);
+    if (cycleObj) {
+      newParams.set("cycle_name", cycleSlug(cycleObj.name, cycleObj.year));
+    } else if (selectedCycleId) {
+      newParams.set("cycle_name", selectedCycleId);
+    } else {
+      newParams.delete("cycle_name");
+    }
+    setSearchParams(newParams, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGuild, selectedCycleId]);
 
   const { memberCounts: guildMemberCounts, isLoading } = useAllGuildsMemberCounts(true);
   const { members, isLoading: isLoadingMembers } = useGuildMembers(selectedGuild?._id, true);

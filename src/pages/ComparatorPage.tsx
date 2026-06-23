@@ -33,6 +33,7 @@ import { ComparisonDataTable } from "@/components/comparator/ComparisonDataTable
 import type { RadarMetricDef } from "@/components/comparator/ComparisonRadarChart";
 import type { TableMetricDef } from "@/components/comparator/ComparisonDataTable";
 import { useUsers, useCycles, useGuilds, fetchUserStats, fetchGuildStats } from "@/hooks/useAPI";
+import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 import { formatScore, formatNumber } from "@/utils/format";
 import type { IUser, IGuild } from "@/interfaces";
 import type { IUserStats, IGuildStats } from "@/hooks/useAPI";
@@ -78,9 +79,7 @@ const ComparatorPage: React.FC = () => {
   const [selectedGuilds, setSelectedGuilds] = useState<SelectedGuild[]>([]);
   const [guildsStats, setGuildsStats] = useState<Map<string, IGuildStats | null>>(new Map());
   const [selectedCharacters, setSelectedCharacters] = useState<SelectedCharacter[]>([]);
-  const [selectedCycleId, setSelectedCycleId] = useState<string>(
-    searchParams.get("cycle_id") || ""
-  );
+  const [selectedCycleId, setSelectedCycleId] = useState<string>("");
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [weeklyMode, setWeeklyMode] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState(1);
@@ -173,6 +172,16 @@ const ComparatorPage: React.FC = () => {
     ];
   }, [t]);
 
+  // Résolution slug cycle depuis l'URL → _id
+  useEffect(() => {
+    if (!cycles.length) return;
+    const slug = searchParams.get("cycle_name");
+    if (!slug || selectedCycleId) return;
+    const resolved = cycleFromSlug(cycles, slug)?._id ?? slug;
+    setSelectedCycleId(resolved);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cycles]);
+
   // Load from URL on mount — runs once when data first becomes available
   const initializedRef = useRef(false);
   useEffect(() => {
@@ -180,19 +189,19 @@ const ComparatorPage: React.FC = () => {
     initializedRef.current = true;
 
     if (comparisonType === "players") {
-      const ids = searchParams.get("players")?.split(",").filter(Boolean) || [];
+      const names = searchParams.get("players")?.split(",").filter(Boolean) || [];
       const valid: SelectedPlayer[] = [];
-      ids.forEach((id) => {
-        const user = users.find((u) => u._id === id);
-        if (user) valid.push({ id, user });
+      names.forEach((name) => {
+        const user = users.find((u) => u.bbs_name === name);
+        if (user?._id) valid.push({ id: user._id, user });
       });
       if (valid.length > 0) setSelectedPlayers(valid);
     } else {
-      const ids = searchParams.get("guilds")?.split(",").filter(Boolean) || [];
+      const names = searchParams.get("guilds")?.split(",").filter(Boolean) || [];
       const valid: SelectedGuild[] = [];
-      ids.forEach((id) => {
-        const guild = guilds.find((g) => g._id === id);
-        if (guild) valid.push({ id, guild });
+      names.forEach((name) => {
+        const guild = guilds.find((g) => g.name === name);
+        if (guild?._id) valid.push({ id: guild._id, guild });
       });
       if (valid.length > 0) setSelectedGuilds(valid);
     }
@@ -203,12 +212,14 @@ const ComparatorPage: React.FC = () => {
     const params = new URLSearchParams();
     params.set("type", comparisonType);
     if (comparisonType === "players" && selectedPlayers.length > 0)
-      params.set("players", selectedPlayers.map((p) => p.id).join(","));
+      params.set("players", selectedPlayers.map((p) => p.user.bbs_name || p.id).join(","));
     else if (comparisonType === "guilds" && selectedGuilds.length > 0)
-      params.set("guilds", selectedGuilds.map((g) => g.id).join(","));
-    if (selectedCycleId) params.set("cycle_id", selectedCycleId);
+      params.set("guilds", selectedGuilds.map((g) => g.guild.name).join(","));
+    const cycleObj = selectedCycleId ? cycles.find(c => c._id === selectedCycleId) : undefined;
+    if (cycleObj) params.set("cycle_name", cycleSlug(cycleObj.name, cycleObj.year));
+    else if (selectedCycleId) params.set("cycle_name", selectedCycleId);
     setSearchParams(params);
-  }, [comparisonType, selectedPlayers, selectedGuilds, selectedCycleId, setSearchParams]);
+  }, [comparisonType, selectedPlayers, selectedGuilds, selectedCycleId, cycles, setSearchParams]);
 
   const loadPlayersStats = async () => {
     if (selectedPlayers.length < 2) {
@@ -292,6 +303,21 @@ const ComparatorPage: React.FC = () => {
     setSearchParams(new URLSearchParams({ type: comparisonType }));
   };
 
+  // Auto-compare dès que ≥2 joueurs/guildes sont sélectionnés ou que le cycle change
+  useEffect(() => {
+    if (comparisonType === "players" && selectedPlayers.length >= 2) {
+      loadPlayersStats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPlayers, selectedCycleId]);
+
+  useEffect(() => {
+    if (comparisonType === "guilds" && selectedGuilds.length >= 2) {
+      loadGuildsStats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGuilds, selectedCycleId]);
+
   const handleSwitchType = (type: "players" | "guilds" | "characters") => {
     setComparisonType(type);
     setSearchParams(new URLSearchParams({ type }));
@@ -323,10 +349,10 @@ const ComparatorPage: React.FC = () => {
     if (!stats || !selectedCycleObj) return null;
     const rot1 = selectedCycleObj.rotations[(weekNum - 1) * 2];
     const rot2 = selectedCycleObj.rotations[(weekNum - 1) * 2 + 1];
-    const s1 = stats.allRotations.find(
+    const s1 = stats.allRotations?.find(
       (r) => r.rotation_id === rot1?.rotation_id
     );
-    const s2 = stats.allRotations.find(
+    const s2 = stats.allRotations?.find(
       (r) => r.rotation_id === rot2?.rotation_id
     );
     return {
@@ -353,45 +379,45 @@ const ComparatorPage: React.FC = () => {
     () => [
       {
         key: "weekTotal",
-        label: "Total semaine",
+        label: t("components.comparatorCharts.weeklyTotal"),
         getRawValue: (s) => (s.weekTotal as number) || 0,
       },
       {
         key: "rotation1Score",
-        label: "Rotation 1",
+        label: t("components.comparatorCharts.weeklyRotation1"),
         getRawValue: (s) => (s.rotation1Score as number) || 0,
       },
       {
         key: "rotation2Score",
-        label: "Rotation 2",
+        label: t("components.comparatorCharts.weeklyRotation2"),
         getRawValue: (s) => (s.rotation2Score as number) || 0,
       },
     ],
-    []
+    [t]
   );
 
   const weeklyTableMetrics = useMemo<TableMetricDef[]>(
     () => [
       {
-        label: "Total semaine",
+        label: t("components.comparatorCharts.weeklyTotal"),
         icon: "📅",
         getDisplayValue: (s) => formatScore((s.weekTotal as number) || 0),
         getRawValue: (s) => (s.weekTotal as number) || 0,
       },
       {
-        label: "Rotation 1",
+        label: t("components.comparatorCharts.weeklyRotation1"),
         icon: "1️⃣",
         getDisplayValue: (s) => formatScore((s.rotation1Score as number) || 0),
         getRawValue: (s) => (s.rotation1Score as number) || 0,
       },
       {
-        label: "Rotation 2",
+        label: t("components.comparatorCharts.weeklyRotation2"),
         icon: "2️⃣",
         getDisplayValue: (s) => formatScore((s.rotation2Score as number) || 0),
         getRawValue: (s) => (s.rotation2Score as number) || 0,
       },
     ],
-    []
+    [t]
   );
 
   const hasPlayersStats = playersStats.size > 0 && Array.from(playersStats.values()).some((s) => s !== null);
@@ -511,7 +537,7 @@ const ComparatorPage: React.FC = () => {
                       leftIcon={<Icon as={FiCalendar} />}
                       onClick={() => setWeeklyMode((v) => !v)}
                     >
-                      Par semaine
+                      {t("pages.comparator.weeklyModeButton")}
                     </Button>
                     {weeklyMode && (
                       <CustomSelect
@@ -522,7 +548,7 @@ const ComparatorPage: React.FC = () => {
                         onChange={(v) => setSelectedWeek(Number(v))}
                         options={Array.from({ length: maxWeeks }, (_, i) => ({
                           value: String(i + 1),
-                          label: `Semaine ${i + 1}`,
+                          label: t("pages.comparator.weeklyWeekOption", { n: i + 1 }),
                         }))}
                       />
                     )}

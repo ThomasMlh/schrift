@@ -1,7 +1,7 @@
 import {
     Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
     Text, Input, InputGroup, InputLeftElement, Spinner,
-    useColorMode, Badge, Flex, IconButton, useDisclosure, Tooltip
+    useColorMode, Badge, Flex, IconButton, useDisclosure, Tooltip, Skeleton
 } from "@chakra-ui/react";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -15,7 +15,6 @@ import { UserDisplay } from "./ui/UserDisplay";
 import { CustomSelect } from "./ui/CustomSelect";
 import { useGuilds, useUsers } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
-import { PageLoader } from "./ui/PageLoader";
 
 interface UsersTableProps {
     isAdminMode?: boolean;
@@ -28,7 +27,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     // États - Initialiser avec les paramètres URL
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
     const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get('search') || "");
-    const [selectedGuildId, setSelectedGuildId] = useState(searchParams.get('guilde_id') || "");
+    const [selectedGuildId, setSelectedGuildId] = useState("");
     const [selectedRole, setSelectedRole] = useState(searchParams.get('role') || "");
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'));
     const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('limit') || '20'));
@@ -36,6 +35,21 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
 
     // Utiliser useSWR pour les guildes (cache automatique)
     const { guilds } = useGuilds();
+
+    // Résolution guild_name depuis l'URL → _id
+    useEffect(() => {
+        if (!guilds.length) return;
+        const name = searchParams.get('guild_name');
+        if (!name || selectedGuildId) return;
+        const guild = guilds.find(g => g.name === name);
+        if (guild) setSelectedGuildId(guild._id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [guilds]);
+
+    const selectedGuildName = useMemo(
+        () => guilds.find(g => g._id === selectedGuildId)?.name || "",
+        [guilds, selectedGuildId]
+    );
 
     // Hook useUsers avec les paramètres de filtrage
     const apiOptions = useMemo(() => ({
@@ -61,11 +75,11 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const { isOpen: isUnbanModalOpen, onOpen: onUnbanModalOpen, onClose: onUnbanModalClose } = useDisclosure();
 
     // Fonction pour mettre à jour l'URL avec les filtres actuels
-    const updateURLParams = (search = "", guildId = "", role = "", limit = itemsPerPage, page = 1) => {
+    const updateURLParams = (search = "", guildName = "", role = "", limit = itemsPerPage, page = 1) => {
         const params = new URLSearchParams();
 
         if (search.trim()) params.set('search', search.trim());
-        if (guildId) params.set('guilde_id', guildId);
+        if (guildName) params.set('guild_name', guildName);
         if (role) params.set('role', role);
         if (limit !== 20) params.set('limit', limit.toString());
         if (page !== 1) params.set('page', page.toString());
@@ -79,7 +93,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
             if (debouncedSearch !== searchTerm) {
                 setDebouncedSearch(searchTerm);
                 setCurrentPage(1);
-                updateURLParams(searchTerm, selectedGuildId, selectedRole, itemsPerPage, 1);
+                updateURLParams(searchTerm, selectedGuildName, selectedRole, itemsPerPage, 1);
             }
         }, 500);
 
@@ -91,24 +105,25 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const handleGuildChange = (guildId: string) => {
         setSelectedGuildId(guildId);
         setCurrentPage(1);
-        updateURLParams(searchTerm, guildId, selectedRole, itemsPerPage, 1);
+        const name = guilds.find(g => g._id === guildId)?.name || "";
+        updateURLParams(searchTerm, name, selectedRole, itemsPerPage, 1);
     };
 
     const handleRoleChange = (role: string) => {
         setSelectedRole(role);
         setCurrentPage(1);
-        updateURLParams(searchTerm, selectedGuildId, role, itemsPerPage, 1);
+        updateURLParams(searchTerm, selectedGuildName, role, itemsPerPage, 1);
     };
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        updateURLParams(searchTerm, selectedGuildId, selectedRole, itemsPerPage, page);
+        updateURLParams(searchTerm, selectedGuildName, selectedRole, itemsPerPage, page);
     };
 
     const handleItemsPerPageChange = (newLimit: number) => {
         setItemsPerPage(newLimit);
         setCurrentPage(1);
-        updateURLParams(searchTerm, selectedGuildId, selectedRole, newLimit, 1);
+        updateURLParams(searchTerm, selectedGuildName, selectedRole, newLimit, 1);
     };
 
     const resetFilters = () => {
@@ -297,23 +312,38 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                 borderColor={borderColor}
                 boxShadow={isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.06)'}
             >
-                {isLoading ? (
-                    <PageLoader color="purple.500" height="200px" />
-                ) : (
-                    <Table variant="simple">
-                        <Thead>
-                            <Tr bg={isDark ? 'rgba(255,255,255,0.03)' : 'gray.50'}>
-                                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colPlayer")}</Th>
-                                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colGuild")}</Th>
-                                <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colRole")}</Th>
-                                {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>BBS ID</Th>}
-                                {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>BBS Name</Th>}
-                                {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colLastLogin")}</Th>}
-                                {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colActions")}</Th>}
-                            </Tr>
-                        </Thead>
-                        <Tbody>
-                            {users.map((user: IUser) => (
+                <Table variant="simple">
+                    <Thead>
+                        <Tr bg={isDark ? 'rgba(255,255,255,0.03)' : 'gray.50'}>
+                            <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colPlayer")}</Th>
+                            <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colGuild")}</Th>
+                            <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colRole")}</Th>
+                            {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>BBS ID</Th>}
+                            {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>BBS Name</Th>}
+                            {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colLastLogin")}</Th>}
+                            {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colActions")}</Th>}
+                        </Tr>
+                    </Thead>
+                    <Tbody>
+                        {isLoading ? (
+                            Array.from({ length: 8 }).map((_, i) => (
+                                <Tr key={i}>
+                                    <Td>
+                                        <HStack spacing={3}>
+                                            <Skeleton boxSize="32px" borderRadius="full" />
+                                            <Skeleton height="16px" width="120px" />
+                                        </HStack>
+                                    </Td>
+                                    <Td><Skeleton height="16px" width="80px" /></Td>
+                                    <Td><Skeleton height="20px" width="60px" borderRadius="md" /></Td>
+                                    {isAdminMode && <Td><Skeleton height="16px" width="60px" /></Td>}
+                                    {isAdminMode && <Td><Skeleton height="16px" width="80px" /></Td>}
+                                    {isAdminMode && <Td><Skeleton height="16px" width="100px" /></Td>}
+                                    {isAdminMode && <Td><Skeleton height="28px" width="60px" borderRadius="md" /></Td>}
+                                </Tr>
+                            ))
+                        ) : (
+                            users.map((user: IUser) => (
                                 <Tr key={user._id} _hover={{ bg: hoverBg }} opacity={user.is_banned ? 0.5 : 1} transition="background 0.15s">
                                     <Td>
                                         <HStack spacing={3}>
@@ -409,10 +439,10 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                                         </Td>
                                     )}
                                 </Tr>
-                            ))}
-                        </Tbody>
-                    </Table>
-                )}
+                            ))
+                        )}
+                    </Tbody>
+                </Table>
             </Box>
 
             {/* Pagination */}

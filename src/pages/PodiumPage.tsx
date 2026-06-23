@@ -14,6 +14,7 @@ import { PodiumInfo } from "@/components/podium/PodiumInfo";
 import { PodiumResults } from "@/components/podium/PodiumResults";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/providers/AuthProvider";
+import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 
 type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
 type CycleRankingType = "average" | "max";
@@ -45,11 +46,9 @@ const PodiumPage = () => {
     (searchParams.get("ranking_type") as CycleRankingType) || "average"
   );
   const [selectedCycleId, setSelectedCycleId] = useState(
-    searchParams.get("cycle_id") || ""
+    searchParams.get("cycle_name") || ""
   );
-  const [selectedRotationId, setSelectedRotationId] = useState(
-    searchParams.get("rotation_id") || ""
-  );
+  const [selectedRotationId, setSelectedRotationId] = useState("");
   const [selectedWeekNumber, setSelectedWeekNumber] = useState(
     searchParams.get("week_number") || ""
   );
@@ -103,16 +102,19 @@ const PodiumPage = () => {
     const params = new URLSearchParams();
     if (mode !== "cycle") params.set("mode", mode);
     if (mode === "cycle" && rankingType !== "average") params.set("ranking_type", rankingType);
-    if (cycleId) params.set("cycle_id", cycleId);
-    if (rotationId) params.set("rotation_id", rotationId);
+    const cycleObj = cycleId ? cycles.find(c => c._id === cycleId) : undefined;
+    if (cycleId) params.set("cycle_name", cycleObj ? cycleSlug(cycleObj.name, cycleObj.year) : cycleId);
+    const rotationPos = rotationId && cycleObj
+      ? cycleObj.rotations.find(r => r.rotation_id === rotationId)?.position
+      : undefined;
+    if (rotationPos !== undefined) params.set("rotation", rotationPos.toString());
     if (weekNumber) params.set("week_number", weekNumber);
     if (guildName) params.set("guild_name", guildName);
     if (limit !== 50) params.set("limit", limit.toString());
     if (page !== 1) params.set("page", page.toString());
     setSearchParams(params);
 
-    const cycle = cycles.find(c => c._id === cycleId);
-    const data = await fetchPodium(mode, cycle?.name || "", {
+    const data = await fetchPodium(mode, cycleObj?.name || "", {
       rankingType, rotationId, weekNumber, guildName, page, limit,
     });
 
@@ -152,24 +154,33 @@ const PodiumPage = () => {
     const currentPage = parseInt(searchParams.get("page") || "1");
     const currentMode = (searchParams.get("mode") as DisplayMode) || "cycle";
     const currentRankingType = (searchParams.get("ranking_type") as CycleRankingType) || "average";
-    const currentCycleId = searchParams.get("cycle_id") || "";
-    const currentRotationId = searchParams.get("rotation_id") || "";
+    const currentCycleSlug = searchParams.get("cycle_name") || "";
+    const currentRotationPos = searchParams.get("rotation") || "";
     const currentGuildName = searchParams.get("guild_name") || "";
     const currentWeekNumber = searchParams.get("week_number") || "";
 
+    // Résolution slug → _id
+    const resolvedCycleId = currentCycleSlug && cycles.length > 0
+      ? (cycleFromSlug(cycles, currentCycleSlug)?._id ?? currentCycleSlug)
+      : currentCycleSlug;
+    const resolvedCycle = resolvedCycleId ? cycles.find(c => c._id === resolvedCycleId) : undefined;
+    const currentRotationId = currentRotationPos && resolvedCycle
+      ? (resolvedCycle.rotations.find(r => r.position === parseInt(currentRotationPos))?.rotation_id ?? "")
+      : "";
+
     setDisplayMode(currentMode);
     setCycleRankingType(currentRankingType);
-    setSelectedCycleId(currentCycleId);
+    setSelectedCycleId(resolvedCycleId);
     setSelectedRotationId(currentRotationId);
     setSelectedGuildName(currentGuildName);
     setSelectedWeekNumber(currentWeekNumber);
 
-    if (currentCycleId && !cyclesLoading && cycles.length > 0) {
+    if (resolvedCycleId && !cyclesLoading && cycles.length > 0) {
       applyFilters({
         page: currentPage,
         mode: currentMode,
         rankingType: currentRankingType,
-        cycleId: currentCycleId,
+        cycleId: resolvedCycleId,
         rotationId: currentRotationId,
         guildName: currentGuildName,
         weekNumber: currentWeekNumber,
