@@ -43,6 +43,7 @@ import { useTranslation } from "react-i18next";
 import { PageLoader } from "../ui/PageLoader";
 import type { ICycle } from "../../interfaces";
 import { AlterationImage } from "../ui/AlterationImage";
+import { cycleSlug } from "@/utils/cycleHelpers";
 
 interface ExistingCyclesListProps {
   cycles: ICycle[];
@@ -410,7 +411,7 @@ const ExistingCyclesList = ({
                       <HStack spacing={2} align="center">
                         <Text
                           as={Link}
-                          to={`/cycle/${cycle._id}`}
+                          to={`/cycle/${cycleSlug(cycle.name, cycle.year)}`}
                           fontWeight="bold"
                           fontSize="lg"
                           _hover={{ color: "blue.400" }}
@@ -420,7 +421,7 @@ const ExistingCyclesList = ({
                           {cycle.name} - {cycle.year}
                         </Text>
                         <Tooltip label="Voir le détail" hasArrow>
-                          <Box as={Link} to={`/cycle/${cycle._id}`} color="gray.500" _hover={{ color: "blue.400" }}>
+                          <Box as={Link} to={`/cycle/${cycleSlug(cycle.name, cycle.year)}`} color="gray.500" _hover={{ color: "blue.400" }}>
                             <ExternalLinkIcon boxSize={3} />
                           </Box>
                         </Tooltip>

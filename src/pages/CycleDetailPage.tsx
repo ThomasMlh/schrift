@@ -14,6 +14,8 @@ import {
   Flex,
   Icon,
   Divider,
+  Skeleton,
+  SimpleGrid,
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { FiCalendar, FiLayers, FiGrid } from "react-icons/fi";
@@ -22,20 +24,27 @@ import { AlterationImage } from "../components/ui/AlterationImage";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
 import CustomLink from "@/components/ui/CustomLink";
 import { HeroSection } from "@/components/HeroSection";
-import { useCycle } from "@/hooks/useAPI";
+import { useCycle, useCycles } from "@/hooks/useAPI";
 import { SEOHead } from "@/components/SEOHead";
 import { useTranslation } from "react-i18next";
-import { PageLoader } from "@/components/ui/PageLoader";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import RotationCalendar from "@/components/cycles/RotationCalendar";
+import { cycleFromSlug } from "@/utils/cycleHelpers";
 
 const CycleDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  
+
+  // Résolution slug → _id (avec fallback sur l'ID brut pour compatibilité)
+  const { cycles } = useCycles({ limit: 100 });
+  const resolvedId = useMemo(() => {
+    if (!cycles.length) return undefined;
+    return cycleFromSlug(cycles, id!)?._id ?? id;
+  }, [cycles, id]);
+
   // Utiliser useSWR pour le cycle (cache automatique)
-  const { cycle, isLoading, error: fetchError } = useCycle(id);
+  const { cycle, isLoading, error: fetchError } = useCycle(resolvedId);
   const [error, setError] = useState<string | null>(null);
   const [showCalendar, setShowCalendar] = useState(false);
 
@@ -68,7 +77,15 @@ const CycleDetailPage = () => {
   if (isLoading) {
     return (
       <Container maxW="container.xl" py={8}>
-        <PageLoader height="200px" />
+        <VStack spacing={6} align="stretch">
+          <Skeleton height="16px" width="240px" borderRadius="md" />
+          <Skeleton height="90px" borderRadius="xl" />
+          {Array.from({ length: 8 }).map((_, i) => (
+            <SimpleGrid key={i} columns={1}>
+              <Skeleton height="68px" borderRadius="xl" />
+            </SimpleGrid>
+          ))}
+        </VStack>
       </Container>
     );
   }

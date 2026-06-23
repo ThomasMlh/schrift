@@ -1,5 +1,11 @@
 import type { ICycle, ICycleRotation } from '../interfaces';
 
+export const cycleSlug = (name: string, year: number | string): string =>
+  `${name.toLowerCase().replace(/\s+/g, '-')}-${year}`;
+
+export const cycleFromSlug = (cycles: ICycle[], slug: string): ICycle | undefined =>
+  cycles.find(c => cycleSlug(c.name, c.year) === slug);
+
 /**
  * Calcule les vraies dates d'une rotation en tenant compte du fuseau horaire de Paris
  * @param startDate - Date de début au format DD/MM/YYYY

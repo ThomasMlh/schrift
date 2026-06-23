@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import { AttackTypeBadge } from "../ui/AttackTypeBadge";
 import { AlterationImage } from "../ui/AlterationImage";
 import { useCycles } from "@/hooks/useAPI";
-import { getRotationRealDates, isCycleActive } from "@/utils/cycleHelpers";
+import { getRotationRealDates, isCycleActive, cycleSlug } from "@/utils/cycleHelpers";
 import type { ICycle, ICycleRotation } from "@/interfaces";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "../ui/PageLoader";
@@ -362,7 +362,7 @@ const RotationCalendar = ({ initialMonth }: RotationCalendarProps) => {
                           <Box
                             key={trackIdx}
                             as={Link}
-                            to={`/cycle/${entry.cycle._id}`}
+                            to={`/cycle/${cycleSlug(entry.cycle.name, entry.cycle.year)}`}
                             _hover={{ opacity: 0.75 }}
                             transition="opacity 0.15s"
                             {...sharedStyle}
@@ -422,7 +422,7 @@ const RotationCalendar = ({ initialMonth }: RotationCalendarProps) => {
                         >
                           <Box
                             as={Link}
-                            to={`/cycle/${entry.cycle._id}`}
+                            to={`/cycle/${cycleSlug(entry.cycle.name, entry.cycle.year)}`}
                             {...sharedStyle}
                           />
                         </Tooltip>
@@ -451,7 +451,7 @@ const RotationCalendar = ({ initialMonth }: RotationCalendarProps) => {
               key={cycle._id}
               spacing={1.5}
               as={Link}
-              to={`/cycle/${cycle._id}`}
+              to={`/cycle/${cycleSlug(cycle.name, cycle.year)}`}
               _hover={{ opacity: 0.7 }}
               transition="opacity 0.15s"
               textDecoration="none"

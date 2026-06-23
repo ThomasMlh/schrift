@@ -19,11 +19,14 @@ import {
   Divider,
   IconButton,
   Tooltip,
+  Skeleton,
+  SkeletonText,
 } from "@chakra-ui/react";
 import { ChevronRightIcon } from "@chakra-ui/icons";
 import { FiCalendar, FiLayers, FiRefreshCw, FiList } from "react-icons/fi";
 
 import { AlterationImage } from "../components/ui/AlterationImage";
+import { cycleSlug } from "@/utils/cycleHelpers";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
 import { Pagination as PaginationComponent } from "../components/ui/Pagination";
 import { CustomSelect } from "../components/ui/CustomSelect";
@@ -31,7 +34,6 @@ import { HeroSection } from "../components/HeroSection";
 import { SEOHead } from "../components/SEOHead";
 import { useCycles } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
-import { PageLoader } from "@/components/ui/PageLoader";
 import RotationCalendar from "../components/cycles/RotationCalendar";
 
 const CyclesPage = () => {
@@ -216,7 +218,32 @@ const CyclesPage = () => {
             {viewMode === "calendar" ? (
               <RotationCalendar />
             ) : isLoading ? (
-              <PageLoader label={t("pages.cycles.loading")} color="blue.500" height="300px" />
+              <SimpleGrid columns={{ base: 1, lg: 2, xl: 3 }} spacing={6} w="100%">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Box
+                    key={i}
+                    bg={cardBg}
+                    borderRadius="xl"
+                    borderWidth={1}
+                    borderColor={borderColor}
+                    overflow="hidden"
+                  >
+                    <Box h="3px" bgGradient="linear(to-r, blue.400, purple.500)" />
+                    <Box p={5} pb={4}>
+                      <Flex justify="space-between" align="flex-start" gap={3}>
+                        <VStack align="start" spacing={2} flex={1}>
+                          <Skeleton height="22px" width="70%" borderRadius="md" />
+                          <Skeleton height="14px" width="50%" borderRadius="md" />
+                        </VStack>
+                        <Skeleton height="22px" width="50px" borderRadius="md" />
+                      </Flex>
+                    </Box>
+                    <Box px={5} pb={5} pt={3}>
+                      <SkeletonText mt={2} noOfLines={5} spacing={3} skeletonHeight="12px" />
+                    </Box>
+                  </Box>
+                ))}
+              </SimpleGrid>
             ) : !Array.isArray(cycles) || cycles.length === 0 ? (
               <Alert status="info" borderRadius="lg">
                 <AlertIcon />
@@ -288,7 +315,7 @@ const CyclesPage = () => {
                                 <VStack align="start" spacing={1} flex={1} minW={0}>
                                   <Heading
                                     as={Link}
-                                    to={`/cycle/${cycle._id}`}
+                                    to={`/cycle/${cycleSlug(cycle.name, cycle.year)}`}
                                     size="md"
                                     noOfLines={2}
                                     color="inherit"
@@ -382,7 +409,7 @@ const CyclesPage = () => {
 
                                 <Button
                                   as={Link}
-                                  to={`/cycle/${cycle._id}`}
+                                  to={`/cycle/${cycleSlug(cycle.name, cycle.year)}`}
                                   rightIcon={<ChevronRightIcon />}
                                   colorScheme="blue"
                                   variant="ghost"

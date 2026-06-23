@@ -22,7 +22,7 @@ import {
   Avatar,
   Heading
 } from "@chakra-ui/react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowBackIcon,
@@ -42,7 +42,8 @@ import { UserDisplay } from "@/components/ui/UserDisplay";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { ScoreLegend } from "@/components/ui/ScoreLegend";
 import { BuildDetailModal } from "@/components/ui/BuildDetailModal";
-import { useGuilds, useRotationScores, useBuilds } from "@/hooks/useAPI";
+import { useGuilds, useRotationScores, useBuilds, useCycles } from "@/hooks/useAPI";
+import { cycleFromSlug } from "@/utils/cycleHelpers";
 import { RankBadge } from "@/components/ui/RankBadge";
 import { AlterationImage } from "@/components/ui/AlterationImage";
 import { SEOHead } from "@/components/SEOHead";
@@ -53,7 +54,8 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 const RotationDetailPage = () => {
-  const { cycleId, position } = useParams<{
+  // cycleId dans l'URL est désormais un slug (ex: "cycle-1-2026")
+  const { cycleId: cycleSlugParam, position } = useParams<{
     cycleId: string;
     position: string;
   }>();
@@ -72,6 +74,13 @@ const RotationDetailPage = () => {
 
   // Constante : chaque cycle a toujours 20 rotations
   const totalRotations = 20;
+
+  // Résolution slug → _id MongoDB (fallback sur l'ID brut pour compatibilité)
+  const { cycles } = useCycles({ limit: 100 });
+  const resolvedCycleId = useMemo(() => {
+    if (!cycles.length) return undefined;
+    return cycleFromSlug(cycles, cycleSlugParam!)?._id ?? cycleSlugParam;
+  }, [cycles, cycleSlugParam]);
 
   // Utiliser les hooks API
   const { guilds, isLoading: isLoadingGuilds } = useGuilds(false, true);
@@ -105,7 +114,7 @@ const RotationDetailPage = () => {
   };
 
   const loadScores = async (guildFilter?: string) => {
-    if (!cycleId || !position) return;
+    if (!resolvedCycleId || !position) return;
 
     // Trouver le nom de la guilde si un filtre est fourni
     let guildName: string | undefined;
@@ -118,7 +127,7 @@ const RotationDetailPage = () => {
       }
     }
 
-    const data = await fetchRotationScores(cycleId, position, {
+    const data = await fetchRotationScores(resolvedCycleId, position, {
       page: currentPage,
       limit: itemsPerPage,
       guildName
@@ -180,11 +189,11 @@ const RotationDetailPage = () => {
   };
 
   useEffect(() => {
-    if (cycleId && position) {
+    if (resolvedCycleId && position) {
       loadScores(selectedGuild || undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cycleId, position, currentPage, itemsPerPage, selectedGuild]);
+  }, [resolvedCycleId, position, currentPage, itemsPerPage, selectedGuild]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -214,14 +223,14 @@ const RotationDetailPage = () => {
   const handlePreviousRotation = () => {
     const currentPosition = parseInt(position || "1");
     if (currentPosition > 1) {
-      navigate(`/cycle/${cycleId}/rotation/${currentPosition - 1}`);
+      navigate(`/cycle/${cycleSlugParam}/rotation/${currentPosition - 1}`);
     }
   };
 
   const handleNextRotation = () => {
     const currentPosition = parseInt(position || "1");
     if (currentPosition < totalRotations) {
-      navigate(`/cycle/${cycleId}/rotation/${currentPosition + 1}`);
+      navigate(`/cycle/${cycleSlugParam}/rotation/${currentPosition + 1}`);
     }
   };
 
@@ -255,8 +264,8 @@ const RotationDetailPage = () => {
   return (
     <>
       <SEOHead
-        title={cycle ? `Rotation ${position} - ${cycle.name} ${cycle.year} - Schrift BBS` : `Rotation ${position} - Cycle ${cycleId} - Schrift BBS`}
-        description={cycle ? `Détails de la rotation ${position} du cycle ${cycle.name} (${cycle.year})` : `Détails de la rotation ${position} du cycle ${cycleId}`}
+        title={cycle ? `Rotation ${position} - ${cycle.name} ${cycle.year} - Schrift BBS` : `Rotation ${position} - Cycle ${cycleSlugParam} - Schrift BBS`}
+        description={cycle ? `Détails de la rotation ${position} du cycle ${cycle.name} (${cycle.year})` : `Détails de la rotation ${position} du cycle ${cycleSlugParam}`}
         noIndex={true}
       />
       <Box w="100%">
@@ -275,7 +284,7 @@ const RotationDetailPage = () => {
               <Breadcrumbs items={[
                 { label: t("nav.home"), to: "/" },
                 { label: t("nav.cycles"), to: "/cycles" },
-                { label: cycle.name, to: `/cycle/${cycleId}` },
+                { label: cycle.name, to: `/cycle/${cycleSlugParam}` },
                 { label: `Rotation #${position}` },
               ]} />
             )}
