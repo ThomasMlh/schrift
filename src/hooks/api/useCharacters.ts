@@ -9,15 +9,19 @@ export const useCharacters = (options?: {
   category?: string;
   killer?: string;
   attackType?: string;
+  soulTrait?: string;
+  exSoulTrait?: string;
   searchQuery?: string;
 }) => {
-  const { page = 1, limit = 20, affinity, category, killer, attackType, searchQuery } = options || {};
+  const { page = 1, limit = 20, affinity, category, killer, attackType, soulTrait, exSoulTrait, searchQuery } = options || {};
 
   let url = `${apiUrl}/api/characters?page=${page}&limit=${limit}`;
   if (affinity) url += `&affinity=${encodeURIComponent(affinity)}`;
   if (category) url += `&category=${encodeURIComponent(category)}`;
   if (killer) url += `&killer=${encodeURIComponent(killer)}`;
   if (attackType) url += `&attack_type=${encodeURIComponent(attackType)}`;
+  if (soulTrait) url += `&soul_trait=${encodeURIComponent(soulTrait)}`;
+  if (exSoulTrait) url += `&ex_soul_trait=${encodeURIComponent(exSoulTrait)}`;
   if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
 
   const { data, error, isLoading, mutate } = useSWR<ICharactersResponse>(
@@ -48,12 +52,16 @@ export const useCharacterMeta = () => {
     killers: string[];
     categories: string[];
     affinities: string[];
+    soul_traits: string[];
+    ex_soul_traits: string[];
   }>(url, fetcher, { revalidateOnFocus: false, dedupingInterval: 300000 });
 
   return {
     killers: data?.killers || [],
     categories: data?.categories || [],
     affinities: data?.affinities || [],
+    soulTraits: data?.soul_traits || [],
+    exSoulTraits: data?.ex_soul_traits || [],
     isLoading,
     error,
   };

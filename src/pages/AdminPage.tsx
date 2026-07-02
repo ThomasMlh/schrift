@@ -26,7 +26,7 @@ const tabConfig: { key: IAdminPage; label: string; icon: string }[] = [
 const AdminPage = () => {
   // Détection des permissions utilisateur
   const { isAdmin: isFullAdmin, isGuildManager } = useAuth();
-  const { updateCharacters, checkBotHealth, uploadImages } = useAdminMutations();
+  const { updateCharacters, checkBotHealth, uploadImages, updateCharactersFromGameDB, uploadGameDbImages } = useAdminMutations();
   const { colorMode } = useColorMode();
   
   // Pages autorisées selon le rôle
@@ -45,6 +45,8 @@ const AdminPage = () => {
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isCheckingBot, setIsCheckingBot] = useState(false);
+  const [isSyncingGameDB, setIsSyncingGameDB] = useState(false);
+  const [isUploadingGameDbImages, setIsUploadingGameDbImages] = useState(false);
   const toast = useToast();
 
   const isDark = colorMode === 'dark';
@@ -67,6 +69,32 @@ const AdminPage = () => {
       toast({ title: (error as Error).message || "Erreur lors de la mise à jour des personnages", status: "error" });
     } finally {
       setIsUpdatingCharacters(false);
+    }
+  };
+
+  const handleSyncGameDB = async () => {
+    setIsSyncingGameDB(true);
+    try {
+      const data = await updateCharactersFromGameDB();
+      toast({ title: (data as { message?: string }).message || "Personnages synchronisés depuis la DB du jeu", status: "success", duration: 6000 });
+    } catch (error: unknown) {
+      toast({ title: (error as Error).message || "Erreur lors de la synchronisation depuis la DB du jeu", status: "error" });
+    } finally {
+      setIsSyncingGameDB(false);
+    }
+  };
+
+  const handleUploadGameDbImages = async () => {
+    setIsUploadingGameDbImages(true);
+    try {
+      const { totalUploaded } = await uploadGameDbImages(50, (total, remaining) => {
+        toast({ title: `Images DB jeu: ${total} uploadées, ${remaining} restants...`, status: "info", duration: 2000 });
+      });
+      toast({ title: `Upload terminé: ${totalUploaded} images (DB jeu)`, status: "success" });
+    } catch (error: unknown) {
+      toast({ title: (error as Error).message || "Erreur upload images DB du jeu", status: "error" });
+    } finally {
+      setIsUploadingGameDbImages(false);
     }
   };
 
@@ -224,6 +252,32 @@ const AdminPage = () => {
                 borderRadius="full"
               >
                 🖼️ Upload images
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor={isDark ? 'orange.600' : 'orange.400'}
+                color={isDark ? 'orange.300' : 'orange.600'}
+                _hover={{ bg: isDark ? 'orange.900' : 'orange.50' }}
+                onClick={handleSyncGameDB}
+                isLoading={isSyncingGameDB}
+                loadingText="Sync…"
+                borderRadius="full"
+              >
+                🎮 Sync DB du jeu
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor={isDark ? 'yellow.600' : 'yellow.400'}
+                color={isDark ? 'yellow.300' : 'yellow.600'}
+                _hover={{ bg: isDark ? 'yellow.900' : 'yellow.50' }}
+                onClick={handleUploadGameDbImages}
+                isLoading={isUploadingGameDbImages}
+                loadingText="Upload…"
+                borderRadius="full"
+              >
+                🖼️ Upload images (DB jeu)
               </Button>
               <Button
                 size="sm"
