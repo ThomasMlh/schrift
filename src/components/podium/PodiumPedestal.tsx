@@ -22,46 +22,87 @@ interface PodiumPedestalProps {
 
 const PODIUM_CONFIG = {
   1: {
-    pedestalHeight: "120px",
-    avatarSize: "xl" as const,
+    pedestalHeight: { base: "80px", md: "120px" },
+    avatarSize: { base: "lg", md: "xl" } as const,
     glowColor: "rgba(255, 215, 0, 0.45)",
     borderColor: "#FFD700",
     glowShadow: "0 0 24px 8px rgba(255, 215, 0, 0.35)",
-    pedestalBg: "linear(to-t, rgba(255, 215, 0, 0.18), rgba(255, 215, 0, 0.05))",
+    pedestalBg: "linear(to-t, rgba(255, 215, 0, 0.32), rgba(255, 215, 0, 0.12) 55%, rgba(255, 215, 0, 0.03))",
     pedestalBorder: "#FFD700",
     textColor: "yellow.300",
     emoji: "🥇",
   },
   2: {
-    pedestalHeight: "85px",
-    avatarSize: "lg" as const,
+    pedestalHeight: { base: "55px", md: "85px" },
+    avatarSize: { base: "md", md: "lg" } as const,
     glowColor: "rgba(192, 192, 192, 0.4)",
     borderColor: "#C0C0C0",
     glowShadow: "0 0 18px 6px rgba(192, 192, 192, 0.3)",
-    pedestalBg: "linear(to-t, rgba(192, 192, 192, 0.12), rgba(192, 192, 192, 0.04))",
+    pedestalBg: "linear(to-t, rgba(192, 192, 192, 0.22), rgba(192, 192, 192, 0.08) 55%, rgba(192, 192, 192, 0.02))",
     pedestalBorder: "#C0C0C0",
     textColor: "gray.300",
     emoji: "🥈",
   },
   3: {
-    pedestalHeight: "60px",
-    avatarSize: "lg" as const,
+    pedestalHeight: { base: "40px", md: "60px" },
+    avatarSize: { base: "md", md: "lg" } as const,
     glowColor: "rgba(205, 127, 50, 0.4)",
     borderColor: "#CD7F32",
     glowShadow: "0 0 18px 6px rgba(205, 127, 50, 0.3)",
-    pedestalBg: "linear(to-t, rgba(205, 127, 50, 0.12), rgba(205, 127, 50, 0.04))",
+    pedestalBg: "linear(to-t, rgba(205, 127, 50, 0.22), rgba(205, 127, 50, 0.08) 55%, rgba(205, 127, 50, 0.02))",
     pedestalBorder: "#CD7F32",
     textColor: "orange.300",
     emoji: "🥉",
   },
 } as const;
 
+// Position/couleur des confettis autour de l'avatar du 1er — valeurs fixes (pas de Math.random)
+// pour éviter tout écart entre le HTML pré-rendu (scripts/prerender.js) et l'hydratation client.
+const CONFETTI_PIECES = [
+  { left: "-20%", top: "0%", rotate: "18deg", delay: "0s", color: "#FFD700" },
+  { left: "102%", top: "8%", rotate: "-22deg", delay: "0.35s", color: "#FF6B6B" },
+  { left: "-14%", top: "58%", rotate: "42deg", delay: "0.7s", color: "#4ECDC4" },
+  { left: "100%", top: "50%", rotate: "-12deg", delay: "1.05s", color: "#C77DFF" },
+  { left: "-24%", top: "88%", rotate: "-38deg", delay: "0.2s", color: "#FFA94D" },
+  { left: "106%", top: "82%", rotate: "26deg", delay: "0.55s", color: "#69DB7C" },
+] as const;
+
+const ConfettiBurst = () => (
+  <Box position="absolute" inset={0} pointerEvents="none" aria-hidden="true">
+    {CONFETTI_PIECES.map((p, i) => (
+      <Box
+        key={i}
+        position="absolute"
+        left={p.left}
+        top={p.top}
+        transform={`rotate(${p.rotate})`}
+      >
+        <Box
+          w="6px"
+          h="10px"
+          borderRadius="sm"
+          bg={p.color}
+          sx={{
+            animation: `podiumConfetti 2.4s ease-in-out ${p.delay} infinite`,
+            "@keyframes podiumConfetti": {
+              "0%, 100%": { transform: "translateY(0px)", opacity: 0.85 },
+              "50%": { transform: "translateY(-7px)", opacity: 0.35 },
+            },
+            "@media (prefers-reduced-motion: reduce)": { animation: "none" },
+          }}
+        />
+      </Box>
+    ))}
+  </Box>
+);
+
 interface PedestalSlotProps {
   player: PodiumPedestalPlayer;
   showGuildName: boolean;
+  entranceIndex: number;
 }
 
-const PedestalSlot = ({ player, showGuildName }: PedestalSlotProps) => {
+const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProps) => {
   const cfg = PODIUM_CONFIG[player.rank as 1 | 2 | 3];
   const avatarUrl =
     player.avatar && player.discord_id
@@ -74,17 +115,32 @@ const PedestalSlot = ({ player, showGuildName }: PedestalSlotProps) => {
       spacing={0}
       flex={player.rank === 1 ? "1.2 1 0%" : "1 1 0%"}
       maxW={player.rank === 1 ? "180px" : "145px"}
-      minW="100px"
+      minW={{ base: "78px", md: "100px" }}
+      sx={{
+        animation: `podiumEnter 0.5s ease-out ${entranceIndex * 0.12}s both`,
+        "@keyframes podiumEnter": {
+          from: { opacity: 0, transform: "translateY(16px)" },
+          to: { opacity: 1, transform: "translateY(0)" },
+        },
+        "@media (prefers-reduced-motion: reduce)": { animation: "none" },
+      }}
     >
       {/* Avatar zone */}
-      <VStack spacing={2} align="center" pb={2}>
+      <VStack
+        spacing={2}
+        align="center"
+        pb={2}
+        transition="transform 0.2s ease-out"
+        _hover={{ transform: "translateY(-4px)" }}
+      >
         {/* Emoji médaille flottant */}
         <Text fontSize={player.rank === 1 ? "2xl" : "xl"} lineHeight={1}>
           {cfg.emoji}
         </Text>
 
-        {/* Avatar avec glow */}
+        {/* Avatar avec glow (+ confettis pour le 1er) */}
         <Box position="relative">
+          {player.rank === 1 && <ConfettiBurst />}
           <Box
             position="absolute"
             inset="-3px"
@@ -127,7 +183,7 @@ const PedestalSlot = ({ player, showGuildName }: PedestalSlotProps) => {
         />
       </VStack>
 
-      {/* Socle */}
+      {/* Socle "3D" : dégradé plus riche + biseau lumineux en haut + ombre interne en bas */}
       <Box
         w="100%"
         h={cfg.pedestalHeight}
@@ -135,6 +191,9 @@ const PedestalSlot = ({ player, showGuildName }: PedestalSlotProps) => {
         borderTop="3px solid"
         borderColor={cfg.pedestalBorder}
         borderTopRadius="md"
+        boxShadow={`inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -10px 16px rgba(0,0,0,0.28)`}
+        position="relative"
+        overflow="hidden"
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -183,11 +242,12 @@ export const PodiumPedestal = ({ players, showGuildName = false }: PodiumPedesta
         spacing={{ base: 3, md: 8 }}
         w="100%"
       >
-        {displayOrder.map((player) => (
+        {displayOrder.map((player, index) => (
           <PedestalSlot
             key={player.user_id}
             player={player}
             showGuildName={showGuildName}
+            entranceIndex={index}
           />
         ))}
       </HStack>
