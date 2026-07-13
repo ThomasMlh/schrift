@@ -1,4 +1,21 @@
-import { Flex, Button, VStack, Box, Badge, HStack, Text } from "@chakra-ui/react";
+import {
+  Flex,
+  VStack,
+  Box,
+  Badge,
+  HStack,
+  Text,
+  Tabs,
+  TabList,
+  Tab,
+  ButtonGroup,
+  Button,
+  IconButton,
+  Tooltip,
+  Divider,
+  useColorModeValue,
+} from "@chakra-ui/react";
+import { RepeatIcon } from "@chakra-ui/icons";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import type { ICycle, IGuild, ICycleRotation } from "@/interfaces";
@@ -7,6 +24,8 @@ import { useTranslation } from "react-i18next";
 
 type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
 type CycleRankingType = "average" | "max";
+
+const MODE_ORDER: DisplayMode[] = ["cycle", "rotation", "weekly", "misses"];
 
 interface PodiumFiltersProps {
   displayMode: DisplayMode;
@@ -31,6 +50,8 @@ interface PodiumFiltersProps {
   filterBg: string;
 }
 
+const SELECT_W = { base: "100%", md: "180px" };
+
 export const PodiumFilters = ({
   displayMode,
   cycleRankingType,
@@ -54,53 +75,69 @@ export const PodiumFilters = ({
   filterBg,
 }: PodiumFiltersProps) => {
   const { t } = useTranslation();
+  const inactiveTabColor = useColorModeValue("gray.600", "gray.300");
+
+  const modeLabels: Record<DisplayMode, string> = {
+    cycle: t("components.podiumFilters.modeFullCycle"),
+    rotation: t("components.podiumFilters.modeByRotation"),
+    weekly: t("components.podiumFilters.modeByWeek"),
+    misses: t("components.podiumFilters.modeMiss"),
+  };
+
   return (
     <VStack spacing={4} align="stretch">
+      {/* Mode d'affichage */}
+      <Tabs
+        index={MODE_ORDER.indexOf(displayMode)}
+        onChange={(index) => onModeChange(MODE_ORDER[index])}
+        variant="soft-rounded"
+        colorScheme="blue"
+        size="sm"
+        isFitted={true}
+        w="100%"
+      >
+        <TabList flexWrap="wrap" gap={1}>
+          {MODE_ORDER.map((mode) => (
+            <Tab key={mode} color={inactiveTabColor}>
+              {modeLabels[mode]}
+            </Tab>
+          ))}
+        </TabList>
+      </Tabs>
+
+      {/* Filtres contextuels + réglages */}
       <Flex
-        direction={{ base: "column", md: "row" }}
+        direction={{ base: "column", lg: "row" }}
         gap={4}
         justify="space-between"
-        align="center"
-        wrap="wrap"
+        align={{ base: "stretch", lg: "center" }}
       >
+        {/* Filtres contextuels */}
         <Flex
-          direction={{ base: "column", md: "row" }}
-          gap={4}
-          justify="center"
-          align="center"
+          direction={{ base: "column", sm: "row" }}
+          gap={3}
+          align={{ base: "stretch", sm: "center" }}
           wrap="wrap"
           flex={1}
         >
-          {/* Filtre par mode d'affichage */}
-          <CustomSelect
-            value={displayMode}
-            onChange={(value) => onModeChange(value as DisplayMode)}
-            options={[
-              { value: "cycle", label: t("components.podiumFilters.modeFullCycle") },
-              { value: "rotation", label: t("components.podiumFilters.modeByRotation") },
-              { value: "weekly", label: t("components.podiumFilters.modeByWeek") },
-              { value: "misses", label: t("components.podiumFilters.modeMiss") }
-            ]}
-            allowDeselect={false}
-            size="md"
-            w="190px"
-          />
-
           {/* Type de podium (uniquement en mode cycle complet) */}
           {displayMode === "cycle" && (
-            <CustomSelect
-              value={cycleRankingType}
-              onChange={(value) =>
-                onCycleRankingTypeChange(value as CycleRankingType)
-              }
-              options={[
-                { value: "average", label: t("components.podiumFilters.rankingAverage") },
-                { value: "max", label: t("components.podiumFilters.rankingMax") }
-              ]}
-              allowDeselect={false}
-              size="md"
-              w="190px"
-            />
+            <ButtonGroup isAttached size="md" variant="outline">
+              <Button
+                onClick={() => onCycleRankingTypeChange("average")}
+                colorScheme={cycleRankingType === "average" ? "blue" : undefined}
+                variant={cycleRankingType === "average" ? "solid" : "outline"}
+              >
+                {t("components.podiumFilters.rankingAverage")}
+              </Button>
+              <Button
+                onClick={() => onCycleRankingTypeChange("max")}
+                colorScheme={cycleRankingType === "max" ? "blue" : undefined}
+                variant={cycleRankingType === "max" ? "solid" : "outline"}
+              >
+                {t("components.podiumFilters.rankingMax")}
+              </Button>
+            </ButtonGroup>
           )}
 
           {/* Filtre par cycle */}
@@ -113,7 +150,7 @@ export const PodiumFilters = ({
             allowDeselect={false}
             size="md"
             showActiveBadge={true}
-            w="190px"
+            w={{ base: "100%", md: "220px" }}
           />
 
           {/* Filtre par rotation (uniquement en mode rotation) */}
@@ -128,7 +165,7 @@ export const PodiumFilters = ({
               }))}
               allowDeselect={false}
               size="md"
-              w="190px"
+              w={SELECT_W}
             />
           )}
 
@@ -146,7 +183,7 @@ export const PodiumFilters = ({
               )}
               allowDeselect={false}
               size="md"
-              w="190px"
+              w={SELECT_W}
             />
           )}
 
@@ -161,10 +198,17 @@ export const PodiumFilters = ({
             }))}
             allowDeselect={true}
             size="md"
-            w="190px"
+            w={SELECT_W}
           />
+        </Flex>
 
-          {/* Éléments par page */}
+        <Divider orientation="horizontal" display={{ base: "block", lg: "none" }} />
+        <Divider orientation="vertical" h="32px" display={{ base: "none", lg: "block" }} />
+
+        {/* Réglages */}
+        <HStack spacing={3} justify={{ base: "space-between", lg: "flex-end" }} flexWrap="wrap">
+          {displayMode === "rotation" && <ScoreLegend />}
+
           <CustomSelect
             value={String(itemsPerPage)}
             onChange={(value) => onItemsPerPageChange(parseInt(value))}
@@ -175,17 +219,20 @@ export const PodiumFilters = ({
             ]}
             allowDeselect={false}
             size="md"
-            w="190px"
+            w={{ base: "140px", md: "150px" }}
           />
-          
-          <Button onClick={onReset} variant="outline" minW="120px">
-            {t("components.podiumFilters.reset")}
-          </Button>
-          
-          {displayMode === "rotation" && <ScoreLegend />}
-        </Flex>
+
+          <Tooltip label={t("components.podiumFilters.reset")}>
+            <IconButton
+              aria-label={t("components.podiumFilters.reset")}
+              icon={<RepeatIcon />}
+              onClick={onReset}
+              variant="outline"
+            />
+          </Tooltip>
+        </HStack>
       </Flex>
-      
+
       {/* Filtres actifs */}
       {(selectedCycleId || selectedGuildName || displayMode !== "cycle" || cycleRankingType !== "average") && (
         <Box p={3} bg={filterBg} borderRadius="md">
