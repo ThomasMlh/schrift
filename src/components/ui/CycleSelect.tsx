@@ -72,11 +72,11 @@ export const CycleSelect = ({
                     label: cycle.name,
                     group: String(year),
                     content: (
-                        <HStack spacing={2} w="100%" justify="space-between">
-                            <Text fontWeight="medium">
+                        <HStack spacing={2} w="100%" minW={0} justify="space-between">
+                            <Text fontWeight="medium" isTruncated minW={0}>
                                 {cycle.name}
                             </Text>
-                            <HStack spacing={1}>
+                            <HStack spacing={1} flexShrink={0}>
                                 {showActiveBadge && (
                                     <>
                                         {isCycleActive(cycle) ? (
@@ -104,17 +104,17 @@ export const CycleSelect = ({
         );
 
         return (
-            <HStack spacing={2} w="100%">
-                <Text fontWeight="medium">
+            <HStack spacing={2} w="100%" minW={0}>
+                <Text fontWeight="medium" isTruncated minW={0} flex="1 1 auto">
                     {selectedCycle?.name || option.label}
                 </Text>
                 {selectedCycle?.year && (
-                    <Badge colorScheme="blue" fontSize="xs">
+                    <Badge colorScheme="blue" fontSize="xs" flexShrink={0}>
                         {selectedCycle.year}
                     </Badge>
                 )}
                 {showActiveBadge && selectedCycle && isCycleActive(selectedCycle) && (
-                    <Badge colorScheme="green" fontSize="xs">
+                    <Badge colorScheme="green" fontSize="xs" flexShrink={0}>
                         Actif
                     </Badge>
                 )}
