@@ -175,6 +175,37 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   }, [selectedUser, selectedTargetGuild, selectedSourceGuild, allMembers, guildMap, toast]);
 
   const removeMove  = (moveId: string) => setDraftMoves((prev) => prev.filter((m) => m.id !== moveId));
+
+  const updateMoveTarget = useCallback((moveId: string, newToGuildId: string | null) => {
+    setDraftMoves((prev) => {
+      const move = prev.find((m) => m.id === moveId);
+      if (!move) return prev;
+      if (newToGuildId && move.fromGuild && move.fromGuild._id === newToGuildId) {
+        toast({ title: "Même guilde", description: "Le joueur est déjà dans cette guilde", status: "warning", duration: 2000 });
+        return prev;
+      }
+      if (!newToGuildId && !move.fromGuild) {
+        toast({ title: "Action inutile", description: "Ce joueur n'a déjà pas de guilde", status: "warning", duration: 2000 });
+        return prev;
+      }
+      const newToGuild = newToGuildId ? guildMap[newToGuildId] || null : null;
+      return prev.map((m) => (m.id === moveId ? { ...m, toGuild: newToGuild } : m));
+    });
+  }, [guildMap, toast]);
+
+  const getTargetOptionsForMove = useCallback((move: DraftMove) => [
+    ...(move.fromGuild ? [{ value: "__none__", label: "✕ Retirer de la guilde" }] : []),
+    ...guilds
+      .filter((g) => g._id !== move.fromGuild?._id)
+      .map((g) => {
+        const count = projectedCounts[g._id] || 0;
+        return {
+          value: g._id,
+          label: `${g.name} (${count}/20)${count >= 20 ? " — pleine" : ""}`
+        };
+      })
+  ], [guilds, projectedCounts]);
+
   const clearDraft  = () => {
     setDraftMoves([]);
     setSelectedSourceGuild("");
@@ -488,6 +519,8 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                       isLast={index === draftMoves.length - 1}
                       getAvatarUrl={getAvatarUrl}
                       onRemove={removeMove}
+                      onChangeTarget={updateMoveTarget}
+                      targetOptions={getTargetOptionsForMove(move)}
                       hoverBg={rowHoverBg}
                       mutedText={mutedText}
                     />
