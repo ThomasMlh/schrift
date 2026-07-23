@@ -9,6 +9,7 @@ import {
 import { useState } from "react";
 import OrbGuideAdminSection from "./OrbGuideAdminSection";
 import BuildsAdminSection from "./BuildsAdminSection";
+import AbilitySlotsAdminSection from "./AbilitySlotsAdminSection";
 
 // Composant wrapper pour les sections de guides pliables
 interface GuideFormWrapperProps {
@@ -94,6 +95,19 @@ const GuidesAdminSection = () => {
           boxShadow={boxShadow}
         >
           <BuildsAdminSection />
+        </GuideFormWrapper>
+
+        {/* Emplacements de capacités */}
+        <GuideFormWrapper
+          title="🎯 Emplacements de capacités"
+          formName="abilitySlotsGuide"
+          colorScheme="purple"
+          openForm={openForm}
+          toggleForm={toggleForm}
+          bgColor={bgColor}
+          boxShadow={boxShadow}
+        >
+          <AbilitySlotsAdminSection />
         </GuideFormWrapper>
 
         {/* Futur: Autres guides */}

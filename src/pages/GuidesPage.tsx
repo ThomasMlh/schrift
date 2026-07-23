@@ -11,10 +11,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
-import { OrbFarmingGuide, RotationsBuildsGuide } from "../components/guides";
+import { OrbFarmingGuide, RotationsBuildsGuide, AbilitySlotsGuide } from "../components/guides";
 import { useTranslation } from "react-i18next";
 
-const SECTION_IDS = ["rotations-builds", "orbs"] as const;
+const SECTION_IDS = ["rotations-builds", "orbs", "ability-slots"] as const;
 type SectionId = (typeof SECTION_IDS)[number];
 
 const GuidesPage = () => {
@@ -28,6 +28,7 @@ const GuidesPage = () => {
   const SECTIONS: { id: SectionId; icon: React.ReactElement; label: string; colorScheme: string }[] = [
     { id: "rotations-builds", icon: <span>⚔️</span>, label: t("pages.guides.tabRotationsBuilds"), colorScheme: "orange" },
     { id: "orbs", icon: <Image src="/orb.png" alt={t("pages.guides.orbIconAlt")} boxSize="18px" />, label: t("pages.guides.tabOrbs"), colorScheme: "purple" },
+    { id: "ability-slots", icon: <span>🎯</span>, label: t("pages.guides.tabAbilitySlots"), colorScheme: "purple" },
   ];
 
   const getInitialSection = (): SectionId => {
@@ -90,6 +91,7 @@ const GuidesPage = () => {
             {/* Content */}
             {activeSection === "rotations-builds" && <RotationsBuildsGuide />}
             {activeSection === "orbs" && <OrbFarmingGuide />}
+            {activeSection === "ability-slots" && <AbilitySlotsGuide />}
 
           </VStack>
         </Container>

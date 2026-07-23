@@ -215,7 +215,8 @@
       "tabOrbs": "Farm d'Orbes",
       "tabOrbsDescription": "Guide complet pour maximiser vos orbes en jeu",
       "tabOrbsBadge": "Ressources",
-      "orbIconAlt": "Icône Orbe"
+      "orbIconAlt": "Icône Orbe",
+      "tabAbilitySlots": "Emplacements de capacités"
     },
     "guilds": {
       "title": "Guildes",
@@ -587,6 +588,16 @@
       "totalHeading": "📊 Total mensuel récurrent",
       "totalDescription": "Sans compter les sources ponctuelles (nouveaux persos, story, events spéciaux)",
       "orbsUnit": "orbes"
+    },
+    "abilitySlotsGuide": {
+      "heading": "Emplacements de capacités",
+      "description": "Plages de valeurs obtenables pour chaque emplacement de capacité, selon son niveau de rareté (★, ★★, ★★★).",
+      "errorTitle": "Erreur de chargement",
+      "colCategory": "Catégorie",
+      "colName": "Nom",
+      "rowsUnit": "capacités",
+      "searchPlaceholder": "Rechercher une capacité...",
+      "noResults": "Aucune capacité ne correspond à votre recherche"
     },
     "comparatorCharts": {
       "radarHeadingPlayers": "📊 Comparaison Radar",

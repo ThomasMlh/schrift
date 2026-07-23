@@ -11,6 +11,7 @@ export { useOCRMutations } from './mutations/useOCRMutations';
 export { useDraftMutations } from './mutations/useDraftMutations';
 export { useAdminMutations } from './mutations/useAdminMutations';
 export { useOrbGuideMutations } from './mutations/useOrbGuideMutations';
+export { useAbilitySlotsGuideMutations } from './mutations/useAbilitySlotsGuideMutations';
 export { useAccessoryMutations } from './mutations/useAccessoryMutations';
 
 import { useCycleMutations } from './mutations/useCycleMutations';

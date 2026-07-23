@@ -215,7 +215,8 @@
       "tabOrbs": "Orb Farming",
       "tabOrbsDescription": "Complete guide to maximize your in-game orbs",
       "tabOrbsBadge": "Resources",
-      "orbIconAlt": "Orb Icon"
+      "orbIconAlt": "Orb Icon",
+      "tabAbilitySlots": "Ability Slots"
     },
     "guilds": {
       "title": "Guilds",
@@ -587,6 +588,16 @@
       "totalHeading": "📊 Monthly recurring total",
       "totalDescription": "Not counting one-time sources (new characters, story, special events)",
       "orbsUnit": "orbs"
+    },
+    "abilitySlotsGuide": {
+      "heading": "Ability Slots",
+      "description": "Obtainable value ranges for each ability slot, based on its rarity level (★, ★★, ★★★).",
+      "errorTitle": "Loading error",
+      "colCategory": "Category",
+      "colName": "Name",
+      "rowsUnit": "abilities",
+      "searchPlaceholder": "Search an ability...",
+      "noResults": "No ability matches your search"
     },
     "comparatorCharts": {
       "radarHeadingPlayers": "📊 Radar Comparison",

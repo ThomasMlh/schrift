@@ -512,6 +512,20 @@ export interface IOrbGuideResponse {
   totalOrbes: number;
 }
 
+export interface IGuideAbilitySlot {
+  _id: string;
+  category: string;
+  name: string;
+  star1: string;
+  star2: string;
+  star3: string;
+  order: number;
+}
+
+export interface IAbilitySlotsGuideResponse {
+  data: IGuideAbilitySlot[];
+}
+
 export interface IEvent {
   cycleName: string;
   rotationNumber: number;

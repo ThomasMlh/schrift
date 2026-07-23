@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import type { IOrbGuideResponse } from '../../interfaces';
+import type { IOrbGuideResponse, IAbilitySlotsGuideResponse } from '../../interfaces';
 import { apiUrl, fetcher } from './shared';
 
 export const useOrbGuide = () => {
@@ -10,6 +10,16 @@ export const useOrbGuide = () => {
   );
 
   return { orbData: data, isLoading, error, mutate };
+};
+
+export const useAbilitySlotsGuide = () => {
+  const { data, error, isLoading, mutate } = useSWR<IAbilitySlotsGuideResponse>(
+    `${apiUrl}/api/guides/ability-slots`,
+    fetcher,
+    { revalidateOnFocus: false, dedupingInterval: 300000 }
+  );
+
+  return { abilitySlotsData: data, isLoading, error, mutate };
 };
 
 export const useScreenshotters = () => {
