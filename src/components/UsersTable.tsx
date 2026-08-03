@@ -13,7 +13,7 @@ import BanUserModal from "./BanUserModal";
 import UnbanUserModal from "./UnbanUserModal";
 import { UserDisplay } from "./ui/UserDisplay";
 import { CustomSelect } from "./ui/CustomSelect";
-import { useGuilds, useUsers } from "@/hooks/useAPI";
+import { useGuilds, useUsers, useUserAccounts } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
 
 interface UsersTableProps {
@@ -51,7 +51,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
         [guilds, selectedGuildId]
     );
 
-    // Hook useUsers avec les paramètres de filtrage
+    // Paramètres de filtrage communs aux deux modes
     const apiOptions = useMemo(() => ({
         authenticated: false,
         page: currentPage,
@@ -61,7 +61,22 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
         ...(selectedRole && { role: selectedRole }),
     }), [currentPage, itemsPerPage, debouncedSearch, selectedGuildId, selectedRole]);
 
-    const { users, pagination, isLoading, mutate } = useUsers(apiOptions);
+    // Mode admin : une ligne par user Discord (ban/édition sont des actions par identité Discord).
+    // Mode public : une ligne par compte bbs — un joueur avec plusieurs comptes apparaît plusieurs
+    // fois, chacun avec sa propre guilde/rôle, cohérent avec le classement et les rosters de guilde.
+    const {
+        users: adminUsers, pagination: adminPagination,
+        isLoading: adminLoading, mutate: adminMutate
+    } = useUsers({ ...apiOptions, enabled: isAdminMode });
+    const {
+        accounts: publicAccounts, pagination: publicPagination,
+        isLoading: publicLoading, mutate: publicMutate
+    } = useUserAccounts({ ...apiOptions, enabled: !isAdminMode });
+
+    const users = isAdminMode ? adminUsers : publicAccounts;
+    const pagination = isAdminMode ? adminPagination : publicPagination;
+    const isLoading = isAdminMode ? adminLoading : publicLoading;
+    const mutate = isAdminMode ? adminMutate : publicMutate;
 
     // Hooks UI
     const { colorMode } = useColorMode();
@@ -344,7 +359,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                             ))
                         ) : (
                             users.map((user: IUser) => (
-                                <Tr key={user._id} _hover={{ bg: hoverBg }} opacity={user.is_banned ? 0.5 : 1} transition="background 0.15s">
+                                <Tr key={user.bbs_id ? `${user._id}-${user.bbs_id}` : user._id} _hover={{ bg: hoverBg }} opacity={user.is_banned ? 0.5 : 1} transition="background 0.15s">
                                     <Td>
                                         <HStack spacing={3}>
                                             <UserDisplay user={user} />

@@ -130,7 +130,7 @@ export const GuildWeeklyRanking = ({
                 player.bbs_name || player.global_name || player.username;
               return (
                 <HStack
-                  key={player.user_id}
+                  key={player.bbs_id || player.user_id}
                   px={4}
                   py={4}
                   spacing={3}
@@ -150,7 +150,7 @@ export const GuildWeeklyRanking = ({
                     </Text>
                     <Avatar size="sm" src={avatarUrl} name={displayName} />
                     <Box flex={1} minW={0}>
-                      <RouterLink to={`/utilisateurs/${player.user_id}`}>
+                      <RouterLink to={player.bbs_name ? `/joueur/${encodeURIComponent(player.bbs_name)}` : "#"}>
                         <Text
                           fontSize="sm"
                           fontWeight="semibold"

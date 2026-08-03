@@ -61,7 +61,7 @@ export const GuildTopMembers = ({ guildId, cycleId }: GuildTopMembersProps) => {
 
             return (
               <HStack
-                key={member.userId}
+                key={member.bbsId || member.userId}
                 spacing={3}
                 p={2}
                 borderRadius="lg"

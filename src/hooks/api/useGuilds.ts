@@ -130,6 +130,7 @@ export const useGuildRankings = (cycleId?: string) => {
 
 export interface IGuildTopMember {
   userId: string;
+  bbsId?: string;
   username: string;
   bbs_name?: string;
   avatar?: string;

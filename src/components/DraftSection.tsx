@@ -50,6 +50,7 @@ const getGuildColor = (index: number): GuildColor =>
 interface DraftMove {
   id: string;
   user: IUser;
+  bbsId: string;
   fromGuild: IGuild | null;
   toGuild: IGuild | null;
 }
@@ -68,7 +69,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
 
   const [draftMoves, setDraftMoves] = useState<DraftMove[]>([]);
   const [selectedSourceGuild, setSelectedSourceGuild] = useState<string>("");
-  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [selectedBbsId, setSelectedBbsId] = useState<string>("");
   const [selectedTargetGuild, setSelectedTargetGuild] = useState<string>("");
   const [isExecuting, setIsExecuting] = useState(false);
 
@@ -87,27 +88,29 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   const guildCardBg   = useColorModeValue("white", "gray.750");
 
   // ── Données dérivées ────────────────────────────────────────────────────────
+  // On drafte des comptes bbs, pas des users : un compte sans bbs_id (guilde/rôle assignés
+  // avant liaison du compte de jeu) n'a rien à envoyer au backend, on l'exclut du pool.
   const allMembers = useMemo(() => {
     const members: (IUser & { guildId: string })[] = [];
     for (const [guildId, guildMembers] of Object.entries(membersByGuild)) {
       for (const member of guildMembers) {
-        members.push({ ...member, guildId });
+        if (member.bbs_id) members.push({ ...member, guildId });
       }
     }
     for (const user of guildlessUsers) {
-      members.push({ ...user, guildId: "" });
+      if (user.bbs_id) members.push({ ...user, guildId: "" });
     }
     return members;
   }, [membersByGuild, guildlessUsers]);
 
   const availableUsers = useMemo(() => {
-    const draftedUserIds = new Set(draftMoves.map((m) => m.user._id));
+    const draftedBbsIds = new Set(draftMoves.map((m) => m.bbsId));
     if (selectedSourceGuild === "__no_guild__") {
-      return guildlessUsers.filter((u) => !draftedUserIds.has(u._id));
+      return guildlessUsers.filter((u) => u.bbs_id && !draftedBbsIds.has(u.bbs_id));
     }
     if (!selectedSourceGuild) return [];
     return (membersByGuild[selectedSourceGuild] || []).filter(
-      (member) => !draftedUserIds.has(member._id)
+      (member) => member.bbs_id && !draftedBbsIds.has(member.bbs_id)
     );
   }, [selectedSourceGuild, membersByGuild, guildlessUsers, draftMoves]);
 
@@ -140,18 +143,19 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     return map;
   }, [guilds]);
 
-  // Joueur sélectionné (pour affichage avatar)
+  // Compte sélectionné (pour affichage avatar) — identifié par bbs_id, pas par user._id, car un
+  // même user peut apparaître plusieurs fois dans la liste (un par compte).
   const selectedUserData = useMemo(
-    () => availableUsers.find((u) => u._id === selectedUser) ?? null,
-    [availableUsers, selectedUser]
+    () => availableUsers.find((u) => u.bbs_id === selectedBbsId) ?? null,
+    [availableUsers, selectedBbsId]
   );
 
-  useEffect(() => { setSelectedUser(""); }, [selectedSourceGuild]);
+  useEffect(() => { setSelectedBbsId(""); }, [selectedSourceGuild]);
 
   // ── Actions ─────────────────────────────────────────────────────────────────
   const addMove = useCallback(() => {
-    if (!selectedUser || !selectedTargetGuild) return;
-    const user = allMembers.find((m) => m._id === selectedUser);
+    if (!selectedBbsId || !selectedTargetGuild) return;
+    const user = allMembers.find((m) => m.bbs_id === selectedBbsId);
     if (!user) return;
 
     const isRemoval    = selectedTargetGuild === "__none__";
@@ -169,10 +173,10 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
       return;
     }
 
-    setDraftMoves((prev) => [...prev, { id: `${user._id}-${Date.now()}`, user, fromGuild, toGuild }]);
-    setSelectedUser("");
+    setDraftMoves((prev) => [...prev, { id: `${user.bbs_id}-${Date.now()}`, user, bbsId: user.bbs_id!, fromGuild, toGuild }]);
+    setSelectedBbsId("");
     setSelectedTargetGuild("");
-  }, [selectedUser, selectedTargetGuild, selectedSourceGuild, allMembers, guildMap, toast]);
+  }, [selectedBbsId, selectedTargetGuild, selectedSourceGuild, allMembers, guildMap, toast]);
 
   const removeMove  = (moveId: string) => setDraftMoves((prev) => prev.filter((m) => m.id !== moveId));
 
@@ -209,14 +213,14 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   const clearDraft  = () => {
     setDraftMoves([]);
     setSelectedSourceGuild("");
-    setSelectedUser("");
+    setSelectedBbsId("");
     setSelectedTargetGuild("");
   };
 
   const handleExecuteDraft = async () => {
     setIsExecuting(true);
     try {
-      await executeDraft(draftMoves.map((m) => ({ userId: m.user._id, toGuildId: m.toGuild?._id || null })));
+      await executeDraft(draftMoves.map((m) => ({ userId: m.user._id, bbsId: m.bbsId, toGuildId: m.toGuild?._id || null })));
       toast({ title: "Draft exécuté", description: `${draftMoves.length} joueur(s) déplacé(s)`, status: "success", duration: 3000 });
       clearDraft();
       onClose();
@@ -424,8 +428,8 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                   </HStack>
                   <CustomSelect
                     placeholder="Sélectionner"
-                    value={selectedUser}
-                    onChange={setSelectedUser}
+                    value={selectedBbsId}
+                    onChange={setSelectedBbsId}
                     size="sm"
                     allowDeselect={false}
                     enableSearch
@@ -433,7 +437,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                     isDisabled={!selectedSourceGuild}
                     isLoading={guildlessLoading}
                     options={availableUsers.map((u) => ({
-                      value: u._id,
+                      value: u.bbs_id!,
                       label: u.bbs_name || u.global_name || u.username
                     }))}
                   />
@@ -441,7 +445,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
 
                 {/* Flèche */}
                 <Box display={{ base: "none", md: "flex" }} alignItems="center" pb={1}>
-                  <ArrowForwardIcon color={selectedUser ? "orange.400" : "gray.300"} boxSize={4} />
+                  <ArrowForwardIcon color={selectedBbsId ? "orange.400" : "gray.300"} boxSize={4} />
                 </Box>
 
                 {/* Étape 3 : Vers */}
@@ -454,7 +458,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                     size="sm"
                     allowDeselect={false}
                     accentColor="orange.400"
-                    isDisabled={!selectedUser}
+                    isDisabled={!selectedBbsId}
                     options={[
                       ...(selectedSourceGuild !== "__no_guild__"
                         ? [{ value: "__none__", label: "✕ Retirer de la guilde" }]
@@ -473,14 +477,14 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                 </Box>
 
                 {/* Bouton ajouter */}
-                <Tooltip label={!selectedUser || !selectedTargetGuild ? "Remplissez tous les champs" : "Ajouter ce transfert"} hasArrow>
+                <Tooltip label={!selectedBbsId || !selectedTargetGuild ? "Remplissez tous les champs" : "Ajouter ce transfert"} hasArrow>
                   <Button
                     leftIcon={<AddIcon boxSize={3} />}
                     colorScheme="orange"
                     size="sm"
                     borderRadius="lg"
                     onClick={addMove}
-                    isDisabled={!selectedUser || !selectedTargetGuild}
+                    isDisabled={!selectedBbsId || !selectedTargetGuild}
                     px={4}
                     alignSelf="flex-end"
                     mb={{ base: 0, md: 0 }}

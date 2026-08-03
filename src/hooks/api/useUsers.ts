@@ -4,6 +4,7 @@ import { apiUrl, fetcher, useAuthenticatedFetcher } from './shared';
 
 export const useUsers = (options?: {
   authenticated?: boolean;
+  enabled?: boolean;
   page?: number;
   limit?: number;
   guilde_id?: string;
@@ -12,9 +13,9 @@ export const useUsers = (options?: {
   is_banned?: string;
 }) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
-  const { authenticated = true, page = 1, limit = 50, guilde_id, role, search, is_banned } = options || {};
+  const { authenticated = true, enabled = true, page = 1, limit = 50, guilde_id, role, search, is_banned } = options || {};
 
-  let url = `${apiUrl}/api/users`;
+  let url: string | null = `${apiUrl}/api/users`;
   const params = new URLSearchParams();
   if (page) params.append('page', page.toString());
   if (limit) params.append('limit', limit.toString());
@@ -23,6 +24,7 @@ export const useUsers = (options?: {
   if (search) params.append('search', search);
   if (is_banned) params.append('is_banned', is_banned);
   if (params.toString()) url += `?${params.toString()}`;
+  if (!enabled) url = null;
 
   const { data, error, isLoading, mutate } = useSWR<{
     success: boolean;
@@ -41,6 +43,48 @@ export const useUsers = (options?: {
   };
 };
 
+// Liste par compte bbs (pas par user) — un même joueur avec plusieurs comptes apparaît une fois
+// par compte, chacun avec sa propre guilde/rôle. Utilisé par la liste publique des joueurs, pour
+// rester cohérent avec le classement/rosters de guilde qui sont déjà par compte.
+export const useUserAccounts = (options?: {
+  authenticated?: boolean;
+  enabled?: boolean;
+  page?: number;
+  limit?: number;
+  guilde_id?: string;
+  role?: string;
+  search?: string;
+}) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const { authenticated = false, enabled = true, page = 1, limit = 50, guilde_id, role, search } = options || {};
+
+  let url: string | null = `${apiUrl}/api/users/accounts`;
+  const params = new URLSearchParams();
+  if (page) params.append('page', page.toString());
+  if (limit) params.append('limit', limit.toString());
+  if (guilde_id) params.append('guilde_id', guilde_id);
+  if (role) params.append('role', role);
+  if (search) params.append('search', search);
+  if (params.toString()) url += `?${params.toString()}`;
+  if (!enabled) url = null;
+
+  const { data, error, isLoading, mutate } = useSWR<{
+    success: boolean;
+    users: IUser[];
+    pagination: IPagination;
+    activeFilters: { guilde_id: string | null; role: string | null; search: string | null };
+  }>(url, authenticated ? authenticatedFetcher : fetcher, { revalidateOnFocus: false });
+
+  return {
+    accounts: data?.users || [],
+    pagination: data?.pagination,
+    activeFilters: data?.activeFilters,
+    isLoading,
+    error,
+    mutate,
+  };
+};
+
 export const useUser = (userId: string | undefined) => {
   const url = userId ? `${apiUrl}/api/users/${userId}` : null;
   const { data, error, isLoading, mutate } = useSWR<{ user: IUser }>(url, fetcher, { revalidateOnFocus: false });
@@ -49,8 +93,27 @@ export const useUser = (userId: string | undefined) => {
 
 export const useUserByBBSName = (bbs_name: string | undefined) => {
   const { users, isLoading } = useUsers({ search: bbs_name, limit: 10, authenticated: false });
-  const user = bbs_name ? users.find(u => u.bbs_name === bbs_name) : undefined;
-  return { user, isLoading };
+
+  let user: IUser | undefined;
+  let matchedBbsId: string | undefined;
+
+  if (bbs_name) {
+    for (const u of users) {
+      if (u.bbs_name === bbs_name) {
+        user = u;
+        matchedBbsId = u.bbs_id;
+        break;
+      }
+      const altMatch = u.bbs_accounts?.find(a => a.bbs_name === bbs_name);
+      if (altMatch) {
+        user = u;
+        matchedBbsId = altMatch.bbs_id;
+        break;
+      }
+    }
+  }
+
+  return { user, matchedBbsId, isLoading };
 };
 
 export interface IUserStats {
@@ -168,18 +231,25 @@ export interface IUserStats {
   performanceByAlteration?: { alteration: string; averageScore: number; count: number }[];
 }
 
-export const useUserStats = (userId: string | undefined, cycleId?: string) => {
-  const url = userId
-    ? `${apiUrl}/api/users/${userId}/stats${cycleId ? `?cycle_id=${cycleId}` : ''}`
-    : null;
+// bbsId optionnel : scope les stats à un compte précis (défaut serveur = compte principal).
+// Chaque compte bbs a son propre historique/classement, jamais fusionné entre alts.
+const buildUserStatsUrl = (userId: string, cycleId?: string, bbsId?: string) => {
+  const params = new URLSearchParams();
+  if (cycleId) params.set('cycle_id', cycleId);
+  if (bbsId) params.set('bbs_id', bbsId);
+  const query = params.toString();
+  return `${apiUrl}/api/users/${userId}/stats${query ? `?${query}` : ''}`;
+};
+
+export const useUserStats = (userId: string | undefined, cycleId?: string, bbsId?: string) => {
+  const url = userId ? buildUserStatsUrl(userId, cycleId, bbsId) : null;
   const { data, error, isLoading, mutate } = useSWR<{ data: { stats: IUserStats } }>(url, fetcher, { revalidateOnFocus: false });
   return { stats: data?.data?.stats, isLoading, error, mutate };
 };
 
-export const fetchUserStats = async (userId: string, cycleId?: string): Promise<IUserStats | null> => {
+export const fetchUserStats = async (userId: string, cycleId?: string, bbsId?: string): Promise<IUserStats | null> => {
   try {
-    const url = `${apiUrl}/api/users/${userId}/stats${cycleId ? `?cycle_id=${cycleId}` : ''}`;
-    const response = await fetch(url);
+    const response = await fetch(buildUserStatsUrl(userId, cycleId, bbsId));
     if (!response.ok) return null;
     const data = await response.json();
     return data.data?.stats || null;

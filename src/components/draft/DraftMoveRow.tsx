@@ -7,6 +7,7 @@ import { CustomSelect } from "../ui/CustomSelect";
 interface DraftMove {
   id: string;
   user: IUser;
+  bbsId: string;
   fromGuild: IGuild | null;
   toGuild: IGuild | null;
 }

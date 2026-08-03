@@ -6,7 +6,7 @@ export const useDraftMutations = () => {
   const { token } = useAuth();
   const request = useMemo(() => makeRequest(token), [token]);
 
-  const executeDraft = async (moves: { userId: string; toGuildId: string | null; role?: string }[]) => {
+  const executeDraft = async (moves: { userId: string; bbsId: string; toGuildId: string | null; role?: string }[]) => {
     const data = await request(`${apiUrl}/api/guildes/draft`, {
       method: 'POST',
       body: JSON.stringify({ moves }),

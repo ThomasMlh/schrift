@@ -188,7 +188,7 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
       {sousChefs.length > 0 && (
         <Flex gap={{ base: 4, md: 6 }} justify="center" wrap="wrap">
           {sousChefs.map((sc) => (
-            <MemberCard key={sc._id} member={sc} roleLabel="Sous-Chef" isLead />
+            <MemberCard key={sc.bbs_id || sc._id} member={sc} roleLabel="Sous-Chef" isLead />
           ))}
         </Flex>
       )}
@@ -216,7 +216,7 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
       {regularMembers.length > 0 && (
         <Flex wrap="wrap" justify="center" gap={4} maxW="1100px">
           {regularMembers.map((member) => (
-            <MemberCard key={member._id} member={member} roleLabel="Membre" />
+            <MemberCard key={member.bbs_id || member._id} member={member} roleLabel="Membre" />
           ))}
         </Flex>
       )}
