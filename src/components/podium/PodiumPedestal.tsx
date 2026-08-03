@@ -2,10 +2,12 @@ import { Box, VStack, HStack, Text, Avatar, Badge, useColorModeValue } from "@ch
 import { getUserAvatarUrl } from "@/utils/discord";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import CustomLink from "@/components/ui/CustomLink";
+import { buildPlayerUrl } from "@/utils/playerUrl";
 
 export interface PodiumPedestalPlayer {
   rank: number;
   user_id: string;
+  bbs_id?: string;
   bbs_name?: string;
   global_name: string;
   discord_id?: string;
@@ -161,7 +163,7 @@ const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProp
         {/* Nom */}
         <VStack spacing={0} align="center" mt={1}>
           <CustomLink
-            to={player.bbs_name ? `/joueur/${player.bbs_name}` : undefined}
+            to={buildPlayerUrl(player.bbs_name, player.bbs_id)}
             text={player.bbs_name || player.global_name}
             textSize={player.rank === 1 ? "sm" : "xs"}
             requireAuth

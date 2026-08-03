@@ -53,9 +53,12 @@ import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 
 const UserPage = () => {
   const { bbs_name } = useParams<{ bbs_name: string }>();
-  const { user: resolvedUser, matchedBbsId, isLoading: resolvingUser } = useUserByBBSName(bbs_name);
-  const userId = resolvedUser?._id;
   const [searchParams, setSearchParams] = useSearchParams();
+  // Désambiguïsation quand plusieurs comptes partagent le même bbs_name (ex: alts d'un même joueur) :
+  // ?compte=<bbs_id> cible le compte exact, prioritaire sur la résolution par nom.
+  const accountIdParam = searchParams.get("compte") || undefined;
+  const { user: resolvedUser, matchedBbsId, isLoading: resolvingUser } = useUserByBBSName(bbs_name, accountIdParam);
+  const userId = resolvedUser?._id;
   const [selectedCycle, setSelectedCycle] = useState<string>("");
   const { isAdmin, currentUser } = useAuth();
   const { t } = useTranslation();
@@ -368,43 +371,65 @@ const UserPage = () => {
         </Card>
 
         {/* Sélecteur de compte bbs — un même joueur peut avoir plusieurs comptes (alts), chacun
-            avec ses propres stats/classement indépendants. Naviguer change juste le bbs_name dans l'URL. */}
-        {userData?.bbs_accounts && userData.bbs_accounts.length > 1 && (
-          <Card mb={6} bg={cardBg} borderRadius="xl" boxShadow="lg">
-            <CardBody py={4}>
-              <VStack align="stretch" spacing={2}>
-                <Text fontSize="sm" fontWeight="semibold" color={mutedText}>
-                  {t("pages.user.accountsLabel")}
-                </Text>
-                <Wrap spacing={2}>
-                  {userData.bbs_accounts.map((account) => {
-                    const isActive = account.bbs_name === bbs_name;
-                    return (
-                      <WrapItem key={account.bbs_id}>
-                        <Button
-                          as={RouterLink}
-                          to={`/joueur/${encodeURIComponent(account.bbs_name || account.bbs_id)}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`}
-                          size="sm"
-                          borderRadius="full"
-                          colorScheme={isActive ? "blue" : "gray"}
-                          variant={isActive ? "solid" : "outline"}
-                          _hover={{ textDecoration: "none", color: "white" }}
-                        >
-                          {account.bbs_name || account.bbs_id}
-                          {account.is_primary && !isActive && (
-                            <Badge ml={2} colorScheme={"purple"} fontSize="2xs">
-                              {t("pages.user.accountPrimary")}
-                            </Badge>
-                          )}
-                        </Button>
-                      </WrapItem>
-                    );
-                  })}
-                </Wrap>
-              </VStack>
-            </CardBody>
-          </Card>
-        )}
+            avec ses propres stats/classement indépendants. bbs_name n'étant pas garanti unique
+            (deux comptes peuvent avoir le même pseudo), chaque lien porte ?compte=<bbs_id> pour
+            cibler le compte exact sans ambiguïté ; la surbrillance se base aussi sur le bbs_id résolu. */}
+        {userData?.bbs_accounts && userData.bbs_accounts.length > 1 && (() => {
+          const nameCounts = new Map<string, number>();
+          userData.bbs_accounts.forEach((a) => {
+            const key = a.bbs_name || a.bbs_id;
+            nameCounts.set(key, (nameCounts.get(key) || 0) + 1);
+          });
+
+          return (
+            <Card mb={6} bg={cardBg} borderRadius="xl" boxShadow="lg">
+              <CardBody py={4}>
+                <VStack align="stretch" spacing={2}>
+                  <Text fontSize="sm" fontWeight="semibold" color={mutedText}>
+                    {t("pages.user.accountsLabel")}
+                  </Text>
+                  <Wrap spacing={2}>
+                    {userData.bbs_accounts.map((account) => {
+                      const isActive = account.bbs_id === matchedBbsId;
+                      const nameKey = account.bbs_name || account.bbs_id;
+                      const isDuplicateName = (nameCounts.get(nameKey) || 0) > 1;
+
+                      const linkParams = new URLSearchParams(searchParams);
+                      linkParams.set("compte", account.bbs_id);
+                      const to = `/joueur/${encodeURIComponent(nameKey)}?${linkParams.toString()}`;
+
+                      return (
+                        <WrapItem key={account.bbs_id}>
+                          <Button
+                            as={RouterLink}
+                            to={to}
+                            size="sm"
+                            borderRadius="full"
+                            colorScheme={isActive ? "blue" : "gray"}
+                            variant={isActive ? "solid" : "outline"}
+                            _hover={{ textDecoration: "none", color: "white" }}
+                          >
+                            {account.bbs_name || account.bbs_id}
+                            {isDuplicateName && (
+                              <Text as="span" fontSize="2xs" opacity={0.7} ml={1}>
+                                ({account.bbs_id})
+                              </Text>
+                            )}
+                            {account.is_primary && !isActive && (
+                              <Badge ml={2} colorScheme={"purple"} fontSize="2xs">
+                                {t("pages.user.accountPrimary")}
+                              </Badge>
+                            )}
+                          </Button>
+                        </WrapItem>
+                      );
+                    })}
+                  </Wrap>
+                </VStack>
+              </CardBody>
+            </Card>
+          );
+        })()}
 
         {/* Détails du bannissement - visible uniquement par les admins */}
         {isAdmin && user.is_banned && <BanDetailsCard user={user} />}

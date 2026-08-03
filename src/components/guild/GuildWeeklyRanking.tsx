@@ -150,7 +150,9 @@ export const GuildWeeklyRanking = ({
                     </Text>
                     <Avatar size="sm" src={avatarUrl} name={displayName} />
                     <Box flex={1} minW={0}>
-                      <RouterLink to={player.bbs_name ? `/joueur/${encodeURIComponent(player.bbs_name)}` : "#"}>
+                      <RouterLink to={player.bbs_name
+                        ? `/joueur/${encodeURIComponent(player.bbs_name)}${player.bbs_id ? `?compte=${encodeURIComponent(player.bbs_id)}` : ""}`
+                        : "#"}>
                         <Text
                           fontSize="sm"
                           fontWeight="semibold"

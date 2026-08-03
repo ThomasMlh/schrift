@@ -24,6 +24,7 @@ import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { FaDiscord } from "react-icons/fa";
 import CustomLink from "./ui/CustomLink";
 import { useAuth } from "../providers/AuthProvider";
+import { buildPlayerUrl } from "@/utils/playerUrl";
 import { useTranslation } from "react-i18next";
 
 const ColorModeSwitcher = () => {
@@ -178,7 +179,7 @@ export const Header = () => {
             />
             <VStack spacing={0} align="start">
               <CustomLink
-                to={currentUser?.bbs_name ? `/joueur/${currentUser.bbs_name}` : undefined}
+                to={buildPlayerUrl(currentUser?.bbs_name, currentUser?.bbs_id)}
                 text={`${currentUser?.global_name}`}
                 textSize="sm"
                 requireAuth={true}
@@ -392,7 +393,7 @@ export const Header = () => {
                     <Avatar size="sm" src={currentUser?.avatar} name={currentUser?.username} />
                     <VStack spacing={0} align="start" flex={1}>
                       <CustomLink
-                        to={currentUser?.bbs_name ? `/joueur/${currentUser.bbs_name}` : undefined}
+                        to={buildPlayerUrl(currentUser?.bbs_name, currentUser?.bbs_id)}
                         text={`${currentUser?.global_name}`}
                         textSize="sm"
                         requireAuth={true}

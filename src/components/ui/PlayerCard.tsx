@@ -2,6 +2,7 @@ import { Box, HStack, VStack, Text, Avatar, Badge, useColorModeValue } from "@ch
 import type { IPodiumPlayer } from "@/interfaces";
 import { ScoreBadge } from "./ScoreBadge";
 import { getUserAvatarUrl } from "@/utils/discord";
+import { buildPlayerUrl } from "@/utils/playerUrl";
 import CustomLink from "./CustomLink";
 
 interface PlayerCardProps {
@@ -66,7 +67,7 @@ const PlayerCard = ({
         {/* Nom + Guilde */}
         <VStack spacing={0} align="start" flex={1} overflow="hidden" minW={0}>
           <CustomLink
-            to={player.bbs_name ? `/joueur/${player.bbs_name}` : undefined}
+            to={buildPlayerUrl(player.bbs_name, player.bbs_id)}
             text={player.bbs_name || player.global_name || "Joueur"}
             textSize="sm"
             requireAuth

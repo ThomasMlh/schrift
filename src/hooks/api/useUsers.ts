@@ -91,7 +91,10 @@ export const useUser = (userId: string | undefined) => {
   return { user: data?.user, isLoading, error, mutate };
 };
 
-export const useUserByBBSName = (bbs_name: string | undefined) => {
+// bbs_name n'est PAS garanti unique (deux comptes, alts d'un même joueur ou non, peuvent avoir le
+// même pseudo) : c'est le chemin "joli" par défaut, mais bbsId — quand fourni (ex: ?compte=... dans
+// l'URL) — prend le dessus et cible le compte exact, sans ambiguïté possible sur le nom.
+export const useUserByBBSName = (bbs_name: string | undefined, bbsId?: string) => {
   const { users, isLoading } = useUsers({ search: bbs_name, limit: 10, authenticated: false });
 
   let user: IUser | undefined;
@@ -99,6 +102,20 @@ export const useUserByBBSName = (bbs_name: string | undefined) => {
 
   if (bbs_name) {
     for (const u of users) {
+      if (bbsId) {
+        if (u.bbs_id === bbsId) {
+          user = u;
+          matchedBbsId = bbsId;
+          break;
+        }
+        const altById = u.bbs_accounts?.find(a => a.bbs_id === bbsId);
+        if (altById) {
+          user = u;
+          matchedBbsId = bbsId;
+          break;
+        }
+        continue;
+      }
       if (u.bbs_name === bbs_name) {
         user = u;
         matchedBbsId = u.bbs_id;

@@ -62,6 +62,7 @@ const extractTop3ForPedestal = (
       return {
         rank: wp.rank,
         user_id: wp.user_id,
+        bbs_id: wp.bbs_id,
         bbs_name: wp.bbs_name,
         global_name: wp.global_name,
         discord_id: wp.discord_id,
@@ -87,6 +88,7 @@ const extractTop3ForPedestal = (
       return {
         rank: pp.rank,
         user_id: pp.user_id,
+        bbs_id: pp.bbs_id,
         bbs_name: pp.bbs_name,
         global_name: pp.global_name,
         discord_id: pp.discord_id,

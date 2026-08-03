@@ -75,7 +75,11 @@ export const UserDisplay = ({
       <VStack spacing={0} align={direction === "row" ? "start" : "center"}>
         {asLink ? (
           <CustomLink
-            to={user.bbs_name ? `/joueur/${user.bbs_name}` : undefined}
+            to={user.bbs_name
+              // bbs_name n'est pas garanti unique (deux comptes peuvent avoir le même pseudo,
+              // notamment des alts d'un même joueur) : ?compte=<bbs_id> cible le compte exact.
+              ? `/joueur/${encodeURIComponent(user.bbs_name)}${user.bbs_id ? `?compte=${encodeURIComponent(user.bbs_id)}` : ""}`
+              : undefined}
             text={user.bbs_name || user.global_name}
             textSize={textSize}
             requireAuth={true}
