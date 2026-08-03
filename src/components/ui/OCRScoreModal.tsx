@@ -41,6 +41,8 @@ interface ScreenshotOCRResult {
     matching: {
       bestMatch: {
         _id: string;
+        user_id: string;
+        bbs_id: string;
         bbs_name: string;
         global_name: string;
         avatar?: string;
@@ -49,6 +51,8 @@ interface ScreenshotOCRResult {
       } | null;
       alternatives: Array<{
         _id: string;
+        user_id: string;
+        bbs_id: string;
         bbs_name: string;
         confidence: number;
       }>;
@@ -147,7 +151,7 @@ const OCRScoreModal = ({
     }
   };
 
-  const handleSubmitScores = async (validatedScores: Array<{ user_id: string; raw_score: number; screenshot_index: number }>) => {
+  const handleSubmitScores = async (validatedScores: Array<{ user_id: string; bbs_id: string; raw_score: number; screenshot_index: number }>) => {
     setIsSubmitting(true);
 
     try {

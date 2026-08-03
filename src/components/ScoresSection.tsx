@@ -51,7 +51,7 @@ const ScoresSection = () => {
 
   const { isOpen, onClose }                     = useDisclosure();
   const { isOpen: isTransferModalOpen, onOpen: onTransferModalOpen, onClose: onTransferModalClose } = useDisclosure();
-  const { currentUser, isAdmin, isGuildManager } = useAuth();
+  const { currentUser, isAdmin, isGuildManager, managedGuildIds } = useAuth();
   const scoreManagement = useScoreManagement({ users, cycles, onClose });
 
   // ── Handlers ────────────────────────────────────────────────────────────────
@@ -268,7 +268,9 @@ const ScoresSection = () => {
           onBulkSubmit={scoreManagement.handleBulkScoreSubmit}
           isBulkSubmitting={scoreManagement.isBulkSubmitting}
           isGuildRestricted={!isAdmin && isGuildManager}
-          userGuildId={currentUser?.guilde_id}
+          // Compte principal + comptes chef/sous-chef confondus, cas rare (multi-guildes via alts) : on
+          // ne propose pour l'instant que la première guilde gérée, pas de sélecteur multi-guildes.
+          userGuildId={managedGuildIds[0] || currentUser?.guilde_id}
           isOCRModalOpen={scoreManagement.isOCRModalOpen}
           onOCRModalClose={() => scoreManagement.setIsOCRModalOpen(false)}
           isTransferModalOpen={isTransferModalOpen}

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import type { IUser } from '../interfaces';
+import type { IUser, IGuildRoleGrant } from '../interfaces';
 import { getToken, isTokenValid, getUserFromToken, clearTokens, setToken as saveToken, getRefreshToken, setRefreshToken as saveRefreshToken } from '../utils/user';
 import { getDiscordAvatarUrl } from '../utils/discord';
 
@@ -9,6 +9,10 @@ interface AuthContextType {
   isLoggedIn: boolean;
   isAdmin: boolean;
   isGuildManager: boolean;
+  // Un grant par compte bbs chef/sous-chef — un user peut gérer plusieurs guildes via des comptes différents.
+  guildRoles: IGuildRoleGrant[];
+  // Raccourci pratique : la liste (dédupliquée) des guilde_id que l'utilisateur peut administrer.
+  managedGuildIds: string[];
   isAuthLoading: boolean;
   token: string | null;
   login: (token: string, refreshToken?: string) => void;
@@ -61,18 +65,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isGuildManager, setIsGuildManager] = useState(false);
+  const [guildRoles, setGuildRoles] = useState<IGuildRoleGrant[]>([]);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [token, setTokenState] = useState<string | null>(null);
 
   const applyTokenState = useCallback((currentToken: string) => {
     const decoded = getUserFromToken();
     if (decoded) {
+      const grants = decoded.guild_roles || [];
       setTokenState(currentToken);
       setIsLoggedIn(true);
       setIsAdmin(decoded.is_admin || false);
-      setIsGuildManager(
-        decoded.role === "chef" || decoded.role === "sous-chef"
-      );
+      setIsGuildManager(grants.length > 0);
+      setGuildRoles(grants);
 
       // Construire l'URL de l'avatar si disponible
       let avatarUrl = null;
@@ -109,8 +114,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             avatar: avatarUrl || undefined,
             bbs_id: u.bbs_id,
             bbs_name: u.bbs_name,
+            bbs_accounts: u.bbs_accounts,
             banner: u.banner,
           } : prev);
+          if (Array.isArray(u.guild_roles)) {
+            setGuildRoles(u.guild_roles);
+            setIsGuildManager(u.guild_roles.length > 0);
+          }
         }
       }
     } catch {
@@ -139,9 +149,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsLoggedIn(false);
       setIsAdmin(false);
       setIsGuildManager(false);
+      setGuildRoles([]);
       setCurrentUser(null);
     }
-    
+
     setIsAuthLoading(false);
   }, [applyTokenState, fetchUserProfile]);
 
@@ -159,6 +170,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoggedIn(false);
     setIsAdmin(false);
     setIsGuildManager(false);
+    setGuildRoles([]);
     setCurrentUser(null);
   };
 
@@ -179,11 +191,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     refreshAuth();
   }, [refreshAuth]);
 
+  const managedGuildIds = [...new Set(guildRoles.map(g => g.guilde_id).filter(Boolean))];
+
   const value: AuthContextType = {
     currentUser,
     isLoggedIn,
     isAdmin,
     isGuildManager,
+    guildRoles,
+    managedGuildIds,
     isAuthLoading,
     token,
     login,

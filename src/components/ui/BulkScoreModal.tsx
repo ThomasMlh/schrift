@@ -285,7 +285,13 @@ const BulkScoreModal = ({
                     // score.user peut être un tableau ou un objet selon le pipeline MongoDB
                     const user = Array.isArray(score.user) ? score.user[0] : score.user;
                     if (user) {
-                        membersToDisplay.push(user);
+                        // Le bbs_id/bbs_name du COMPTE qui a joué ce score prime sur le miroir du user
+                        // (utile si le score appartient à un alt, pas au compte principal actuel).
+                        membersToDisplay.push({
+                            ...user,
+                            bbs_id: score.bbs_id || user.bbs_id,
+                            bbs_name: score.bbs_name || user.bbs_name
+                        });
                         newScores[user._id] = score.raw_score || 0;
                         if (score.raw_score > 0) {
                             foundExistingScores = true;
@@ -337,9 +343,22 @@ const BulkScoreModal = ({
             return;
         }
 
+        const membersWithoutAccount = displayedMembers.filter((m) => !m.bbs_id);
+        if (membersWithoutAccount.length > 0) {
+            toast({
+                title: "Compte bbs manquant",
+                description: `${membersWithoutAccount.length} membre(s) n'ont pas de compte bbs lié et ne peuvent pas recevoir de score.`,
+                status: "error",
+                duration: 4000,
+                isClosable: true,
+            });
+            return;
+        }
+
         // Créer les données de scores pour tous les membres affichés
         const scoresData: IScoreFormData[] = displayedMembers.map((member: IUser) => ({
             user_id: member._id,
+            bbs_id: member.bbs_id!,
             cycle_id: selectedCycleId,
             rotation_id: selectedRotationId,
             guild_id: selectedGuildId,

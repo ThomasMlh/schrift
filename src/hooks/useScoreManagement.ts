@@ -71,7 +71,20 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
             return null;
         }
 
-        return { selectedUser, guildId };
+        // Le score est rattaché au compte bbs principal du user (pas de sélecteur d'alt pour
+        // l'instant côté saisie manuelle/bulk).
+        const bbsId = selectedUser.bbs_id;
+        if (!bbsId) {
+            toast({
+                title: t(sm("toastNoGuildTitle")),
+                description: "Ce joueur n'a pas de compte bbs lié.",
+                status: "error",
+                duration: 3000,
+            });
+            return null;
+        }
+
+        return { selectedUser, guildId, bbsId };
     };
 
     const handleSubmitScore = async (currentUser: IUser | null) => {
@@ -102,6 +115,7 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
         try {
             const scoreData: IScoreFormData = {
                 user_id: selectedUserId,
+                bbs_id: userData.bbsId,
                 cycle_id: selectedCycleId,
                 rotation_id: selectedRotationId,
                 guild_id: userData.guildId,
@@ -207,6 +221,7 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
         try {
             const scoreData: IScoreFormData = {
                 user_id: selectedUserId,
+                bbs_id: userData.bbsId,
                 cycle_id: selectedCycleId,
                 rotation_id: rotation.rotation_id,
                 guild_id: userData.guildId,

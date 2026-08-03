@@ -44,6 +44,8 @@ interface PlayerResult {
   matching: {
     bestMatch: {
       _id: string;
+      user_id: string;
+      bbs_id: string;
       bbs_name: string;
       global_name: string;
       avatar?: string;
@@ -52,6 +54,8 @@ interface PlayerResult {
     } | null;
     alternatives: Array<{
       _id: string;
+      user_id: string;
+      bbs_id: string;
       bbs_name: string;
       confidence: number;
     }>;
@@ -71,7 +75,7 @@ interface ScreenshotResult {
 interface OCRResultsValidationProps {
   results: ScreenshotResult[];
   guildMembers: IUser[];
-  onSubmit: (scores: Array<{ user_id: string; raw_score: number; screenshot_index: number }>) => void;
+  onSubmit: (scores: Array<{ user_id: string; bbs_id: string; raw_score: number; screenshot_index: number }>) => void;
   onBack: () => void;
   onReset: () => void;
   isSubmitting: boolean;
@@ -85,8 +89,8 @@ export const OCRResultsValidation = ({
   onReset,
   isSubmitting
 }: OCRResultsValidationProps) => {
-  // État pour gérer les modifications utilisateur
-  const [editedResults, setEditedResults] = useState<Map<string, { user_id: string; score: number }>>(
+  // État pour gérer les modifications utilisateur (bbs_id identifie le compte précis, user_id son propriétaire)
+  const [editedResults, setEditedResults] = useState<Map<string, { user_id: string; bbs_id: string; score: number }>>(
     new Map()
   );
 
@@ -112,8 +116,11 @@ export const OCRResultsValidation = ({
     0
   );
 
-  const memberOptions = guildMembers.map(m => ({
-    value: m._id,
+  // Un compte par ligne (bbs_id = valeur unique du select), pas un user par ligne — un user avec
+  // plusieurs comptes dans la même guilde apparaît donc plusieurs fois, chacun sélectionnable.
+  const membersWithAccount = guildMembers.filter(m => m.bbs_id);
+  const memberOptions = membersWithAccount.map(m => ({
+    value: m.bbs_id!,
     label: m.bbs_name || m.global_name || "Joueur"
   }));
 
@@ -124,24 +131,27 @@ export const OCRResultsValidation = ({
   const getPlayerData = (screenshot: ScreenshotResult, player: PlayerResult) => {
     const key = getPlayerKey(screenshot.index, player.lineNumber);
     const edited = editedResults.get(key);
-    
+
     if (edited) {
       return edited;
     }
 
     return {
-      user_id: player.matching.bestMatch?._id || "",
+      user_id: player.matching.bestMatch?.user_id || player.matching.bestMatch?._id || "",
+      bbs_id: player.matching.bestMatch?.bbs_id || "",
       score: player.score || 0
     };
   };
 
-  const handleUserChange = (screenshot: ScreenshotResult, player: PlayerResult, userId: string) => {
+  const handleUserChange = (screenshot: ScreenshotResult, player: PlayerResult, bbsId: string) => {
     const key = getPlayerKey(screenshot.index, player.lineNumber);
     const currentData = getPlayerData(screenshot, player);
-    
+    const member = membersWithAccount.find(m => m.bbs_id === bbsId);
+
     setEditedResults(new Map(editedResults.set(key, {
       ...currentData,
-      user_id: userId
+      user_id: member?._id || "",
+      bbs_id: bbsId
     })));
   };
 
@@ -156,15 +166,16 @@ export const OCRResultsValidation = ({
   };
 
   const handleSubmit = () => {
-    const scores: Array<{ user_id: string; raw_score: number; screenshot_index: number }> = [];
+    const scores: Array<{ user_id: string; bbs_id: string; raw_score: number; screenshot_index: number }> = [];
 
     results.forEach(screenshot => {
       screenshot.players.forEach(player => {
         const data = getPlayerData(screenshot, player);
-        
-        if (data.user_id && data.score > 0) {
+
+        if (data.user_id && data.bbs_id && data.score > 0) {
           scores.push({
             user_id: data.user_id,
+            bbs_id: data.bbs_id,
             raw_score: data.score, // Le score détecté est le raw_score
             screenshot_index: screenshot.index
           });
@@ -176,11 +187,11 @@ export const OCRResultsValidation = ({
   };
 
   const canSubmit = () => {
-    // Vérifier que tous les joueurs ont un user_id et un score valide
+    // Vérifier que tous les joueurs ont un compte (bbs_id) et un score valide
     return results.every(screenshot =>
       screenshot.players.every(player => {
         const data = getPlayerData(screenshot, player);
-        return data.user_id && data.score > 0;
+        return data.user_id && data.bbs_id && data.score > 0;
       })
     );
   };
@@ -301,7 +312,7 @@ export const OCRResultsValidation = ({
                             </HStack>
                             <VStack spacing={2} align="stretch">
                               <CustomSelect
-                                value={data.user_id}
+                                value={data.bbs_id}
                                 onChange={(value) => handleUserChange(screenshot, player, value)}
                                 options={memberOptions}
                                 placeholder="Choisir un joueur"
@@ -346,7 +357,7 @@ export const OCRResultsValidation = ({
                                 </Td>
                                 <Td>
                                   <CustomSelect
-                                    value={data.user_id}
+                                    value={data.bbs_id}
                                     onChange={(value) => handleUserChange(screenshot, player, value)}
                                     options={memberOptions}
                                     placeholder="Choisir un joueur"

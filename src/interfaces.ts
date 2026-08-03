@@ -10,6 +10,25 @@ export interface IGuild {
   discord_channel_id?: string;
 }
 
+// Un compte bbs (principal ou alt) rattaché à un user. guilde_id/role sont propres à CE compte —
+// un même user peut avoir un compte chef d'une guilde et un autre simple membre d'une autre.
+export interface IBbsAccount {
+  bbs_id: string;
+  bbs_name?: string | null;
+  guilde_id?: string | null;
+  role?: Role | null;
+  is_primary: boolean;
+  linked_at?: string;
+}
+
+// Un grant chef/sous-chef embarqué dans le JWT, un par compte ayant un rôle élevé — permet de
+// scoper la saisie de scores à la/les guilde(s) réellement gérée(s) via CE compte.
+export interface IGuildRoleGrant {
+  bbs_id: string;
+  guilde_id: string;
+  role: Role;
+}
+
 export interface IUser {
   _id: string;
   username: string;
@@ -21,6 +40,8 @@ export interface IUser {
   is_admin?: boolean;
   bbs_id?: string;
   bbs_name?: string;
+  bbs_accounts?: IBbsAccount[];
+  guild_roles?: IGuildRoleGrant[];
   last_login?: string;
   exp?: number;
   guild_name?: string;
@@ -127,6 +148,8 @@ export interface ICyclesResponse {
 export interface IScore {
   _id?: string;
   user_id: string;
+  bbs_id: string;
+  bbs_name?: string | null;
   cycle_id: string;
   rotation_id: string;
   guild_id: string;
@@ -147,6 +170,7 @@ export interface IScoreWithUser
 
 export interface IScoreFormData {
   user_id: string;
+  bbs_id: string;
   cycle_id: string;
   rotation_id: string;
   guild_id: string;
@@ -182,6 +206,7 @@ export interface IRankInfo {
 export interface IPodiumPlayer {
   rank: number;
   user_id: string;
+  bbs_id?: string;
   bbs_name?: string;
   discord_id?: string;
   global_name: string;
@@ -255,6 +280,7 @@ export interface IPodiumResponse {
 export interface IPodiumWeeklyPlayer {
   rank: number;
   user_id: string;
+  bbs_id?: string;
   bbs_name?: string;
   discord_id?: string;
   global_name: string;
@@ -295,6 +321,7 @@ export interface IPodiumWeeklyResponse {
 export interface IPodiumMissPlayer {
   rank: number;
   user_id: string;
+  bbs_id?: string;
   bbs_name?: string;
   discord_id?: string;
   global_name: string;

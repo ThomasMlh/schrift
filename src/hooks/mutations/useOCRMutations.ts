@@ -25,7 +25,7 @@ export const useOCRMutations = () => {
     guild_id: string;
     cycle_id: string;
     rotation_id: string;
-    scores: Array<{ user_id: string; raw_score: number; screenshot_index: number }>;
+    scores: Array<{ user_id: string; bbs_id: string; raw_score: number; screenshot_index: number }>;
   }) => {
     const data = await request(`${apiUrl}/api/ocr/submit-batch`, {
       method: 'POST',
