@@ -256,6 +256,8 @@
       "userNotFound": "Utilisateur introuvable",
       "errorLoadingProfile": "Erreur lors du chargement du profil utilisateur",
       "noGuild": "Aucune guilde",
+      "accountsLabel": "Comptes",
+      "accountPrimary": "Principal",
       "seoTitle": "{{name}} - Profil Joueur | Schrift BBS",
       "seoDescriptionNoGuild": "Profil de {{name}} sur Schrift BBS",
       "seoDescriptionWithGuild": "Profil de {{name}} - Guilde {{guild}} | Schrift BBS",

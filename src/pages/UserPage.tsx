@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, Link as RouterLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   Container,
@@ -22,6 +22,9 @@ import {
   Flex,
   Center,
   Skeleton,
+  Button,
+  Wrap,
+  WrapItem,
 } from "@chakra-ui/react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { formatRoleName } from "@/utils/user";
@@ -50,7 +53,7 @@ import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 
 const UserPage = () => {
   const { bbs_name } = useParams<{ bbs_name: string }>();
-  const { user: resolvedUser, isLoading: resolvingUser } = useUserByBBSName(bbs_name);
+  const { user: resolvedUser, matchedBbsId, isLoading: resolvingUser } = useUserByBBSName(bbs_name);
   const userId = resolvedUser?._id;
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCycle, setSelectedCycle] = useState<string>("");
@@ -89,14 +92,19 @@ const UserPage = () => {
     isLoading: userLoading,
     error: userError
   } = useUser(userId);
-  const { guildName, isLoading: guildLoading } = useGuild(userData?.guilde_id);
+  // Le compte affiché n'est pas forcément le principal : si l'URL pointe vers le bbs_name d'un
+  // alt, on veut montrer SA guilde/rôle/pseudo, pas ceux du miroir racine (compte principal).
+  const viewedAccount = userData?.bbs_accounts?.find(a => a.bbs_id === matchedBbsId);
+  const viewedGuildeId = viewedAccount?.guilde_id ?? userData?.guilde_id;
+  const { guildName, isLoading: guildLoading } = useGuild(viewedGuildeId);
   const { cycles } = useCycles({ limit: 100, page: 1 });
   const { stats, isLoading: statsLoading } = useUserStats(
     userId,
-    selectedCycle
+    selectedCycle,
+    matchedBbsId
   );
   // Stats sans filtre de cycle — uniquement pour l'évolution temporelle globale
-  const { stats: globalStats } = useUserStats(userId);
+  const { stats: globalStats } = useUserStats(userId, undefined, matchedBbsId);
 
   // Résolution du slug cycle depuis l'URL → _id (prioritaire sur le défaut)
   useEffect(() => {
@@ -139,10 +147,15 @@ const UserPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCycle]);
 
-  // Enrichir l'utilisateur avec l'avatar et le nom de guilde
+  // Enrichir l'utilisateur avec l'avatar et le nom de guilde, en affichant les infos du compte
+  // consulté (bbs_name/guilde/rôle) plutôt que celles du compte principal si c'est un alt.
   const user = userData
     ? {
         ...userData,
+        bbs_id: viewedAccount?.bbs_id ?? userData.bbs_id,
+        bbs_name: viewedAccount?.bbs_name ?? userData.bbs_name,
+        guilde_id: viewedGuildeId,
+        role: viewedAccount?.role ?? userData.role,
         guild_name: guildName,
       }
     : null;
@@ -172,6 +185,7 @@ const UserPage = () => {
     "linear(to-br, gray.800, purple.900)"
   );
   const tabBg = useColorModeValue("white", "gray.800");
+  const mutedText = useColorModeValue("gray.500", "gray.400");
 
   // Styles communs pour les onglets
   const tabStyles = {
@@ -352,6 +366,45 @@ const UserPage = () => {
             </VStack>
           </CardBody>
         </Card>
+
+        {/* Sélecteur de compte bbs — un même joueur peut avoir plusieurs comptes (alts), chacun
+            avec ses propres stats/classement indépendants. Naviguer change juste le bbs_name dans l'URL. */}
+        {userData?.bbs_accounts && userData.bbs_accounts.length > 1 && (
+          <Card mb={6} bg={cardBg} borderRadius="xl" boxShadow="lg">
+            <CardBody py={4}>
+              <VStack align="stretch" spacing={2}>
+                <Text fontSize="sm" fontWeight="semibold" color={mutedText}>
+                  {t("pages.user.accountsLabel")}
+                </Text>
+                <Wrap spacing={2}>
+                  {userData.bbs_accounts.map((account) => {
+                    const isActive = account.bbs_name === bbs_name;
+                    return (
+                      <WrapItem key={account.bbs_id}>
+                        <Button
+                          as={RouterLink}
+                          to={`/joueur/${encodeURIComponent(account.bbs_name || account.bbs_id)}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`}
+                          size="sm"
+                          borderRadius="full"
+                          colorScheme={isActive ? "blue" : "gray"}
+                          variant={isActive ? "solid" : "outline"}
+                          _hover={{ textDecoration: "none", color: "white" }}
+                        >
+                          {account.bbs_name || account.bbs_id}
+                          {account.is_primary && !isActive && (
+                            <Badge ml={2} colorScheme={"purple"} fontSize="2xs">
+                              {t("pages.user.accountPrimary")}
+                            </Badge>
+                          )}
+                        </Button>
+                      </WrapItem>
+                    );
+                  })}
+                </Wrap>
+              </VStack>
+            </CardBody>
+          </Card>
+        )}
 
         {/* Détails du bannissement - visible uniquement par les admins */}
         {isAdmin && user.is_banned && <BanDetailsCard user={user} />}

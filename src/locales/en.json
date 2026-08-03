@@ -256,6 +256,8 @@
       "userNotFound": "User not found",
       "errorLoadingProfile": "Error loading user profile",
       "noGuild": "No guild",
+      "accountsLabel": "Accounts",
+      "accountPrimary": "Primary",
       "seoTitle": "{{name}} - Player Profile | Schrift BBS",
       "seoDescriptionNoGuild": "{{name}}'s profile on Schrift BBS",
       "seoDescriptionWithGuild": "{{name}}'s profile - Guild {{guild}} | Schrift BBS",
