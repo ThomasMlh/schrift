@@ -70,7 +70,7 @@ const GuidesPage = () => {
 
             {/* Navigation toolbar */}
             <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={3}>
-              <ButtonGroup size="sm" isAttached>
+              <ButtonGroup size="sm" spacing={2} isAttached display={{ base: "flex", md: "inline-flex" }} flexDir={{base: "column", md: "row"}}>
                 {SECTIONS.map((sec) => {
                   const isActive = activeSection === sec.id;
                   return (
@@ -80,6 +80,7 @@ const GuidesPage = () => {
                       colorScheme={isActive ? sec.colorScheme : "gray"}
                       leftIcon={sec.icon}
                       onClick={() => handleSectionChange(sec.id)}
+                      borderRadius={{ base: "none", md: "md" }}
                     >
                       {sec.label}
                     </Button>
