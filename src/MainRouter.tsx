@@ -25,6 +25,7 @@ const AdminPage = lazy(() => import("./pages/AdminPage"));
 const PodiumPage = lazy(() => import("./pages/PodiumPage"));
 const ComparatorPage = lazy(() => import("./pages/ComparatorPage"));
 const GuidesPage = lazy(() => import("./pages/GuidesPage"));
+const AnnoncesPage = lazy(() => import("./pages/AnnoncesPage"));
 const GuildesPage = lazy(() => import("./pages/GuildesPage"));
 const OCRDebugPage = lazy(() => import("./pages/OCRDebugPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -141,6 +142,7 @@ const AppRoutes = () => {
         />
         <Route path="/guides" element={<GuidesPage />} />
         <Route path="/guides/:section" element={<GuidesPage />} />
+        <Route path="/annonce" element={<AnnoncesPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>
