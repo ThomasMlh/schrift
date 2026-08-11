@@ -105,7 +105,7 @@ const AdminFormsSection: React.FC<AdminFormsSectionProps> = ({
   const borderColor = isDark ? 'whiteAlpha.100' : 'gray.200';
 
   // Guildes triées
-  const sortedGuilds = [...guilds].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+  const sortedGuilds = [...guilds].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'fr', { sensitivity: 'base' }));
 
   // Fonction pour toggle les formulaires en mobile
   const toggleForm = (formName: string) => {
