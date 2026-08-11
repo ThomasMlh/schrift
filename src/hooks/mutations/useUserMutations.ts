@@ -58,6 +58,15 @@ export const useUserMutations = () => {
     return result;
   };
 
+  const createManualUser = async (data: IAccountFormData) => {
+    const result = await request(`${apiUrl}/api/users/manual`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, { fallbackError: "Erreur lors de la création du joueur" });
+    await invalidateKeys(`${apiUrl}/api/users`, `${apiUrl}/api/guildes`);
+    return result;
+  };
+
   const addUserAccount = async (userId: string, data: IAccountFormData) => {
     const result = await request(`${apiUrl}/api/users/${userId}/accounts`, {
       method: 'POST',
@@ -106,7 +115,7 @@ export const useUserMutations = () => {
   };
 
   return {
-    updateUserRole, moveUserToGuild, banUser, unbanUser, updateUser,
+    updateUserRole, moveUserToGuild, banUser, unbanUser, updateUser, createManualUser,
     addUserAccount, updateUserAccount, removeUserAccount, setPrimaryUserAccount, transferUserAccount
   };
 };

@@ -11,6 +11,7 @@ import { Pagination as PaginationComponent } from "./ui/Pagination";
 import EditUserModal from "./EditUserModal";
 import BanUserModal from "./BanUserModal";
 import UnbanUserModal from "./UnbanUserModal";
+import CreateManualUserModal from "./CreateManualUserModal";
 import { UserDisplay } from "./ui/UserDisplay";
 import { CustomSelect } from "./ui/CustomSelect";
 import { useGuilds, useUsers, useUserAccounts } from "@/hooks/useAPI";
@@ -88,6 +89,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onClose: onEditModalClose } = useDisclosure();
     const { isOpen: isBanModalOpen, onOpen: onBanModalOpen, onClose: onBanModalClose } = useDisclosure();
     const { isOpen: isUnbanModalOpen, onOpen: onUnbanModalOpen, onClose: onUnbanModalClose } = useDisclosure();
+    const { isOpen: isCreateModalOpen, onOpen: onCreateModalOpen, onClose: onCreateModalClose } = useDisclosure();
 
     // Fonction pour mettre à jour l'URL avec les filtres actuels
     const updateURLParams = (search = "", guildName = "", role = "", limit = itemsPerPage, page = 1) => {
@@ -270,6 +272,12 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                     <Button onClick={resetFilters} variant="outline" minW="120px">
                         {t("common.reset")}
                     </Button>
+
+                    {isAdminMode && (
+                        <Button onClick={onCreateModalOpen} colorScheme="purple" minW="180px">
+                            + Créer un joueur
+                        </Button>
+                    )}
                 </Flex>
             </VStack>
 
@@ -501,6 +509,12 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                         onClose={onUnbanModalClose}
                         user={selectedUser}
                         onUserUpdated={handleUserUpdated}
+                    />
+                    <CreateManualUserModal
+                        isOpen={isCreateModalOpen}
+                        onClose={onCreateModalClose}
+                        guilds={guilds}
+                        onUserCreated={handleUserUpdated}
                     />
                 </>
             )}

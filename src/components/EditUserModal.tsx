@@ -217,7 +217,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, gu
                         <VStack spacing={0} align="start">
                             <Text>Modifier le joueur</Text>
                             <Text fontSize="sm" color="gray.500">
-                                {user.global_name || user.username} (@{user.username})
+                                {user.global_name || user.username || user.bbs_name}
+                                {user.username && ` (@${user.username})`}
                             </Text>
                         </VStack>
                     </HStack>
