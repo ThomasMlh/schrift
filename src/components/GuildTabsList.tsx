@@ -58,7 +58,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({ editable = false }) => {
   const handleRemoveMember = (member: IUser, guildId: string) => {
     setMemberToDelete({
       id: member._id,
-      name: member.global_name || member.username,
+      name: member.bbs_name || member.global_name || member.username,
       guildId: guildId
     });
     setIsDeleteMemberOpen(true);
@@ -101,7 +101,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({ editable = false }) => {
       refreshMembers();
       toast({
         title: t("components.guildTabsList.toastRoleChangedTitle"),
-        description: `${member.username} ${t("components.guildTabsList.toastRoleChangedDesc")} ${
+        description: `${member.bbs_name || member.global_name || member.username} ${t("components.guildTabsList.toastRoleChangedDesc")} ${
           newRole === "chef"
             ? t("components.guildTabsList.roleChef")
             : newRole === "sous-chef"
@@ -137,7 +137,7 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({ editable = false }) => {
       refreshMembers();
       toast({
         title: t("components.guildTabsList.toastMovedTitle"),
-        description: `${member.username} ${t("components.guildTabsList.toastMovedDesc")} ${
+        description: `${member.bbs_name || member.global_name || member.username} ${t("components.guildTabsList.toastMovedDesc")} ${
           targetGuild?.name || t("components.guildTabsList.toastMovedFallback")
         }`,
         status: "success",
@@ -167,9 +167,11 @@ const GuildTabsList: React.FC<GuildTabsListProps> = ({ editable = false }) => {
       }
 
       // Si même rôle, trier par ordre alphabétique
-      return a.username.localeCompare(b.username, "fr", {
-        sensitivity: "base"
-      });
+      return (a.bbs_name || a.global_name || a.username || "").localeCompare(
+        b.bbs_name || b.global_name || b.username || "",
+        "fr",
+        { sensitivity: "base" }
+      );
     });
   };
 
