@@ -13,7 +13,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { UserSearchSelect } from "../ui/UserSearchSelect";
 import { UserDisplay } from "../ui/UserDisplay";
-import type { IUser } from "@/interfaces";
+import type { IUser, IGuild } from "@/interfaces";
 
 const DEFAULT_COLORS = ["#3182CE", "#38A169", "#DD6B20", "#9F7AEA", "#E53E3E"];
 
@@ -30,6 +30,7 @@ interface MultiPlayerSelectorProps {
   availableUsers: IUser[];
   entityColors?: string[];
   onSearchChange?: (query: string) => void;
+  guilds?: IGuild[];
 }
 
 export const MultiPlayerSelector = ({
@@ -40,6 +41,7 @@ export const MultiPlayerSelector = ({
   availableUsers,
   entityColors = DEFAULT_COLORS,
   onSearchChange,
+  guilds = [],
 }: MultiPlayerSelectorProps) => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
@@ -55,17 +57,20 @@ export const MultiPlayerSelector = ({
   const [selectedUserId, setSelectedUserId] = useState("");
   const { t } = useTranslation();
 
-  const handleUserSelect = (userId: string) => {
-    const user = availableUsers.find((u) => u._id === userId);
+  // availableUsers liste des comptes bbs (pas des users) : un joueur avec plusieurs comptes y
+  // apparaît une fois par compte, chacun avec son propre bbs_id — c'est ce bbs_id qui sert de
+  // clé de sélection (deux comptes d'un même joueur partagent le même _id user).
+  const handleUserSelect = (bbsId: string) => {
+    const user = availableUsers.find((u) => u.bbs_id === bbsId);
     if (user && selectedPlayers.length < maxPlayers) {
-      onAddPlayer(userId, user);
+      onAddPlayer(bbsId, user);
       setSelectedUserId("");
       setSearchQuery("");
     }
   };
 
   const availableUsersFiltered = availableUsers.filter(
-    (user) => !selectedPlayers.some((p) => p.id === user._id)
+    (user) => !selectedPlayers.some((p) => p.id === user.bbs_id)
   );
 
   return (
@@ -159,6 +164,8 @@ export const MultiPlayerSelector = ({
               searchQuery={searchQuery}
               onSearchChange={handleSearchChange}
               placeholder={t("components.multiPlayerSelector.searchPlaceholder")}
+              guilds={guilds}
+              getItemId={(u) => u.bbs_id || u._id || ''}
             />
           </Box>
         )}

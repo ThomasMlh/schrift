@@ -32,7 +32,7 @@ import { ComparisonRadarChart } from "@/components/comparator/ComparisonRadarCha
 import { ComparisonDataTable } from "@/components/comparator/ComparisonDataTable";
 import type { RadarMetricDef } from "@/components/comparator/ComparisonRadarChart";
 import type { TableMetricDef } from "@/components/comparator/ComparisonDataTable";
-import { useUsers, useCycles, useGuilds, fetchUserStats, fetchGuildStats } from "@/hooks/useAPI";
+import { useUserAccounts, useCycles, useGuilds, fetchUserStats, fetchGuildStats } from "@/hooks/useAPI";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 import { formatScore, formatNumber } from "@/utils/format";
 import type { IUser, IGuild } from "@/interfaces";
@@ -85,7 +85,10 @@ const ComparatorPage: React.FC = () => {
   const [selectedWeek, setSelectedWeek] = useState(1);
 
   const [userSearch, setUserSearch] = useState("");
-  const { users = [] } = useUsers({ authenticated: false, limit: 100, search: userSearch || undefined });
+  // Comptes bbs (pas users) : un joueur avec plusieurs comptes apparaît une fois par compte,
+  // chacun avec son propre bbs_name/guilde — nécessaire pour pouvoir comparer deux comptes
+  // d'un même joueur entre eux.
+  const { accounts: users = [] } = useUserAccounts({ authenticated: false, limit: 100, search: userSearch || undefined });
   const { guilds = [] } = useGuilds(false);
   const { cycles = [] } = useCycles();
 
@@ -189,11 +192,13 @@ const ComparatorPage: React.FC = () => {
     initializedRef.current = true;
 
     if (comparisonType === "players") {
-      const names = searchParams.get("players")?.split(",").filter(Boolean) || [];
+      // players=<bbs_id>,<bbs_id>,... — bbs_id (unique par compte) plutôt que bbs_name
+      // (non garanti unique, notamment entre alts) pour désambiguïser précisément le compte.
+      const bbsIds = searchParams.get("players")?.split(",").filter(Boolean) || [];
       const valid: SelectedPlayer[] = [];
-      names.forEach((name) => {
-        const user = users.find((u) => u.bbs_name === name);
-        if (user?._id) valid.push({ id: user._id, user });
+      bbsIds.forEach((bbsId) => {
+        const user = users.find((u) => u.bbs_id === bbsId);
+        if (user) valid.push({ id: bbsId, user });
       });
       if (valid.length > 0) setSelectedPlayers(valid);
     } else {
@@ -212,7 +217,7 @@ const ComparatorPage: React.FC = () => {
     const params = new URLSearchParams();
     params.set("type", comparisonType);
     if (comparisonType === "players" && selectedPlayers.length > 0)
-      params.set("players", selectedPlayers.map((p) => p.user.bbs_name || p.id).join(","));
+      params.set("players", selectedPlayers.map((p) => p.id).join(","));
     else if (comparisonType === "guilds" && selectedGuilds.length > 0)
       params.set("guilds", selectedGuilds.map((g) => g.guild.name).join(","));
     const cycleObj = selectedCycleId ? cycles.find(c => c._id === selectedCycleId) : undefined;
@@ -231,7 +236,7 @@ const ComparatorPage: React.FC = () => {
     try {
       await Promise.all(
         selectedPlayers.map(async (p) => {
-          map.set(p.id, await fetchUserStats(p.id, selectedCycleId));
+          map.set(p.id, await fetchUserStats(p.user._id, selectedCycleId, p.user.bbs_id));
         })
       );
       setPlayersStats(map);
@@ -591,6 +596,7 @@ const ComparatorPage: React.FC = () => {
                 maxPlayers={5}
                 entityColors={ENTITY_COLORS}
                 onSearchChange={setUserSearch}
+                guilds={guilds}
               />
             ) : isGuilds ? (
               <MultiGuildSelector
