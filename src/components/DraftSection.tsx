@@ -29,7 +29,7 @@ import {
 } from "@chakra-ui/react";
 import { AddIcon, ArrowForwardIcon, CheckIcon } from "@chakra-ui/icons";
 import { DraftMoveRow } from "./draft/DraftMoveRow";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type { IGuild, IUser } from "../interfaces";
 import {
   useGuilds,
@@ -68,13 +68,13 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [draftMoves, setDraftMoves] = useState<DraftMove[]>([]);
-  const [selectedSourceGuild, setSelectedSourceGuild] = useState<string>("");
   const [selectedBbsId, setSelectedBbsId] = useState<string>("");
   const [selectedTargetGuild, setSelectedTargetGuild] = useState<string>("");
   const [isExecuting, setIsExecuting] = useState(false);
 
-  const { users: guildlessUsers, isLoading: guildlessLoading } =
-    useGuildlessUsers(selectedSourceGuild === "__no_guild__");
+  // Pool unifié (guilde source déduite du joueur choisi) : toujours chargé, pas seulement
+  // quand "sans guilde" est sélectionné comme avant l'étape "Depuis" fusionnée.
+  const { users: guildlessUsers, isLoading: guildlessLoading } = useGuildlessUsers(true);
 
   // ── Couleurs ────────────────────────────────────────────────────────────────
   const cardBg        = useColorModeValue("white", "gray.800");
@@ -103,16 +103,12 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     return members;
   }, [membersByGuild, guildlessUsers]);
 
+  // Pool de joueurs proposé au select unique (tous membres + sans guilde confondus), moins
+  // ceux déjà présents dans le draft en cours.
   const availableUsers = useMemo(() => {
     const draftedBbsIds = new Set(draftMoves.map((m) => m.bbsId));
-    if (selectedSourceGuild === "__no_guild__") {
-      return guildlessUsers.filter((u) => u.bbs_id && !draftedBbsIds.has(u.bbs_id));
-    }
-    if (!selectedSourceGuild) return [];
-    return (membersByGuild[selectedSourceGuild] || []).filter(
-      (member) => member.bbs_id && !draftedBbsIds.has(member.bbs_id)
-    );
-  }, [selectedSourceGuild, membersByGuild, guildlessUsers, draftMoves]);
+    return allMembers.filter((member) => !draftedBbsIds.has(member.bbs_id!));
+  }, [allMembers, draftMoves]);
 
   const projectedCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -150,25 +146,22 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     [availableUsers, selectedBbsId]
   );
 
-  useEffect(() => { setSelectedBbsId(""); }, [selectedSourceGuild]);
-
   // ── Actions ─────────────────────────────────────────────────────────────────
   const addMove = useCallback(() => {
     if (!selectedBbsId || !selectedTargetGuild) return;
     const user = allMembers.find((m) => m.bbs_id === selectedBbsId);
     if (!user) return;
 
-    const isRemoval    = selectedTargetGuild === "__none__";
-    const isFromNoGuild = selectedSourceGuild === "__no_guild__";
-    const fromGuild    = isFromNoGuild ? null : user.guildId ? guildMap[user.guildId] || null : null;
-    const toGuild      = isRemoval ? null : guildMap[selectedTargetGuild] || null;
+    const isRemoval = selectedTargetGuild === "__none__";
+    const fromGuild = user.guildId ? guildMap[user.guildId] || null : null;
+    const toGuild    = isRemoval ? null : guildMap[selectedTargetGuild] || null;
 
     if (!isRemoval && !toGuild) return;
     if (!isRemoval && fromGuild && fromGuild._id === toGuild!._id) {
       toast({ title: "Même guilde", description: "Le joueur est déjà dans cette guilde", status: "warning", duration: 2000 });
       return;
     }
-    if (isRemoval && isFromNoGuild) {
+    if (isRemoval && !fromGuild) {
       toast({ title: "Action inutile", description: "Ce joueur n'a déjà pas de guilde", status: "warning", duration: 2000 });
       return;
     }
@@ -176,7 +169,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     setDraftMoves((prev) => [...prev, { id: `${user.bbs_id}-${Date.now()}`, user, bbsId: user.bbs_id!, fromGuild, toGuild }]);
     setSelectedBbsId("");
     setSelectedTargetGuild("");
-  }, [selectedBbsId, selectedTargetGuild, selectedSourceGuild, allMembers, guildMap, toast]);
+  }, [selectedBbsId, selectedTargetGuild, allMembers, guildMap, toast]);
 
   const removeMove  = (moveId: string) => setDraftMoves((prev) => prev.filter((m) => m.id !== moveId));
 
@@ -212,7 +205,6 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
 
   const clearDraft  = () => {
     setDraftMoves([]);
-    setSelectedSourceGuild("");
     setSelectedBbsId("");
     setSelectedTargetGuild("");
   };
@@ -237,6 +229,38 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     user.avatar && user.discord_id
       ? `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.webp?size=64`
       : undefined;
+
+  // ── Ligne enrichie du select joueur (avatar + guilde + rôle) ──────────────────
+  const renderPlayerOption = (user: IUser & { guildId: string }) => {
+    const guild = user.guildId ? guildMap[user.guildId] : null;
+    const color = user.guildId ? guildColorMap[user.guildId] : "gray";
+    return (
+      <HStack spacing={2} overflow="hidden">
+        <Avatar
+          size="2xs"
+          src={getAvatarUrl(user)}
+          name={user.bbs_name || user.global_name}
+          flexShrink={0}
+        />
+        <Text fontWeight="medium" isTruncated>
+          {user.bbs_name || user.global_name || user.username}
+        </Text>
+        <Badge colorScheme={color} fontSize="2xs" borderRadius="full" flexShrink={0}>
+          {guild ? guild.name : "Sans guilde"}
+        </Badge>
+        {(user.role === "chef" || user.role === "sous-chef") && (
+          <Badge
+            colorScheme={user.role === "chef" ? "red" : "orange"}
+            fontSize="2xs"
+            borderRadius="full"
+            flexShrink={0}
+          >
+            {user.role === "chef" ? "👑" : "🥈"}
+          </Badge>
+        )}
+      </HStack>
+    );
+  };
 
   // ── Chargement ───────────────────────────────────────────────────────────────
   if (membersLoading) {
@@ -381,64 +405,31 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                 Nouveau transfert
               </Text>
 
-              {/* 3 étapes visuelles */}
+              {/* 2 étapes visuelles */}
               <Grid
-                templateColumns={{ base: "1fr", md: "1fr auto 1fr auto 1fr auto" }}
+                templateColumns={{ base: "1fr", md: "1fr auto 1fr auto" }}
                 gap={3}
                 alignItems="end"
               >
-                {/* Étape 1 : Depuis */}
+                {/* Étape 1 : Joueur (recherche globale, guilde source déduite) */}
                 <Box>
                   <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>
-                    Depuis
+                    Joueur
                   </Text>
                   <CustomSelect
-                    placeholder="Guilde source"
-                    value={selectedSourceGuild}
-                    onChange={setSelectedSourceGuild}
-                    size="sm"
-                    allowDeselect={false}
-                    accentColor="orange.400"
-                    options={[
-                      { value: "__no_guild__", label: "Sans guilde" },
-                      ...guilds.map((g) => ({
-                        value: g._id,
-                        label: `${g.name} (${membersByGuild[g._id]?.length || 0})`
-                      }))
-                    ]}
-                  />
-                </Box>
-
-                {/* Flèche */}
-                <Box display={{ base: "none", md: "flex" }} alignItems="center" pb={1}>
-                  <ArrowForwardIcon color={selectedSourceGuild ? "orange.400" : "gray.300"} boxSize={4} />
-                </Box>
-
-                {/* Étape 2 : Joueur */}
-                <Box>
-                  <HStack spacing={2} mb={1.5}>
-                    <Text fontSize="xs" fontWeight="medium" color={mutedText}>Joueur</Text>
-                    {selectedUserData && (
-                      <Avatar
-                        size="2xs"
-                        src={getAvatarUrl(selectedUserData)}
-                        name={selectedUserData.bbs_name || selectedUserData.global_name}
-                      />
-                    )}
-                  </HStack>
-                  <CustomSelect
-                    placeholder="Sélectionner"
+                    placeholder="Rechercher un joueur"
                     value={selectedBbsId}
                     onChange={setSelectedBbsId}
                     size="sm"
                     allowDeselect={false}
                     enableSearch
                     accentColor="orange.400"
-                    isDisabled={!selectedSourceGuild}
                     isLoading={guildlessLoading}
+                    renderSelected={(option) => option.content}
                     options={availableUsers.map((u) => ({
                       value: u.bbs_id!,
-                      label: u.bbs_name || u.global_name || u.username
+                      label: u.bbs_name || u.global_name || u.username,
+                      content: renderPlayerOption(u)
                     }))}
                   />
                 </Box>
@@ -448,7 +439,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                   <ArrowForwardIcon color={selectedBbsId ? "orange.400" : "gray.300"} boxSize={4} />
                 </Box>
 
-                {/* Étape 3 : Vers */}
+                {/* Étape 2 : Vers */}
                 <Box>
                   <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>Vers</Text>
                   <CustomSelect
@@ -460,11 +451,11 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                     accentColor="orange.400"
                     isDisabled={!selectedBbsId}
                     options={[
-                      ...(selectedSourceGuild !== "__no_guild__"
+                      ...(selectedUserData?.guildId
                         ? [{ value: "__none__", label: "✕ Retirer de la guilde" }]
                         : []),
                       ...guilds
-                        .filter((g) => g._id !== selectedSourceGuild)
+                        .filter((g) => g._id !== selectedUserData?.guildId)
                         .map((g) => {
                           const count = projectedCounts[g._id] || 0;
                           return {
