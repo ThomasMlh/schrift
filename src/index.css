@@ -11,6 +11,14 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Espace occupé par l'overlay mobile de Discord (Activity) au-dessus du contenu.
+     --discord-safe-area-inset-* est fourni par le client Discord ; env(safe-area-inset-*)
+     sert de repli hors Activity (notch iOS, tests locaux). Vaut 0px partout ailleurs. */
+  --sait: var(--discord-safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --saib: var(--discord-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --sail: var(--discord-safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --sair: var(--discord-safe-area-inset-right, env(safe-area-inset-right, 0px));
 }
 
 #root {
@@ -33,6 +41,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  padding: var(--sait) var(--sair) var(--saib) var(--sail);
 }
 
 h1 {

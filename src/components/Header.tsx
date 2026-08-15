@@ -229,7 +229,7 @@ export const Header = () => {
       id="main-navbar"
       zIndex={10}
       position="sticky"
-      top={0}
+      top="var(--sait, 0px)"
       bg={isDark ? 'rgba(17,24,39,0.95)' : 'rgba(255,255,255,0.95)'}
       sx={{ backdropFilter: 'blur(12px)' }}
       borderBottom="1px solid"
