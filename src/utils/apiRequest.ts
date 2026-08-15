@@ -1,6 +1,9 @@
 import { mutate } from 'swr';
+import { isDiscordActivity } from '../activity/discordActivity';
 
-export const apiUrl = import.meta.env.VITE_API_BASE_URL as string;
+// En Discord Activity, tout fetch cross-origin doit passer par le proxy Discord
+// (préfixe /.proxy/<mapping configuré dans le portail>) au lieu de l'URL absolue.
+export const apiUrl = isDiscordActivity() ? '/.proxy' : (import.meta.env.VITE_API_BASE_URL as string);
 
 /**
  * Crée une fonction de requête authentifiée liée au token courant.

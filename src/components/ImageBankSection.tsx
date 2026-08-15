@@ -36,8 +36,8 @@ import {
 import { useAuth } from "../providers/AuthProvider";
 import type { IAccessory } from "../interfaces";
 import { PageLoader } from "./ui/PageLoader";
+import { apiUrl } from "../utils/apiRequest";
 
-const apiUrl = import.meta.env.VITE_API_BASE_URL;
 const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
 type Bank = "accessories" | "killers" | "categories" | "affinity";
