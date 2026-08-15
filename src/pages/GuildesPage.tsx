@@ -31,6 +31,7 @@ import { CycleSelect } from "@/components/ui/CycleSelect";
 import type { IGuild } from "../interfaces";
 import { useTranslation } from "react-i18next";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
+import { bucketUrl } from "@/utils/apiRequest";
 
 const GuildesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -39,7 +40,6 @@ const GuildesPage = () => {
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
   const [selectedWeeklyWeek, setSelectedWeeklyWeek] = useState(1);
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
   const { t } = useTranslation();
 
   const sidebarBg = useColorModeValue("white", "rgba(26, 32, 44, 0.8)");

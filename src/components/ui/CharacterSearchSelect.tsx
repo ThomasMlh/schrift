@@ -15,6 +15,7 @@ import { SearchIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
 import { AffinityIcon } from "./AffinityIcon";
 import { useCharacters, useCharacter } from "../../hooks/useAPI";
+import { bucketUrl } from "../../utils/apiRequest";
 
 interface Character {
   _id: string;
@@ -50,8 +51,6 @@ export const CharacterSearchSelect = ({
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const hoverBg = useColorModeValue("gray.50", "gray.600");
   const menuBg = useColorModeValue("white", "gray.800");
-
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
   // Récupérer les personnages avec recherche API
   const { characters, isLoading } = useCharacters({

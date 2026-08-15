@@ -34,6 +34,7 @@ import { useCharacter, useBuilds } from "@/hooks/useAPI";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { useTranslation } from "react-i18next";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { bucketUrl } from "@/utils/apiRequest";
 
 interface SectionCardProps {
   label: string;
@@ -71,7 +72,6 @@ const CharacterDetailPage = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { t } = useTranslation();
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
   // Utiliser useSWR pour le personnage (cache automatique)
   const { character, isLoading, error: fetchError } = useCharacter(id);

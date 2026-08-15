@@ -26,6 +26,7 @@ import { AffinityIcon } from "./AffinityIcon";
 import type { IBuild } from "../../interfaces";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
+import { bucketUrl } from "@/utils/apiRequest";
 
 interface BuildDetailModalProps {
   isOpen: boolean;
@@ -50,8 +51,6 @@ export const BuildDetailModal = ({
   const mutedText = useColorModeValue("gray.500", "gray.400");
   const { currentUser } = useAuth();
   const { t } = useTranslation();
-
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";

@@ -52,6 +52,7 @@ import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { bucketUrl } from "@/utils/apiRequest";
 
 const RotationDetailPage = () => {
   // cycleId dans l'URL est désormais un slug (ex: "cycle-1-2026")
@@ -591,7 +592,6 @@ const RotationDetailPage = () => {
                 ) : (
                   <SimpleGrid columns={{ base: 2, sm: 3, md: 4, lg: 5 }} spacing={3}>
                     {builds.map((build) => {
-                      const bucketUrl = import.meta.env.VITE_BUCKET_URL;
                       return (
                         <Box
                           key={build._id}

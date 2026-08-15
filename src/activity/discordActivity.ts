@@ -1,6 +1,4 @@
-import { DiscordSDK, patchUrlMappings } from '@discord/embedded-app-sdk';
-
-const BUCKET_HOST = 'bucket.bbs-schrift.fr';
+import { DiscordSDK } from '@discord/embedded-app-sdk';
 
 const CLIENT_ID = import.meta.env.VITE_DISCORD_CLIENT_ID as string;
 
@@ -29,17 +27,6 @@ const getDiscordSdk = (): DiscordSDK => {
 export async function setupDiscordActivity(
   login: (token: string, refreshToken?: string) => void
 ): Promise<void> {
-  // Les <img src="https://bucket.bbs-schrift.fr/...">, absolus et cross-origin, sont
-  // bloqués dans l'iframe Activity. On les réécrit à la volée vers /.proxy/bucket/...
-  // (le préfixe "/bucket" côté portail doit exister comme mapping de chemin de proxy,
-  // cible bucket.bbs-schrift.fr) pour qu'ils passent par le proxy Discord.
-  patchUrlMappings([{ prefix: '/.proxy/bucket', target: BUCKET_HOST }], {
-    patchFetch: false,
-    patchWebSocket: false,
-    patchXhr: false,
-    patchSrcAttributes: true,
-  });
-
   const discordSdk = getDiscordSdk();
   await discordSdk.ready();
 

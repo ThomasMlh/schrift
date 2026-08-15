@@ -36,6 +36,7 @@ import { AttackTypeBadge } from "../ui/AttackTypeBadge";
 import { AlterationImage } from "../ui/AlterationImage";
 import type { IBuild } from "../../interfaces";
 import { PageLoader } from "../ui/PageLoader";
+import { bucketUrl } from "../../utils/apiRequest";
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return "N/A";
@@ -63,7 +64,6 @@ const RotationsBuildsGuide = () => {
   const mutedText = useColorModeValue("gray.500", "gray.400");
 
   const { t } = useTranslation();
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
   const { currentUser } = useAuth();
   const isAuthenticated = !!currentUser;

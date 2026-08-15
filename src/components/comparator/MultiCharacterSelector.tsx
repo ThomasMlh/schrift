@@ -21,6 +21,7 @@ import { useCharacters } from "@/hooks/useAPI";
 import { AffinityIcon } from "../ui/AffinityIcon";
 import { AttackTypeBadge } from "../ui/AttackTypeBadge";
 import type { ICharacter } from "@/interfaces";
+import { bucketUrl } from "@/utils/apiRequest";
 
 const DEFAULT_COLORS = ["#3182CE", "#38A169", "#DD6B20", "#9F7AEA", "#E53E3E"];
 
@@ -56,8 +57,6 @@ export const MultiCharacterSelector = ({
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
-
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
   const { characters, isLoading } = useCharacters({
     searchQuery: searchTerm || undefined,
