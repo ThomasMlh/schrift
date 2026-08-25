@@ -20,6 +20,7 @@ import CustomLink from "./ui/CustomLink";
 import { CharactersKillers, CharactersCategories, CharactersAffinities } from "../utils/chractersData";
 import { CustomSelect } from "./ui/CustomSelect";
 import { useTranslation } from "react-i18next";
+import { bucketUrl } from "../utils/apiRequest";
 
 export const CharactersTable = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -38,7 +39,6 @@ export const CharactersTable = () => {
   const categories = CharactersCategories;
   const killers = CharactersKillers;
 
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
   const borderColor = isDark ? 'whiteAlpha.100' : 'gray.200';

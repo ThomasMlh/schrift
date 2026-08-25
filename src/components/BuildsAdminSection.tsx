@@ -37,6 +37,7 @@ import { UserDisplay } from "./ui/UserDisplay";
 import { BuildDetailModal } from "./ui/BuildDetailModal";
 import { CustomSelect } from "./ui/CustomSelect";
 import { PageLoader } from "./ui/PageLoader";
+import { bucketUrl } from "../utils/apiRequest";
 
 const BuildsAdminSection = () => {
   const { deleteBuild, validateBuild } = useAPIMutations();
@@ -52,8 +53,6 @@ const BuildsAdminSection = () => {
   const toast = useToast();
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
-
-  const bucketUrl = import.meta.env.VITE_BUCKET_URL;
 
   const { builds, pagination, isLoading, mutate } = useBuilds({
     page: currentPage,

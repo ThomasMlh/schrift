@@ -115,7 +115,7 @@ const PodiumPage = () => {
     setSearchParams(params);
 
     const data = await fetchPodium(mode, cycleObj?.name || "", {
-      rankingType, rotationId, weekNumber, guildName, page, limit,
+      cycleYear: cycleObj?.year, rankingType, rotationId, weekNumber, guildName, page, limit,
     });
 
     if (data) {

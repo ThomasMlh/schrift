@@ -1,6 +1,15 @@
 import { mutate } from 'swr';
+import { isDiscordActivity } from '../activity/discordActivity';
 
-export const apiUrl = import.meta.env.VITE_API_BASE_URL as string;
+// En Discord Activity, tout fetch cross-origin doit passer par le proxy Discord
+// (préfixe /.proxy/<mapping configuré dans le portail>) au lieu de l'URL absolue.
+export const apiUrl = isDiscordActivity() ? '/.proxy' : (import.meta.env.VITE_API_BASE_URL as string);
+
+// Même logique pour les images du bucket. Construire l'URL correcte dès le départ (plutôt
+// que de réécrire les <img src> après coup) est nécessaire car certains composants (Chakra
+// Avatar notamment) précherchent l'image via un `new Image()` détaché du DOM avant de
+// l'afficher : une réécriture basée sur un MutationObserver ne verrait jamais cette requête.
+export const bucketUrl = isDiscordActivity() ? '/.proxy/bucket' : (import.meta.env.VITE_BUCKET_URL as string);
 
 /**
  * Crée une fonction de requête authentifiée liée au token courant.

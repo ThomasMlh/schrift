@@ -17,6 +17,7 @@ import {
 import { SearchIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
 import { useAccessories, useAccessoriesSubeffects } from "../../hooks/useAPI";
+import { bucketUrl } from "../../utils/apiRequest";
 
 interface AccessorySearchSelectProps {
   value?: { id_accessory: string; id_subeffect?: string };
@@ -127,7 +128,7 @@ export const AccessorySearchSelect = ({
             >
               {selectedAccessory.code && (
                 <Image
-                  src={`${import.meta.env.VITE_BUCKET_URL}/accessories/${selectedAccessory.code}/thumb.png`}
+                  src={`${bucketUrl}/accessories/${selectedAccessory.code}/thumb.png`}
                   alt={selectedAccessory.name}
                   boxSize="20px"
                   borderRadius="sm"
@@ -196,7 +197,7 @@ export const AccessorySearchSelect = ({
                     >
                       {accessory.code && (
                         <Image
-                          src={`${import.meta.env.VITE_BUCKET_URL}/accessories/${accessory.code}/thumb.png`}
+                          src={`${bucketUrl}/accessories/${accessory.code}/thumb.png`}
                           alt={accessory.name}
                           boxSize="22px"
                           borderRadius="sm"

@@ -1,8 +1,9 @@
 import { useCallback } from 'react';
 import type { IPagination } from '../../interfaces';
 import { useAuth } from '../../providers/AuthProvider';
+import { apiUrl } from '../../utils/apiRequest';
 
-export const apiUrl = import.meta.env.VITE_API_BASE_URL;
+export { apiUrl };
 
 export const fetcher = async (url: string) => {
   const response = await fetch(url);

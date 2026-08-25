@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import type { IUser, IGuildRoleGrant } from '../interfaces';
 import { getToken, isTokenValid, getUserFromToken, clearTokens, setToken as saveToken, getRefreshToken, setRefreshToken as saveRefreshToken } from '../utils/user';
 import { getDiscordAvatarUrl } from '../utils/discord';
+import { apiUrl } from '../utils/apiRequest';
+import { isDiscordActivity, setupDiscordActivity } from '../activity/discordActivity';
 
 interface AuthContextType {
   currentUser: IUser | null;
@@ -35,8 +37,6 @@ export const useAuth = () => {
 interface AuthProviderProps {
   children: ReactNode;
 }
-
-const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
 async function tryRefreshToken(): Promise<string | null> {
   const refreshToken = getRefreshToken();
@@ -186,9 +186,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return headers;
   };
 
-  // Vérifier l'authentification au chargement
+  // Vérifier l'authentification au chargement.
+  // En Discord Activity : connexion automatique via le SDK (identité Discord), pas de
+  // redirection navigateur. Hors Activity : flow web classique inchangé.
   useEffect(() => {
-    refreshAuth();
+    if (isDiscordActivity()) {
+      setupDiscordActivity(login).catch((error) => {
+        console.error('Erreur lors de la connexion Discord Activity:', error);
+        setIsAuthLoading(false);
+      });
+    } else {
+      refreshAuth();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshAuth]);
 
   const managedGuildIds = [...new Set(guildRoles.map(g => g.guilde_id).filter(Boolean))];

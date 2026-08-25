@@ -2,11 +2,13 @@ import {
     Box, Button, Text, InputGroup, InputLeftElement, Input, Flex,
     useColorModeValue, IconButton,
     HStack,
-    Badge
+    Badge,
+    Avatar
 } from "@chakra-ui/react";
 import { ChevronDownIcon, SearchIcon, CloseIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef, useMemo } from "react";
 import type { IUser, IGuild } from "../../interfaces";
+import { getUserAvatarUrl } from "../../utils/discord";
 
 interface UserSearchSelectProps {
     users: IUser[];
@@ -16,6 +18,10 @@ interface UserSearchSelectProps {
     onSearchChange: (query: string) => void;
     placeholder?: string;
     guilds?: IGuild[];
+    // Clé d'identification d'un item — par défaut _id (1 user = 1 item). Les appelants qui
+    // listent des comptes bbs plutôt que des users (plusieurs items peuvent partager le même
+    // _id) doivent passer une clé unique par compte, ex: (u) => u.bbs_id.
+    getItemId?: (user: IUser) => string;
 }
 
 export const UserSearchSelect = ({
@@ -25,14 +31,15 @@ export const UserSearchSelect = ({
     searchQuery,
     onSearchChange,
     placeholder = "Choisir un utilisateur",
-    guilds = []
+    guilds = [],
+    getItemId = (user) => user._id || ''
 }: UserSearchSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [filteredUsers, setFilteredUsers] = useState<IUser[]>(users || []);
     const menuRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const selectedUser = users?.find(user => user._id === selectedUserId);
+    const selectedUser = users?.find(user => getItemId(user) === selectedUserId);
 
     // Créer une map des guildes pour un accès rapide
     const guildMap = useMemo(() => {
@@ -91,7 +98,7 @@ export const UserSearchSelect = ({
     }, [isOpen]);
 
     const handleUserSelect = (user: IUser) => {
-        onUserSelect(user._id || '');
+        onUserSelect(getItemId(user));
         setIsOpen(false);
         onSearchChange(''); // Reset search
     };
@@ -125,6 +132,11 @@ export const UserSearchSelect = ({
                     color={textColor}
                 >
                     <HStack flex={1} cursor="pointer" onClick={() => setIsOpen(!isOpen)}>
+                        <Avatar
+                            size="xs"
+                            name={selectedUser.bbs_name || selectedUser.global_name}
+                            src={getUserAvatarUrl(selectedUser) || undefined}
+                        />
                         <Text fontWeight="medium">
                             {selectedUser.bbs_name || selectedUser.global_name}
                         </Text>
@@ -237,7 +249,7 @@ export const UserSearchSelect = ({
                         {filteredUsers.length > 0 ? (
                             filteredUsers.map((user: IUser) => (
                                 <Flex
-                                    key={user._id}
+                                    key={getItemId(user)}
                                     p={3}
                                     cursor="pointer"
                                     _hover={{ bg: hoverBg }}
@@ -248,13 +260,18 @@ export const UserSearchSelect = ({
                                     _last={{ borderBottom: "none" }}
                                 >
                                     <HStack flex={1}>
+                                        <Avatar
+                                            size="xs"
+                                            name={user.bbs_name || user.global_name}
+                                            src={getUserAvatarUrl(user) || undefined}
+                                        />
                                         <Text fontWeight="medium" color={textColor}>
                                             {user.bbs_name || user.global_name}
                                         </Text>
                                         {getGuildName(user) && (
-                                            <Text fontSize="xs" color="gray.500">
+                                            <Badge fontSize="xs" colorScheme="blue">
                                                 {getGuildName(user)}
-                                            </Text>
+                                            </Badge>
                                         )}
                                     </HStack>
                                 </Flex>

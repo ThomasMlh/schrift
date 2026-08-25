@@ -72,6 +72,7 @@ export const usePodiumFetch = () => {
     mode: 'cycle' | 'rotation' | 'weekly' | 'misses',
     cycleName: string,
     options: {
+      cycleYear?: number;
       rankingType?: 'average' | 'max';
       rotationId?: string;
       weekNumber?: string;
@@ -82,7 +83,7 @@ export const usePodiumFetch = () => {
   ): Promise<IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse | null> => {
     if (!cycleName) return null;
 
-    const { rankingType = 'average', rotationId, weekNumber, guildName, page = 1, limit = 50 } = options;
+    const { cycleYear, rankingType = 'average', rotationId, weekNumber, guildName, page = 1, limit = 50 } = options;
     setIsLoading(true);
     setError(null);
 
@@ -100,6 +101,7 @@ export const usePodiumFetch = () => {
         if (rotationId?.trim()) url += `&rotation_id=${encodeURIComponent(rotationId)}`;
       }
 
+      if (cycleYear) url += `&year=${cycleYear}`;
       if (guildName?.trim()) url += `&guild_name=${encodeURIComponent(guildName.trim())}`;
 
       const response = await fetch(url);
