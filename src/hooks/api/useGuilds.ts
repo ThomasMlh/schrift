@@ -49,8 +49,12 @@ export const useAllGuildsMembers = (guilds: IGuild[], authenticated: boolean = t
 
   const guildIds = guilds.map(g => g._id).sort().join(',');
 
+  // Clé en string (pas un tableau) préfixée par /api/guildes : invalidateKeys() ne matche que
+  // des clés string par préfixe (voir apiRequest.ts), une clé composite ['all-guilds-members', ...]
+  // serait silencieusement ignorée par toutes les mutations qui invalident déjà '/api/guildes'
+  // (draft, ajout/retrait de membre, changement de rôle...), laissant ce cache périmé jusqu'à F5.
   const { data, error, isLoading, mutate } = useSWR<Record<string, IUser[]>>(
-    guildIds ? ['all-guilds-members', guildIds] : null,
+    guildIds ? `${apiUrl}/api/guildes/all-members?ids=${guildIds}` : null,
     async () => {
       const results = await Promise.all(
         guilds.map(g => f(`${apiUrl}/api/guildes/${g._id}/membres`))
