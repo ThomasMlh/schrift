@@ -11,6 +11,7 @@ import ImageBankSection from "../components/ImageBankSection";
 import NotificationSettingsSection from "../components/NotificationSettingsSection";
 import ActivityLogSection from "../components/ActivityLogSection";
 import { useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import type { AdminPage as IAdminPage } from "../interfaces";
 import { useAuth } from "../providers/AuthProvider";
 
@@ -43,9 +44,26 @@ const AdminPage = () => {
     return [] as IAdminPage[];
   }, [isFullAdmin, isGuildManager]);
 
-  const [currentPage, setCurrentPage] = useState<IAdminPage>(
-    isFullAdmin ? allowedPages[0] : "scores"
-  );
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Onglet initial : celui de l'URL (?tab=...) s'il est autorisé pour ce rôle, sinon le défaut
+  // habituel. AdminPage ne monte qu'une fois l'auth résolue (ProtectedRoute attend isAuthLoading),
+  // donc allowedPages est déjà fiable ici — pas besoin d'un effet de correction après coup.
+  const [currentPage, setCurrentPage] = useState<IAdminPage>(() => {
+    const urlTab = searchParams.get('tab') as IAdminPage | null;
+    if (urlTab && allowedPages.includes(urlTab)) return urlTab;
+    return isFullAdmin ? allowedPages[0] : "scores";
+  });
+
+  // Change l'onglet et persiste le choix dans l'URL pour survivre à un refresh.
+  const handleTabChange = (page: IAdminPage) => {
+    setCurrentPage(page);
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.set('tab', page);
+      return next;
+    }, { replace: true });
+  };
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isCheckingBot, setIsCheckingBot] = useState(false);
@@ -265,7 +283,7 @@ const AdminPage = () => {
             return (
               <Button
                 key={tab.key}
-                onClick={() => setCurrentPage(tab.key)}
+                onClick={() => handleTabChange(tab.key)}
                 size="sm"
                 px={4}
                 h="36px"
