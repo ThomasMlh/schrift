@@ -1,13 +1,35 @@
 // Types généraux
 export type Page = "guilds" | "characters";
-export type AdminPage = "guilds" | "draft" | "cycles" | "scores" | "users" | "guides" | "banned" | "images";
+export type AdminPage = "guilds" | "draft" | "cycles" | "scores" | "users" | "guides" | "banned" | "images" | "notifications" | "activity";
 export type Role = "chef" | "sous-chef" | "membre";
+
+export type NotificationType =
+  | "scores" | "score_edit" | "rotation_transfer" | "character_update" | "image_upload"
+  | "ban" | "draft" | "guild_toggle" | "build_proposal" | "build_delete" | "cycle_change"
+  | "guild_change" | "membre_role_change" | "guild_member_change";
 
 export interface IGuild {
   _id: string;
   name: string;
   disabled?: boolean;
-  discord_channel_id?: string;
+  discord_channel_id?: string; // salon "chef" (accès restreint)
+  discord_general_channel_id?: string; // salon général, tous les membres
+  disabled_notification_types?: NotificationType[];
+}
+
+export interface IActivityLogEntry {
+  _id: string;
+  type: NotificationType | string;
+  data: Record<string, unknown>;
+  channel_id: string | null;
+  guilde_id: string | null;
+  created_at: string;
+}
+
+export interface IActivityResponse {
+  success: boolean;
+  activity: IActivityLogEntry[];
+  pagination: IPagination;
 }
 
 // Un compte bbs (principal ou alt) rattaché à un user. guilde_id/role sont propres à CE compte —

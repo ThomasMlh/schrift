@@ -13,6 +13,7 @@ export { useAdminMutations } from './mutations/useAdminMutations';
 export { useOrbGuideMutations } from './mutations/useOrbGuideMutations';
 export { useAbilitySlotsGuideMutations } from './mutations/useAbilitySlotsGuideMutations';
 export { useAccessoryMutations } from './mutations/useAccessoryMutations';
+export { useSettingsMutations } from './mutations/useSettingsMutations';
 
 import { useCycleMutations } from './mutations/useCycleMutations';
 import { useGuildMutations } from './mutations/useGuildMutations';

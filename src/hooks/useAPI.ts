@@ -10,3 +10,5 @@ export * from './api/useScores';
 export * from './api/useBuilds';
 export * from './api/useAccessories';
 export * from './api/useGuides';
+export * from './api/useActivity';
+export * from './api/useSettings';
