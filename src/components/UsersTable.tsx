@@ -5,7 +5,7 @@ import {
 } from "@chakra-ui/react";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { SearchIcon, EditIcon, NotAllowedIcon, CheckCircleIcon } from "@chakra-ui/icons";
+import { SearchIcon, EditIcon, NotAllowedIcon, CheckCircleIcon, StarIcon } from "@chakra-ui/icons";
 import type { IUser } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import EditUserModal from "./EditUserModal";
@@ -339,10 +339,9 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                     <Thead>
                         <Tr bg={isDark ? 'rgba(255,255,255,0.03)' : 'gray.50'}>
                             <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colPlayer")}</Th>
-                            <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colGuild")}</Th>
-                            <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colRole")}</Th>
-                            {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>BBS ID</Th>}
-                            {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>BBS Name</Th>}
+                            {!isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colGuild")}</Th>}
+                            {!isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colRole")}</Th>}
+                            {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>Comptes</Th>}
                             {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colLastLogin")}</Th>}
                             {isAdminMode && <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'}>{t("components.usersTable.colActions")}</Th>}
                         </Tr>
@@ -357,10 +356,9 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                                             <Skeleton height="16px" width="120px" />
                                         </HStack>
                                     </Td>
-                                    <Td><Skeleton height="16px" width="80px" /></Td>
-                                    <Td><Skeleton height="20px" width="60px" borderRadius="md" /></Td>
-                                    {isAdminMode && <Td><Skeleton height="16px" width="60px" /></Td>}
-                                    {isAdminMode && <Td><Skeleton height="16px" width="80px" /></Td>}
+                                    {!isAdminMode && <Td><Skeleton height="16px" width="80px" /></Td>}
+                                    {!isAdminMode && <Td><Skeleton height="20px" width="60px" borderRadius="md" /></Td>}
+                                    {isAdminMode && <Td><Skeleton height="16px" width="140px" /></Td>}
                                     {isAdminMode && <Td><Skeleton height="16px" width="100px" /></Td>}
                                     {isAdminMode && <Td><Skeleton height="28px" width="60px" borderRadius="md" /></Td>}
                                 </Tr>
@@ -376,29 +374,47 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                                             )}
                                         </HStack>
                                     </Td>
-                                    <Td>
-                                        <Text>{user.guilde_id ? getGuildName(user.guilde_id) : t('pages.user.noGuild')}</Text>
-                                    </Td>
-                                    <Td>
-                                        <Badge
-                                            colorScheme={getRoleBadgeColor(user.role)}
-                                            variant={badgeVariant}
-                                        >
-                                            {getRoleLabel(user.role)}
-                                        </Badge>
-                                    </Td>
-                                    {isAdminMode && (
+                                    {!isAdminMode && (
                                         <Td>
-                                            <Text fontSize="sm">
-                                                {user.bbs_id || "-"}
-                                            </Text>
+                                            <Text>{user.guilde_id ? getGuildName(user.guilde_id) : t('pages.user.noGuild')}</Text>
+                                        </Td>
+                                    )}
+                                    {!isAdminMode && (
+                                        <Td>
+                                            <Badge
+                                                colorScheme={getRoleBadgeColor(user.role)}
+                                                variant={badgeVariant}
+                                            >
+                                                {getRoleLabel(user.role)}
+                                            </Badge>
                                         </Td>
                                     )}
                                     {isAdminMode && (
                                         <Td>
-                                            <Text fontSize="sm">
-                                                {user.bbs_name || "-"}
-                                            </Text>
+                                            {user.bbs_accounts && user.bbs_accounts.length > 0 ? (
+                                                <VStack spacing={1} align="start">
+                                                    {user.bbs_accounts.map((account) => (
+                                                        <HStack key={account.bbs_id} spacing={1.5}>
+                                                            {account.is_primary && (
+                                                                <StarIcon boxSize={2.5} color="yellow.400" />
+                                                            )}
+                                                            <Text fontSize="sm" fontWeight={account.is_primary ? "semibold" : "normal"}>
+                                                                {account.bbs_name || account.bbs_id}
+                                                            </Text>
+                                                            <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>
+                                                                — {account.guilde_id ? getGuildName(account.guilde_id) : t('pages.user.noGuild')}
+                                                            </Text>
+                                                            {account.role && (
+                                                                <Badge colorScheme={getRoleBadgeColor(account.role)} variant={badgeVariant} fontSize="2xs">
+                                                                    {getRoleLabel(account.role)}
+                                                                </Badge>
+                                                            )}
+                                                        </HStack>
+                                                    ))}
+                                                </VStack>
+                                            ) : (
+                                                <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>Aucun compte</Text>
+                                            )}
                                         </Td>
                                     )}
                                     {isAdminMode && (
