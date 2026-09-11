@@ -24,9 +24,9 @@ const getDiscordSdk = (): DiscordSDK => {
  * Handshake + authentification automatique pour le contexte Discord Activity.
  * À appeler uniquement quand isDiscordActivity() est vrai.
  */
-export async function setupDiscordActivity(
+export const setupDiscordActivity = async (
   login: (token: string, refreshToken?: string) => void
-): Promise<void> {
+): Promise<void> => {
   const discordSdk = getDiscordSdk();
   await discordSdk.ready();
 
@@ -53,4 +53,4 @@ export async function setupDiscordActivity(
   await discordSdk.commands.authenticate({ access_token: data.discord_access_token });
 
   login(data.token, data.refreshToken);
-}
+};

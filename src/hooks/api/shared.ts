@@ -11,10 +11,10 @@ export const fetcher = async (url: string) => {
   return response.json();
 };
 
-export function normalizeList<T>(
+export const normalizeList = <T>(
   data: unknown,
   extraKeys: string[] = []
-): { items: T[]; pagination: IPagination | null } {
+): { items: T[]; pagination: IPagination | null } => {
   if (!data) return { items: [], pagination: null };
   if (Array.isArray(data)) return { items: data as T[], pagination: null };
   const obj = data as Record<string, unknown>;
@@ -24,7 +24,7 @@ export function normalizeList<T>(
     }
   }
   return { items: [], pagination: null };
-}
+};
 
 export const useAuthenticatedFetcher = () => {
   const { token } = useAuth();

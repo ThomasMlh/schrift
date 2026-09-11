@@ -19,21 +19,19 @@ import type { ICycle, ICycleRotation } from "@/interfaces";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "../ui/PageLoader";
 
-function toUTCKey(date: Date): string {
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
-}
+const toUTCKey = (date: Date): string =>
+  `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
 
-function toLocalKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
+const toLocalKey = (date: Date): string =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
 // Bar color driven by attack type
-function getAttackColor(attack: string): { solid: string; bg: string } {
+const getAttackColor = (attack: string): { solid: string; bg: string } => {
   const a = attack?.toUpperCase();
   if (a === "R") return { solid: "#E53E3E", bg: "rgba(229,62,62,0.12)" };   // red
   if (a === "B") return { solid: "#3182CE", bg: "rgba(49,130,206,0.12)" };  // blue
   return { solid: "#DD6B20", bg: "rgba(221,107,32,0.12)" };                 // melee / orange
-}
+};
 
 // Used for past-cycle bars and legend swatches
 const LEGEND_PALETTE = [

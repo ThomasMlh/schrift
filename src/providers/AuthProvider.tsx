@@ -38,7 +38,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-async function tryRefreshToken(): Promise<string | null> {
+const tryRefreshToken = async (): Promise<string | null> => {
   const refreshToken = getRefreshToken();
   if (!refreshToken) return null;
 
@@ -58,7 +58,7 @@ async function tryRefreshToken(): Promise<string | null> {
   } catch {
     return null;
   }
-}
+};
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
