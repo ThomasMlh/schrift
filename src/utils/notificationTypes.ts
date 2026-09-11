@@ -53,6 +53,12 @@ export const formatActivityEntry = (type: string, data: Record<string, unknown>)
       return `${fmt(data, "submitted_by")} a saisi des scores${data.guild_name ? ` pour **${fmt(data, "guild_name")}**` : ""}`;
     case "score_edit":
       return `${fmt(data, "submitted_by")} a modifié le score de **${fmt(data, "pseudo")}**`;
+    case "rotation_transfer":
+      return `${fmt(data, "submitted_by")} a transféré ${fmt(data, "transferred_count")} score(s) vers **${fmt(data, "target_rotation")}**`;
+    case "character_update":
+      return `Synchronisation personnages — ${fmt(data, "message", "")}`;
+    case "image_upload":
+      return `Upload d'images — ${fmt(data, "message", "")}`;
     case "build_proposal":
       return `${fmt(data, "proposed_by")} a proposé un build`;
     case "build_delete":

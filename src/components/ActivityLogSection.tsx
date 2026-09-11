@@ -1,11 +1,13 @@
 import {
     Box, Table, Thead, Tbody, Tr, Th, Td, VStack,
-    Text, useColorModeValue, Badge, Flex, Select
+    Text, useColorModeValue, Badge, Flex, Select, IconButton, HStack
 } from "@chakra-ui/react";
+import { FiEye } from "react-icons/fi";
 import { Fragment, useMemo, useState } from "react";
 import type { IActivityLogEntry } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import { PageLoader } from "./ui/PageLoader";
+import ActivityDetailModal from "./ActivityDetailModal";
 import { useActivity, useGuilds } from "@/hooks/useAPI";
 import { useAuth } from "@/providers/AuthProvider";
 import { NOTIFICATION_TYPES, NOTIFICATION_TYPE_LABELS, formatActivityEntry } from "@/utils/notificationTypes";
@@ -28,6 +30,7 @@ const ActivityLogSection: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [typeFilter, setTypeFilter] = useState("");
     const [guildFilter, setGuildFilter] = useState("");
+    const [selectedEntry, setSelectedEntry] = useState<IActivityLogEntry | null>(null);
 
     const { guilds } = useGuilds();
 
@@ -116,9 +119,18 @@ const ActivityLogSection: React.FC = () => {
                                         <Text fontSize="sm">{getGuildName(entry.guilde_id) || "-"}</Text>
                                     </Td>
                                     <Td>
-                                        <Text fontSize="sm" maxW="500px" noOfLines={2}>
-                                            <Highlighted text={formatActivityEntry(entry.type, entry.data)} />
-                                        </Text>
+                                        <HStack justify="space-between" spacing={2}>
+                                            <Text fontSize="sm" maxW="440px" noOfLines={2}>
+                                                <Highlighted text={formatActivityEntry(entry.type, entry.data)} />
+                                            </Text>
+                                            <IconButton
+                                                aria-label="Voir le détail"
+                                                icon={<FiEye />}
+                                                size="xs"
+                                                variant="ghost"
+                                                onClick={() => setSelectedEntry(entry)}
+                                            />
+                                        </HStack>
                                     </Td>
                                 </Tr>
                             ))}
@@ -138,6 +150,12 @@ const ActivityLogSection: React.FC = () => {
                     itemsOnPage={pagination.itemsOnPage}
                 />
             )}
+
+            <ActivityDetailModal
+                entry={selectedEntry}
+                guildName={selectedEntry ? getGuildName(selectedEntry.guilde_id) : undefined}
+                onClose={() => setSelectedEntry(null)}
+            />
         </VStack>
     );
 };
