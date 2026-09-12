@@ -2,9 +2,10 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate
+  Navigate,
+  useLocation,
 } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useRef } from "react";
 import { Box, Flex, Spinner, Text } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import type { IProtectedRoute } from "./interfaces";
@@ -150,15 +151,35 @@ const AppRoutes = () => {
   );
 };
 
+// Masque le header/footer du site quand la page est chargée en mode capture
+// (?capture=1), utilisé par le bot Discord pour screenshoter uniquement le
+// contenu de la page (ex: podium), sans la nav ni le footer autour.
+const AppShell = () => {
+  const location = useLocation();
+  // Capturé une seule fois au montage : certaines pages (ex: PodiumPage) réécrivent
+  // l'URL via setSearchParams() sans préserver "capture", ce qui ferait réapparaître
+  // le header/footer en cours de chargement si on relisait location.search à chaque render.
+  const isCaptureRef = useRef(new URLSearchParams(location.search).get("capture") === "1");
+  const isCapture = isCaptureRef.current;
+
+  if (isCapture) {
+    return <AppRoutes />;
+  }
+
+  return (
+    <Flex direction="column" minH="100vh">
+      <Header />
+      <AppRoutes />
+      <Footer />
+    </Flex>
+  );
+};
+
 const MainRouter = () => {
   return (
     <Router>
       <AuthProvider>
-        <Flex direction="column" minH="100vh">
-          <Header />
-          <AppRoutes />
-          <Footer />
-        </Flex>
+        <AppShell />
       </AuthProvider>
     </Router>
   );

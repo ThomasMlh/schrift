@@ -4,7 +4,7 @@ export type AdminPage = "guilds" | "draft" | "cycles" | "scores" | "users" | "gu
 export type Role = "chef" | "sous-chef" | "membre";
 
 export type NotificationType =
-  | "scores" | "score_edit" | "rotation_transfer" | "character_update" | "image_upload"
+  | "scores" | "podium_snapshot" | "score_edit" | "rotation_transfer" | "character_update" | "image_upload"
   | "ban" | "draft" | "guild_toggle" | "build_proposal" | "build_delete" | "cycle_change"
   | "guild_change" | "membre_role_change" | "guild_member_change";
 

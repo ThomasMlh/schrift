@@ -35,6 +35,9 @@ const PodiumPage = () => {
   const toast = useToast();
   const { t } = useTranslation();
   const hasLoadedFromURL = useRef(false);
+  // applyFilters réécrit l'URL avec new URLSearchParams(...) et ne connaît pas "capture" :
+  // on le lit une seule fois au montage pour survivre à ces réécritures.
+  const isCaptureRef = useRef(searchParams.get("capture") === "1");
 
   const [podiumData, setPodiumData] = useState<
     IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse | null
@@ -65,6 +68,7 @@ const PodiumPage = () => {
   const { currentUser, isLoggedIn } = useAuth();
 
   const filterBg = useColorModeValue("blue.50", "blue.900");
+  const captureBg = useColorModeValue("white", "gray.800");
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -278,6 +282,37 @@ const PodiumPage = () => {
   const availableWeeks = selectedCycle
     ? Math.floor(selectedCycle.rotations.length / 2)
     : 0;
+
+  // Rendu minimal (sans hero/filtres) utilisé par le bot Discord pour capturer
+  // une image du podium à envoyer automatiquement dans un salon.
+  const isCapture = isCaptureRef.current;
+  if (isCapture) {
+    // L'id "podium-capture" n'apparaît qu'une fois les données chargées : c'est le
+    // signal attendu par le bot (Playwright) pour ne pas screenshoter le skeleton.
+    return (
+      <Box w="1100px">
+        {podiumData ? (
+          <VStack id="podium-capture" spacing={5} align="stretch" bg={captureBg} p={6}>
+            <PodiumInfo
+              displayMode={displayMode}
+              podiumData={podiumData}
+              selectedCycle={selectedCycle}
+              filterBg={filterBg}
+            />
+            <PodiumResults
+              displayMode={displayMode}
+              isLoading={isLoading}
+              podiumData={podiumData}
+              selectedCycleId={selectedCycleId}
+              selectedWeekNumber={selectedWeekNumber}
+              selectedGuildName={selectedGuildName}
+              onPageChange={handlePageChange}
+            />
+          </VStack>
+        ) : null}
+      </Box>
+    );
+  }
 
   return (
     <>

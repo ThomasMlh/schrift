@@ -210,6 +210,15 @@ const DetailBody: React.FC<{ type: string; data: Record<string, unknown> }> = ({
                 </VStack>
             );
 
+        case "podium_snapshot":
+            return (
+                <VStack align="stretch" spacing={0}>
+                    <Field label="Guilde" value={s("guild_name")} />
+                    <Field label="Cycle" value={s("cycle_name")} />
+                    <Field label="Rotation" value={data.killer ? `${s("killer")} ${data.attack === "R" ? "🔴" : data.attack === "B" ? "🔵" : ""}`.trim() : undefined} />
+                </VStack>
+            );
+
         case "guild_member_change":
             return (
                 <VStack align="stretch" spacing={0}>

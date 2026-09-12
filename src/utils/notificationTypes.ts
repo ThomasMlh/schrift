@@ -2,13 +2,14 @@ import type { NotificationType } from "@/interfaces";
 
 // Miroir de schrift-api/src/utils/notificationTypes.js — garder les deux listes synchronisées.
 export const NOTIFICATION_TYPES: NotificationType[] = [
-  "scores", "score_edit", "rotation_transfer", "character_update", "image_upload",
+  "scores", "podium_snapshot", "score_edit", "rotation_transfer", "character_update", "image_upload",
   "ban", "draft", "guild_toggle", "build_proposal", "build_delete", "cycle_change",
   "guild_change", "membre_role_change", "guild_member_change",
 ];
 
 export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   scores: "Saisie de scores",
+  podium_snapshot: "Capture du podium (salon membres)",
   score_edit: "Modification de score",
   rotation_transfer: "Transfert de rotation",
   character_update: "Sync personnages",
@@ -51,6 +52,8 @@ export const formatActivityEntry = (type: string, data: Record<string, unknown>)
       return `Cycle **${fmt(data, "cycle_name")}** ${data.action === "create" ? "créé" : data.action === "delete" ? "supprimé" : "modifié"}`;
     case "scores":
       return `${fmt(data, "submitted_by")} a saisi des scores${data.guild_name ? ` pour **${fmt(data, "guild_name")}**` : ""}`;
+    case "podium_snapshot":
+      return `Podium capturé${data.guild_name ? ` pour **${fmt(data, "guild_name")}**` : ""}`;
     case "score_edit":
       return `${fmt(data, "submitted_by")} a modifié le score de **${fmt(data, "pseudo")}**`;
     case "rotation_transfer":
