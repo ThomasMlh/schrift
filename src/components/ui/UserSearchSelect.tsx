@@ -69,7 +69,7 @@ export const UserSearchSelect = ({
             const filtered = users.filter(user => {
                 const query = searchQuery.toLowerCase();
                 return (
-                    user.username.toLowerCase().includes(query) ||
+                    (user.username && user.username.toLowerCase().includes(query)) ||
                     (user.global_name && user.global_name.toLowerCase().includes(query)) ||
                     (user.bbs_name && user.bbs_name.toLowerCase().includes(query))
                 );
