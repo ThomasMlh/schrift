@@ -44,6 +44,7 @@ import { PageLoader } from "../ui/PageLoader";
 import type { ICycle } from "../../interfaces";
 import { AlterationImage } from "../ui/AlterationImage";
 import { cycleSlug } from "@/utils/cycleHelpers";
+import { PublishCycleRecapButton } from "./PublishCycleRecapButton";
 
 interface ExistingCyclesListProps {
   cycles: ICycle[];
@@ -520,6 +521,8 @@ const ExistingCyclesList = ({
                         isDisabled={!cycle.rotations || cycle.rotations.length === 0}
                       />
                     </Tooltip>
+
+                    <PublishCycleRecapButton cycle={cycle} />
 
                     <Tooltip label="Modifier ce cycle" hasArrow>
                       <IconButton

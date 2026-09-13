@@ -14,6 +14,7 @@ export { useOrbGuideMutations } from './mutations/useOrbGuideMutations';
 export { useAbilitySlotsGuideMutations } from './mutations/useAbilitySlotsGuideMutations';
 export { useAccessoryMutations } from './mutations/useAccessoryMutations';
 export { useSettingsMutations } from './mutations/useSettingsMutations';
+export { usePodiumMutations } from './mutations/usePodiumMutations';
 
 import { useCycleMutations } from './mutations/useCycleMutations';
 import { useGuildMutations } from './mutations/useGuildMutations';
@@ -22,6 +23,7 @@ import { useScoreMutations } from './mutations/useScoreMutations';
 import { useBuildMutations } from './mutations/useBuildMutations';
 import { useOCRMutations } from './mutations/useOCRMutations';
 import { useDraftMutations } from './mutations/useDraftMutations';
+import { usePodiumMutations } from './mutations/usePodiumMutations';
 
 /** Hook combiné — maintient la compatibilité avec l'API existante. */
 export const useAPIMutations = () => ({
@@ -32,4 +34,5 @@ export const useAPIMutations = () => ({
   ...useBuildMutations(),
   ...useOCRMutations(),
   ...useDraftMutations(),
+  ...usePodiumMutations(),
 });
