@@ -11,12 +11,30 @@ import { useAuth } from "@/providers/AuthProvider";
 import { NOTIFICATION_TYPES, NOTIFICATION_TYPE_LABELS } from "@/utils/notificationTypes";
 
 const GuildNotificationRow: React.FC<{ guild: IGuild }> = ({ guild }) => {
-    const { updateGuild } = useAPIMutations();
+    const { updateGuild, testGuildNotification } = useAPIMutations();
     const toast = useToast();
     const [channelId, setChannelId] = useState(guild.discord_channel_id || "");
     const [generalChannelId, setGeneralChannelId] = useState(guild.discord_general_channel_id || "");
     const [disabledTypes, setDisabledTypes] = useState<NotificationType[]>(guild.disabled_notification_types || []);
     const [isSaving, setIsSaving] = useState(false);
+    const [testingChannel, setTestingChannel] = useState<"chef" | "general" | null>(null);
+
+    const handleTest = async (which: "chef" | "general") => {
+        const value = which === "chef" ? channelId : generalChannelId;
+        if (!value.trim()) {
+            toast({ title: "Renseigne un ID de channel avant de tester", status: "warning" });
+            return;
+        }
+        setTestingChannel(which);
+        try {
+            await testGuildNotification(guild._id, value.trim());
+            toast({ title: "Notification de test envoyée", status: "success" });
+        } catch (error) {
+            toast({ title: error instanceof Error ? error.message : "Échec de l'envoi", status: "error" });
+        } finally {
+            setTestingChannel(null);
+        }
+    };
 
     useEffect(() => {
         setChannelId(guild.discord_channel_id || "");
@@ -54,19 +72,43 @@ const GuildNotificationRow: React.FC<{ guild: IGuild }> = ({ guild }) => {
                 <VStack align="stretch" spacing={4}>
                     <Box>
                         <Text fontSize="sm" mb={1}>ID du channel Discord — chef (accès restreint)</Text>
-                        <Input
-                            placeholder="ID du channel Discord chef"
-                            value={channelId}
-                            onChange={(e) => setChannelId(e.target.value)}
-                        />
+                        <Flex gap={2}>
+                            <Input
+                                placeholder="ID du channel Discord chef"
+                                value={channelId}
+                                onChange={(e) => setChannelId(e.target.value)}
+                            />
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleTest("chef")}
+                                isLoading={testingChannel === "chef"}
+                                isDisabled={testingChannel !== null}
+                                flexShrink={0}
+                            >
+                                Tester
+                            </Button>
+                        </Flex>
                     </Box>
                     <Box>
                         <Text fontSize="sm" mb={1}>ID du channel Discord — général (tous les membres)</Text>
-                        <Input
-                            placeholder="ID du channel Discord général"
-                            value={generalChannelId}
-                            onChange={(e) => setGeneralChannelId(e.target.value)}
-                        />
+                        <Flex gap={2}>
+                            <Input
+                                placeholder="ID du channel Discord général"
+                                value={generalChannelId}
+                                onChange={(e) => setGeneralChannelId(e.target.value)}
+                            />
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleTest("general")}
+                                isLoading={testingChannel === "general"}
+                                isDisabled={testingChannel !== null}
+                                flexShrink={0}
+                            >
+                                Tester
+                            </Button>
+                        </Flex>
                     </Box>
                     <Box>
                         <Text fontSize="sm" mb={2}>Notifications désactivées pour cette guilde</Text>

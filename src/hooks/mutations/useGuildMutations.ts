@@ -34,6 +34,15 @@ export const useGuildMutations = () => {
     return result;
   };
 
+  // channelId n'est pas forcément celui déjà enregistré : sert à tester une valeur avant
+  // de l'avoir sauvegardée.
+  const testGuildNotification = async (guildId: string, channelId: string) => {
+    return request(`${apiUrl}/api/guildes/${guildId}/test-notification`, {
+      method: 'POST',
+      body: JSON.stringify({ channel_id: channelId }),
+    }, { fallbackError: "Erreur lors de l'envoi de la notification de test" });
+  };
+
   const toggleGuildDisable = async (guildId: string) => {
     const result = await request(`${apiUrl}/api/guildes/${guildId}/toggle-disable`, {
       method: 'PATCH',
@@ -60,5 +69,5 @@ export const useGuildMutations = () => {
     return result;
   };
 
-  return { createGuild, updateGuild, deleteGuild, toggleGuildDisable, assignUserToGuild, removeGuildMember };
+  return { createGuild, updateGuild, deleteGuild, testGuildNotification, toggleGuildDisable, assignUserToGuild, removeGuildMember };
 };
