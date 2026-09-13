@@ -21,3 +21,19 @@ export const useNotificationSettings = () => {
     mutate,
   };
 };
+
+export const usePodiumSettings = () => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+
+  const { data, error, isLoading, mutate } = useSWR<{
+    success: boolean;
+    min_scores_for_ranking: number;
+  }>(`${apiUrl}/api/settings/podium`, authenticatedFetcher, { revalidateOnFocus: false });
+
+  return {
+    minScoresForRanking: data?.min_scores_for_ranking ?? 0,
+    isLoading,
+    error,
+    mutate,
+  };
+};

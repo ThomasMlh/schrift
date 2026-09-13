@@ -17,5 +17,14 @@ export const useSettingsMutations = () => {
     return result;
   };
 
-  return { updateGlobalNotificationSettings };
+  const updatePodiumMinScores = async (minScoresForRanking: number) => {
+    const result = await request(`${apiUrl}/api/settings/podium`, {
+      method: 'PUT',
+      body: JSON.stringify({ min_scores_for_ranking: minScoresForRanking }),
+    }, { fallbackError: 'Erreur lors de la mise à jour du seuil du podium' });
+    await mutate(`${apiUrl}/api/settings/podium`);
+    return result;
+  };
+
+  return { updateGlobalNotificationSettings, updatePodiumMinScores };
 };

@@ -1,11 +1,13 @@
 import {
   Box, VStack, HStack, Text, Button, ButtonGroup, Grid, GridItem, Flex, Image, Input,
   Avatar, Badge, Divider, Alert, AlertIcon, useColorModeValue, useToast,
+  NumberInput, NumberInputField,
 } from "@chakra-ui/react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { RepeatIcon } from "@chakra-ui/icons";
-import { useCycles, useGuilds } from "@/hooks/useAPI";
+import { useCycles, useGuilds, usePodiumSettings } from "@/hooks/useAPI";
 import { useAuth } from "@/providers/AuthProvider";
+import { useSettingsMutations } from "@/hooks/useAPIMutations";
 import { apiUrl } from "@/hooks/api/shared";
 import { bucketUrl } from "@/utils/apiRequest";
 import { CycleSelect } from "@/components/ui/CycleSelect";
@@ -49,10 +51,32 @@ const DEFAULT_GUILD_ORDER = ["A", "C", "B", "E", "D"];
 // l'ordre de guildes choisi. Ne modifie rien — juste une proposition à appliquer à la main via
 // l'onglet Draft si elle est validée.
 const DraftProposalSection = () => {
-  const { token } = useAuth();
+  const { token, isAdmin } = useAuth();
   const toast = useToast();
   const { cycles } = useCycles({ authenticated: true });
   const { guilds } = useGuilds(true);
+  const { minScoresForRanking: savedMinScores, mutate: mutatePodiumSettings } = usePodiumSettings();
+  const { updatePodiumMinScores } = useSettingsMutations();
+
+  const [minScoresInput, setMinScoresInput] = useState(0);
+  const [isSavingThreshold, setIsSavingThreshold] = useState(false);
+
+  useEffect(() => {
+    setMinScoresInput(savedMinScores);
+  }, [savedMinScores]);
+
+  const handleSaveThreshold = async () => {
+    setIsSavingThreshold(true);
+    try {
+      await updatePodiumMinScores(minScoresInput);
+      await mutatePodiumSettings();
+      toast({ title: "Seuil du podium mis à jour", status: "success" });
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : "Erreur lors de la mise à jour", status: "error" });
+    } finally {
+      setIsSavingThreshold(false);
+    }
+  };
 
   const [selectedCycleId, setSelectedCycleId] = useState("");
   const [rankingType, setRankingType] = useState<RankingType>("average");
@@ -201,6 +225,34 @@ const DraftProposalSection = () => {
             ))}
           </HStack>
         </Box>
+
+        {isAdmin && (
+          <Box>
+            <Text fontSize="xs" color={mutedText} mb={1}>
+              Seuil podium — scores minimum sur le cycle pour être classé (0 = désactivé)
+            </Text>
+            <HStack spacing={2}>
+              <NumberInput
+                value={minScoresInput}
+                onChange={(_, valueAsNumber) => setMinScoresInput(isNaN(valueAsNumber) ? 0 : valueAsNumber)}
+                min={0}
+                size="sm"
+                w="100px"
+              >
+                <NumberInputField />
+              </NumberInput>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleSaveThreshold}
+                isLoading={isSavingThreshold}
+                isDisabled={minScoresInput === savedMinScores}
+              >
+                Enregistrer
+              </Button>
+            </HStack>
+          </Box>
+        )}
 
         {result && (
           <>
