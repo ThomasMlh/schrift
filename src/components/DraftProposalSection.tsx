@@ -1,10 +1,10 @@
 import {
   Box, VStack, HStack, Text, Button, ButtonGroup, Grid, GridItem, Flex, Image, Input,
   Avatar, Badge, Divider, Alert, AlertIcon, useColorModeValue, useToast,
-  NumberInput, NumberInputField,
+  NumberInput, NumberInputField, IconButton,
 } from "@chakra-ui/react";
-import { useState, useMemo, useEffect } from "react";
-import { RepeatIcon } from "@chakra-ui/icons";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { RepeatIcon, TimeIcon, DeleteIcon, ViewIcon } from "@chakra-ui/icons";
 import { useCycles, useGuilds, usePodiumSettings } from "@/hooks/useAPI";
 import { useAuth } from "@/providers/AuthProvider";
 import { useSettingsMutations } from "@/hooks/useAPIMutations";
@@ -42,6 +42,21 @@ interface DraftProposalResponse {
     totalCandidates: number;
     minScoresRequired?: number;
   };
+}
+
+interface HistoryEntry {
+  _id: string;
+  created_at: string;
+  created_by?: string;
+  cycle_name: string;
+  ranking_type: RankingType;
+  guild_order: string[];
+  total_candidates: number;
+}
+
+interface HistoryEntryFull extends HistoryEntry {
+  guilds: DraftProposalGuild[];
+  leftover: DraftProposalPlayer[];
 }
 
 const DEFAULT_GUILD_ORDER = ["A", "C", "B", "E", "D"];
@@ -85,6 +100,58 @@ const DraftProposalSection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [loadingHistoryId, setLoadingHistoryId] = useState<string | null>(null);
+  const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
+
+  const authHeaders = useMemo(() => ({ Authorization: token ? `Bearer ${token}` : "" }), [token]);
+
+  const fetchHistory = useCallback(async () => {
+    try {
+      const response = await fetch(`${apiUrl}/api/podium/draft-proposal/history`, { headers: authHeaders });
+      const data = await response.json();
+      if (response.ok && data.success) setHistory(data.entries);
+    } catch {
+      // silencieux : l'historique est un bonus, pas une fonctionnalité critique
+    }
+  }, [authHeaders]);
+
+  useEffect(() => {
+    if (isAdmin) fetchHistory();
+  }, [isAdmin, fetchHistory]);
+
+  const handleLoadHistoryEntry = async (id: string) => {
+    setLoadingHistoryId(id);
+    try {
+      const response = await fetch(`${apiUrl}/api/podium/draft-proposal/history/${id}`, { headers: authHeaders });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || "Erreur lors du chargement");
+      const entry = data.entry as HistoryEntryFull;
+      setRankingType(entry.ranking_type);
+      setGuildOrder(entry.guild_order);
+      setResult({
+        guilds: entry.guilds,
+        leftover: entry.leftover,
+        meta: { totalCandidates: entry.total_candidates },
+      });
+    } catch (err) {
+      toast({ title: err instanceof Error ? err.message : "Erreur inconnue", status: "error" });
+    } finally {
+      setLoadingHistoryId(null);
+    }
+  };
+
+  const handleDeleteHistoryEntry = async (id: string) => {
+    setDeletingHistoryId(id);
+    try {
+      await fetch(`${apiUrl}/api/podium/draft-proposal/history/${id}`, { method: "DELETE", headers: authHeaders });
+      setHistory((prev) => prev.filter((e) => e._id !== id));
+    } catch (err) {
+      toast({ title: err instanceof Error ? err.message : "Erreur lors de la suppression", status: "error" });
+    } finally {
+      setDeletingHistoryId(null);
+    }
+  };
 
   const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
@@ -127,13 +194,14 @@ const DraftProposalSection = () => {
         guild_names: guildOrder.join(","),
       });
       const response = await fetch(`${apiUrl}/api/podium/draft-proposal?${params}`, {
-        headers: { Authorization: token ? `Bearer ${token}` : "" },
+        headers: authHeaders,
       });
       const data = await response.json();
       if (!response.ok || !data.success) {
         throw new Error(data.message || "Erreur lors de la génération de la proposition");
       }
       setResult(data);
+      fetchHistory();
     } catch (err) {
       toast({
         title: "Erreur",
@@ -251,6 +319,54 @@ const DraftProposalSection = () => {
                 Enregistrer
               </Button>
             </HStack>
+          </Box>
+        )}
+
+        {isAdmin && history.length > 0 && (
+          <Box>
+            <HStack mb={1}>
+              <TimeIcon boxSize={3} color={mutedText} />
+              <Text fontSize="xs" color={mutedText}>Propositions générées récemment</Text>
+            </HStack>
+            <VStack align="stretch" spacing={1} maxH="180px" overflowY="auto">
+              {history.map((entry) => (
+                <HStack
+                  key={entry._id}
+                  fontSize="xs"
+                  px={2}
+                  py={1}
+                  borderRadius="md"
+                  bg={rowAltBg}
+                  spacing={2}
+                >
+                  <Text color={mutedText} whiteSpace="nowrap">
+                    {new Date(entry.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
+                  </Text>
+                  <Text isTruncated flex={1}>
+                    {entry.cycle_name} · {entry.ranking_type === "average" ? "Moyenne" : "Total"} · {entry.guild_order.join(">")}
+                    {entry.created_by ? ` · ${entry.created_by}` : ""}
+                  </Text>
+                  <Text color={mutedText} whiteSpace="nowrap">{entry.total_candidates} joueurs</Text>
+                  <IconButton
+                    aria-label="Voir cette proposition"
+                    icon={<ViewIcon />}
+                    size="xs"
+                    variant="ghost"
+                    isLoading={loadingHistoryId === entry._id}
+                    onClick={() => handleLoadHistoryEntry(entry._id)}
+                  />
+                  <IconButton
+                    aria-label="Supprimer cette entrée"
+                    icon={<DeleteIcon />}
+                    size="xs"
+                    variant="ghost"
+                    colorScheme="red"
+                    isLoading={deletingHistoryId === entry._id}
+                    onClick={() => handleDeleteHistoryEntry(entry._id)}
+                  />
+                </HStack>
+              ))}
+            </VStack>
           </Box>
         )}
 
