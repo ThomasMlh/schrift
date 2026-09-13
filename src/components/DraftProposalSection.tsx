@@ -1,0 +1,306 @@
+import {
+  Box, VStack, HStack, Text, Button, ButtonGroup, Grid, GridItem, Flex, Image,
+  Avatar, Badge, Divider, Alert, AlertIcon, useColorModeValue, useToast,
+} from "@chakra-ui/react";
+import { useState, useMemo } from "react";
+import { RepeatIcon } from "@chakra-ui/icons";
+import { useCycles, useGuilds } from "@/hooks/useAPI";
+import { useAuth } from "@/providers/AuthProvider";
+import { apiUrl } from "@/hooks/api/shared";
+import { bucketUrl } from "@/utils/apiRequest";
+import { CycleSelect } from "@/components/ui/CycleSelect";
+import { CustomSelect } from "@/components/ui/CustomSelect";
+import { getUserAvatarUrl } from "@/utils/discord";
+import { getGuildColor } from "@/components/DraftSection";
+
+type RankingType = "average" | "total";
+
+interface DraftProposalPlayer {
+  bbs_id: string;
+  bbs_name?: string;
+  global_name?: string;
+  discord_id?: string;
+  avatar?: string;
+  averageScore: number;
+  totalScore: number;
+  totalScores: number;
+  overallRank: number;
+  currentGuildName: string | null;
+}
+
+interface DraftProposalGuild {
+  guild_name: string;
+  players: DraftProposalPlayer[];
+}
+
+interface DraftProposalResponse {
+  guilds: DraftProposalGuild[];
+  leftover: DraftProposalPlayer[];
+  meta: {
+    totalCandidates: number;
+    minScoresRequired?: number;
+  };
+}
+
+const DEFAULT_GUILD_ORDER = ["A", "C", "B", "E", "D"];
+
+// Outil admin en lecture seule : simule une répartition des 5 guildes sur un cycle donné, en
+// classant tous leurs membres actuels par score et en les répartissant par paquets de 20 dans
+// l'ordre de guildes choisi. Ne modifie rien — juste une proposition à appliquer à la main via
+// l'onglet Draft si elle est validée.
+const DraftProposalSection = () => {
+  const { token } = useAuth();
+  const toast = useToast();
+  const { cycles } = useCycles({ authenticated: true });
+  const { guilds } = useGuilds(true);
+
+  const [selectedCycleId, setSelectedCycleId] = useState("");
+  const [rankingType, setRankingType] = useState<RankingType>("average");
+  const [guildOrder, setGuildOrder] = useState<string[]>(DEFAULT_GUILD_ORDER);
+  const [result, setResult] = useState<DraftProposalResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  const cardBg = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const mutedText = useColorModeValue("gray.600", "gray.400");
+  const headerBg = useColorModeValue("gray.50", "gray.900");
+  const rowAltBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const hoverBg = useColorModeValue("orange.50", "orange.900");
+
+  const selectedCycle = cycles.find((c) => c._id === selectedCycleId);
+  const guildOptions = guilds.map((g) => ({ value: g.name, label: g.name }));
+
+  // Même code couleur par guilde que l'onglet Draft juste en dessous (indexé dans le même
+  // ordre, celui de useGuilds), plutôt qu'une palette propre à ce tableau.
+  const guildColorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    guilds.forEach((g, i) => { map[g.name] = getGuildColor(i); });
+    return map;
+  }, [guilds]);
+
+  const handleGuildOrderChange = (index: number, value: string) => {
+    setGuildOrder((prev) => prev.map((g, i) => (i === index ? value : g)));
+  };
+
+  const handleGenerate = async () => {
+    if (!selectedCycle) return;
+    setIsLoading(true);
+    setResult(null);
+    try {
+      const params = new URLSearchParams({
+        cycle_name: selectedCycle.name,
+        year: String(selectedCycle.year),
+        ranking_type: rankingType,
+        guild_names: guildOrder.join(","),
+      });
+      const response = await fetch(`${apiUrl}/api/podium/draft-proposal?${params}`, {
+        headers: { Authorization: token ? `Bearer ${token}` : "" },
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Erreur lors de la génération de la proposition");
+      }
+      setResult(data);
+    } catch (err) {
+      toast({
+        title: "Erreur",
+        description: err instanceof Error ? err.message : "Erreur inconnue",
+        status: "error",
+        duration: 4000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Box borderWidth="1px" borderColor={borderColor} borderRadius="lg" p={5} bg={cardBg}>
+      <VStack align="stretch" spacing={4}>
+        <Box>
+          <Text fontWeight="bold" fontSize="lg">🧮 Proposition de draft automatique</Text>
+          <Text fontSize="sm" color={mutedText}>
+            Simulation en lecture seule : classe les membres actuels des guildes sélectionnées par score sur un
+            cycle, et propose une répartition par paquets de 20 (les meilleurs dans la 1ère guilde, etc.). Rien
+            n'est appliqué — à toi de faire les mouvements dans l'onglet Draft si tu valides la proposition.
+          </Text>
+        </Box>
+
+        <HStack spacing={3} flexWrap="wrap" align="flex-end">
+          <Box>
+            <Text fontSize="xs" color={mutedText} mb={1}>Cycle</Text>
+            <CycleSelect
+              cycles={cycles}
+              value={selectedCycleId}
+              onChange={setSelectedCycleId}
+              placeholder="Choisir un cycle"
+              valueKey="_id"
+              allowDeselect={false}
+              size="md"
+              w="220px"
+            />
+          </Box>
+
+          <Box>
+            <Text fontSize="xs" color={mutedText} mb={1}>Classement</Text>
+            <ButtonGroup size="sm" isAttached variant="outline">
+              <Button
+                colorScheme={rankingType === "average" ? "blue" : undefined}
+                variant={rankingType === "average" ? "solid" : "outline"}
+                onClick={() => setRankingType("average")}
+              >
+                Moyenne
+              </Button>
+              <Button
+                colorScheme={rankingType === "total" ? "blue" : undefined}
+                variant={rankingType === "total" ? "solid" : "outline"}
+                onClick={() => setRankingType("total")}
+              >
+                Total
+              </Button>
+            </ButtonGroup>
+          </Box>
+
+          <Button
+            leftIcon={<RepeatIcon />}
+            colorScheme="purple"
+            onClick={handleGenerate}
+            isLoading={isLoading}
+            isDisabled={!selectedCycle}
+          >
+            Générer
+          </Button>
+        </HStack>
+
+        <Box>
+          <Text fontSize="xs" color={mutedText} mb={1}>
+            Ordre des guildes (1er paquet de 20 → 1ère guilde, etc.)
+          </Text>
+          <HStack spacing={2} flexWrap="wrap">
+            {guildOrder.map((g, i) => (
+              <HStack key={i} spacing={1.5}>
+                {i > 0 && <Text color={mutedText} fontSize="sm">›</Text>}
+                <Box w="10px" h="10px" borderRadius="sm" bg={`${guildColorMap[g] || "gray"}.500`} flexShrink={0} />
+                <CustomSelect
+                  value={g}
+                  onChange={(value) => handleGuildOrderChange(i, value)}
+                  options={guildOptions}
+                  allowDeselect={false}
+                  size="sm"
+                  w="90px"
+                />
+              </HStack>
+            ))}
+          </HStack>
+        </Box>
+
+        {result && (
+          <>
+            <Divider />
+            {result.meta.minScoresRequired !== undefined && (
+              <Alert status="info" fontSize="sm" borderRadius="md">
+                <AlertIcon />
+                Seuls les joueurs avec au moins {result.meta.minScoresRequired} scores sur le cycle sont classés
+                ({result.meta.totalCandidates} joueur(s) éligible(s) au total).
+              </Alert>
+            )}
+
+            <Box borderWidth="1px" borderColor={borderColor} borderRadius="lg" overflowX="auto">
+              <Grid
+                templateColumns={{
+                  base: `repeat(${result.guilds.length}, minmax(350px, 1fr))`,
+                  md: `repeat(${result.guilds.length}, minmax(450px, 1fr))`,
+                }}
+                minW={{ base: `${result.guilds.length * 350}px`, md: `${result.guilds.length * 450}px` }}
+              >
+                {result.guilds.map((g, colIndex) => {
+                  const color = guildColorMap[g.guild_name] || "gray";
+                  return (
+                    <GridItem
+                      key={g.guild_name}
+                      borderRightWidth={colIndex < result.guilds.length - 1 ? "1px" : 0}
+                      borderColor={borderColor}
+                    >
+                      <HStack spacing={2} px={3} py={2.5} borderBottomWidth="2px" borderColor={borderColor} bg={headerBg}>
+                        {!imageErrors[g.guild_name] ? (
+                          <Image
+                            src={`${bucketUrl}/guilds/${g.guild_name}.png`}
+                            alt={g.guild_name}
+                            w="40px"
+                            h="40px"
+                            objectFit="contain"
+                            flexShrink={0}
+                            onError={() => setImageErrors((prev) => ({ ...prev, [g.guild_name]: true }))}
+                          />
+                        ) : (
+                          <Flex w="34px" h="34px" borderRadius="md" bg={`${color}.500`} align="center" justify="center" flexShrink={0}>
+                            <Text color="white" fontWeight="800" fontSize="lg">{g.guild_name}</Text>
+                          </Flex>
+                        )}
+                        <Box minW={0}>
+                          <Text fontWeight="bold" fontSize="sm" isTruncated>Guilde {g.guild_name}</Text>
+                          <Text fontSize="xs" fontFamily="mono" color={mutedText}>{g.players.length}/20 joueurs</Text>
+                        </Box>
+                      </HStack>
+
+                      <VStack align="stretch" spacing={0}>
+                        {g.players.map((p, i) => (
+                          <HStack
+                            key={p.bbs_id}
+                            spacing={2}
+                            px={3}
+                            py={1.5}
+                            bg={i % 2 === 1 ? rowAltBg : undefined}
+                            _hover={{ bg: hoverBg }}
+                            fontSize="sm"
+                          >
+                            <Text w="20px" fontFamily="mono" fontSize="xs" color={mutedText} textAlign="right">{p.overallRank}</Text>
+                            <Avatar
+                              size="2xs"
+                              src={getUserAvatarUrl({ discord_id: p.discord_id, avatar: p.avatar }) || undefined}
+                              name={p.bbs_name}
+                            />
+                            <HStack flex={1} minW={0} spacing={1.5}>
+                              <Text isTruncated>{p.bbs_name || p.global_name}</Text>
+                              {p.currentGuildName && p.currentGuildName !== g.guild_name && (
+                                <Badge
+                                  colorScheme={guildColorMap[p.currentGuildName] || "orange"}
+                                  fontSize="0.6rem" px={1.5} borderRadius="sm" fontFamily="mono" flexShrink={0}
+                                >
+                                  ◦ {p.currentGuildName}
+                                </Badge>
+                              )}
+                            </HStack>
+                            <Text fontFamily="mono" fontSize="xs" color={mutedText} whiteSpace="nowrap">
+                              {(rankingType === "average" ? p.averageScore : p.totalScore).toLocaleString("fr-FR")}
+                            </Text>
+                          </HStack>
+                        ))}
+                        {g.players.length === 0 && (
+                          <Text fontSize="sm" color={mutedText} px={3} py={2}>Aucun joueur éligible.</Text>
+                        )}
+                      </VStack>
+                    </GridItem>
+                  );
+                })}
+              </Grid>
+            </Box>
+
+            {result.leftover.length > 0 && (
+              <Box borderWidth="1px" borderColor={borderColor} borderRadius="md" p={3}>
+                <Text fontWeight="bold" mb={2}>
+                  Hors répartition ({result.leftover.length})
+                </Text>
+                <Text fontSize="sm" color={mutedText}>
+                  Plus de candidats que de places (5 guildes × 20) : ces joueurs ne rentrent dans aucun paquet.
+                </Text>
+              </Box>
+            )}
+          </>
+        )}
+      </VStack>
+    </Box>
+  );
+};
+
+export default DraftProposalSection;

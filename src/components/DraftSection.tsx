@@ -40,11 +40,12 @@ import { useAPIMutations } from "@/hooks/useAPIMutations";
 import { CustomSelect } from "./ui/CustomSelect";
 import { PageLoader } from "./ui/PageLoader";
 
-// Palette de couleurs Chakra assignées par index de guilde
-const GUILD_COLORS = ["purple", "blue", "teal", "green", "orange", "pink", "cyan", "red"] as const;
-type GuildColor = typeof GUILD_COLORS[number];
+// Palette de couleurs Chakra assignées par index de guilde — exportée pour que d'autres vues
+// (ex: DraftProposalSection) utilisent le même code couleur par guilde que l'onglet Draft.
+export const GUILD_COLORS = ["purple", "blue", "teal", "green", "orange", "pink", "cyan", "red"] as const;
+export type GuildColor = typeof GUILD_COLORS[number];
 
-const getGuildColor = (index: number): GuildColor =>
+export const getGuildColor = (index: number): GuildColor =>
   GUILD_COLORS[index % GUILD_COLORS.length];
 
 interface DraftMove {

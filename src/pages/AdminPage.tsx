@@ -1,7 +1,8 @@
-import { Box, Flex, Heading, HStack, Text, Button, useToast, useColorMode } from "@chakra-ui/react";
+import { Box, Flex, Heading, HStack, VStack, Text, Button, useToast, useColorMode } from "@chakra-ui/react";
 import { useAdminMutations } from "@/hooks/mutations/useAdminMutations";
 import GuildsAdminSection from "../components/GuildsAdminSection";
 import DraftSection from "../components/DraftSection";
+import DraftProposalSection from "../components/DraftProposalSection";
 import CyclesSection from "../components/CyclesSection";
 import ScoresSection from "../components/ScoresSection";
 import UsersTable from "../components/UsersTable";
@@ -135,7 +136,12 @@ const AdminPage = () => {
   const renderPage = () => {
     switch (currentPage) {
       case "draft":
-        return <DraftSection onDraftComplete={() => {}} />;
+        return (
+          <VStack align="stretch" spacing={6}>
+            <DraftProposalSection />
+            <DraftSection onDraftComplete={() => {}} />
+          </VStack>
+        );
       case "cycles":
         return <CyclesSection />;
       case "scores":
