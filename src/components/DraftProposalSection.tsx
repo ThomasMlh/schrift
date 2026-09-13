@@ -1,5 +1,5 @@
 import {
-  Box, VStack, HStack, Text, Button, ButtonGroup, Grid, GridItem, Flex, Image,
+  Box, VStack, HStack, Text, Button, ButtonGroup, Grid, GridItem, Flex, Image, Input,
   Avatar, Badge, Divider, Alert, AlertIcon, useColorModeValue, useToast,
 } from "@chakra-ui/react";
 import { useState, useMemo } from "react";
@@ -60,6 +60,7 @@ const DraftProposalSection = () => {
   const [result, setResult] = useState<DraftProposalResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [searchQuery, setSearchQuery] = useState("");
 
   const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
@@ -67,6 +68,13 @@ const DraftProposalSection = () => {
   const headerBg = useColorModeValue("gray.50", "gray.900");
   const rowAltBg = useColorModeValue("gray.50", "whiteAlpha.50");
   const hoverBg = useColorModeValue("orange.50", "orange.900");
+  const matchBg = useColorModeValue("yellow.100", "yellow.700");
+
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const isMatch = (p: DraftProposalPlayer) =>
+    !!normalizedSearch &&
+    ((p.bbs_name && p.bbs_name.toLowerCase().includes(normalizedSearch)) ||
+      (p.global_name && p.global_name.toLowerCase().includes(normalizedSearch)));
 
   const selectedCycle = cycles.find((c) => c._id === selectedCycleId);
   const guildOptions = guilds.map((g) => ({ value: g.name, label: g.name }));
@@ -205,6 +213,21 @@ const DraftProposalSection = () => {
               </Alert>
             )}
 
+            <HStack spacing={3}>
+              <Input
+                placeholder="Rechercher un joueur…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                size="sm"
+                maxW="260px"
+              />
+              {normalizedSearch && (
+                <Text fontSize="xs" color={mutedText}>
+                  {result.guilds.reduce((sum, g) => sum + g.players.filter(isMatch).length, 0)} résultat(s)
+                </Text>
+              )}
+            </HStack>
+
             <Box borderWidth="1px" borderColor={borderColor} borderRadius="lg" overflowX="auto">
               <Grid
                 templateColumns={{
@@ -250,7 +273,8 @@ const DraftProposalSection = () => {
                             spacing={2}
                             px={3}
                             py={1.5}
-                            bg={i % 2 === 1 ? rowAltBg : undefined}
+                            bg={isMatch(p) ? matchBg : (i % 2 === 1 ? rowAltBg : undefined)}
+                            opacity={normalizedSearch && !isMatch(p) ? 0.4 : 1}
                             _hover={{ bg: hoverBg }}
                             fontSize="sm"
                           >
