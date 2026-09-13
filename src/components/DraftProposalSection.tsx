@@ -28,6 +28,7 @@ interface DraftProposalPlayer {
   totalScores: number;
   overallRank: number;
   currentGuildName: string | null;
+  isPinned?: boolean;
 }
 
 interface DraftProposalGuild {
@@ -103,6 +104,31 @@ const DraftProposalSection = () => {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loadingHistoryId, setLoadingHistoryId] = useState<string | null>(null);
   const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
+
+  // "Et si" : bbs_id -> nom affiché, pour retrouver qui exclure/épingler même une fois que sa
+  // ligne a disparu du tableau après une régénération.
+  const [excluded, setExcluded] = useState<Map<string, string>>(new Map());
+  const [pinned, setPinned] = useState<Map<string, string>>(new Map());
+
+  const toggleExcluded = (p: DraftProposalPlayer) => {
+    setExcluded((prev) => {
+      const next = new Map(prev);
+      if (next.has(p.bbs_id)) next.delete(p.bbs_id);
+      else next.set(p.bbs_id, p.bbs_name || p.global_name || p.bbs_id);
+      return next;
+    });
+    setPinned((prev) => { if (!prev.has(p.bbs_id)) return prev; const next = new Map(prev); next.delete(p.bbs_id); return next; });
+  };
+
+  const togglePinned = (p: DraftProposalPlayer) => {
+    setPinned((prev) => {
+      const next = new Map(prev);
+      if (next.has(p.bbs_id)) next.delete(p.bbs_id);
+      else next.set(p.bbs_id, p.bbs_name || p.global_name || p.bbs_id);
+      return next;
+    });
+    setExcluded((prev) => { if (!prev.has(p.bbs_id)) return prev; const next = new Map(prev); next.delete(p.bbs_id); return next; });
+  };
 
   const authHeaders = useMemo(() => ({ Authorization: token ? `Bearer ${token}` : "" }), [token]);
 
@@ -193,6 +219,8 @@ const DraftProposalSection = () => {
         ranking_type: rankingType,
         guild_names: guildOrder.join(","),
       });
+      if (excluded.size > 0) params.set("excluded_bbs_ids", [...excluded.keys()].join(","));
+      if (pinned.size > 0) params.set("pinned_bbs_ids", [...pinned.keys()].join(","));
       const response = await fetch(`${apiUrl}/api/podium/draft-proposal?${params}`, {
         headers: authHeaders,
       });
@@ -318,6 +346,37 @@ const DraftProposalSection = () => {
               >
                 Enregistrer
               </Button>
+            </HStack>
+          </Box>
+        )}
+
+        {(excluded.size > 0 || pinned.size > 0) && (
+          <Box>
+            <HStack justify="space-between" mb={1}>
+              <Text fontSize="xs" color={mutedText}>
+                Simulation "et si" — ces choix s'appliquent à la prochaine génération
+              </Text>
+              <Button
+                size="xs"
+                variant="link"
+                onClick={() => { setExcluded(new Map()); setPinned(new Map()); }}
+              >
+                Réinitialiser
+              </Button>
+            </HStack>
+            <HStack spacing={1.5} flexWrap="wrap">
+              {[...pinned.entries()].map(([id, name]) => (
+                <Badge key={id} colorScheme="blue" borderRadius="full" px={2} py={0.5} fontSize="0.7rem">
+                  📌 {name}
+                  <Text as="span" ml={1.5} cursor="pointer" onClick={() => setPinned((prev) => { const n = new Map(prev); n.delete(id); return n; })}>✕</Text>
+                </Badge>
+              ))}
+              {[...excluded.entries()].map(([id, name]) => (
+                <Badge key={id} colorScheme="red" borderRadius="full" px={2} py={0.5} fontSize="0.7rem">
+                  exclu · {name}
+                  <Text as="span" ml={1.5} cursor="pointer" onClick={() => setExcluded((prev) => { const n = new Map(prev); n.delete(id); return n; })}>✕</Text>
+                </Badge>
+              ))}
             </HStack>
           </Box>
         )}
@@ -454,6 +513,9 @@ const DraftProposalSection = () => {
                             />
                             <HStack flex={1} minW={0} spacing={1.5}>
                               <Text isTruncated>{p.bbs_name || p.global_name}</Text>
+                              {p.isPinned && (
+                                <Text fontSize="0.7rem" flexShrink={0} title="Épinglé dans sa guilde actuelle">📌</Text>
+                              )}
                               {p.currentGuildName && p.currentGuildName !== g.guild_name && (
                                 <Badge
                                   colorScheme={guildColorMap[p.currentGuildName] || "orange"}
@@ -466,6 +528,24 @@ const DraftProposalSection = () => {
                             <Text fontFamily="mono" fontSize="xs" color={mutedText} whiteSpace="nowrap">
                               {(rankingType === "average" ? p.averageScore : p.totalScore).toLocaleString("fr-FR")}
                             </Text>
+                            <HStack spacing={0.5} flexShrink={0}>
+                              <IconButton
+                                aria-label="Épingler dans la guilde actuelle"
+                                icon={<Text fontSize="0.7rem">📌</Text>}
+                                size="xs"
+                                variant={pinned.has(p.bbs_id) ? "solid" : "ghost"}
+                                colorScheme={pinned.has(p.bbs_id) ? "blue" : undefined}
+                                onClick={() => togglePinned(p)}
+                              />
+                              <IconButton
+                                aria-label="Exclure de la simulation"
+                                icon={<Text fontSize="0.7rem">✕</Text>}
+                                size="xs"
+                                variant={excluded.has(p.bbs_id) ? "solid" : "ghost"}
+                                colorScheme={excluded.has(p.bbs_id) ? "red" : undefined}
+                                onClick={() => toggleExcluded(p)}
+                              />
+                            </HStack>
                           </HStack>
                         ))}
                         {g.players.length === 0 && (
