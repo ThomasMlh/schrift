@@ -57,7 +57,7 @@ interface ScoreRowProps {
     member: IUser;
     index: number;
     score: number;
-    onChange: (userId: string, value: number) => void;
+    onChange: (bbsId: string, value: number) => void;
     isDisabled: boolean;
     isDark: boolean;
     rowBg: string;
@@ -71,7 +71,7 @@ interface ScoreRowProps {
 interface ScoreCardProps {
     member: IUser;
     score: number;
-    onChange: (userId: string, value: number) => void;
+    onChange: (bbsId: string, value: number) => void;
     isDisabled: boolean;
     isDark: boolean;
     rowBg: string;
@@ -114,7 +114,7 @@ const ScoreRow = memo(({
                 max={9999999999}
                 step={10000000}
                 value={score}
-                onChange={(_, value) => onChange(member._id, value)}
+                onChange={(_, value) => onChange(member.bbs_id!, value)}
                 isDisabled={isDisabled}
                 w="160px"
                 flexShrink={0}
@@ -161,7 +161,7 @@ const ScoreCard = memo(({
                     max={9999999999}
                     step={10000000}
                     value={score}
-                    onChange={(_, value) => onChange(member._id, value)}
+                    onChange={(_, value) => onChange(member.bbs_id!, value)}
                     isDisabled={isDisabled}
                     format={formatNumber}
                     parse={parseNumber}
@@ -232,7 +232,9 @@ const BulkScoreModal = ({
     const [selectedGuildId, setSelectedGuildId] = useState<string>(isGuildRestricted ? userGuildId || "" : "");
     const [selectedCycleId, setSelectedCycleId] = useState<string>("");
     const [selectedRotationId, setSelectedRotationId] = useState<string>("");
-    const [scores, setScores] = useState<{ [userId: string]: number }>({});
+    // Indexé par bbs_id (le compte), pas user_id : un même user peut avoir plusieurs comptes
+    // bbs dans la même guilde, et chacun doit garder sa propre valeur.
+    const [scores, setScores] = useState<{ [bbsId: string]: number }>({});
     const [hasExistingScores, setHasExistingScores] = useState(false);
     const [displayedMembers, setDisplayedMembers] = useState<IUser[]>([]);
     const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -273,7 +275,7 @@ const BulkScoreModal = ({
             return;
         }
 
-        const newScores: { [userId: string]: number } = {};
+        const newScores: { [bbsId: string]: number } = {};
         let membersToDisplay: IUser[] = [];
         let foundExistingScores = false;
 
@@ -287,12 +289,13 @@ const BulkScoreModal = ({
                     if (user) {
                         // Le bbs_id/bbs_name du COMPTE qui a joué ce score prime sur le miroir du user
                         // (utile si le score appartient à un alt, pas au compte principal actuel).
+                        const bbsId = score.bbs_id || user.bbs_id;
                         membersToDisplay.push({
                             ...user,
-                            bbs_id: score.bbs_id || user.bbs_id,
+                            bbs_id: bbsId,
                             bbs_name: score.bbs_name || user.bbs_name
                         });
-                        newScores[user._id] = score.raw_score || 0;
+                        if (bbsId) newScores[bbsId] = score.raw_score || 0;
                         if (score.raw_score > 0) {
                             foundExistingScores = true;
                         }
@@ -303,7 +306,7 @@ const BulkScoreModal = ({
             // Sinon, utiliser la liste des membres actuels de la guilde
             if (Array.isArray(guildMembers) && guildMembers.length > 0) {
                 guildMembers.forEach((user: IUser) => {
-                    newScores[user._id] = 0;
+                    if (user.bbs_id) newScores[user.bbs_id] = 0;
                 });
                 membersToDisplay = guildMembers;
             }
@@ -324,10 +327,10 @@ const BulkScoreModal = ({
     const selectedCycle = cycles.find(cycle => cycle._id === selectedCycleId);
     const selectedGuild = guilds.find(guild => guild._id === selectedGuildId);
 
-    const handleScoreChange = useCallback((userId: string, score: number) => {
+    const handleScoreChange = useCallback((bbsId: string, score: number) => {
         setScores(prev => ({
             ...prev,
-            [userId]: score
+            [bbsId]: score
         }));
     }, []);
 
@@ -362,7 +365,7 @@ const BulkScoreModal = ({
             cycle_id: selectedCycleId,
             rotation_id: selectedRotationId,
             guild_id: selectedGuildId,
-            raw_score: scores[member._id] || 0
+            raw_score: scores[member.bbs_id!] || 0
         }));
 
         if (scoresData.length === 0) {
@@ -634,10 +637,10 @@ const BulkScoreModal = ({
                                     <VStack spacing={1.5} align="stretch">
                                         {displayedMembers.map((member: IUser, idx: number) => (
                                             <ScoreRow
-                                                key={member._id}
+                                                key={member.bbs_id}
                                                 member={member}
                                                 index={idx}
-                                                score={scores[member._id] || 0}
+                                                score={scores[member.bbs_id!] || 0}
                                                 onChange={handleScoreChange}
                                                 isDisabled={isSubmitting || isLoadingScores}
                                                 isDark={isDark}
@@ -654,9 +657,9 @@ const BulkScoreModal = ({
                                     <SimpleGrid columns={4} spacing={2}>
                                         {displayedMembers.map((member: IUser) => (
                                             <ScoreCard
-                                                key={member._id}
+                                                key={member.bbs_id}
                                                 member={member}
-                                                score={scores[member._id] || 0}
+                                                score={scores[member.bbs_id!] || 0}
                                                 onChange={handleScoreChange}
                                                 isDisabled={isSubmitting || isLoadingScores}
                                                 isDark={isDark}
