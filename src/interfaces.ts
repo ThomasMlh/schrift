@@ -177,6 +177,7 @@ export interface IScore {
   guild_id: string;
   score: number;
   raw_score: number;
+  is_differential?: boolean;
   rank?: number;
   created_at?: string;
   updated_at?: string;
