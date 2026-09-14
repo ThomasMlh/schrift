@@ -3,10 +3,11 @@ import {
     useColorModeValue, IconButton,
     HStack,
     Badge,
-    Avatar
+    Avatar,
+    Portal
 } from "@chakra-ui/react";
 import { ChevronDownIcon, SearchIcon, CloseIcon } from "@chakra-ui/icons";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import type { IUser, IGuild } from "../../interfaces";
 import { getUserAvatarUrl } from "../../utils/discord";
 
@@ -36,7 +37,10 @@ export const UserSearchSelect = ({
 }: UserSearchSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [filteredUsers, setFilteredUsers] = useState<IUser[]>(users || []);
+    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0, maxH: 300, openUp: false });
     const menuRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const selectedUser = users?.find(user => getItemId(user) === selectedUserId);
@@ -78,10 +82,15 @@ export const UserSearchSelect = ({
         }
     }, [searchQuery, users]);
 
-    // Gérer le clic en dehors du composant
+    // Gérer le clic en dehors du composant — le menu est en Portal (hors de menuRef), donc il
+    // faut aussi exclure dropdownRef pour ne pas fermer le menu au clic dedans.
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            const target = event.target as Node;
+            if (
+                menuRef.current && !menuRef.current.contains(target) &&
+                dropdownRef.current && !dropdownRef.current.contains(target)
+            ) {
                 setIsOpen(false);
             }
         };
@@ -96,6 +105,38 @@ export const UserSearchSelect = ({
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen]);
+
+    // Calcule la position du menu par rapport au trigger (en Portal, donc en coordonnées document)
+    // — évite que le menu soit rogné par un ancêtre en overflow:hidden (ex: un Modal), cf. CustomSelect.
+    const updateMenuPosition = useCallback(() => {
+        if (!triggerRef.current) return;
+        const rect = triggerRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const desiredMaxH = 300;
+        const margin = 8;
+
+        const openUp = spaceBelow < desiredMaxH && spaceAbove > spaceBelow;
+        const availableSpace = openUp ? spaceAbove - margin : spaceBelow - margin;
+        const maxH = Math.min(desiredMaxH, Math.max(100, availableSpace));
+
+        setMenuPosition(openUp
+            ? { top: rect.top + window.scrollY - maxH - 4, left: rect.left + window.scrollX, width: rect.width, maxH, openUp: true }
+            : { top: rect.bottom + window.scrollY + 4, left: rect.left + window.scrollX, width: rect.width, maxH, openUp: false }
+        );
+    }, []);
+
+    useEffect(() => {
+        if (isOpen) {
+            updateMenuPosition();
+            window.addEventListener('scroll', updateMenuPosition, true);
+            window.addEventListener('resize', updateMenuPosition);
+        }
+        return () => {
+            window.removeEventListener('scroll', updateMenuPosition, true);
+            window.removeEventListener('resize', updateMenuPosition);
+        };
+    }, [isOpen, updateMenuPosition]);
 
     const handleUserSelect = (user: IUser) => {
         onUserSelect(getItemId(user));
@@ -117,6 +158,7 @@ export const UserSearchSelect = ({
 
     return (
         <Box position="relative" ref={menuRef}>
+            <Box ref={triggerRef}>
             {selectedUser ? (
                 // Affichage quand un utilisateur est sélectionné
                 <Flex
@@ -186,25 +228,29 @@ export const UserSearchSelect = ({
                     <Text>{placeholder}</Text>
                 </Button>
             )}
+            </Box>
 
             {isOpen && (
+                <Portal>
                 <Box
+                    ref={dropdownRef}
                     position="absolute"
-                    top="100%"
-                    left={0}
-                    right={0}
-                    zIndex={1000}
+                    top={`${menuPosition.top}px`}
+                    left={`${menuPosition.left}px`}
+                    width={`${menuPosition.width}px`}
+                    zIndex={9999}
                     bg={menuBg}
                     border="1px solid"
                     borderColor={borderColor}
                     borderRadius="md"
                     boxShadow="xl"
-                    maxH="300px"
+                    maxH={`${menuPosition.maxH}px`}
                     overflowY="auto"
-                    mt={1}
+                    display="flex"
+                    flexDirection="column"
                 >
                     {/* Input de recherche intégré */}
-                    <Box p={2} borderBottom="1px solid" borderColor={borderColor}>
+                    <Box p={2} borderBottom="1px solid" borderColor={borderColor} bg={menuBg} position="sticky" top={0} zIndex={1}>
                         <InputGroup size="sm">
                             <InputLeftElement pointerEvents="none">
                                 <SearchIcon color="gray.400" />
@@ -226,7 +272,7 @@ export const UserSearchSelect = ({
                     </Box>
 
                     {/* Liste des utilisateurs */}
-                    <Box maxH="200px" overflowY="auto">
+                    <Box overflowY="auto">
                         {/* Option de déselection */}
                         <Flex
                             p={3}
@@ -245,7 +291,7 @@ export const UserSearchSelect = ({
                         >
                             <Text>Aucun utilisateur sélectionné</Text>
                         </Flex>
-                        
+
                         {filteredUsers.length > 0 ? (
                             filteredUsers.map((user: IUser) => (
                                 <Flex
@@ -283,6 +329,7 @@ export const UserSearchSelect = ({
                         )}
                     </Box>
                 </Box>
+                </Portal>
             )}
         </Box>
     );
