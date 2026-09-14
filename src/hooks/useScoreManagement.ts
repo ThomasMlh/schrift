@@ -7,17 +7,17 @@ import { useAPIMutations } from "./useAPIMutations";
 interface UseScoreManagementProps {
     users: IUser[];
     cycles: ICycle[];
-    onClose: () => void;
 }
 
-export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagementProps) => {
-    const { createScore, updateScore, deleteScore, createBulkScores } = useAPIMutations();
+export const useScoreManagement = ({ users, cycles }: UseScoreManagementProps) => {
+    const { updateScore, deleteScore, createBulkScores } = useAPIMutations();
     const toast = useToast();
     const { t } = useTranslation();
 
     const sm = (key: string) => `hooks.scoreManagement.${key}`;
 
-    // États du formulaire
+    // États du formulaire (édition uniquement — la création à l'unité se fait via la saisie
+    // groupée ; les cas de compte parti de la guilde se corrigent via "Transférer un score")
     const [selectedCycleId, setSelectedCycleId] = useState("");
     const [selectedRotationId, setSelectedRotationId] = useState("");
     const [selectedUserId, setSelectedUserId] = useState("");
@@ -33,9 +33,8 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
     const [isOCRModalOpen, setIsOCRModalOpen] = useState(false);
 
     // État de chargement unifié — une seule action à la fois
-    type LoadingAction = 'submit' | 'delete' | 'update' | 'bulk' | null;
+    type LoadingAction = 'delete' | 'update' | 'bulk' | null;
     const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
-    const isSubmitting = loadingAction === 'submit';
     const isDeleting = loadingAction === 'delete';
     const isUpdating = loadingAction === 'update';
     const isBulkSubmitting = loadingAction === 'bulk';
@@ -85,63 +84,6 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
         }
 
         return { selectedUser, guildId, bbsId };
-    };
-
-    const handleSubmitScore = async (currentUser: IUser | null) => {
-        if (!currentUser) {
-            toast({
-                title: t(sm("toastNotLoggedTitle")),
-                description: t(sm("toastNotLoggedDesc")),
-                status: "error",
-                duration: 3000,
-            });
-            return;
-        }
-
-        if (!selectedCycleId || !selectedRotationId || !selectedUserId || scoreValue < 0) {
-            toast({
-                title: t(sm("toastMissingDataTitle")),
-                description: t(sm("toastMissingDataDesc")),
-                status: "error",
-                duration: 3000,
-            });
-            return;
-        }
-
-        const userData = validateAndGetUserData(selectedUserId);
-        if (!userData) return;
-
-        setLoadingAction('submit');
-        try {
-            const scoreData: IScoreFormData = {
-                user_id: selectedUserId,
-                bbs_id: userData.bbsId,
-                cycle_id: selectedCycleId,
-                rotation_id: selectedRotationId,
-                guild_id: userData.guildId,
-                score: scoreValue
-            };
-
-            await createScore(scoreData);
-            toast({
-                title: t(sm("toastScoreAddedTitle")),
-                description: t(sm("toastScoreAddedDesc")),
-                status: "success",
-                duration: 3000,
-            });
-            resetForm();
-            onClose();
-        } catch (error: unknown) {
-            const err = error as Error;
-            toast({
-                title: t(sm("toastScoreAddErrorTitle")),
-                description: err.message || t(sm("toastScoreAddErrorFallback")),
-                status: "error",
-                duration: 3000,
-            });
-        } finally {
-            setLoadingAction(null);
-        }
     };
 
     const handleDeleteScore = async () => {
@@ -302,13 +244,11 @@ export const useScoreManagement = ({ users, cycles, onClose }: UseScoreManagemen
         setIsOCRModalOpen,
 
         // États de chargement
-        isSubmitting,
         isDeleting,
         isUpdating,
         isBulkSubmitting,
 
         // Handlers
-        handleSubmitScore,
         handleDeleteScore,
         handleEditScore,
         handleUpdateScore,

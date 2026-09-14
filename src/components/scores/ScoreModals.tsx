@@ -7,10 +7,6 @@ import TransferRotationModal from "@/components/ui/TransferRotationModal";
 import type { IScore, IUser, ICycle, IGuild, IScoreFormData } from "@/interfaces";
 
 interface ScoreModalsProps {
-    // Modal d'ajout
-    isOpen: boolean;
-    onClose: () => void;
-
     // Modal d'édition
     isEditModalOpen: boolean;
     onEditModalClose: () => void;
@@ -44,7 +40,7 @@ interface ScoreModalsProps {
     guilds: IGuild[];
     isLoadingCycles: boolean;
 
-    // États du formulaire
+    // États du formulaire (édition)
     selectedUserId: string;
     setSelectedUserId: (value: string) => void;
     selectedCycleId: string;
@@ -57,9 +53,7 @@ interface ScoreModalsProps {
     setUserSearchQuery: (value: string) => void;
 
     // Handlers
-    onSubmitScore: () => void;
     onUpdateScore: () => void;
-    isSubmitting: boolean;
     isUpdating: boolean;
 
     // Helpers
@@ -68,8 +62,6 @@ interface ScoreModalsProps {
 }
 
 export const ScoreModals = ({
-    isOpen,
-    onClose,
     isEditModalOpen,
     onEditModalClose,
     isDeleteModalOpen,
@@ -101,38 +93,13 @@ export const ScoreModals = ({
     setScoreValue,
     userSearchQuery,
     setUserSearchQuery,
-    onSubmitScore,
     onUpdateScore,
-    isSubmitting,
     isUpdating,
     getUserInfo,
     getCycleInfo
 }: ScoreModalsProps) => {
     return (
         <>
-            {/* Modal d'ajout de score */}
-            <ScoreModal
-                isOpen={isOpen}
-                onClose={onClose}
-                users={users}
-                cycles={cycles}
-                selectedUserId={selectedUserId}
-                setSelectedUserId={setSelectedUserId}
-                selectedCycleId={selectedCycleId}
-                setSelectedCycleId={setSelectedCycleId}
-                selectedRotationId={selectedRotationId}
-                setSelectedRotationId={setSelectedRotationId}
-                scoreValue={scoreValue}
-                setScoreValue={setScoreValue}
-                userSearchQuery={userSearchQuery}
-                setUserSearchQuery={setUserSearchQuery}
-                onSubmit={onSubmitScore}
-                isSubmitting={isSubmitting}
-                isLoadingCycles={isLoadingCycles}
-                title="Ajouter un score"
-                submitButtonText="Ajouter le score"
-            />
-
             {/* Modal d'édition de score */}
             <ScoreModal
                 isOpen={isEditModalOpen}
