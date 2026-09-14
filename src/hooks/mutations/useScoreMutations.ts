@@ -42,6 +42,17 @@ export const useScoreMutations = () => {
     return result;
   };
 
+  // Réattribue un score existant à un autre compte bbs — contrairement à updateScore, le compte
+  // cible n'a pas besoin d'appartenir à la guilde actuelle du score (cf. commentaire de la route).
+  const transferScoreAccount = async (scoreId: string, params: { target_user_id: string; target_bbs_id: string }) => {
+    const result = await request(`${apiUrl}/api/scores/${scoreId}/transfer-account`, {
+      method: 'PUT',
+      body: JSON.stringify(params),
+    }, { fallbackError: 'Erreur lors du transfert du score' });
+    await invalidateKeys(`${apiUrl}/api/scores`);
+    return result;
+  };
+
   const transferRotation = async (params: {
     cycle_id: string;
     source_rotation_id: string;
@@ -59,5 +70,5 @@ export const useScoreMutations = () => {
     return data;
   };
 
-  return { createScore, updateScore, deleteScore, createBulkScores, transferRotation };
+  return { createScore, updateScore, deleteScore, createBulkScores, transferRotation, transferScoreAccount };
 };

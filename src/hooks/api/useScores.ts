@@ -10,16 +10,18 @@ export const useScores = (options?: {
   cycle_id?: string;
   rotation_id?: string;
   guild_id?: string;
+  bbs_id?: string;
   authenticated?: boolean;
 }) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
-  const { page = 1, limit = 20, search, cycle_id, rotation_id, guild_id, authenticated = false } = options || {};
+  const { page = 1, limit = 20, search, cycle_id, rotation_id, guild_id, bbs_id, authenticated = false } = options || {};
 
   let url = `${apiUrl}/api/scores?page=${page}&limit=${limit}`;
   if (search) url += `&search=${encodeURIComponent(search)}`;
   if (cycle_id) url += `&cycle_id=${encodeURIComponent(cycle_id)}`;
   if (rotation_id) url += `&rotation_id=${encodeURIComponent(rotation_id)}`;
   if (guild_id) url += `&guild_id=${encodeURIComponent(guild_id)}`;
+  if (bbs_id) url += `&bbs_id=${encodeURIComponent(bbs_id)}`;
 
   const { data, error, isLoading, mutate } = useSWR<IScoresResponse>(
     url,

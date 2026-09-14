@@ -25,6 +25,7 @@ import { useScoreManagement } from "@/hooks/useScoreManagement";
 import { ScoresStatsCards } from "./scores/ScoresStatsCards";
 import { ScoresFilters } from "./scores/ScoresFilters";
 import { ScoreModals } from "./scores/ScoreModals";
+import { TransferScoreModal } from "./ui/TransferScoreModal";
 import { useTranslation } from "react-i18next";
 
 const ScoresSection = () => {
@@ -49,10 +50,10 @@ const ScoresSection = () => {
     authenticated: true
   });
 
-  const { isOpen, onClose }                     = useDisclosure();
   const { isOpen: isTransferModalOpen, onOpen: onTransferModalOpen, onClose: onTransferModalClose } = useDisclosure();
+  const { isOpen: isTransferScoreModalOpen, onOpen: onTransferScoreModalOpen, onClose: onTransferScoreModalClose } = useDisclosure();
   const { currentUser, isAdmin, isGuildManager, managedGuildIds } = useAuth();
-  const scoreManagement = useScoreManagement({ users, cycles, onClose });
+  const scoreManagement = useScoreManagement({ users, cycles });
 
   // ── Handlers ────────────────────────────────────────────────────────────────
   const handleCycleFilterChange    = (id: string) => { setFilterCycleId(id); setFilterRotationId(""); setCurrentPage(1); };
@@ -140,6 +141,15 @@ const ScoresSection = () => {
                       onClick={onTransferModalOpen}
                     >
                       Transférer rotation
+                    </Button>
+                    <Button
+                      size="sm"
+                      colorScheme="teal"
+                      borderRadius="lg"
+                      leftIcon={<Text fontSize="sm">🔀</Text>}
+                      onClick={onTransferScoreModalOpen}
+                    >
+                      Transférer un score
                     </Button>
                     <Tooltip label="Outils de debug OCR" hasArrow>
                       <IconButton
@@ -254,8 +264,6 @@ const ScoresSection = () => {
 
         {/* ── Modals ────────────────────────────────────────────────────────── */}
         <ScoreModals
-          isOpen={isOpen}
-          onClose={onClose}
           isEditModalOpen={scoreManagement.isEditModalOpen}
           onEditModalClose={() => { scoreManagement.setIsEditModalOpen(false); scoreManagement.resetForm(); }}
           isDeleteModalOpen={scoreManagement.isDeleteModalOpen}
@@ -289,12 +297,17 @@ const ScoresSection = () => {
           setScoreValue={scoreManagement.setScoreValue}
           userSearchQuery={scoreManagement.userSearchQuery}
           setUserSearchQuery={scoreManagement.setUserSearchQuery}
-          onSubmitScore={() => scoreManagement.handleSubmitScore(currentUser)}
           onUpdateScore={scoreManagement.handleUpdateScore}
-          isSubmitting={scoreManagement.isSubmitting}
           isUpdating={scoreManagement.isUpdating}
           getUserInfo={getUserInfo}
           getCycleInfo={getCycleInfo}
+        />
+
+        <TransferScoreModal
+          isOpen={isTransferScoreModalOpen}
+          onClose={onTransferScoreModalClose}
+          cycles={cycles}
+          guilds={guilds}
         />
       </VStack>
     </Box>
