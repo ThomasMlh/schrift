@@ -5,7 +5,12 @@
   # Forcer HTTPS
   RewriteCond %{HTTPS} off
   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-  
+
+  # Forcer le domaine canonique sans www (évite un localStorage/session
+  # different entre www.bbs-schrift.fr et bbs-schrift.fr)
+  RewriteCond %{HTTP_HOST} ^www\.bbs-schrift\.fr$ [NC]
+  RewriteRule ^(.*)$ https://bbs-schrift.fr/$1 [L,R=301]
+
   # Règles pour Single Page Application
   # Ne pas appliquer aux fichiers existants
   RewriteCond %{REQUEST_FILENAME} !-f
