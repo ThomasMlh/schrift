@@ -121,7 +121,14 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
       {/* Liste des scores */}
       <VStack spacing={0} align="stretch">
         {scores.map((score, idx) => {
-          const user = getUserInfo(score.user_id);
+          const owner = getUserInfo(score.user_id);
+          // Le nom/compte affichés doivent être ceux qui ont réellement produit CE score, pas le
+          // compte bbs principal actuel du user — un compte peut avoir été transféré à un autre
+          // user depuis (les scores restent volontairement sous l'ancien user_id, cf. account
+          // transfer), ou le user peut avoir plusieurs comptes bbs dans la même guilde.
+          const user = owner
+            ? { ...owner, bbs_name: score.bbs_name || owner.bbs_name, bbs_id: score.bbs_id || owner.bbs_id }
+            : undefined;
           const cycle = getCycleInfo(score.cycle_id);
           const rotation = getRotationInfo(score.cycle_id, score.rotation_id);
 

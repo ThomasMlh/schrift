@@ -265,6 +265,7 @@ const ScoresSection = () => {
         {/* ── Modals ────────────────────────────────────────────────────────── */}
         <ScoreModals
           isEditModalOpen={scoreManagement.isEditModalOpen}
+          editingScore={scoreManagement.editingScore}
           onEditModalClose={() => { scoreManagement.setIsEditModalOpen(false); scoreManagement.resetForm(); }}
           isDeleteModalOpen={scoreManagement.isDeleteModalOpen}
           onDeleteModalClose={() => { scoreManagement.setIsDeleteModalOpen(false); scoreManagement.setScoreToDelete(null); }}
