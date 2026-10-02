@@ -10,6 +10,7 @@ interface ScoreModalsProps {
     // Modal d'édition
     isEditModalOpen: boolean;
     onEditModalClose: () => void;
+    editingScore: IScore | null;
 
     // Modal de suppression
     isDeleteModalOpen: boolean;
@@ -64,6 +65,7 @@ interface ScoreModalsProps {
 export const ScoreModals = ({
     isEditModalOpen,
     onEditModalClose,
+    editingScore,
     isDeleteModalOpen,
     onDeleteModalClose,
     onDeleteConfirm,
@@ -116,6 +118,8 @@ export const ScoreModals = ({
                 setScoreValue={setScoreValue}
                 userSearchQuery={userSearchQuery}
                 setUserSearchQuery={setUserSearchQuery}
+                editingScoreBbsName={editingScore?.bbs_name || undefined}
+                editingScoreBbsId={editingScore?.bbs_id}
                 onSubmit={onUpdateScore}
                 isSubmitting={isUpdating}
                 isLoadingCycles={isLoadingCycles}

@@ -15,6 +15,7 @@ export { useAbilitySlotsGuideMutations } from './mutations/useAbilitySlotsGuideM
 export { useAccessoryMutations } from './mutations/useAccessoryMutations';
 export { useSettingsMutations } from './mutations/useSettingsMutations';
 export { usePodiumMutations } from './mutations/usePodiumMutations';
+export { useDiscordMutations } from './mutations/useDiscordMutations';
 
 import { useCycleMutations } from './mutations/useCycleMutations';
 import { useGuildMutations } from './mutations/useGuildMutations';

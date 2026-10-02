@@ -47,6 +47,11 @@ interface ScoreModalProps {
     setScoreValue: (value: number) => void;
     userSearchQuery: string;
     setUserSearchQuery: (query: string) => void;
+    // Compte bbs qui a réellement produit le score édité — peut différer du compte bbs principal
+    // actuel du user (score.user_id ne bouge pas quand un compte est transféré à un autre user,
+    // cf. account transfer) : sans ça, le nom/lien affichés seraient ceux du mauvais compte.
+    editingScoreBbsName?: string;
+    editingScoreBbsId?: string;
     onSubmit: () => void;
     isSubmitting: boolean;
     isLoadingCycles: boolean;
@@ -71,6 +76,8 @@ export const ScoreModal = ({
     setScoreValue,
     userSearchQuery,
     setUserSearchQuery,
+    editingScoreBbsName,
+    editingScoreBbsId,
     onSubmit,
     isSubmitting,
     isLoadingCycles,
@@ -81,7 +88,10 @@ export const ScoreModal = ({
 }: ScoreModalProps) => {
     // ── Données dérivées ─────────────────────────────────────────────────────
     const selectedCycle    = cycles.find((c) => c._id === selectedCycleId);
-    const selectedUser     = users.find((u) => u._id === selectedUserId);
+    const foundUser        = users.find((u) => u._id === selectedUserId);
+    const selectedUser     = foundUser && isEdit && editingScoreBbsName
+        ? { ...foundUser, bbs_name: editingScoreBbsName, bbs_id: editingScoreBbsId || foundUser.bbs_id }
+        : foundUser;
     const selectedRotation = selectedCycle?.rotations.find(
         (r) => (r._id ?? r.rotation_id) === selectedRotationId
     );

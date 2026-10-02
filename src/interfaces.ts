@@ -1,6 +1,6 @@
 // Types généraux
 export type Page = "guilds" | "characters";
-export type AdminPage = "guilds" | "draft" | "cycles" | "scores" | "users" | "guides" | "banned" | "images" | "notifications" | "activity";
+export type AdminPage = "guilds" | "draft" | "cycles" | "scores" | "users" | "guides" | "banned" | "images" | "notifications" | "activity" | "messages";
 export type Role = "chef" | "sous-chef" | "membre";
 
 export type NotificationType =
@@ -15,6 +15,21 @@ export interface IGuild {
   discord_channel_id?: string; // salon "chef" (accès restreint)
   discord_general_channel_id?: string; // salon général, tous les membres
   disabled_notification_types?: NotificationType[];
+}
+
+export interface IDiscordChannelMember {
+  id: string;
+  username: string;
+  display_name: string;
+}
+
+export interface IDiscordChannel {
+  id: string;
+  name: string;
+  guild_id: string;
+  guild_name: string;
+  category: string | null; // nom de la catégorie Discord ; null si le salon n'en a pas
+  members: IDiscordChannelMember[];
 }
 
 export interface IActivityLogEntry {
