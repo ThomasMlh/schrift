@@ -124,7 +124,13 @@ const DiscordMessageSection: React.FC = () => {
   const buildFinalContent = () => {
     let final = content;
     for (const [displayName, member] of usedMentions) {
-      const pattern = new RegExp(`@${escapeRegExp(displayName)}\\b`, 'g');
+      // \b (limite de mot) ne reconnaît que les lettres ASCII [A-Za-z0-9_] : un pseudo "fancy
+      // font" stylisé (très courant sur Discord, ex: "Ʉs Яodt", "外道-Røkůdø") n'en contient
+      // souvent aucune, donc \b ne matchait jamais et le @Pseudo restait en texte brut au lieu
+      // d'être converti en ping. \p{L}/\p{N} (avec le flag 'u') reconnaissent lettres et chiffres
+      // de N'IMPORTE QUEL alphabet Unicode : on vérifie juste que ce qui suit le pseudo n'en est
+      // pas un (espace, ponctuation, ou fin de message).
+      const pattern = new RegExp(`@${escapeRegExp(displayName)}(?=[^\\p{L}\\p{N}]|$)`, 'gu');
       final = final.replace(pattern, `<@${member.id}>`);
     }
     return final;
