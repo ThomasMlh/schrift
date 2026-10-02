@@ -11,6 +11,7 @@ import GuidesAdminSection from "../components/GuidesAdminSection";
 import ImageBankSection from "../components/ImageBankSection";
 import NotificationSettingsSection from "../components/NotificationSettingsSection";
 import ActivityLogSection from "../components/ActivityLogSection";
+import DiscordMessageSection from "../components/DiscordMessageSection";
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { AdminPage as IAdminPage } from "../interfaces";
@@ -27,6 +28,7 @@ const tabConfig: { key: IAdminPage; label: string; icon: string }[] = [
   { key: 'images',  label: 'Images',   icon: '🖼️' },
   { key: 'notifications', label: 'Notifications', icon: '🔔' },
   { key: 'activity', label: 'Activité', icon: '📜' },
+  { key: 'messages', label: 'Messages', icon: '💬' },
 ];
 
 const AdminPage = () => {
@@ -38,9 +40,9 @@ const AdminPage = () => {
   // Pages autorisées selon le rôle
   const allowedPages = useMemo(() => {
     if (isFullAdmin) {
-      return ['guilds', 'draft', 'cycles', 'scores', 'users', 'banned', 'guides', 'images', 'notifications', 'activity'] as IAdminPage[];
+      return ['guilds', 'draft', 'cycles', 'scores', 'users', 'banned', 'guides', 'images', 'notifications', 'activity', 'messages'] as IAdminPage[];
     } else if (isGuildManager) {
-      return ['scores', 'notifications', 'activity'] as IAdminPage[];
+      return ['scores', 'notifications', 'activity', 'messages'] as IAdminPage[];
     }
     return [] as IAdminPage[];
   }, [isFullAdmin, isGuildManager]);
@@ -158,6 +160,8 @@ const AdminPage = () => {
         return <NotificationSettingsSection />;
       case "activity":
         return <ActivityLogSection />;
+      case "messages":
+        return <DiscordMessageSection />;
       case "guilds":
       default:
         return <GuildsAdminSection />;
