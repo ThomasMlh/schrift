@@ -28,6 +28,7 @@ export interface IDiscordChannel {
   name: string;
   guild_id: string;
   guild_name: string;
+  category: string | null; // nom de la catégorie Discord ; null si le salon n'en a pas
   members: IDiscordChannelMember[];
 }
 
