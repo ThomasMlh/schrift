@@ -3,11 +3,13 @@ import {
   Text, Textarea, VStack, useColorModeValue, useToast,
 } from "@chakra-ui/react";
 import { useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { useDiscordChannels } from "@/hooks/useAPI";
 import { useDiscordMutations } from "@/hooks/useAPIMutations";
 import type { IDiscordChannel, IDiscordChannelMember } from "@/interfaces";
 
 const UNCATEGORIZED_LABEL = "Sans catégorie";
+const MENTION_PATTERN = /<@(\d+)>/g;
 
 // Regroupe les salons par catégorie Discord, dans l'ordre d'arrivée (déjà trié côté bot
 // comme la sidebar Discord : catégorie puis position du salon dedans).
@@ -21,8 +23,6 @@ const groupByCategory = (channels: IDiscordChannel[]): [string, IDiscordChannel[
   return Array.from(groups.entries());
 };
 
-const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
 // Repère un "@" juste avant le curseur, sans espace entre les deux : c'est une mention en
 // cours de frappe. Renvoie sa position de départ et le texte tapé après le "@" (le filtre),
 // ou null si le curseur n'est pas dans ce contexte (pas de "@" récent, ou espace tapé après).
@@ -35,12 +35,39 @@ const detectMentionInProgress = (text: string, cursorPos: number): { start: numb
   return { start: atIndex, query: between };
 };
 
-// Onglet admin "Messages" : choisir un salon Discord parmi ceux accessibles à
-// l'utilisateur (tous pour un admin, uniquement ceux de sa/ses guildes pour un
-// chef/sous-chef — filtré côté API), puis composer un message libre en mentionnant
-// des membres directement dans le texte (taper "@" ouvre une liste de suggestions,
-// comme sur Discord/Slack). Chaque mention choisie est affichée en "@Pseudo" dans
-// la zone de texte et convertie en ping Discord natif (<@id>) au moment de l'envoi.
+// Remplace chaque jeton <@id> par "@Pseudo" (résolu via la liste des membres du salon), pour
+// un aperçu lisible de ce qui sera réellement envoyé — le ping brut <@id> n'est pas parlant.
+const renderPreview = (text: string, members: IDiscordChannelMember[]): ReactNode[] => {
+  const memberById = new Map(members.map((m) => [m.id, m]));
+  const parts: ReactNode[] = [];
+  let lastIndex = 0;
+  let key = 0;
+
+  for (const match of text.matchAll(MENTION_PATTERN)) {
+    const index = match.index ?? 0;
+    if (index > lastIndex) parts.push(text.slice(lastIndex, index));
+    const member = memberById.get(match[1]);
+    parts.push(
+      <Text as="span" key={key++} color="blue.300" fontWeight="semibold" bg="blue.900" px="1" borderRadius="sm">
+        @{member?.display_name ?? match[1]}
+      </Text>
+    );
+    lastIndex = index + match[0].length;
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return parts;
+};
+
+// Onglet admin "Messages" : choisir un salon Discord parmi ceux accessibles à l'utilisateur
+// (tous pour un admin, uniquement ceux de sa/ses guildes pour un chef/sous-chef — filtré côté
+// API), puis composer un message libre en mentionnant des membres directement dans le texte
+// (taper "@" ouvre une liste de suggestions, comme sur Discord/Slack).
+//
+// Une mention choisie insère directement le ping Discord natif <@id> dans le texte — pas un
+// "@Pseudo" à reconvertir plus tard : ça évite toute la classe de bugs liée au matching par
+// pseudo (ex: pseudos "fancy font" en Unicode non-ASCII que \b ne reconnaissait pas). Comme
+// <@id> n'est pas lisible tel quel, un aperçu sous la zone de texte résout chaque <@id> en
+// "@Pseudo" pour que l'admin voie ce qui sera réellement envoyé avant de cliquer sur Envoyer.
 const DiscordMessageSection: React.FC = () => {
   const { channels, isLoading } = useDiscordChannels();
   const { sendDiscordMessage } = useDiscordMutations();
@@ -51,15 +78,12 @@ const DiscordMessageSection: React.FC = () => {
   const [content, setContent] = useState("");
   const [mentionStart, setMentionStart] = useState<number | null>(null);
   const [mentionQuery, setMentionQuery] = useState<string>("");
-  // Pseudo (tel qu'inséré dans le texte) -> membre choisi via la liste de suggestions.
-  // Sert à retrouver l'ID Discord au moment de l'envoi ; un "@Pseudo" tapé à la main sans
-  // passer par la suggestion n'est PAS converti en ping (comportement prévisible).
-  const [usedMentions, setUsedMentions] = useState<Map<string, IDiscordChannelMember>>(new Map());
   const [isSending, setIsSending] = useState(false);
 
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
   const hoverBg = useColorModeValue('gray.100', 'whiteAlpha.100');
+  const previewBg = useColorModeValue('gray.50', 'gray.900');
 
   const channelGroups = useMemo(() => groupByCategory(channels), [channels]);
   const selectedChannel = channels.find((c) => c.id === channelId) || null;
@@ -67,7 +91,6 @@ const DiscordMessageSection: React.FC = () => {
   const handleChannelChange = (id: string) => {
     setChannelId(id);
     setContent("");
-    setUsedMentions(new Map());
     setMentionStart(null);
   };
 
@@ -92,15 +115,14 @@ const DiscordMessageSection: React.FC = () => {
     if (mentionStart === null || !textarea) return;
 
     const cursorPos = textarea.selectionStart;
-    const mentionText = `@${member.display_name} `;
-    const newContent = `${content.slice(0, mentionStart)}${mentionText}${content.slice(cursorPos)}`;
+    const mentionToken = `<@${member.id}> `;
+    const newContent = `${content.slice(0, mentionStart)}${mentionToken}${content.slice(cursorPos)}`;
 
     setContent(newContent);
-    setUsedMentions((prev) => new Map(prev).set(member.display_name, member));
     setMentionStart(null);
     setMentionQuery("");
 
-    const newCursorPos = mentionStart + mentionText.length;
+    const newCursorPos = mentionStart + mentionToken.length;
     requestAnimationFrame(() => {
       textarea.focus();
       textarea.setSelectionRange(newCursorPos, newCursorPos);
@@ -118,36 +140,15 @@ const DiscordMessageSection: React.FC = () => {
     }
   };
 
-  // Remplace chaque "@Pseudo" effectivement présent dans le texte final par son ping Discord
-  // natif <@id>. Si l'admin a modifié/supprimé une partie d'une mention insérée, elle ne
-  // matche plus et reste du texte brut — pas de ping accidentel sur un fragment.
-  const buildFinalContent = () => {
-    let final = content;
-    for (const [displayName, member] of usedMentions) {
-      // \b (limite de mot) ne reconnaît que les lettres ASCII [A-Za-z0-9_] : un pseudo "fancy
-      // font" stylisé (très courant sur Discord, ex: "Ʉs Яodt", "外道-Røkůdø") n'en contient
-      // souvent aucune, donc \b ne matchait jamais et le @Pseudo restait en texte brut au lieu
-      // d'être converti en ping. \p{L}/\p{N} (avec le flag 'u') reconnaissent lettres et chiffres
-      // de N'IMPORTE QUEL alphabet Unicode : on vérifie juste que ce qui suit le pseudo n'en est
-      // pas un (espace, ponctuation, ou fin de message).
-      const pattern = new RegExp(`@${escapeRegExp(displayName)}(?=[^\\p{L}\\p{N}]|$)`, 'gu');
-      final = final.replace(pattern, `<@${member.id}>`);
-    }
-    return final;
-  };
-
   const handleSend = async () => {
     if (!channelId || !content.trim()) return;
     setIsSending(true);
     try {
-      const finalContent = buildFinalContent();
-      const mentionUserIds = [...new Set([...finalContent.matchAll(/<@(\d+)>/g)].map((m) => m[1]))];
-
-      await sendDiscordMessage({ channel_id: channelId, content: finalContent, mention_user_ids: mentionUserIds });
+      const mentionUserIds = [...new Set([...content.matchAll(MENTION_PATTERN)].map((m) => m[1]))];
+      await sendDiscordMessage({ channel_id: channelId, content, mention_user_ids: mentionUserIds });
 
       toast({ title: "Message envoyé", status: "success" });
       setContent("");
-      setUsedMentions(new Map());
     } catch (error) {
       toast({ title: error instanceof Error ? error.message : "Erreur lors de l'envoi", status: "error" });
     } finally {
@@ -224,6 +225,23 @@ const DiscordMessageSection: React.FC = () => {
             </Box>
           )}
         </FormControl>
+
+        {content.trim() && (
+          <Box>
+            <Text fontSize="xs" color="gray.500" mb={1}>Aperçu</Text>
+            <Box
+              borderWidth="1px"
+              borderColor={borderColor}
+              borderRadius="md"
+              bg={previewBg}
+              p={3}
+              fontSize="sm"
+              whiteSpace="pre-wrap"
+            >
+              {renderPreview(content, selectedChannel?.members || [])}
+            </Box>
+          </Box>
+        )}
 
         <Flex justify="flex-end">
           <Button
