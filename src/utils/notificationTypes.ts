@@ -4,7 +4,7 @@ import type { NotificationType } from "@/interfaces";
 export const NOTIFICATION_TYPES: NotificationType[] = [
   "scores", "podium_snapshot", "score_edit", "rotation_transfer", "character_update", "image_upload",
   "ban", "draft", "guild_toggle", "build_proposal", "build_delete", "cycle_change",
-  "guild_change", "membre_role_change", "guild_member_change", "personal_record",
+  "guild_change", "membre_role_change", "guild_member_change", "personal_record", "cycle_recap",
 ];
 
 export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
@@ -24,6 +24,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   membre_role_change: "Changement de rôle de membre",
   guild_member_change: "Ajout / retrait de membre",
   personal_record: "Record personnel battu (salon membres)",
+  cycle_recap: "Bilan de fin de cycle (salon membres)",
 };
 
 const fmt = (data: Record<string, unknown>, key: string, fallback = "?"): string =>
@@ -73,6 +74,8 @@ export const formatActivityEntry = (type: string, data: Record<string, unknown>)
       const count = Array.isArray(data.records) ? data.records.length : 0;
       return `${count} record(s) personnel(s) battu(s)${data.guild_name ? ` dans **${fmt(data, "guild_name")}**` : ""}`;
     }
+    case "cycle_recap":
+      return `Bilan de fin de **${fmt(data, "cycle_name")}** publié${data.guild_name ? ` pour **${fmt(data, "guild_name")}**` : ""}`;
     default:
       return `${type} : ${fmt(data, "message", JSON.stringify(data).slice(0, 120))}`;
   }

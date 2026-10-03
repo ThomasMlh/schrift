@@ -12,6 +12,7 @@ import ImageBankSection from "../components/ImageBankSection";
 import NotificationSettingsSection from "../components/NotificationSettingsSection";
 import ActivityLogSection from "../components/ActivityLogSection";
 import DiscordMessageSection from "../components/DiscordMessageSection";
+import DeclineAlertsSection from "../components/DeclineAlertsSection";
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { AdminPage as IAdminPage } from "../interfaces";
@@ -22,6 +23,7 @@ const tabConfig: { key: IAdminPage; label: string; icon: string }[] = [
   { key: 'draft',   label: 'Draft',    icon: '🔀' },
   { key: 'cycles',  label: 'Cycles',   icon: '🔄' },
   { key: 'scores',  label: 'Scores',   icon: '📊' },
+  { key: 'alerts',  label: 'Baisses de régime', icon: '📉' },
   { key: 'users',   label: 'Joueurs',  icon: '👥' },
   { key: 'banned',  label: 'Bannis',   icon: '🚫' },
   { key: 'guides',  label: 'Guides',   icon: '📚' },
@@ -40,9 +42,9 @@ const AdminPage = () => {
   // Pages autorisées selon le rôle
   const allowedPages = useMemo(() => {
     if (isFullAdmin) {
-      return ['guilds', 'draft', 'cycles', 'scores', 'users', 'banned', 'guides', 'images', 'notifications', 'activity', 'messages'] as IAdminPage[];
+      return ['guilds', 'draft', 'cycles', 'scores', 'alerts', 'users', 'banned', 'guides', 'images', 'notifications', 'activity', 'messages'] as IAdminPage[];
     } else if (isGuildManager) {
-      return ['scores', 'notifications', 'activity', 'messages'] as IAdminPage[];
+      return ['scores', 'alerts', 'notifications', 'activity', 'messages'] as IAdminPage[];
     }
     return [] as IAdminPage[];
   }, [isFullAdmin, isGuildManager]);
@@ -148,6 +150,8 @@ const AdminPage = () => {
         return <CyclesSection />;
       case "scores":
         return <ScoresSection />;
+      case "alerts":
+        return <DeclineAlertsSection />;
       case "users":
         return <UsersTable isAdminMode={true} />;
       case "banned":

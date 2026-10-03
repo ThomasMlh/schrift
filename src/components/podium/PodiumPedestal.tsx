@@ -1,6 +1,7 @@
 import { Box, VStack, HStack, Text, Avatar, Badge, useColorModeValue } from "@chakra-ui/react";
 import { getUserAvatarUrl } from "@/utils/discord";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
+import { ProgressionBadge } from "@/components/ui/ProgressionBadge";
 import CustomLink from "@/components/ui/CustomLink";
 import { buildPlayerUrl } from "@/utils/playerUrl";
 
@@ -15,6 +16,8 @@ export interface PodiumPedestalPlayer {
   guild_name?: string;
   displayScore: number;
   forceBlueScore?: boolean;
+  // Classement progression : le badge affiche l'écart en % plutôt que le score
+  progression?: { percent: number; previousAverage?: number; average?: number };
 }
 
 interface PodiumPedestalProps {
@@ -199,11 +202,19 @@ const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProp
         </VStack>
 
         {/* Score */}
-        <ScoreBadge
-          score={player.displayScore}
-          forceBlue={player.forceBlueScore}
-          fontSize={{ base: "xs", md: "sm" }}
-        />
+        {player.progression ? (
+          <ProgressionBadge
+            percent={player.progression.percent}
+            previousAverage={player.progression.previousAverage}
+            average={player.progression.average}
+          />
+        ) : (
+          <ScoreBadge
+            score={player.displayScore}
+            forceBlue={player.forceBlueScore}
+            fontSize={{ base: "xs", md: "sm" }}
+          />
+        )}
       </VStack>
 
       {/* Socle "3D" : dégradé plus riche + biseau lumineux en haut + ombre interne en bas */}

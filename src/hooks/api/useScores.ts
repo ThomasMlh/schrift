@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { useState, useCallback } from 'react';
-import type { IScoresResponse, IPodiumResponse, IPodiumWeeklyResponse, IPodiumMissesResponse } from '../../interfaces';
+import type { IScoresResponse, IPodiumResponse, IPodiumWeeklyResponse, IPodiumMissesResponse, PodiumRankingType } from '../../interfaces';
 import { apiUrl, fetcher, useAuthenticatedFetcher } from './shared';
 
 export const useScores = (options?: {
@@ -75,7 +75,7 @@ export const usePodiumFetch = () => {
     cycleName: string,
     options: {
       cycleYear?: number;
-      rankingType?: 'average' | 'max';
+      rankingType?: PodiumRankingType;
       rotationId?: string;
       weekNumber?: string;
       guildName?: string;
