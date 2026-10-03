@@ -12,7 +12,6 @@ import { AddIcon } from "@chakra-ui/icons";
 import type { IRotationTemplate, ICycleRotation, ICycleFormData, ICycle, IEvent } from "../interfaces";
 import type { DropResult } from '@hello-pangea/dnd';
 import { ExistingCyclesList } from "./cycles/ExistingCyclesList";
-import { CycleRecapAutoSwitch } from "./cycles/CycleRecapAutoSwitch";
 import { CycleCreationModal } from "./cycles/CycleCreationModal";
 import { useCycles, useRotations } from "@/hooks/useAPI";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
@@ -336,8 +335,6 @@ const CyclesSection = () => {
             Créer un cycle
           </Button>
         </HStack>
-
-        <CycleRecapAutoSwitch />
 
         {/* Section d'affichage des cycles existants */}
         <ExistingCyclesList

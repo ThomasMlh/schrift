@@ -28,12 +28,10 @@ export const usePodiumSettings = () => {
   const { data, error, isLoading, mutate } = useSWR<{
     success: boolean;
     min_scores_for_ranking: number;
-    auto_cycle_recap: boolean;
   }>(`${apiUrl}/api/settings/podium`, authenticatedFetcher, { revalidateOnFocus: false });
 
   return {
     minScoresForRanking: data?.min_scores_for_ranking ?? 0,
-    autoCycleRecap: data?.auto_cycle_recap ?? false,
     isLoading,
     error,
     mutate,
