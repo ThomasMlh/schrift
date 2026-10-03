@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import type { IDiscordChannel } from '../../interfaces';
+import type { IDiscordChannel, IDiscordEmoji } from '../../interfaces';
 import { apiUrl, useAuthenticatedFetcher } from './shared';
 
 // Liste des salons Discord accessibles à l'utilisateur courant (tous pour un admin,
@@ -15,4 +15,18 @@ export const useDiscordChannels = () => {
   );
 
   return { channels: data?.channels || [], isLoading, error, mutate };
+};
+
+// Emojis custom des serveurs Discord accessibles (même périmètre que les salons).
+export const useDiscordEmojis = () => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const url = `${apiUrl}/api/discord/emojis`;
+
+  const { data, error, isLoading } = useSWR<{ success: boolean; emojis: IDiscordEmoji[] }>(
+    url,
+    authenticatedFetcher,
+    { revalidateOnFocus: false, dedupingInterval: 300000 }
+  );
+
+  return { emojis: data?.emojis || [], isLoading, error };
 };
