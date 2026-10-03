@@ -53,6 +53,7 @@ import { useTranslation } from "react-i18next";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { bucketUrl } from "@/utils/apiRequest";
+import { RotationKillerHistory } from "@/components/rotation/RotationKillerHistory";
 
 const RotationDetailPage = () => {
   // cycleId dans l'URL est désormais un slug (ex: "cycle-1-2026")
@@ -580,6 +581,15 @@ const RotationDetailPage = () => {
                 </>
               )}
             </Box>
+
+            {/* Historique de ce killer sur tous les cycles (records, moyennes, score à battre) */}
+            {rotation?._id && (
+              <RotationKillerHistory
+                rotationId={rotation._id}
+                cycleId={cycle?._id ?? resolvedCycleId}
+                guildId={selectedGuild || undefined}
+              />
+            )}
 
             {/* Builds validés pour cette rotation */}
             {(buildsLoading || builds.length > 0) && (

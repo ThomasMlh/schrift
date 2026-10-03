@@ -140,7 +140,24 @@
       "paginationShow": "Afficher",
       "paginationPerPage": "par page",
       "ariaPreviousPage": "Page précédente",
-      "buttonViewCharacters": "Voir les personnages"
+      "buttonViewCharacters": "Voir les personnages",
+      "historyTitle": "Historique sur ce killer",
+      "historySubtitle": "Tous les cycles où ce killer est apparu",
+      "historyAbsoluteRecord": "Record absolu",
+      "historyGuildRecord": "Record de la guilde",
+      "historyRecordToBeat": "Score à battre",
+      "historyRecordToBeatHelp": "Meilleur score des cycles précédents",
+      "historyBeaten": "Battu ce cycle",
+      "historyRemaining": "Il manque {{value}}",
+      "historyNoRecord": "Aucun score pour l'instant",
+      "historyChartTitle": "Moyenne par cycle",
+      "historyAllPlayers": "Tous les joueurs",
+      "historyGuildAverage": "Guilde",
+      "historyNotEnoughCycles": "Pas encore assez de cycles pour afficher une évolution",
+      "historyScoresCount": "{{count}} score(s)",
+      "historyHolder": "par {{name}} · {{cycle}}",
+      "historyShowTable": "Tableau",
+      "historyShowChart": "Graphique"
     },
     "players": {
       "title": "Joueurs",
@@ -284,7 +301,15 @@
       "statTotalScoresValue": "Total Scores",
       "statAverageMLabel": "Score Moyen",
       "statTotalPointsBLabel": "Points Totaux",
-      "statBestScoreRecord": "Meilleur Score"
+      "statBestScoreRecord": "Meilleur Score",
+      "tabRecords": "Records",
+      "recordsTitle": "Records personnels par killer",
+      "recordsSubtitle": "Meilleur score obtenu sur chaque killer, tous cycles confondus",
+      "recordsKiller": "Killer",
+      "recordsScore": "Record",
+      "recordsCycle": "Obtenu au",
+      "recordsAttempts": "Tentatives",
+      "recordsEmpty": "Aucun record pour ce compte"
     },
     "discordCallback": {
       "loading": "Connexion en cours avec Discord...",

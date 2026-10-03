@@ -6,7 +6,7 @@ export type Role = "chef" | "sous-chef" | "membre";
 export type NotificationType =
   | "scores" | "podium_snapshot" | "score_edit" | "rotation_transfer" | "character_update" | "image_upload"
   | "ban" | "draft" | "guild_toggle" | "build_proposal" | "build_delete" | "cycle_change"
-  | "guild_change" | "membre_role_change" | "guild_member_change";
+  | "guild_change" | "membre_role_change" | "guild_member_change" | "personal_record";
 
 export interface IGuild {
   _id: string;
@@ -38,6 +38,57 @@ export interface IDiscordEmoji {
   animated: boolean;
   url: string;
   guild_id: string; // serveur Discord auquel appartient l'emoji
+}
+
+// Auteur d'un record sur un killer (GET /api/rotations/:id/history)
+export interface IKillerRecordHolder {
+  score: number;
+  bbs_id: string;
+  bbs_name: string | null;
+  guild_id: string | null;
+  guild_name: string | null;
+  cycle_id: string;
+  cycle_name: string | null;
+  cycle_year: number | null;
+}
+
+export interface IRotationHistoryCycle {
+  cycle_id: string;
+  cycle_name: string;
+  cycle_year: number;
+  average: number | null;
+  count: number;
+  guild_average: number | null;
+  guild_count: number | null;
+}
+
+export interface IRotationHistory {
+  rotation_id: string;
+  absolute_record: IKillerRecordHolder | null;
+  guild_record: IKillerRecordHolder | null;
+  record_to_beat: IKillerRecordHolder | null; // meilleur score des AUTRES cycles (périmètre guilde si filtrée)
+  current_cycle_best: IKillerRecordHolder | null;
+  per_cycle: IRotationHistoryCycle[];
+}
+
+// Record personnel d'un compte bbs sur un killer (GET /api/users/:userId/records)
+export interface IAccountKillerRecord {
+  rotation_id: string;
+  killer: string | null;
+  attack: string | null;
+  alteration: string | null;
+  score: number;
+  cycle_id: string;
+  cycle_name: string | null;
+  cycle_year: number | null;
+  attempts: number;
+}
+
+export interface IUserAccountRecords {
+  bbs_id: string;
+  bbs_name: string | null;
+  is_primary: boolean;
+  records: IAccountKillerRecord[];
 }
 
 export interface IActivityLogEntry {

@@ -44,7 +44,8 @@ import { UserPositionPerformance } from "@/components/user/UserPositionPerforman
 import { BanDetailsCard } from "@/components/user/BanDetailsCard";
 import { UserTypeAnalysis } from "@/components/user/UserTypeAnalysis";
 import { UserWeeklySection } from "@/components/user/UserWeeklySection";
-import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock } from "react-icons/fi";
+import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock, FiStar } from "react-icons/fi";
+import { UserKillerRecords } from "@/components/user/UserKillerRecords";
 import { getDiscordBannerUrl } from "@/utils/discord";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
@@ -69,9 +70,10 @@ const UserPage = () => {
     "tendance": 1,
     "performances": 2,
     "top-rotations": 3,
-    "evolution": 4
+    "evolution": 4,
+    "records": 5
   };
-  const TAB_NAMES = ["vue-ensemble", "tendance", "performances", "top-rotations", "evolution"];
+  const TAB_NAMES = ["vue-ensemble", "tendance", "performances", "top-rotations", "evolution", "records"];
 
   // Déterminer l'onglet actif depuis l'URL
   const tabParam = searchParams.get("tab");
@@ -551,6 +553,10 @@ const UserPage = () => {
                       <Icon as={FiClock} mr={2} />
                       {t("pages.user.tabEvolution")}
                     </Tab>
+                    <Tab {...tabStyles}>
+                      <Icon as={FiStar} mr={2} />
+                      {t("pages.user.tabRecords")}
+                    </Tab>
                   </TabList>
 
                   <TabPanels>
@@ -628,6 +634,11 @@ const UserPage = () => {
                     {/* Évolution temporelle */}
                     <TabPanel p={0}>
                       <UserTemporalEvolution temporalEvolution={globalStats?.temporalEvolution ?? []} />
+                    </TabPanel>
+
+                    {/* Records personnels par killer */}
+                    <TabPanel p={0}>
+                      <UserKillerRecords userId={userId} bbsId={matchedBbsId} />
                     </TabPanel>
                   </TabPanels>
                 </Tabs>
