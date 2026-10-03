@@ -26,5 +26,14 @@ export const useSettingsMutations = () => {
     return result;
   };
 
-  return { updateGlobalNotificationSettings, updatePodiumMinScores };
+  const updateAutoCycleRecap = async (enabled: boolean) => {
+    const result = await request(`${apiUrl}/api/settings/podium`, {
+      method: 'PUT',
+      body: JSON.stringify({ auto_cycle_recap: enabled }),
+    }, { fallbackError: "Erreur lors de la mise à jour de l'envoi automatique du récap" });
+    await mutate(`${apiUrl}/api/settings/podium`);
+    return result;
+  };
+
+  return { updateGlobalNotificationSettings, updatePodiumMinScores, updateAutoCycleRecap };
 };

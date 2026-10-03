@@ -1,10 +1,11 @@
 import {
   IconButton, Tooltip, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalCloseButton, ModalBody, ModalFooter, VStack, Box, Text, ButtonGroup, Button, useToast,
+  Checkbox, HStack, Skeleton, useColorModeValue,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import type { ICycle } from "@/interfaces";
-import { useGuilds } from "@/hooks/useAPI";
+import type { ICycle, ICycleRecap, PodiumRankingType } from "@/interfaces";
+import { useCycleRecapPreview, useGuilds } from "@/hooks/useAPI";
 import { usePodiumMutations } from "@/hooks/useAPIMutations";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 
@@ -12,8 +13,52 @@ interface PublishCycleRecapButtonProps {
   cycle: ICycle;
 }
 
-// Publie manuellement le podium final d'un cycle (capture d'écran, même mécanisme que le
-// récap automatique par rotation) dans le salon général d'une guilde ou de toutes.
+const RANKING_OPTIONS: { value: PodiumRankingType; label: string }[] = [
+  { value: "average", label: "Moyenne" },
+  { value: "max", label: "Max" },
+  { value: "progression", label: "Progression" },
+];
+
+const MEDALS: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
+const formatNumber = (n: number) => n.toLocaleString("fr-FR");
+const formatPercent = (n: number) => `${n > 0 ? "+" : ""}${n.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+
+// Aperçu texte du bilan, au plus près de l'embed envoyé par le bot (format_cycle_recap).
+const RecapPreview = ({ recap }: { recap: ICycleRecap }) => {
+  const evolution = recap.guild_average != null && recap.previous_guild_average
+    ? ((recap.guild_average - recap.previous_guild_average) / recap.previous_guild_average) * 100
+    : null;
+
+  return (
+    <VStack align="stretch" spacing={2} fontSize="sm">
+      <Text fontWeight="bold">📊 Fin du {recap.cycle_name} {recap.cycle_year} · {recap.participants} joueur(s)</Text>
+      {recap.top3.length > 0 ? (
+        <Box>
+          {recap.top3.map((p) => (
+            <Text key={p.rank}>{MEDALS[p.rank]} <b>{p.pseudo}</b> — {formatNumber(p.average)}</Text>
+          ))}
+        </Box>
+      ) : (
+        <Text color="gray.500">Aucun score enregistré pour cette guilde sur ce cycle.</Text>
+      )}
+      {recap.guild_average != null && (
+        <Text>
+          Moyenne de la guilde : <b>{formatNumber(recap.guild_average)}</b>
+          {evolution != null && ` (${evolution > 0 ? "📈" : evolution < 0 ? "📉" : "➖"} ${formatPercent(evolution)} vs ${recap.previous_cycle_name ?? "cycle précédent"})`}
+        </Text>
+      )}
+      {recap.best_progression && (
+        <Text>
+          🚀 Plus forte progression : <b>{recap.best_progression.pseudo}</b> ({formatPercent(recap.best_progression.percent)})
+        </Text>
+      )}
+      <Text>🏅 Records personnels battus : <b>{recap.records_count}</b></Text>
+    </VStack>
+  );
+};
+
+// Publie manuellement le récap de fin d'un cycle dans le salon général d'une guilde ou de toutes :
+// capture du podium final (même mécanisme que le récap automatique par rotation) et/ou bilan écrit.
 export const PublishCycleRecapButton: React.FC<PublishCycleRecapButtonProps> = ({ cycle }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { guilds } = useGuilds(true);
@@ -21,8 +66,17 @@ export const PublishCycleRecapButton: React.FC<PublishCycleRecapButtonProps> = (
   const toast = useToast();
 
   const [guildName, setGuildName] = useState("");
-  const [rankingType, setRankingType] = useState<"average" | "max">("average");
+  const [rankingType, setRankingType] = useState<PodiumRankingType>("average");
+  const [includeSnapshot, setIncludeSnapshot] = useState(true);
+  const [includeSummary, setIncludeSummary] = useState(true);
   const [isPublishing, setIsPublishing] = useState(false);
+  const previewBg = useColorModeValue("gray.50", "whiteAlpha.50");
+
+  const selectedGuildId = guilds.find((g) => g.name === guildName)?._id;
+  const { recap, isLoading: isPreviewLoading } = useCycleRecapPreview(
+    isOpen && includeSummary ? cycle._id : undefined,
+    selectedGuildId
+  );
 
   const guildOptions = [{ value: "", label: "Toutes les guildes actives" }, ...guilds.map((g) => ({ value: g.name, label: g.name }))];
 
@@ -34,13 +88,20 @@ export const PublishCycleRecapButton: React.FC<PublishCycleRecapButtonProps> = (
         year: cycle.year,
         rankingType,
         guildName: guildName || undefined,
+        includeSnapshot,
+        includeSummary,
       });
       const requested = data.results.filter((r) => r.status === "requested").length;
       const skipped = data.results.filter((r) => r.status === "skipped");
+      const failed = data.results.filter((r) => r.status === "error");
+      const details = [
+        skipped.length > 0 && `Ignoré (pas de salon configuré) : ${skipped.map((s) => s.guild).join(", ")}`,
+        failed.length > 0 && `En erreur : ${failed.map((f) => f.guild).join(", ")}`,
+      ].filter(Boolean).join(" · ");
       toast({
         title: `Récap demandé pour ${requested} guilde(s)`,
-        description: skipped.length > 0 ? `Ignoré (pas de salon configuré) : ${skipped.map((s) => s.guild).join(", ")}` : undefined,
-        status: skipped.length > 0 ? "warning" : "success",
+        description: details || undefined,
+        status: skipped.length > 0 || failed.length > 0 ? "warning" : "success",
         duration: 5000,
       });
       onClose();
@@ -53,7 +114,7 @@ export const PublishCycleRecapButton: React.FC<PublishCycleRecapButtonProps> = (
 
   return (
     <>
-      <Tooltip label="Publier le récap podium sur Discord" hasArrow>
+      <Tooltip label="Publier le récap de fin de cycle sur Discord" hasArrow>
         <IconButton
           size="xs"
           aria-label="Publier le récap Discord"
@@ -74,9 +135,17 @@ export const PublishCycleRecapButton: React.FC<PublishCycleRecapButtonProps> = (
           <ModalBody>
             <VStack align="stretch" spacing={4}>
               <Text fontSize="sm" color="gray.500">
-                Envoie une capture d'écran du podium final du cycle dans le salon général de la/les
-                guilde(s) choisie(s). Rien n'est appliqué ni modifié, juste une notification Discord.
+                Envoie le récap du cycle dans le salon général de la/les guilde(s) choisie(s). Rien
+                n'est appliqué ni modifié, juste une notification Discord.
               </Text>
+              <HStack spacing={6}>
+                <Checkbox isChecked={includeSnapshot} onChange={(e) => setIncludeSnapshot(e.target.checked)}>
+                  Capture du podium
+                </Checkbox>
+                <Checkbox isChecked={includeSummary} onChange={(e) => setIncludeSummary(e.target.checked)}>
+                  Bilan écrit
+                </Checkbox>
+              </HStack>
               <Box>
                 <Text fontSize="sm" mb={1}>Guilde</Text>
                 <CustomSelect
@@ -87,22 +156,45 @@ export const PublishCycleRecapButton: React.FC<PublishCycleRecapButtonProps> = (
                   size="md"
                 />
               </Box>
-              <Box>
-                <Text fontSize="sm" mb={1}>Classement</Text>
-                <ButtonGroup size="sm" isAttached variant="outline" w="100%">
-                  <Button flex={1} colorScheme={rankingType === "average" ? "blue" : undefined} variant={rankingType === "average" ? "solid" : "outline"} onClick={() => setRankingType("average")}>
-                    Moyenne
-                  </Button>
-                  <Button flex={1} colorScheme={rankingType === "max" ? "blue" : undefined} variant={rankingType === "max" ? "solid" : "outline"} onClick={() => setRankingType("max")}>
-                    Max
-                  </Button>
-                </ButtonGroup>
-              </Box>
+              {includeSnapshot && (
+                <Box>
+                  <Text fontSize="sm" mb={1}>Classement de la capture</Text>
+                  <ButtonGroup size="sm" isAttached variant="outline" w="100%">
+                    {RANKING_OPTIONS.map((option) => (
+                      <Button
+                        key={option.value}
+                        flex={1}
+                        colorScheme={rankingType === option.value ? "blue" : undefined}
+                        variant={rankingType === option.value ? "solid" : "outline"}
+                        onClick={() => setRankingType(option.value)}
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </ButtonGroup>
+                </Box>
+              )}
+              {includeSummary && (
+                <Box bg={previewBg} borderRadius="md" p={3}>
+                  <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" color="gray.500" mb={2}>
+                    Aperçu du bilan
+                  </Text>
+                  {!selectedGuildId ? (
+                    <Text fontSize="sm" color="gray.500">Choisis une guilde pour voir l'aperçu de son bilan.</Text>
+                  ) : isPreviewLoading ? (
+                    <Skeleton h="80px" borderRadius="md" />
+                  ) : recap ? (
+                    <RecapPreview recap={recap} />
+                  ) : (
+                    <Text fontSize="sm" color="gray.500">Aperçu indisponible.</Text>
+                  )}
+                </Box>
+              )}
             </VStack>
           </ModalBody>
           <ModalFooter>
             <Button variant="ghost" mr={3} onClick={onClose}>Annuler</Button>
-            <Button colorScheme="purple" onClick={handlePublish} isLoading={isPublishing}>
+            <Button colorScheme="purple" onClick={handlePublish} isLoading={isPublishing} isDisabled={!includeSnapshot && !includeSummary}>
               Publier
             </Button>
           </ModalFooter>
