@@ -4,7 +4,7 @@ import type { NotificationType } from "@/interfaces";
 export const NOTIFICATION_TYPES: NotificationType[] = [
   "scores", "podium_snapshot", "score_edit", "rotation_transfer", "character_update", "image_upload",
   "ban", "draft", "guild_toggle", "build_proposal", "build_delete", "cycle_change",
-  "guild_change", "membre_role_change", "guild_member_change",
+  "guild_change", "membre_role_change", "guild_member_change", "personal_record",
 ];
 
 export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
@@ -23,6 +23,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   guild_change: "Création / renommage / suppression de guilde",
   membre_role_change: "Changement de rôle de membre",
   guild_member_change: "Ajout / retrait de membre",
+  personal_record: "Record personnel battu (salon membres)",
 };
 
 const fmt = (data: Record<string, unknown>, key: string, fallback = "?"): string =>
@@ -68,6 +69,10 @@ export const formatActivityEntry = (type: string, data: Record<string, unknown>)
       return `${fmt(data, "proposed_by")} a supprimé un build`;
     case "draft":
       return `Draft — ${fmt(data, "guild_name")}`;
+    case "personal_record": {
+      const count = Array.isArray(data.records) ? data.records.length : 0;
+      return `${count} record(s) personnel(s) battu(s)${data.guild_name ? ` dans **${fmt(data, "guild_name")}**` : ""}`;
+    }
     default:
       return `${type} : ${fmt(data, "message", JSON.stringify(data).slice(0, 120))}`;
   }

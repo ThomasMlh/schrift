@@ -13,3 +13,4 @@ export * from './api/useGuides';
 export * from './api/useActivity';
 export * from './api/useSettings';
 export * from './api/useDiscord';
+export * from './api/useRecords';
