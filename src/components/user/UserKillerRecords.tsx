@@ -24,7 +24,8 @@ export const UserKillerRecords = ({ userId, bbsId }: UserKillerRecordsProps) => 
   if (isLoading) return <Skeleton h="240px" borderRadius="lg" />;
 
   const account = accounts.find((a) => a.bbs_id === bbsId) ?? accounts.find((a) => a.is_primary) ?? accounts[0];
-  const records = account?.records ?? [];
+  // Meilleur record en tête (l'API renvoie les killers par ordre alphabétique)
+  const records = [...(account?.records ?? [])].sort((a, b) => b.score - a.score);
 
   return (
     <Box>
