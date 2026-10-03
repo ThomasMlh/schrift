@@ -1,9 +1,10 @@
 import {
-  Box, HStack, Skeleton, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useColorModeValue,
+  Box, HStack, Skeleton, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tooltip, Tr, useColorModeValue,
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { useUserRecords } from "@/hooks/useAPI";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
+import { AlterationImage } from "@/components/ui/AlterationImage";
 
 interface UserKillerRecordsProps {
   userId?: string;
@@ -52,7 +53,13 @@ export const UserKillerRecords = ({ userId, bbsId }: UserKillerRecordsProps) => 
                     <HStack spacing={2}>
                       {r.attack && <AttackTypeBadge attackType={r.attack} size="12px" />}
                       <Text fontWeight="medium">{r.killer ?? "—"}</Text>
-                      {r.alteration && <Text fontSize="xs" color={mutedText}>{r.alteration}</Text>}
+                      {r.alteration && (
+                        <Tooltip label={t(`alterations.${r.alteration}`, r.alteration)} hasArrow>
+                          <Box as="span" display="inline-flex">
+                            <AlterationImage alteration={r.alteration} size="20px" />
+                          </Box>
+                        </Tooltip>
+                      )}
                     </HStack>
                   </Td>
                   <Td isNumeric fontWeight="semibold">{r.score.toLocaleString("fr-FR")}</Td>
