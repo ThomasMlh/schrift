@@ -32,6 +32,14 @@ export interface IDiscordChannel {
   members: IDiscordChannelMember[];
 }
 
+export interface IDiscordEmoji {
+  id: string;
+  name: string;
+  animated: boolean;
+  url: string;
+  guild_id: string; // serveur Discord auquel appartient l'emoji
+}
+
 export interface IActivityLogEntry {
   _id: string;
   type: NotificationType | string;

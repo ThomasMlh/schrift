@@ -1,15 +1,19 @@
 import {
-  Box, Button, Flex, FormControl, FormLabel, Select,
-  Text, Textarea, VStack, useColorModeValue, useToast,
+  Box, Button, Center, Flex, FormControl, FormLabel, Image, Popover, PopoverBody, PopoverContent,
+  PopoverTrigger, Select, Spinner, Text, Textarea, VStack, useColorMode, useColorModeValue, useToast,
 } from "@chakra-ui/react";
-import { useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { useDiscordChannels } from "@/hooks/useAPI";
+import { useDiscordChannels, useDiscordEmojis } from "@/hooks/useAPI";
 import { useDiscordMutations } from "@/hooks/useAPIMutations";
 import type { IDiscordChannel, IDiscordChannelMember } from "@/interfaces";
 
+const DiscordEmojiPicker = lazy(() => import("./DiscordEmojiPicker"));
+
 const UNCATEGORIZED_LABEL = "Sans catégorie";
 const MENTION_PATTERN = /<@(\d+)>/g;
+// Mention <@id> OU emoji custom <:nom:id> / <a:nom:id> (animé) — pour l'aperçu.
+const PREVIEW_TOKEN_PATTERN = /<@(\d+)>|<(a?):(\w+):(\d+)>/g;
 
 // Regroupe les salons par catégorie Discord, dans l'ordre d'arrivée (déjà trié côté bot
 // comme la sidebar Discord : catégorie puis position du salon dedans).
@@ -35,23 +39,41 @@ const detectMentionInProgress = (text: string, cursorPos: number): { start: numb
   return { start: atIndex, query: between };
 };
 
-// Remplace chaque jeton <@id> par "@Pseudo" (résolu via la liste des membres du salon), pour
-// un aperçu lisible de ce qui sera réellement envoyé — le ping brut <@id> n'est pas parlant.
+// Rend les jetons Discord de façon lisible, pour un aperçu de ce qui sera réellement envoyé :
+// <@id> devient "@Pseudo" (résolu via la liste des membres du salon), et un emoji custom
+// <:nom:id> / <a:nom:id> devient son image (servie par le CDN Discord à partir de l'id).
 const renderPreview = (text: string, members: IDiscordChannelMember[]): ReactNode[] => {
   const memberById = new Map(members.map((m) => [m.id, m]));
   const parts: ReactNode[] = [];
   let lastIndex = 0;
   let key = 0;
 
-  for (const match of text.matchAll(MENTION_PATTERN)) {
+  for (const match of text.matchAll(PREVIEW_TOKEN_PATTERN)) {
     const index = match.index ?? 0;
     if (index > lastIndex) parts.push(text.slice(lastIndex, index));
-    const member = memberById.get(match[1]);
-    parts.push(
-      <Text as="span" key={key++} color="blue.300" fontWeight="semibold" bg="blue.900" px="1" borderRadius="sm">
-        @{member?.display_name ?? match[1]}
-      </Text>
-    );
+
+    const [, mentionId, animated, emojiName, emojiId] = match;
+    if (mentionId) {
+      const member = memberById.get(mentionId);
+      parts.push(
+        <Text as="span" key={key++} color="blue.300" fontWeight="semibold" bg="blue.900" px="1" borderRadius="sm">
+          @{member?.display_name ?? mentionId}
+        </Text>
+      );
+    } else {
+      parts.push(
+        <Image
+          key={key++}
+          src={`https://cdn.discordapp.com/emojis/${emojiId}.${animated ? "gif" : "png"}`}
+          alt={`:${emojiName}:`}
+          title={`:${emojiName}:`}
+          display="inline-block"
+          boxSize="22px"
+          verticalAlign="middle"
+          mx="1px"
+        />
+      );
+    }
     lastIndex = index + match[0].length;
   }
   if (lastIndex < text.length) parts.push(text.slice(lastIndex));
@@ -70,7 +92,9 @@ const renderPreview = (text: string, members: IDiscordChannelMember[]): ReactNod
 // "@Pseudo" pour que l'admin voie ce qui sera réellement envoyé avant de cliquer sur Envoyer.
 const DiscordMessageSection: React.FC = () => {
   const { channels, isLoading } = useDiscordChannels();
+  const { emojis } = useDiscordEmojis();
   const { sendDiscordMessage } = useDiscordMutations();
+  const { colorMode } = useColorMode();
   const toast = useToast();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -87,6 +111,11 @@ const DiscordMessageSection: React.FC = () => {
 
   const channelGroups = useMemo(() => groupByCategory(channels), [channels]);
   const selectedChannel = channels.find((c) => c.id === channelId) || null;
+  // Seuls les emojis du serveur Discord du salon choisi sont proposés.
+  const serverEmojis = useMemo(
+    () => (selectedChannel ? emojis.filter((e) => e.guild_id === selectedChannel.guild_id) : []),
+    [emojis, selectedChannel]
+  );
 
   const handleChannelChange = (id: string) => {
     setChannelId(id);
@@ -126,6 +155,21 @@ const DiscordMessageSection: React.FC = () => {
     requestAnimationFrame(() => {
       textarea.focus();
       textarea.setSelectionRange(newCursorPos, newCursorPos);
+    });
+  };
+
+  // Insère un emoji à la position du curseur. Le textarea conserve sa sélection même après
+  // avoir perdu le focus (clic dans le sélecteur), donc selectionStart reste fiable ici.
+  const insertEmoji = (token: string) => {
+    const textarea = textareaRef.current;
+    const start = textarea?.selectionStart ?? content.length;
+    const end = textarea?.selectionEnd ?? content.length;
+    setContent(`${content.slice(0, start)}${token}${content.slice(end)}`);
+
+    const newCursorPos = start + token.length;
+    requestAnimationFrame(() => {
+      textarea?.focus();
+      textarea?.setSelectionRange(newCursorPos, newCursorPos);
     });
   };
 
@@ -181,7 +225,21 @@ const DiscordMessageSection: React.FC = () => {
         </FormControl>
 
         <FormControl position="relative">
-          <FormLabel fontSize="sm">Message</FormLabel>
+          <Flex justify="space-between" align="center" mb={2}>
+            <FormLabel fontSize="sm" mb={0}>Message</FormLabel>
+            <Popover placement="bottom-end" isLazy>
+              <PopoverTrigger>
+                <Button size="xs" variant="outline" isDisabled={!selectedChannel}>😀 Emoji</Button>
+              </PopoverTrigger>
+              <PopoverContent w="auto" border="none" bg="transparent" boxShadow="none">
+                <PopoverBody p={0}>
+                  <Suspense fallback={<Center w="350px" h="450px"><Spinner /></Center>}>
+                    <DiscordEmojiPicker serverEmojis={serverEmojis} isDark={colorMode === "dark"} onPick={insertEmoji} />
+                  </Suspense>
+                </PopoverBody>
+              </PopoverContent>
+            </Popover>
+          </Flex>
           <Textarea
             ref={textareaRef}
             placeholder={selectedChannel ? "Votre message... (tapez @ pour mentionner quelqu'un)" : "Choisissez d'abord un salon"}
