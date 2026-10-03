@@ -1,12 +1,12 @@
 // Types généraux
 export type Page = "guilds" | "characters";
-export type AdminPage = "guilds" | "draft" | "cycles" | "scores" | "users" | "guides" | "banned" | "images" | "notifications" | "activity" | "messages";
+export type AdminPage = "guilds" | "draft" | "cycles" | "scores" | "users" | "guides" | "banned" | "images" | "notifications" | "activity" | "messages" | "alerts";
 export type Role = "chef" | "sous-chef" | "membre";
 
 export type NotificationType =
   | "scores" | "podium_snapshot" | "score_edit" | "rotation_transfer" | "character_update" | "image_upload"
   | "ban" | "draft" | "guild_toggle" | "build_proposal" | "build_delete" | "cycle_change"
-  | "guild_change" | "membre_role_change" | "guild_member_change" | "personal_record";
+  | "guild_change" | "membre_role_change" | "guild_member_change" | "personal_record" | "cycle_recap";
 
 export interface IGuild {
   _id: string;
@@ -312,6 +312,9 @@ export interface IPodiumPlayer {
   is_differential?: boolean;
   averageScore?: number; // Moyenne des scores (si mode cycle en moyenne)
   totalScore?: number; // Somme des scores (si mode cycle en max)
+  previousAverageScore?: number; // Moyenne au cycle précédent (classement progression)
+  progression?: number; // Écart de moyenne avec le cycle précédent (classement progression)
+  progressionPercent?: number; // Écart en % (classement progression)
   totalScores: number; // Nombre de scores pris en compte pour la moyenne
   totalRawScore?: number;
   avatar?: string;
@@ -342,6 +345,9 @@ export interface IProtectedRoute {
   children: React.ReactNode;
 }
 
+export type PodiumRankingType = "average" | "max" | "progression";
+export type PodiumType = "individual_scores" | "average_scores" | "max_scores" | "progression";
+
 export interface IPodiumResponse {
   success: boolean;
   podium?: IPodiumPlayer[]; // Nouvelle API retourne podium
@@ -352,7 +358,7 @@ export interface IPodiumResponse {
     cycle_id: string;
     rotation_id: string | null;
     guild_name?: string;
-    ranking_type?: "average" | "max" | null;
+    ranking_type?: PodiumRankingType | null;
   };
   meta: {
     totalPlayers: number;
@@ -368,8 +374,9 @@ export interface IPodiumResponse {
     };
     guildSpecific: boolean;
     fullPodium: boolean;
-    podiumType: "individual_scores" | "average_scores" | "max_scores";
+    podiumType: PodiumType;
     averageScore?: number;
+    previousCycle?: { _id: string; name: string; year: number } | null;
   };
 }
 
@@ -659,4 +666,47 @@ export interface IEvent {
   start_date: string;
   end_date: string;
   period: string;
+}
+
+// Baisses de régime (espace chefs/admins) : derniers scores comparés à l'habitude du joueur
+// sur les mêmes killers
+export interface IDeclineSample {
+  cycle_id: string;
+  cycle_name: string | null;
+  cycle_year: number | null;
+  rotation_id: string;
+  killer: string | null;
+  attack: string | null;
+  alteration: string | null;
+  score: number;
+  usual: number;
+}
+
+export interface IDeclineAlert {
+  bbs_id: string;
+  bbs_name: string | null;
+  user_id: string;
+  discord_id?: string;
+  global_name?: string;
+  avatar?: string;
+  guild_id: string;
+  guild_name: string | null;
+  ratio: number;
+  drop_percent: number;
+  samples: IDeclineSample[];
+}
+
+// Bilan de fin de cycle d'une guilde (aperçu avant publication sur Discord)
+export interface ICycleRecap {
+  guild_name: string;
+  cycle_name: string;
+  cycle_year: number;
+  previous_cycle_name: string | null;
+  participants: number;
+  top3: { rank: number; pseudo: string; average: number }[];
+  records_count: number;
+  records: { pseudo: string; killer: string; attack: string; previous_score: number; new_score: number }[];
+  best_progression: { pseudo: string; previous_average: number; average: number; percent: number } | null;
+  guild_average: number | null;
+  previous_guild_average: number | null;
 }

@@ -178,7 +178,8 @@
       "heroDescriptionWeekly": "Classement par semaine (2 rotations)",
       "heroDescriptionMisses": "Classement des miss (scores négatifs)",
       "heroDescriptionMax": "Classement par score max (somme des scores) sur le cycle",
-      "heroDescriptionAverage": "Classement des moyennes par cycle"
+      "heroDescriptionAverage": "Classement des moyennes par cycle",
+      "heroDescriptionProgression": "Classement des joueurs qui ont le plus progressé par rapport au cycle précédent"
     },
     "comparator": {
       "title": "Comparateur",
@@ -467,7 +468,9 @@
       "badgeTypeMax": "Type : Score max (somme)",
       "badgeCycle": "Cycle :",
       "badgeWeek": "Semaine :",
-      "badgeGuild": "Guilde :"
+      "badgeGuild": "Guilde :",
+      "rankingProgression": "Progression",
+      "badgeTypeProgression": "Type : Progression"
     },
     "podiumInfo": {
       "rotationScore": "Score moyen",
@@ -478,7 +481,9 @@
       "missTitle": "Classement des Miss",
       "missPlayers": "{{count}} joueur(s) avec au moins 1 miss",
       "missTotal": "Total : {{count}} miss dans le cycle",
-      "missAverage": "Moyenne : {{avg}} miss/joueur"
+      "missAverage": "Moyenne : {{avg}} miss/joueur",
+      "progressionComparedTo": "Évolution de la moyenne de chaque joueur entre {{previous}} et {{current}}. Seuls les joueurs ayant des scores sur les deux cycles apparaissent.",
+      "progressionNoPreviousCycle": "Pas de cycle précédent : la progression ne peut pas être calculée pour ce cycle."
     },
     "podiumResults": {
       "loading": "Chargement du podium...",
@@ -487,7 +492,8 @@
       "selectCycleFirst": "Veuillez sélectionner un cycle",
       "paginationInfo": "Page {{current}} sur {{total}} - Affichage de {{count}} joueur(s)",
       "playersWithMiss": "{{count}} joueur(s) avec miss",
-      "playersTotal": "{{count}} joueur(s) au total"
+      "playersTotal": "{{count}} joueur(s) au total",
+      "progressionTooltip": "Moyenne : {{previous}} → {{current}}"
     },
     "scoresSection": {
       "heading": "Gestion des Scores",

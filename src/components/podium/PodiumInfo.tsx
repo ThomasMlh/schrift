@@ -74,6 +74,23 @@ export const PodiumInfo = ({
     );
   }
 
+  /* ─── Cycle mode, classement progression ─── */
+  if (displayMode === "cycle" && isPodiumResponse(podiumData) && podiumData.meta.podiumType === "progression") {
+    const previous = podiumData.meta.previousCycle;
+    return (
+      <Box px={4} py={3} bg={filterBg} borderRadius="lg">
+        <Text fontSize="sm" textAlign="center" color={mutedText}>
+          {previous
+            ? t("components.podiumInfo.progressionComparedTo", {
+              previous: `${previous.name} ${previous.year}`,
+              current: [selectedCycle?.name, selectedCycle?.year].filter(Boolean).join(" ") || podiumData.meta.cycleName,
+            })
+            : t("components.podiumInfo.progressionNoPreviousCycle")}
+        </Text>
+      </Box>
+    );
+  }
+
   /* ─── Weekly mode ─── */
   if (displayMode === "weekly" && isWeeklyResponse(podiumData)) {
     return (

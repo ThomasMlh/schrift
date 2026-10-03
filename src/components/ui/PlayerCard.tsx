@@ -1,6 +1,7 @@
 import { Box, HStack, VStack, Text, Avatar, Badge, useColorModeValue } from "@chakra-ui/react";
-import type { IPodiumPlayer } from "@/interfaces";
+import type { IPodiumPlayer, PodiumType } from "@/interfaces";
 import { ScoreBadge } from "./ScoreBadge";
+import { ProgressionBadge } from "./ProgressionBadge";
 import { getUserAvatarUrl } from "@/utils/discord";
 import { buildPlayerUrl } from "@/utils/playerUrl";
 import CustomLink from "./CustomLink";
@@ -8,7 +9,7 @@ import CustomLink from "./CustomLink";
 interface PlayerCardProps {
   player: IPodiumPlayer;
   showGuildName?: boolean;
-  podiumType?: "individual_scores" | "average_scores" | "max_scores";
+  podiumType?: PodiumType;
 }
 
 const PlayerCard = ({
@@ -83,11 +84,19 @@ const PlayerCard = ({
 
         {/* Score */}
         <Box flexShrink={0}>
-          <ScoreBadge
-            score={isRotationMode ? player.score || 0 : cycleScore}
-            forceBlue={!isRotationMode}
-            fontSize={{ base: "xs", md: "sm" }}
-          />
+          {podiumType === "progression" && player.progressionPercent != null ? (
+            <ProgressionBadge
+              percent={player.progressionPercent}
+              previousAverage={player.previousAverageScore}
+              average={player.averageScore}
+            />
+          ) : (
+            <ScoreBadge
+              score={isRotationMode ? player.score || 0 : cycleScore}
+              forceBlue={!isRotationMode}
+              fontSize={{ base: "xs", md: "sm" }}
+            />
+          )}
         </Box>
       </HStack>
     </Box>

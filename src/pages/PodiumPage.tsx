@@ -6,6 +6,7 @@ import type {
   IPodiumResponse,
   IPodiumWeeklyResponse,
   IPodiumMissesResponse,
+  PodiumRankingType,
 } from "../interfaces";
 import { SEOHead } from "@/components/SEOHead";
 import { useCycles, useGuilds, usePodiumFetch } from "@/hooks/useAPI";
@@ -17,7 +18,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 
 type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
-type CycleRankingType = "average" | "max";
+type CycleRankingType = PodiumRankingType;
 
 interface FilterOverrides {
   page?: number;
@@ -335,6 +336,8 @@ const PodiumPage = () => {
               ? t("pages.podium.heroDescriptionMisses")
               : cycleRankingType === "max"
               ? t("pages.podium.heroDescriptionMax")
+              : cycleRankingType === "progression"
+              ? t("pages.podium.heroDescriptionProgression")
               : t("pages.podium.heroDescriptionAverage")
           }
           badge={{ text: t("pages.podium.heroBadge"), icon: "🏆" }}

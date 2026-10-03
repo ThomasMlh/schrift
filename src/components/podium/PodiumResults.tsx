@@ -4,6 +4,7 @@ import type {
   IPodiumWeeklyResponse,
   IPodiumMissesResponse,
   IPodiumPlayer,
+  PodiumType,
 } from "@/interfaces";
 import PlayerCard from "@/components/ui/PlayerCard";
 import PlayerCardWeekly from "@/components/ui/PlayerCardWeekly";
@@ -47,7 +48,7 @@ const isPodiumResponse = (
 // Extrait les joueurs top 3 normalisés pour le PodiumPedestal
 const extractTop3ForPedestal = (
   data: IPodiumResponse | IPodiumWeeklyResponse,
-  podiumType?: "individual_scores" | "average_scores" | "max_scores",
+  podiumType?: PodiumType,
   isFirstPage = true
 ): PodiumPedestalPlayer[] => {
   if (!isFirstPage) return [];
@@ -96,6 +97,9 @@ const extractTop3ForPedestal = (
         guild_name: pp.guild_name,
         displayScore: score,
         forceBlueScore: !isRotation,
+        ...(podiumType === "progression" && pp.progressionPercent != null && {
+          progression: { percent: pp.progressionPercent, previousAverage: pp.previousAverageScore, average: pp.averageScore },
+        }),
       };
     }).filter(Boolean) as PodiumPedestalPlayer[];
   }

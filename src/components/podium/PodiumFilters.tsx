@@ -18,12 +18,12 @@ import {
 import { RepeatIcon } from "@chakra-ui/icons";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import { CustomSelect } from "@/components/ui/CustomSelect";
-import type { ICycle, IGuild, ICycleRotation } from "@/interfaces";
+import type { ICycle, IGuild, ICycleRotation, PodiumRankingType } from "@/interfaces";
 import { ScoreLegend } from "@/components/ui/ScoreLegend";
 import { useTranslation } from "react-i18next";
 
 type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
-type CycleRankingType = "average" | "max";
+type CycleRankingType = PodiumRankingType;
 
 const MODE_ORDER: DisplayMode[] = ["cycle", "rotation", "weekly", "misses"];
 
@@ -136,6 +136,13 @@ export const PodiumFilters = ({
                 variant={cycleRankingType === "max" ? "solid" : "outline"}
               >
                 {t("components.podiumFilters.rankingMax")}
+              </Button>
+              <Button
+                onClick={() => onCycleRankingTypeChange("progression")}
+                colorScheme={cycleRankingType === "progression" ? "blue" : undefined}
+                variant={cycleRankingType === "progression" ? "solid" : "outline"}
+              >
+                {t("components.podiumFilters.rankingProgression")}
               </Button>
             </ButtonGroup>
           )}
@@ -251,7 +258,11 @@ export const PodiumFilters = ({
               </Badge>
             )}
             {displayMode === "cycle" && cycleRankingType !== "average" && (
-              <Badge colorScheme="pink">{t("components.podiumFilters.badgeTypeMax")}</Badge>
+              <Badge colorScheme="pink">
+                {cycleRankingType === "progression"
+                  ? t("components.podiumFilters.badgeTypeProgression")
+                  : t("components.podiumFilters.badgeTypeMax")}
+              </Badge>
             )}
             {selectedCycle && (
               <Badge colorScheme="blue">{t("components.podiumFilters.badgeCycle")} {selectedCycle.name} - {selectedCycle.year}</Badge>

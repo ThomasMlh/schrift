@@ -178,7 +178,8 @@
       "heroDescriptionWeekly": "Weekly ranking (2 rotations)",
       "heroDescriptionMisses": "Misses ranking (negative scores)",
       "heroDescriptionMax": "Max score ranking (sum of scores) for the cycle",
-      "heroDescriptionAverage": "Average ranking per cycle"
+      "heroDescriptionAverage": "Average ranking per cycle",
+      "heroDescriptionProgression": "Players who improved the most compared with the previous cycle"
     },
     "comparator": {
       "title": "Comparator",
@@ -467,7 +468,9 @@
       "badgeTypeMax": "Type: Max score (sum)",
       "badgeCycle": "Cycle:",
       "badgeWeek": "Week:",
-      "badgeGuild": "Guild:"
+      "badgeGuild": "Guild:",
+      "rankingProgression": "Progression",
+      "badgeTypeProgression": "Type: Progression"
     },
     "podiumInfo": {
       "rotationScore": "Average score",
@@ -478,7 +481,9 @@
       "missTitle": "Miss Rankings",
       "missPlayers": "{{count}} player(s) with at least 1 miss",
       "missTotal": "Total: {{count}} misses in the cycle",
-      "missAverage": "Average: {{avg}} misses/player"
+      "missAverage": "Average: {{avg}} misses/player",
+      "progressionComparedTo": "Change in each player's average between {{previous}} and {{current}}. Only players with scores in both cycles are listed.",
+      "progressionNoPreviousCycle": "No previous cycle: progression can't be computed for this cycle."
     },
     "podiumResults": {
       "loading": "Loading podium...",
@@ -487,7 +492,8 @@
       "selectCycleFirst": "Please select a cycle",
       "paginationInfo": "Page {{current}} of {{total}} - Displaying {{count}} player(s)",
       "playersWithMiss": "{{count}} player(s) with miss",
-      "playersTotal": "{{count}} player(s) in total"
+      "playersTotal": "{{count}} player(s) in total",
+      "progressionTooltip": "Average: {{previous}} → {{current}}"
     },
     "scoresSection": {
       "heading": "Score Management",
