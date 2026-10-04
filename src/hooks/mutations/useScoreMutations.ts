@@ -33,6 +33,15 @@ export const useScoreMutations = () => {
     return true;
   };
 
+  // Marque un score signalé "à vérifier" comme correct (il réapparaît si sa valeur change)
+  const reviewScoreAnomaly = async (scoreId: string) => {
+    await request(`${apiUrl}/api/scores/${scoreId}/anomaly-review`, {
+      method: 'POST',
+    }, { fallbackError: 'Erreur lors de la validation du score' });
+    await invalidateKeys(`${apiUrl}/api/scores`);
+    return true;
+  };
+
   const createBulkScores = async (scoresData: IScoreFormData[]) => {
     const result = await request(`${apiUrl}/api/scores/bulk`, {
       method: 'POST',
@@ -70,5 +79,5 @@ export const useScoreMutations = () => {
     return data;
   };
 
-  return { createScore, updateScore, deleteScore, createBulkScores, transferRotation, transferScoreAccount };
+  return { createScore, updateScore, deleteScore, createBulkScores, transferRotation, transferScoreAccount, reviewScoreAnomaly };
 };

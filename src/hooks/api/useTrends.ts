@@ -1,5 +1,7 @@
 import useSWR from 'swr';
-import type { ICycleRecap, IDeclineAlert } from '../../interfaces';
+import type {
+  ICycleRecap, IDeclineAlert, IPagination, IScoreAnomaly, IScoreHistoryEntry, ScoreHistoryAction,
+} from '../../interfaces';
 import { apiUrl, useAuthenticatedFetcher } from './shared';
 
 // Baisses de régime des membres (chefs : leurs guildes ; admins : toutes, ou guildId).
@@ -28,4 +30,34 @@ export const useCycleRecapPreview = (cycleId?: string, guildId?: string) => {
   );
 
   return { recap: data?.recap ?? null, isLoading, error };
+};
+
+// Scores à vérifier (probables erreurs de saisie) sur les cycles récents.
+export const useScoreAnomalies = (guildId?: string) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const url = `${apiUrl}/api/scores/anomalies${guildId ? `?guild_id=${guildId}` : ''}`;
+
+  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; anomalies: IScoreAnomaly[] }>(
+    url,
+    authenticatedFetcher,
+    { revalidateOnFocus: false }
+  );
+
+  return { anomalies: data?.anomalies ?? [], isLoading, error, mutate };
+};
+
+// Historique paginé des modifications de scores (chefs : leurs guildes ; admins : tout).
+export const useScoreHistory = (filters: { guildId?: string; action?: ScoreHistoryAction; page?: number }) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const params = new URLSearchParams({ page: String(filters.page ?? 1), limit: '30' });
+  if (filters.guildId) params.set('guild_id', filters.guildId);
+  if (filters.action) params.set('action', filters.action);
+
+  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; entries: IScoreHistoryEntry[]; pagination: IPagination }>(
+    `${apiUrl}/api/scores/history?${params.toString()}`,
+    authenticatedFetcher,
+    { revalidateOnFocus: false, keepPreviousData: true }
+  );
+
+  return { entries: data?.entries ?? [], pagination: data?.pagination ?? null, isLoading, error, mutate };
 };
