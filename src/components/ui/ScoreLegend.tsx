@@ -30,13 +30,13 @@ interface ScoreLegendItem {
 const legendItems: ScoreLegendItem[] = [
   {
     labelKey: "rainbow",
-    minScore: 600000000,
+    minScore: 621000000,
     isRainbow: true
   },
   {
     labelKey: "clearExtraWave56",
     minScore: 580000000,
-    maxScore: 599999999,
+    maxScore: 620999999,
     colorScheme: "blue"
   },
   {
@@ -145,7 +145,7 @@ export const ScoreLegend = () => {
                     }}
                     textAlign="center"
                   >
-                    600M+
+                    621M+
                   </Box>
                 ) : (
                   <Box

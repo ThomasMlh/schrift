@@ -1,6 +1,6 @@
 export const getScoreDisplayValue = (score: number) => {
     switch (true) {
-        case score >= 600000000:
+        case score >= 621000000:
             return "rainbow";
         case score >= 580000000:
             return "blue";

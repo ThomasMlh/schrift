@@ -27,7 +27,7 @@ export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" }, for
     }
 
     const getScoreStyle = (value: number) => {
-        if (value >= 600000000) {
+        if (value >= 621000000) {
             // Arc-en-ciel (buff QG)
             return {
                 textGradient: "linear-gradient(90deg, #ff6b6b, #ffa07a, #ffd966, #90ee90, #87ceeb, #9370db)",
