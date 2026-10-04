@@ -24,7 +24,7 @@ interface GuildScoreDistributionProps {
   cycleId?: string;
 }
 
-const CLEAR_THRESHOLD_INDEX = 4; // index 4 = ≥600M = clear
+const CLEAR_THRESHOLD_INDEX = 4; // index 4 = ≥617M = clear
 const MISS_INDEX = 0;
 
 export const GuildScoreDistribution = ({ guildId, cycleId }: GuildScoreDistributionProps) => {
@@ -95,7 +95,7 @@ export const GuildScoreDistribution = ({ guildId, cycleId }: GuildScoreDistribut
         </Box>
       )}
       <Text fontSize="2xs" color={subText} mt={1}>
-        🟢 ≥ 600M = clear &nbsp;·&nbsp; 🔴 &lt; 600M &nbsp;·&nbsp; ⚫ miss
+        🟢 ≥ 617M = clear &nbsp;·&nbsp; 🔴 &lt; 617M &nbsp;·&nbsp; ⚫ miss
       </Text>
     </Box>
   );
