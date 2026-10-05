@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import type { IRotationHistory, IUserAccountRecords } from '../../interfaces';
+import type { IRotationHistory, IUserAccountAchievements, IUserAccountRecords } from '../../interfaces';
 import { apiUrl, fetcher } from './shared';
 
 // Historique d'un killer sur tous les cycles (records, moyennes par cycle, score à battre).
@@ -30,4 +30,17 @@ export const useUserRecords = (userId?: string) => {
   );
 
   return { accounts: data?.data ?? [], isLoading, error };
+};
+
+// Succès de chaque compte bbs d'un joueur, avec la rareté de chaque palier.
+export const useUserAchievements = (userId?: string) => {
+  const url = userId ? `${apiUrl}/api/users/${userId}/achievements` : null;
+
+  const { data, error, isLoading } = useSWR<{ success: boolean; total_accounts: number; data: IUserAccountAchievements[] }>(
+    url,
+    fetcher,
+    { revalidateOnFocus: false, dedupingInterval: 60000 }
+  );
+
+  return { accounts: data?.data ?? [], totalAccounts: data?.total_accounts ?? 0, isLoading, error };
 };

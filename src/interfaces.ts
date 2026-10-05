@@ -770,3 +770,32 @@ export interface IScoreHistoryEntry {
   by_name: string | null;
   created_at: string;
 }
+
+// Succès (calculés côté API à partir des scores)
+export type AchievementTier = "bronze" | "silver" | "gold" | "platinum";
+export type AchievementCategory = "scores" | "records" | "regularity" | "progression" | "podium" | "versatility";
+export type AchievementUnit = "count" | "score" | "billions" | "percent" | "flag";
+
+export interface IAchievementTierState {
+  tier: AchievementTier;
+  threshold: number;
+  unlocked_at: number | null; // timestamp (ms) de la rotation ou du cycle qui l'a débloqué
+  rarity: number; // % des comptes l'ayant débloqué
+}
+
+export interface IAchievement {
+  code: string;
+  category: AchievementCategory;
+  unit: AchievementUnit;
+  value: number;
+  current_tier: AchievementTier | null;
+  next_tier: { tier: AchievementTier; threshold: number } | null;
+  tiers: IAchievementTierState[];
+}
+
+export interface IUserAccountAchievements {
+  bbs_id: string;
+  bbs_name: string | null;
+  is_primary: boolean;
+  achievements: IAchievement[];
+}
