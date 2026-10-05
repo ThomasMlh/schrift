@@ -52,7 +52,8 @@ src/
   hooks/mutations/    # mutation hooks (POST/PATCH/DELETE) per domain
   providers/          # AuthProvider (session/JWT), APIProvider
   activity/           # Discord Activity integration (auto login in iframe)
-  interfaces.ts       # shared types (IUser, IGuild, IBbsAccount, ...)
+  types/              # shared types, one file per domain (user, guild, score, podium, ...)
+  interfaces.ts       # re-exports types/ so existing imports from "@/interfaces" keep working
   locales/            # fr/en translations
   utils/              # helpers (fetch, tokens, Discord, ...)
 scripts/               # prerender.js, generate-sitemap.js (run at build time)
