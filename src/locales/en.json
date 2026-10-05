@@ -10,7 +10,8 @@
     "guides": "Guides",
     "admin": "Admin",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "myProfile": "My profile"
   },
   "auth": {
     "login": "Log in",

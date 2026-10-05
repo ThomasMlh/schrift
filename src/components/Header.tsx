@@ -114,6 +114,8 @@ export const Header = () => {
   const { currentUser, isLoggedIn, isAdmin, isGuildManager, logout: authLogout } = useAuth();
   const toast = useToast();
   const { t } = useTranslation();
+  // Nom affiché en haut à droite : le pseudo Discord, à défaut le nom d'utilisateur ou le compte de jeu
+  const displayName = currentUser?.global_name || currentUser?.username || currentUser?.bbs_name || t("nav.myProfile");
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
   const location = useLocation();
@@ -175,12 +177,12 @@ export const Header = () => {
             <Avatar
               size="sm"
               src={currentUser?.avatar}
-              name={currentUser?.username}
+              name={displayName}
             />
             <VStack spacing={0} align="start">
               <CustomLink
                 to={buildPlayerUrl(currentUser?.bbs_name, currentUser?.bbs_id)}
-                text={`${currentUser?.global_name}`}
+                text={displayName}
                 textSize="sm"
                 requireAuth={true}
               />
@@ -390,11 +392,11 @@ export const Header = () => {
               {isLoggedIn ? (
                 <VStack spacing={3}>
                   <HStack spacing={2} w="100%">
-                    <Avatar size="sm" src={currentUser?.avatar} name={currentUser?.username} />
+                    <Avatar size="sm" src={currentUser?.avatar} name={displayName} />
                     <VStack spacing={0} align="start" flex={1}>
                       <CustomLink
                         to={buildPlayerUrl(currentUser?.bbs_name, currentUser?.bbs_id)}
-                        text={`${currentUser?.global_name}`}
+                        text={displayName}
                         textSize="sm"
                         requireAuth={true}
                       />

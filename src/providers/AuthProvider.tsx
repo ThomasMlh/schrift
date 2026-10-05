@@ -38,6 +38,10 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+// Délai maximal d'attente du profil (/api/auth/me) avant d'afficher le site avec les seules
+// infos du token : une API lente (démarrage à froid) ne doit pas bloquer le site.
+const PROFILE_TIMEOUT_MS = 6000;
+
 const tryRefreshToken = async (): Promise<string | null> => {
   const refreshToken = getRefreshToken();
   if (!refreshToken) return null;
@@ -66,7 +70,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isGuildManager, setIsGuildManager] = useState(false);
   const [guildRoles, setGuildRoles] = useState<IGuildRoleGrant[]>([]);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  // En chargement seulement s'il y a une session à restaurer : un visiteur sans token voit le
+  // site immédiatement, un utilisateur connecté le voit une fois son profil chargé.
+  const [isAuthLoading, setIsAuthLoading] = useState(() => isDiscordActivity() || !!getToken() || !!getRefreshToken());
   const [token, setTokenState] = useState<string | null>(null);
 
   const applyTokenState = useCallback((currentToken: string) => {
@@ -95,9 +101,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const fetchUserProfile = useCallback(async (currentToken: string) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), PROFILE_TIMEOUT_MS);
     try {
       const response = await fetch(`${apiUrl}/api/auth/me`, {
         headers: { 'Authorization': `Bearer ${currentToken}` },
+        signal: controller.signal,
       });
       if (response.ok) {
         const data = await response.json();
@@ -124,7 +133,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       }
     } catch {
-      // silently fail - JWT data is sufficient
+      // Échec ou délai dépassé : on garde les infos du token
+    } finally {
+      clearTimeout(timeoutId);
     }
   }, []);
 
@@ -133,14 +144,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     if (currentToken && isTokenValid(currentToken)) {
       applyTokenState(currentToken);
-      // Fetch full profile from API to get up-to-date fields
-      fetchUserProfile(currentToken);
+      // Le token ne porte que les droits : pseudo, avatar et comptes viennent du profil
+      await fetchUserProfile(currentToken);
     } else if (currentToken || getRefreshToken()) {
       // Token expiré mais refresh token disponible
       const newToken = await tryRefreshToken();
       if (newToken) {
         applyTokenState(newToken);
-        fetchUserProfile(newToken);
+        await fetchUserProfile(newToken);
       } else {
         logout();
       }
@@ -161,6 +172,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (refreshToken) {
       saveRefreshToken(refreshToken);
     }
+    setIsAuthLoading(true);
     refreshAuth();
   };
 
