@@ -10,7 +10,8 @@
     "guides": "Guides",
     "admin": "Admin",
     "openMenu": "Ouvrir le menu",
-    "closeMenu": "Fermer le menu"
+    "closeMenu": "Fermer le menu",
+    "myProfile": "Mon profil"
   },
   "auth": {
     "login": "Se connecter",

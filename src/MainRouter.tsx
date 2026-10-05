@@ -156,6 +156,7 @@ const AppRoutes = () => {
 // contenu de la page (ex: podium), sans la nav ni le footer autour.
 const AppShell = () => {
   const location = useLocation();
+  const { isAuthLoading } = useAuth();
   // Capturé une seule fois au montage : certaines pages (ex: PodiumPage) réécrivent
   // l'URL via setSearchParams() sans préserver "capture", ce qui ferait réapparaître
   // le header/footer en cours de chargement si on relisait location.search à chaque render.
@@ -164,6 +165,16 @@ const AppShell = () => {
 
   if (isCapture) {
     return <AppRoutes />;
+  }
+
+  // Session en cours de restauration : on attend le profil plutôt que d'afficher un header
+  // à moitié rempli (pseudo manquant).
+  if (isAuthLoading) {
+    return (
+      <Flex minH="100vh" align="center" justify="center">
+        <Spinner size="xl" color="purple.500" thickness="3px" />
+      </Flex>
+    );
   }
 
   return (
