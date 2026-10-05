@@ -44,8 +44,9 @@ import { UserPositionPerformance } from "@/components/user/UserPositionPerforman
 import { BanDetailsCard } from "@/components/user/BanDetailsCard";
 import { UserTypeAnalysis } from "@/components/user/UserTypeAnalysis";
 import { UserWeeklySection } from "@/components/user/UserWeeklySection";
-import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock, FiStar } from "react-icons/fi";
+import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock, FiStar, FiHexagon } from "react-icons/fi";
 import { UserKillerRecords } from "@/components/user/UserKillerRecords";
+import { UserAchievements } from "@/components/achievements/UserAchievements";
 import { getDiscordBannerUrl } from "@/utils/discord";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
@@ -71,9 +72,10 @@ const UserPage = () => {
     "performances": 2,
     "top-rotations": 3,
     "evolution": 4,
-    "records": 5
+    "records": 5,
+    "succes": 6
   };
-  const TAB_NAMES = ["vue-ensemble", "tendance", "performances", "top-rotations", "evolution", "records"];
+  const TAB_NAMES = ["vue-ensemble", "tendance", "performances", "top-rotations", "evolution", "records", "succes"];
 
   // Déterminer l'onglet actif depuis l'URL
   const tabParam = searchParams.get("tab");
@@ -557,6 +559,10 @@ const UserPage = () => {
                       <Icon as={FiStar} mr={2} />
                       {t("pages.user.tabRecords")}
                     </Tab>
+                    <Tab {...tabStyles}>
+                      <Icon as={FiHexagon} mr={2} />
+                      {t("pages.user.tabAchievements")}
+                    </Tab>
                   </TabList>
 
                   <TabPanels>
@@ -639,6 +645,11 @@ const UserPage = () => {
                     {/* Records personnels par killer */}
                     <TabPanel p={0}>
                       <UserKillerRecords userId={userId} bbsId={matchedBbsId} />
+                    </TabPanel>
+
+                    {/* Succès du compte */}
+                    <TabPanel p={0}>
+                      <UserAchievements userId={userId} bbsId={matchedBbsId} />
                     </TabPanel>
                   </TabPanels>
                 </Tabs>

@@ -310,7 +310,17 @@
       "recordsScore": "Record",
       "recordsCycle": "Obtenu au",
       "recordsAttempts": "Tentatives",
-      "recordsEmpty": "Aucun record pour ce compte"
+      "recordsEmpty": "Aucun record pour ce compte",
+      "tabAchievements": "Succès",
+      "achievementsTitle": "Succès",
+      "achievementsSubtitle": "Débloqués automatiquement à partir des scores du compte",
+      "achievementsEmpty": "Aucun succès pour ce compte",
+      "achievementsLocked": "non obtenu",
+      "achievementsUnlockOnce": "à obtenir une fois",
+      "achievementsRarity": "{{value}} % des joueurs",
+      "achievementsUnlockedOn": "Obtenu le {{date}}",
+      "achievementsProgress": "{{value}} / {{threshold}} vers {{tier}}",
+      "achievementsSummary": "{{unlocked}} / {{total}} paliers"
     },
     "discordCallback": {
       "loading": "Connexion en cours avec Discord...",
@@ -912,6 +922,126 @@
       "toastBulkSuccessDesc": "{{count}} scores ont été enregistrés avec succès",
       "toastBulkErrorTitle": "Erreur",
       "toastBulkErrorFallback": "Erreur lors de l'enregistrement des scores"
+    }
+  },
+  "achievements": {
+    "tiers": {
+      "bronze": "Bronze",
+      "silver": "Argent",
+      "gold": "Or",
+      "platinum": "Platine"
+    },
+    "categories": {
+      "scores": "Scores",
+      "records": "Records",
+      "regularity": "Régularité",
+      "progression": "Progression",
+      "podium": "Podium",
+      "versatility": "Polyvalence"
+    },
+    "first_step": {
+      "name": "Premier pas",
+      "description": "Avoir un premier score enregistré"
+    },
+    "clear": {
+      "name": "Clear",
+      "description": "Scores à 617M ou plus"
+    },
+    "perfect_score": {
+      "name": "Score parfait",
+      "description": "Meilleur score sur une rotation"
+    },
+    "perfect_week": {
+      "name": "Semaine parfaite",
+      "description": "Les 2 rotations d'une même semaine à 620M ou plus"
+    },
+    "exceptional_cycle": {
+      "name": "Cycle d'exception",
+      "description": "Un cycle à 12 Md ou plus au total"
+    },
+    "immaculate_cycle": {
+      "name": "Cycle immaculé",
+      "description": "Toutes les rotations d'un cycle à 621M ou plus"
+    },
+    "billionaire": {
+      "name": "Milliardaire",
+      "description": "Total de points cumulés"
+    },
+    "outdone": {
+      "name": "Dépassement",
+      "description": "Records personnels battus sur un killer"
+    },
+    "reference": {
+      "name": "Référence",
+      "description": "Détenir le record absolu d'un killer"
+    },
+    "living_legend": {
+      "name": "Légende vivante",
+      "description": "Records absolus détenus en même temps"
+    },
+    "veteran": {
+      "name": "Vétéran",
+      "description": "Cycles joués"
+    },
+    "diligent": {
+      "name": "Assidu",
+      "description": "Rotations jouées"
+    },
+    "full_cycle": {
+      "name": "Cycle complet",
+      "description": "Cycles joués en entier, sans miss"
+    },
+    "flawless": {
+      "name": "Sans faute",
+      "description": "Rotations d'affilée sans miss"
+    },
+    "unstoppable": {
+      "name": "Inarrêtable",
+      "description": "Cycles complets d'affilée"
+    },
+    "loyal": {
+      "name": "Fidèle",
+      "description": "Cycles consécutifs dans la même guilde"
+    },
+    "comeback": {
+      "name": "Le retour",
+      "description": "Un cycle complet après au moins un cycle d'absence"
+    },
+    "improving": {
+      "name": "En progrès",
+      "description": "Hausse de la moyenne par rapport au cycle précédent"
+    },
+    "revelation": {
+      "name": "Révélation",
+      "description": "Plus forte progression de sa guilde sur un cycle"
+    },
+    "on_a_roll": {
+      "name": "Sur sa lancée",
+      "description": "Cycles d'affilée avec une moyenne en hausse"
+    },
+    "podium": {
+      "name": "Sur le podium",
+      "description": "Top 3 de sa guilde sur un cycle"
+    },
+    "leader": {
+      "name": "Meneur",
+      "description": "N°1 de sa guilde sur un cycle"
+    },
+    "elite": {
+      "name": "Élite",
+      "description": "Top 10 du podium global sur un cycle"
+    },
+    "number_one": {
+      "name": "Numéro un",
+      "description": "N°1 du podium global sur un cycle"
+    },
+    "week_king": {
+      "name": "Roi de la semaine",
+      "description": "N°1 de sa guilde au classement d'une semaine"
+    },
+    "versatile": {
+      "name": "Touche-à-tout",
+      "description": "Clear sur des killers différents"
     }
   }
 }

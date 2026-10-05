@@ -310,7 +310,17 @@
       "recordsScore": "Record",
       "recordsCycle": "Set in",
       "recordsAttempts": "Attempts",
-      "recordsEmpty": "No record for this account"
+      "recordsEmpty": "No record for this account",
+      "tabAchievements": "Achievements",
+      "achievementsTitle": "Achievements",
+      "achievementsSubtitle": "Unlocked automatically from the account's scores",
+      "achievementsEmpty": "No achievements for this account",
+      "achievementsLocked": "locked",
+      "achievementsUnlockOnce": "unlock once",
+      "achievementsRarity": "{{value}}% of players",
+      "achievementsUnlockedOn": "Unlocked on {{date}}",
+      "achievementsProgress": "{{value}} / {{threshold}} to {{tier}}",
+      "achievementsSummary": "{{unlocked}} / {{total}} tiers"
     },
     "discordCallback": {
       "loading": "Connecting with Discord...",
@@ -912,6 +922,126 @@
       "toastBulkSuccessDesc": "{{count}} scores were successfully saved",
       "toastBulkErrorTitle": "Error",
       "toastBulkErrorFallback": "Error saving scores"
+    }
+  },
+  "achievements": {
+    "tiers": {
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "platinum": "Platinum"
+    },
+    "categories": {
+      "scores": "Scores",
+      "records": "Records",
+      "regularity": "Consistency",
+      "progression": "Progression",
+      "podium": "Podium",
+      "versatility": "Versatility"
+    },
+    "first_step": {
+      "name": "First step",
+      "description": "Have a first score recorded"
+    },
+    "clear": {
+      "name": "Clear",
+      "description": "Scores of 617M or more"
+    },
+    "perfect_score": {
+      "name": "Perfect score",
+      "description": "Best score on a rotation"
+    },
+    "perfect_week": {
+      "name": "Perfect week",
+      "description": "Both rotations of a week at 620M or more"
+    },
+    "exceptional_cycle": {
+      "name": "Exceptional cycle",
+      "description": "A cycle totalling 12B or more"
+    },
+    "immaculate_cycle": {
+      "name": "Immaculate cycle",
+      "description": "Every rotation of a cycle at 621M or more"
+    },
+    "billionaire": {
+      "name": "Billionaire",
+      "description": "Total points scored"
+    },
+    "outdone": {
+      "name": "Outdone",
+      "description": "Personal records beaten on a killer"
+    },
+    "reference": {
+      "name": "Benchmark",
+      "description": "Hold the all-time record on a killer"
+    },
+    "living_legend": {
+      "name": "Living legend",
+      "description": "All-time records held at the same time"
+    },
+    "veteran": {
+      "name": "Veteran",
+      "description": "Cycles played"
+    },
+    "diligent": {
+      "name": "Diligent",
+      "description": "Rotations played"
+    },
+    "full_cycle": {
+      "name": "Full cycle",
+      "description": "Cycles played in full, without a miss"
+    },
+    "flawless": {
+      "name": "Flawless",
+      "description": "Rotations in a row without a miss"
+    },
+    "unstoppable": {
+      "name": "Unstoppable",
+      "description": "Full cycles in a row"
+    },
+    "loyal": {
+      "name": "Loyal",
+      "description": "Consecutive cycles in the same guild"
+    },
+    "comeback": {
+      "name": "Comeback",
+      "description": "A full cycle after missing at least one cycle"
+    },
+    "improving": {
+      "name": "Improving",
+      "description": "Average increase over the previous cycle"
+    },
+    "revelation": {
+      "name": "Breakthrough",
+      "description": "Biggest improvement in their guild over a cycle"
+    },
+    "on_a_roll": {
+      "name": "On a roll",
+      "description": "Cycles in a row with a rising average"
+    },
+    "podium": {
+      "name": "On the podium",
+      "description": "Top 3 of their guild over a cycle"
+    },
+    "leader": {
+      "name": "Leader",
+      "description": "No. 1 of their guild over a cycle"
+    },
+    "elite": {
+      "name": "Elite",
+      "description": "Top 10 of the global podium over a cycle"
+    },
+    "number_one": {
+      "name": "Number one",
+      "description": "No. 1 of the global podium over a cycle"
+    },
+    "week_king": {
+      "name": "King of the week",
+      "description": "No. 1 of their guild in a weekly ranking"
+    },
+    "versatile": {
+      "name": "All-rounder",
+      "description": "Clears on different killers"
     }
   }
 }
