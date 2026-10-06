@@ -142,3 +142,60 @@ export interface IScoreHistoryEntry {
   by_name: string | null;
   created_at: string;
 }
+
+// Scores manquants d'un cycle pour les membres actuels d'une guilde (espace chefs)
+export interface IMissingScoreMember {
+  user_id: string;
+  bbs_id: string;
+  bbs_name: string | null;
+  global_name: string | null;
+}
+
+export interface IMissingScoreRotation {
+  rotation_id: string;
+  position: number;
+  start_date: string | null;
+  end_date: string | null;
+  killer: string | null;
+  attack: string | null;
+  alteration: string | null;
+  is_differential: boolean;
+  missing: IMissingScoreMember[];
+}
+
+export interface IMissingScoresResponse {
+  success: boolean;
+  cycle: { _id: string; name: string; year: number } | null;
+  members_count: number;
+  rotations: IMissingScoreRotation[];
+}
+
+// Fiche de préparation d'une rotation : historique de chaque membre sur le killer
+export interface IPreparationMember {
+  user_id: string;
+  bbs_id: string;
+  bbs_name: string | null;
+  global_name: string | null;
+  attempts: number;
+  best: number | null;
+  average: number | null;
+  last: { score: number; cycle_name: string | null; cycle_year: number | null } | null;
+  this_cycle: number | null;
+}
+
+export interface IRotationPreparation {
+  success: boolean;
+  cycle: { _id: string; name: string; year: number };
+  rotation: {
+    rotation_id: string;
+    position: number;
+    start_date: string | null;
+    end_date: string | null;
+    killer: string | null;
+    attack: string | null;
+    alteration: string | null;
+  };
+  killer_stats: { attempts: number; average: number | null; record: number | null };
+  members: IPreparationMember[];
+}
+

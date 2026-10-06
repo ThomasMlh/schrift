@@ -14,6 +14,7 @@ import ActivityLogSection from "../components/ActivityLogSection";
 import DiscordMessageSection from "../components/DiscordMessageSection";
 import DeclineAlertsSection from "../components/DeclineAlertsSection";
 import ScoreControlSection from "../components/ScoreControlSection";
+import RotationPreparationSection from "../components/RotationPreparationSection";
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { AdminPage as IAdminPage } from "../interfaces";
@@ -25,6 +26,7 @@ const tabConfig: { key: IAdminPage; label: string; icon: string }[] = [
   { key: 'cycles',  label: 'Cycles',   icon: '🔄' },
   { key: 'scores',  label: 'Scores',   icon: '📊' },
   { key: 'score-control', label: 'Contrôle des scores', icon: '🔎' },
+  { key: 'preparation', label: 'Préparation', icon: '🎯' },
   { key: 'alerts',  label: 'Baisses de régime', icon: '📉' },
   { key: 'users',   label: 'Joueurs',  icon: '👥' },
   { key: 'banned',  label: 'Bannis',   icon: '🚫' },
@@ -44,9 +46,9 @@ const AdminPage = () => {
   // Pages autorisées selon le rôle
   const allowedPages = useMemo(() => {
     if (isFullAdmin) {
-      return ['guilds', 'draft', 'cycles', 'scores', 'score-control', 'alerts', 'users', 'banned', 'guides', 'images', 'notifications', 'activity', 'messages'] as IAdminPage[];
+      return ['guilds', 'draft', 'cycles', 'scores', 'score-control', 'preparation', 'alerts', 'users', 'banned', 'guides', 'images', 'notifications', 'activity', 'messages'] as IAdminPage[];
     } else if (isGuildManager) {
-      return ['scores', 'score-control', 'alerts', 'notifications', 'activity', 'messages'] as IAdminPage[];
+      return ['scores', 'score-control', 'preparation', 'alerts', 'notifications', 'activity', 'messages'] as IAdminPage[];
     }
     return [] as IAdminPage[];
   }, [isFullAdmin, isGuildManager]);
@@ -154,6 +156,8 @@ const AdminPage = () => {
         return <ScoresSection />;
       case "score-control":
         return <ScoreControlSection />;
+      case "preparation":
+        return <RotationPreparationSection />;
       case "alerts":
         return <DeclineAlertsSection />;
       case "users":

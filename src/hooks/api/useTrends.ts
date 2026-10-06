@@ -1,6 +1,7 @@
 import useSWR from 'swr';
 import type {
-  ICycleRecap, IDeclineAlert, IPagination, IScoreAnomaly, IScoreHistoryEntry, ScoreHistoryAction,
+  ICycleRecap, IDeclineAlert, IMissingScoresResponse, IPagination, IRotationPreparation, IScoreAnomaly,
+  IScoreHistoryEntry, ScoreHistoryAction,
 } from '../../interfaces';
 import { apiUrl, useAuthenticatedFetcher } from './shared';
 
@@ -60,4 +61,29 @@ export const useScoreHistory = (filters: { guildId?: string; action?: ScoreHisto
   );
 
   return { entries: data?.entries ?? [], pagination: data?.pagination ?? null, isLoading, error, mutate };
+};
+
+// Scores manquants d'un cycle (cycle en cours par défaut) pour une guilde.
+export const useMissingScores = (guildId?: string, cycleId?: string, enabled = true) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const params = new URLSearchParams();
+  if (guildId) params.set('guild_id', guildId);
+  if (cycleId) params.set('cycle_id', cycleId);
+  const url = enabled ? `${apiUrl}/api/scores/missing?${params.toString()}` : null;
+
+  const { data, error, isLoading, mutate } = useSWR<IMissingScoresResponse>(url, authenticatedFetcher, { revalidateOnFocus: false });
+  return { data: data ?? null, isLoading, error, mutate };
+};
+
+// Fiche de préparation d'une rotation (prochaine rotation du cycle en cours par défaut).
+export const useRotationPreparation = (guildId?: string, rotationId?: string, cycleId?: string, enabled = true) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const params = new URLSearchParams();
+  if (guildId) params.set('guild_id', guildId);
+  if (rotationId) params.set('rotation_id', rotationId);
+  if (cycleId) params.set('cycle_id', cycleId);
+  const url = enabled ? `${apiUrl}/api/scores/preparation?${params.toString()}` : null;
+
+  const { data, error, isLoading } = useSWR<IRotationPreparation>(url, authenticatedFetcher, { revalidateOnFocus: false });
+  return { data: data ?? null, isLoading, error };
 };
