@@ -15,3 +15,4 @@ export * from './api/useSettings';
 export * from './api/useDiscord';
 export * from './api/useRecords';
 export * from './api/useTrends';
+export * from './api/useGuildGoals';

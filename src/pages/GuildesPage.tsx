@@ -25,6 +25,7 @@ import { formatScore } from "@/utils/format";
 import { GuildTopMembers } from "@/components/guild/GuildTopMembers";
 import { GuildScoreDistribution } from "@/components/guild/GuildScoreDistribution";
 import { GuildEvolution } from "@/components/guild/GuildEvolution";
+import { GuildGoals } from "@/components/guild/GuildGoals";
 import { GuildWeeklyRanking } from "@/components/guild/GuildWeeklyRanking";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
 import { CycleSelect } from "@/components/ui/CycleSelect";
@@ -439,6 +440,11 @@ const GuildesPage = () => {
                       </Tooltip>
                     ))}
                   </SimpleGrid>
+
+                  {/* Objectifs du cycle */}
+                  <Box mt={2}>
+                    <GuildGoals guildId={selectedGuild._id} cycleId={selectedCycleId || undefined} />
+                  </Box>
 
                   {/* Top membres + Distribution */}
                   <SimpleGrid columns={{ base: 1, md: 2 }} gap={4} mt={2}>
