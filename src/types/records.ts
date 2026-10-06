@@ -67,6 +67,7 @@ export interface IAchievementTierState {
 
 export interface IAchievement {
   code: string;
+  name?: string; // nom français (Discord, bot)
   category: AchievementCategory;
   unit: AchievementUnit;
   value: number;
@@ -80,4 +81,12 @@ export interface IUserAccountAchievements {
   bbs_name: string | null;
   is_primary: boolean;
   achievements: IAchievement[];
+}
+
+// Succès le plus rare d'un compte, affiché à côté du pseudo dans les classements
+export interface ITopAchievement {
+  code: string;
+  name: string;
+  tier: AchievementTier;
+  rarity: number;
 }

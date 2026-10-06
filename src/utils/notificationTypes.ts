@@ -5,6 +5,7 @@ export const NOTIFICATION_TYPES: NotificationType[] = [
   "scores", "podium_snapshot", "score_edit", "rotation_transfer", "character_update", "image_upload",
   "ban", "draft", "guild_toggle", "build_proposal", "build_delete", "cycle_change",
   "guild_change", "membre_role_change", "guild_member_change", "personal_record", "cycle_recap",
+  "achievement_unlock",
 ];
 
 export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
@@ -25,6 +26,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   guild_member_change: "Ajout / retrait de membre",
   personal_record: "Record personnel battu (salon membres)",
   cycle_recap: "Bilan de fin de cycle (salon membres)",
+  achievement_unlock: "Succès or et platine débloqués (salon membres)",
 };
 
 const fmt = (data: Record<string, unknown>, key: string, fallback = "?"): string =>
@@ -73,6 +75,10 @@ export const formatActivityEntry = (type: string, data: Record<string, unknown>)
     case "personal_record": {
       const count = Array.isArray(data.records) ? data.records.length : 0;
       return `${count} record(s) personnel(s) battu(s)${data.guild_name ? ` dans **${fmt(data, "guild_name")}**` : ""}`;
+    }
+    case "achievement_unlock": {
+      const count = Array.isArray(data.unlocks) ? data.unlocks.length : 0;
+      return `${count} succès débloqué(s)${data.guild_name ? ` dans **${fmt(data, "guild_name")}**` : ""}`;
     }
     case "cycle_recap":
       return `Bilan de fin de **${fmt(data, "cycle_name")}** publié${data.guild_name ? ` pour **${fmt(data, "guild_name")}**` : ""}`;

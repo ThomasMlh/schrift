@@ -1,5 +1,6 @@
 // Podiums (cycle, rotation, semaine, miss)
 import type { IPagination } from "./common";
+import type { ITopAchievement } from "./records";
 
 export interface IRankInfo {
   rank: number;
@@ -10,6 +11,7 @@ export interface IRankInfo {
 
 export interface IPodiumPlayer {
   rank: number;
+  top_achievement?: ITopAchievement | null; // succès le plus rare du compte
   user_id: string;
   bbs_id?: string;
   bbs_name?: string;
@@ -84,6 +86,7 @@ export interface IPodiumResponse {
 // Interfaces pour le podium weekly
 export interface IPodiumWeeklyPlayer {
   rank: number;
+  top_achievement?: ITopAchievement | null;
   user_id: string;
   bbs_id?: string;
   bbs_name?: string;

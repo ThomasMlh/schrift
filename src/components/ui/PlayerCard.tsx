@@ -5,6 +5,7 @@ import { ProgressionBadge } from "./ProgressionBadge";
 import { getUserAvatarUrl } from "@/utils/discord";
 import { buildPlayerUrl } from "@/utils/playerUrl";
 import CustomLink from "./CustomLink";
+import { TopAchievementBadge } from "@/components/achievements/TopAchievementBadge";
 
 interface PlayerCardProps {
   player: IPodiumPlayer;
@@ -67,14 +68,17 @@ const PlayerCard = ({
 
         {/* Nom + Guilde */}
         <VStack spacing={0} align="start" flex={1} overflow="hidden" minW={0}>
-          <CustomLink
-            to={buildPlayerUrl(player.bbs_name, player.bbs_id)}
-            text={player.bbs_name || player.global_name || "Joueur"}
-            textSize="sm"
-            requireAuth
-            rainbow={player.rank === 1}
-            sx={{ fontWeight: player.rank === 1 ? "semibold" : "medium", noOfLines: 1 }}
-          />
+          <HStack spacing={1.5} maxW="100%" minW={0}>
+            <CustomLink
+              to={buildPlayerUrl(player.bbs_name, player.bbs_id)}
+              text={player.bbs_name || player.global_name || "Joueur"}
+              textSize="sm"
+              requireAuth
+              rainbow={player.rank === 1}
+              sx={{ fontWeight: player.rank === 1 ? "semibold" : "medium", noOfLines: 1 }}
+            />
+            <TopAchievementBadge achievement={player.top_achievement} size={18} />
+          </HStack>
           {showGuildName && player.guild_name && (
             <Badge colorScheme="purple" variant="subtle" fontSize="xs" px={2} borderRadius="full">
               {player.guild_name}
