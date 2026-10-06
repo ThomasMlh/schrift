@@ -2,6 +2,8 @@ import { Box, VStack, HStack, Text, Avatar, Badge, useColorModeValue } from "@ch
 import { getUserAvatarUrl } from "@/utils/discord";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { ProgressionBadge } from "@/components/ui/ProgressionBadge";
+import { TopAchievementBadge } from "@/components/achievements/TopAchievementBadge";
+import type { ITopAchievement } from "@/interfaces";
 import CustomLink from "@/components/ui/CustomLink";
 import { buildPlayerUrl } from "@/utils/playerUrl";
 
@@ -18,6 +20,8 @@ export interface PodiumPedestalPlayer {
   forceBlueScore?: boolean;
   // Classement progression : le badge affiche l'écart en % plutôt que le score
   progression?: { percent: number; previousAverage?: number; average?: number };
+  // Succès le plus rare du joueur, affiché à côté de son pseudo
+  top_achievement?: ITopAchievement | null;
 }
 
 interface PodiumPedestalProps {
@@ -186,14 +190,17 @@ const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProp
 
         {/* Nom */}
         <VStack spacing={0} align="center" mt={1}>
-          <CustomLink
-            to={buildPlayerUrl(player.bbs_name, player.bbs_id)}
-            text={player.bbs_name || player.global_name}
-            textSize={player.rank === 1 ? "sm" : "xs"}
-            requireAuth
-            rainbow={player.rank === 1}
-            sx={{ fontWeight: player.rank === 1 ? "bold" : "semibold", textAlign: "center", noOfLines: 1 }}
-          />
+          <HStack spacing={1} justify="center" maxW="100%" minW={0}>
+            <CustomLink
+              to={buildPlayerUrl(player.bbs_name, player.bbs_id)}
+              text={player.bbs_name || player.global_name}
+              textSize={player.rank === 1 ? "sm" : "xs"}
+              requireAuth
+              rainbow={player.rank === 1}
+              sx={{ fontWeight: player.rank === 1 ? "bold" : "semibold", textAlign: "center", noOfLines: 1 }}
+            />
+            <TopAchievementBadge achievement={player.top_achievement} size={player.rank === 1 ? 20 : 16} />
+          </HStack>
           {showGuildName && player.guild_name && (
             <Badge colorScheme="purple" variant="subtle" fontSize="xs" px={2} borderRadius="full" maxW="130px" isTruncated>
               {player.guild_name}

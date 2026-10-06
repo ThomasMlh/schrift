@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { mutate } from 'swr';
 import { useAuth } from '@/providers/AuthProvider';
 import { makeRequest, invalidateKeys, apiUrl } from '@/utils/apiRequest';
-import type { IGuild } from '@/interfaces';
+import type { GuildGoalType, IGuild } from '@/interfaces';
 
 export const useGuildMutations = () => {
   const { token } = useAuth();
@@ -69,5 +69,15 @@ export const useGuildMutations = () => {
     return result;
   };
 
-  return { createGuild, updateGuild, deleteGuild, testGuildNotification, toggleGuildDisable, assignUserToGuild, removeGuildMember };
+  // Remplace les objectifs d'une guilde sur un cycle (liste vide = aucun objectif)
+  const setGuildGoals = async (guildId: string, cycleId: string, goals: { type: GuildGoalType; target: number }[]) => {
+    const result = await request(`${apiUrl}/api/guildes/${guildId}/goals`, {
+      method: 'PUT',
+      body: JSON.stringify({ cycle_id: cycleId, goals }),
+    }, { fallbackError: 'Erreur lors de la mise à jour des objectifs' });
+    await invalidateKeys(`${apiUrl}/api/guildes/${guildId}/goals`);
+    return result;
+  };
+
+  return { createGuild, updateGuild, deleteGuild, testGuildNotification, toggleGuildDisable, assignUserToGuild, removeGuildMember, setGuildGoals };
 };

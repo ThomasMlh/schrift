@@ -71,6 +71,7 @@ const extractTop3ForPedestal = (
         guild_name: wp.guild_name,
         displayScore: wp.week_total_score,
         forceBlueScore: true,
+        top_achievement: wp.top_achievement,
       };
     });
   }
@@ -97,6 +98,7 @@ const extractTop3ForPedestal = (
         guild_name: pp.guild_name,
         displayScore: score,
         forceBlueScore: !isRotation,
+        top_achievement: pp.top_achievement,
         ...(podiumType === "progression" && pp.progressionPercent != null && {
           progression: { percent: pp.progressionPercent, previousAverage: pp.previousAverageScore, average: pp.averageScore },
         }),

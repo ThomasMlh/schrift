@@ -14,6 +14,7 @@ import { AlterationImage } from "@/components/ui/AlterationImage";
 import { Pagination } from "@/components/ui/Pagination";
 import CustomLink from "@/components/ui/CustomLink";
 import { buildPlayerUrl } from "@/utils/playerUrl";
+import { MissingScoresPanel } from "@/components/scoreControl/MissingScoresPanel";
 
 const formatScore = (n: number | undefined | null) => (n == null ? "—" : n.toLocaleString("fr-FR"));
 const cycleLabel = (name: string | null, year: number | null, position: number | null) =>
@@ -89,6 +90,8 @@ const ScoreControlSection = () => {
     { value: "", label: isAdmin ? "Toutes les guildes" : "Toutes mes guildes" },
     ...selectableGuilds.map((g) => ({ value: g._id, label: g.name })),
   ];
+  // Les scores manquants portent sur une seule guilde : celle choisie, ou la seule gérée par le chef
+  const singleGuildId = guildId || (selectableGuilds.length === 1 ? selectableGuilds[0]._id : "");
 
   const handleReview = async (anomaly: IScoreAnomaly) => {
     setBusyId(anomaly.score_id);
@@ -203,7 +206,7 @@ const ScoreControlSection = () => {
               Contrôle des scores
             </Text>
             <Text fontSize="sm" color={mutedText} maxW="2xl">
-              Repère les scores probablement mal saisis et consulte l'historique de toutes les modifications.
+              Repère les scores probablement mal saisis ou pas encore saisis, et consulte l'historique de toutes les modifications.
               Visible uniquement par les chefs, sous-chefs et admins.
             </Text>
           </VStack>
@@ -217,6 +220,7 @@ const ScoreControlSection = () => {
         <Tabs variant="soft-rounded" colorScheme="purple" isLazy>
           <TabList>
             <Tab>⚠️ À vérifier{anomalies.length > 0 ? ` (${anomalies.length})` : ""}</Tab>
+            <Tab>📝 Manquants</Tab>
             <Tab>📜 Historique</Tab>
           </TabList>
           <TabPanels>
@@ -234,6 +238,10 @@ const ScoreControlSection = () => {
               ) : (
                 <VStack spacing={3} align="stretch">{anomalies.map(renderAnomaly)}</VStack>
               )}
+            </TabPanel>
+
+            <TabPanel px={0}>
+              <MissingScoresPanel guildId={singleGuildId} />
             </TabPanel>
 
             <TabPanel px={0}>
