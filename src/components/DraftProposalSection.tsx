@@ -13,6 +13,7 @@ import { bucketUrl } from "@/utils/apiRequest";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { getUserAvatarUrl } from "@/utils/discord";
+import { DraftReplacementPanel } from "@/components/draft/DraftReplacementPanel";
 import { getGuildColor } from "@/components/DraftSection";
 
 type RankingType = "average" | "total";
@@ -101,6 +102,8 @@ const DraftProposalSection = () => {
   const [selectedCycleId, setSelectedCycleId] = useState("");
   const [rankingType, setRankingType] = useState<RankingType>("average");
   const [guildOrder, setGuildOrder] = useState<string[]>(DEFAULT_GUILD_ORDER);
+  // Répartition complète (paquets de 20) ou remplacement ciblé de quelques joueurs d'une guilde
+  const [mode, setMode] = useState<"full" | "replacement">("full");
   // Guildes figées : elles gardent leurs membres actuels et sont sautées dans la répartition
   const [lockedGuilds, setLockedGuilds] = useState<Set<string>>(new Set());
   const [result, setResult] = useState<DraftProposalResponse | null>(null);
@@ -272,6 +275,15 @@ const DraftProposalSection = () => {
           </Text>
         </Box>
 
+        <ButtonGroup size="sm" isAttached variant="outline" alignSelf="flex-start">
+          <Button colorScheme={mode === "full" ? "purple" : undefined} variant={mode === "full" ? "solid" : "outline"} onClick={() => setMode("full")}>
+            Répartition complète
+          </Button>
+          <Button colorScheme={mode === "replacement" ? "purple" : undefined} variant={mode === "replacement" ? "solid" : "outline"} onClick={() => setMode("replacement")}>
+            Remplacement ciblé
+          </Button>
+        </ButtonGroup>
+
         <HStack spacing={3} flexWrap="wrap" align="flex-end">
           <Box>
             <Text fontSize="xs" color={mutedText} mb={1}>Cycle</Text>
@@ -307,27 +319,30 @@ const DraftProposalSection = () => {
             </ButtonGroup>
           </Box>
 
-          <Button
-            leftIcon={<RepeatIcon />}
-            colorScheme="purple"
-            onClick={handleGenerate}
-            isLoading={isLoading}
-            isDisabled={!selectedCycle}
-          >
-            Générer
-          </Button>
+          {mode === "full" && (
+            <Button
+              leftIcon={<RepeatIcon />}
+              colorScheme="purple"
+              onClick={handleGenerate}
+              isLoading={isLoading}
+              isDisabled={!selectedCycle}
+            >
+              Générer
+            </Button>
+          )}
         </HStack>
 
         <Box>
           <Text fontSize="xs" color={mutedText} mb={1}>
-            Ordre des guildes (1er paquet de 20 → 1ère guilde, etc.). 🔒 fige une guilde : elle garde ses
-            membres actuels et n'entre pas dans la répartition.
+            {mode === "full"
+              ? "Ordre des guildes (1er paquet de 20 → 1ère guilde, etc.). 🔒 fige une guilde : elle garde ses membres actuels et n'entre pas dans la répartition."
+              : "Hiérarchie des guildes (de la meilleure à la moins bonne) : les remplaçants ne sont cherchés que dans les guildes plus bas."}
           </Text>
           <HStack spacing={2} flexWrap="wrap">
             {guildOrder.map((g, i) => {
               const isLocked = lockedGuilds.has(g);
               return (
-                <HStack key={i} spacing={1.5} opacity={isLocked ? 0.6 : 1}>
+                <HStack key={i} spacing={1.5} opacity={mode === "full" && isLocked ? 0.6 : 1}>
                   {i > 0 && <Text color={mutedText} fontSize="sm">›</Text>}
                   <Box w="10px" h="10px" borderRadius="sm" bg={`${guildColorMap[g] || "gray"}.500`} flexShrink={0} />
                   <CustomSelect
@@ -338,6 +353,7 @@ const DraftProposalSection = () => {
                     size="sm"
                     w="90px"
                   />
+                  {mode === "full" && (
                   <Tooltip label={isLocked ? `Libérer la guilde ${g}` : `Figer la guilde ${g} (membres inchangés)`} hasArrow>
                     <IconButton
                       aria-label={isLocked ? `Libérer la guilde ${g}` : `Figer la guilde ${g}`}
@@ -349,11 +365,12 @@ const DraftProposalSection = () => {
                       onClick={() => toggleLockedGuild(g)}
                     />
                   </Tooltip>
+                  )}
                 </HStack>
               );
             })}
           </HStack>
-          {activeLockedGuilds.length > 0 && (
+          {mode === "full" && activeLockedGuilds.length > 0 && (
             <Text fontSize="xs" color={mutedText} mt={1}>
               Guilde(s) figée(s) : {activeLockedGuilds.join(", ")} · les paquets de 20 sont répartis entre les autres guildes.
             </Text>
@@ -467,7 +484,21 @@ const DraftProposalSection = () => {
           </Box>
         )}
 
-        {result && (
+        {mode === "replacement" && selectedCycle && (
+          <>
+            <Divider />
+            <DraftReplacementPanel
+              cycleName={selectedCycle.name}
+              cycleYear={selectedCycle.year}
+              rankingType={rankingType}
+              guildOrder={guildOrder}
+              authHeaders={authHeaders}
+              guildColorMap={guildColorMap}
+            />
+          </>
+        )}
+
+        {mode === "full" && result && (
           <>
             <Divider />
             {result.meta.minScoresRequired !== undefined && (
