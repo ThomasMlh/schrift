@@ -1,7 +1,7 @@
 import {
   Box, VStack, HStack, Text, Button, ButtonGroup, Grid, GridItem, Flex, Image, Input,
   Avatar, Badge, Divider, Alert, AlertIcon, useColorModeValue, useToast,
-  NumberInput, NumberInputField, IconButton,
+  NumberInput, NumberInputField, IconButton, Tooltip,
 } from "@chakra-ui/react";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { RepeatIcon, TimeIcon, DeleteIcon, ViewIcon } from "@chakra-ui/icons";
@@ -26,7 +26,7 @@ interface DraftProposalPlayer {
   averageScore: number;
   totalScore: number;
   totalScores: number;
-  overallRank: number;
+  overallRank: number | null; // null pour les membres d'une guilde figée
   currentGuildName: string | null;
   isPinned?: boolean;
 }
@@ -34,6 +34,9 @@ interface DraftProposalPlayer {
 interface DraftProposalGuild {
   guild_name: string;
   players: DraftProposalPlayer[];
+  // Guilde figée : membres actuels inchangés, hors répartition
+  locked?: boolean;
+  member_count?: number;
 }
 
 interface DraftProposalResponse {
@@ -52,6 +55,7 @@ interface HistoryEntry {
   cycle_name: string;
   ranking_type: RankingType;
   guild_order: string[];
+  locked_guild_names?: string[];
   total_candidates: number;
 }
 
@@ -97,6 +101,8 @@ const DraftProposalSection = () => {
   const [selectedCycleId, setSelectedCycleId] = useState("");
   const [rankingType, setRankingType] = useState<RankingType>("average");
   const [guildOrder, setGuildOrder] = useState<string[]>(DEFAULT_GUILD_ORDER);
+  // Guildes figées : elles gardent leurs membres actuels et sont sautées dans la répartition
+  const [lockedGuilds, setLockedGuilds] = useState<Set<string>>(new Set());
   const [result, setResult] = useState<DraftProposalResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
@@ -155,6 +161,7 @@ const DraftProposalSection = () => {
       const entry = data.entry as HistoryEntryFull;
       setRankingType(entry.ranking_type);
       setGuildOrder(entry.guild_order);
+      setLockedGuilds(new Set(entry.locked_guild_names ?? []));
       setResult({
         guilds: entry.guilds,
         leftover: entry.leftover,
@@ -208,6 +215,16 @@ const DraftProposalSection = () => {
     setGuildOrder((prev) => prev.map((g, i) => (i === index ? value : g)));
   };
 
+  const toggleLockedGuild = (name: string) => {
+    setLockedGuilds((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  };
+  const activeLockedGuilds = guildOrder.filter((g) => lockedGuilds.has(g));
+
   const handleGenerate = async () => {
     if (!selectedCycle) return;
     setIsLoading(true);
@@ -219,6 +236,7 @@ const DraftProposalSection = () => {
         ranking_type: rankingType,
         guild_names: guildOrder.join(","),
       });
+      if (activeLockedGuilds.length > 0) params.set("locked_guild_names", activeLockedGuilds.join(","));
       if (excluded.size > 0) params.set("excluded_bbs_ids", [...excluded.keys()].join(","));
       if (pinned.size > 0) params.set("pinned_bbs_ids", [...pinned.keys()].join(","));
       const response = await fetch(`${apiUrl}/api/podium/draft-proposal?${params}`, {
@@ -302,24 +320,44 @@ const DraftProposalSection = () => {
 
         <Box>
           <Text fontSize="xs" color={mutedText} mb={1}>
-            Ordre des guildes (1er paquet de 20 → 1ère guilde, etc.)
+            Ordre des guildes (1er paquet de 20 → 1ère guilde, etc.). 🔒 fige une guilde : elle garde ses
+            membres actuels et n'entre pas dans la répartition.
           </Text>
           <HStack spacing={2} flexWrap="wrap">
-            {guildOrder.map((g, i) => (
-              <HStack key={i} spacing={1.5}>
-                {i > 0 && <Text color={mutedText} fontSize="sm">›</Text>}
-                <Box w="10px" h="10px" borderRadius="sm" bg={`${guildColorMap[g] || "gray"}.500`} flexShrink={0} />
-                <CustomSelect
-                  value={g}
-                  onChange={(value) => handleGuildOrderChange(i, value)}
-                  options={guildOptions}
-                  allowDeselect={false}
-                  size="sm"
-                  w="90px"
-                />
-              </HStack>
-            ))}
+            {guildOrder.map((g, i) => {
+              const isLocked = lockedGuilds.has(g);
+              return (
+                <HStack key={i} spacing={1.5} opacity={isLocked ? 0.6 : 1}>
+                  {i > 0 && <Text color={mutedText} fontSize="sm">›</Text>}
+                  <Box w="10px" h="10px" borderRadius="sm" bg={`${guildColorMap[g] || "gray"}.500`} flexShrink={0} />
+                  <CustomSelect
+                    value={g}
+                    onChange={(value) => handleGuildOrderChange(i, value)}
+                    options={guildOptions}
+                    allowDeselect={false}
+                    size="sm"
+                    w="90px"
+                  />
+                  <Tooltip label={isLocked ? `Libérer la guilde ${g}` : `Figer la guilde ${g} (membres inchangés)`} hasArrow>
+                    <IconButton
+                      aria-label={isLocked ? `Libérer la guilde ${g}` : `Figer la guilde ${g}`}
+                      aria-pressed={isLocked}
+                      icon={<Text fontSize="0.8rem">{isLocked ? "🔒" : "🔓"}</Text>}
+                      size="xs"
+                      variant={isLocked ? "solid" : "ghost"}
+                      colorScheme={isLocked ? "orange" : undefined}
+                      onClick={() => toggleLockedGuild(g)}
+                    />
+                  </Tooltip>
+                </HStack>
+              );
+            })}
           </HStack>
+          {activeLockedGuilds.length > 0 && (
+            <Text fontSize="xs" color={mutedText} mt={1}>
+              Guilde(s) figée(s) : {activeLockedGuilds.join(", ")} · les paquets de 20 sont répartis entre les autres guildes.
+            </Text>
+          )}
         </Box>
 
         {isAdmin && (
@@ -488,8 +526,15 @@ const DraftProposalSection = () => {
                           </Flex>
                         )}
                         <Box minW={0}>
-                          <Text fontWeight="bold" fontSize="sm" isTruncated>Guilde {g.guild_name}</Text>
-                          <Text fontSize="xs" fontFamily="mono" color={mutedText}>{g.players.length}/20 joueurs</Text>
+                          <HStack spacing={1.5}>
+                            <Text fontWeight="bold" fontSize="sm" isTruncated>Guilde {g.guild_name}</Text>
+                            {g.locked && <Badge colorScheme="orange" fontSize="0.6rem">🔒 Inchangée</Badge>}
+                          </HStack>
+                          <Text fontSize="xs" fontFamily="mono" color={mutedText}>
+                            {g.locked
+                              ? `${g.member_count ?? g.players.length} membre(s) actuel(s)${(g.member_count ?? 0) > g.players.length ? ` · ${(g.member_count ?? 0) - g.players.length} sans score ce cycle` : ""}`
+                              : `${g.players.length}/20 joueurs`}
+                          </Text>
                         </Box>
                       </HStack>
 
@@ -505,7 +550,7 @@ const DraftProposalSection = () => {
                             _hover={{ bg: hoverBg }}
                             fontSize="sm"
                           >
-                            <Text w="20px" fontFamily="mono" fontSize="xs" color={mutedText} textAlign="right">{p.overallRank}</Text>
+                            <Text w="20px" fontFamily="mono" fontSize="xs" color={mutedText} textAlign="right">{p.overallRank ?? "—"}</Text>
                             <Avatar
                               size="2xs"
                               src={getUserAvatarUrl({ discord_id: p.discord_id, avatar: p.avatar }) || undefined}
@@ -528,6 +573,7 @@ const DraftProposalSection = () => {
                             <Text fontFamily="mono" fontSize="xs" color={mutedText} whiteSpace="nowrap">
                               {(rankingType === "average" ? p.averageScore : p.totalScore).toLocaleString("fr-FR")}
                             </Text>
+                            {!g.locked && (
                             <HStack spacing={0.5} flexShrink={0}>
                               <IconButton
                                 aria-label="Épingler dans la guilde actuelle"
@@ -546,6 +592,7 @@ const DraftProposalSection = () => {
                                 onClick={() => toggleExcluded(p)}
                               />
                             </HStack>
+                            )}
                           </HStack>
                         ))}
                         {g.players.length === 0 && (
