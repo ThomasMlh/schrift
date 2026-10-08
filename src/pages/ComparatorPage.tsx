@@ -15,7 +15,6 @@ import {
   Icon,
   Flex,
   Grid,
-  Text,
 } from "@chakra-ui/react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -30,18 +29,15 @@ import { MultiCharacterSelector } from "@/components/comparator/MultiCharacterSe
 import type { SelectedCharacter } from "@/components/comparator/MultiCharacterSelector";
 import { ComparisonRadarChart } from "@/components/comparator/ComparisonRadarChart";
 import { ComparisonDataTable } from "@/components/comparator/ComparisonDataTable";
-import type { RadarMetricDef } from "@/components/comparator/ComparisonRadarChart";
-import type { TableMetricDef } from "@/components/comparator/ComparisonDataTable";
 import { useUserAccounts, useCycles, useGuilds, fetchUserStats, fetchGuildStats } from "@/hooks/useAPI";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
-import { formatScore, formatNumber } from "@/utils/format";
 import type { IUser, IGuild } from "@/interfaces";
 import type { IUserStats, IGuildStats } from "@/hooks/useAPI";
 import { FiRefreshCw, FiBarChart2, FiUsers, FiShield, FiCalendar, FiBookOpen } from "react-icons/fi";
-import { AffinityIcon } from "@/components/ui/AffinityIcon";
-import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
-import { KillerIcon } from "@/components/ui/KillerIcon";
 import { useTranslation } from "react-i18next";
+import { useComparatorMetrics, ENTITY_COLORS } from "@/components/comparator/useComparatorMetrics";
+import { CharacterAttributesTable } from "@/components/comparator/CharacterAttributesTable";
+import { WeeklyModeBanner } from "@/components/comparator/WeeklyModeBanner";
 
 interface SelectedPlayer {
   id: string;
@@ -52,19 +48,6 @@ interface SelectedGuild {
   id: string;
   guild: IGuild;
 }
-
-const ENTITY_COLORS = [
-  "#3182CE",
-  "#38A169",
-  "#DD6B20",
-  "#9F7AEA",
-  "#E53E3E",
-];
-
-const parseStatValue = (val?: string): number => {
-  if (!val) return 0;
-  return parseInt(val.replace(/[^\d]/g, ""), 10) || 0;
-};
 
 const ComparatorPage: React.FC = () => {
   const toast = useToast();
@@ -98,25 +81,14 @@ const ComparatorPage: React.FC = () => {
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const mutedText = "text.muted";
 
+  const {
+    charRadarMetrics, charTableMetrics,
+    playerRadarMetrics, guildRadarMetrics, playerTableMetrics, guildTableMetrics,
+    weeklyRadarMetrics, weeklyTableMetrics,
+  } = useComparatorMetrics();
+
   const playerAccentBg = isDark ? "rgba(49,130,206,0.08)" : "blue.50";
   const guildAccentBg = isDark ? "rgba(159,122,234,0.08)" : "purple.50";
-
-  // Character radar & table metrics (computed from selected chars directly)
-  const charRadarMetrics = useMemo<RadarMetricDef[]>(() => [
-    { key: "atk", label: t("components.comparatorCharts.radarCharAtk"), getRawValue: (s) => parseStatValue(s.atk as string) },
-    { key: "def", label: t("components.comparatorCharts.radarCharDef"), getRawValue: (s) => parseStatValue(s.def as string) },
-    { key: "end", label: t("components.comparatorCharts.radarCharEnd"), getRawValue: (s) => parseStatValue(s.end as string) },
-    { key: "cct", label: t("components.comparatorCharts.radarCharCct"), getRawValue: (s) => parseStatValue(s.cct as string) },
-    { key: "pre", label: t("components.comparatorCharts.radarCharPre"), getRawValue: (s) => parseStatValue(s.pre as string) },
-  ], [t]);
-
-  const charTableMetrics = useMemo<TableMetricDef[]>(() => [
-    { label: t("components.comparatorCharts.radarCharAtk"), icon: "⚔️", getDisplayValue: (s) => formatNumber(parseStatValue(s.atk as string)), getRawValue: (s) => parseStatValue(s.atk as string) },
-    { label: t("components.comparatorCharts.radarCharDef"), icon: "🛡️", getDisplayValue: (s) => formatNumber(parseStatValue(s.def as string)), getRawValue: (s) => parseStatValue(s.def as string) },
-    { label: t("components.comparatorCharts.radarCharEnd"), icon: "❤️", getDisplayValue: (s) => formatNumber(parseStatValue(s.end as string)), getRawValue: (s) => parseStatValue(s.end as string) },
-    { label: t("components.comparatorCharts.radarCharCct"), icon: "💥", getDisplayValue: (s) => formatNumber(parseStatValue(s.cct as string)), getRawValue: (s) => parseStatValue(s.cct as string) },
-    { label: t("components.comparatorCharts.radarCharPre"), icon: "🎯", getDisplayValue: (s) => formatNumber(parseStatValue(s.pre as string)), getRawValue: (s) => parseStatValue(s.pre as string) },
-  ], [t]);
 
   const charsData = useMemo(() =>
     selectedCharacters.map((sc, i) => ({
@@ -126,54 +98,6 @@ const ComparatorPage: React.FC = () => {
     })),
     [selectedCharacters]
   );
-
-  // Radar metrics
-  const playerRadarMetrics = useMemo<RadarMetricDef[]>(() => {
-    const P = (s: Record<string, unknown>) => s as unknown as IUserStats;
-    return [
-      { key: "averageScore", label: t("components.comparatorCharts.radarAvg"), getRawValue: (s) => P(s)?.averageScore || 0 },
-      { key: "bestScore", label: t("components.comparatorCharts.radarBest"), getRawValue: (s) => P(s)?.bestScore?.score || 0 },
-      { key: "totalScores", label: t("components.comparatorCharts.radarParticipation"), getRawValue: (s) => P(s)?.totalScores || 0 },
-      { key: "regularity", label: t("components.comparatorCharts.radarRegularity"), getRawValue: (s) => typeof P(s)?.missRate === "number" ? 100 - P(s).missRate! : 0, absolute: true },
-      { key: "totalPoints", label: t("components.comparatorCharts.radarTotalPoints"), getRawValue: (s) => P(s)?.totalPoints || 0 },
-    ];
-  }, [t]);
-
-  const guildRadarMetrics = useMemo<RadarMetricDef[]>(() => {
-    const G = (s: Record<string, unknown>) => s as unknown as IGuildStats;
-    return [
-      { key: "averageScore", label: t("components.comparatorCharts.radarAvg"), getRawValue: (s) => G(s)?.averageScore || 0 },
-      { key: "bestScore", label: t("components.comparatorCharts.radarBest"), getRawValue: (s) => G(s)?.bestScore || 0 },
-      { key: "totalMembers", label: t("components.comparatorCharts.radarMembers"), getRawValue: (s) => G(s)?.totalMembers || 0 },
-      { key: "totalScores", label: t("components.comparatorCharts.radarParticipation"), getRawValue: (s) => G(s)?.totalScores || 0 },
-      { key: "clearRate", label: t("components.comparatorCharts.metricClearRate"), getRawValue: (s) => G(s)?.clearRate || 0, absolute: true },
-    ];
-  }, [t]);
-
-  // Table metrics
-  const playerTableMetrics = useMemo<TableMetricDef[]>(() => {
-    const P = (s: Record<string, unknown>) => s as unknown as IUserStats;
-    return [
-      { label: t("components.comparatorCharts.metricAvgScore"), icon: "📊", getDisplayValue: (s) => formatScore(P(s)?.averageScore), getRawValue: (s) => P(s)?.averageScore || 0 },
-      { label: t("components.comparatorCharts.metricBestScore"), icon: "🏆", getDisplayValue: (s) => formatNumber(P(s)?.bestScore?.score), getRawValue: (s) => P(s)?.bestScore?.score || 0 },
-      { label: t("components.comparatorCharts.metricWorstScore"), icon: "📉", getDisplayValue: (s) => formatNumber(P(s)?.worstScore?.score), getRawValue: (s) => P(s)?.worstScore?.score || 0 },
-      { label: t("components.comparatorCharts.metricParticipations"), icon: "🎯", getDisplayValue: (s) => formatNumber(P(s)?.totalScores), getRawValue: (s) => P(s)?.totalScores || 0 },
-      { label: t("components.comparatorCharts.metricTotalPoints"), icon: "💰", getDisplayValue: (s) => formatScore(P(s)?.totalPoints), getRawValue: (s) => P(s)?.totalPoints || 0 },
-      { label: t("components.comparatorCharts.metricMissRate"), icon: "⚠️", getDisplayValue: (s) => typeof P(s)?.missRate === "number" ? `${P(s).missRate}%` : "N/A", getRawValue: (s) => P(s)?.missRate || 0, inverse: true },
-    ];
-  }, [t]);
-
-  const guildTableMetrics = useMemo<TableMetricDef[]>(() => {
-    const G = (s: Record<string, unknown>) => s as unknown as IGuildStats;
-    return [
-      { label: t("components.comparatorCharts.metricMemberCount"), icon: "👥", getDisplayValue: (s) => formatNumber(G(s)?.totalMembers), getRawValue: (s) => G(s)?.totalMembers || 0 },
-      { label: t("components.comparatorCharts.metricAvgScore"), icon: "📊", getDisplayValue: (s) => formatScore(G(s)?.averageScore), getRawValue: (s) => G(s)?.averageScore || 0 },
-      { label: t("components.comparatorCharts.metricBestScore"), icon: "🏆", getDisplayValue: (s) => formatNumber(G(s)?.bestScore), getRawValue: (s) => G(s)?.bestScore || 0 },
-      { label: t("components.comparatorCharts.metricTotalParticipations"), icon: "🎯", getDisplayValue: (s) => formatNumber(G(s)?.totalScores), getRawValue: (s) => G(s)?.totalScores || 0 },
-      { label: t("components.comparatorCharts.metricTotalPoints"), icon: "💰", getDisplayValue: (s) => formatScore(G(s)?.totalPoints), getRawValue: (s) => G(s)?.totalPoints || 0 },
-      { label: t("components.comparatorCharts.metricClearRate"), icon: "✅", getDisplayValue: (s) => typeof G(s)?.clearRate === "number" ? `${G(s).clearRate}%` : "N/A", getRawValue: (s) => G(s)?.clearRate || 0 },
-    ];
-  }, [t]);
 
   // Résolution slug cycle depuis l'URL → _id
   useEffect(() => {
@@ -378,51 +302,6 @@ const ComparatorPage: React.FC = () => {
       })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedPlayers, playersStats, selectedWeek, selectedCycleObj]
-  );
-
-  const weeklyRadarMetrics = useMemo<RadarMetricDef[]>(
-    () => [
-      {
-        key: "weekTotal",
-        label: t("components.comparatorCharts.weeklyTotal"),
-        getRawValue: (s) => (s.weekTotal as number) || 0,
-      },
-      {
-        key: "rotation1Score",
-        label: t("components.comparatorCharts.weeklyRotation1"),
-        getRawValue: (s) => (s.rotation1Score as number) || 0,
-      },
-      {
-        key: "rotation2Score",
-        label: t("components.comparatorCharts.weeklyRotation2"),
-        getRawValue: (s) => (s.rotation2Score as number) || 0,
-      },
-    ],
-    [t]
-  );
-
-  const weeklyTableMetrics = useMemo<TableMetricDef[]>(
-    () => [
-      {
-        label: t("components.comparatorCharts.weeklyTotal"),
-        icon: "📅",
-        getDisplayValue: (s) => formatScore((s.weekTotal as number) || 0),
-        getRawValue: (s) => (s.weekTotal as number) || 0,
-      },
-      {
-        label: t("components.comparatorCharts.weeklyRotation1"),
-        icon: "1️⃣",
-        getDisplayValue: (s) => formatScore((s.rotation1Score as number) || 0),
-        getRawValue: (s) => (s.rotation1Score as number) || 0,
-      },
-      {
-        label: t("components.comparatorCharts.weeklyRotation2"),
-        icon: "2️⃣",
-        getDisplayValue: (s) => formatScore((s.rotation2Score as number) || 0),
-        getRawValue: (s) => (s.rotation2Score as number) || 0,
-      },
-    ],
-    [t]
   );
 
   const hasPlayersStats = playersStats.size > 0 && Array.from(playersStats.values()).some((s) => s !== null);
@@ -660,66 +539,7 @@ const ComparatorPage: React.FC = () => {
                   />
                 </Grid>
 
-                {/* Attributs qualitatifs */}
-                <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={4}>
-                  <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={mutedText} mb={4}>
-                    {t("components.comparatorCharts.charAttributesHeading")}
-                  </Text>
-                  <Box overflowX="auto">
-                    <Box display="grid" gridTemplateColumns={`140px repeat(${selectedCharacters.length}, 1fr)`} gap={2} minW="400px">
-                      {/* Header row */}
-                      <Box />
-                      {selectedCharacters.map((sc, i) => (
-                        <Box key={sc.id} textAlign="center">
-                          <Box w={2} h={2} borderRadius="full" bg={ENTITY_COLORS[i % ENTITY_COLORS.length]} display="inline-block" mr={1} />
-                          <Text fontSize="xs" fontWeight="semibold" noOfLines={1}>{sc.character.name}</Text>
-                        </Box>
-                      ))}
-
-                      {/* Affinity */}
-                      <Text fontSize="sm" color={mutedText} alignSelf="center">{t("components.comparatorCharts.metricAffinity")}</Text>
-                      {selectedCharacters.map((sc) => (
-                        <Flex key={sc.id} justify="center" align="center" gap={1}>
-                          {sc.character.affinity
-                            ? <AffinityIcon affinity={sc.character.affinity} size="18px" />
-                            : <Text fontSize="xs" color={mutedText}>—</Text>}
-                        </Flex>
-                      ))}
-
-                      {/* Attack type */}
-                      <Text fontSize="sm" color={mutedText} alignSelf="center">{t("components.comparatorCharts.metricAttackType")}</Text>
-                      {selectedCharacters.map((sc) => (
-                        <Flex key={sc.id} justify="center" align="center">
-                          {sc.character.attack_type
-                            ? <AttackTypeBadge attackType={sc.character.attack_type} size="18px" />
-                            : <Text fontSize="xs" color={mutedText}>—</Text>}
-                        </Flex>
-                      ))}
-
-                      {/* Killers */}
-                      <Text fontSize="sm" color={mutedText} alignSelf="center">{t("components.comparatorCharts.metricKillers")}</Text>
-                      {selectedCharacters.map((sc) => (
-                        <Flex key={sc.id} justify="center" flexWrap="wrap" gap={1}>
-                          {sc.character.killers?.length
-                            ? sc.character.killers.map((k) => <KillerIcon key={k} killer={k} size="18px" />)
-                            : <Text fontSize="xs" color={mutedText}>—</Text>}
-                        </Flex>
-                      ))}
-
-                      {/* Categories */}
-                      <Text fontSize="sm" color={mutedText} alignSelf="center">{t("components.comparatorCharts.metricCategories")}</Text>
-                      {selectedCharacters.map((sc) => (
-                        <Flex key={sc.id} justify="center" flexWrap="wrap" gap={1}>
-                          {sc.character.categories?.length
-                            ? sc.character.categories.map((cat) => (
-                                <Badge key={cat} fontSize="2xs" borderRadius="full" colorScheme="gray">{cat}</Badge>
-                              ))
-                            : <Text fontSize="xs" color={mutedText}>—</Text>}
-                        </Flex>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
+                <CharacterAttributesTable selectedCharacters={selectedCharacters} />
               </>
             )}
 
@@ -727,30 +547,7 @@ const ComparatorPage: React.FC = () => {
             {!isLoadingStats && hasResults && !isCharacters && (
               <>
                 {weeklyMode && isPlayers && (
-                  <Box
-                    bg={isDark ? "rgba(159,122,234,0.08)" : "purple.50"}
-                    borderRadius="lg"
-                    px={4}
-                    py={2}
-                    borderLeft="3px solid"
-                    borderColor="purple.400"
-                  >
-                    <HStack spacing={2}>
-                      <Icon as={FiCalendar} color="purple.400" boxSize={4} />
-                      <Text fontSize="sm" fontWeight="semibold" color="purple.600" _dark={{ color: "purple.300" }}>
-                        Mode hebdomadaire — Semaine {selectedWeek}
-                      </Text>
-                      {selectedCycleObj && (() => {
-                        const r1 = selectedCycleObj.rotations[(selectedWeek - 1) * 2];
-                        const r2 = selectedCycleObj.rotations[(selectedWeek - 1) * 2 + 1];
-                        return r1 ? (
-                          <Text fontSize="xs" color="gray.500">
-                            R{r1.position} {r1.killer}{r2 ? ` + R${r2.position} ${r2.killer}` : ""}
-                          </Text>
-                        ) : null;
-                      })()}
-                    </HStack>
-                  </Box>
+                  <WeeklyModeBanner week={selectedWeek} cycle={selectedCycleObj} />
                 )}
                 <Grid
                   templateColumns={{ base: "1fr", xl: "repeat(2, 1fr)" }}
