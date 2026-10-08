@@ -100,7 +100,7 @@ const DiscordCallback = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <PageLoader label={t("pages.discordCallback.loading")} color="purple.500" />;
+  return <PageLoader variant="spinner" label={t("pages.discordCallback.loading")} color="purple.500" />;
 }
 
 export default DiscordCallback;

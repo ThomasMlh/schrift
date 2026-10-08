@@ -34,9 +34,9 @@ export const OCRScreenshotUploader = ({
   const [screenshots, setScreenshots] = useState<Array<{ data: string; filename: string; preview: string }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.600");
-  const dropzoneBg = useColorModeValue("gray.50", "gray.700");
+  const dropzoneBg = "bg.muted";
   const dropzoneBorder = useColorModeValue("gray.300", "gray.600");
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -229,6 +229,7 @@ export const OCRScreenshotUploader = ({
 
           {isProcessing && (
             <PageLoader
+              variant="spinner"
               label="🔍 Analyse des screenshots en cours..."
               subtitle="Détection des noms et scores par OCR"
               color="blue.500"
