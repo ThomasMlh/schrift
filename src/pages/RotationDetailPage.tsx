@@ -48,6 +48,7 @@ import { RankBadge } from "@/components/ui/RankBadge";
 import { AlterationImage } from "@/components/ui/AlterationImage";
 import { SEOHead } from "@/components/SEOHead";
 import { HeroSection } from "@/components/HeroSection";
+import { FiRepeat } from "react-icons/fi";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "@/components/ui/PageLoader";
@@ -274,7 +275,7 @@ const RotationDetailPage = () => {
         <HeroSection
           title={`Rotation #${position}`}
           description={cycle ? `${cycle.name} — ${cycle.year}` : ""}
-          badge={{ text: `${position} / ${totalRotations}`, icon: "⚡" }}
+          badge={{ text: `${position} / ${totalRotations}`, icon: FiRepeat }}
           size="sm"
         />
 
@@ -390,7 +391,7 @@ const RotationDetailPage = () => {
                     <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider">
                       {t("pages.rotationDetail.tableScore")}s
                     </Text>
-                    <Text fontSize="md" fontWeight="bold" bgGradient="linear(to-r, blue.400, purple.500)" bgClip="text">
+                    <Text fontSize="md" fontWeight="bold" color="text.strong">
                       {totalItems}
                       {selectedGuild && (
                         <Text as="span" fontSize="xs" color="blue.500" ml={1} fontWeight="normal">

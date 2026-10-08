@@ -268,7 +268,7 @@ const ExistingCyclesList = ({
             <StatLabel fontSize="xs" color="gray.500">
               Cycles
             </StatLabel>
-            <StatNumber fontSize="2xl" bgGradient={headerGradient} bgClip="text">
+            <StatNumber fontSize="2xl" color="text.strong">
               {cycles.length}
             </StatNumber>
           </Stat>
@@ -276,7 +276,7 @@ const ExistingCyclesList = ({
             <StatLabel fontSize="xs" color="gray.500">
               Rotations totales
             </StatLabel>
-            <StatNumber fontSize="2xl" bgGradient={headerGradient} bgClip="text">
+            <StatNumber fontSize="2xl" color="text.strong">
               {totalRotations}
             </StatNumber>
           </Stat>
@@ -284,7 +284,7 @@ const ExistingCyclesList = ({
             <StatLabel fontSize="xs" color="gray.500">
               Moyenne / cycle
             </StatLabel>
-            <StatNumber fontSize="2xl" bgGradient={headerGradient} bgClip="text">
+            <StatNumber fontSize="2xl" color="text.strong">
               {cycles.length > 0
                 ? Math.round(totalRotations / cycles.length)
                 : 0}

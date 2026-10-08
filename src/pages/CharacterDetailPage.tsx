@@ -293,8 +293,7 @@ const CharacterDetailPage = () => {
                 <Heading
                   size="xl"
                   textAlign="center"
-                  bgGradient={isDark ? "linear(to-r, #C4B5FD, #818CF8)" : "linear(to-r, #7C3AED, #4F46E5)"}
-                  bgClip="text"
+                  color="text.strong"
                 >
                   {character.name}
                 </Heading>

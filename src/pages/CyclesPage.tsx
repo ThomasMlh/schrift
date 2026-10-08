@@ -87,7 +87,7 @@ const CyclesPage = () => {
         <HeroSection
           title={t("pages.cycles.heroTitle")}
           description={t("pages.cycles.heroDescription")}
-          badge={{ text: t("pages.cycles.heroBadge"), icon: "⚡" }}
+          badge={{ text: t("pages.cycles.heroBadge"), icon: FiCalendar }}
           size="lg"
         />
 
@@ -114,17 +114,17 @@ const CyclesPage = () => {
                 <HStack spacing={6}>
                   <HStack spacing={3}>
                     <Box
-                      bg="blue.500"
+                      bg="bg.inset"
                       borderRadius="lg"
                       p={2}
                       display="flex"
                       alignItems="center"
                       justifyContent="center"
                     >
-                      <Icon as={FiCalendar} color="white" boxSize={4} />
+                      <Icon as={FiCalendar} color="accent" boxSize={4} />
                     </Box>
                     <VStack align="start" spacing={0}>
-                      <Text fontSize="2xl" fontWeight="extrabold" bgGradient="linear(to-r, blue.400, purple.500)" bgClip="text">
+                      <Text fontSize="2xl" fontWeight="extrabold" color="text.strong">
                         {isLoading ? "…" : totalCount}
                       </Text>
                       <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wide">
@@ -136,17 +136,17 @@ const CyclesPage = () => {
                   {pagination && (
                     <HStack spacing={3}>
                       <Box
-                        bgGradient="linear(to-br, purple.500, pink.500)"
+                        bg="bg.inset"
                         borderRadius="lg"
                         p={2}
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
                       >
-                        <Icon as={FiLayers} color="white" boxSize={4} />
+                        <Icon as={FiLayers} color="accent" boxSize={4} />
                       </Box>
                       <VStack align="start" spacing={0}>
-                        <Text fontSize="2xl" fontWeight="extrabold" bgGradient="linear(to-r, purple.500, pink.400)" bgClip="text">
+                        <Text fontSize="2xl" fontWeight="extrabold" color="text.strong">
                           {pagination.itemsOnPage}
                         </Text>
                         <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wide">
