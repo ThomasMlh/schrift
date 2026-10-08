@@ -7,6 +7,7 @@ import {
 import { useState } from "react";
 import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
 import { PageLoader } from "./ui/PageLoader";
+import { DeleteConfirmationModal } from "./ui/DeleteConfirmationModal";
 import { useOrbGuide } from "@/hooks/useAPI";
 import { useOrbGuideMutations } from "@/hooks/useAPIMutations";
 
@@ -60,13 +61,17 @@ const OrbGuideAdminSection = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette entrée ?")) return;
+  // Entrée en attente de confirmation de suppression
+  const [toDelete, setToDelete] = useState<{ id: string; title: string } | null>(null);
+
+  const handleDelete = async () => {
+    if (!toDelete) return;
     setSaving(true);
     try {
-      const result = await deleteOrbSource(id);
+      const result = await deleteOrbSource(toDelete.id);
       toast({ title: (result as { message: string }).message, status: "success", duration: 3000 });
       mutate();
+      setToDelete(null);
     } catch {
       toast({ title: "Erreur", description: "Impossible de supprimer l'entrée", status: "error", duration: 3000 });
     } finally {
@@ -107,7 +112,7 @@ const OrbGuideAdminSection = () => {
                 <Td>
                   <HStack spacing={2}>
                     <IconButton aria-label="Modifier" icon={<EditIcon />} size="sm" colorScheme="blue" onClick={() => handleOpenModal(orb)} />
-                    <IconButton aria-label="Supprimer" icon={<DeleteIcon />} size="sm" colorScheme="red" onClick={() => orb._id && handleDelete(orb._id)} isDisabled={!orb._id} />
+                    <IconButton aria-label="Supprimer" icon={<DeleteIcon />} size="sm" colorScheme="red" onClick={() => orb._id && setToDelete({ id: orb._id, title: orb.title })} isDisabled={!orb._id} />
                   </HStack>
                 </Td>
               </Tr>
@@ -115,6 +120,15 @@ const OrbGuideAdminSection = () => {
           </Tbody>
         </Table>
       </Box>
+
+      <DeleteConfirmationModal
+        isOpen={!!toDelete}
+        onClose={() => setToDelete(null)}
+        onConfirm={handleDelete}
+        isDeleting={saving}
+        title="Supprimer la source d'orbes"
+        description={`Supprimer « ${toDelete?.title ?? ""} » du guide des orbes ? Cette action est définitive.`}
+      />
 
       <Modal isOpen={isOpen} onClose={handleCloseModal} size="xl">
         <ModalOverlay />
