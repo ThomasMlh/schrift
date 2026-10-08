@@ -10,7 +10,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
-import { FiBookOpen } from "react-icons/fi";
 import { OrbFarmingGuide, RotationsBuildsGuide, AbilitySlotsGuide } from "../components/guides";
 import { useTranslation } from "react-i18next";
 
@@ -62,7 +61,6 @@ const GuidesPage = () => {
         <HeroSection
           title={t("pages.guides.heroTitle")}
           description={t("pages.guides.heroDescription")}
-          badge={{ text: t("pages.guides.heroBadge"), icon: FiBookOpen }}
         />
 
         <Container maxW="container.xl" px={{ base: 4, md: 6 }} py={8}>

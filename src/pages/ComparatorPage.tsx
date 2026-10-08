@@ -343,7 +343,6 @@ const ComparatorPage: React.FC = () => {
         <HeroSection
           title={t("pages.comparator.heroTitle")}
           description={t("pages.comparator.heroDescription")}
-          badge={{ text: t("pages.comparator.heroBadge"), icon: FiBarChart2 }}
         />
 
         <Container maxW="container.xl" py={8}>

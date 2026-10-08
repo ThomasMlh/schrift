@@ -2,7 +2,6 @@ import { Container, VStack, Box, useColorModeValue, useToast, HStack, Button, Te
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { HeroSection } from "../components/HeroSection";
-import { FiAward } from "react-icons/fi";
 import type {
   IPodiumResponse,
   IPodiumWeeklyResponse,
@@ -341,7 +340,6 @@ const PodiumPage = () => {
               ? t("pages.podium.heroDescriptionProgression")
               : t("pages.podium.heroDescriptionAverage")
           }
-          badge={{ text: t("pages.podium.heroBadge"), icon: FiAward }}
         />
 
         <Container maxW="container.xl" py={8}>

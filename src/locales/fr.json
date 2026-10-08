@@ -68,8 +68,7 @@
       "seoDescription": "Découvrez tous les personnages de Bleach Brave Souls avec leurs statistiques, affinités, types d'attaque et informations détaillées. Base de données mise à jour régulièrement.",
       "heading": "Base de données des personnages Ṣčhrīft",
       "heroTitle": "Base de données BBS",
-      "heroDescription": "Découvrez tous les personnages de Bleach Brave Souls avec leurs statistiques, affinités et informations détaillées",
-      "heroBadge": "Base de données"
+      "heroDescription": "Découvrez tous les personnages de Bleach Brave Souls avec leurs statistiques, affinités et informations détaillées"
     },
     "cycles": {
       "title": "Cycles",
@@ -77,7 +76,6 @@
       "seoDescription": "Découvrez tous les cycles de rotation de Bleach Brave Souls. Consultez les rotations, événements et classements de guilde détaillés.",
       "heroTitle": "Cycles de Rotation",
       "heroDescription": "Découvrez tous les cycles de rotation disponibles",
-      "heroBadge": "Événements BBS",
       "statsTotal": "Total",
       "statsCycleSingular": "cycle disponible",
       "statsCyclePlural": "cycles disponibles",
@@ -166,15 +164,13 @@
       "seoTitle": "Schrift BBS - Liste des joueurs",
       "seoDescription": "Découvrez tous les joueurs de Bleach Brave Souls. Consultez leurs statistiques, classements et informations de guilde.",
       "heroTitle": "Liste des joueurs",
-      "heroDescription": "Liste de tous les joueurs avec leurs informations",
-      "heroBadge": "Joueurs"
+      "heroDescription": "Liste de tous les joueurs avec leurs informations"
     },
     "podium": {
       "title": "Podium",
       "seoTitle": "Schrift BBS - Podium des Joueurs - Bleach Brave Souls",
       "seoDescription": "Découvrez tous les joueurs de Bleach Brave Souls. Consultez leurs statistiques, classements et informations de guilde.",
       "heroTitle": "Podium des Joueurs",
-      "heroBadge": "Classement",
       "heroDescriptionRotation": "Classement des scores individuels pour une rotation",
       "heroDescriptionWeekly": "Classement par semaine (2 rotations)",
       "heroDescriptionMisses": "Classement des miss (scores négatifs)",
@@ -188,7 +184,6 @@
       "seoDescription": "Comparez les performances entre joueurs ou guildes dans Bleach Brave Souls.",
       "heroTitle": "Comparateur Avancé",
       "heroDescription": "Comparez les performances de joueurs ou de guildes",
-      "heroBadge": "Analyse",
       "configHeading": "Configuration",
       "cycleFilterLabel": "📊 Filtrer par cycle (optionnel)",
       "cycleAllPlaceholder": "Tous les cycles",
@@ -227,7 +222,6 @@
       "seoDescription": "Guides complets pour Bleach Brave Souls : rotations, équipes recommandées, farming d'orbes et plus encore.",
       "heroTitle": "Guides BBS",
       "heroDescription": "Découvrez nos guides complets pour améliorer votre expérience de jeu",
-      "heroBadge": "Guides complets",
       "tabRotationsBuilds": "🔄 Rotations & Builds",
       "tabRotationsBuildsDescription": "Builds validés par la communauté pour chaque rotation",
       "tabRotationsBuildsBadge": "Communauté",
@@ -244,7 +238,6 @@
       "heading": "Guildes Ṣčhrīft",
       "heroTitle": "Guildes Ṣčhrīft",
       "heroDescription": "Explorez la hiérarchie et les membres de chaque guilde",
-      "heroBadge": "Guildes",
       "memberSingular": "joueur",
       "memberPlural": "joueurs",
       "loading": "Chargement...",

@@ -48,7 +48,6 @@ import { RankBadge } from "@/components/ui/RankBadge";
 import { AlterationImage } from "@/components/ui/AlterationImage";
 import { SEOHead } from "@/components/SEOHead";
 import { HeroSection } from "@/components/HeroSection";
-import { FiRepeat } from "react-icons/fi";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "@/components/ui/PageLoader";
@@ -274,8 +273,7 @@ const RotationDetailPage = () => {
       <Box w="100%">
         <HeroSection
           title={`Rotation #${position}`}
-          description={cycle ? `${cycle.name} — ${cycle.year}` : ""}
-          badge={{ text: `${position} / ${totalRotations}`, icon: FiRepeat }}
+          description={cycle ? `${cycle.name} — ${cycle.year} · ${position} / ${totalRotations}` : ""}
           size="sm"
         />
 

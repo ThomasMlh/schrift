@@ -87,7 +87,6 @@ const CyclesPage = () => {
         <HeroSection
           title={t("pages.cycles.heroTitle")}
           description={t("pages.cycles.heroDescription")}
-          badge={{ text: t("pages.cycles.heroBadge"), icon: FiCalendar }}
           size="lg"
         />
 

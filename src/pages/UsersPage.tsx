@@ -1,7 +1,6 @@
 import { Container, VStack, Box } from "@chakra-ui/react";
 import UsersTable from "../components/UsersTable";
 import { HeroSection } from "../components/HeroSection";
-import { FiUsers } from "react-icons/fi";
 import { SEOHead } from "@/components/SEOHead";
 import { useTranslation } from "react-i18next";
 
@@ -29,7 +28,6 @@ const UsersPage = () => {
         <HeroSection
           title={t("pages.players.heroTitle")}
           description={t("pages.players.heroDescription")}
-          badge={{ text: t("pages.players.heroBadge"), icon: FiUsers }}
         />
 
         <Container maxW="container.xl" py={8}>

@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { FiUsers, FiGrid, FiChevronRight, FiShield, FiBarChart2, FiAward, FiTarget, FiTrendingUp, FiCheckCircle } from "react-icons/fi";
+import { FiUsers, FiGrid, FiChevronRight, FiBarChart2, FiAward, FiTarget, FiTrendingUp, FiCheckCircle } from "react-icons/fi";
 import { StatCard } from "../components/ui/StatCard";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
@@ -134,7 +134,6 @@ const GuildesPage = () => {
         <HeroSection
           title={t("pages.guilds.heroTitle")}
           description={t("pages.guilds.heroDescription")}
-          badge={{ text: t("pages.guilds.heroBadge"), icon: FiShield }}
           size="lg"
         />
 
