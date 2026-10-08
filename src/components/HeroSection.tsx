@@ -53,7 +53,7 @@ export const HeroSection = ({
             mt={2}
             fontSize={{ base: "sm", md: "md" }}
             color={isDark ? 'gray.400' : 'gray.600'}
-            maxW="2xl"
+            maxW="3xl"
           >
             {description}
           </Text>
