@@ -1,8 +1,5 @@
 import {
-  Box, Button, Flex, FormControl, FormLabel, Heading, Input, Select, Table, Tbody, Td, Text,
-  Th, Thead, Tr, useColorModeValue, useToast, IconButton, Modal, ModalOverlay,
-  ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure,
-  VStack, HStack, Alert, AlertIcon
+  Box, Button, FormControl, FormLabel, Input, Select, Table, Tbody, Td, Text, Th, Thead, Tr, useColorModeValue, useToast, IconButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure, VStack, HStack, Alert, AlertIcon,
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
@@ -11,6 +8,7 @@ import { DeleteConfirmationModal } from "./ui/DeleteConfirmationModal";
 import { useAbilitySlotsGuide } from "@/hooks/useAPI";
 import { useAbilitySlotsGuideMutations } from "@/hooks/useAPIMutations";
 import type { IGuideAbilitySlot } from "@/interfaces";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 type AbilitySlotRow = Partial<IGuideAbilitySlot> & { category: string; name: string; star1: string; star2: string; star3: string };
 
@@ -127,12 +125,14 @@ const AbilitySlotsAdminSection = () => {
 
   return (
     <Box w="100%" p={4}>
-      <Flex justify="space-between" align="center" mb={6}>
-        <Heading size="lg">🎯 Gestion des Emplacements de capacités</Heading>
-        <Button leftIcon={<AddIcon />} colorScheme="purple" onClick={() => handleOpenModal()}>
-          Ajouter une ligne
-        </Button>
-      </Flex>
+      <Box mb={6}>
+        <SectionHeader
+          icon="🎯"
+          title="Emplacements de capacités"
+          description="Lignes affichées dans le guide des emplacements de capacités."
+          actions={<Button leftIcon={<AddIcon />} colorScheme="purple" onClick={() => handleOpenModal()}>Ajouter une ligne</Button>}
+        />
+      </Box>
 
       <Text fontSize="sm" color="gray.500" mb={4}>
         L'ordre d'affichage est calculé automatiquement : une nouvelle ligne est ajoutée à la

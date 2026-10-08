@@ -15,6 +15,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import CustomLink from "@/components/ui/CustomLink";
 import { buildPlayerUrl } from "@/utils/playerUrl";
 import { MissingScoresPanel } from "@/components/scoreControl/MissingScoresPanel";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const formatScore = (n: number | undefined | null) => (n == null ? "—" : n.toLocaleString("fr-FR"));
 const cycleLabel = (name: string | null, year: number | null, position: number | null) =>
@@ -200,22 +201,15 @@ const ScoreControlSection = () => {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={5} align="stretch">
-        <Flex justify="space-between" align={{ base: "stretch", md: "center" }} direction={{ base: "column", md: "row" }} gap={4}>
-          <VStack align="start" spacing={1}>
-            <Text fontSize="2xl" fontWeight="extrabold" bgGradient="linear(to-r, blue.400, purple.500)" bgClip="text" letterSpacing="tight">
-              Contrôle des scores
-            </Text>
-            <Text fontSize="sm" color={mutedText} maxW="2xl">
-              Repère les scores probablement mal saisis ou pas encore saisis, et consulte l'historique de toutes les modifications.
-              Visible uniquement par les chefs, sous-chefs et admins.
-            </Text>
-          </VStack>
-          {guildOptions.length > 2 && (
+        <SectionHeader
+          title="Contrôle des scores"
+          description="Repère les scores probablement mal saisis ou pas encore saisis, et consulte l'historique de toutes les modifications. Visible uniquement par les chefs, sous-chefs et admins."
+          actions={guildOptions.length > 2 && (
             <Box minW={{ md: "260px" }}>
               <CustomSelect value={guildId} onChange={(v) => { setGuildId(v); setPage(1); }} options={guildOptions} allowDeselect={false} size="md" />
             </Box>
           )}
-        </Flex>
+        />
 
         <Tabs variant="soft-rounded" colorScheme="purple" isLazy>
           <TabList>

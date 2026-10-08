@@ -1,27 +1,5 @@
 import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  Grid,
-  Heading,
-  HStack,
-  IconButton,
-  Image,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  Text,
-  useColorModeValue,
-  useToast,
-  VStack,
+  Box, Button, Flex, FormControl, FormLabel, Grid, HStack, IconButton, Image, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spinner, Text, useColorModeValue, useToast, VStack,
 } from "@chakra-ui/react";
 import { AddIcon, EditIcon } from "@chakra-ui/icons";
 import { useState, useEffect } from "react";
@@ -37,6 +15,7 @@ import { useAuth } from "../providers/AuthProvider";
 import type { IAccessory } from "../interfaces";
 import { PageLoader } from "./ui/PageLoader";
 import { apiUrl, bucketUrl } from "../utils/apiRequest";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 type Bank = "accessories" | "killers" | "categories" | "affinity";
 
@@ -478,7 +457,9 @@ const ImageBankSection = () => {
 
   return (
     <Box>
-      <Heading size="md" mb={5}>Banque d’images</Heading>
+      <Box mb={5}>
+        <SectionHeader title="Banque d’images" description="Accessoires, killers, catégories et affinités stockés dans le bucket." />
+      </Box>
 
       <HStack spacing={1} mb={6} flexWrap="wrap">
         {BANKS.map((bank) => {

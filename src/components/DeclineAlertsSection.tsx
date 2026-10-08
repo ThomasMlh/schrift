@@ -11,6 +11,7 @@ import { AlterationImage } from "@/components/ui/AlterationImage";
 import CustomLink from "@/components/ui/CustomLink";
 import { getUserAvatarUrl } from "@/utils/discord";
 import { buildPlayerUrl } from "@/utils/playerUrl";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const formatScore = (n: number) => n.toLocaleString("fr-FR");
 
@@ -99,28 +100,15 @@ const DeclineAlertsSection = () => {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={5} align="stretch">
-        <Flex justify="space-between" align={{ base: "stretch", md: "center" }} direction={{ base: "column", md: "row" }} gap={4}>
-          <VStack align="start" spacing={1}>
-            <Text
-              fontSize="2xl"
-              fontWeight="extrabold"
-              bgGradient="linear(to-r, blue.400, purple.500)"
-              bgClip="text"
-              letterSpacing="tight"
-            >
-              Baisses de régime
-            </Text>
-            <Text fontSize="sm" color={mutedText} maxW="2xl">
-              Membres dont les 3 derniers scores (sur les 2 derniers cycles) sont en moyenne à moins de 80 % de
-              leur habitude sur les mêmes killers. Visible uniquement par les chefs, sous-chefs et admins.
-            </Text>
-          </VStack>
-          {guildOptions.length > 2 && (
+        <SectionHeader
+          title="Baisses de régime"
+          description="Membres dont les 3 derniers scores (sur les 2 derniers cycles) sont en moyenne à moins de 80 % de leur habitude sur les mêmes killers. Visible uniquement par les chefs, sous-chefs et admins."
+          actions={guildOptions.length > 2 && (
             <Box minW={{ md: "260px" }}>
               <CustomSelect value={guildId} onChange={setGuildId} options={guildOptions} allowDeselect={false} size="md" />
             </Box>
           )}
-        </Flex>
+        />
 
         {isLoading ? (
           <VStack spacing={3} align="stretch">

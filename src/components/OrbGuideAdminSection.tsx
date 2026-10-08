@@ -1,8 +1,5 @@
 import {
-  Box, Button, Flex, FormControl, FormLabel, Heading, Input, Table, Tbody, Td, Textarea,
-  Th, Thead, Tr, useColorModeValue, useToast, IconButton, Modal, ModalOverlay,
-  ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure,
-  VStack, HStack, NumberInput, NumberInputField, Alert, AlertIcon
+  Box, Button, FormControl, FormLabel, Input, Table, Tbody, Td, Textarea, Th, Thead, Tr, useColorModeValue, useToast, IconButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure, VStack, HStack, NumberInput, NumberInputField, Alert, AlertIcon,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
@@ -10,6 +7,7 @@ import { PageLoader } from "./ui/PageLoader";
 import { DeleteConfirmationModal } from "./ui/DeleteConfirmationModal";
 import { useOrbGuide } from "@/hooks/useAPI";
 import { useOrbGuideMutations } from "@/hooks/useAPIMutations";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 interface OrbSource {
   _id?: string;
@@ -86,12 +84,14 @@ const OrbGuideAdminSection = () => {
 
   return (
     <Box w="100%" p={4}>
-      <Flex justify="space-between" align="center" mb={6}>
-        <Heading size="lg">📚 Gestion du Guide Orbes</Heading>
-        <Button leftIcon={<AddIcon />} colorScheme="purple" onClick={() => handleOpenModal()}>
-          Ajouter une source
-        </Button>
-      </Flex>
+      <Box mb={6}>
+        <SectionHeader
+          icon="📚"
+          title="Guide des orbes"
+          description="Sources d'orbes affichées dans le guide public."
+          actions={<Button leftIcon={<AddIcon />} colorScheme="purple" onClick={() => handleOpenModal()}>Ajouter une source</Button>}
+        />
+      </Box>
 
       <Box bg={bgColor} borderWidth="1px" borderColor={borderColor} borderRadius="lg" overflow="auto">
         <Table variant="simple">

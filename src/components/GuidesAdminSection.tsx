@@ -1,15 +1,11 @@
 import {
-  Box,
-  Button,
-  Container,
-  Heading,
-  VStack,
-  useColorModeValue,
+  Box, Button, Container, VStack, useColorModeValue,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import OrbGuideAdminSection from "./OrbGuideAdminSection";
 import BuildsAdminSection from "./BuildsAdminSection";
 import AbilitySlotsAdminSection from "./AbilitySlotsAdminSection";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 // Composant wrapper pour les sections de guides pliables
 interface GuideFormWrapperProps {
@@ -66,9 +62,9 @@ const GuidesAdminSection = () => {
 
   return (
     <Container maxW="100vw" w="100%" px={0} py={8}>
-      <Heading mb={8} textAlign="center">
-        Administration des Guides
-      </Heading>
+      <Box px={4} mb={8}>
+        <SectionHeader title="Administration des guides" description="Contenu des guides publics : orbes, emplacements de capacités et builds." />
+      </Box>
 
       <VStack spacing={6} w="100%" px={4}>
         {/* Guide des Orbes */}
