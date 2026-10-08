@@ -6,6 +6,7 @@ import { TopAchievementBadge } from "@/components/achievements/TopAchievementBad
 import type { ITopAchievement } from "@/interfaces";
 import CustomLink from "@/components/ui/CustomLink";
 import { buildPlayerUrl } from "@/utils/playerUrl";
+import { MedalBadge } from "./MedalBadge";
 
 export interface PodiumPedestalPlayer {
   rank: number;
@@ -39,7 +40,6 @@ const PODIUM_CONFIG = {
     pedestalBg: "linear(to-t, rgba(255, 215, 0, 0.32), rgba(255, 215, 0, 0.12) 55%, rgba(255, 215, 0, 0.03))",
     pedestalBorder: "#FFD700",
     textColor: "yellow.300",
-    emoji: "🥇",
   },
   2: {
     pedestalHeight: { base: "55px", md: "85px" },
@@ -50,7 +50,6 @@ const PODIUM_CONFIG = {
     pedestalBg: "linear(to-t, rgba(192, 192, 192, 0.22), rgba(192, 192, 192, 0.08) 55%, rgba(192, 192, 192, 0.02))",
     pedestalBorder: "#C0C0C0",
     textColor: "gray.300",
-    emoji: "🥈",
   },
   3: {
     pedestalHeight: { base: "40px", md: "60px" },
@@ -61,7 +60,6 @@ const PODIUM_CONFIG = {
     pedestalBg: "linear(to-t, rgba(205, 127, 50, 0.22), rgba(205, 127, 50, 0.08) 55%, rgba(205, 127, 50, 0.02))",
     pedestalBorder: "#CD7F32",
     textColor: "orange.300",
-    emoji: "🥉",
   },
 } as const;
 
@@ -113,10 +111,6 @@ interface PedestalSlotProps {
 
 const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProps) => {
   const cfg = PODIUM_CONFIG[player.rank as 1 | 2 | 3];
-  // Le bot Discord (Chromium headless) screenshote cette page en mode ?capture=1 :
-  // la police d'emoji couleur (Noto Color Emoji) y fait planter le rendu, donc on
-  // remplace l'emoji médaille par un badge sans dépendance à une police dans ce mode.
-  const isCaptureMode = new URLSearchParams(window.location.search).get("capture") === "1";
   const avatarUrl =
     player.avatar && player.discord_id
       ? getUserAvatarUrl({ discord_id: player.discord_id, avatar: player.avatar }) || undefined
@@ -146,27 +140,7 @@ const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProp
         transition="transform 0.2s ease-out"
         _hover={{ transform: "translateY(-4px)" }}
       >
-        {/* Emoji médaille flottant (badge coloré en mode capture, cf. commentaire plus haut) */}
-        {isCaptureMode ? (
-          <Box
-            w={player.rank === 1 ? "26px" : "22px"}
-            h={player.rank === 1 ? "26px" : "22px"}
-            borderRadius="full"
-            bg={cfg.borderColor}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            color="blackAlpha.800"
-            fontWeight="black"
-            fontSize="xs"
-          >
-            {player.rank}
-          </Box>
-        ) : (
-          <Text fontSize={player.rank === 1 ? "2xl" : "xl"} lineHeight={1}>
-            {cfg.emoji}
-          </Text>
-        )}
+        <MedalBadge rank={player.rank as 1 | 2 | 3} size={player.rank === 1 ? 30 : 24} />
 
         {/* Avatar avec glow (+ confettis pour le 1er) */}
         <Box position="relative">
