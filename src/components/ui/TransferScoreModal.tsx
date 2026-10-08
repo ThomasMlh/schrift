@@ -121,10 +121,10 @@ export const TransferScoreModal = ({ isOpen, onClose, cycles, guilds }: Transfer
     };
 
     // ── Couleurs ─────────────────────────────────────────────────────────────
-    const modalBg     = useColorModeValue("white", "gray.800");
+    const modalBg = "bg.card";
     const borderColor = useColorModeValue("gray.200", "gray.700");
     const mutedText   = useColorModeValue("gray.500", "gray.400");
-    const previewBg   = useColorModeValue("gray.50", "gray.750");
+    const previewBg = "bg.muted";
 
     return (
         <Modal isOpen={isOpen} onClose={handleClose} size="md" isCentered>

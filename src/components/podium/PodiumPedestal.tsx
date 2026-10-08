@@ -1,4 +1,4 @@
-import { Box, VStack, HStack, Text, Avatar, Badge, useColorModeValue } from "@chakra-ui/react";
+import { Box, VStack, HStack, Text, Avatar, Badge } from "@chakra-ui/react";
 import { getUserAvatarUrl } from "@/utils/discord";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
 import { ProgressionBadge } from "@/components/ui/ProgressionBadge";
@@ -254,7 +254,7 @@ const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProp
 };
 
 export const PodiumPedestal = ({ players, showGuildName = false }: PodiumPedestalProps) => {
-  const containerBg = useColorModeValue("gray.50", "gray.900");
+  const containerBg = "bg.page";
 
   const top3 = [1, 2, 3]
     .map((rank) => players.find((p) => p.rank === rank))

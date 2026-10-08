@@ -38,7 +38,7 @@ export const UserRivals = ({
   );
   const currentUserBorder = useColorModeValue("purple.400", "purple.500");
   const rankBg = useColorModeValue("gray.100", "gray.700");
-  const diffBg = useColorModeValue("white", "gray.800");
+  const diffBg = "bg.card";
   const { t } = useTranslation();
 
   if (!rivals || rivals.length === 0) {

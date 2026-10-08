@@ -44,7 +44,7 @@ export const OCRContextSelection = ({
   const [selectedScreenshotterId, setSelectedScreenshotterId] = useState("");
   const { screenshotters, isLoading: loadingScreenshotters } = useScreenshotters();
 
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
   useEffect(() => {

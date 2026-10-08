@@ -10,7 +10,7 @@ interface PlayerCardMissProps {
 }
 
 const PlayerCardMiss = ({ player, showGuildName = false }: PlayerCardMissProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const borderColor = useColorModeValue("red.100", "rgba(254,178,178,0.15)");
   const hoverBorderColor = useColorModeValue("red.400", "red.400");
   const rankColor = useColorModeValue("red.400", "red.400");

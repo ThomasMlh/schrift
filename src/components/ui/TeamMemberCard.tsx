@@ -56,7 +56,7 @@ export const TeamMemberCard = memo(({
   getUsedAccessoryIds,
 }: TeamMemberCardProps) => {
   const borderColor = useColorModeValue("gray.200", "gray.600");
-  const bgColor = useColorModeValue("gray.50", "gray.700");
+  const bgColor = "bg.muted";
 
   return (
     <Box

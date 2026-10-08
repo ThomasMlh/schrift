@@ -37,7 +37,7 @@ export const PodiumSection: React.FC = () => {
   });
 
   // Hooks UI
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const shadowColor = useColorModeValue("lg", "dark-lg");
 

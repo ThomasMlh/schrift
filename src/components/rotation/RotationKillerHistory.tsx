@@ -49,10 +49,10 @@ export const RotationKillerHistory = ({ rotationId, cycleId, guildId }: Rotation
   const [showTable, setShowTable] = useState(false);
 
   const bg = useColorModeValue("white", "rgba(26,32,44,0.7)");
-  const border = useColorModeValue("gray.200", "whiteAlpha.100");
-  const tileBg = useColorModeValue("gray.50", "whiteAlpha.50");
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
-  const strongText = useColorModeValue("gray.800", "whiteAlpha.900");
+  const border = "border.faint";
+  const tileBg = "bg.subtle";
+  const mutedText = "text.muted";
+  const strongText = "text.strong";
   const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)";
   const axisColor = isDark ? "#718096" : "#A0AEC0";
   const colors = SERIES_COLORS[isDark ? "dark" : "light"];

@@ -1,7 +1,6 @@
 import {
   Alert, AlertIcon, Badge, Box, Container, Flex, HStack, SimpleGrid, Skeleton, Table, TableContainer, Tbody, Td, Text,
-  Th, Thead, Tooltip, Tr, VStack, useColorModeValue,
-} from "@chakra-ui/react";
+  Th, Thead, Tooltip, Tr, VStack, } from "@chakra-ui/react";
 import { useState } from "react";
 import { useCycles, useGuilds, useRotationPreparation } from "@/hooks/useAPI";
 import { useAuth } from "@/providers/AuthProvider";
@@ -30,10 +29,10 @@ const RotationPreparationSection = () => {
   const { data, isLoading, error } = useRotationPreparation(effectiveGuildId || undefined, rotationId || undefined, undefined, !!effectiveGuildId);
   const { cycles } = useCycles({ authenticated: true });
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.200", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
-  const headerBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const cardBg = "bg.card";
+  const border = "border.subtle";
+  const mutedText = "text.muted";
+  const headerBg = "bg.subtle";
 
   const cycle = data ? cycles.find((c) => c._id === data.cycle._id) : undefined;
   const rotationOptions = (cycle?.rotations ?? []).map((r) => ({

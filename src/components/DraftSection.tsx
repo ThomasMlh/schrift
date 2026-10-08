@@ -78,14 +78,14 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   const { users: guildlessUsers, isLoading: guildlessLoading } = useGuildlessUsers(true);
 
   // ── Couleurs ────────────────────────────────────────────────────────────────
-  const cardBg        = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const sidebarBg     = useColorModeValue("gray.50", "gray.850");
   const borderColor   = useColorModeValue("gray.200", "gray.700");
   const mutedText     = useColorModeValue("gray.500", "gray.400");
-  const progressBg    = useColorModeValue("gray.200", "gray.600");
+  const progressBg = "border.default";
   const rowHoverBg    = useColorModeValue("gray.50", "gray.700");
-  const modalBg       = useColorModeValue("white", "gray.800");
-  const emptyBg       = useColorModeValue("gray.50", "gray.750");
+  const modalBg = "bg.card";
+  const emptyBg = "bg.muted";
   const guildCardBg   = useColorModeValue("white", "gray.750");
 
   // ── Données dérivées ────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 import {
   Alert, AlertIcon, Badge, Box, Button, Flex, HStack, NumberInput, NumberInputField, Skeleton, Text, Tooltip, VStack,
-  useColorModeValue, useToast,
+  useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useCycles, useMissingScores } from "@/hooks/useAPI";
@@ -26,9 +26,9 @@ export const MissingScoresPanel = ({ guildId }: MissingScoresPanelProps) => {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const { data, isLoading, error } = useMissingScores(guildId, cycleId || undefined, !!guildId);
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.200", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
+  const cardBg = "bg.card";
+  const border = "border.subtle";
+  const mutedText = "text.muted";
 
   if (!guildId) {
     return <Alert status="info" borderRadius="md"><AlertIcon />Choisis une guilde en haut de la page pour voir ses scores manquants.</Alert>;

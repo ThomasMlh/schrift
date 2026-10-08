@@ -171,7 +171,7 @@ const ExistingCyclesList = ({
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
 
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const cardBorder = useColorModeValue("gray.200", "whiteAlpha.100");
   const headerGradient = useColorModeValue(
     "linear(to-r, blue.500, purple.500)",

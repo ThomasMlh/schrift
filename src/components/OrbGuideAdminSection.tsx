@@ -28,7 +28,7 @@ const OrbGuideAdminSection = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.700");
 
   const handleOpenModal = (orb?: OrbSource) => {

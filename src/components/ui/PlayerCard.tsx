@@ -18,10 +18,10 @@ const PlayerCard = ({
   showGuildName = false,
   podiumType = "average_scores",
 }: PlayerCardProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const hoverBorderColor = useColorModeValue("blue.400", "blue.500");
-  const rankColor = useColorModeValue("gray.500", "gray.400");
+  const rankColor = "text.muted";
 
   const isRotationMode = player.score !== undefined;
   const cycleScore =

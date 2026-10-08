@@ -18,7 +18,7 @@ interface UserScoreDistributionProps {
 }
 
 export const UserScoreDistribution = ({ rotations }: UserScoreDistributionProps) => {
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const textColor = useColorModeValue("#4a5568", "#cbd5e0");
 
   // Grouper par type d'attaque

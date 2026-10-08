@@ -30,9 +30,9 @@ export const GuildTopMembers = ({ guildId, cycleId }: GuildTopMembersProps) => {
   const { t } = useTranslation();
 
   const bg = useColorModeValue("white", "rgba(26,32,44,0.7)");
-  const border = useColorModeValue("gray.100", "whiteAlpha.100");
-  const countColor = useColorModeValue("gray.500", "whiteAlpha.600");
-  const subText = useColorModeValue("gray.500", "whiteAlpha.600");
+  const border = "bg.hover";
+  const countColor = "text.muted";
+  const subText = "text.muted";
   const firstPlaceBg = useColorModeValue("yellow.50", "rgba(214,158,46,0.1)");
 
   return (

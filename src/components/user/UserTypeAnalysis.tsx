@@ -33,7 +33,7 @@ interface TypeRowProps {
 
 const TypeRow = ({ label, averageScore, count, maxScore, badge }: TypeRowProps) => {
   const pct = maxScore > 0 ? Math.round((averageScore / maxScore) * 100) : 0;
-  const rowBg = useColorModeValue("gray.50", "gray.700");
+  const rowBg = "bg.muted";
   const { t } = useTranslation();
 
   return (
@@ -63,7 +63,7 @@ const TypeRow = ({ label, averageScore, count, maxScore, badge }: TypeRowProps) 
 
 export const UserTypeAnalysis = ({ stats }: UserTypeAnalysisProps) => {
   const { t } = useTranslation();
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const attackSummaryBg = useColorModeValue("blue.50", "blue.900");
 
   const maxAttackScore = stats.performanceByAttack && stats.performanceByAttack.length > 0

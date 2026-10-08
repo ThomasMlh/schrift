@@ -47,11 +47,11 @@ export const MultiCharacterSelector = ({
 }: MultiCharacterSelectorProps) => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "gray.400");
-  const hoverBg = useColorModeValue("gray.50", "gray.700");
-  const menuBg = useColorModeValue("white", "gray.800");
+  const mutedText = "text.muted";
+  const hoverBg = "bg.muted";
+  const menuBg = "bg.card";
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);

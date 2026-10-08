@@ -71,10 +71,10 @@ const ScoresSection = () => {
   const getCycleInfo = (cycleId: string) => cycles.find((c) => c._id === cycleId);
 
   // ── Couleurs ─────────────────────────────────────────────────────────────────
-  const cardBg      = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.700");
-  const mutedText   = useColorModeValue("gray.500", "gray.400");
-  const tableBg     = useColorModeValue("white", "gray.800");
+  const mutedText = "text.muted";
+  const tableBg = "bg.card";
 
   return (
     <Box w="100%" maxW="container.xl" mx="auto">

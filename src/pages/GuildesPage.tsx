@@ -44,13 +44,13 @@ const GuildesPage = () => {
   const { t } = useTranslation();
 
   const sidebarBg = useColorModeValue("white", "rgba(26, 32, 44, 0.8)");
-  const sidebarBorder = useColorModeValue("gray.200", "whiteAlpha.100");
+  const sidebarBorder = "border.faint";
   const panelBg = useColorModeValue("gray.50", "rgba(26, 32, 44, 0.4)");
   const panelHeaderBg = useColorModeValue("white", "rgba(26, 32, 44, 0.8)");
   const itemHoverBg = useColorModeValue("purple.50", "whiteAlpha.50");
   const itemActiveBg = useColorModeValue("purple.50", "rgba(159, 122, 234, 0.12)");
-  const countColor = useColorModeValue("gray.500", "whiteAlpha.600");
-  const dividerColor = useColorModeValue("gray.100", "whiteAlpha.100");
+  const countColor = "text.muted";
+  const dividerColor = "bg.hover";
 
   // Sélectionner la guilde depuis l'URL (par nom) ou par défaut la première
   useEffect(() => {
@@ -113,7 +113,7 @@ const GuildesPage = () => {
   const maxWeeks = selectedCycleObj ? Math.floor(selectedCycleObj.rotations.length / 2) : 0;
 
   const statCardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.7)");
-  const statCardBorder = useColorModeValue("gray.100", "whiteAlpha.100");
+  const statCardBorder = "bg.hover";
 
   const structuredData = {
     "@context": "https://schema.org",

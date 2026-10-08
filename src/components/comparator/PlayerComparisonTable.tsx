@@ -32,8 +32,8 @@ export const PlayerComparisonTable = ({
 }: PlayerComparisonTableProps) => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
-  const bgColor = useColorModeValue("white", "gray.800");
-  const tableBg = useColorModeValue("gray.50", "gray.750");
+  const bgColor = "bg.card";
+  const tableBg = "bg.muted";
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const { t } = useTranslation();
 

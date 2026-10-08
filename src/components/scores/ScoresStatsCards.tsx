@@ -23,9 +23,9 @@ interface StatCardProps {
 }
 
 const StatCard = ({ label, value, sub, icon, accentColor, isLoading }: StatCardProps) => {
-    const cardBg      = useColorModeValue("white", "gray.800");
+    const cardBg = "bg.card";
     const borderColor = useColorModeValue("gray.200", "gray.700");
-    const mutedText   = useColorModeValue("gray.500", "gray.400");
+    const mutedText = "text.muted";
 
     return (
         <Box

@@ -51,7 +51,7 @@ const BuildsAdminSection = () => {
   const cancelRef = useRef<HTMLButtonElement>(null);
   
   const toast = useToast();
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
   const { builds, pagination, isLoading, mutate } = useBuilds({

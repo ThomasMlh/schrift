@@ -61,7 +61,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, gu
     const primaryCardBg = useColorModeValue("purple.50", "rgba(124,58,237,0.08)");
     const primaryCardBorder = useColorModeValue("purple.200", "purple.700");
     const altCardBorder = useColorModeValue("gray.200", "whiteAlpha.200");
-    const mutedLabel = useColorModeValue("gray.500", "gray.400");
+    const mutedLabel = "text.muted";
     const dashedBorder = useColorModeValue("gray.300", "whiteAlpha.300");
 
     // Initialiser les comptes avec les données de l'utilisateur

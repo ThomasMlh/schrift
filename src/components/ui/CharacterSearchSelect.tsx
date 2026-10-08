@@ -50,7 +50,7 @@ export const CharacterSearchSelect = ({
   const bgColor = useColorModeValue("white", "gray.700");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const hoverBg = useColorModeValue("gray.50", "gray.600");
-  const menuBg = useColorModeValue("white", "gray.800");
+  const menuBg = "bg.card";
 
   // Récupérer les personnages avec recherche API
   const { characters, isLoading } = useCharacters({

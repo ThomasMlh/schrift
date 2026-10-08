@@ -39,8 +39,8 @@ const ComparisonEntity: React.FC<ComparisonEntityProps> = ({
     "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
     "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
   );
-  const cardBg = useColorModeValue("white", "gray.800");
-  const statBg = useColorModeValue("gray.50", "gray.700");
+  const cardBg = "bg.card";
+  const statBg = "bg.muted";
 
   return (
     <Card

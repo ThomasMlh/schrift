@@ -8,8 +8,7 @@ import {
   Card,
   CardBody,
   Icon,
-  Tooltip,
-  useColorModeValue
+  Tooltip
 } from "@chakra-ui/react";
 import { FiTrendingUp, FiTrendingDown, FiAward, FiCalendar, FiUsers, FiAlertTriangle, FiBarChart2, FiCheckCircle } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
@@ -55,8 +54,8 @@ export const UserStatsOverview = ({
     : null;
 
   // Couleurs pour le mode clair/sombre
-  const cardBg = useColorModeValue("white", "gray.800");
-  const hoverBg = useColorModeValue("gray.50", "gray.700");
+  const cardBg = "bg.card";
+  const hoverBg = "bg.muted";
 
   return (
     <VStack spacing={6} align="stretch">

@@ -59,9 +59,9 @@ const RotationsBuildsGuide = () => {
 
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "gray.400");
+  const mutedText = "text.muted";
 
   const { t } = useTranslation();
 

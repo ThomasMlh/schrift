@@ -56,9 +56,9 @@ export const ScoresFilters = ({
     onGuildChange,
     onResetFilters,
 }: ScoresFiltersProps) => {
-    const cardBg      = useColorModeValue("white", "gray.800");
+    const cardBg = "bg.card";
     const borderColor = useColorModeValue("gray.200", "gray.700");
-    const mutedText   = useColorModeValue("gray.500", "gray.400");
+    const mutedText = "text.muted";
     const labelColor  = useColorModeValue("purple.600", "purple.400");
 
     // Labels des filtres actifs pour les chips

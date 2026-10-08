@@ -57,7 +57,7 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
       : t("components.user.recentTrend.trendStable");
 
   const scoreBg = useColorModeValue("gray.50", "gray.700");
-  const scoreItemBorderColor = useColorModeValue("gray.200", "gray.600");
+  const scoreItemBorderColor = "border.default";
 
   return (
     <VStack spacing={6} align="stretch">
@@ -134,7 +134,7 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
           borderRadius="xl"
           boxShadow="md"
           borderWidth="1px"
-          borderColor={useColorModeValue("gray.200", "gray.600")}
+          borderColor="border.default"
         >
           <VStack spacing={3}>
             <Badge colorScheme="gray" fontSize="sm" px={3} py={1}>

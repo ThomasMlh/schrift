@@ -97,7 +97,7 @@ export const OCRResultsValidation = ({
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
   // Formatage des scores avec virgules (ex: 1234567 → 1,234,567)

@@ -28,7 +28,7 @@ interface UserPositionPerformanceProps {
 export const UserPositionPerformance = ({
   performanceByQuartile
 }: UserPositionPerformanceProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const radarColor = useColorModeValue("#3182CE", "#63B3ED");
   const tooltipBg = useColorModeValue("#FFFFFF", "#2D3748");
   const tooltipBorder = useColorModeValue("#E2E8F0", "#4A5568");

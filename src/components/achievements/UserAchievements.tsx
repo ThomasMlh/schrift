@@ -29,7 +29,7 @@ export const UserAchievements = ({ userId, bbsId }: UserAchievementsProps) => {
   const { t } = useTranslation();
   const { accounts, isLoading } = useUserAchievements(userId);
 
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const border = useColorModeValue("gray.200", "whiteAlpha.200");
   const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
   const strongText = useColorModeValue("gray.800", "whiteAlpha.900");

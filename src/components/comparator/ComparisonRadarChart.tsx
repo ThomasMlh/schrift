@@ -46,7 +46,7 @@ export const ComparisonRadarChart = ({
 }: ComparisonRadarChartProps) => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const textColor = useColorModeValue("#2D3748", "#E2E8F0");
   const haloColor = useColorModeValue("rgba(255,255,255,0.9)", "rgba(26,32,44,0.85)");

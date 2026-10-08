@@ -39,7 +39,7 @@ export const SkillSearchSelect = ({
   const bgColor = useColorModeValue("white", "gray.700");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const hoverBg = useColorModeValue("gray.50", "gray.600");
-  const menuBg = useColorModeValue("white", "gray.800");
+  const menuBg = "bg.card";
 
   // Utiliser le hook pour récupérer les skills avec recherche
   const { skills, isLoading } = useSkills(searchTerm);

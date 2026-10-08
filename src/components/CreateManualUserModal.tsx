@@ -1,6 +1,6 @@
 import {
     Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton,
-    Button, Input, VStack, HStack, useToast, Text, useColorModeValue
+    Button, Input, VStack, HStack, useToast, Text
 } from "@chakra-ui/react";
 import { useState } from "react";
 import type { IGuild, Role } from "../interfaces";
@@ -17,7 +17,7 @@ interface CreateManualUserModalProps {
 const CreateManualUserModal: React.FC<CreateManualUserModalProps> = ({ isOpen, onClose, guilds, onUserCreated }) => {
     const { createManualUser } = useUserMutations();
     const toast = useToast();
-    const mutedLabel = useColorModeValue("gray.500", "gray.400");
+    const mutedLabel = "text.muted";
 
     const [form, setForm] = useState({ bbs_id: "", bbs_name: "", guilde_id: "", role: "membre" as Role });
     const [isSubmitting, setIsSubmitting] = useState(false);

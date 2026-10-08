@@ -32,7 +32,7 @@ const AbilitySlotsAdminSection = () => {
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
   const toast = useToast();
 
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.700");
 
   const existingCategories = useMemo(() => {

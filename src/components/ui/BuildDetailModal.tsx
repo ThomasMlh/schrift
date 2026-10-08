@@ -43,12 +43,12 @@ export const BuildDetailModal = ({
   build,
   onEdit,
 }: BuildDetailModalProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const cardBorder = useColorModeValue("gray.100", "gray.700");
-  const sectionBg = useColorModeValue("gray.50", "gray.750");
-  const headerBg = useColorModeValue("gray.50", "gray.900");
-  const linkCardBg = useColorModeValue("gray.50", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "gray.400");
+  const sectionBg = "bg.muted";
+  const headerBg = "bg.page";
+  const linkCardBg = "bg.muted";
+  const mutedText = "text.muted";
   const { currentUser } = useAuth();
   const { t } = useTranslation();
 

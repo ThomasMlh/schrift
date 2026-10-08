@@ -186,13 +186,13 @@ const UserPage = () => {
     }
   };
 
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const gradientBg = useColorModeValue(
     "linear(to-br, blue.50, purple.50)",
     "linear(to-br, gray.800, purple.900)"
   );
-  const tabBg = useColorModeValue("white", "gray.800");
-  const mutedText = useColorModeValue("gray.500", "gray.400");
+  const tabBg = "bg.card";
+  const mutedText = "text.muted";
 
   // Styles communs pour les onglets
   const tabStyles = {

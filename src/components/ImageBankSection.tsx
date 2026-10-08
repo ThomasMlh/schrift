@@ -72,10 +72,10 @@ const AccessoryFormModal = ({
   const isEdit = accessory !== null;
   const { saveAccessory } = useAccessoryMutations();
   const previewBg = useColorModeValue("gray.100", "gray.700");
-  const browseBg = useColorModeValue("gray.50", "gray.900");
-  const browseBorder = useColorModeValue("gray.200", "gray.700");
+  const browseBg = "bg.page";
+  const browseBorder = "border.subtle";
   const codeHoverBg = useColorModeValue("purple.50", "purple.900");
-  const codeFallbackBg = useColorModeValue("gray.200", "gray.700");
+  const codeFallbackBg = "border.subtle";
 
   const { codes, isLoading: isLoadingCodes, fetchCodes } = useAccessoryCodes(token);
 
@@ -284,7 +284,7 @@ interface ImageCardProps {
 }
 
 const ImageCard = ({ src, label, sublabel, onEdit }: ImageCardProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const emptyBg = useColorModeValue("gray.100", "gray.700");
   const labelColor = useColorModeValue("gray.700", "gray.200");
@@ -458,9 +458,9 @@ const ImageBankSection = () => {
   const { killers, categories, affinities, isLoading: isLoadingMeta } = useCharacterMeta();
   const { token } = useAuth();
 
-  const tabInactiveColor = useColorModeValue("gray.500", "gray.400");
-  const tabInactiveBorder = useColorModeValue("gray.200", "whiteAlpha.200");
-  const tabInactiveHoverBg = useColorModeValue("gray.100", "whiteAlpha.100");
+  const tabInactiveColor = "text.muted";
+  const tabInactiveBorder = "border.faint";
+  const tabInactiveHoverBg = "bg.hover";
   const tabInactiveHoverBorder = useColorModeValue("gray.300", "whiteAlpha.300");
 
   const renderBank = () => {

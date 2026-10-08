@@ -37,9 +37,9 @@ export const GuildEvolution = ({ guildId }: GuildEvolutionProps) => {
   const { t } = useTranslation();
 
   const bg = useColorModeValue("white", "rgba(26,32,44,0.7)");
-  const border = useColorModeValue("gray.100", "whiteAlpha.100");
-  const countColor = useColorModeValue("gray.500", "whiteAlpha.600");
-  const subText = useColorModeValue("gray.500", "whiteAlpha.600");
+  const border = "bg.hover";
+  const countColor = "text.muted";
+  const subText = "text.muted";
   const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)";
   const axisColor = isDark ? "#718096" : "#A0AEC0";
 

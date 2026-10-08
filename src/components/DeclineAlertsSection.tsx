@@ -1,7 +1,6 @@
 import {
   Alert, AlertIcon, Avatar, Badge, Box, Container, Flex, HStack, Skeleton, Table, TableContainer, Tbody, Td,
-  Text, Th, Thead, Tooltip, Tr, VStack, useColorModeValue,
-} from "@chakra-ui/react";
+  Text, Th, Thead, Tooltip, Tr, VStack, } from "@chakra-ui/react";
 import { useState } from "react";
 import { useDeclineAlerts, useGuilds } from "@/hooks/useAPI";
 import { useAuth } from "@/providers/AuthProvider";
@@ -24,10 +23,10 @@ const DeclineAlertsSection = () => {
   const [guildId, setGuildId] = useState("");
   const { alerts, isLoading, error } = useDeclineAlerts(guildId || undefined);
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.200", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
-  const headerBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const cardBg = "bg.card";
+  const border = "border.subtle";
+  const mutedText = "text.muted";
+  const headerBg = "bg.subtle";
 
   const selectableGuilds = isAdmin
     ? guilds.filter((g) => !g.disabled)

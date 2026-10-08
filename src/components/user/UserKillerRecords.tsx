@@ -1,6 +1,5 @@
 import {
-  Box, HStack, Skeleton, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tooltip, Tr, useColorModeValue,
-} from "@chakra-ui/react";
+  Box, HStack, Skeleton, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tooltip, Tr, } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { useUserRecords } from "@/hooks/useAPI";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
@@ -18,9 +17,9 @@ export const UserKillerRecords = ({ userId, bbsId }: UserKillerRecordsProps) => 
   const { t } = useTranslation();
   const { accounts, isLoading } = useUserRecords(userId);
 
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
-  const strongText = useColorModeValue("gray.800", "whiteAlpha.900");
-  const headerBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const mutedText = "text.muted";
+  const strongText = "text.strong";
+  const headerBg = "bg.subtle";
 
   if (isLoading) return <Skeleton h="240px" borderRadius="lg" />;
 

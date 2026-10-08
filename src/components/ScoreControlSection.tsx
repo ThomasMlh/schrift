@@ -1,7 +1,7 @@
 import {
   Alert, AlertIcon, Badge, Box, Button, Container, Flex, HStack, Modal, ModalBody, ModalCloseButton, ModalContent,
   ModalFooter, ModalHeader, ModalOverlay, NumberInput, NumberInputField, Skeleton, Tab, Table, TableContainer, TabList,
-  TabPanel, TabPanels, Tabs, Tbody, Td, Text, Th, Thead, Tooltip, Tr, VStack, useColorModeValue, useToast,
+  TabPanel, TabPanels, Tabs, Tbody, Td, Text, Th, Thead, Tooltip, Tr, VStack, useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useGuilds, useScoreAnomalies, useScoreHistory } from "@/hooks/useAPI";
@@ -78,10 +78,10 @@ const ScoreControlSection = () => {
     guildId: guildId || undefined, action: action || undefined, page,
   });
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.200", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
-  const headerBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const cardBg = "bg.card";
+  const border = "border.subtle";
+  const mutedText = "text.muted";
+  const headerBg = "bg.subtle";
 
   const selectableGuilds = isAdmin
     ? guilds.filter((g) => !g.disabled)

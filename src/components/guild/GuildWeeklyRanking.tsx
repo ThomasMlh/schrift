@@ -36,10 +36,10 @@ export const GuildWeeklyRanking = ({
   weekNumber,
   onWeekChange,
 }: GuildWeeklyRankingProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.700");
-  const rowHover = useColorModeValue("gray.50", "whiteAlpha.50");
-  const mutedColor = useColorModeValue("gray.500", "gray.400");
+  const rowHover = "bg.subtle";
+  const mutedColor = "text.muted";
 
   const url =
     cycleName && weekNumber

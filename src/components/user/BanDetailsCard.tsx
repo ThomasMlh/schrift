@@ -4,8 +4,7 @@ import {
   HStack,
   VStack,
   Text,
-  Icon,
-  useColorModeValue
+  Icon
 } from "@chakra-ui/react";
 import { FiAlertCircle } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
@@ -16,7 +15,7 @@ interface BanDetailsCardProps {
 }
 
 export const BanDetailsCard = ({ user }: BanDetailsCardProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const { t } = useTranslation();
 
   if (!user.is_banned) return null;
