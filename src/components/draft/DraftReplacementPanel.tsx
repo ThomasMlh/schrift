@@ -59,9 +59,9 @@ export const DraftReplacementPanel = ({ cycleName, cycleYear, rankingType, guild
   const [isLoadingRoster, setIsLoadingRoster] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.200", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "gray.400");
+  const cardBg = "bg.card";
+  const border = "border.subtle";
+  const mutedText = "text.muted";
   const recommendedBg = useColorModeValue("green.50", "rgba(72,187,120,0.12)");
 
   const scoreOf = (p: ReplacementPlayer) => (rankingType === "average" ? p.averageScore : p.totalScore);
@@ -187,7 +187,7 @@ export const DraftReplacementPanel = ({ cycleName, cycleYear, rankingType, guild
           {result.replacements.map(({ player, suggestions, eligible_count, recommended_bbs_id }) => {
             const recommended = suggestions.find((s) => s.bbs_id === recommended_bbs_id);
             return (
-              <Box key={player.bbs_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg" p={3}>
+              <Box key={player.bbs_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl" p={3}>
                 <Flex justify="space-between" align="center" gap={2} wrap="wrap" mb={2}>
                   <HStack spacing={2}>
                     {playerLine(player)}

@@ -69,7 +69,7 @@ const PodiumPage = () => {
   const { currentUser, isLoggedIn } = useAuth();
 
   const filterBg = useColorModeValue("blue.50", "blue.900");
-  const captureBg = useColorModeValue("white", "gray.800");
+  const captureBg = "bg.card";
 
   const structuredData = {
     "@context": "https://schema.org",

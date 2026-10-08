@@ -33,8 +33,8 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
   const lineColor = useColorModeValue("#3182CE", "#63B3ED");
   const gridColor = useColorModeValue("#E2E8F0", "#4A5568");
   const textColor = useColorModeValue("#2D3748", "#E2E8F0");
-  const tooltipBg = useColorModeValue("#FFFFFF", "#2D3748");
-  const tooltipBorder = useColorModeValue("#E2E8F0", "#4A5568");
+  const tooltipBg = "bg.elevated";
+  const tooltipBorder = "border.default";
 
   // État pour le filtre d'année
   const [selectedYear, setSelectedYear] = useState<string>("all");

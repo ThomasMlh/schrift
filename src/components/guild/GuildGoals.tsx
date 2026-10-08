@@ -1,7 +1,6 @@
 import {
   Box, Button, Checkbox, Flex, HStack, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader,
-  ModalOverlay, NumberInput, NumberInputField, Progress, SimpleGrid, Skeleton, Text, VStack, useColorModeValue,
-  useDisclosure, useToast,
+  ModalOverlay, NumberInput, NumberInputField, Progress, SimpleGrid, Skeleton, Text, VStack, useDisclosure, useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -38,9 +37,9 @@ export const GuildGoals = ({ guildId, cycleId }: GuildGoalsProps) => {
   );
   const [isSaving, setIsSaving] = useState(false);
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.200", "whiteAlpha.200");
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
+  const cardBg = "bg.card";
+  const border = "border.faint";
+  const mutedText = "text.muted";
 
   const canEdit = isAdmin || managedGuildIds.includes(guildId);
   const goals = data?.goals ?? [];

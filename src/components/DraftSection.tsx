@@ -78,15 +78,15 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   const { users: guildlessUsers, isLoading: guildlessLoading } = useGuildlessUsers(true);
 
   // ── Couleurs ────────────────────────────────────────────────────────────────
-  const cardBg        = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const sidebarBg     = useColorModeValue("gray.50", "gray.850");
   const borderColor   = useColorModeValue("gray.200", "gray.700");
   const mutedText     = useColorModeValue("gray.500", "gray.400");
-  const progressBg    = useColorModeValue("gray.200", "gray.600");
+  const progressBg = "border.default";
   const rowHoverBg    = useColorModeValue("gray.50", "gray.700");
-  const modalBg       = useColorModeValue("white", "gray.800");
-  const emptyBg       = useColorModeValue("gray.50", "gray.750");
-  const guildCardBg   = useColorModeValue("white", "gray.750");
+  const modalBg = "bg.card";
+  const emptyBg = "bg.muted";
+  const guildCardBg = "bg.elevated";
 
   // ── Données dérivées ────────────────────────────────────────────────────────
   // On drafte des comptes bbs, pas des users : un compte sans bbs_id (guilde/rôle assignés
@@ -310,7 +310,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                   <Box
                     key={guild._id}
                     bg={guildCardBg}
-                    borderRadius="lg"
+                    borderRadius="xl"
                     p={3}
                     mb={2}
                     borderWidth="1px"
@@ -355,7 +355,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
               {/* Sans guilde */}
               <Box
                 bg={guildCardBg}
-                borderRadius="lg"
+                borderRadius="xl"
                 p={3}
                 borderWidth="1px"
                 borderColor={borderColor}

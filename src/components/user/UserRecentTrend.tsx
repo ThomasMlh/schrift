@@ -22,7 +22,7 @@ interface UserRecentTrendProps {
 
 export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
   const { t } = useTranslation();
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const headerBg = useColorModeValue(
     recentTrend.direction === "up"
       ? "linear(to-r, green.50, teal.50)"
@@ -56,8 +56,8 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
       ? t("components.user.recentTrend.trendDown")
       : t("components.user.recentTrend.trendStable");
 
-  const scoreBg = useColorModeValue("gray.50", "gray.700");
-  const scoreItemBorderColor = useColorModeValue("gray.200", "gray.600");
+  const scoreBg = "bg.muted";
+  const scoreItemBorderColor = "border.default";
 
   return (
     <VStack spacing={6} align="stretch">
@@ -134,7 +134,7 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
           borderRadius="xl"
           boxShadow="md"
           borderWidth="1px"
-          borderColor={useColorModeValue("gray.200", "gray.600")}
+          borderColor="border.default"
         >
           <VStack spacing={3}>
             <Badge colorScheme="gray" fontSize="sm" px={3} py={1}>
@@ -168,7 +168,7 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
                 key={idx}
                 bg={isRecent ? scoreBg : cardBg}
                 p={4}
-                borderRadius="lg"
+                borderRadius="xl"
                 borderWidth="1px"
                 borderColor={scoreItemBorderColor}
                 transition="all 0.2s"

@@ -35,10 +35,10 @@ const roleConfig = {
 };
 
 export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
-  const cardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.8)");
-  const cardBorder = useColorModeValue("gray.200", "whiteAlpha.100");
+  const cardBg = "bg.glass";
+  const cardBorder = "border.faint";
   const connectorColor = useColorModeValue("gray.300", "whiteAlpha.200");
-  const subtleText = useColorModeValue("gray.500", "whiteAlpha.600");
+  const subtleText = "text.muted";
   const { t } = useTranslation();
 
   const chef = members.find((m) => m.role === "chef");

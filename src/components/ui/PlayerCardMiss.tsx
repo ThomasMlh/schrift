@@ -10,7 +10,7 @@ interface PlayerCardMissProps {
 }
 
 const PlayerCardMiss = ({ player, showGuildName = false }: PlayerCardMissProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const borderColor = useColorModeValue("red.100", "rgba(254,178,178,0.15)");
   const hoverBorderColor = useColorModeValue("red.400", "red.400");
   const rankColor = useColorModeValue("red.400", "red.400");
@@ -32,7 +32,7 @@ const PlayerCardMiss = ({ player, showGuildName = false }: PlayerCardMissProps) 
       bg={cardBg}
       borderWidth="1px"
       borderColor={borderColor}
-      borderRadius="lg"
+      borderRadius="xl"
       px={3}
       py={2}
       transition="all 0.15s ease"

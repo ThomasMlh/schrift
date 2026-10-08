@@ -10,7 +10,6 @@ import {
   Th,
   Td,
   Badge,
-  useColorModeValue,
   useColorMode,
   Icon,
   Flex,
@@ -47,9 +46,9 @@ export const ComparisonDataTable = ({
 }: ComparisonDataTableProps) => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
-  const bgColor = useColorModeValue("white", "gray.800");
-  const tableBg = useColorModeValue("gray.50", "gray.750");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const bgColor = "bg.card";
+  const tableBg = "bg.muted";
+  const borderColor = "border.subtle";
   const defaultAccentBg = isDark ? "rgba(49,130,206,0.08)" : "blue.50";
   const { t } = useTranslation();
 

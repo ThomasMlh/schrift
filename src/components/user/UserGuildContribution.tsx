@@ -47,12 +47,12 @@ export const UserGuildContribution = ({
   guildName,
   temporalEvolution,
 }: UserGuildContributionProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const gridColor = useColorModeValue("#E2E8F0", "#4A5568");
   const textColor = useColorModeValue("#2D3748", "#E2E8F0");
-  const tooltipBg = useColorModeValue("#FFFFFF", "#2D3748");
-  const tooltipBorder = useColorModeValue("#E2E8F0", "#4A5568");
-  const mutedColor = useColorModeValue("gray.500", "gray.400");
+  const tooltipBg = "bg.elevated";
+  const tooltipBorder = "border.default";
+  const mutedColor = "text.muted";
   const cycleBg = useColorModeValue("blue.50", "rgba(49,130,206,0.1)");
   const noteColor = useColorModeValue("gray.400", "gray.600");
   const { t } = useTranslation();
@@ -223,7 +223,7 @@ export const UserGuildContribution = ({
         )}
 
         {/* Note de bas de carte */}
-        <HStack spacing={1.5} mt={4} pt={3} borderTop="1px solid" borderColor={useColorModeValue("gray.100", "gray.700")}>
+        <HStack spacing={1.5} mt={4} pt={3} borderTop="1px solid" borderColor="bg.inset">
           <Icon as={FiInfo} boxSize={3} color={noteColor} flexShrink={0} />
           <Text fontSize="2xs" color={noteColor}>
             {t("components.user.guildContribution.note")}

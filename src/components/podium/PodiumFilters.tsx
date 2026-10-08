@@ -13,7 +13,6 @@ import {
   IconButton,
   Tooltip,
   Divider,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { RepeatIcon } from "@chakra-ui/icons";
 import { CycleSelect } from "@/components/ui/CycleSelect";
@@ -75,7 +74,7 @@ export const PodiumFilters = ({
   filterBg,
 }: PodiumFiltersProps) => {
   const { t } = useTranslation();
-  const inactiveTabColor = useColorModeValue("gray.600", "gray.300");
+  const inactiveTabColor = "text.secondary";
 
   const modeLabels: Record<DisplayMode, string> = {
     cycle: t("components.podiumFilters.modeFullCycle"),

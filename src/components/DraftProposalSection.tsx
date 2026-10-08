@@ -189,11 +189,11 @@ const DraftProposalSection = () => {
     }
   };
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const cardBg = "bg.card";
+  const borderColor = "border.subtle";
   const mutedText = useColorModeValue("gray.600", "gray.400");
-  const headerBg = useColorModeValue("gray.50", "gray.900");
-  const rowAltBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const headerBg = "bg.page";
+  const rowAltBg = "bg.subtle";
   const hoverBg = useColorModeValue("orange.50", "orange.900");
   const matchBg = useColorModeValue("yellow.100", "yellow.700");
 
@@ -264,7 +264,7 @@ const DraftProposalSection = () => {
   };
 
   return (
-    <Box borderWidth="1px" borderColor={borderColor} borderRadius="lg" p={5} bg={cardBg}>
+    <Box borderWidth="1px" borderColor={borderColor} borderRadius="xl" p={5} bg={cardBg}>
       <VStack align="stretch" spacing={4}>
         <Box>
           <Text fontWeight="bold" fontSize="lg">🧮 Proposition de draft automatique</Text>

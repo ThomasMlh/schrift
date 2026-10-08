@@ -17,8 +17,7 @@ import {
   StepDescription,
   StepSeparator,
   Box,
-  Icon,
-  useColorModeValue
+  Icon
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { FiUpload, FiCheckCircle, FiSettings } from "react-icons/fi";
@@ -81,7 +80,7 @@ const OCRScoreModal = ({
 }: OCRScoreModalProps) => {
   const toast = useToast();
   const { processOCRBatch, submitOCRBatch } = useAPIMutations();
-  const modalBg = useColorModeValue("white", "gray.800");
+  const modalBg = "bg.card";
 
   const [currentStep, setCurrentStep] = useState(0);
 

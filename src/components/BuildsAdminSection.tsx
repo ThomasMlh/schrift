@@ -1,30 +1,5 @@
 import {
-  Box,
-  Button,
-  Container,
-  Heading,
-  Text,
-  useToast,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Badge,
-  IconButton,
-  useDisclosure,
-  VStack,
-  HStack,
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  useColorModeValue,
-  Avatar,
-  Tooltip,
+  Box, Button, Container, Text, useToast, Table, Thead, Tbody, Tr, Th, Td, Badge, IconButton, useDisclosure, VStack, HStack, AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Avatar, Tooltip,
 } from "@chakra-ui/react";
 import { useState, useRef } from "react";
 import { useBuilds } from "../hooks/useAPI";
@@ -38,6 +13,7 @@ import { BuildDetailModal } from "./ui/BuildDetailModal";
 import { CustomSelect } from "./ui/CustomSelect";
 import { PageLoader } from "./ui/PageLoader";
 import { bucketUrl } from "../utils/apiRequest";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const BuildsAdminSection = () => {
   const { deleteBuild, validateBuild } = useAPIMutations();
@@ -51,8 +27,8 @@ const BuildsAdminSection = () => {
   const cancelRef = useRef<HTMLButtonElement>(null);
   
   const toast = useToast();
-  const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const bgColor = "bg.card";
+  const borderColor = "border.default";
 
   const { builds, pagination, isLoading, mutate } = useBuilds({
     page: currentPage,
@@ -124,10 +100,10 @@ const BuildsAdminSection = () => {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={6} align="stretch">
-        <Heading size="lg">Gestion des Builds</Heading>
+        <SectionHeader title="Gestion des builds" description="Validez, modifiez ou supprimez les builds proposés." />
 
         {/* Filtres */}
-        <Box bg={bgColor} p={4} borderRadius="md" borderWidth="1px" borderColor={borderColor}>
+        <Box bg={bgColor} p={4} borderRadius="xl" borderWidth="1px" borderColor={borderColor}>
           <HStack spacing={4}>
             <Box>
               <Text fontSize="sm" fontWeight="medium" mb={2}>
@@ -154,12 +130,12 @@ const BuildsAdminSection = () => {
         {isLoading ? (
           <PageLoader color="orange.500" height="200px" />
         ) : builds.length === 0 ? (
-          <Box bg={bgColor} p={8} borderRadius="md" borderWidth="1px" borderColor={borderColor} textAlign="center">
+          <Box bg={bgColor} p={8} borderRadius="xl" borderWidth="1px" borderColor={borderColor} textAlign="center">
             <Text>Aucun build trouvé</Text>
           </Box>
         ) : (
           <>
-            <Box overflowX="auto" bg={bgColor} borderRadius="md" borderWidth="1px" borderColor={borderColor}>
+            <Box overflowX="auto" bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor}>
               <Table variant="simple">
                 <Thead>
                   <Tr>

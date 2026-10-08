@@ -47,10 +47,10 @@ export const CharacterSearchSelect = ({
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const bgColor = useColorModeValue("white", "gray.700");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const bgColor = "bg.elevated";
+  const borderColor = "border.default";
   const hoverBg = useColorModeValue("gray.50", "gray.600");
-  const menuBg = useColorModeValue("white", "gray.800");
+  const menuBg = "bg.card";
 
   // Récupérer les personnages avec recherche API
   const { characters, isLoading } = useCharacters({

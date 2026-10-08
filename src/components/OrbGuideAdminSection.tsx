@@ -1,14 +1,13 @@
 import {
-  Box, Button, Flex, FormControl, FormLabel, Heading, Input, Table, Tbody, Td, Textarea,
-  Th, Thead, Tr, useColorModeValue, useToast, IconButton, Modal, ModalOverlay,
-  ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure,
-  VStack, HStack, NumberInput, NumberInputField, Alert, AlertIcon
+  Box, Button, FormControl, FormLabel, Input, Table, Tbody, Td, Textarea, Th, Thead, Tr, useToast, IconButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure, VStack, HStack, NumberInput, NumberInputField, Alert, AlertIcon,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
 import { PageLoader } from "./ui/PageLoader";
+import { DeleteConfirmationModal } from "./ui/DeleteConfirmationModal";
 import { useOrbGuide } from "@/hooks/useAPI";
 import { useOrbGuideMutations } from "@/hooks/useAPIMutations";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 interface OrbSource {
   _id?: string;
@@ -27,8 +26,8 @@ const OrbGuideAdminSection = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const bgColor = "bg.card";
+  const borderColor = "border.subtle";
 
   const handleOpenModal = (orb?: OrbSource) => {
     setSelectedOrb(orb ?? { title: "", description: "", amount: 0 });
@@ -60,13 +59,17 @@ const OrbGuideAdminSection = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette entrée ?")) return;
+  // Entrée en attente de confirmation de suppression
+  const [toDelete, setToDelete] = useState<{ id: string; title: string } | null>(null);
+
+  const handleDelete = async () => {
+    if (!toDelete) return;
     setSaving(true);
     try {
-      const result = await deleteOrbSource(id);
+      const result = await deleteOrbSource(toDelete.id);
       toast({ title: (result as { message: string }).message, status: "success", duration: 3000 });
       mutate();
+      setToDelete(null);
     } catch {
       toast({ title: "Erreur", description: "Impossible de supprimer l'entrée", status: "error", duration: 3000 });
     } finally {
@@ -81,14 +84,16 @@ const OrbGuideAdminSection = () => {
 
   return (
     <Box w="100%" p={4}>
-      <Flex justify="space-between" align="center" mb={6}>
-        <Heading size="lg">📚 Gestion du Guide Orbes</Heading>
-        <Button leftIcon={<AddIcon />} colorScheme="purple" onClick={() => handleOpenModal()}>
-          Ajouter une source
-        </Button>
-      </Flex>
+      <Box mb={6}>
+        <SectionHeader
+          icon="📚"
+          title="Guide des orbes"
+          description="Sources d'orbes affichées dans le guide public."
+          actions={<Button leftIcon={<AddIcon />} colorScheme="purple" onClick={() => handleOpenModal()}>Ajouter une source</Button>}
+        />
+      </Box>
 
-      <Box bg={bgColor} borderWidth="1px" borderColor={borderColor} borderRadius="lg" overflow="auto">
+      <Box bg={bgColor} borderWidth="1px" borderColor={borderColor} borderRadius="xl" overflow="auto">
         <Table variant="simple">
           <Thead>
             <Tr>
@@ -107,7 +112,7 @@ const OrbGuideAdminSection = () => {
                 <Td>
                   <HStack spacing={2}>
                     <IconButton aria-label="Modifier" icon={<EditIcon />} size="sm" colorScheme="blue" onClick={() => handleOpenModal(orb)} />
-                    <IconButton aria-label="Supprimer" icon={<DeleteIcon />} size="sm" colorScheme="red" onClick={() => orb._id && handleDelete(orb._id)} isDisabled={!orb._id} />
+                    <IconButton aria-label="Supprimer" icon={<DeleteIcon />} size="sm" colorScheme="red" onClick={() => orb._id && setToDelete({ id: orb._id, title: orb.title })} isDisabled={!orb._id} />
                   </HStack>
                 </Td>
               </Tr>
@@ -115,6 +120,15 @@ const OrbGuideAdminSection = () => {
           </Tbody>
         </Table>
       </Box>
+
+      <DeleteConfirmationModal
+        isOpen={!!toDelete}
+        onClose={() => setToDelete(null)}
+        onConfirm={handleDelete}
+        isDeleting={saving}
+        title="Supprimer la source d'orbes"
+        description={`Supprimer « ${toDelete?.title ?? ""} » du guide des orbes ? Cette action est définitive.`}
+      />
 
       <Modal isOpen={isOpen} onClose={handleCloseModal} size="xl">
         <ModalOverlay />

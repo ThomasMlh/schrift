@@ -201,7 +201,7 @@ const DiscordMessageSection: React.FC = () => {
   };
 
   return (
-    <Box bg={bgColor} borderRadius="lg" borderWidth="1px" borderColor={borderColor} p={4}>
+    <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={4}>
       <VStack align="stretch" spacing={4}>
         <FormControl>
           <FormLabel fontSize="sm">Salon Discord</FormLabel>
@@ -262,7 +262,7 @@ const DiscordMessageSection: React.FC = () => {
               bg={bgColor}
               borderWidth="1px"
               borderColor={borderColor}
-              borderRadius="md"
+              borderRadius="xl"
               boxShadow="md"
             >
               {mentionCandidates.map((m) => (
@@ -290,7 +290,7 @@ const DiscordMessageSection: React.FC = () => {
             <Box
               borderWidth="1px"
               borderColor={borderColor}
-              borderRadius="md"
+              borderRadius="xl"
               bg={previewBg}
               p={3}
               fontSize="sm"

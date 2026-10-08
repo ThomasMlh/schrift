@@ -121,10 +121,10 @@ export const TransferScoreModal = ({ isOpen, onClose, cycles, guilds }: Transfer
     };
 
     // ── Couleurs ─────────────────────────────────────────────────────────────
-    const modalBg     = useColorModeValue("white", "gray.800");
-    const borderColor = useColorModeValue("gray.200", "gray.700");
+    const modalBg = "bg.card";
+    const borderColor = "border.subtle";
     const mutedText   = useColorModeValue("gray.500", "gray.400");
-    const previewBg   = useColorModeValue("gray.50", "gray.750");
+    const previewBg = "bg.muted";
 
     return (
         <Modal isOpen={isOpen} onClose={handleClose} size="md" isCentered>
@@ -205,7 +205,7 @@ export const TransferScoreModal = ({ isOpen, onClose, cycles, guilds }: Transfer
                                     <Text>Recherche du score…</Text>
                                 </HStack>
                             ) : sourceScore ? (
-                                <Flex align="center" justify="space-between" bg={previewBg} borderRadius="lg" borderWidth="1px" borderColor={borderColor} p={3}>
+                                <Flex align="center" justify="space-between" bg={previewBg} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={3}>
                                     <HStack spacing={2}>
                                         <Avatar size="xs" src={sourceAccount ? getUserAvatarUrl(sourceAccount) ?? undefined : undefined} name={sourceAccount?.bbs_name} />
                                         <Text fontSize="sm">{sourceAccount?.bbs_name}</Text>
@@ -245,7 +245,7 @@ export const TransferScoreModal = ({ isOpen, onClose, cycles, guilds }: Transfer
 
                         {/* ── Récapitulatif ──────────────────────────────── */}
                         {canSubmit && (
-                            <Box bg={previewBg} borderRadius="lg" borderWidth="1px" borderColor={borderColor} borderLeftWidth="3px" borderLeftColor="teal.400" p={3}>
+                            <Box bg={previewBg} borderRadius="xl" borderWidth="1px" borderColor={borderColor} borderLeftWidth="3px" borderLeftColor="teal.400" p={3}>
                                 <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={2}>
                                     Récapitulatif
                                 </Text>

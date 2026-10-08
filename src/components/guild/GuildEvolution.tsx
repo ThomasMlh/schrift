@@ -37,9 +37,9 @@ export const GuildEvolution = ({ guildId }: GuildEvolutionProps) => {
   const { t } = useTranslation();
 
   const bg = useColorModeValue("white", "rgba(26,32,44,0.7)");
-  const border = useColorModeValue("gray.100", "whiteAlpha.100");
-  const countColor = useColorModeValue("gray.500", "whiteAlpha.600");
-  const subText = useColorModeValue("gray.500", "whiteAlpha.600");
+  const border = "bg.hover";
+  const countColor = "text.muted";
+  const subText = "text.muted";
   const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)";
   const axisColor = isDark ? "#718096" : "#A0AEC0";
 
@@ -55,7 +55,7 @@ export const GuildEvolution = ({ guildId }: GuildEvolutionProps) => {
   const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string; color: string }>; label?: string }) => {
     if (!active || !payload?.length) return null;
     return (
-      <Box bg={bg} p={3} borderRadius="md" boxShadow="md" borderWidth="1px" borderColor={border}>
+      <Box bg={bg} p={3} borderRadius="xl" boxShadow="md" borderWidth="1px" borderColor={border}>
         <Text fontSize="xs" fontWeight="semibold" mb={1}>{label}</Text>
         {payload.map((p, i: number) => (
           <HStack key={i} spacing={2}>

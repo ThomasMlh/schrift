@@ -1,7 +1,7 @@
 import {
   Alert, AlertIcon, Badge, Box, Button, Container, Flex, HStack, Modal, ModalBody, ModalCloseButton, ModalContent,
   ModalFooter, ModalHeader, ModalOverlay, NumberInput, NumberInputField, Skeleton, Tab, Table, TableContainer, TabList,
-  TabPanel, TabPanels, Tabs, Tbody, Td, Text, Th, Thead, Tooltip, Tr, VStack, useColorModeValue, useToast,
+  TabPanel, TabPanels, Tabs, Tbody, Td, Text, Th, Thead, Tooltip, Tr, VStack, useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useGuilds, useScoreAnomalies, useScoreHistory } from "@/hooks/useAPI";
@@ -15,6 +15,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import CustomLink from "@/components/ui/CustomLink";
 import { buildPlayerUrl } from "@/utils/playerUrl";
 import { MissingScoresPanel } from "@/components/scoreControl/MissingScoresPanel";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const formatScore = (n: number | undefined | null) => (n == null ? "—" : n.toLocaleString("fr-FR"));
 const cycleLabel = (name: string | null, year: number | null, position: number | null) =>
@@ -78,10 +79,10 @@ const ScoreControlSection = () => {
     guildId: guildId || undefined, action: action || undefined, page,
   });
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.200", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
-  const headerBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const cardBg = "bg.card";
+  const border = "border.subtle";
+  const mutedText = "text.muted";
+  const headerBg = "bg.subtle";
 
   const selectableGuilds = isAdmin
     ? guilds.filter((g) => !g.disabled)
@@ -138,7 +139,7 @@ const ScoreControlSection = () => {
   );
 
   const renderAnomaly = (anomaly: IScoreAnomaly) => (
-    <Box key={anomaly.score_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg" p={4}>
+    <Box key={anomaly.score_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl" p={4}>
       <Flex justify="space-between" align={{ base: "start", md: "center" }} gap={3} direction={{ base: "column", md: "row" }}>
         <VStack align="start" spacing={1} minW={0}>
           <HStack spacing={2} wrap="wrap">
@@ -200,22 +201,15 @@ const ScoreControlSection = () => {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={5} align="stretch">
-        <Flex justify="space-between" align={{ base: "stretch", md: "center" }} direction={{ base: "column", md: "row" }} gap={4}>
-          <VStack align="start" spacing={1}>
-            <Text fontSize="2xl" fontWeight="extrabold" bgGradient="linear(to-r, blue.400, purple.500)" bgClip="text" letterSpacing="tight">
-              Contrôle des scores
-            </Text>
-            <Text fontSize="sm" color={mutedText} maxW="2xl">
-              Repère les scores probablement mal saisis ou pas encore saisis, et consulte l'historique de toutes les modifications.
-              Visible uniquement par les chefs, sous-chefs et admins.
-            </Text>
-          </VStack>
-          {guildOptions.length > 2 && (
+        <SectionHeader
+          title="Contrôle des scores"
+          description="Repère les scores probablement mal saisis ou pas encore saisis, et consulte l'historique de toutes les modifications. Visible uniquement par les chefs, sous-chefs et admins."
+          actions={guildOptions.length > 2 && (
             <Box minW={{ md: "260px" }}>
               <CustomSelect value={guildId} onChange={(v) => { setGuildId(v); setPage(1); }} options={guildOptions} allowDeselect={false} size="md" />
             </Box>
           )}
-        </Flex>
+        />
 
         <Tabs variant="soft-rounded" colorScheme="purple" isLazy>
           <TabList>
@@ -264,7 +258,7 @@ const ScoreControlSection = () => {
                 <Alert status="info" borderRadius="md"><AlertIcon />Aucune modification enregistrée pour l'instant.</Alert>
               ) : (
                 <VStack spacing={3} align="stretch">
-                  <TableContainer bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg">
+                  <TableContainer bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl">
                     <Table size="sm">
                       <Thead bg={headerBg}>
                         <Tr>

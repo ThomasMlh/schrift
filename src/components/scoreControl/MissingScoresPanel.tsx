@@ -1,6 +1,6 @@
 import {
   Alert, AlertIcon, Badge, Box, Button, Flex, HStack, NumberInput, NumberInputField, Skeleton, Text, Tooltip, VStack,
-  useColorModeValue, useToast,
+  useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useCycles, useMissingScores } from "@/hooks/useAPI";
@@ -26,9 +26,9 @@ export const MissingScoresPanel = ({ guildId }: MissingScoresPanelProps) => {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const { data, isLoading, error } = useMissingScores(guildId, cycleId || undefined, !!guildId);
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.200", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
+  const cardBg = "bg.card";
+  const border = "border.subtle";
+  const mutedText = "text.muted";
 
   if (!guildId) {
     return <Alert status="info" borderRadius="md"><AlertIcon />Choisis une guilde en haut de la page pour voir ses scores manquants.</Alert>;
@@ -89,7 +89,7 @@ export const MissingScoresPanel = ({ guildId }: MissingScoresPanelProps) => {
             {totalMissing} score(s) manquant(s) sur {data.cycle.name} {data.cycle.year} · {data.members_count} membre(s)
           </Text>
           {data.rotations.filter((r) => r.missing.length > 0).map((rotation) => (
-            <Box key={rotation.rotation_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg" p={4}>
+            <Box key={rotation.rotation_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl" p={4}>
               <HStack spacing={2} mb={3} wrap="wrap">
                 <Badge colorScheme="purple" variant="subtle">R{rotation.position}</Badge>
                 {rotation.attack && <AttackTypeBadge attackType={rotation.attack} size="12px" />}

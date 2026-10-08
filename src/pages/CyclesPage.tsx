@@ -44,14 +44,14 @@ const CyclesPage = () => {
 
   const { cycles = [], pagination, isLoading, mutate: mutateCycles } = useCycles({ page: currentPage, limit: itemsPerPage });
 
-  const cardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.7)");
-  const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
-  const statBg = useColorModeValue("white", "rgba(26, 32, 44, 0.6)");
+  const cardBg = "bg.glass";
+  const borderColor = "border.faint";
+  const statBg = "bg.glass";
   const yearLabelColor = useColorModeValue("gray.500", "whiteAlpha.500");
-  const rotationRowBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const rotationRowBg = "bg.subtle";
   const rotationRowHover = useColorModeValue("blue.50", "whiteAlpha.100");
-  const killLabelColor = useColorModeValue("gray.700", "whiteAlpha.900");
-  const subTextColor = useColorModeValue("gray.500", "whiteAlpha.600");
+  const killLabelColor = "text.strong";
+  const subTextColor = "text.muted";
   const headerAccentBg = useColorModeValue(
     "linear-gradient(135deg, rgba(66,153,225,0.08), rgba(159,122,234,0.08))",
     "linear-gradient(135deg, rgba(66,153,225,0.12), rgba(159,122,234,0.12))"

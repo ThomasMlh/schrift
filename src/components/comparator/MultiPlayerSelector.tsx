@@ -45,9 +45,9 @@ export const MultiPlayerSelector = ({
 }: MultiPlayerSelectorProps) => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const borderColor = useColorModeValue("gray.200", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "gray.400");
+  const mutedText = "text.muted";
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearchChange = (q: string) => {
@@ -105,7 +105,7 @@ export const MultiPlayerSelector = ({
                 key={player.id}
                 px={3}
                 py={2}
-                borderRadius="lg"
+                borderRadius="xl"
                 borderWidth="1px"
                 borderColor={borderColor}
                 borderLeftWidth="3px"

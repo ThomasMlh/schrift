@@ -42,10 +42,10 @@ export const AccessorySearchSelect = ({
   const { accessories, isLoading } = useAccessories(accessorySearch);
   const { subeffects, isLoading: isLoadingSubeffects } = useAccessoriesSubeffects(subeffectSearch);
 
-  const bgColor = useColorModeValue("white", "gray.700");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const bgColor = "bg.elevated";
+  const borderColor = "border.default";
   const hoverBg = useColorModeValue("gray.50", "gray.600");
-  const menuBg = useColorModeValue("white", "gray.800");
+  const menuBg = "bg.card";
 
   // Filtrer les accessoires disponibles (exclure ceux déjà sélectionnés)
   const availableAccessories = accessories.filter(

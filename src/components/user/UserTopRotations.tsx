@@ -27,8 +27,8 @@ interface UserTopRotationsProps {
 
 export const UserTopRotations = ({ stats }: UserTopRotationsProps) => {
   const { t } = useTranslation();
-  const tableBg = useColorModeValue("white", "gray.800");
-  const stripedBg = useColorModeValue("gray.50", "gray.700");
+  const tableBg = "bg.card";
+  const stripedBg = "bg.muted";
   const hoverBg = useColorModeValue("blue.50", "gray.600");
 
   if (!stats.bestRotation || !stats.worstRotation) {

@@ -57,12 +57,12 @@ const CycleDetailPage = () => {
     return new Date(y, m - 1, 1);
   }, [cycle]);
 
-  const cardBg = useColorModeValue("white", "rgba(26, 32, 44, 0.7)");
-  const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
-  const subTextColor = useColorModeValue("gray.500", "whiteAlpha.600");
-  const labelColor = useColorModeValue("gray.700", "whiteAlpha.900");
-  const statBg = useColorModeValue("white", "rgba(26, 32, 44, 0.6)");
-  const rowBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const cardBg = "bg.glass";
+  const borderColor = "border.faint";
+  const subTextColor = "text.muted";
+  const labelColor = "text.strong";
+  const statBg = "bg.glass";
+  const rowBg = "bg.subtle";
   const rowHoverBg = useColorModeValue("blue.50", "whiteAlpha.100");
 
   useEffect(() => {

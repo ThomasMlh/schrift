@@ -1,8 +1,7 @@
 import {
   IconButton, Tooltip, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalCloseButton, ModalBody, ModalFooter, VStack, Box, Text, ButtonGroup, Button, useToast,
-  Checkbox, HStack, Skeleton, useColorModeValue,
-} from "@chakra-ui/react";
+  Checkbox, HStack, Skeleton, } from "@chakra-ui/react";
 import { useState } from "react";
 import type { ICycle, ICycleRecap, PodiumRankingType } from "@/interfaces";
 import { useCycleRecapPreview, useGuilds } from "@/hooks/useAPI";
@@ -70,7 +69,7 @@ export const PublishCycleRecapButton: React.FC<PublishCycleRecapButtonProps> = (
   const [includeSnapshot, setIncludeSnapshot] = useState(true);
   const [includeSummary, setIncludeSummary] = useState(true);
   const [isPublishing, setIsPublishing] = useState(false);
-  const previewBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const previewBg = "bg.subtle";
 
   const selectedGuildId = guilds.find((g) => g.name === guildName)?._id;
   const { recap, isLoading: isPreviewLoading } = useCycleRecapPreview(

@@ -1,6 +1,5 @@
 import {
-  Alert, AlertIcon, Badge, Box, Container, Flex, HStack, SimpleGrid, Skeleton, Table, TableContainer, Tbody, Td, Text,
-  Th, Thead, Tooltip, Tr, VStack, useColorModeValue,
+  Alert, AlertIcon, Badge, Box, Container, HStack, SimpleGrid, Skeleton, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tooltip, Tr, VStack,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useCycles, useGuilds, useRotationPreparation } from "@/hooks/useAPI";
@@ -9,6 +8,7 @@ import { CustomSelect } from "@/components/ui/CustomSelect";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { AlterationImage } from "@/components/ui/AlterationImage";
 import { getScoreDisplayValue } from "@/utils/scores";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const formatScore = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString("fr-FR"));
 const SCORE_COLORS: Record<string, string> = {
@@ -30,10 +30,10 @@ const RotationPreparationSection = () => {
   const { data, isLoading, error } = useRotationPreparation(effectiveGuildId || undefined, rotationId || undefined, undefined, !!effectiveGuildId);
   const { cycles } = useCycles({ authenticated: true });
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.200", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
-  const headerBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const cardBg = "bg.card";
+  const border = "border.subtle";
+  const mutedText = "text.muted";
+  const headerBg = "bg.subtle";
 
   const cycle = data ? cycles.find((c) => c._id === data.cycle._id) : undefined;
   const rotationOptions = (cycle?.rotations ?? []).map((r) => ({
@@ -45,17 +45,10 @@ const RotationPreparationSection = () => {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={5} align="stretch">
-        <Flex justify="space-between" align={{ base: "stretch", md: "center" }} direction={{ base: "column", md: "row" }} gap={4}>
-          <VStack align="start" spacing={1}>
-            <Text fontSize="2xl" fontWeight="extrabold" bgGradient="linear(to-r, blue.400, purple.500)" bgClip="text" letterSpacing="tight">
-              Préparation d'une rotation
-            </Text>
-            <Text fontSize="sm" color={mutedText} maxW="2xl">
-              Ce que chaque membre a déjà fait sur le killer de la rotation : record, moyenne et dernier score.
-              Par défaut, la prochaine rotation du cycle en cours.
-            </Text>
-          </VStack>
-          <HStack spacing={3} flexWrap="wrap">
+        <SectionHeader
+          title="Préparation d'une rotation"
+          description="Ce que chaque membre a déjà fait sur le killer de la rotation : record, moyenne et dernier score. Par défaut, la prochaine rotation du cycle en cours."
+          actions={<>
             {guildOptions.length > 1 && (
               <Box minW="200px">
                 <CustomSelect value={guildId} onChange={setGuildId} options={guildOptions} placeholder="Choisir une guilde" size="md" />
@@ -66,8 +59,8 @@ const RotationPreparationSection = () => {
                 <CustomSelect value={rotationId || data?.rotation.rotation_id || ""} onChange={setRotationId} options={rotationOptions} allowDeselect={false} size="md" />
               </Box>
             )}
-          </HStack>
-        </Flex>
+          </>}
+        />
 
         {!effectiveGuildId ? (
           <Alert status="info" borderRadius="md"><AlertIcon />Choisis une guilde pour préparer sa rotation.</Alert>
@@ -78,7 +71,7 @@ const RotationPreparationSection = () => {
         ) : (
           <>
             <SimpleGrid columns={{ base: 1, md: 4 }} spacing={3}>
-              <Box bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg" p={4}>
+              <Box bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl" p={4}>
                 <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" color={mutedText}>
                   {data.cycle.name} {data.cycle.year} · R{data.rotation.position}
                 </Text>
@@ -94,7 +87,7 @@ const RotationPreparationSection = () => {
                 ["Moyenne tous joueurs", formatScore(data.killer_stats.average)],
                 ["Scores sur ce killer", data.killer_stats.attempts.toLocaleString("fr-FR")],
               ].map(([label, value]) => (
-                <Box key={label} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg" p={4}>
+                <Box key={label} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl" p={4}>
                   <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" color={mutedText}>{label}</Text>
                   <Text fontSize="xl" fontWeight="bold" mt={1} sx={{ fontVariantNumeric: "tabular-nums" }}>{value}</Text>
                 </Box>
@@ -104,7 +97,7 @@ const RotationPreparationSection = () => {
             {data.members.length === 0 ? (
               <Alert status="info" borderRadius="md"><AlertIcon />Aucun membre dans cette guilde.</Alert>
             ) : (
-              <TableContainer bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg">
+              <TableContainer bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl">
                 <Table size="sm">
                   <Thead bg={headerBg}>
                     <Tr>

@@ -25,7 +25,7 @@ export const UserWeeklySection = ({
   cycleId,
   allRotations,
 }: UserWeeklySectionProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const rotBg = useColorModeValue("purple.50", "rgba(159,122,234,0.08)");
   const rotBorder = useColorModeValue("purple.200", "purple.700");
 

@@ -82,7 +82,7 @@ const ActivityLogSection: React.FC = () => {
                 </Text>
             )}
 
-            <Box overflowX="auto" bg={bgColor} borderRadius="lg" borderWidth="1px" borderColor={borderColor}>
+            <Box overflowX="auto" bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor}>
                 {isLoading ? (
                     <PageLoader height="150px" />
                 ) : activity.length === 0 ? (

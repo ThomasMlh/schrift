@@ -1,7 +1,6 @@
 import {
   Alert, AlertIcon, Avatar, Badge, Box, Container, Flex, HStack, Skeleton, Table, TableContainer, Tbody, Td,
-  Text, Th, Thead, Tooltip, Tr, VStack, useColorModeValue,
-} from "@chakra-ui/react";
+  Text, Th, Thead, Tooltip, Tr, VStack, } from "@chakra-ui/react";
 import { useState } from "react";
 import { useDeclineAlerts, useGuilds } from "@/hooks/useAPI";
 import { useAuth } from "@/providers/AuthProvider";
@@ -12,6 +11,7 @@ import { AlterationImage } from "@/components/ui/AlterationImage";
 import CustomLink from "@/components/ui/CustomLink";
 import { getUserAvatarUrl } from "@/utils/discord";
 import { buildPlayerUrl } from "@/utils/playerUrl";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const formatScore = (n: number) => n.toLocaleString("fr-FR");
 
@@ -24,10 +24,10 @@ const DeclineAlertsSection = () => {
   const [guildId, setGuildId] = useState("");
   const { alerts, isLoading, error } = useDeclineAlerts(guildId || undefined);
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const border = useColorModeValue("gray.200", "gray.700");
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
-  const headerBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const cardBg = "bg.card";
+  const border = "border.subtle";
+  const mutedText = "text.muted";
+  const headerBg = "bg.subtle";
 
   const selectableGuilds = isAdmin
     ? guilds.filter((g) => !g.disabled)
@@ -44,7 +44,7 @@ const DeclineAlertsSection = () => {
     const name = alert.bbs_name || alert.global_name || alert.bbs_id;
 
     return (
-      <Box key={alert.bbs_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg" p={4}>
+      <Box key={alert.bbs_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl" p={4}>
         <Flex justify="space-between" align="center" gap={3} mb={3} wrap="wrap">
           <HStack spacing={3} minW={0}>
             <Avatar size="sm" src={avatarUrl} name={name} />
@@ -100,28 +100,15 @@ const DeclineAlertsSection = () => {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={5} align="stretch">
-        <Flex justify="space-between" align={{ base: "stretch", md: "center" }} direction={{ base: "column", md: "row" }} gap={4}>
-          <VStack align="start" spacing={1}>
-            <Text
-              fontSize="2xl"
-              fontWeight="extrabold"
-              bgGradient="linear(to-r, blue.400, purple.500)"
-              bgClip="text"
-              letterSpacing="tight"
-            >
-              Baisses de régime
-            </Text>
-            <Text fontSize="sm" color={mutedText} maxW="2xl">
-              Membres dont les 3 derniers scores (sur les 2 derniers cycles) sont en moyenne à moins de 80 % de
-              leur habitude sur les mêmes killers. Visible uniquement par les chefs, sous-chefs et admins.
-            </Text>
-          </VStack>
-          {guildOptions.length > 2 && (
+        <SectionHeader
+          title="Baisses de régime"
+          description="Membres dont les 3 derniers scores (sur les 2 derniers cycles) sont en moyenne à moins de 80 % de leur habitude sur les mêmes killers. Visible uniquement par les chefs, sous-chefs et admins."
+          actions={guildOptions.length > 2 && (
             <Box minW={{ md: "260px" }}>
               <CustomSelect value={guildId} onChange={setGuildId} options={guildOptions} allowDeselect={false} size="md" />
             </Box>
           )}
-        </Flex>
+        />
 
         {isLoading ? (
           <VStack spacing={3} align="stretch">

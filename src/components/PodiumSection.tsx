@@ -37,8 +37,8 @@ export const PodiumSection: React.FC = () => {
   });
 
   // Hooks UI
-  const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const bgColor = "bg.card";
+  const borderColor = "border.default";
   const shadowColor = useColorModeValue("lg", "dark-lg");
 
   // Sélectionner le cycle le plus récent par défaut quand les cycles sont chargés
@@ -105,7 +105,7 @@ export const PodiumSection: React.FC = () => {
   return (
     <Box
       bg={bgColor}
-      borderRadius="lg"
+      borderRadius="xl"
       borderWidth="1px"
       borderColor={borderColor}
       boxShadow={shadowColor}

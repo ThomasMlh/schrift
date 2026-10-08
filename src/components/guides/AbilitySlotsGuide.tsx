@@ -74,12 +74,12 @@ const StarValue = ({ value, isDark }: { value: string; isDark: boolean }) => {
 const AbilitySlotsGuide = () => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
-  const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const bgColor = "bg.card";
+  const borderColor = "border.subtle";
   const rowHoverBg = useColorModeValue("purple.50", "whiteAlpha.50");
-  const rowStripeBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const rowStripeBg = "bg.subtle";
   const mutedText = useColorModeValue("gray.500", "gray.400");
-  const panelBg = useColorModeValue("white", "gray.800");
+  const panelBg = "bg.card";
 
   const { t } = useTranslation();
   const { abilitySlotsData, isLoading: loading, error } = useAbilitySlotsGuide();

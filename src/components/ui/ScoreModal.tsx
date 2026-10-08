@@ -119,11 +119,11 @@ export const ScoreModal = ({
     };
 
     // ── Couleurs ─────────────────────────────────────────────────────────────
-    const modalBg       = useColorModeValue("white", "gray.800");
-    const borderColor   = useColorModeValue("gray.200", "gray.700");
+    const modalBg = "bg.card";
+    const borderColor = "border.subtle";
     const mutedText     = useColorModeValue("gray.500", "gray.400");
-    const lockedBg      = useColorModeValue("gray.50", "gray.750");
-    const previewBg     = useColorModeValue("gray.50", "gray.750");
+    const lockedBg = "bg.muted";
+    const previewBg = "bg.muted";
     const accentColor   = isEdit ? "orange" : submitButtonColor;
     const avatarUrl     = selectedUser
         ? getUserAvatarUrl(selectedUser) ?? undefined
@@ -169,7 +169,7 @@ export const ScoreModal = ({
                                     gap={3}
                                     p={3}
                                     bg={lockedBg}
-                                    borderRadius="lg"
+                                    borderRadius="xl"
                                     borderWidth="1px"
                                     borderColor={borderColor}
                                 >
@@ -305,7 +305,7 @@ export const ScoreModal = ({
                         {canSubmit && (
                             <Box
                                 bg={previewBg}
-                                borderRadius="lg"
+                                borderRadius="xl"
                                 borderWidth="1px"
                                 borderColor={borderColor}
                                 borderLeftWidth="3px"

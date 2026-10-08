@@ -60,9 +60,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, gu
 
     const primaryCardBg = useColorModeValue("purple.50", "rgba(124,58,237,0.08)");
     const primaryCardBorder = useColorModeValue("purple.200", "purple.700");
-    const altCardBorder = useColorModeValue("gray.200", "whiteAlpha.200");
-    const mutedLabel = useColorModeValue("gray.500", "gray.400");
-    const dashedBorder = useColorModeValue("gray.300", "whiteAlpha.300");
+    const altCardBorder = "border.faint";
+    const mutedLabel = "text.muted";
+    const dashedBorder = "border.strong";
 
     // Initialiser les comptes avec les données de l'utilisateur
     useEffect(() => {
@@ -242,7 +242,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, gu
                                         key={account.bbs_id}
                                         p={3}
                                         borderWidth="1px"
-                                        borderRadius="lg"
+                                        borderRadius="xl"
                                         bg={account.is_primary ? primaryCardBg : undefined}
                                         borderColor={account.is_primary ? primaryCardBorder : altCardBorder}
                                     >

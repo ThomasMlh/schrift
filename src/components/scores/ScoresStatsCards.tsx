@@ -3,7 +3,6 @@ import {
     SimpleGrid,
     Skeleton,
     Text,
-    useColorModeValue,
 } from "@chakra-ui/react";
 import type { IPagination } from "@/interfaces";
 
@@ -23,9 +22,9 @@ interface StatCardProps {
 }
 
 const StatCard = ({ label, value, sub, icon, accentColor, isLoading }: StatCardProps) => {
-    const cardBg      = useColorModeValue("white", "gray.800");
-    const borderColor = useColorModeValue("gray.200", "gray.700");
-    const mutedText   = useColorModeValue("gray.500", "gray.400");
+    const cardBg = "bg.card";
+    const borderColor = "border.subtle";
+    const mutedText = "text.muted";
 
     return (
         <Box

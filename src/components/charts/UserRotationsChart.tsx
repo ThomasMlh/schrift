@@ -25,7 +25,7 @@ interface UserRotationsChartProps {
 }
 
 export const UserRotationsChart = ({ rotations, showAll = false }: UserRotationsChartProps) => {
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = "bg.card";
   const gridColor = useColorModeValue("#f0f0f0", "#2d3748");
   const textColor = useColorModeValue("#4a5568", "#cbd5e0");
   

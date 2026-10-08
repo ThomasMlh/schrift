@@ -1,12 +1,6 @@
 import { useState } from "react";
 import {
-  Container,
-  VStack,
-  Text,
-  useToast,
-  useDisclosure,
-  Button,
-  HStack
+  Container, VStack, useToast, useDisclosure, Button,
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import type { IRotationTemplate, ICycleRotation, ICycleFormData, ICycle, IEvent } from "../interfaces";
@@ -20,6 +14,7 @@ import {
   calculateAllRotationDates,
   ensureCorrectRotationPositions,
 } from "@/utils/cycleHelpers";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const CyclesSection = () => {
   const { deleteCycle, createCycle, updateCycle } = useAPIMutations();
@@ -306,22 +301,10 @@ const CyclesSection = () => {
     <Container maxW="container.xl" py={8}>
       <VStack spacing={6} align="stretch">
         {/* Modern header */}
-        <HStack justify="space-between" align="center">
-          <VStack align="start" spacing={0}>
-            <Text
-              fontSize="2xl"
-              fontWeight="extrabold"
-              bgGradient="linear(to-r, blue.400, purple.500)"
-              bgClip="text"
-              letterSpacing="tight"
-            >
-              Gestion des Cycles
-            </Text>
-            <Text fontSize="sm" color="gray.500">
-              Créez et gérez les cycles de rotation
-            </Text>
-          </VStack>
-          <Button
+        <SectionHeader
+          title="Gestion des cycles"
+          description="Créez et gérez les cycles de rotation"
+          actions={<Button
             leftIcon={<AddIcon />}
             bgGradient="linear(to-r, blue.400, purple.500)"
             color="white"
@@ -333,8 +316,8 @@ const CyclesSection = () => {
             onClick={handleOpenCreate}
           >
             Créer un cycle
-          </Button>
-        </HStack>
+          </Button>}
+        />
 
         {/* Section d'affichage des cycles existants */}
         <ExistingCyclesList

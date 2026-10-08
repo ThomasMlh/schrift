@@ -12,11 +12,11 @@ interface PlayerCardWeeklyProps {
 }
 
 const PlayerCardWeekly = ({ player, showGuildName = false }: PlayerCardWeeklyProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const cardBg = "bg.card";
+  const borderColor = "border.subtle";
   const hoverBorderColor = useColorModeValue("blue.400", "blue.500");
-  const rankColor = useColorModeValue("gray.500", "gray.400");
-  const subScoreColor = useColorModeValue("gray.500", "gray.400");
+  const rankColor = "text.muted";
+  const subScoreColor = "text.muted";
 
   const avatarUrl =
     player.avatar && player.discord_id
@@ -28,7 +28,7 @@ const PlayerCardWeekly = ({ player, showGuildName = false }: PlayerCardWeeklyPro
       bg={cardBg}
       borderWidth="1px"
       borderColor={borderColor}
-      borderRadius="lg"
+      borderRadius="xl"
       px={3}
       py={2}
       transition="all 0.15s ease"

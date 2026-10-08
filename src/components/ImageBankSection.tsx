@@ -1,27 +1,5 @@
 import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  Grid,
-  Heading,
-  HStack,
-  IconButton,
-  Image,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  Text,
-  useColorModeValue,
-  useToast,
-  VStack,
+  Box, Button, Flex, FormControl, FormLabel, Grid, HStack, IconButton, Image, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spinner, Text, useColorModeValue, useToast, VStack,
 } from "@chakra-ui/react";
 import { AddIcon, EditIcon } from "@chakra-ui/icons";
 import { useState, useEffect } from "react";
@@ -37,6 +15,7 @@ import { useAuth } from "../providers/AuthProvider";
 import type { IAccessory } from "../interfaces";
 import { PageLoader } from "./ui/PageLoader";
 import { apiUrl, bucketUrl } from "../utils/apiRequest";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 type Bank = "accessories" | "killers" | "categories" | "affinity";
 
@@ -71,11 +50,11 @@ const AccessoryFormModal = ({
   const toast = useToast();
   const isEdit = accessory !== null;
   const { saveAccessory } = useAccessoryMutations();
-  const previewBg = useColorModeValue("gray.100", "gray.700");
-  const browseBg = useColorModeValue("gray.50", "gray.900");
-  const browseBorder = useColorModeValue("gray.200", "gray.700");
+  const previewBg = "bg.inset";
+  const browseBg = "bg.page";
+  const browseBorder = "border.subtle";
   const codeHoverBg = useColorModeValue("purple.50", "purple.900");
-  const codeFallbackBg = useColorModeValue("gray.200", "gray.700");
+  const codeFallbackBg = "border.subtle";
 
   const { codes, isLoading: isLoadingCodes, fetchCodes } = useAccessoryCodes(token);
 
@@ -284,9 +263,9 @@ interface ImageCardProps {
 }
 
 const ImageCard = ({ src, label, sublabel, onEdit }: ImageCardProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const emptyBg = useColorModeValue("gray.100", "gray.700");
+  const cardBg = "bg.card";
+  const borderColor = "border.subtle";
+  const emptyBg = "bg.inset";
   const labelColor = useColorModeValue("gray.700", "gray.200");
   const [imgError, setImgError] = useState(false);
 
@@ -458,10 +437,10 @@ const ImageBankSection = () => {
   const { killers, categories, affinities, isLoading: isLoadingMeta } = useCharacterMeta();
   const { token } = useAuth();
 
-  const tabInactiveColor = useColorModeValue("gray.500", "gray.400");
-  const tabInactiveBorder = useColorModeValue("gray.200", "whiteAlpha.200");
-  const tabInactiveHoverBg = useColorModeValue("gray.100", "whiteAlpha.100");
-  const tabInactiveHoverBorder = useColorModeValue("gray.300", "whiteAlpha.300");
+  const tabInactiveColor = "text.muted";
+  const tabInactiveBorder = "border.faint";
+  const tabInactiveHoverBg = "bg.hover";
+  const tabInactiveHoverBorder = "border.strong";
 
   const renderBank = () => {
     switch (activeBank) {
@@ -478,7 +457,9 @@ const ImageBankSection = () => {
 
   return (
     <Box>
-      <Heading size="md" mb={5}>Banque d’images</Heading>
+      <Box mb={5}>
+        <SectionHeader title="Banque d’images" description="Accessoires, killers, catégories et affinités stockés dans le bucket." />
+      </Box>
 
       <HStack spacing={1} mb={6} flexWrap="wrap">
         {BANKS.map((bank) => {

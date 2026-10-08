@@ -162,7 +162,7 @@ const GlobalNotificationSettings: React.FC = () => {
     const borderColor = useColorModeValue('gray.200', 'gray.600');
 
     return (
-        <Box bg={bgColor} borderRadius="lg" borderWidth="1px" borderColor={borderColor} p={4}>
+        <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={4}>
             <Text fontWeight="medium" mb={1}>Global (hors guilde)</Text>
             <Text fontSize="sm" color="gray.500" mb={3}>
                 S'applique aux notifications sans channel de guilde dédié (bannissements, et toute
@@ -195,7 +195,7 @@ const NotificationSettingsSection: React.FC = () => {
         <VStack spacing={6} align="stretch" w="100%">
             {isFullAdmin && <GlobalNotificationSettings />}
 
-            <Box bg={bgColor} borderRadius="lg" borderWidth="1px" borderColor={borderColor}>
+            <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor}>
                 <Accordion allowToggle>
                     {guilds.map((guild) => (
                         <GuildNotificationRow key={guild._id} guild={guild} />

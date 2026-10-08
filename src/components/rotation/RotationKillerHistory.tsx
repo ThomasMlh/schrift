@@ -1,5 +1,5 @@
 import {
-  Box, Button, Flex, HStack, SimpleGrid, Skeleton, Table, Tbody, Td, Text, Th, Thead, Tr,
+  Box, Button, Flex, HStack, SimpleGrid, Skeleton, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr,
   useColorMode, useColorModeValue,
 } from "@chakra-ui/react";
 import { useState } from "react";
@@ -49,10 +49,10 @@ export const RotationKillerHistory = ({ rotationId, cycleId, guildId }: Rotation
   const [showTable, setShowTable] = useState(false);
 
   const bg = useColorModeValue("white", "rgba(26,32,44,0.7)");
-  const border = useColorModeValue("gray.200", "whiteAlpha.100");
-  const tileBg = useColorModeValue("gray.50", "whiteAlpha.50");
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
-  const strongText = useColorModeValue("gray.800", "whiteAlpha.900");
+  const border = "border.faint";
+  const tileBg = "bg.subtle";
+  const mutedText = "text.muted";
+  const strongText = "text.strong";
   const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)";
   const axisColor = isDark ? "#718096" : "#A0AEC0";
   const colors = SERIES_COLORS[isDark ? "dark" : "light"];
@@ -77,7 +77,7 @@ export const RotationKillerHistory = ({ rotationId, cycleId, guildId }: Rotation
     });
 
   const renderTile = (label: string, holder: IKillerRecordHolder | null, help?: string, footer?: ReactNode) => (
-    <Box bg={tileBg} borderRadius="lg" p={4} borderWidth="1px" borderColor={border}>
+    <Box bg={tileBg} borderRadius="xl" p={4} borderWidth="1px" borderColor={border}>
       <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" color={mutedText}>
         {label}
       </Text>
@@ -109,7 +109,7 @@ export const RotationKillerHistory = ({ rotationId, cycleId, guildId }: Rotation
   const renderTooltip = ({ active, payload, label }: TooltipRenderProps) => {
     if (!active || !payload?.length) return null;
     return (
-      <Box bg={bg} p={3} borderRadius="md" boxShadow="md" borderWidth="1px" borderColor={border}>
+      <Box bg={bg} p={3} borderRadius="xl" boxShadow="md" borderWidth="1px" borderColor={border}>
         <Text fontSize="xs" fontWeight="semibold" mb={1} color={strongText}>{label}</Text>
         {payload.filter((p) => p.value != null).map((p) => {
           const isAll = p.dataKey === "all";
@@ -170,6 +170,7 @@ export const RotationKillerHistory = ({ rotationId, cycleId, guildId }: Rotation
           <Text fontSize="sm" color={mutedText}>{t("pages.rotationDetail.historyNotEnoughCycles")}</Text>
         </Flex>
       ) : showTable ? (
+        <TableContainer>
         <Table size="sm">
           <Thead>
             <Tr>
@@ -188,6 +189,7 @@ export const RotationKillerHistory = ({ rotationId, cycleId, guildId }: Rotation
             ))}
           </Tbody>
         </Table>
+        </TableContainer>
       ) : (
         <Box h="220px">
           <ResponsiveContainer width="100%" height="100%">

@@ -32,8 +32,8 @@ export const GuildComparisonRadar = ({
 }: GuildComparisonRadarProps) => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
-  const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const bgColor = "bg.card";
+  const borderColor = "border.subtle";
   const textColor = useColorModeValue("#2D3748", "#E2E8F0");
   const haloColor = useColorModeValue("rgba(255,255,255,0.9)", "rgba(26,32,44,0.85)");
   const gridColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)";
@@ -171,7 +171,7 @@ export const GuildComparisonRadar = ({
         <Box
           bg={bgColor}
           p={3}
-          borderRadius="md"
+          borderRadius="xl"
           boxShadow="lg"
           borderWidth="1px"
           borderColor={borderColor}
