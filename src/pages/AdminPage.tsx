@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, HStack, VStack, Text, Button, useToast, useColorMode } from "@chakra-ui/react";
+import { Box, Flex, Heading, HStack, VStack, Text, Button, Select, useToast, useColorMode } from "@chakra-ui/react";
 import { useAdminMutations } from "@/hooks/mutations/useAdminMutations";
 import GuildsAdminSection from "../components/GuildsAdminSection";
 import DraftSection from "../components/DraftSection";
@@ -20,21 +20,32 @@ import { useSearchParams } from "react-router-dom";
 import type { AdminPage as IAdminPage } from "../interfaces";
 import { useAuth } from "../providers/AuthProvider";
 
-const tabConfig: { key: IAdminPage; label: string; icon: string }[] = [
-  { key: 'guilds',  label: 'Guildes',  icon: '🏰' },
-  { key: 'draft',   label: 'Draft',    icon: '🔀' },
-  { key: 'cycles',  label: 'Cycles',   icon: '🔄' },
-  { key: 'scores',  label: 'Scores',   icon: '📊' },
-  { key: 'score-control', label: 'Contrôle des scores', icon: '🔎' },
-  { key: 'preparation', label: 'Préparation', icon: '🎯' },
-  { key: 'alerts',  label: 'Baisses de régime', icon: '📉' },
-  { key: 'users',   label: 'Joueurs',  icon: '👥' },
-  { key: 'banned',  label: 'Bannis',   icon: '🚫' },
-  { key: 'guides',  label: 'Guides',   icon: '📚' },
-  { key: 'images',  label: 'Images',   icon: '🖼️' },
-  { key: 'notifications', label: 'Notifications', icon: '🔔' },
-  { key: 'activity', label: 'Activité', icon: '📜' },
-  { key: 'messages', label: 'Messages', icon: '💬' },
+type TabGroup = 'guilds' | 'scores' | 'players' | 'content' | 'communication';
+
+// Groupes de la navigation (dans l'ordre d'affichage)
+const tabGroups: { key: TabGroup; label: string }[] = [
+  { key: 'guilds', label: 'Guildes' },
+  { key: 'scores', label: 'Scores' },
+  { key: 'players', label: 'Joueurs' },
+  { key: 'content', label: 'Contenu' },
+  { key: 'communication', label: 'Communication' },
+];
+
+const tabConfig: { key: IAdminPage; label: string; icon: string; group: TabGroup }[] = [
+  { key: 'guilds',  label: 'Guildes',  icon: '🏰', group: 'guilds' },
+  { key: 'draft',   label: 'Draft',    icon: '🔀', group: 'guilds' },
+  { key: 'cycles',  label: 'Cycles',   icon: '🔄', group: 'scores' },
+  { key: 'scores',  label: 'Scores',   icon: '📊', group: 'scores' },
+  { key: 'score-control', label: 'Contrôle des scores', icon: '🔎', group: 'scores' },
+  { key: 'preparation', label: 'Préparation', icon: '🎯', group: 'scores' },
+  { key: 'alerts',  label: 'Baisses de régime', icon: '📉', group: 'scores' },
+  { key: 'users',   label: 'Joueurs',  icon: '👥', group: 'players' },
+  { key: 'banned',  label: 'Bannis',   icon: '🚫', group: 'players' },
+  { key: 'guides',  label: 'Guides',   icon: '📚', group: 'content' },
+  { key: 'images',  label: 'Images',   icon: '🖼️', group: 'content' },
+  { key: 'notifications', label: 'Notifications', icon: '🔔', group: 'communication' },
+  { key: 'activity', label: 'Activité', icon: '📜', group: 'communication' },
+  { key: 'messages', label: 'Messages', icon: '💬', group: 'communication' },
 ];
 
 const AdminPage = () => {
@@ -88,6 +99,10 @@ const AdminPage = () => {
   const separatorColor = isDark ? 'whiteAlpha.100' : 'gray.200';
 
   const visibleTabs = tabConfig.filter(t => allowedPages.includes(t.key));
+  // Groupes non vides pour ce rôle (un chef ne voit que les siens)
+  const visibleGroups = tabGroups
+    .map(group => ({ ...group, tabs: visibleTabs.filter(t => t.group === group.key) }))
+    .filter(group => group.tabs.length > 0);
 
   const handleUpdateCharacters = async () => {
     setIsUpdatingCharacters(true);
@@ -290,74 +305,107 @@ const AdminPage = () => {
           )}
         </Flex>
 
-        {/* Tab navigation */}
-        <HStack
-          spacing={1}
-          overflowX="auto"
-          py="4px"
-          mx="-2px"
-          px="2px"
-          sx={{ '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}
+      </Box>
+
+      {/* Navigation groupée : colonne à gauche sur grand écran, liste déroulante sur mobile/tablette.
+          (L'ancienne barre d'onglets horizontale débordait sans pouvoir défiler à la souris.) */}
+      <Flex position="relative" zIndex={1} align="flex-start" gap={6} pt={6} px={{ base: 3, md: 6 }}>
+        <Box
+          as="nav"
+          aria-label="Sections de l'administration"
+          display={{ base: 'none', lg: 'block' }}
+          w="230px"
+          flexShrink={0}
+          position="sticky"
+          top="16px"
+          bg={headerBg}
+          border="1px solid"
+          borderColor={separatorColor}
+          borderRadius="xl"
+          p={3}
         >
-          {visibleTabs.map(tab => {
-            const isActive = currentPage === tab.key;
-            const isBanned = tab.key === 'banned';
-            return (
-              <Button
-                key={tab.key}
-                onClick={() => handleTabChange(tab.key)}
-                size="sm"
-                px={4}
-                h="36px"
-                borderRadius="full"
-                flexShrink={0}
-                mb={0}
-                transition="all 0.18s ease"
-                sx={isActive ? {
-                  background: isBanned
-                    ? 'linear-gradient(135deg, #DC2626, #9B1C1C)'
-                    : 'linear-gradient(135deg, #7C3AED, #4F46E5)',
-                  color: 'white',
-                  boxShadow: isBanned
-                    ? '0 0 16px rgba(220,38,38,0.35)'
-                    : '0 0 16px rgba(124,58,237,0.35)',
-                  border: 'none',
-                  _hover: {
-                    background: isBanned
-                      ? 'linear-gradient(135deg, #B91C1C, #7F1D1D)'
-                      : 'linear-gradient(135deg, #6D28D9, #4338CA)',
-                  },
-                } : {
-                  background: 'transparent',
-                  color: tabInactiveColor,
-                  border: '1px solid',
-                  borderColor: tabInactiveBorder,
-                  _hover: {
-                    background: tabInactiveHoverBg,
-                    color: isDark ? 'gray.100' : 'gray.700',
-                    borderColor: isDark ? 'whiteAlpha.300' : 'gray.300',
-                  },
-                }}
-              >
-                <HStack spacing={1.5}>
-                  <Text as="span" fontSize="sm">{tab.icon}</Text>
-                  <Text as="span" fontSize="sm" fontWeight={isActive ? 'semibold' : 'normal'}>
-                    {tab.label}
-                  </Text>
-                </HStack>
-              </Button>
-            );
-          })}
-        </HStack>
+          <VStack align="stretch" spacing={4}>
+            {visibleGroups.map(group => (
+              <Box key={group.key}>
+                <Text
+                  fontSize="2xs"
+                  fontWeight="semibold"
+                  letterSpacing="widest"
+                  textTransform="uppercase"
+                  color={tabInactiveColor}
+                  px={3}
+                  mb={1}
+                >
+                  {group.label}
+                </Text>
+                <VStack align="stretch" spacing={0.5}>
+                  {group.tabs.map(tab => {
+                    const isActive = currentPage === tab.key;
+                    const isBanned = tab.key === 'banned';
+                    return (
+                      <Button
+                        key={tab.key}
+                        onClick={() => handleTabChange(tab.key)}
+                        aria-current={isActive ? 'page' : undefined}
+                        size="sm"
+                        h="36px"
+                        justifyContent="flex-start"
+                        borderRadius="lg"
+                        transition="all 0.15s ease"
+                        sx={isActive ? {
+                          background: isBanned
+                            ? 'linear-gradient(135deg, #DC2626, #9B1C1C)'
+                            : 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+                          color: 'white',
+                          _hover: {
+                            background: isBanned
+                              ? 'linear-gradient(135deg, #B91C1C, #7F1D1D)'
+                              : 'linear-gradient(135deg, #6D28D9, #4338CA)',
+                          },
+                        } : {
+                          background: 'transparent',
+                          color: tabInactiveColor,
+                          _hover: { background: tabInactiveHoverBg, color: isDark ? 'gray.100' : 'gray.700' },
+                        }}
+                      >
+                        <HStack spacing={2}>
+                          <Text as="span" fontSize="sm">{tab.icon}</Text>
+                          <Text as="span" fontSize="sm" fontWeight={isActive ? 'semibold' : 'normal'}>{tab.label}</Text>
+                        </HStack>
+                      </Button>
+                    );
+                  })}
+                </VStack>
+              </Box>
+            ))}
+          </VStack>
+        </Box>
 
-        {/* Active tab underline indicator */}
-        <Box h="2px" bg={separatorColor} />
-      </Box>
+        <Box flex={1} minW={0}>
+          {/* Mobile / tablette : choix de la section dans une liste groupée */}
+          <Box display={{ base: 'block', lg: 'none' }} mb={4}>
+            <Select
+              id="admin-section"
+              aria-label="Section de l'administration"
+              value={currentPage}
+              onChange={(e) => handleTabChange(e.target.value as IAdminPage)}
+              bg={headerBg}
+              borderColor={tabInactiveBorder}
+              borderRadius="lg"
+            >
+              {visibleGroups.map(group => (
+                <optgroup key={group.key} label={group.label}>
+                  {group.tabs.map(tab => (
+                    <option key={tab.key} value={tab.key}>{tab.icon} {tab.label}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </Select>
+          </Box>
 
-      {/* Page content */}
-      <Box position="relative" zIndex={1} pt={6} px={{ base: 3, md: 6 }}>
-        {renderPage()}
-      </Box>
+          {renderPage()}
+        </Box>
+      </Flex>
     </Box>
   );
 }
