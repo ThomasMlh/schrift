@@ -1,6 +1,7 @@
 import {
   Box, Button, FormControl, FormLabel, Input, Select, Table, Tbody, Td, Text, Th, Thead, Tr, useToast, IconButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure, VStack, HStack, Alert, AlertIcon,
 } from "@chakra-ui/react";
+import { FiTarget } from "react-icons/fi";
 import { useMemo, useState } from "react";
 import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
 import { PageLoader } from "./ui/PageLoader";
@@ -127,7 +128,7 @@ const AbilitySlotsAdminSection = () => {
     <Box w="100%" p={4}>
       <Box mb={6}>
         <SectionHeader
-          icon="🎯"
+          icon={FiTarget}
           title="Emplacements de capacités"
           description="Lignes affichées dans le guide des emplacements de capacités."
           actions={<Button leftIcon={<AddIcon />} colorScheme="purple" onClick={() => handleOpenModal()}>Ajouter une ligne</Button>}

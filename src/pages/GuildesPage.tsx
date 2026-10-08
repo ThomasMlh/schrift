@@ -10,13 +10,12 @@ import {
   Icon,
   SimpleGrid,
   Divider,
-  Tooltip,
-  Skeleton,
   Badge,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { FiUsers, FiGrid, FiChevronRight } from "react-icons/fi";
+import { FiUsers, FiGrid, FiChevronRight, FiShield, FiBarChart2, FiAward, FiTarget, FiTrendingUp, FiCheckCircle } from "react-icons/fi";
+import { StatCard } from "../components/ui/StatCard";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
 import { GuildOrgChart } from "../components/GuildOrgChart";
@@ -112,8 +111,6 @@ const GuildesPage = () => {
   const selectedCycleObj = cycles.find((c) => c._id === selectedCycleId);
   const maxWeeks = selectedCycleObj ? Math.floor(selectedCycleObj.rotations.length / 2) : 0;
 
-  const statCardBg = "bg.glass";
-  const statCardBorder = "bg.hover";
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -137,7 +134,7 @@ const GuildesPage = () => {
         <HeroSection
           title={t("pages.guilds.heroTitle")}
           description={t("pages.guilds.heroDescription")}
-          badge={{ text: t("pages.guilds.heroBadge"), icon: "⚔️" }}
+          badge={{ text: t("pages.guilds.heroBadge"), icon: FiShield }}
           size="lg"
         />
 
@@ -172,8 +169,7 @@ const GuildesPage = () => {
                     <Text
                       fontSize="2xl"
                       fontWeight="extrabold"
-                      bgGradient="linear(to-r, purple.500, pink.400)"
-                      bgClip="text"
+                      color="text.strong"
                       lineHeight={1.2}
                     >
                       {guilds.length}
@@ -190,8 +186,7 @@ const GuildesPage = () => {
                     <Text
                       fontSize="2xl"
                       fontWeight="extrabold"
-                      bgGradient="linear(to-r, blue.400, purple.500)"
-                      bgClip="text"
+                      color="text.strong"
                       lineHeight={1.2}
                     >
                       {isLoading ? "..." : totalMembers}
@@ -405,39 +400,18 @@ const GuildesPage = () => {
                   </HStack>
                   <SimpleGrid columns={{ base: 2, sm: 3, md: 5 }} gap={3}>
                     {[
-                      { label: t("pages.guilds.statAvgScore"), icon: "📊", value: guildStats ? formatScore(guildStats.averageScore) : null },
-                      { label: t("pages.guilds.statBestScore"), icon: "🏆", value: guildStats ? formatScore(guildStats.bestScore) : null },
-                      { label: t("pages.guilds.statTotalParticipations"), icon: "🎯", value: guildStats ? guildStats.totalScores.toLocaleString("fr-FR") : null },
-                      { label: t("pages.guilds.statTotalPoints"), icon: "💰", value: guildStats ? formatScore(guildStats.totalPoints) : null },
+                      { label: t("pages.guilds.statAvgScore"), icon: FiBarChart2, value: guildStats ? formatScore(guildStats.averageScore) : null },
+                      { label: t("pages.guilds.statBestScore"), icon: FiAward, value: guildStats ? formatScore(guildStats.bestScore) : null },
+                      { label: t("pages.guilds.statTotalParticipations"), icon: FiTarget, value: guildStats ? guildStats.totalScores.toLocaleString("fr-FR") : null },
+                      { label: t("pages.guilds.statTotalPoints"), icon: FiTrendingUp, value: guildStats ? formatScore(guildStats.totalPoints) : null },
                       {
                         label: t("pages.guilds.statClearRate"),
-                        icon: "✅",
+                        icon: FiCheckCircle,
                         value: guildStats ? `${guildStats.clearRate}%` : null,
                         tooltip: t("pages.guilds.statClearRateTooltip"),
                       },
                     ].map(({ label, icon, value, tooltip }) => (
-                      <Tooltip key={label} label={tooltip} isDisabled={!tooltip} hasArrow placement="top">
-                        <Box
-                          bg={statCardBg}
-                          borderRadius="xl"
-                          borderWidth="1px"
-                          borderColor={statCardBorder}
-                          p={4}
-                          textAlign="center"
-                          boxShadow="sm"
-                          cursor={tooltip ? "default" : undefined}
-                        >
-                          <Text fontSize="lg" mb={1}>{icon}</Text>
-                          <Skeleton isLoaded={!isLoadingStats} fadeDuration={0.4}>
-                            <Text fontSize="xl" fontWeight="bold" lineHeight={1.2}>
-                              {value ?? "—"}
-                            </Text>
-                          </Skeleton>
-                          <Text fontSize="2xs" color={countColor} textTransform="uppercase" letterSpacing="wide" mt={1} fontWeight="semibold">
-                            {label}
-                          </Text>
-                        </Box>
-                      </Tooltip>
+                      <StatCard key={label} label={label} icon={icon} value={value} tooltip={tooltip} isLoading={isLoadingStats} />
                     ))}
                   </SimpleGrid>
 

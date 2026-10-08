@@ -1,6 +1,7 @@
 import {
   Box, Button, FormControl, FormLabel, Input, Table, Tbody, Td, Textarea, Th, Thead, Tr, useToast, IconButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure, VStack, HStack, NumberInput, NumberInputField, Alert, AlertIcon,
 } from "@chakra-ui/react";
+import { FiBookOpen } from "react-icons/fi";
 import { useState } from "react";
 import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
 import { PageLoader } from "./ui/PageLoader";
@@ -86,7 +87,7 @@ const OrbGuideAdminSection = () => {
     <Box w="100%" p={4}>
       <Box mb={6}>
         <SectionHeader
-          icon="📚"
+          icon={FiBookOpen}
           title="Guide des orbes"
           description="Sources d'orbes affichées dans le guide public."
           actions={<Button leftIcon={<AddIcon />} colorScheme="purple" onClick={() => handleOpenModal()}>Ajouter une source</Button>}
