@@ -11,12 +11,20 @@ interface PlayerCardProps {
   player: IPodiumPlayer;
   showGuildName?: boolean;
   podiumType?: PodiumType;
+  /** Écart de score avec le joueur classé juste au-dessus */
+  gapToAbove?: number;
 }
+
+const formatGap = (gap: number) =>
+  gap >= 1_000_000
+    ? `−${(gap / 1_000_000).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} M`
+    : `−${Math.round(gap / 1_000).toLocaleString("fr-FR")} k`;
 
 const PlayerCard = ({
   player,
   showGuildName = false,
   podiumType = "average_scores",
+  gapToAbove,
 }: PlayerCardProps) => {
   const cardBg = "bg.card";
   const borderColor = "border.subtle";
@@ -87,7 +95,7 @@ const PlayerCard = ({
         </VStack>
 
         {/* Score */}
-        <Box flexShrink={0}>
+        <VStack flexShrink={0} spacing={0} align="end">
           {podiumType === "progression" && player.progressionPercent != null ? (
             <ProgressionBadge
               percent={player.progressionPercent}
@@ -101,7 +109,12 @@ const PlayerCard = ({
               fontSize={{ base: "xs", md: "sm" }}
             />
           )}
-        </Box>
+          {gapToAbove != null && gapToAbove > 0 && (
+            <Text fontSize="2xs" color="text.muted" title={gapToAbove.toLocaleString("fr-FR")}>
+              {formatGap(gapToAbove)}
+            </Text>
+          )}
+        </VStack>
       </HStack>
     </Box>
   );

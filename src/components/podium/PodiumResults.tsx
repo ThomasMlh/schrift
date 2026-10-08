@@ -109,6 +109,14 @@ const extractTop3ForPedestal = (
   return [];
 };
 
+// Score affiché pour un joueur, comme dans PlayerCard
+const playerScore = (p: IPodiumPlayer, podiumType?: PodiumType) =>
+  p.score !== undefined
+    ? p.score ?? 0
+    : podiumType === "max_scores"
+    ? p.totalScore ?? p.averageScore ?? 0
+    : p.averageScore ?? p.totalScore ?? 0;
+
 const PlayerList = ({
   displayMode,
   podiumData,
@@ -129,6 +137,15 @@ const PlayerList = ({
 
   if (listData.length === 0) return null;
 
+  // Scores par rang (page entière, top 3 compris) pour afficher l'écart avec le joueur au-dessus.
+  // Pas d'écart en progression : le classement s'y fait en %, pas en points.
+  const scoreByRank = new Map<number, number>();
+  if (isPodiumResponse(podiumData) && podiumData.meta.podiumType !== "progression") {
+    for (const p of podiumData.data as IPodiumPlayer[]) {
+      scoreByRank.set(p.rank, playerScore(p, podiumData.meta.podiumType));
+    }
+  }
+
   return (
     <VStack spacing={2} align="stretch">
       {displayMode === "weekly" && isWeeklyResponse(podiumData)
@@ -148,14 +165,20 @@ const PlayerList = ({
             />
           ))
         : isPodiumResponse(podiumData)
-        ? listData.map((player) => (
-            <PlayerCard
-              key={player.user_id}
-              player={player as IPodiumPlayer}
-              showGuildName={showGuildName}
-              podiumType={podiumData.meta.podiumType}
-            />
-          ))
+        ? listData.map((player) => {
+            const p = player as IPodiumPlayer;
+            const aboveScore = scoreByRank.get(p.rank - 1);
+            const score = scoreByRank.get(p.rank);
+            return (
+              <PlayerCard
+                key={p.user_id}
+                player={p}
+                showGuildName={showGuildName}
+                podiumType={podiumData.meta.podiumType}
+                gapToAbove={aboveScore != null && score != null ? aboveScore - score : undefined}
+              />
+            );
+          })
         : null}
     </VStack>
   );
