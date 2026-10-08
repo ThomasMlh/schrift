@@ -1,5 +1,5 @@
 import {
-  Box, Button, Flex, HStack, SimpleGrid, Skeleton, Table, Tbody, Td, Text, Th, Thead, Tr,
+  Box, Button, Flex, HStack, SimpleGrid, Skeleton, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr,
   useColorMode, useColorModeValue,
 } from "@chakra-ui/react";
 import { useState } from "react";
@@ -170,6 +170,7 @@ export const RotationKillerHistory = ({ rotationId, cycleId, guildId }: Rotation
           <Text fontSize="sm" color={mutedText}>{t("pages.rotationDetail.historyNotEnoughCycles")}</Text>
         </Flex>
       ) : showTable ? (
+        <TableContainer>
         <Table size="sm">
           <Thead>
             <Tr>
@@ -188,6 +189,7 @@ export const RotationKillerHistory = ({ rotationId, cycleId, guildId }: Rotation
             ))}
           </Tbody>
         </Table>
+        </TableContainer>
       ) : (
         <Box h="220px">
           <ResponsiveContainer width="100%" height="100%">
