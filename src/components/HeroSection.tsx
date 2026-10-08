@@ -35,32 +35,10 @@ export const HeroSection = ({
       w="100%"
       py={paddingY[size]}
       px={4}
-      position="relative"
-      overflow="hidden"
-      bg={isDark
-        ? 'linear-gradient(135deg, rgba(124,58,237,0.18) 0%, rgba(79,70,229,0.12) 100%)'
-        : 'linear-gradient(135deg, rgba(124,58,237,0.07) 0%, rgba(79,70,229,0.04) 100%)'
-      }
       borderBottom="1px solid"
       borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
     >
-      {/* Decorative blobs */}
-      <Box
-        position="absolute" top="-80px" right="-80px"
-        w="320px" h="320px" borderRadius="full"
-        bg={isDark ? 'rgba(124,58,237,0.12)' : 'rgba(124,58,237,0.06)'}
-        sx={{ filter: 'blur(70px)' }}
-        pointerEvents="none"
-      />
-      <Box
-        position="absolute" bottom="-50px" left="-50px"
-        w="240px" h="240px" borderRadius="full"
-        bg={isDark ? 'rgba(79,70,229,0.10)' : 'rgba(79,70,229,0.04)'}
-        sx={{ filter: 'blur(60px)' }}
-        pointerEvents="none"
-      />
-
-      <Container maxW="container.xl" position="relative" zIndex={1}>
+      <Container maxW="container.xl">
         <VStack spacing={4} textAlign="center" align="center">
           {badge && (
             <Badge
