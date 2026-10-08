@@ -400,18 +400,18 @@ const GuildesPage = () => {
                   </HStack>
                   <SimpleGrid columns={{ base: 2, sm: 3, md: 5 }} gap={3}>
                     {[
-                      { label: t("pages.guilds.statAvgScore"), icon: FiBarChart2, value: guildStats ? formatScore(guildStats.averageScore) : null },
-                      { label: t("pages.guilds.statBestScore"), icon: FiAward, value: guildStats ? formatScore(guildStats.bestScore) : null },
-                      { label: t("pages.guilds.statTotalParticipations"), icon: FiTarget, value: guildStats ? guildStats.totalScores.toLocaleString("fr-FR") : null },
-                      { label: t("pages.guilds.statTotalPoints"), icon: FiTrendingUp, value: guildStats ? formatScore(guildStats.totalPoints) : null },
+                      { label: t("pages.guilds.statAvgScore"), icon: FiBarChart2, gradient: "linear(to-br, orange.400, red.400)", value: guildStats ? formatScore(guildStats.averageScore) : null },
+                      { label: t("pages.guilds.statBestScore"), icon: FiAward, gradient: "linear(to-br, yellow.400, orange.400)", value: guildStats ? formatScore(guildStats.bestScore) : null },
+                      { label: t("pages.guilds.statTotalParticipations"), icon: FiTarget, gradient: "linear(to-br, blue.400, purple.500)", value: guildStats ? guildStats.totalScores.toLocaleString("fr-FR") : null },
+                      { label: t("pages.guilds.statTotalPoints"), icon: FiTrendingUp, gradient: "linear(to-br, purple.500, pink.400)", value: guildStats ? formatScore(guildStats.totalPoints) : null },
                       {
                         label: t("pages.guilds.statClearRate"),
-                        icon: FiCheckCircle,
+                        icon: FiCheckCircle, gradient: "linear(to-br, green.400, teal.400)",
                         value: guildStats ? `${guildStats.clearRate}%` : null,
                         tooltip: t("pages.guilds.statClearRateTooltip"),
                       },
-                    ].map(({ label, icon, value, tooltip }) => (
-                      <StatCard key={label} label={label} icon={icon} value={value} tooltip={tooltip} isLoading={isLoadingStats} />
+                    ].map(({ label, icon, gradient, value, tooltip }) => (
+                      <StatCard key={label} label={label} icon={icon} gradient={gradient} value={value} tooltip={tooltip} isLoading={isLoadingStats} />
                     ))}
                   </SimpleGrid>
 

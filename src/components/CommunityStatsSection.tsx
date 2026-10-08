@@ -1,4 +1,4 @@
-import { Box, SimpleGrid, Text } from "@chakra-ui/react";
+import { Box, HStack, Icon, SimpleGrid, Text } from "@chakra-ui/react";
 import { FiUsers, FiShield, FiBarChart2, FiCheckCircle } from "react-icons/fi";
 import { useCommunityStats, useCycles } from "@/hooks/useAPI";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
@@ -20,25 +20,25 @@ export const CommunityStatsSection = () => {
 
   const cards = [
     {
-      icon: FiUsers,
+      icon: FiUsers, gradient: "linear(to-br, purple.500, pink.400)",
       value: stats?.totalMembers ?? null,
       label: t("pages.home.communityMembers"),
       format: (v: number) => v.toLocaleString("fr-FR"),
     },
     {
-      icon: FiShield,
+      icon: FiShield, gradient: "linear(to-br, blue.400, purple.500)",
       value: stats?.totalGuilds ?? null,
       label: t("pages.home.communityGuilds"),
       format: (v: number) => String(v),
     },
     {
-      icon: FiBarChart2,
+      icon: FiBarChart2, gradient: "linear(to-br, orange.400, red.400)",
       value: stats?.avgScore ?? null,
       label: t("pages.home.communityAvgScore"),
       format: formatScore,
     },
     {
-      icon: FiCheckCircle,
+      icon: FiCheckCircle, gradient: "linear(to-br, green.400, teal.400)",
       value: stats?.globalClearRate ?? null,
       label: t("pages.home.communityClearRate"),
       format: (v: number) => `${v}%`,
@@ -47,21 +47,31 @@ export const CommunityStatsSection = () => {
 
   return (
     <Box w="100%">
-      <Box mb={4}>
-        <Text as="h2" fontWeight="bold" fontSize="lg" color="text.strong">{t("pages.home.communityTitle")}</Text>
-        <Text fontSize="sm" color="text.muted">
-          {currentCycle
-            ? `${currentCycle.name} ${currentCycle.year}`
-            : t("pages.home.communitySubtitle")}
-        </Text>
-      </Box>
+      <HStack spacing={3} mb={4} align="center">
+        <Box
+          p={2} borderRadius="lg"
+          bgGradient="linear(135deg, #7C3AED, #4F46E5)"
+          display="flex" alignItems="center" justifyContent="center"
+        >
+          <Icon as={FiBarChart2} boxSize={4} color="white" />
+        </Box>
+        <Box>
+          <Text as="h2" fontWeight="bold" fontSize="lg" color="text.strong">{t("pages.home.communityTitle")}</Text>
+          <Text fontSize="sm" color="text.muted">
+            {currentCycle
+              ? `${currentCycle.name} ${currentCycle.year}`
+              : t("pages.home.communitySubtitle")}
+          </Text>
+        </Box>
+      </HStack>
 
       <SimpleGrid columns={{ base: 2, md: 4 }} gap={4}>
-        {cards.map(({ icon, value, label, format }) => (
+        {cards.map(({ icon, gradient, value, label, format }) => (
           <StatCard
             key={label}
             label={label}
             icon={icon}
+            gradient={gradient}
             value={value !== null ? format(value) : null}
             isLoading={isLoading}
           />

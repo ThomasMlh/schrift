@@ -391,7 +391,7 @@ const RotationDetailPage = () => {
                     <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider">
                       {t("pages.rotationDetail.tableScore")}s
                     </Text>
-                    <Text fontSize="md" fontWeight="bold" color="text.strong">
+                    <Text fontSize="md" fontWeight="bold" bgGradient="linear(to-r, blue.400, purple.500)" bgClip="text">
                       {totalItems}
                       {selectedGuild && (
                         <Text as="span" fontSize="xs" color="blue.500" ml={1} fontWeight="normal">

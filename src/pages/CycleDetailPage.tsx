@@ -198,11 +198,11 @@ const CycleDetailPage = () => {
                   <Divider orientation="vertical" h="40px" />
 
                   <HStack spacing={3}>
-                    <Box bg="bg.inset" borderRadius="lg" p={2} display="flex" alignItems="center" justifyContent="center">
-                      <Icon as={FiLayers} color="accent" boxSize={4} />
+                    <Box bgGradient="linear(to-br, purple.500, blue.500)" borderRadius="lg" p={2} display="flex" alignItems="center" justifyContent="center">
+                      <Icon as={FiLayers} color="white" boxSize={4} />
                     </Box>
                     <VStack align="start" spacing={0}>
-                      <Text fontSize="lg" fontWeight="extrabold" color="text.strong">
+                      <Text fontSize="lg" fontWeight="extrabold" bgGradient="linear(to-r, purple.500, blue.400)" bgClip="text">
                         {cycle.rotations.length}
                       </Text>
                       <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wide">

@@ -114,17 +114,17 @@ const CyclesPage = () => {
                 <HStack spacing={6}>
                   <HStack spacing={3}>
                     <Box
-                      bg="bg.inset"
+                      bg="blue.500"
                       borderRadius="lg"
                       p={2}
                       display="flex"
                       alignItems="center"
                       justifyContent="center"
                     >
-                      <Icon as={FiCalendar} color="accent" boxSize={4} />
+                      <Icon as={FiCalendar} color="white" boxSize={4} />
                     </Box>
                     <VStack align="start" spacing={0}>
-                      <Text fontSize="2xl" fontWeight="extrabold" color="text.strong">
+                      <Text fontSize="2xl" fontWeight="extrabold" bgGradient="linear(to-r, blue.400, purple.500)" bgClip="text">
                         {isLoading ? "…" : totalCount}
                       </Text>
                       <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wide">
@@ -136,17 +136,17 @@ const CyclesPage = () => {
                   {pagination && (
                     <HStack spacing={3}>
                       <Box
-                        bg="bg.inset"
+                        bgGradient="linear(to-br, purple.500, pink.500)"
                         borderRadius="lg"
                         p={2}
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
                       >
-                        <Icon as={FiLayers} color="accent" boxSize={4} />
+                        <Icon as={FiLayers} color="white" boxSize={4} />
                       </Box>
                       <VStack align="start" spacing={0}>
-                        <Text fontSize="2xl" fontWeight="extrabold" color="text.strong">
+                        <Text fontSize="2xl" fontWeight="extrabold" bgGradient="linear(to-r, purple.500, pink.400)" bgClip="text">
                           {pagination.itemsOnPage}
                         </Text>
                         <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wide">

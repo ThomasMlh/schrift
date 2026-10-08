@@ -11,7 +11,7 @@ interface SectionHeaderProps {
   actions?: ReactNode;
 }
 
-// En-tête commun des sections de l'administration : titre, description
+// En-tête commun des sections de l'administration : titre en dégradé de la marque, description
 // et actions, pour que toutes les sections aient le même rendu.
 export const SectionHeader = ({ title, icon, description, actions }: SectionHeaderProps) => (
   <Flex
@@ -22,12 +22,13 @@ export const SectionHeader = ({ title, icon, description, actions }: SectionHead
   >
     <VStack align="start" spacing={1} minW={0}>
       <HStack spacing={2}>
-        {icon && <Icon as={icon} boxSize={5} color="accent" aria-hidden />}
+        {icon && <Icon as={icon} boxSize={6} color="purple.400" aria-hidden />}
         <Text
           as="h2"
           fontSize="2xl"
           fontWeight="extrabold"
-          color="text.strong"
+          bgGradient="linear(to-r, blue.400, purple.500)"
+          bgClip="text"
           letterSpacing="tight"
         >
           {title}
