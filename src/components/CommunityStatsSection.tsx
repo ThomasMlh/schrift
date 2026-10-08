@@ -1,9 +1,10 @@
-import { Box, HStack, Icon, SimpleGrid, Text } from "@chakra-ui/react";
+import { Box, SimpleGrid } from "@chakra-ui/react";
 import { FiUsers, FiShield, FiBarChart2, FiCheckCircle } from "react-icons/fi";
 import { useCommunityStats, useCycles } from "@/hooks/useAPI";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
 import { useTranslation } from "react-i18next";
 import { StatCard } from "./ui/StatCard";
+import { HomeSectionHeader } from "./ui/HomeSectionHeader";
 
 const formatScore = (n: number) => {
   if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`;
@@ -47,23 +48,11 @@ export const CommunityStatsSection = () => {
 
   return (
     <Box w="100%">
-      <HStack spacing={3} mb={4} align="center">
-        <Box
-          p={2} borderRadius="lg"
-          bgGradient="linear(135deg, #7C3AED, #4F46E5)"
-          display="flex" alignItems="center" justifyContent="center"
-        >
-          <Icon as={FiBarChart2} boxSize={4} color="white" />
-        </Box>
-        <Box>
-          <Text as="h2" fontWeight="bold" fontSize="lg" color="text.strong">{t("pages.home.communityTitle")}</Text>
-          <Text fontSize="sm" color="text.muted">
-            {currentCycle
-              ? `${currentCycle.name} ${currentCycle.year}`
-              : t("pages.home.communitySubtitle")}
-          </Text>
-        </Box>
-      </HStack>
+      <HomeSectionHeader
+        icon={FiBarChart2}
+        title={t("pages.home.communityTitle")}
+        subtitle={currentCycle ? `${currentCycle.name} ${currentCycle.year}` : t("pages.home.communitySubtitle")}
+      />
 
       <SimpleGrid columns={{ base: 2, md: 4 }} gap={4}>
         {cards.map(({ icon, gradient, value, label, format }) => (

@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "./ui/PageLoader";
+import { HomeSectionHeader } from "./ui/HomeSectionHeader";
 import { FaClock, FaCalendarAlt } from "react-icons/fa";
 import { FiChevronRight } from "react-icons/fi";
 import { AttackTypeBadge } from "./ui/AttackTypeBadge";
@@ -99,24 +100,11 @@ export const CurrentInfoSection = () => {
 
   return (
     <Box w="100%">
-      {/* Section header */}
-      <HStack spacing={3} mb={4} align="center">
-        <Box
-          p={2} borderRadius="lg"
-          bgGradient="linear(135deg, #7C3AED, #4F46E5)"
-          display="flex" alignItems="center" justifyContent="center"
-        >
-          <Icon as={FaClock} boxSize={4} color="white" />
-        </Box>
-        <Box>
-          <Text as="h2" fontWeight="bold" fontSize="lg" color="text.strong">
-            {t("components.currentInfoSection.heading")}
-          </Text>
-          <Text fontSize="sm" color="text.muted">
-            {t("components.currentInfoSection.subheading")}
-          </Text>
-        </Box>
-      </HStack>
+      <HomeSectionHeader
+        icon={FaClock}
+        title={t("components.currentInfoSection.heading")}
+        subtitle={t("components.currentInfoSection.subheading")}
+      />
 
       <Box
         borderRadius="2xl"
