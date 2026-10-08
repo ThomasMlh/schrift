@@ -28,7 +28,6 @@ const UsersPage = () => {
         <HeroSection
           title={t("pages.players.heroTitle")}
           description={t("pages.players.heroDescription")}
-          badge={{ text: t("pages.players.heroBadge"), icon: "👥" }}
         />
 
         <Container maxW="container.xl" py={8}>

@@ -273,8 +273,7 @@ const RotationDetailPage = () => {
       <Box w="100%">
         <HeroSection
           title={`Rotation #${position}`}
-          description={cycle ? `${cycle.name} — ${cycle.year}` : ""}
-          badge={{ text: `${position} / ${totalRotations}`, icon: "⚡" }}
+          description={cycle ? `${cycle.name} — ${cycle.year} · ${position} / ${totalRotations}` : ""}
           size="sm"
         />
 

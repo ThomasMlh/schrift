@@ -1,10 +1,11 @@
-import { Flex, HStack, Text, VStack } from "@chakra-ui/react";
+import { Flex, HStack, Icon, Text, VStack } from "@chakra-ui/react";
 import type { ReactNode } from "react";
+import type { IconType } from "react-icons";
 
 interface SectionHeaderProps {
   title: string;
-  // Emoji ou petit pictogramme affiché avant le titre (hors dégradé)
-  icon?: string;
+  // Pictogramme affiché avant le titre
+  icon?: IconType;
   description?: ReactNode;
   // Boutons d'action alignés à droite (sous le titre sur mobile)
   actions?: ReactNode;
@@ -21,7 +22,7 @@ export const SectionHeader = ({ title, icon, description, actions }: SectionHead
   >
     <VStack align="start" spacing={1} minW={0}>
       <HStack spacing={2}>
-        {icon && <Text as="span" fontSize="2xl" lineHeight={1}>{icon}</Text>}
+        {icon && <Icon as={icon} boxSize={6} color="purple.400" aria-hidden />}
         <Text
           as="h2"
           fontSize="2xl"

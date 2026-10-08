@@ -340,7 +340,6 @@ const PodiumPage = () => {
               ? t("pages.podium.heroDescriptionProgression")
               : t("pages.podium.heroDescriptionAverage")
           }
-          badge={{ text: t("pages.podium.heroBadge"), icon: "🏆" }}
         />
 
         <Container maxW="container.xl" py={8}>

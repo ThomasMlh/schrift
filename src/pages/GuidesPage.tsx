@@ -61,7 +61,6 @@ const GuidesPage = () => {
         <HeroSection
           title={t("pages.guides.heroTitle")}
           description={t("pages.guides.heroDescription")}
-          badge={{ text: t("pages.guides.heroBadge"), icon: "📖" }}
         />
 
         <Container maxW="container.xl" px={{ base: 4, md: 6 }} py={8}>

@@ -120,8 +120,7 @@ const CycleDetailPage = () => {
       <Box w="100%">
         <HeroSection
           title={`${cycle.name} — ${cycle.year}`}
-          description={t("pages.cycleDetail.subtitle")}
-          badge={{ text: `${cycle.rotations?.length || 0} rotations`, icon: "⚔️" }}
+          description={`${t("pages.cycleDetail.subtitle")} · ${cycle.rotations?.length || 0} rotations`}
           size="md"
         />
 

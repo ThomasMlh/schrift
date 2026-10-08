@@ -1,7 +1,9 @@
 import {
-  Box, Button, Flex, FormControl, FormLabel, Grid, HStack, IconButton, Image, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spinner, Text, useColorModeValue, useToast, VStack,
+  Box, Button, Flex, FormControl, FormLabel, Grid, HStack, Icon, IconButton, Image, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spinner, Text, useColorModeValue, useToast, VStack,
 } from "@chakra-ui/react";
 import { AddIcon, EditIcon } from "@chakra-ui/icons";
+import type { IconType } from "react-icons";
+import { FiCircle, FiCrosshair, FiFolder, FiStar } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { mutate as swrMutate } from "swr";
 import { useAccessories, useCharacterMeta, useAccessoryCodes } from "../hooks/useAPI";
@@ -19,11 +21,11 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 
 type Bank = "accessories" | "killers" | "categories" | "affinity";
 
-const BANKS: { key: Bank; label: string; icon: string }[] = [
-  { key: "accessories", label: "Accessoires", icon: "\u{1F48D}" },
-  { key: "killers", label: "Killers", icon: "\u2694\uFE0F" },
-  { key: "categories", label: "Catégories", icon: "\u{1F4C2}" },
-  { key: "affinity", label: "Affinités", icon: "\u2728" },
+const BANKS: { key: Bank; label: string; icon: IconType }[] = [
+  { key: "accessories", label: "Accessoires", icon: FiCircle },
+  { key: "killers", label: "Killers", icon: FiCrosshair },
+  { key: "categories", label: "Catégories", icon: FiFolder },
+  { key: "affinity", label: "Affinités", icon: FiStar },
 ];
 
 // ─── Modale création / édition accessoire
@@ -496,7 +498,7 @@ const ImageBankSection = () => {
               }
             >
               <HStack spacing={1.5}>
-                <Text as="span" fontSize="sm">{bank.icon}</Text>
+                <Icon as={bank.icon} boxSize={3.5} aria-hidden />
                 <Text as="span" fontSize="sm" fontWeight={isActive ? "semibold" : "normal"}>
                   {bank.label}
                 </Text>

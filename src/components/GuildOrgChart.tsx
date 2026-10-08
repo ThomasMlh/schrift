@@ -3,8 +3,11 @@ import {
   VStack,
   Text,
   Flex,
+  Icon,
   useColorModeValue
 } from "@chakra-ui/react";
+import { FaCrown } from "react-icons/fa";
+import { FiStar } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import type { IUser } from "../interfaces";
 import { UserDisplay } from "./ui/UserDisplay";
@@ -18,19 +21,19 @@ const roleConfig = {
     gradient: "linear(to-r, purple.400, pink.400)",
     glow: "purple.400",
     ringGradient: "linear-gradient(135deg, #9F7AEA, #ED64A6)",
-    icon: "👑",
+    icon: FaCrown,
   },
   "Sous-Chef": {
     gradient: "linear(to-r, blue.400, cyan.400)",
     glow: "blue.400",
     ringGradient: "linear-gradient(135deg, #4299E1, #0BC5EA)",
-    icon: "⭐",
+    icon: FiStar,
   },
   Membre: {
     gradient: "linear(to-r, whiteAlpha.600, whiteAlpha.800)",
     glow: "whiteAlpha.400",
     ringGradient: "linear-gradient(135deg, #e7eaee, #ffffff)",
-    icon: "",
+    icon: null,
   },
 };
 
@@ -112,9 +115,7 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
           <VStack spacing={3}>
             {/* Role icon */}
             {config.icon && (
-              <Text fontSize={isLead ? "xl" : "md"} lineHeight={1}>
-                {config.icon}
-              </Text>
+              <Icon as={config.icon} boxSize={isLead ? 5 : 4} color={config.glow} aria-hidden />
             )}
             <UserDisplay
               user={member}

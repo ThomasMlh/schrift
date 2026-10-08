@@ -55,7 +55,6 @@ const CharactersPage = () => {
           <HeroSection
             title={t("pages.characters.heroTitle")}
             description={t("pages.characters.heroDescription")}
-            badge={{ text: t("pages.characters.heroBadge"), icon: "⚔️" }}
           />
           <Container maxW="container.xl" py={8}>
             <VStack spacing={6} align="stretch">
