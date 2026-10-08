@@ -103,7 +103,7 @@ const BuildsAdminSection = () => {
         <SectionHeader title="Gestion des builds" description="Validez, modifiez ou supprimez les builds proposés." />
 
         {/* Filtres */}
-        <Box bg={bgColor} p={4} borderRadius="md" borderWidth="1px" borderColor={borderColor}>
+        <Box bg={bgColor} p={4} borderRadius="xl" borderWidth="1px" borderColor={borderColor}>
           <HStack spacing={4}>
             <Box>
               <Text fontSize="sm" fontWeight="medium" mb={2}>
@@ -130,12 +130,12 @@ const BuildsAdminSection = () => {
         {isLoading ? (
           <PageLoader color="orange.500" height="200px" />
         ) : builds.length === 0 ? (
-          <Box bg={bgColor} p={8} borderRadius="md" borderWidth="1px" borderColor={borderColor} textAlign="center">
+          <Box bg={bgColor} p={8} borderRadius="xl" borderWidth="1px" borderColor={borderColor} textAlign="center">
             <Text>Aucun build trouvé</Text>
           </Box>
         ) : (
           <>
-            <Box overflowX="auto" bg={bgColor} borderRadius="md" borderWidth="1px" borderColor={borderColor}>
+            <Box overflowX="auto" bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor}>
               <Table variant="simple">
                 <Thead>
                   <Tr>

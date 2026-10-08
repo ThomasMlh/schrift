@@ -45,7 +45,7 @@ export const GuildScoreDistribution = ({ guildId, cycleId }: GuildScoreDistribut
   const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
     if (!active || !payload?.length) return null;
     return (
-      <Box bg={bg} p={2} borderRadius="md" boxShadow="md" borderWidth="1px" borderColor={border}>
+      <Box bg={bg} p={2} borderRadius="xl" boxShadow="md" borderWidth="1px" borderColor={border}>
         <Text fontSize="xs" fontWeight="semibold">{label}</Text>
         <Text fontSize="xs" color={subText}>{payload[0].value} score(s)</Text>
       </Box>

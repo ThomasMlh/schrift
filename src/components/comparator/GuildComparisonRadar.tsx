@@ -171,7 +171,7 @@ export const GuildComparisonRadar = ({
         <Box
           bg={bgColor}
           p={3}
-          borderRadius="md"
+          borderRadius="xl"
           boxShadow="lg"
           borderWidth="1px"
           borderColor={borderColor}

@@ -242,7 +242,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, gu
                                         key={account.bbs_id}
                                         p={3}
                                         borderWidth="1px"
-                                        borderRadius="lg"
+                                        borderRadius="xl"
                                         bg={account.is_primary ? primaryCardBg : undefined}
                                         borderColor={account.is_primary ? primaryCardBorder : altCardBorder}
                                     >

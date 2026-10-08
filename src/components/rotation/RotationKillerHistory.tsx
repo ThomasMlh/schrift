@@ -77,7 +77,7 @@ export const RotationKillerHistory = ({ rotationId, cycleId, guildId }: Rotation
     });
 
   const renderTile = (label: string, holder: IKillerRecordHolder | null, help?: string, footer?: ReactNode) => (
-    <Box bg={tileBg} borderRadius="lg" p={4} borderWidth="1px" borderColor={border}>
+    <Box bg={tileBg} borderRadius="xl" p={4} borderWidth="1px" borderColor={border}>
       <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" color={mutedText}>
         {label}
       </Text>
@@ -109,7 +109,7 @@ export const RotationKillerHistory = ({ rotationId, cycleId, guildId }: Rotation
   const renderTooltip = ({ active, payload, label }: TooltipRenderProps) => {
     if (!active || !payload?.length) return null;
     return (
-      <Box bg={bg} p={3} borderRadius="md" boxShadow="md" borderWidth="1px" borderColor={border}>
+      <Box bg={bg} p={3} borderRadius="xl" boxShadow="md" borderWidth="1px" borderColor={border}>
         <Text fontSize="xs" fontWeight="semibold" mb={1} color={strongText}>{label}</Text>
         {payload.filter((p) => p.value != null).map((p) => {
           const isAll = p.dataKey === "all";

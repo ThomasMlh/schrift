@@ -168,7 +168,7 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
                 key={idx}
                 bg={isRecent ? scoreBg : cardBg}
                 p={4}
-                borderRadius="lg"
+                borderRadius="xl"
                 borderWidth="1px"
                 borderColor={scoreItemBorderColor}
                 transition="all 0.2s"

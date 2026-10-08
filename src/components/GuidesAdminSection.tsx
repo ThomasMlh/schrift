@@ -42,7 +42,7 @@ const GuideFormWrapper: React.FC<GuideFormWrapperProps> = ({
         {title} {isOpen ? "▲" : "▼"}
       </Button>
       {isOpen && (
-        <Box p={4} borderWidth={1} borderRadius="lg" boxShadow={boxShadow} bg={bgColor}>
+        <Box p={4} borderWidth={1} borderRadius="xl" boxShadow={boxShadow} bg={bgColor}>
           {children}
         </Box>
       )}

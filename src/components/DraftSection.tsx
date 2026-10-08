@@ -310,7 +310,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                   <Box
                     key={guild._id}
                     bg={guildCardBg}
-                    borderRadius="lg"
+                    borderRadius="xl"
                     p={3}
                     mb={2}
                     borderWidth="1px"
@@ -355,7 +355,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
               {/* Sans guilde */}
               <Box
                 bg={guildCardBg}
-                borderRadius="lg"
+                borderRadius="xl"
                 p={3}
                 borderWidth="1px"
                 borderColor={borderColor}

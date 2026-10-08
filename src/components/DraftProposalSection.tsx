@@ -264,7 +264,7 @@ const DraftProposalSection = () => {
   };
 
   return (
-    <Box borderWidth="1px" borderColor={borderColor} borderRadius="lg" p={5} bg={cardBg}>
+    <Box borderWidth="1px" borderColor={borderColor} borderRadius="xl" p={5} bg={cardBg}>
       <VStack align="stretch" spacing={4}>
         <Box>
           <Text fontWeight="bold" fontSize="lg">🧮 Proposition de draft automatique</Text>

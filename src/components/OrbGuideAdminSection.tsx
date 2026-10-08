@@ -93,7 +93,7 @@ const OrbGuideAdminSection = () => {
         />
       </Box>
 
-      <Box bg={bgColor} borderWidth="1px" borderColor={borderColor} borderRadius="lg" overflow="auto">
+      <Box bg={bgColor} borderWidth="1px" borderColor={borderColor} borderRadius="xl" overflow="auto">
         <Table variant="simple">
           <Thead>
             <Tr>

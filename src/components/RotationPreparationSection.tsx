@@ -71,7 +71,7 @@ const RotationPreparationSection = () => {
         ) : (
           <>
             <SimpleGrid columns={{ base: 1, md: 4 }} spacing={3}>
-              <Box bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg" p={4}>
+              <Box bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl" p={4}>
                 <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" color={mutedText}>
                   {data.cycle.name} {data.cycle.year} · R{data.rotation.position}
                 </Text>
@@ -87,7 +87,7 @@ const RotationPreparationSection = () => {
                 ["Moyenne tous joueurs", formatScore(data.killer_stats.average)],
                 ["Scores sur ce killer", data.killer_stats.attempts.toLocaleString("fr-FR")],
               ].map(([label, value]) => (
-                <Box key={label} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg" p={4}>
+                <Box key={label} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl" p={4}>
                   <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" color={mutedText}>{label}</Text>
                   <Text fontSize="xl" fontWeight="bold" mt={1} sx={{ fontVariantNumeric: "tabular-nums" }}>{value}</Text>
                 </Box>
@@ -97,7 +97,7 @@ const RotationPreparationSection = () => {
             {data.members.length === 0 ? (
               <Alert status="info" borderRadius="md"><AlertIcon />Aucun membre dans cette guilde.</Alert>
             ) : (
-              <TableContainer bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg">
+              <TableContainer bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl">
                 <Table size="sm">
                   <Thead bg={headerBg}>
                     <Tr>

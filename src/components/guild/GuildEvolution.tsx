@@ -55,7 +55,7 @@ export const GuildEvolution = ({ guildId }: GuildEvolutionProps) => {
   const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string; color: string }>; label?: string }) => {
     if (!active || !payload?.length) return null;
     return (
-      <Box bg={bg} p={3} borderRadius="md" boxShadow="md" borderWidth="1px" borderColor={border}>
+      <Box bg={bg} p={3} borderRadius="xl" boxShadow="md" borderWidth="1px" borderColor={border}>
         <Text fontSize="xs" fontWeight="semibold" mb={1}>{label}</Text>
         {payload.map((p, i: number) => (
           <HStack key={i} spacing={2}>

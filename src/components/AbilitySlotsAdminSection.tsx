@@ -139,7 +139,7 @@ const AbilitySlotsAdminSection = () => {
         suite des autres lignes de sa catégorie (ou en fin de tableau pour une nouvelle catégorie).
       </Text>
 
-      <Box bg={bgColor} borderWidth="1px" borderColor={borderColor} borderRadius="lg" overflow="auto">
+      <Box bg={bgColor} borderWidth="1px" borderColor={borderColor} borderRadius="xl" overflow="auto">
         <Table variant="simple" size="sm">
           <Thead>
             <Tr>

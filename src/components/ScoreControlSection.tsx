@@ -139,7 +139,7 @@ const ScoreControlSection = () => {
   );
 
   const renderAnomaly = (anomaly: IScoreAnomaly) => (
-    <Box key={anomaly.score_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg" p={4}>
+    <Box key={anomaly.score_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl" p={4}>
       <Flex justify="space-between" align={{ base: "start", md: "center" }} gap={3} direction={{ base: "column", md: "row" }}>
         <VStack align="start" spacing={1} minW={0}>
           <HStack spacing={2} wrap="wrap">
@@ -258,7 +258,7 @@ const ScoreControlSection = () => {
                 <Alert status="info" borderRadius="md"><AlertIcon />Aucune modification enregistrée pour l'instant.</Alert>
               ) : (
                 <VStack spacing={3} align="stretch">
-                  <TableContainer bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg">
+                  <TableContainer bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl">
                     <Table size="sm">
                       <Thead bg={headerBg}>
                         <Tr>

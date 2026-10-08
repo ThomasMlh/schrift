@@ -89,7 +89,7 @@ export const MissingScoresPanel = ({ guildId }: MissingScoresPanelProps) => {
             {totalMissing} score(s) manquant(s) sur {data.cycle.name} {data.cycle.year} · {data.members_count} membre(s)
           </Text>
           {data.rotations.filter((r) => r.missing.length > 0).map((rotation) => (
-            <Box key={rotation.rotation_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg" p={4}>
+            <Box key={rotation.rotation_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl" p={4}>
               <HStack spacing={2} mb={3} wrap="wrap">
                 <Badge colorScheme="purple" variant="subtle">R{rotation.position}</Badge>
                 {rotation.attack && <AttackTypeBadge attackType={rotation.attack} size="12px" />}

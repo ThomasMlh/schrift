@@ -169,7 +169,7 @@ export const ScoreModal = ({
                                     gap={3}
                                     p={3}
                                     bg={lockedBg}
-                                    borderRadius="lg"
+                                    borderRadius="xl"
                                     borderWidth="1px"
                                     borderColor={borderColor}
                                 >
@@ -305,7 +305,7 @@ export const ScoreModal = ({
                         {canSubmit && (
                             <Box
                                 bg={previewBg}
-                                borderRadius="lg"
+                                borderRadius="xl"
                                 borderWidth="1px"
                                 borderColor={borderColor}
                                 borderLeftWidth="3px"

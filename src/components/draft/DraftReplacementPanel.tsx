@@ -187,7 +187,7 @@ export const DraftReplacementPanel = ({ cycleName, cycleYear, rankingType, guild
           {result.replacements.map(({ player, suggestions, eligible_count, recommended_bbs_id }) => {
             const recommended = suggestions.find((s) => s.bbs_id === recommended_bbs_id);
             return (
-              <Box key={player.bbs_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg" p={3}>
+              <Box key={player.bbs_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl" p={3}>
                 <Flex justify="space-between" align="center" gap={2} wrap="wrap" mb={2}>
                   <HStack spacing={2}>
                     {playerLine(player)}

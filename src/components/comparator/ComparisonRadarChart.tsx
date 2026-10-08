@@ -100,7 +100,7 @@ export const ComparisonRadarChart = ({
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; color?: string; payload: { metric: string } }> }) => {
     if (!active || !payload?.length) return null;
     return (
-      <Box bg={bgColor} p={3} borderRadius="md" boxShadow="lg" borderWidth="1px" borderColor={borderColor}>
+      <Box bg={bgColor} p={3} borderRadius="xl" boxShadow="lg" borderWidth="1px" borderColor={borderColor}>
         <Text fontWeight="bold" fontSize="sm" mb={2}>{payload[0].payload.metric}</Text>
         {payload.map((entry, i: number) => (
           <HStack key={i} spacing={2}>

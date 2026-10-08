@@ -105,7 +105,7 @@ export const PodiumSection: React.FC = () => {
   return (
     <Box
       bg={bgColor}
-      borderRadius="lg"
+      borderRadius="xl"
       borderWidth="1px"
       borderColor={borderColor}
       boxShadow={shadowColor}

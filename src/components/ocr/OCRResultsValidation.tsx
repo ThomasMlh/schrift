@@ -285,7 +285,7 @@ export const OCRResultsValidation = ({
                             key={player.lineNumber}
                             borderWidth="1px"
                             borderColor={borderColor}
-                            borderRadius="md"
+                            borderRadius="xl"
                             p={3}
                             bg={player.needsReview ? "orange.900" : undefined}
                           >

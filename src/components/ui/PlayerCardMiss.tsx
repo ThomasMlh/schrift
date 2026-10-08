@@ -32,7 +32,7 @@ const PlayerCardMiss = ({ player, showGuildName = false }: PlayerCardMissProps) 
       bg={cardBg}
       borderWidth="1px"
       borderColor={borderColor}
-      borderRadius="lg"
+      borderRadius="xl"
       px={3}
       py={2}
       transition="all 0.15s ease"

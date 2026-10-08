@@ -44,7 +44,7 @@ const DeclineAlertsSection = () => {
     const name = alert.bbs_name || alert.global_name || alert.bbs_id;
 
     return (
-      <Box key={alert.bbs_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="lg" p={4}>
+      <Box key={alert.bbs_id} bg={cardBg} borderWidth="1px" borderColor={border} borderRadius="xl" p={4}>
         <Flex justify="space-between" align="center" gap={3} mb={3} wrap="wrap">
           <HStack spacing={3} minW={0}>
             <Avatar size="sm" src={avatarUrl} name={name} />

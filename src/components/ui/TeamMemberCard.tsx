@@ -62,7 +62,7 @@ export const TeamMemberCard = memo(({
     <Box
       p={4}
       borderWidth="1px"
-      borderRadius="md"
+      borderRadius="xl"
       borderColor={borderColor}
       bg={bgColor}
     >
