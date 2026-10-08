@@ -12,14 +12,10 @@ import {
   Flex,
   useToast,
   Image,
-  SimpleGrid,
-  IconButton,
-  Tooltip
 } from "@chakra-ui/react";
-import type { ReactNode } from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
-import { ArrowBackIcon, DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import { ArrowBackIcon } from "@chakra-ui/icons";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import { BuildDetailModal } from "@/components/ui/BuildDetailModal";
 import type { IBuild } from "@/interfaces";
@@ -35,37 +31,9 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import { useTranslation } from "react-i18next";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { bucketUrl } from "@/utils/apiRequest";
-
-interface SectionCardProps {
-  label: string;
-  accentColor: string;
-  isDark: boolean;
-  children: ReactNode;
-}
-
-const SectionCard = ({ label, accentColor, isDark, children }: SectionCardProps) => (
-  <Box
-    p={4}
-    borderRadius="xl"
-    bg={isDark ? 'rgba(255,255,255,0.03)' : 'gray.50'}
-    border="1px solid"
-    borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
-    borderLeftWidth="3px"
-    borderLeftColor={accentColor}
-  >
-    <Text
-      fontSize="2xs"
-      fontWeight="semibold"
-      letterSpacing="widest"
-      textTransform="uppercase"
-      color={accentColor}
-      mb={3}
-    >
-      {label}
-    </Text>
-    {children}
-  </Box>
-);
+import { SectionCard } from "@/components/character/SectionCard";
+import { CharacterVisuals } from "@/components/character/CharacterVisuals";
+import { CharacterBuilds } from "@/components/character/CharacterBuilds";
 
 const CharacterDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -541,122 +509,9 @@ const CharacterDetailPage = () => {
             </Box>
           </Box>
 
-          {/* Visuals */}
-          <Box>
-            <Text
-              fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
-              textTransform="uppercase"
-              color={isDark ? 'purple.400' : 'purple.600'}
-              mb={4}
-            >
-              {t("pages.characterDetail.headingVisuals")}
-            </Text>
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-              {[
-                ...(character.banner_id ? [{
-                  src: `${bucketUrl}/banners/${character.banner_id}.png`,
-                  label: t("pages.characterDetail.labelBanner"),
-                  filename: `banniere-${character.name}.png`,
-                  key: "banner",
-                }] : []),
-                { src: `${bucketUrl}/characters/attack/${character._id}.png`, label: t("pages.characterDetail.labelSpecialAttack"), filename: `attaque-${character.name}.png`, key: "attack" },
-                { src: `${bucketUrl}/characters/artwork/${character._id}.png`, label: t("pages.characterDetail.labelArtwork"), filename: `artwork-${character.name}.png`, key: "artwork" },
-                { src: `${bucketUrl}/characters/phrase/${character._id}.png`, label: t("pages.characterDetail.labelPhrase"), filename: `phrase-${character.name}.png`, key: "phrase" },
-              ].map(({ src, label, filename, key }) => (
-                <Box key={key} borderRadius="xl" overflow="hidden" border="1px solid"
-                  borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
-                  bg={isDark ? 'gray.800' : 'white'}>
-                  <Flex px={4} pt={3} pb={2} borderBottom="1px solid"
-                    borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
-                    justify="space-between" align="center">
-                    <Text fontSize="xs" fontWeight="semibold" letterSpacing="widest"
-                      textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
-                      {label}
-                    </Text>
-                    <HStack spacing={1}>
-                      <Tooltip label={t("pages.characterDetail.tooltipDownload")}>
-                        <IconButton aria-label={t("pages.characterDetail.tooltipDownload")} icon={<DownloadIcon />} size="xs"
-                          variant="ghost" borderRadius="full"
-                          onClick={() => handleDownload(src, filename)} />
-                      </Tooltip>
-                      <Tooltip label={t("pages.characterDetail.tooltipExpand")}>
-                        <IconButton aria-label={t("pages.characterDetail.tooltipExpand")} icon={<ExternalLinkIcon />} size="xs"
-                          variant="ghost" borderRadius="full"
-                          onClick={() => openLightbox(src, label)} />
-                      </Tooltip>
-                    </HStack>
-                  </Flex>
-                  <Image
-                    src={src}
-                    alt={label}
-                    w="100%" h="auto"
-                    cursor="zoom-in"
-                    onClick={() => openLightbox(src, label)}
-                  />
-                </Box>
-              ))}
-            </SimpleGrid>
-          </Box>
+          <CharacterVisuals character={character} onDownload={handleDownload} onOpen={openLightbox} />
 
-          {/* Builds validés utilisant ce personnage */}
-          {(buildsLoading || characterBuilds.length > 0) && (
-            <Box>
-              <Text
-                fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
-                textTransform="uppercase"
-                color={isDark ? 'purple.400' : 'purple.600'}
-                mb={4}
-              >
-                Builds validés ({characterBuilds.length})
-              </Text>
-              {buildsLoading ? (
-                <PageLoader height="80px" />
-              ) : (
-                <SimpleGrid columns={{ base: 2, sm: 3, md: 4, lg: 5 }} spacing={3}>
-                  {characterBuilds.map((build) => (
-                    <Box
-                      key={build._id}
-                      p={3}
-                      bg={isDark ? 'gray.800' : 'white'}
-                      borderRadius="xl"
-                      border="1px solid"
-                      borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
-                      cursor="pointer"
-                      _hover={{ borderColor: "purple.400", transform: "translateY(-2px)", boxShadow: "md" }}
-                      transition="all 0.15s"
-                      onClick={() => setSelectedBuild(build)}
-                    >
-                      <HStack spacing={1} justify="center" mb={2}>
-                        {build.team.map((member, i) => (
-                          <Avatar
-                            key={i}
-                            size="sm"
-                            src={member.character?._id ? `${bucketUrl}/characters/thumb/${member.character._id}.png` : undefined}
-                            name={member.character?.name ?? "?"}
-                            border="2px solid"
-                            borderColor={["purple.400", "blue.400", "teal.400"][i]}
-                          />
-                        ))}
-                      </HStack>
-                      {build.rotation && (
-                        <HStack justify="center" spacing={1} mb={1}>
-                          <Text fontSize="xs" color={isDark ? 'gray.400' : 'gray.500'} noOfLines={1}>
-                            {build.rotation.killer}
-                          </Text>
-                          <AttackTypeBadge attackType={build.rotation.attack} size="12px" />
-                        </HStack>
-                      )}
-                      {build.user && (
-                        <Text fontSize="xs" color={isDark ? 'gray.500' : 'gray.400'} textAlign="center" noOfLines={1}>
-                          {build.user.bbs_name || build.user.global_name}
-                        </Text>
-                      )}
-                    </Box>
-                  ))}
-                </SimpleGrid>
-              )}
-            </Box>
-          )}
+          <CharacterBuilds builds={characterBuilds} isLoading={buildsLoading} onSelect={setSelectedBuild} />
 
           {/* Bottom navigation */}
           <Flex justify="center">
