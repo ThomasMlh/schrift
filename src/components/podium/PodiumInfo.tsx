@@ -1,4 +1,5 @@
-import { Box, HStack, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, Icon, Text, useColorModeValue } from "@chakra-ui/react";
+import { FiTrendingDown } from "react-icons/fi";
 import type {
   IPodiumResponse,
   IPodiumWeeklyResponse,
@@ -128,9 +129,10 @@ export const PodiumInfo = ({
     return (
       <Box px={4} py={3} bg={filterBg} borderRadius="lg">
         <HStack spacing={5} flexWrap="wrap" justify="center" align="center">
-          <Text fontSize="sm" fontWeight="bold" color={redAccent}>
-            📉 {t("components.podiumInfo.missTitle")}
-          </Text>
+          <HStack spacing={1.5} color={redAccent}>
+            <Icon as={FiTrendingDown} boxSize={4} aria-hidden />
+            <Text fontSize="sm" fontWeight="bold">{t("components.podiumInfo.missTitle")}</Text>
+          </HStack>
           <Text fontSize="sm" color={mutedText}>
             {t("components.podiumInfo.missPlayers", {
               count: podiumData.meta.totalPlayersWithMisses,

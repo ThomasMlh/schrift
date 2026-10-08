@@ -481,14 +481,9 @@
       "allGuilds": "Toutes les guildes",
       "week": "Semaine",
       "reset": "Réinitialiser",
-      "activeFilters": "Filtres actifs :",
-      "badgeMode": "Mode :",
-      "badgeTypeMax": "Type : Score max (somme)",
-      "badgeCycle": "Cycle :",
-      "badgeWeek": "Semaine :",
-      "badgeGuild": "Guilde :",
       "rankingProgression": "Progression",
-      "badgeTypeProgression": "Type : Progression"
+      "shortcutCurrentCycle": "Cycle en cours",
+      "shortcutMyGuild": "Ma guilde"
     },
     "podiumInfo": {
       "rotationScore": "Score moyen",
@@ -848,6 +843,9 @@
       "limitReached": "⚠️ Limite de {{max}} personnages atteinte",
       "noResults": "Aucun personnage trouvé",
       "typeToSearch": "Tapez pour rechercher..."
+    },
+    "podiumPedestal": {
+      "medal": "Médaille de la place {{rank}}"
     }
   },
   "affinities": {
