@@ -50,7 +50,7 @@ const AccessoryFormModal = ({
   const toast = useToast();
   const isEdit = accessory !== null;
   const { saveAccessory } = useAccessoryMutations();
-  const previewBg = useColorModeValue("gray.100", "gray.700");
+  const previewBg = "bg.inset";
   const browseBg = "bg.page";
   const browseBorder = "border.subtle";
   const codeHoverBg = useColorModeValue("purple.50", "purple.900");
@@ -264,8 +264,8 @@ interface ImageCardProps {
 
 const ImageCard = ({ src, label, sublabel, onEdit }: ImageCardProps) => {
   const cardBg = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const emptyBg = useColorModeValue("gray.100", "gray.700");
+  const borderColor = "border.subtle";
+  const emptyBg = "bg.inset";
   const labelColor = useColorModeValue("gray.700", "gray.200");
   const [imgError, setImgError] = useState(false);
 
@@ -440,7 +440,7 @@ const ImageBankSection = () => {
   const tabInactiveColor = "text.muted";
   const tabInactiveBorder = "border.faint";
   const tabInactiveHoverBg = "bg.hover";
-  const tabInactiveHoverBorder = useColorModeValue("gray.300", "whiteAlpha.300");
+  const tabInactiveHoverBorder = "border.strong";
 
   const renderBank = () => {
     switch (activeBank) {

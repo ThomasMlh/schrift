@@ -86,7 +86,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   const rowHoverBg    = useColorModeValue("gray.50", "gray.700");
   const modalBg = "bg.card";
   const emptyBg = "bg.muted";
-  const guildCardBg   = useColorModeValue("white", "gray.750");
+  const guildCardBg = "bg.elevated";
 
   // ── Données dérivées ────────────────────────────────────────────────────────
   // On drafte des comptes bbs, pas des users : un compte sans bbs_id (guilde/rôle assignés

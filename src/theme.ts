@@ -21,12 +21,19 @@ const semanticTokens = {
     'bg.subtle': { default: 'gray.50', _dark: 'whiteAlpha.50' },
     'bg.muted': { default: 'gray.50', _dark: 'gray.700' },
     'bg.hover': { default: 'gray.100', _dark: 'whiteAlpha.100' },
+    'bg.inset': { default: 'gray.100', _dark: 'gray.700' },
+    'bg.elevated': { default: 'white', _dark: 'gray.700' },
+    // Carte translucide posée sur un fond décoré (dégradés, bannières)
+    'bg.glass': { default: 'white', _dark: 'rgba(26,32,44,0.7)' },
     // Bordures
     'border.subtle': { default: 'gray.200', _dark: 'gray.700' },
     'border.default': { default: 'gray.200', _dark: 'gray.600' },
     'border.faint': { default: 'gray.200', _dark: 'whiteAlpha.200' },
+    'border.strong': { default: 'gray.300', _dark: 'whiteAlpha.300' },
     // Textes
     'text.strong': { default: 'gray.800', _dark: 'whiteAlpha.900' },
+    'text.body': { default: 'gray.700', _dark: 'gray.200' },
+    'text.secondary': { default: 'gray.600', _dark: 'gray.300' },
     'text.muted': { default: 'gray.500', _dark: 'gray.400' },
     // Accent de la marque (violet)
     'accent': { default: 'purple.600', _dark: 'purple.300' },

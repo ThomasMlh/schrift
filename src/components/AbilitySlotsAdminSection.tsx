@@ -1,5 +1,5 @@
 import {
-  Box, Button, FormControl, FormLabel, Input, Select, Table, Tbody, Td, Text, Th, Thead, Tr, useColorModeValue, useToast, IconButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure, VStack, HStack, Alert, AlertIcon,
+  Box, Button, FormControl, FormLabel, Input, Select, Table, Tbody, Td, Text, Th, Thead, Tr, useToast, IconButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure, VStack, HStack, Alert, AlertIcon,
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
@@ -31,7 +31,7 @@ const AbilitySlotsAdminSection = () => {
   const toast = useToast();
 
   const bgColor = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
 
   const existingCategories = useMemo(() => {
     const seen = new Set<string>();

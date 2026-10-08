@@ -7,7 +7,6 @@ import {
   Card,
   CardBody,
   Badge,
-  useColorModeValue,
   Flex,
   Alert,
   AlertIcon,
@@ -50,7 +49,7 @@ const OrbFarmingGuide = () => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
   const bgColor = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
   const mutedText = "text.muted";
 
   const { t } = useTranslation();

@@ -9,7 +9,6 @@ import {
   Alert,
   AlertIcon,
   useToast,
-  useColorModeValue,
   useColorMode,
   Badge,
   Icon,
@@ -78,7 +77,7 @@ const ComparatorPage: React.FC = () => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
   const bgColor = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
   const mutedText = "text.muted";
 
   const {

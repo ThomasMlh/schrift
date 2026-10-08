@@ -1,5 +1,5 @@
 import {
-  Box, Button, Container, Text, useToast, Table, Thead, Tbody, Tr, Th, Td, Badge, IconButton, useDisclosure, VStack, HStack, AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, useColorModeValue, Avatar, Tooltip,
+  Box, Button, Container, Text, useToast, Table, Thead, Tbody, Tr, Th, Td, Badge, IconButton, useDisclosure, VStack, HStack, AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Avatar, Tooltip,
 } from "@chakra-ui/react";
 import { useState, useRef } from "react";
 import { useBuilds } from "../hooks/useAPI";
@@ -28,7 +28,7 @@ const BuildsAdminSection = () => {
   
   const toast = useToast();
   const bgColor = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const borderColor = "border.default";
 
   const { builds, pagination, isLoading, mutate } = useBuilds({
     page: currentPage,

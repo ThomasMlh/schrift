@@ -5,7 +5,6 @@ import {
   Text,
   Box,
   Button,
-  useColorModeValue,
   HStack,
   Icon,
   Accordion,
@@ -98,7 +97,7 @@ export const OCRResultsValidation = ({
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const bgColor = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const borderColor = "border.default";
 
   // Formatage des scores avec virgules (ex: 1234567 → 1,234,567)
   const formatNumber = (value: string | number): string => {

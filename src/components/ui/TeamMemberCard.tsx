@@ -8,7 +8,6 @@ import {
   Button,
   IconButton,
   Text,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import { memo } from "react";
@@ -55,7 +54,7 @@ export const TeamMemberCard = memo(({
   onAccessoryChange,
   getUsedAccessoryIds,
 }: TeamMemberCardProps) => {
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const borderColor = "border.default";
   const bgColor = "bg.muted";
 
   return (

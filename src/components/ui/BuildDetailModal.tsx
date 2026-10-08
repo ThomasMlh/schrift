@@ -13,7 +13,6 @@ import {
   HStack,
   Badge,
   Image,
-  useColorModeValue,
   Divider,
   Grid,
   GridItem,
@@ -44,7 +43,7 @@ export const BuildDetailModal = ({
   onEdit,
 }: BuildDetailModalProps) => {
   const cardBg = "bg.card";
-  const cardBorder = useColorModeValue("gray.100", "gray.700");
+  const cardBorder = "bg.inset";
   const sectionBg = "bg.muted";
   const headerBg = "bg.page";
   const linkCardBg = "bg.muted";

@@ -75,9 +75,9 @@ const AbilitySlotsGuide = () => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
   const bgColor = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
   const rowHoverBg = useColorModeValue("purple.50", "whiteAlpha.50");
-  const rowStripeBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const rowStripeBg = "bg.subtle";
   const mutedText = useColorModeValue("gray.500", "gray.400");
   const panelBg = "bg.card";
 

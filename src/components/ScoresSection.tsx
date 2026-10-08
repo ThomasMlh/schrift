@@ -8,7 +8,6 @@ import {
   IconButton,
   Text,
   Tooltip,
-  useColorModeValue,
   useDisclosure,
   VStack,
   Alert,
@@ -72,7 +71,7 @@ const ScoresSection = () => {
 
   // ── Couleurs ─────────────────────────────────────────────────────────────────
   const cardBg = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
   const mutedText = "text.muted";
   const tableBg = "bg.card";
 

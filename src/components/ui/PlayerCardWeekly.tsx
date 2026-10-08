@@ -13,7 +13,7 @@ interface PlayerCardWeeklyProps {
 
 const PlayerCardWeekly = ({ player, showGuildName = false }: PlayerCardWeeklyProps) => {
   const cardBg = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
   const hoverBorderColor = useColorModeValue("blue.400", "blue.500");
   const rankColor = "text.muted";
   const subScoreColor = "text.muted";

@@ -120,9 +120,9 @@ export const ScoreModal = ({
 
     // ── Couleurs ─────────────────────────────────────────────────────────────
     const modalBg = "bg.card";
-    const borderColor   = useColorModeValue("gray.200", "gray.700");
+    const borderColor = "border.subtle";
     const mutedText     = useColorModeValue("gray.500", "gray.400");
-    const lockedBg      = useColorModeValue("gray.50", "gray.750");
+    const lockedBg = "bg.muted";
     const previewBg = "bg.muted";
     const accentColor   = isEdit ? "orange" : submitButtonColor;
     const avatarUrl     = selectedUser

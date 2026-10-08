@@ -30,8 +30,8 @@ export const UserPositionPerformance = ({
 }: UserPositionPerformanceProps) => {
   const cardBg = "bg.card";
   const radarColor = useColorModeValue("#3182CE", "#63B3ED");
-  const tooltipBg = useColorModeValue("#FFFFFF", "#2D3748");
-  const tooltipBorder = useColorModeValue("#E2E8F0", "#4A5568");
+  const tooltipBg = "bg.elevated";
+  const tooltipBorder = "border.default";
   const { t } = useTranslation();
 
   if (performanceByQuartile.length < 2) return null;

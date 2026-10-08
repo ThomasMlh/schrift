@@ -19,7 +19,7 @@ const PlayerCard = ({
   podiumType = "average_scores",
 }: PlayerCardProps) => {
   const cardBg = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
   const hoverBorderColor = useColorModeValue("blue.400", "blue.500");
   const rankColor = "text.muted";
 

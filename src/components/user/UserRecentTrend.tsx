@@ -22,7 +22,7 @@ interface UserRecentTrendProps {
 
 export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
   const { t } = useTranslation();
-  const cardBg = useColorModeValue("white", "gray.800");
+  const cardBg = "bg.card";
   const headerBg = useColorModeValue(
     recentTrend.direction === "up"
       ? "linear(to-r, green.50, teal.50)"
@@ -56,7 +56,7 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
       ? t("components.user.recentTrend.trendDown")
       : t("components.user.recentTrend.trendStable");
 
-  const scoreBg = useColorModeValue("gray.50", "gray.700");
+  const scoreBg = "bg.muted";
   const scoreItemBorderColor = "border.default";
 
   return (

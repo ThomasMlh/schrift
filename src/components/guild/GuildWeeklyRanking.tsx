@@ -7,7 +7,6 @@ import {
   Avatar,
   Skeleton,
   SkeletonCircle,
-  useColorModeValue,
   Divider,
 } from "@chakra-ui/react";
 import { CustomSelect } from "@/components/ui/CustomSelect";
@@ -37,7 +36,7 @@ export const GuildWeeklyRanking = ({
   onWeekChange,
 }: GuildWeeklyRankingProps) => {
   const cardBg = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
   const rowHover = "bg.subtle";
   const mutedColor = "text.muted";
 

@@ -35,7 +35,7 @@ export const OCRScreenshotUploader = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const bgColor = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const borderColor = "border.default";
   const dropzoneBg = "bg.muted";
   const dropzoneBorder = useColorModeValue("gray.300", "gray.600");
 

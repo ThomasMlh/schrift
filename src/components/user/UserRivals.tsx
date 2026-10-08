@@ -30,14 +30,14 @@ export const UserRivals = ({
   currentUserAverage,
   loggedInUserId
 }: UserRivalsProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const cardBg = "bg.card";
+  const borderColor = "border.subtle";
   const currentUserBg = useColorModeValue(
     "linear(to-r, purple.50, pink.50)",
     "linear(to-r, purple.900, pink.900)"
   );
   const currentUserBorder = useColorModeValue("purple.400", "purple.500");
-  const rankBg = useColorModeValue("gray.100", "gray.700");
+  const rankBg = "bg.inset";
   const diffBg = "bg.card";
   const { t } = useTranslation();
 

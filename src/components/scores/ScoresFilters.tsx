@@ -57,7 +57,7 @@ export const ScoresFilters = ({
     onResetFilters,
 }: ScoresFiltersProps) => {
     const cardBg = "bg.card";
-    const borderColor = useColorModeValue("gray.200", "gray.700");
+    const borderColor = "border.subtle";
     const mutedText = "text.muted";
     const labelColor  = useColorModeValue("purple.600", "purple.400");
 

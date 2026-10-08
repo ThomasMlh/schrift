@@ -10,7 +10,6 @@ import {
   Th,
   Td,
   Badge,
-  useColorModeValue,
   useColorMode,
   Icon,
   Flex,
@@ -34,7 +33,7 @@ export const PlayerComparisonTable = ({
   const isDark = colorMode === "dark";
   const bgColor = "bg.card";
   const tableBg = "bg.muted";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
   const { t } = useTranslation();
 
   // Trouver le meilleur pour chaque métrique

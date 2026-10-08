@@ -11,8 +11,7 @@ import {
   PopoverHeader,
   PopoverTrigger,
   Text,
-  VStack,
-  useColorModeValue
+  VStack
 } from "@chakra-ui/react";
 import { InfoIcon } from "@chakra-ui/icons";
 import { useTranslation } from "react-i18next";
@@ -93,7 +92,7 @@ const legendItems: ScoreLegendItem[] = [
 
 export const ScoreLegend = () => {
   const { t } = useTranslation();
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const borderColor = "border.default";
   const bgColor = "bg.card";
 
   return (

@@ -11,7 +11,6 @@ import {
   InputLeftElement,
   Spinner,
   Flex,
-  useColorModeValue,
   useColorMode,
 } from "@chakra-ui/react";
 import { CloseIcon, SearchIcon } from "@chakra-ui/icons";
@@ -48,7 +47,7 @@ export const MultiCharacterSelector = ({
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
   const bgColor = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
   const mutedText = "text.muted";
   const hoverBg = "bg.muted";
   const menuBg = "bg.card";

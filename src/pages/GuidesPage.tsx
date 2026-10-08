@@ -5,7 +5,6 @@ import {
   ButtonGroup,
   Button,
   Image,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -23,7 +22,7 @@ const GuidesPage = () => {
   const { t } = useTranslation();
 
   const bgColor = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
 
   const SECTIONS: { id: SectionId; icon: React.ReactElement; label: string; colorScheme: string }[] = [
     { id: "rotations-builds", icon: <span>⚔️</span>, label: t("pages.guides.tabRotationsBuilds"), colorScheme: "orange" },

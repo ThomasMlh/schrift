@@ -30,9 +30,9 @@ export const UserAchievements = ({ userId, bbsId }: UserAchievementsProps) => {
   const { accounts, isLoading } = useUserAchievements(userId);
 
   const cardBg = "bg.card";
-  const border = useColorModeValue("gray.200", "whiteAlpha.200");
-  const mutedText = useColorModeValue("gray.500", "whiteAlpha.600");
-  const strongText = useColorModeValue("gray.800", "whiteAlpha.900");
+  const border = "border.faint";
+  const mutedText = "text.muted";
+  const strongText = "text.strong";
   const barTrack = useColorModeValue("gray.100", "whiteAlpha.200");
   const tierTextIndex = useColorModeValue(0, 1);
 

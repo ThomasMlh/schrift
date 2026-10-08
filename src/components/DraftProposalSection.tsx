@@ -190,10 +190,10 @@ const DraftProposalSection = () => {
   };
 
   const cardBg = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
   const mutedText = useColorModeValue("gray.600", "gray.400");
   const headerBg = "bg.page";
-  const rowAltBg = useColorModeValue("gray.50", "whiteAlpha.50");
+  const rowAltBg = "bg.subtle";
   const hoverBg = useColorModeValue("orange.50", "orange.900");
   const matchBg = useColorModeValue("yellow.100", "yellow.700");
 

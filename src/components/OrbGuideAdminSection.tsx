@@ -1,5 +1,5 @@
 import {
-  Box, Button, FormControl, FormLabel, Input, Table, Tbody, Td, Textarea, Th, Thead, Tr, useColorModeValue, useToast, IconButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure, VStack, HStack, NumberInput, NumberInputField, Alert, AlertIcon,
+  Box, Button, FormControl, FormLabel, Input, Table, Tbody, Td, Textarea, Th, Thead, Tr, useToast, IconButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, ModalCloseButton, useDisclosure, VStack, HStack, NumberInput, NumberInputField, Alert, AlertIcon,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
@@ -27,7 +27,7 @@ const OrbGuideAdminSection = () => {
   const toast = useToast();
 
   const bgColor = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = "border.subtle";
 
   const handleOpenModal = (orb?: OrbSource) => {
     setSelectedOrb(orb ?? { title: "", description: "", amount: 0 });

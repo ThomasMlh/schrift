@@ -7,7 +7,6 @@ import {
   Button,
   Text,
   Box,
-  useColorModeValue,
   HStack,
   Icon,
   Alert,
@@ -45,7 +44,7 @@ export const OCRContextSelection = ({
   const { screenshotters, isLoading: loadingScreenshotters } = useScreenshotters();
 
   const bgColor = "bg.card";
-  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const borderColor = "border.default";
 
   useEffect(() => {
     if (isGuildRestricted && userGuildId) {

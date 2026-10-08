@@ -20,7 +20,7 @@ interface BreadcrumbsProps {
 export const Breadcrumbs = ({ items }: BreadcrumbsProps) => {
   const mutedColor = useColorModeValue("gray.400", "whiteAlpha.400");
   const linkColor = useColorModeValue("gray.500", "whiteAlpha.600");
-  const activeColor = useColorModeValue("gray.700", "whiteAlpha.900");
+  const activeColor = "text.strong";
 
   return (
     <Breadcrumb
