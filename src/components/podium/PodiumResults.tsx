@@ -117,6 +117,25 @@ const playerScore = (p: IPodiumPlayer, podiumType?: PodiumType) =>
     ? p.totalScore ?? p.averageScore ?? 0
     : p.averageScore ?? p.totalScore ?? 0;
 
+// Écart de score avec le rang juste au-dessus, calculé sur la page entière (top 3 compris).
+// Pas d'écart en progression (classement en %), ni en semaine ou en mode miss.
+const buildGapToAbove = (
+  data: IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse
+) => {
+  const scoreByRank = new Map<number, number>();
+  if (isPodiumResponse(data) && data.meta.podiumType !== "progression") {
+    for (const p of data.data as IPodiumPlayer[]) {
+      scoreByRank.set(p.rank, playerScore(p, data.meta.podiumType));
+    }
+  }
+  return (rank: number) => {
+    const above = scoreByRank.get(rank - 1);
+    const score = scoreByRank.get(rank);
+    // Pas d'écart pour un miss (score 0), il n'aurait pas de sens
+    return above != null && score != null && score > 0 ? above - score : undefined;
+  };
+};
+
 const PlayerList = ({
   displayMode,
   podiumData,
@@ -137,14 +156,7 @@ const PlayerList = ({
 
   if (listData.length === 0) return null;
 
-  // Scores par rang (page entière, top 3 compris) pour afficher l'écart avec le joueur au-dessus.
-  // Pas d'écart en progression : le classement s'y fait en %, pas en points.
-  const scoreByRank = new Map<number, number>();
-  if (isPodiumResponse(podiumData) && podiumData.meta.podiumType !== "progression") {
-    for (const p of podiumData.data as IPodiumPlayer[]) {
-      scoreByRank.set(p.rank, playerScore(p, podiumData.meta.podiumType));
-    }
-  }
+  const gapToAbove = buildGapToAbove(podiumData);
 
   return (
     <VStack spacing={2} align="stretch">
@@ -165,20 +177,15 @@ const PlayerList = ({
             />
           ))
         : isPodiumResponse(podiumData)
-        ? listData.map((player) => {
-            const p = player as IPodiumPlayer;
-            const aboveScore = scoreByRank.get(p.rank - 1);
-            const score = scoreByRank.get(p.rank);
-            return (
-              <PlayerCard
-                key={p.user_id}
-                player={p}
-                showGuildName={showGuildName}
-                podiumType={podiumData.meta.podiumType}
-                gapToAbove={aboveScore != null && score != null ? aboveScore - score : undefined}
-              />
-            );
-          })
+        ? listData.map((player) => (
+            <PlayerCard
+              key={player.user_id}
+              player={player as IPodiumPlayer}
+              showGuildName={showGuildName}
+              podiumType={podiumData.meta.podiumType}
+              gapToAbove={gapToAbove(player.rank)}
+            />
+          ))
         : null}
     </VStack>
   );
@@ -309,6 +316,8 @@ export const PodiumResults = ({
 
               if (allData.length === 0) return null;
 
+              const gapToAbove = buildGapToAbove(podiumData);
+
               const renderList = (items: typeof allData) => {
                 if (displayMode === "weekly" && isWeeklyResponse(podiumData)) {
                   return items.map((p) => (
@@ -335,6 +344,7 @@ export const PodiumResults = ({
                       player={p as IPodiumPlayer}
                       showGuildName={showGuildName}
                       podiumType={podiumData.meta.podiumType}
+                      gapToAbove={gapToAbove(p.rank)}
                     />
                   ));
                 }
