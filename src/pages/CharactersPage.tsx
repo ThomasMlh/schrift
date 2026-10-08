@@ -2,6 +2,7 @@ import { Box, Container, VStack } from "@chakra-ui/react";
 import { CharactersTable } from "../components/CharactersTable";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
+import { FiDatabase } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 
 const CharactersPage = () => {
@@ -55,7 +56,7 @@ const CharactersPage = () => {
           <HeroSection
             title={t("pages.characters.heroTitle")}
             description={t("pages.characters.heroDescription")}
-            badge={{ text: t("pages.characters.heroBadge"), icon: "⚔️" }}
+            badge={{ text: t("pages.characters.heroBadge"), icon: FiDatabase }}
           />
           <Container maxW="container.xl" py={8}>
             <VStack spacing={6} align="stretch">
