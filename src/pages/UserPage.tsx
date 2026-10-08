@@ -1,11 +1,10 @@
-import { useParams, useSearchParams, Link as RouterLink } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   Container,
   VStack,
   HStack,
   Text,
-  Badge,
   Alert,
   AlertIcon,
   Card,
@@ -18,18 +17,12 @@ import {
   Tab,
   TabPanel,
   Icon,
-  useColorModeValue,
   Flex,
   Center,
   Skeleton,
-  Button,
-  Wrap,
-  WrapItem,
 } from "@chakra-ui/react";
 import { PageLoader } from "@/components/ui/PageLoader";
-import { formatRoleName } from "@/utils/user";
 import { SEOHead } from "@/components/SEOHead";
-import { UserDisplay } from "@/components/ui/UserDisplay";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import { useCycles, useUser, useUserByBBSName, useUserStats, useGuild } from "@/hooks/useAPI";
 import { StatCard } from "@/components/user/StatCard";
@@ -47,11 +40,13 @@ import { UserWeeklySection } from "@/components/user/UserWeeklySection";
 import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock, FiStar, FiHexagon } from "react-icons/fi";
 import { UserKillerRecords } from "@/components/user/UserKillerRecords";
 import { UserAchievements } from "@/components/achievements/UserAchievements";
-import { getDiscordBannerUrl } from "@/utils/discord";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
+import { UserProfileHeader } from "@/components/user/UserProfileHeader";
+import { UserAccountSwitcher } from "@/components/user/UserAccountSwitcher";
+import { userTabStyles } from "@/components/user/userTabStyles";
 
 const UserPage = () => {
   const { bbs_name } = useParams<{ bbs_name: string }>();
@@ -167,72 +162,15 @@ const UserPage = () => {
       }
     : null;
 
-  const bannerUrl = user?.discord_id && user?.banner ? getDiscordBannerUrl(user.discord_id, user.banner) : null;
   const loading = resolvingUser || userLoading || guildLoading;
   const error = userError
     ? t("pages.user.errorLoadingProfile")
     : null;
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case "chef":
-        return "purple";
-      case "sous-chef":
-        return "blue";
-      case "membre":
-        return "green";
-      default:
-        return "gray";
-    }
-  };
 
   const cardBg = "bg.card";
-  const gradientBg = useColorModeValue(
-    "linear(to-br, blue.50, purple.50)",
-    "linear(to-br, gray.800, purple.900)"
-  );
   const tabBg = "bg.card";
-  const mutedText = "text.muted";
 
-  // Styles communs pour les onglets
-  const tabStyles = {
-    fontWeight: "semibold",
-    fontSize: "md",
-    px: 6,
-    py: 3,
-    borderRadius: "lg",
-    border: "2px solid",
-    borderColor: "gray.300",
-    bg: "gray.100",
-    color: "gray.700",
-    _dark: {
-      borderColor: "gray.500",
-      bg: "gray.700",
-      color: "gray.200"
-    },
-    _selected: {
-      bg: "blue.600",
-      color: "white",
-      borderColor: "blue.600",
-      boxShadow: "0 0 0 3px rgba(66, 153, 225, 0.3)",
-      _dark: {
-        bg: "blue.600",
-        color: "white",
-        borderColor: "blue.600"
-      }
-    },
-    _hover: {
-      borderColor: "blue.400",
-      bg: "blue.50",
-      color: "blue.700",
-      transform: "translateY(-2px)",
-      _dark: {
-        bg: "gray.600",
-        color: "white"
-      }
-    },
-    transition: "all 0.2s"
-  };
 
   if (loading) {
     return <PageLoader label={t("pages.user.loadingProfile")} />;
@@ -277,163 +215,11 @@ const UserPage = () => {
           { label: user.bbs_name || user.global_name },
         ]} />
 
-        {/* Header avec profil utilisateur */}
-        <Card
-          bgGradient={gradientBg}
-          {...(bannerUrl && {
-            backgroundImage: `url('${bannerUrl}')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center"
-          })}
-          borderRadius="2xl"
-          boxShadow="2xl"
-          mb={6}
-          overflow="hidden"
-          position="relative"
-        >
-          {/* Overlay sombre pour la lisibilité (uniquement si bannière) */}
-          {bannerUrl && (
-            <Box
-              position="absolute"
-              top={0}
-              left={0}
-              right={0}
-              bottom={0}
-              bg="blackAlpha.600"
-              zIndex={0}
-            />
-          )}
-          {!bannerUrl && (
-            <Box
-              position="absolute"
-              top={0}
-              right={0}
-              width="300px"
-              height="300px"
-              opacity={0.1}
-            />
-          )}
-          <CardBody py={8}>
-            <VStack 
-              spacing={4} 
-              align="center" 
-              position="relative" 
-              zIndex={1}
-              {...(bannerUrl && {
-                sx: {
-                  "& *": {
-                    color: "white !important"
-                  }
-                }
-              })}
-            >
-              <UserDisplay
-                user={user}
-                avatarSize="2xl"
-                direction="column"
-                textSize="2xl"
-                spacing={4}
-                asLink={false}
-              />
+        <UserProfileHeader user={user} />
 
-              <VStack spacing={2} textAlign="center">
-                {user.guilde_id ? (
-                  <HStack spacing={2}>
-                    <Badge
-                      colorScheme={getRoleBadgeColor(user.role || "membre")}
-                      variant="solid"
-                      px={4}
-                      py={2}
-                      borderRadius="full"
-                      fontSize="md"
-                      textTransform="uppercase"
-                    >
-                      {formatRoleName(user.role)} {user.guild_name}
-                    </Badge>
-                  </HStack>
-                ) : (
-                  <Text fontSize="md" color={bannerUrl ? "whiteAlpha.800" : "gray.500"}>
-                    {t("pages.user.noGuild")}
-                  </Text>
-                )}
-                {user.is_banned && (
-                  <Badge
-                    colorScheme="red"
-                    variant="solid"
-                    px={4}
-                    py={1}
-                    borderRadius="full"
-                    fontSize="sm"
-                    textTransform="uppercase"
-                  >
-                    {t("pages.user.badgeBanned")}
-                  </Badge>
-                )}
-              </VStack>
-            </VStack>
-          </CardBody>
-        </Card>
-
-        {/* Sélecteur de compte bbs — un même joueur peut avoir plusieurs comptes (alts), chacun
-            avec ses propres stats/classement indépendants. bbs_name n'étant pas garanti unique
-            (deux comptes peuvent avoir le même pseudo), chaque lien porte ?compte=<bbs_id> pour
-            cibler le compte exact sans ambiguïté ; la surbrillance se base aussi sur le bbs_id résolu. */}
-        {userData?.bbs_accounts && userData.bbs_accounts.length > 1 && (() => {
-          const nameCounts = new Map<string, number>();
-          userData.bbs_accounts.forEach((a) => {
-            const key = a.bbs_name || a.bbs_id;
-            nameCounts.set(key, (nameCounts.get(key) || 0) + 1);
-          });
-
-          return (
-            <Card mb={6} bg={cardBg} borderRadius="xl" boxShadow="lg">
-              <CardBody py={4}>
-                <VStack align="stretch" spacing={2}>
-                  <Text fontSize="sm" fontWeight="semibold" color={mutedText}>
-                    {t("pages.user.accountsLabel")}
-                  </Text>
-                  <Wrap spacing={2}>
-                    {userData.bbs_accounts.map((account) => {
-                      const isActive = account.bbs_id === matchedBbsId;
-                      const nameKey = account.bbs_name || account.bbs_id;
-                      const isDuplicateName = (nameCounts.get(nameKey) || 0) > 1;
-
-                      const linkParams = new URLSearchParams(searchParams);
-                      linkParams.set("compte", account.bbs_id);
-                      const to = `/joueur/${encodeURIComponent(nameKey)}?${linkParams.toString()}`;
-
-                      return (
-                        <WrapItem key={account.bbs_id}>
-                          <Button
-                            as={RouterLink}
-                            to={to}
-                            size="sm"
-                            borderRadius="full"
-                            colorScheme={isActive ? "blue" : "gray"}
-                            variant={isActive ? "solid" : "outline"}
-                            _hover={{ textDecoration: "none", color: "white" }}
-                          >
-                            {account.bbs_name || account.bbs_id}
-                            {isDuplicateName && (
-                              <Text as="span" fontSize="2xs" opacity={0.7} ml={1}>
-                                ({account.bbs_id})
-                              </Text>
-                            )}
-                            {account.is_primary && !isActive && (
-                              <Badge ml={2} colorScheme={"purple"} fontSize="2xs">
-                                {t("pages.user.accountPrimary")}
-                              </Badge>
-                            )}
-                          </Button>
-                        </WrapItem>
-                      );
-                    })}
-                  </Wrap>
-                </VStack>
-              </CardBody>
-            </Card>
-          );
-        })()}
+        {userData?.bbs_accounts && userData.bbs_accounts.length > 1 && (
+          <UserAccountSwitcher accounts={userData.bbs_accounts} activeBbsId={matchedBbsId} />
+        )}
 
         {/* Détails du bannissement - visible uniquement par les admins */}
         {isAdmin && user.is_banned && <BanDetailsCard user={user} />}
@@ -535,31 +321,31 @@ const UserPage = () => {
               <CardBody>
                 <Tabs colorScheme="blue" variant="enclosed" index={tabIndex} onChange={handleTabChange}>
                   <TabList mb={6} flexWrap="wrap" justifyContent={{ base: "center", md: "flex-start" }} flexDirection={{ base: "column", md: "row" }} gap={2} borderBottom="none">
-                    <Tab {...tabStyles}>
+                    <Tab {...userTabStyles}>
                       <Icon as={FiBarChart2} mr={2} />
                       {t("pages.user.tabOverview")}
                     </Tab>
-                    <Tab {...tabStyles} isDisabled={!selectedCycle || !stats.recentTrend}>
+                    <Tab {...userTabStyles} isDisabled={!selectedCycle || !stats.recentTrend}>
                       <Icon as={FiTrendingUp} mr={2} />
                       {t("pages.user.tabTrend")}
                     </Tab>
-                    <Tab {...tabStyles}>
+                    <Tab {...userTabStyles}>
                       <Icon as={FiActivity} mr={2} />
                       {t("pages.user.tabPerformances")}
                     </Tab>
-                    <Tab {...tabStyles}>
+                    <Tab {...userTabStyles}>
                       <Icon as={FiAward} mr={2} />
                       {t("pages.user.tabTopRotations")}
                     </Tab>
-                    <Tab {...tabStyles} isDisabled={!globalStats?.temporalEvolution || globalStats.temporalEvolution.length < 2}>
+                    <Tab {...userTabStyles} isDisabled={!globalStats?.temporalEvolution || globalStats.temporalEvolution.length < 2}>
                       <Icon as={FiClock} mr={2} />
                       {t("pages.user.tabEvolution")}
                     </Tab>
-                    <Tab {...tabStyles}>
+                    <Tab {...userTabStyles}>
                       <Icon as={FiStar} mr={2} />
                       {t("pages.user.tabRecords")}
                     </Tab>
-                    <Tab {...tabStyles}>
+                    <Tab {...userTabStyles}>
                       <Icon as={FiHexagon} mr={2} />
                       {t("pages.user.tabAchievements")}
                     </Tab>
