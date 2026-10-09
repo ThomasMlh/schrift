@@ -352,8 +352,7 @@
       "headingRotations": "Rotations where its killers help (current cycle)",
       "rotationsNone": "No remaining rotation of this cycle matches its killers.",
       "rotationNow": "Now",
-      "rotationSameColor": "Same colour",
-      "statScaleHint": "Bars compare each stat to the best character in the database."
+      "rotationSameColor": "Same colour"
     }
   },
   "components": {

@@ -48,14 +48,12 @@ export const useCharacterMeta = () => {
     killers: string[];
     categories: string[];
     affinities: string[];
-    stat_max?: Partial<Record<"end" | "atk" | "def" | "cct" | "pre", number>>;
   }>(url, fetcher, { revalidateOnFocus: false, dedupingInterval: 300000 });
 
   return {
     killers: data?.killers || [],
     categories: data?.categories || [],
     affinities: data?.affinities || [],
-    statMax: data?.stat_max ?? {},
     isLoading,
     error,
   };

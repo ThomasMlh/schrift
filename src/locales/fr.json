@@ -352,8 +352,7 @@
       "headingRotations": "Rotations où ses killers servent (cycle en cours)",
       "rotationsNone": "Aucune rotation restante de ce cycle ne correspond à ses killers.",
       "rotationNow": "En cours",
-      "rotationSameColor": "Même couleur",
-      "statScaleHint": "Les barres comparent chaque stat au meilleur personnage de la base."
+      "rotationSameColor": "Même couleur"
     }
   },
   "components": {

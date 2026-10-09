@@ -25,13 +25,13 @@ import { KillerIcon } from "../components/ui/KillerIcon";
 import { CategoryIcon } from "../components/ui/CategoryIcon";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
 import { SEOHead } from "../components/SEOHead";
-import { useCharacter, useBuilds, useCharacterMeta } from "@/hooks/useAPI";
+import { useCharacter, useBuilds } from "@/hooks/useAPI";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { useTranslation } from "react-i18next";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { bucketUrl } from "@/utils/apiRequest";
 import { Pill, SectionCard, TraitRow } from "@/components/character/SectionCard";
-import { CharacterStatBars } from "@/components/character/CharacterStatBars";
+import { CharacterStats } from "@/components/character/CharacterStats";
 import { CharacterRotations } from "@/components/character/CharacterRotations";
 import { FiActivity, FiBarChart2, FiCrosshair, FiShield } from "react-icons/fi";
 import { CharacterVisuals } from "@/components/character/CharacterVisuals";
@@ -45,7 +45,6 @@ const CharacterDetailPage = () => {
 
   // Utiliser useSWR pour le personnage (cache automatique)
   const { character, isLoading, error: fetchError } = useCharacter(id);
-  const { statMax } = useCharacterMeta();
   const { builds: characterBuilds, isLoading: buildsLoading } = useBuilds({
     character_id: id,
     isValid: true,
@@ -307,7 +306,7 @@ const CharacterDetailPage = () => {
             {/* Stats */}
             {character.stats && (
               <SectionCard title={t("pages.characterDetail.headingStats")} icon={FiActivity}>
-                <CharacterStatBars stats={character.stats} statMax={statMax} />
+                <CharacterStats stats={character.stats} />
               </SectionCard>
             )}
 
