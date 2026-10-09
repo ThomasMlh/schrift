@@ -498,7 +498,7 @@
     "scoresSection": {
       "heading": "Gestion des Scores",
       "scoresCount": "scores enregistrés",
-      "buttonAutoEntry": "📸 Saisie automatique",
+      "buttonAutoEntry": "Depuis une capture (OCR)",
       "buttonManualEntry": "Saisie manuelle",
       "noScores": "Aucun score enregistré pour le moment.",
       "loading": "Chargement des scores…"
