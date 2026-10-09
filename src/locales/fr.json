@@ -376,8 +376,6 @@
       "filterAllGuilds": "Toutes les guildes",
       "filterAllRoles": "Tous les rôles",
       "perPage": "{{count}} / page",
-      "activeFilters": "Filtres actifs :",
-      "paginationInfo": "{{totalCount}} joueur(s) trouvé(s) - Page {{currentPage}} sur {{totalPages}} - Affichage de {{itemsOnPage}} résultat(s)",
       "colPlayer": "Joueur",
       "colGuild": "Guilde",
       "colRole": "Rôle",
@@ -390,7 +388,10 @@
       "ariaLabelEdit": "Modifier le joueur",
       "ariaLabelBan": "Bannir le joueur",
       "ariaLabelUnban": "Débannir le joueur",
-      "noResults": "Aucun joueur trouvé"
+      "noResults": "Aucun joueur trouvé",
+      "filterAllGuildsShort": "Toutes",
+      "resultsCount_one": "{{count}} joueur",
+      "resultsCount_other": "{{count}} joueurs"
     },
     "charactersTable": {
       "searchPlaceholder": "Rechercher un personnage...",
