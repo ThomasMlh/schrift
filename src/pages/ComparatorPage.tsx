@@ -4,16 +4,18 @@ import {
   Box,
   HStack,
   Button,
-  ButtonGroup,
   IconButton,
   Alert,
   AlertIcon,
   useToast,
-  useColorMode,
   Badge,
   Icon,
   Flex,
   Grid,
+  Tabs,
+  TabList,
+  Tab,
+  Tooltip,
 } from "@chakra-ui/react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -28,11 +30,13 @@ import { MultiCharacterSelector } from "@/components/comparator/MultiCharacterSe
 import type { SelectedCharacter } from "@/components/comparator/MultiCharacterSelector";
 import { ComparisonRadarChart } from "@/components/comparator/ComparisonRadarChart";
 import { ComparisonDataTable } from "@/components/comparator/ComparisonDataTable";
+import { ComparisonSummary } from "@/components/comparator/ComparisonSummary";
+import type { IconType } from "react-icons";
 import { useUserAccounts, useCycles, useGuilds, fetchUserStats, fetchGuildStats } from "@/hooks/useAPI";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 import type { IUser, IGuild } from "@/interfaces";
 import type { IUserStats, IGuildStats } from "@/hooks/useAPI";
-import { FiRefreshCw, FiBarChart2, FiUsers, FiShield, FiCalendar, FiBookOpen } from "react-icons/fi";
+import { FiRefreshCw, FiUsers, FiShield, FiCalendar, FiBookOpen } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import { useComparatorMetrics, ENTITY_COLORS } from "@/components/comparator/useComparatorMetrics";
 import { CharacterAttributesTable } from "@/components/comparator/CharacterAttributesTable";
@@ -47,6 +51,15 @@ interface SelectedGuild {
   id: string;
   guild: IGuild;
 }
+
+type ComparisonType = "players" | "guilds" | "characters";
+const TYPE_ORDER: ComparisonType[] = ["players", "guilds", "characters"];
+const TYPE_ICONS: Record<ComparisonType, IconType> = { players: FiUsers, guilds: FiShield, characters: FiBookOpen };
+const TYPE_LABELS: Record<ComparisonType, string> = {
+  players: "pages.comparator.tabPlayers",
+  guilds: "pages.comparator.tabGuilds",
+  characters: "pages.comparator.tabCharacters",
+};
 
 const ComparatorPage: React.FC = () => {
   const toast = useToast();
@@ -74,11 +87,6 @@ const ComparatorPage: React.FC = () => {
   const { guilds = [] } = useGuilds(false);
   const { cycles = [] } = useCycles();
 
-  const { colorMode } = useColorMode();
-  const isDark = colorMode === "dark";
-  const bgColor = "bg.card";
-  const borderColor = "border.subtle";
-  const mutedText = "text.muted";
 
   const {
     charRadarMetrics, charTableMetrics,
@@ -86,8 +94,6 @@ const ComparatorPage: React.FC = () => {
     weeklyRadarMetrics, weeklyTableMetrics,
   } = useComparatorMetrics();
 
-  const playerAccentBg = isDark ? "rgba(49,130,206,0.08)" : "blue.50";
-  const guildAccentBg = isDark ? "rgba(159,122,234,0.08)" : "purple.50";
 
   const charsData = useMemo(() =>
     selectedCharacters.map((sc, i) => ({
@@ -163,7 +169,6 @@ const ComparatorPage: React.FC = () => {
         })
       );
       setPlayersStats(map);
-      toast({ title: t("pages.comparator.toastComparisonLoadedTitle"), status: "success", duration: 2000 });
     } catch {
       toast({ title: t("common.error"), description: t("pages.comparator.toastErrorLoadingStats"), status: "error", duration: 3000 });
     } finally {
@@ -185,7 +190,6 @@ const ComparatorPage: React.FC = () => {
         })
       );
       setGuildsStats(map);
-      toast({ title: t("pages.comparator.toastComparisonLoadedTitle"), status: "success", duration: 2000 });
     } catch {
       toast({ title: t("common.error"), description: t("pages.comparator.toastErrorLoadingStats"), status: "error", duration: 3000 });
     } finally {
@@ -312,14 +316,13 @@ const ComparatorPage: React.FC = () => {
   const isCharacters = comparisonType === "characters";
 
   const selectedCount = isPlayers ? selectedPlayers.length : isGuilds ? selectedGuilds.length : selectedCharacters.length;
-  const canCompare = selectedCount >= 2;
   const hasResults = isPlayers ? hasPlayersStats : isGuilds ? hasGuildsStats : hasCharStats;
 
-  const compareWord = isPlayers
-    ? selectedCount > 1 ? t("pages.comparator.wordPlayers") : t("pages.comparator.wordPlayer")
-    : isGuilds
-    ? selectedCount > 1 ? t("pages.comparator.wordGuilds") : t("pages.comparator.wordGuild")
-    : selectedCount > 1 ? t("pages.comparator.wordCharacters") : t("pages.comparator.wordCharacter");
+
+  const isWeekly = weeklyMode && isPlayers;
+  const resultEntities = isWeekly ? weeklyPlayersData : isPlayers ? playersData : guildsData;
+  const resultRadarMetrics = isWeekly ? weeklyRadarMetrics : isPlayers ? playerRadarMetrics : guildRadarMetrics;
+  const resultTableMetrics = isWeekly ? weeklyTableMetrics : isPlayers ? playerTableMetrics : guildTableMetrics;
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -348,120 +351,92 @@ const ComparatorPage: React.FC = () => {
         <Container maxW="container.xl" py={8}>
           <VStack spacing={5} align="stretch">
 
-            {/* Compact toolbar */}
-            <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={3}>
-              <Flex gap={3} align="center" wrap="wrap">
+            {/* Barre d'outils : type de comparaison, cycle, mode hebdo */}
+            <Flex
+              bg="bg.card"
+              borderRadius="xl"
+              borderWidth="1px"
+              borderColor="border.subtle"
+              p={3}
+              gap={3}
+              align="center"
+              wrap="wrap"
+            >
+              <Tabs
+                index={TYPE_ORDER.indexOf(comparisonType)}
+                onChange={(i) => handleSwitchType(TYPE_ORDER[i])}
+                variant="soft-rounded"
+                colorScheme="purple"
+                size="sm"
+              >
+                <TabList gap={1} flexWrap="wrap">
+                  {TYPE_ORDER.map((type) => {
+                    const count = type === "players" ? selectedPlayers.length : type === "guilds" ? selectedGuilds.length : selectedCharacters.length;
+                    return (
+                      <Tab key={type} color="text.secondary" fontWeight="semibold" gap={2}>
+                        <Icon as={TYPE_ICONS[type]} aria-hidden />
+                        {t(TYPE_LABELS[type])}
+                        {count > 0 && (
+                          <Badge colorScheme="purple" variant="subtle" fontSize="2xs" borderRadius="full">{count}</Badge>
+                        )}
+                      </Tab>
+                    );
+                  })}
+                </TabList>
+              </Tabs>
 
-                {/* Type toggle */}
-                <ButtonGroup size="sm" isAttached flexShrink={0}>
-                  <Button
-                    variant={isPlayers ? "solid" : "outline"}
-                    colorScheme={isPlayers ? "blue" : "gray"}
-                    leftIcon={<Icon as={FiUsers} />}
-                    onClick={() => handleSwitchType("players")}
-                  >
-                    {t("pages.comparator.tabPlayers")}
-                    {selectedPlayers.length > 0 && (
-                      <Badge ml={2} colorScheme="blue" variant={isPlayers ? "solid" : "outline"} fontSize="2xs" borderRadius="full">
-                        {selectedPlayers.length}
-                      </Badge>
-                    )}
-                  </Button>
-                  <Button
-                    variant={isGuilds ? "solid" : "outline"}
-                    colorScheme={isGuilds ? "purple" : "gray"}
-                    leftIcon={<Icon as={FiShield} />}
-                    onClick={() => handleSwitchType("guilds")}
-                  >
-                    {t("pages.comparator.tabGuilds")}
-                    {selectedGuilds.length > 0 && (
-                      <Badge ml={2} colorScheme="purple" variant={isGuilds ? "solid" : "outline"} fontSize="2xs" borderRadius="full">
-                        {selectedGuilds.length}
-                      </Badge>
-                    )}
-                  </Button>
-                  <Button
-                    variant={isCharacters ? "solid" : "outline"}
-                    colorScheme={isCharacters ? "green" : "gray"}
-                    leftIcon={<Icon as={FiBookOpen} />}
-                    onClick={() => handleSwitchType("characters")}
-                  >
-                    {t("pages.comparator.tabCharacters")}
-                    {selectedCharacters.length > 0 && (
-                      <Badge ml={2} colorScheme="green" variant={isCharacters ? "solid" : "outline"} fontSize="2xs" borderRadius="full">
-                        {selectedCharacters.length}
-                      </Badge>
-                    )}
-                  </Button>
-                </ButtonGroup>
-
-                {/* Cycle select (hidden for character mode) */}
-                {!isCharacters && (
-                  <Box flex={1} minW="160px">
-                    <CycleSelect
-                      cycles={cycles}
-                      value={selectedCycleId}
-                      onChange={handleCycleChange}
-                      placeholder={t("pages.comparator.cycleAllPlaceholder")}
-                      allowDeselect
-                      size="sm"
-                    />
-                  </Box>
-                )}
-
-                {/* Weekly mode toggle (players only) */}
-                {isPlayers && selectedCycleId && maxWeeks > 0 && (
-                  <HStack spacing={2} flexShrink={0}>
-                    <Button
-                      size="sm"
-                      variant={weeklyMode ? "solid" : "outline"}
-                      colorScheme="purple"
-                      leftIcon={<Icon as={FiCalendar} />}
-                      onClick={() => setWeeklyMode((v) => !v)}
-                    >
-                      {t("pages.comparator.weeklyModeButton")}
-                    </Button>
-                    {weeklyMode && (
-                      <CustomSelect
-                        size="sm"
-                        w="130px"
-                        allowDeselect={false}
-                        value={String(selectedWeek)}
-                        onChange={(v) => setSelectedWeek(Number(v))}
-                        options={Array.from({ length: maxWeeks }, (_, i) => ({
-                          value: String(i + 1),
-                          label: t("pages.comparator.weeklyWeekOption", { n: i + 1 }),
-                        }))}
-                      />
-                    )}
-                  </HStack>
-                )}
-
-                {/* Actions */}
-                <HStack spacing={2} flexShrink={0}>
-                  <IconButton
-                    icon={<Icon as={FiRefreshCw} />}
-                    aria-label={t("pages.comparator.buttonReset")}
+              {!isCharacters && (
+                <Box flex={1} minW="180px" maxW={{ md: "260px" }}>
+                  <CycleSelect
+                    cycles={cycles}
+                    value={selectedCycleId}
+                    onChange={handleCycleChange}
+                    placeholder={t("pages.comparator.cycleAllPlaceholder")}
+                    allowDeselect
                     size="sm"
-                    variant="ghost"
-                    color={mutedText}
-                    onClick={handleReset}
                   />
-                  {!isCharacters && (
-                    <Button
+                </Box>
+              )}
+
+              {isPlayers && selectedCycleId && maxWeeks > 0 && (
+                <HStack spacing={2}>
+                  <Button
+                    size="sm"
+                    variant={weeklyMode ? "solid" : "outline"}
+                    colorScheme={weeklyMode ? "purple" : "gray"}
+                    leftIcon={<Icon as={FiCalendar} />}
+                    onClick={() => setWeeklyMode((v) => !v)}
+                    aria-pressed={weeklyMode}
+                  >
+                    {t("pages.comparator.weeklyModeButton")}
+                  </Button>
+                  {weeklyMode && (
+                    <CustomSelect
                       size="sm"
-                      colorScheme={isPlayers ? "blue" : "purple"}
-                      leftIcon={<Icon as={FiBarChart2} />}
-                      onClick={isPlayers ? loadPlayersStats : loadGuildsStats}
-                      isDisabled={!canCompare}
-                      isLoading={isLoadingStats}
-                    >
-                      {t("pages.comparator.buttonCompare")} {selectedCount} {compareWord}
-                    </Button>
+                      w="130px"
+                      allowDeselect={false}
+                      value={String(selectedWeek)}
+                      onChange={(v) => setSelectedWeek(Number(v))}
+                      options={Array.from({ length: maxWeeks }, (_, i) => ({
+                        value: String(i + 1),
+                        label: t("pages.comparator.weeklyWeekOption", { n: i + 1 }),
+                      }))}
+                    />
                   )}
                 </HStack>
-              </Flex>
-            </Box>
+              )}
+
+              <Tooltip label={t("pages.comparator.buttonReset")} hasArrow>
+                <IconButton
+                  icon={<Icon as={FiRefreshCw} />}
+                  aria-label={t("pages.comparator.buttonReset")}
+                  size="sm"
+                  variant="ghost"
+                  ml="auto"
+                  onClick={handleReset}
+                />
+              </Tooltip>
+            </Flex>
 
             {/* Selector */}
             {isPlayers ? (
@@ -510,7 +485,7 @@ const ComparatorPage: React.FC = () => {
             {isLoadingStats && (
               <PageLoader
                 label={t("pages.comparator.loadingStats")}
-                color={isPlayers ? "blue.500" : "purple.500"}
+                color="purple.400"
                 height="200px"
               />
             )}
@@ -518,6 +493,7 @@ const ComparatorPage: React.FC = () => {
             {/* Character comparison results */}
             {isCharacters && hasCharStats && (
               <>
+                <ComparisonSummary entities={charsData} metrics={charTableMetrics} />
                 <Grid
                   templateColumns={{ base: "1fr", xl: "repeat(2, 1fr)" }}
                   gap={5}
@@ -527,13 +503,11 @@ const ComparatorPage: React.FC = () => {
                     entities={charsData}
                     metrics={charRadarMetrics}
                     heading={t("components.comparatorCharts.radarHeadingCharacters")}
-                    accentBg={isDark ? "rgba(56,161,105,0.08)" : "green.50"}
                   />
                   <ComparisonDataTable
                     entities={charsData}
                     metrics={charTableMetrics}
                     heading={t("components.comparatorCharts.tableHeadingCharacters")}
-                    accentBg={isDark ? "rgba(56,161,105,0.08)" : "green.50"}
                   />
                 </Grid>
 
@@ -541,63 +515,37 @@ const ComparatorPage: React.FC = () => {
               </>
             )}
 
-            {/* Results – side-by-side on xl+ */}
+            {/* Résultats joueurs / guildes */}
             {!isLoadingStats && hasResults && !isCharacters && (
               <>
                 {weeklyMode && isPlayers && (
                   <WeeklyModeBanner week={selectedWeek} cycle={selectedCycleObj} />
                 )}
+                <ComparisonSummary entities={resultEntities} metrics={resultTableMetrics} />
                 <Grid
                   templateColumns={{ base: "1fr", xl: "repeat(2, 1fr)" }}
                   gap={5}
                   alignItems="stretch"
                 >
                   <ComparisonRadarChart
-                    entities={
-                      weeklyMode && isPlayers
-                        ? weeklyPlayersData
-                        : isPlayers
-                        ? playersData
-                        : guildsData
-                    }
-                    metrics={
-                      weeklyMode && isPlayers
-                        ? weeklyRadarMetrics
-                        : isPlayers
-                        ? playerRadarMetrics
-                        : guildRadarMetrics
-                    }
+                    entities={resultEntities}
+                    metrics={resultRadarMetrics}
                     heading={t(isPlayers
                       ? "components.comparatorCharts.radarHeadingPlayers"
                       : "components.comparatorCharts.radarHeadingGuilds"
                     )}
-                    accentBg={isPlayers ? playerAccentBg : guildAccentBg}
                   />
                   <ComparisonDataTable
-                    entities={
-                      weeklyMode && isPlayers
-                        ? weeklyPlayersData
-                        : isPlayers
-                        ? playersData
-                        : guildsData
-                    }
-                    metrics={
-                      weeklyMode && isPlayers
-                        ? weeklyTableMetrics
-                        : isPlayers
-                        ? playerTableMetrics
-                        : guildTableMetrics
-                    }
+                    entities={resultEntities}
+                    metrics={resultTableMetrics}
                     heading={t(isPlayers
                       ? "components.comparatorCharts.tableHeadingPlayers"
                       : "components.comparatorCharts.tableHeadingGuilds"
                     )}
-                    accentBg={isPlayers ? playerAccentBg : guildAccentBg}
                   />
                 </Grid>
               </>
             )}
-
           </VStack>
         </Container>
       </Box>
