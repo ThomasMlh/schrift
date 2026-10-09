@@ -267,7 +267,7 @@ const DraftProposalSection = () => {
     <Box borderWidth="1px" borderColor={borderColor} borderRadius="xl" p={5} bg={cardBg}>
       <VStack align="stretch" spacing={4}>
         <Box>
-          <Text fontWeight="bold" fontSize="lg">🧮 Proposition de draft automatique</Text>
+          <Text fontWeight="bold" fontSize="lg">Proposition de draft automatique</Text>
           <Text fontSize="sm" color={mutedText}>
             Simulation en lecture seule : classe les membres actuels des guildes sélectionnées par score sur un
             cycle, et propose une répartition par paquets de 20 (les meilleurs dans la 1ère guilde, etc.). Rien

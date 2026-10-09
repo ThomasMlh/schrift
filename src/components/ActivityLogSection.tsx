@@ -3,27 +3,15 @@ import {
     Text, useColorModeValue, Badge, Flex, Select, IconButton, HStack
 } from "@chakra-ui/react";
 import { FiEye } from "react-icons/fi";
-import { Fragment, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { IActivityLogEntry } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import { PageLoader } from "./ui/PageLoader";
 import ActivityDetailModal from "./ActivityDetailModal";
+import { BoldMarkdownText } from "./ui/BoldMarkdownText";
 import { useActivity, useGuilds } from "@/hooks/useAPI";
 import { useAuth } from "@/providers/AuthProvider";
 import { NOTIFICATION_TYPES, NOTIFICATION_TYPE_LABELS, formatActivityEntry } from "@/utils/notificationTypes";
-
-// Rend "**texte**" en gras, sans dépendance markdown — juste ce qu'il faut pour le journal.
-const Highlighted: React.FC<{ text: string }> = ({ text }) => (
-    <>
-        {text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
-            part.startsWith("**") && part.endsWith("**") ? (
-                <Text as="b" key={i}>{part.slice(2, -2)}</Text>
-            ) : (
-                <Fragment key={i}>{part}</Fragment>
-            )
-        )}
-    </>
-);
 
 const ActivityLogSection: React.FC = () => {
     const { isAdmin } = useAuth();
@@ -121,7 +109,7 @@ const ActivityLogSection: React.FC = () => {
                                     <Td>
                                         <HStack justify="space-between" spacing={2}>
                                             <Text fontSize="sm" maxW="440px" noOfLines={2}>
-                                                <Highlighted text={formatActivityEntry(entry.type, entry.data)} />
+                                                <BoldMarkdownText text={formatActivityEntry(entry.type, entry.data)} />
                                             </Text>
                                             <IconButton
                                                 aria-label="Voir le détail"

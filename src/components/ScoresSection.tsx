@@ -5,6 +5,7 @@ import {
   Button,
   Flex,
   HStack,
+  Icon,
   IconButton,
   Text,
   Tooltip,
@@ -14,7 +15,8 @@ import {
   AlertIcon,
 } from "@chakra-ui/react";
 import { PageLoader } from "@/components/ui/PageLoader";
-import { FiTool } from "react-icons/fi";
+import { FiBarChart2, FiEdit3, FiRepeat, FiShuffle, FiTool } from "react-icons/fi";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import type { IScore } from "../interfaces";
 import { useAuth } from "@/providers/AuthProvider";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
@@ -70,7 +72,6 @@ const ScoresSection = () => {
   const getCycleInfo = (cycleId: string) => cycles.find((c) => c._id === cycleId);
 
   // ── Couleurs ─────────────────────────────────────────────────────────────────
-  const cardBg = "bg.card";
   const borderColor = "border.subtle";
   const mutedText = "text.muted";
   const tableBg = "bg.card";
@@ -79,38 +80,15 @@ const ScoresSection = () => {
     <Box w="100%" maxW="container.xl" mx="auto">
       <VStack spacing={5} align="stretch">
 
-        {/* ── Header ───────────────────────────────────────────────────────── */}
-        <Box
-          bg={cardBg}
-          borderRadius="xl"
-          borderWidth="1px"
-          borderColor={borderColor}
-          overflow="hidden"
-        >
-          {/* Barre accent */}
-          <Box h="3px" bgGradient="linear(to-r, purple.400, indigo.400, blue.400)" />
+        <SectionHeader
+          title={t("components.scoresSection.heading")}
+          icon={FiBarChart2}
+          description={pagination
+            ? `${pagination.totalCount.toLocaleString("fr-FR")} ${t("components.scoresSection.scoresCount")}`
+            : "Chargement…"}
+          actions={(isAdmin || isGuildManager) ? (
+            <>
 
-          <Flex
-            px={5}
-            py={4}
-            justify="space-between"
-            align={{ base: "flex-start", md: "center" }}
-            direction={{ base: "column", md: "row" }}
-            gap={4}
-          >
-            <Box>
-              <Text fontSize="xl" fontWeight="bold" mb={0.5}>
-                {t("components.scoresSection.heading")}
-              </Text>
-              <Text fontSize="sm" color={mutedText}>
-                {pagination
-                  ? `${pagination.totalCount.toLocaleString()} ${t("components.scoresSection.scoresCount")}`
-                  : "Chargement…"}
-              </Text>
-            </Box>
-
-            {(isAdmin || isGuildManager) && (
-              <HStack spacing={2} flexWrap="wrap">
                 <Button
                   size="sm"
                   colorScheme="blue"
@@ -124,7 +102,7 @@ const ScoresSection = () => {
                   size="sm"
                   colorScheme="green"
                   borderRadius="lg"
-                  leftIcon={<Text fontSize="sm">📝</Text>}
+                  leftIcon={<Icon as={FiEdit3} />}
                   onClick={() => scoreManagement.setIsBulkModalOpen(true)}
                   isDisabled={!currentUser}
                 >
@@ -136,7 +114,7 @@ const ScoresSection = () => {
                       size="sm"
                       colorScheme="orange"
                       borderRadius="lg"
-                      leftIcon={<Text fontSize="sm">🔄</Text>}
+                      leftIcon={<Icon as={FiRepeat} />}
                       onClick={onTransferModalOpen}
                     >
                       Transférer rotation
@@ -145,7 +123,7 @@ const ScoresSection = () => {
                       size="sm"
                       colorScheme="teal"
                       borderRadius="lg"
-                      leftIcon={<Text fontSize="sm">🔀</Text>}
+                      leftIcon={<Icon as={FiShuffle} />}
                       onClick={onTransferScoreModalOpen}
                     >
                       Transférer un score
@@ -162,10 +140,9 @@ const ScoresSection = () => {
                     </Tooltip>
                   </>
                 )}
-              </HStack>
-            )}
-          </Flex>
-        </Box>
+            </>
+          ) : undefined}
+        />
 
         {/* ── Stats ─────────────────────────────────────────────────────────── */}
         <ScoresStatsCards
