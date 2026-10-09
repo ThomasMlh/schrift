@@ -4,6 +4,10 @@ import type { RadarMetricDef } from "./ComparisonRadarChart";
 import type { TableMetricDef } from "./ComparisonDataTable";
 import type { IUserStats, IGuildStats } from "@/hooks/useAPI";
 import { formatScore, formatNumber } from "@/utils/format";
+import {
+  FiAlertTriangle, FiAward, FiBarChart2, FiCalendar, FiCheckCircle, FiCrosshair, FiHash, FiHeart, FiShield,
+  FiTarget, FiTrendingDown, FiTrendingUp, FiUsers, FiZap,
+} from "react-icons/fi";
 
 // Définitions des métriques du comparateur (radar et tableau) pour les personnages, les joueurs,
 // les guildes et le mode hebdomadaire. Pure configuration, sortie de ComparatorPage.
@@ -34,11 +38,11 @@ export const useComparatorMetrics = () => {
   ], [t]);
 
   const charTableMetrics = useMemo<TableMetricDef[]>(() => [
-    { label: t("components.comparatorCharts.radarCharAtk"), icon: "⚔️", getDisplayValue: (s) => formatNumber(parseStatValue(s.atk as string)), getRawValue: (s) => parseStatValue(s.atk as string) },
-    { label: t("components.comparatorCharts.radarCharDef"), icon: "🛡️", getDisplayValue: (s) => formatNumber(parseStatValue(s.def as string)), getRawValue: (s) => parseStatValue(s.def as string) },
-    { label: t("components.comparatorCharts.radarCharEnd"), icon: "❤️", getDisplayValue: (s) => formatNumber(parseStatValue(s.end as string)), getRawValue: (s) => parseStatValue(s.end as string) },
-    { label: t("components.comparatorCharts.radarCharCct"), icon: "💥", getDisplayValue: (s) => formatNumber(parseStatValue(s.cct as string)), getRawValue: (s) => parseStatValue(s.cct as string) },
-    { label: t("components.comparatorCharts.radarCharPre"), icon: "🎯", getDisplayValue: (s) => formatNumber(parseStatValue(s.pre as string)), getRawValue: (s) => parseStatValue(s.pre as string) },
+    { label: t("components.comparatorCharts.radarCharAtk"), icon: FiZap, getDisplayValue: (s) => formatNumber(parseStatValue(s.atk as string)), getRawValue: (s) => parseStatValue(s.atk as string) },
+    { label: t("components.comparatorCharts.radarCharDef"), icon: FiShield, getDisplayValue: (s) => formatNumber(parseStatValue(s.def as string)), getRawValue: (s) => parseStatValue(s.def as string) },
+    { label: t("components.comparatorCharts.radarCharEnd"), icon: FiHeart, getDisplayValue: (s) => formatNumber(parseStatValue(s.end as string)), getRawValue: (s) => parseStatValue(s.end as string) },
+    { label: t("components.comparatorCharts.radarCharCct"), icon: FiTarget, getDisplayValue: (s) => formatNumber(parseStatValue(s.cct as string)), getRawValue: (s) => parseStatValue(s.cct as string) },
+    { label: t("components.comparatorCharts.radarCharPre"), icon: FiCrosshair, getDisplayValue: (s) => formatNumber(parseStatValue(s.pre as string)), getRawValue: (s) => parseStatValue(s.pre as string) },
   ], [t]);
 
   // Radar metrics
@@ -68,24 +72,24 @@ export const useComparatorMetrics = () => {
   const playerTableMetrics = useMemo<TableMetricDef[]>(() => {
     const P = (s: Record<string, unknown>) => s as unknown as IUserStats;
     return [
-      { label: t("components.comparatorCharts.metricAvgScore"), icon: "📊", getDisplayValue: (s) => formatScore(P(s)?.averageScore), getRawValue: (s) => P(s)?.averageScore || 0 },
-      { label: t("components.comparatorCharts.metricBestScore"), icon: "🏆", getDisplayValue: (s) => formatNumber(P(s)?.bestScore?.score), getRawValue: (s) => P(s)?.bestScore?.score || 0 },
-      { label: t("components.comparatorCharts.metricWorstScore"), icon: "📉", getDisplayValue: (s) => formatNumber(P(s)?.worstScore?.score), getRawValue: (s) => P(s)?.worstScore?.score || 0 },
-      { label: t("components.comparatorCharts.metricParticipations"), icon: "🎯", getDisplayValue: (s) => formatNumber(P(s)?.totalScores), getRawValue: (s) => P(s)?.totalScores || 0 },
-      { label: t("components.comparatorCharts.metricTotalPoints"), icon: "💰", getDisplayValue: (s) => formatScore(P(s)?.totalPoints), getRawValue: (s) => P(s)?.totalPoints || 0 },
-      { label: t("components.comparatorCharts.metricMissRate"), icon: "⚠️", getDisplayValue: (s) => typeof P(s)?.missRate === "number" ? `${P(s).missRate}%` : "N/A", getRawValue: (s) => P(s)?.missRate || 0, inverse: true },
+      { label: t("components.comparatorCharts.metricAvgScore"), icon: FiBarChart2, getDisplayValue: (s) => formatScore(P(s)?.averageScore), getRawValue: (s) => P(s)?.averageScore || 0 },
+      { label: t("components.comparatorCharts.metricBestScore"), icon: FiAward, getDisplayValue: (s) => formatNumber(P(s)?.bestScore?.score), getRawValue: (s) => P(s)?.bestScore?.score || 0 },
+      { label: t("components.comparatorCharts.metricWorstScore"), icon: FiTrendingDown, getDisplayValue: (s) => formatNumber(P(s)?.worstScore?.score), getRawValue: (s) => P(s)?.worstScore?.score || 0 },
+      { label: t("components.comparatorCharts.metricParticipations"), icon: FiTarget, getDisplayValue: (s) => formatNumber(P(s)?.totalScores), getRawValue: (s) => P(s)?.totalScores || 0 },
+      { label: t("components.comparatorCharts.metricTotalPoints"), icon: FiTrendingUp, getDisplayValue: (s) => formatScore(P(s)?.totalPoints), getRawValue: (s) => P(s)?.totalPoints || 0 },
+      { label: t("components.comparatorCharts.metricMissRate"), icon: FiAlertTriangle, getDisplayValue: (s) => typeof P(s)?.missRate === "number" ? `${P(s).missRate}%` : "N/A", getRawValue: (s) => P(s)?.missRate || 0, inverse: true, unit: "percent" },
     ];
   }, [t]);
 
   const guildTableMetrics = useMemo<TableMetricDef[]>(() => {
     const G = (s: Record<string, unknown>) => s as unknown as IGuildStats;
     return [
-      { label: t("components.comparatorCharts.metricMemberCount"), icon: "👥", getDisplayValue: (s) => formatNumber(G(s)?.totalMembers), getRawValue: (s) => G(s)?.totalMembers || 0 },
-      { label: t("components.comparatorCharts.metricAvgScore"), icon: "📊", getDisplayValue: (s) => formatScore(G(s)?.averageScore), getRawValue: (s) => G(s)?.averageScore || 0 },
-      { label: t("components.comparatorCharts.metricBestScore"), icon: "🏆", getDisplayValue: (s) => formatNumber(G(s)?.bestScore), getRawValue: (s) => G(s)?.bestScore || 0 },
-      { label: t("components.comparatorCharts.metricTotalParticipations"), icon: "🎯", getDisplayValue: (s) => formatNumber(G(s)?.totalScores), getRawValue: (s) => G(s)?.totalScores || 0 },
-      { label: t("components.comparatorCharts.metricTotalPoints"), icon: "💰", getDisplayValue: (s) => formatScore(G(s)?.totalPoints), getRawValue: (s) => G(s)?.totalPoints || 0 },
-      { label: t("components.comparatorCharts.metricClearRate"), icon: "✅", getDisplayValue: (s) => typeof G(s)?.clearRate === "number" ? `${G(s).clearRate}%` : "N/A", getRawValue: (s) => G(s)?.clearRate || 0 },
+      { label: t("components.comparatorCharts.metricMemberCount"), icon: FiUsers, getDisplayValue: (s) => formatNumber(G(s)?.totalMembers), getRawValue: (s) => G(s)?.totalMembers || 0 },
+      { label: t("components.comparatorCharts.metricAvgScore"), icon: FiBarChart2, getDisplayValue: (s) => formatScore(G(s)?.averageScore), getRawValue: (s) => G(s)?.averageScore || 0 },
+      { label: t("components.comparatorCharts.metricBestScore"), icon: FiAward, getDisplayValue: (s) => formatNumber(G(s)?.bestScore), getRawValue: (s) => G(s)?.bestScore || 0 },
+      { label: t("components.comparatorCharts.metricTotalParticipations"), icon: FiTarget, getDisplayValue: (s) => formatNumber(G(s)?.totalScores), getRawValue: (s) => G(s)?.totalScores || 0 },
+      { label: t("components.comparatorCharts.metricTotalPoints"), icon: FiTrendingUp, getDisplayValue: (s) => formatScore(G(s)?.totalPoints), getRawValue: (s) => G(s)?.totalPoints || 0 },
+      { label: t("components.comparatorCharts.metricClearRate"), icon: FiCheckCircle, getDisplayValue: (s) => typeof G(s)?.clearRate === "number" ? `${G(s).clearRate}%` : "N/A", getRawValue: (s) => G(s)?.clearRate || 0, unit: "percent" },
     ];
   }, [t]);
 
@@ -114,19 +118,19 @@ export const useComparatorMetrics = () => {
     () => [
       {
         label: t("components.comparatorCharts.weeklyTotal"),
-        icon: "📅",
+        icon: FiCalendar,
         getDisplayValue: (s) => formatScore((s.weekTotal as number) || 0),
         getRawValue: (s) => (s.weekTotal as number) || 0,
       },
       {
         label: t("components.comparatorCharts.weeklyRotation1"),
-        icon: "1️⃣",
+        icon: FiHash,
         getDisplayValue: (s) => formatScore((s.rotation1Score as number) || 0),
         getRawValue: (s) => (s.rotation1Score as number) || 0,
       },
       {
         label: t("components.comparatorCharts.weeklyRotation2"),
-        icon: "2️⃣",
+        icon: FiHash,
         getDisplayValue: (s) => formatScore((s.rotation2Score as number) || 0),
         getRawValue: (s) => (s.rotation2Score as number) || 0,
       },

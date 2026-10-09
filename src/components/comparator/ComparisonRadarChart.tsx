@@ -35,14 +35,12 @@ interface ComparisonRadarChartProps {
   entities: RadarEntityDef[];
   metrics: RadarMetricDef[];
   heading: string;
-  accentBg?: string;
 }
 
 export const ComparisonRadarChart = ({
   entities,
   metrics,
   heading,
-  accentBg,
 }: ComparisonRadarChartProps) => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
@@ -51,7 +49,6 @@ export const ComparisonRadarChart = ({
   const textColor = useColorModeValue("#2D3748", "#E2E8F0");
   const haloColor = useColorModeValue("rgba(255,255,255,0.9)", "rgba(26,32,44,0.85)");
   const gridColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.1)";
-  const defaultAccentBg = isDark ? "rgba(49,130,206,0.08)" : "blue.50";
   const { t } = useTranslation();
 
   const maxValues: Record<string, number> = {};
@@ -116,8 +113,8 @@ export const ComparisonRadarChart = ({
     <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={5} h="100%" display="flex" flexDirection="column">
       <VStack spacing={4} align="stretch" flex={1}>
         <HStack justify="space-between">
-          <Text fontSize="lg" fontWeight="bold">{heading}</Text>
-          <Text fontSize="xs" color="gray.500">{t("components.comparatorCharts.radarScale")}</Text>
+          <Text fontSize="lg" fontWeight="bold" color="text.strong">{heading}</Text>
+          <Text fontSize="xs" color="text.muted">{t("components.comparatorCharts.radarScale")}</Text>
         </HStack>
         <Box w="100%" flex={1} minH="400px">
           <ResponsiveContainer width="100%" height="100%">
@@ -141,13 +138,9 @@ export const ComparisonRadarChart = ({
             </RadarChart>
           </ResponsiveContainer>
         </Box>
-        <Box p={3} borderRadius="lg" bg={accentBg ?? defaultAccentBg}>
-          <Text fontSize="xs" color="gray.600" _dark={{ color: "gray.400" }}>
-            💡{" "}
-            <Text as="span" fontWeight="semibold">{t("components.comparatorCharts.radarTip")}</Text>{" "}
-            {t("components.comparatorCharts.radarTipText")}
-          </Text>
-        </Box>
+        <Text fontSize="xs" color="text.muted">
+          {t("components.comparatorCharts.radarTip")} {t("components.comparatorCharts.radarTipText")}
+        </Text>
       </VStack>
     </Box>
   );
