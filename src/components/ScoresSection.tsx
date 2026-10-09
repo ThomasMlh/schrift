@@ -7,15 +7,20 @@ import {
   HStack,
   Icon,
   IconButton,
+  Menu,
+  MenuButton,
+  MenuDivider,
+  MenuItem,
+  MenuList,
   Text,
-  Tooltip,
   useDisclosure,
   VStack,
   Alert,
   AlertIcon,
 } from "@chakra-ui/react";
 import { PageLoader } from "@/components/ui/PageLoader";
-import { FiBarChart2, FiEdit3, FiRepeat, FiShuffle, FiTool } from "react-icons/fi";
+import { FiBarChart2, FiCamera, FiEdit3, FiMoreHorizontal, FiPlus, FiRepeat, FiShuffle, FiTool } from "react-icons/fi";
+import { ChevronDownIcon } from "@chakra-ui/icons";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import type { IScore } from "../interfaces";
 import { useAuth } from "@/providers/AuthProvider";
@@ -23,7 +28,6 @@ import { Pagination as PaginationComponent } from "./ui/Pagination";
 import ScoresTable from "./ui/ScoresTable";
 import { useCycles, useUsers, useGuilds, useScores } from "@/hooks/useAPI";
 import { useScoreManagement } from "@/hooks/useScoreManagement";
-import { ScoresStatsCards } from "./scores/ScoresStatsCards";
 import { ScoresFilters } from "./scores/ScoresFilters";
 import { ScoreModals } from "./scores/ScoreModals";
 import { TransferScoreModal } from "./ui/TransferScoreModal";
@@ -88,67 +92,39 @@ const ScoresSection = () => {
             : "Chargement…"}
           actions={(isAdmin || isGuildManager) ? (
             <>
-
-                <Button
+              <Menu placement="bottom-end">
+                <MenuButton
+                  as={Button}
                   size="sm"
-                  colorScheme="blue"
-                  borderRadius="lg"
-                  onClick={() => scoreManagement.setIsOCRModalOpen(true)}
+                  colorScheme="purple"
+                  leftIcon={<Icon as={FiPlus} />}
+                  rightIcon={<ChevronDownIcon />}
                   isDisabled={!currentUser}
                 >
-                  {t("components.scoresSection.buttonAutoEntry")}
-                </Button>
-                <Button
-                  size="sm"
-                  colorScheme="green"
-                  borderRadius="lg"
-                  leftIcon={<Icon as={FiEdit3} />}
-                  onClick={() => scoreManagement.setIsBulkModalOpen(true)}
-                  isDisabled={!currentUser}
-                >
-                  {t("components.scoresSection.buttonManualEntry")}
-                </Button>
-                {isAdmin && (
-                  <>
-                    <Button
-                      size="sm"
-                      colorScheme="orange"
-                      borderRadius="lg"
-                      leftIcon={<Icon as={FiRepeat} />}
-                      onClick={onTransferModalOpen}
-                    >
-                      Transférer rotation
-                    </Button>
-                    <Button
-                      size="sm"
-                      colorScheme="teal"
-                      borderRadius="lg"
-                      leftIcon={<Icon as={FiShuffle} />}
-                      onClick={onTransferScoreModalOpen}
-                    >
-                      Transférer un score
-                    </Button>
-                    <Tooltip label="Outils de debug OCR" hasArrow>
-                      <IconButton
-                        aria-label="OCR Debug"
-                        icon={<FiTool />}
-                        size="sm"
-                        variant="outline"
-                        borderRadius="lg"
-                        onClick={() => navigate("/ocr-debug")}
-                      />
-                    </Tooltip>
-                  </>
-                )}
+                  Saisir des scores
+                </MenuButton>
+                <MenuList>
+                  <MenuItem icon={<Icon as={FiCamera} />} onClick={() => scoreManagement.setIsOCRModalOpen(true)}>
+                    {t("components.scoresSection.buttonAutoEntry")}
+                  </MenuItem>
+                  <MenuItem icon={<Icon as={FiEdit3} />} onClick={() => scoreManagement.setIsBulkModalOpen(true)}>
+                    {t("components.scoresSection.buttonManualEntry")}
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+              {isAdmin && (
+                <Menu placement="bottom-end">
+                  <MenuButton as={IconButton} icon={<FiMoreHorizontal />} size="sm" variant="outline" aria-label="Autres actions" />
+                  <MenuList>
+                    <MenuItem icon={<Icon as={FiRepeat} />} onClick={onTransferModalOpen}>Transférer une rotation</MenuItem>
+                    <MenuItem icon={<Icon as={FiShuffle} />} onClick={onTransferScoreModalOpen}>Transférer un score</MenuItem>
+                    <MenuDivider />
+                    <MenuItem icon={<Icon as={FiTool} />} onClick={() => navigate("/ocr-debug")}>Debug OCR</MenuItem>
+                  </MenuList>
+                </Menu>
+              )}
             </>
           ) : undefined}
-        />
-
-        {/* ── Stats ─────────────────────────────────────────────────────────── */}
-        <ScoresStatsCards
-          pagination={pagination}
-          activeFiltersCount={activeFiltersCount}
-          isLoading={isLoadingScores}
         />
 
         {/* ── Filtres ───────────────────────────────────────────────────────── */}
@@ -183,7 +159,7 @@ const ScoresSection = () => {
           ) : !Array.isArray(scores) || scores.length === 0 ? (
             <Flex justify="center" align="center" py={16}>
               <VStack spacing={3}>
-                <Text fontSize="3xl">📊</Text>
+                <Icon as={FiBarChart2} boxSize={8} color="text.muted" />
                 <Text fontWeight="medium">Aucun score trouvé</Text>
                 {activeFiltersCount > 0 ? (
                   <HStack>
@@ -207,6 +183,7 @@ const ScoresSection = () => {
               scores={scores}
               users={users}
               cycles={cycles}
+              hideCycle={!!filterCycleId}
               isAdmin={isAdmin}
               isGuildManager={isGuildManager}
               onEditScore={scoreManagement.handleEditScore}

@@ -498,7 +498,7 @@
     "scoresSection": {
       "heading": "Score Management",
       "scoresCount": "scores registered",
-      "buttonAutoEntry": "📸 Auto entry",
+      "buttonAutoEntry": "From a screenshot (OCR)",
       "buttonManualEntry": "Manual entry",
       "noScores": "No score registered yet.",
       "loading": "Loading scores…"
