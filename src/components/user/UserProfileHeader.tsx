@@ -1,13 +1,20 @@
-import { Badge, Box, Card, CardBody, HStack, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Avatar, Badge, Box, Flex, HStack, Image, Text, VStack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
-import type { IUser } from "@/interfaces";
-import { UserDisplay } from "@/components/ui/UserDisplay";
+import type { IUser, ITopAchievement } from "@/interfaces";
 import { formatRoleName } from "@/utils/user";
-import { getDiscordBannerUrl } from "@/utils/discord";
+import { getDiscordBannerUrl, getUserAvatarUrl } from "@/utils/discord";
+import { TopAchievementBadge } from "@/components/achievements/TopAchievementBadge";
 
 interface UserProfileHeaderProps {
   // Utilisateur enrichi avec le compte consulté (pseudo, guilde et rôle de l'alt le cas échéant)
   user: IUser;
+  // Succès le plus rare du compte consulté
+  topAchievement?: ITopAchievement | null;
+  // Choix du cycle, affiché à droite
+  cycleControl?: ReactNode;
+  // Sélecteur de compte (alts), affiché sous le rôle
+  accountSwitcher?: ReactNode;
 }
 
 const getRoleBadgeColor = (role: string) => {
@@ -23,110 +30,121 @@ const getRoleBadgeColor = (role: string) => {
   }
 };
 
-// En-tête de la page joueur : bannière Discord (ou dégradé), avatar, guilde et rôle
-export const UserProfileHeader = ({ user }: UserProfileHeaderProps) => {
+// En-tête de la page joueur : bannière Discord (ou dégradé) en bandeau, avatar, pseudo,
+// meilleur succès, guilde et rôle, avec le choix du cycle et des comptes.
+export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountSwitcher }: UserProfileHeaderProps) => {
   const { t } = useTranslation();
   const bannerUrl = user.discord_id && user.banner ? getDiscordBannerUrl(user.discord_id, user.banner) : null;
-  const gradientBg = useColorModeValue(
-    "linear(to-br, blue.50, purple.50)",
-    "linear(to-br, gray.800, purple.900)"
-  );
+  const avatarUrl = user.avatar && user.discord_id
+    ? getUserAvatarUrl({ discord_id: user.discord_id, avatar: user.avatar }) || undefined
+    : undefined;
+  const displayName = user.bbs_name || user.global_name;
+  const [bannerFailed, setBannerFailed] = useState(false);
+  const hasBanner = Boolean(bannerUrl) && !bannerFailed;
+
+  // Nouvelle bannière (autre joueur ou autre compte) : on retente le chargement
+  useEffect(() => setBannerFailed(false), [bannerUrl]);
 
   return (
-    <Card
-      bgGradient={gradientBg}
-      {...(bannerUrl && {
-        backgroundImage: `url('${bannerUrl}')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center"
-      })}
+    <Box
+      bg="bg.card"
+      borderWidth="1px"
+      borderColor="border.subtle"
       borderRadius="2xl"
-      boxShadow="2xl"
-      mb={6}
+      boxShadow="md"
       overflow="hidden"
-      position="relative"
+      mb={6}
     >
-      {/* Overlay sombre pour la lisibilité (uniquement si bannière) */}
-      {bannerUrl && (
-        <Box
-          position="absolute"
-          top={0}
-          left={0}
-          right={0}
-          bottom={0}
-          bg="blackAlpha.600"
-          zIndex={0}
-        />
-      )}
-      {!bannerUrl && (
-        <Box
-          position="absolute"
-          top={0}
-          right={0}
-          width="300px"
-          height="300px"
-          opacity={0.1}
-        />
-      )}
-      <CardBody py={8}>
-        <VStack 
-          spacing={4} 
-          align="center" 
-          position="relative" 
-          zIndex={1}
-          {...(bannerUrl && {
-            sx: {
-              "& *": {
-                color: "white !important"
-              }
-            }
-          })}
-        >
-          <UserDisplay
-            user={user}
-            avatarSize="2xl"
-            direction="column"
-            textSize="2xl"
-            spacing={4}
-            asLink={false}
+      {/* Bandeau : plus haut quand la bannière Discord se charge (format 600×240), pour qu'on
+          en voie l'essentiel ; simple liseré dégradé sinon, y compris si l'image a disparu
+          côté Discord (hash enregistré mais périmé). */}
+      <Box
+        position="relative"
+        h={hasBanner ? { base: "140px", sm: "180px", md: "240px" } : { base: "90px", md: "120px" }}
+        bgGradient="linear(to-r, purple.600, blue.500)"
+        transition="height 0.2s"
+      >
+        {bannerUrl && !bannerFailed && (
+          <Image
+            src={bannerUrl}
+            alt=""
+            position="absolute"
+            inset={0}
+            w="100%"
+            h="100%"
+            objectFit="cover"
+            onError={() => setBannerFailed(true)}
           />
+        )}
+      </Box>
 
-          <VStack spacing={2} textAlign="center">
-            {user.guilde_id ? (
-              <HStack spacing={2}>
+      <Flex
+        px={{ base: 4, md: 6 }}
+        pb={5}
+        gap={4}
+        direction={{ base: "column", md: "row" }}
+        justify="space-between"
+        align={{ base: "stretch", md: "flex-end" }}
+      >
+        <Flex gap={4} align="flex-end" minW={0}>
+          <Avatar
+            size={{ base: "xl", md: "2xl" }}
+            src={avatarUrl}
+            name={displayName}
+            mt={{ base: -10, md: -14 }}
+            borderWidth="4px"
+            borderColor="bg.card"
+            flexShrink={0}
+          />
+          <VStack align="start" spacing={2} minW={0} pt={2}>
+            <HStack spacing={2} minW={0}>
+              <Text
+                as="h1"
+                fontSize={{ base: "xl", md: "3xl" }}
+                fontWeight="extrabold"
+                letterSpacing="tight"
+                lineHeight="short"
+                color="text.strong"
+                noOfLines={1}
+              >
+                {displayName}
+              </Text>
+              <TopAchievementBadge achievement={topAchievement} size={26} />
+            </HStack>
+            <HStack spacing={2} flexWrap="wrap">
+              {user.guilde_id ? (
                 <Badge
                   colorScheme={getRoleBadgeColor(user.role || "membre")}
-                  variant="solid"
-                  px={4}
-                  py={2}
+                  variant="subtle"
+                  px={3}
+                  py={1}
                   borderRadius="full"
-                  fontSize="md"
+                  fontSize="xs"
                   textTransform="uppercase"
                 >
-                  {formatRoleName(user.role)} {user.guild_name}
+                  {formatRoleName(user.role)} · {user.guild_name}
                 </Badge>
-              </HStack>
-            ) : (
-              <Text fontSize="md" color={bannerUrl ? "whiteAlpha.800" : "gray.500"}>
-                {t("pages.user.noGuild")}
-              </Text>
-            )}
-            {user.is_banned && (
-              <Badge
-                colorScheme="red"
-                variant="solid"
-                px={4}
-                py={1}
-                borderRadius="full"
-                fontSize="sm"
-                textTransform="uppercase"
-              >
-                {t("pages.user.badgeBanned")}
-              </Badge>
-            )}
+              ) : (
+                <Text fontSize="sm" color="text.muted">
+                  {t("pages.user.noGuild")}
+                </Text>
+              )}
+              {user.is_banned && (
+                <Badge colorScheme="red" variant="solid" px={3} py={1} borderRadius="full" fontSize="xs" textTransform="uppercase">
+                  {t("pages.user.badgeBanned")}
+                </Badge>
+              )}
+            </HStack>
+            {accountSwitcher}
           </VStack>
-        </VStack>
-      </CardBody>
-    </Card>
+        </Flex>
+
+        {cycleControl && (
+          <Box w={{ base: "100%", md: "260px" }} flexShrink={0}>
+            {cycleControl}
+          </Box>
+        )}
+      </Flex>
+    </Box>
   );
 };

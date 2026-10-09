@@ -3,29 +3,26 @@ import { useState, useEffect } from "react";
 import {
   Container,
   VStack,
-  HStack,
   Text,
   Alert,
   AlertIcon,
   Card,
   CardBody,
   SimpleGrid,
-  Box,
   Tabs,
   TabList,
   TabPanels,
   Tab,
   TabPanel,
   Icon,
-  Flex,
   Center,
   Skeleton,
 } from "@chakra-ui/react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { SEOHead } from "@/components/SEOHead";
 import { CycleSelect } from "@/components/ui/CycleSelect";
-import { useCycles, useUser, useUserByBBSName, useUserStats, useGuild } from "@/hooks/useAPI";
-import { StatCard } from "@/components/user/StatCard";
+import { useCycles, useUser, useUserByBBSName, useUserStats, useGuild, useUserAchievements } from "@/hooks/useAPI";
+import { StatCard } from "@/components/ui/StatCard";
 import { UserStatsOverview } from "@/components/user/UserStatsOverview";
 import { UserPerformances } from "@/components/user/UserPerformances";
 import { UserTopRotations } from "@/components/user/UserTopRotations";
@@ -37,7 +34,7 @@ import { UserPositionPerformance } from "@/components/user/UserPositionPerforman
 import { BanDetailsCard } from "@/components/user/BanDetailsCard";
 import { UserTypeAnalysis } from "@/components/user/UserTypeAnalysis";
 import { UserWeeklySection } from "@/components/user/UserWeeklySection";
-import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock, FiStar, FiHexagon } from "react-icons/fi";
+import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock, FiHexagon, FiTarget } from "react-icons/fi";
 import { UserKillerRecords } from "@/components/user/UserKillerRecords";
 import { UserAchievements } from "@/components/achievements/UserAchievements";
 import { useAuth } from "@/providers/AuthProvider";
@@ -46,7 +43,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 import { UserProfileHeader } from "@/components/user/UserProfileHeader";
 import { UserAccountSwitcher } from "@/components/user/UserAccountSwitcher";
-import { userTabStyles } from "@/components/user/userTabStyles";
+import { findTopAchievement } from "@/components/achievements/achievementCatalog";
 
 const UserPage = () => {
   const { bbs_name } = useParams<{ bbs_name: string }>();
@@ -60,17 +57,18 @@ const UserPage = () => {
   const { isAdmin, currentUser } = useAuth();
   const { t } = useTranslation();
 
-  // Mapping des onglets
+  // Onglets : clé d'URL → index. Les anciennes clés (tendance, top-rotations, records)
+  // renvoient vers l'onglet qui contient désormais leur section.
+  const TAB_NAMES = ["vue-ensemble", "performances", "evolution", "succes"];
   const TAB_MAP: Record<string, number> = {
     "vue-ensemble": 0,
-    "tendance": 1,
-    "performances": 2,
-    "top-rotations": 3,
-    "evolution": 4,
-    "records": 5,
-    "succes": 6
+    "tendance": 0,
+    "performances": 1,
+    "top-rotations": 1,
+    "records": 1,
+    "evolution": 2,
+    "succes": 3,
   };
-  const TAB_NAMES = ["vue-ensemble", "tendance", "performances", "top-rotations", "evolution", "records", "succes"];
 
   // Déterminer l'onglet actif depuis l'URL
   const tabParam = searchParams.get("tab");
@@ -105,6 +103,9 @@ const UserPage = () => {
     selectedCycle,
     matchedBbsId
   );
+  // Succès le plus rare du compte consulté, affiché à côté du pseudo
+  const { accounts: achievementAccounts } = useUserAchievements(userId);
+  const topAchievement = findTopAchievement(achievementAccounts, matchedBbsId);
   // Stats sans filtre de cycle — uniquement pour l'évolution temporelle globale
   const { stats: globalStats } = useUserStats(userId, undefined, matchedBbsId);
 
@@ -169,7 +170,6 @@ const UserPage = () => {
 
 
   const cardBg = "bg.card";
-  const tabBg = "bg.card";
 
 
   if (loading) {
@@ -215,43 +215,34 @@ const UserPage = () => {
           { label: user.bbs_name || user.global_name },
         ]} />
 
-        <UserProfileHeader user={user} />
-
-        {userData?.bbs_accounts && userData.bbs_accounts.length > 1 && (
-          <UserAccountSwitcher accounts={userData.bbs_accounts} activeBbsId={matchedBbsId} />
-        )}
+        <UserProfileHeader
+          user={user}
+          topAchievement={topAchievement}
+          accountSwitcher={
+            userData?.bbs_accounts && userData.bbs_accounts.length > 1 ? (
+              <UserAccountSwitcher accounts={userData.bbs_accounts} activeBbsId={matchedBbsId} />
+            ) : undefined
+          }
+          cycleControl={
+            <>
+              <Text fontSize="xs" color="text.muted" mb={1}>
+                {t("pages.user.cycleFilterLabel")}
+              </Text>
+              <CycleSelect
+                cycles={cycles}
+                value={selectedCycle}
+                onChange={setSelectedCycle}
+                placeholder={t("pages.user.cycleAllPlaceholder")}
+                allowDeselect={true}
+                valueKey="_id"
+                size="md"
+              />
+            </>
+          }
+        />
 
         {/* Détails du bannissement - visible uniquement par les admins */}
         {isAdmin && user.is_banned && <BanDetailsCard user={user} />}
-
-        {/* Filtre de cycle */}
-        <Card mb={6} bg={cardBg} borderRadius="xl" boxShadow="lg">
-          <CardBody>
-            <Flex
-              direction={{ base: "column", md: "row" }}
-              gap={4}
-              align={{ base: "stretch", md: "center" }}
-            >
-              <HStack spacing={3} flex="1">
-                <Icon as={FiBarChart2} boxSize={5} color="blue.500" />
-                <Text fontWeight="semibold" fontSize="lg">
-                  {t("pages.user.cycleFilterLabel")}
-                </Text>
-              </HStack>
-              <Box maxW={{ base: "full", md: "300px" }}>
-                <CycleSelect
-                  cycles={cycles}
-                  value={selectedCycle}
-                  onChange={setSelectedCycle}
-                  placeholder={t("pages.user.cycleAllPlaceholder")}
-                  allowDeselect={true}
-                  valueKey="_id"
-                  size="md"
-                />
-              </Box>
-            </Flex>
-          </CardBody>
-        </Card>
 
         {statsLoading ? (
           <VStack spacing={6}>
@@ -266,41 +257,37 @@ const UserPage = () => {
           <VStack spacing={6}>
             {/* Statistiques principales */}
             <SimpleGrid
-              columns={{ base: 1, sm: 2, lg: 4 }}
-              spacing={6}
+              columns={{ base: 2, lg: 4 }}
+              spacing={4}
               w="full"
             >
               <StatCard
-                icon="🎯"
+                icon={FiTarget}
+                gradient="linear(to-br, blue.400, purple.500)"
                 label={t("pages.user.statTotalScoresLabel")}
-                value={stats.totalScores}
-                helpText={t("pages.user.statTotalScoresHelp")}
-                borderColor="blue.500"
-                valueColor="blue.500"
+                value={stats.totalScores.toLocaleString("fr-FR")}
+                tooltip={t("pages.user.statTotalScoresHelp")}
               />
               <StatCard
-                icon="📈"
+                icon={FiBarChart2}
+                gradient="linear(to-br, orange.400, red.400)"
                 label={t("pages.user.statAverageScoreLabel")}
                 value={`${(Math.round(stats.averageScore) / 1000000).toFixed(1)}M`}
-                helpText={t("pages.user.statAverageScoreHelp")}
-                borderColor="purple.500"
-                valueColor="purple.500"
+                tooltip={t("pages.user.statAverageScoreHelp")}
               />
               <StatCard
-                icon="💰"
+                icon={FiTrendingUp}
+                gradient="linear(to-br, purple.500, pink.400)"
                 label={t("pages.user.statTotalPointsLabel")}
                 value={`${(stats.totalPoints / 1000000000).toFixed(1)}B`}
-                helpText={t("pages.user.statTotalPointsHelp")}
-                borderColor="green.500"
-                valueColor="green.500"
+                tooltip={t("pages.user.statTotalPointsHelp")}
               />
               <StatCard
-                icon="🏆"
+                icon={FiAward}
+                gradient="linear(to-br, yellow.400, orange.400)"
                 label={t("pages.user.statBestScoreLabel")}
-                value={stats.bestScore.score.toLocaleString()}
-                helpText={t("pages.user.statBestScoreHelp")}
-                borderColor="orange.500"
-                valueColor="orange.500"
+                value={stats.bestScore.score.toLocaleString("fr-FR")}
+                tooltip={t("pages.user.statBestScoreHelp")}
               />
             </SimpleGrid>
 
@@ -316,131 +303,110 @@ const UserPage = () => {
               ) : null;
             })()}
 
-            {/* Onglets pour les différentes visualisations */}
-            <Card w="full" bg={tabBg} borderRadius="xl" boxShadow="lg">
-              <CardBody>
-                <Tabs colorScheme="blue" variant="enclosed" index={tabIndex} onChange={handleTabChange}>
-                  <TabList mb={6} flexWrap="wrap" justifyContent={{ base: "center", md: "flex-start" }} flexDirection={{ base: "column", md: "row" }} gap={2} borderBottom="none">
-                    <Tab {...userTabStyles}>
-                      <Icon as={FiBarChart2} mr={2} />
-                      {t("pages.user.tabOverview")}
-                    </Tab>
-                    <Tab {...userTabStyles} isDisabled={!selectedCycle || !stats.recentTrend}>
-                      <Icon as={FiTrendingUp} mr={2} />
-                      {t("pages.user.tabTrend")}
-                    </Tab>
-                    <Tab {...userTabStyles}>
-                      <Icon as={FiActivity} mr={2} />
-                      {t("pages.user.tabPerformances")}
-                    </Tab>
-                    <Tab {...userTabStyles}>
-                      <Icon as={FiAward} mr={2} />
-                      {t("pages.user.tabTopRotations")}
-                    </Tab>
-                    <Tab {...userTabStyles} isDisabled={!globalStats?.temporalEvolution || globalStats.temporalEvolution.length < 2}>
-                      <Icon as={FiClock} mr={2} />
-                      {t("pages.user.tabEvolution")}
-                    </Tab>
-                    <Tab {...userTabStyles}>
-                      <Icon as={FiStar} mr={2} />
-                      {t("pages.user.tabRecords")}
-                    </Tab>
-                    <Tab {...userTabStyles}>
-                      <Icon as={FiHexagon} mr={2} />
-                      {t("pages.user.tabAchievements")}
-                    </Tab>
-                  </TabList>
+            {/* Onglets */}
+            <Tabs
+              w="full"
+              variant="soft-rounded"
+              colorScheme="purple"
+              size="sm"
+              index={tabIndex}
+              onChange={handleTabChange}
+              isLazy
+            >
+              <TabList gap={1} flexWrap="wrap" mb={5}>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                  <Icon as={FiBarChart2} aria-hidden />{t("pages.user.tabOverview")}
+                </Tab>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                  <Icon as={FiActivity} aria-hidden />{t("pages.user.tabPerformances")}
+                </Tab>
+                <Tab
+                  color="text.secondary"
+                  fontWeight="semibold"
+                  gap={2}
+                  isDisabled={!globalStats?.temporalEvolution || globalStats.temporalEvolution.length < 2}
+                >
+                  <Icon as={FiClock} aria-hidden />{t("pages.user.tabEvolution")}
+                </Tab>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                  <Icon as={FiHexagon} aria-hidden />{t("pages.user.tabAchievements")}
+                </Tab>
+              </TabList>
 
-                  <TabPanels>
-                    {/* Vue d'ensemble */}
-                    <TabPanel p={0}>
-                      <VStack spacing={6} align="stretch">
-                        <UserStatsOverview
-                          stats={stats}
-                          guildName={user?.guild_name}
-                          hasGuild={!!user?.guilde_id}
-                        />
+              <TabPanels>
+                {/* Aperçu */}
+                <TabPanel p={0}>
+                  <VStack spacing={6} align="stretch">
+                    <UserStatsOverview
+                      stats={stats}
+                      guildName={user?.guild_name}
+                      hasGuild={!!user?.guilde_id}
+                    />
 
-                        {/* Contribution à la guilde */}
-                        {globalStats?.guildContribution && globalStats.guildContribution.byCycle.length > 0 && (
-                          <UserGuildContribution
-                            historicalContribution={globalStats.guildContribution}
-                            cycleContribution={selectedCycle ? (stats?.guildContribution ?? null) : undefined}
-                            cycleContributionLoading={!!selectedCycle && statsLoading}
-                            hasSelectedCycle={!!selectedCycle}
-                            selectedCycleId={selectedCycle}
-                            selectedCycleName={cycles.find((c) => c._id === selectedCycle)?.name}
-                            guildName={user?.guild_name}
-                            temporalEvolution={globalStats.temporalEvolution}
-                          />
-                        )}
+                    {/* Tendance récente (cycle choisi uniquement) */}
+                    {stats.recentTrend && selectedCycle && (
+                      <UserRecentTrend recentTrend={stats.recentTrend} />
+                    )}
 
-                        {/* Rivaux */}
-                        {stats.rivals && stats.rivals.length > 0 && user && (
-                          <UserRivals
-                            rivals={stats.rivals}
-                            currentUser={user}
-                            currentUserRank={stats.ranking?.global || null}
-                            currentUserAverage={stats.averageScore}
-                            loggedInUserId={currentUser?._id}
-                          />
-                        )}
+                    {/* Contribution à la guilde */}
+                    {globalStats?.guildContribution && globalStats.guildContribution.byCycle.length > 0 && (
+                      <UserGuildContribution
+                        historicalContribution={globalStats.guildContribution}
+                        cycleContribution={selectedCycle ? (stats?.guildContribution ?? null) : undefined}
+                        cycleContributionLoading={!!selectedCycle && statsLoading}
+                        hasSelectedCycle={!!selectedCycle}
+                        selectedCycleId={selectedCycle}
+                        selectedCycleName={cycles.find((c) => c._id === selectedCycle)?.name}
+                        guildName={user?.guild_name}
+                        temporalEvolution={globalStats.temporalEvolution}
+                      />
+                    )}
 
-                        {/* Performance par période du cycle */}
-                        {globalStats?.performanceByQuartile && globalStats.performanceByQuartile.length >= 2 && (
-                          <UserPositionPerformance
-                            performanceByQuartile={globalStats.performanceByQuartile}
-                          />
-                        )}
+                    {/* Rivaux */}
+                    {stats.rivals && stats.rivals.length > 0 && user && (
+                      <UserRivals
+                        rivals={stats.rivals}
+                        currentUser={user}
+                        currentUserRank={stats.ranking?.global || null}
+                        currentUserAverage={stats.averageScore}
+                        loggedInUserId={currentUser?._id}
+                      />
+                    )}
 
-                        {/* Performance par type d'attaque / altération */}
-                        {(stats.performanceByAttack || stats.performanceByAlteration) && (
-                          <UserTypeAnalysis stats={stats} />
-                        )}
-                      </VStack>
-                    </TabPanel>
+                    {/* Performance par période du cycle */}
+                    {globalStats?.performanceByQuartile && globalStats.performanceByQuartile.length >= 2 && (
+                      <UserPositionPerformance
+                        performanceByQuartile={globalStats.performanceByQuartile}
+                      />
+                    )}
 
-                    {/* Tendance récente */}
-                    <TabPanel p={0}>
-                      {stats.recentTrend && selectedCycle ? (
-                        <UserRecentTrend recentTrend={stats.recentTrend} />
-                      ) : (
-                        <Box textAlign="center" py={10}>
-                          <Text fontSize="lg" color="gray.500">
-                            {t("pages.user.trendSelectCycleHint")}
-                          </Text>
-                        </Box>
-                      )}
-                    </TabPanel>
+                    {/* Performance par type d'attaque / altération */}
+                    {(stats.performanceByAttack || stats.performanceByAlteration) && (
+                      <UserTypeAnalysis stats={stats} />
+                    )}
+                  </VStack>
+                </TabPanel>
 
-                    {/* Graphique de performances */}
-                    <TabPanel p={0}>
-                      <UserPerformances stats={stats} />
-                    </TabPanel>
+                {/* Performances : graphique, top rotations, records par killer */}
+                <TabPanel p={0}>
+                  <VStack spacing={6} align="stretch">
+                    <UserPerformances stats={stats} />
+                    <UserTopRotations stats={stats} />
+                    <UserKillerRecords userId={userId} bbsId={matchedBbsId} />
+                  </VStack>
+                </TabPanel>
 
-                    {/* Top Rotations détaillées */}
-                    <TabPanel p={0}>
-                      <UserTopRotations stats={stats} />
-                    </TabPanel>
+                {/* Évolution sur les cycles */}
+                <TabPanel p={0}>
+                  <UserTemporalEvolution temporalEvolution={globalStats?.temporalEvolution ?? []} />
+                </TabPanel>
 
-                    {/* Évolution temporelle */}
-                    <TabPanel p={0}>
-                      <UserTemporalEvolution temporalEvolution={globalStats?.temporalEvolution ?? []} />
-                    </TabPanel>
-
-                    {/* Records personnels par killer */}
-                    <TabPanel p={0}>
-                      <UserKillerRecords userId={userId} bbsId={matchedBbsId} />
-                    </TabPanel>
-
-                    {/* Succès du compte */}
-                    <TabPanel p={0}>
-                      <UserAchievements userId={userId} bbsId={matchedBbsId} />
-                    </TabPanel>
-                  </TabPanels>
-                </Tabs>
-              </CardBody>
-            </Card>
+                {/* Succès du compte */}
+                <TabPanel p={0}>
+                  <UserAchievements userId={userId} bbsId={matchedBbsId} />
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
           </VStack>
         ) : (
           <Center mt={8}>

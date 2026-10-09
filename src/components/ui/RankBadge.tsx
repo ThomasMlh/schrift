@@ -1,4 +1,5 @@
-import { Badge, HStack, Text } from "@chakra-ui/react";
+import { Badge, HStack } from "@chakra-ui/react";
+import { MedalBadge } from "./MedalBadge";
 
 interface RankBadgeProps {
   rank: number;
@@ -25,20 +26,20 @@ export const RankBadge = ({ rank, variant = "default" }: RankBadgeProps) => {
     );
   }
 
-  // Emoji et couleurs pour les 3 premiers
+  // Couleurs pour les 3 premiers (la médaille est dessinée par MedalBadge)
   const medals = {
-    1: { emoji: "🥇", color: "yellow" },
-    2: { emoji: "🥈", color: "gray" },
-    3: { emoji: "🥉", color: "orange" },
+    1: { color: "yellow" },
+    2: { color: "gray" },
+    3: { color: "orange" },
   };
 
   const medal = medals[rank as keyof typeof medals];
 
-  // Variant with-emoji-separated: emoji séparé du badge (PodiumSection)
+  // Variant with-emoji-separated: médaille séparée du badge (PodiumSection)
   if (variant === "with-emoji-separated" && medal) {
     return (
       <HStack spacing={2}>
-        <Text fontSize="xl">{medal.emoji}</Text>
+        <MedalBadge rank={rank as 1 | 2 | 3} size={22} />
         <Badge
           colorScheme={medal.color}
           variant="solid"
@@ -69,21 +70,23 @@ export const RankBadge = ({ rank, variant = "default" }: RankBadgeProps) => {
     );
   }
 
-  // Variant default: emoji dans le badge
+  // Variant default: médaille devant le badge
   if (medal) {
     return (
-      <Badge
-        colorScheme={medal.color}
-        variant="solid"
-        fontSize="sm"
-        px={3}
-        py={1}
-        borderRadius="full"
-        minW={{ base: "55px", md: "auto" }}
-        textAlign="center"
-      >
-        {medal.emoji}#{rank}
-      </Badge>
+      <HStack spacing={1.5}>
+        <MedalBadge rank={rank as 1 | 2 | 3} size={16} />
+        <Badge
+          colorScheme={medal.color}
+          variant="solid"
+          fontSize="sm"
+          px={3}
+          py={1}
+          borderRadius="full"
+          textAlign="center"
+        >
+          #{rank}
+        </Badge>
+      </HStack>
     );
   }
 
