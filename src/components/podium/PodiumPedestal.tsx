@@ -6,7 +6,7 @@ import { TopAchievementBadge } from "@/components/achievements/TopAchievementBad
 import type { ITopAchievement } from "@/interfaces";
 import CustomLink from "@/components/ui/CustomLink";
 import { buildPlayerUrl } from "@/utils/playerUrl";
-import { MedalBadge } from "./MedalBadge";
+import { MedalBadge } from "@/components/ui/MedalBadge";
 
 export interface PodiumPedestalPlayer {
   rank: number;

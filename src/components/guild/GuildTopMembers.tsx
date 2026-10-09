@@ -11,8 +11,7 @@ import {
 import { useGuildTopMembers } from "@/hooks/useAPI";
 import { getUserAvatarUrl } from "@/utils/discord";
 import { useTranslation } from "react-i18next";
-
-const MEDALS = ["🥇", "🥈", "🥉"];
+import { MedalBadge } from "@/components/ui/MedalBadge";
 
 const formatScore = (n: number) => {
   if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`;
@@ -67,7 +66,13 @@ export const GuildTopMembers = ({ guildId, cycleId }: GuildTopMembersProps) => {
                 borderRadius="lg"
                 bg={index === 0 ? firstPlaceBg : "transparent"}
               >
-                <Text fontSize="lg" w="24px" textAlign="center">{MEDALS[index]}</Text>
+                <Box w="24px" display="flex" justifyContent="center" flexShrink={0}>
+                  {index < 3 ? (
+                    <MedalBadge rank={(index + 1) as 1 | 2 | 3} size={18} />
+                  ) : (
+                    <Text fontSize="sm" fontWeight="bold" color="text.muted">#{index + 1}</Text>
+                  )}
+                </Box>
                 <Avatar size="sm" src={avatarUrl} name={member.bbs_name || member.username} />
                 <Text fontSize="sm" fontWeight="semibold" noOfLines={1} flex={1} minW={0}>{member.bbs_name}</Text>
                 <Text fontSize="sm" fontWeight="bold">{formatScore(member.bestScore)}</Text>

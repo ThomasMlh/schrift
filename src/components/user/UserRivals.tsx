@@ -9,7 +9,8 @@ import {
   Heading,
   Flex
 } from "@chakra-ui/react";
-import { FiUsers, FiTrendingUp, FiTrendingDown } from "react-icons/fi";
+import { FiUsers, FiTrendingUp, FiTrendingDown, FiTarget } from "react-icons/fi";
+import { MedalBadge } from "@/components/ui/MedalBadge";
 import { useTranslation } from "react-i18next";
 import { UserDisplay } from "@/components/ui/UserDisplay";
 import type { IUserStats } from "@/hooks/useAPI";
@@ -63,13 +64,6 @@ export const UserRivals = ({
   const rivalsWithCurrentUser = insertIndex === -1
     ? [...rivals, profileEntry]
     : [...rivals.slice(0, insertIndex), profileEntry, ...rivals.slice(insertIndex)];
-
-  const getRankEmoji = (rank: number) => {
-    if (rank === 1) return "🥇";
-    if (rank === 2) return "🥈";
-    if (rank === 3) return "🥉";
-    return "🎯";
-  };
 
   return (
     <Box>
@@ -141,7 +135,11 @@ export const UserRivals = ({
                         flexDir="column"
                         boxShadow="inner"
                       >
-                        <Text fontSize="xl">{getRankEmoji(rival.rank)}</Text>
+                        {rival.rank <= 3 ? (
+                          <MedalBadge rank={rival.rank as 1 | 2 | 3} size={20} />
+                        ) : (
+                          <Icon as={FiTarget} boxSize={5} color="purple.400" aria-hidden />
+                        )}
                         <Text
                           fontSize="xs"
                           color="gray.500"
