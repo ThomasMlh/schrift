@@ -481,14 +481,9 @@
       "allGuilds": "All guilds",
       "week": "Week",
       "reset": "Reset",
-      "activeFilters": "Active filters:",
-      "badgeMode": "Mode:",
-      "badgeTypeMax": "Type: Max score (sum)",
-      "badgeCycle": "Cycle:",
-      "badgeWeek": "Week:",
-      "badgeGuild": "Guild:",
       "rankingProgression": "Progression",
-      "badgeTypeProgression": "Type: Progression"
+      "shortcutCurrentCycle": "Current cycle",
+      "shortcutMyGuild": "My guild"
     },
     "podiumInfo": {
       "rotationScore": "Average score",
@@ -848,6 +843,9 @@
       "limitReached": "⚠️ Limit of {{max}} characters reached",
       "noResults": "No character found",
       "typeToSearch": "Type to search..."
+    },
+    "podiumPedestal": {
+      "medal": "Rank {{rank}} medal"
     }
   },
   "affinities": {

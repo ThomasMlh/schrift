@@ -1,4 +1,5 @@
-import { Container, VStack, Box, useColorModeValue, useToast, HStack, Button, Text } from "@chakra-ui/react";
+import { Container, VStack, Box, useToast, Button, Icon } from "@chakra-ui/react";
+import { FiClock, FiShield } from "react-icons/fi";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { HeroSection } from "../components/HeroSection";
@@ -68,7 +69,7 @@ const PodiumPage = () => {
   const { fetchPodium, isLoading, error } = usePodiumFetch();
   const { currentUser, isLoggedIn } = useAuth();
 
-  const filterBg = useColorModeValue("blue.50", "blue.900");
+  const filterBg = "bg.subtle";
   const captureBg = "bg.card";
 
   const structuredData = {
@@ -315,6 +316,11 @@ const PodiumPage = () => {
     );
   }
 
+  const userGuild = isLoggedIn && currentUser?.guilde_id
+    ? guilds.find((g) => g._id === currentUser.guilde_id)
+    : undefined;
+  const isMyGuildActive = Boolean(userGuild && selectedGuildName === userGuild.name);
+
   return (
     <>
       <SEOHead
@@ -344,42 +350,6 @@ const PodiumPage = () => {
 
         <Container maxW="container.xl" py={8}>
           <VStack spacing={5} align="stretch">
-            {/* Raccourcis */}
-            <HStack spacing={2} flexWrap="wrap">
-              <Text fontSize="xs" color="gray.500" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mr={1}>
-                Raccourcis :
-              </Text>
-              <Button
-                size="xs"
-                variant="outline"
-                colorScheme="blue"
-                borderRadius="full"
-                onClick={selectDefaultCycle}
-              >
-                Cycle en cours
-              </Button>
-              {isLoggedIn && currentUser?.guilde_id && (() => {
-                const userGuild = guilds.find(g => g._id === currentUser.guilde_id);
-                if (!userGuild) return null;
-                const isActive = selectedGuildName === userGuild.name;
-                return (
-                  <Button
-                    size="xs"
-                    variant={isActive ? "solid" : "outline"}
-                    colorScheme="purple"
-                    borderRadius="full"
-                    onClick={() => {
-                      const next = isActive ? "" : userGuild.name;
-                      setSelectedGuildName(next);
-                      applyFilters({ guildName: next });
-                    }}
-                  >
-                    Ma guilde
-                  </Button>
-                );
-              })()}
-            </HStack>
-
             <PodiumFilters
               displayMode={displayMode}
               cycleRankingType={cycleRankingType}
@@ -400,7 +370,37 @@ const PodiumPage = () => {
               onGuildChange={handleGuildChange}
               onItemsPerPageChange={handleItemsPerPageChange}
               onReset={resetFilters}
-              filterBg={filterBg}
+              shortcuts={
+                <>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    colorScheme="purple"
+                    borderRadius="full"
+                    leftIcon={<Icon as={FiClock} />}
+                    onClick={selectDefaultCycle}
+                  >
+                    {t("components.podiumFilters.shortcutCurrentCycle")}
+                  </Button>
+                  {userGuild && (
+                    <Button
+                      size="xs"
+                      variant={isMyGuildActive ? "solid" : "outline"}
+                      colorScheme="purple"
+                      borderRadius="full"
+                      leftIcon={<Icon as={FiShield} />}
+                      aria-pressed={isMyGuildActive}
+                      onClick={() => {
+                        const next = isMyGuildActive ? "" : userGuild.name;
+                        setSelectedGuildName(next);
+                        applyFilters({ guildName: next });
+                      }}
+                    >
+                      {t("components.podiumFilters.shortcutMyGuild")}
+                    </Button>
+                  )}
+                </>
+              }
             />
 
             {podiumData && (
