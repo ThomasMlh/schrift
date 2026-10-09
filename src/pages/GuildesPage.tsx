@@ -4,17 +4,21 @@ import {
   Box,
   Flex,
   HStack,
-  useColorModeValue,
   Image,
   Text,
   Icon,
   SimpleGrid,
-  Divider,
   Badge,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
 } from "@chakra-ui/react";
+import { FaCrown } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { FiUsers, FiGrid, FiChevronRight, FiBarChart2, FiAward, FiTarget, FiTrendingUp, FiCheckCircle } from "react-icons/fi";
+import { FiUsers, FiGrid, FiActivity, FiBarChart2, FiAward, FiTarget, FiTrendingUp, FiCheckCircle } from "react-icons/fi";
 import { StatCard } from "../components/ui/StatCard";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
@@ -33,6 +37,44 @@ import { useTranslation } from "react-i18next";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 import { bucketUrl } from "@/utils/apiRequest";
 
+const TAB_KEYS = ["overview", "members", "stats"] as const;
+type TabKey = (typeof TAB_KEYS)[number];
+
+interface GuildLogoProps {
+  guild: IGuild;
+  size: string;
+  hasError?: boolean;
+  onError: () => void;
+}
+
+/** Logo de la guilde, ou sa lettre sur fond dégradé si l'image manque */
+const GuildLogo = ({ guild, size, hasError, onError }: GuildLogoProps) =>
+  hasError ? (
+    <Flex
+      w={size}
+      h={size}
+      flexShrink={0}
+      align="center"
+      justify="center"
+      bgGradient="linear(to-br, purple.500, pink.400)"
+      borderRadius="lg"
+    >
+      <Text fontSize="sm" color="white" fontWeight="bold">
+        {guild.name.charAt(0)}
+      </Text>
+    </Flex>
+  ) : (
+    <Image
+      src={`${bucketUrl}/guilds/${guild.name}.png`}
+      alt={guild.name}
+      w={size}
+      h={size}
+      flexShrink={0}
+      objectFit="contain"
+      onError={onError}
+    />
+  );
+
 const GuildesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { guilds } = useGuilds(true);
@@ -40,16 +82,12 @@ const GuildesPage = () => {
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
   const [selectedWeeklyWeek, setSelectedWeeklyWeek] = useState(1);
+  const [activeTab, setActiveTab] = useState<TabKey>(() => {
+    const tab = searchParams.get("tab");
+    return TAB_KEYS.includes(tab as TabKey) ? (tab as TabKey) : "overview";
+  });
   const { t } = useTranslation();
 
-  const sidebarBg = "bg.glass";
-  const sidebarBorder = "border.faint";
-  const panelBg = useColorModeValue("gray.50", "rgba(26, 32, 44, 0.4)");
-  const panelHeaderBg = "bg.glass";
-  const itemHoverBg = useColorModeValue("purple.50", "whiteAlpha.50");
-  const itemActiveBg = useColorModeValue("purple.50", "rgba(159, 122, 234, 0.12)");
-  const countColor = "text.muted";
-  const dividerColor = "bg.hover";
 
   // Sélectionner la guilde depuis l'URL (par nom) ou par défaut la première
   useEffect(() => {
@@ -96,9 +134,14 @@ const GuildesPage = () => {
     } else {
       newParams.delete("cycle_name");
     }
+    if (activeTab !== "overview") {
+      newParams.set("tab", activeTab);
+    } else {
+      newParams.delete("tab");
+    }
     setSearchParams(newParams, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGuild, selectedCycleId]);
+  }, [selectedGuild, selectedCycleId, activeTab]);
 
   const { memberCounts: guildMemberCounts, isLoading } = useAllGuildsMemberCounts(true);
   const { members, isLoading: isLoadingMembers } = useGuildMembers(selectedGuild?._id, true);
@@ -109,6 +152,12 @@ const GuildesPage = () => {
   const currentGuildRank = selectedGuild ? rankings.find(r => r._id === selectedGuild._id) : null;
 
   const selectedCycleObj = cycles.find((c) => c._id === selectedCycleId);
+  const leaderNames = members
+    .filter((m) => m.role === "chef" || m.role === "sous-chef")
+    .sort((a, b) => (a.role === "chef" ? -1 : 0) - (b.role === "chef" ? -1 : 0))
+    .map((m) => m.bbs_name || m.global_name || m.username)
+    .filter(Boolean)
+    .join(" · ");
   const maxWeeks = selectedCycleObj ? Math.floor(selectedCycleObj.rotations.length / 2) : 0;
 
 
@@ -138,204 +187,98 @@ const GuildesPage = () => {
         />
 
         <Container maxW="container.xl" py={8}>
-          <Flex
-            direction={{ base: "column", md: "row" }}
-            gap={5}
-            align="stretch"
-            minH="600px"
-          >
-            {/* ── Sidebar ── */}
-            <Box
-              w={{ base: "100%", md: "240px" }}
-              flexShrink={0}
-              bg={sidebarBg}
-              borderRadius="xl"
-              borderWidth={1}
-              borderColor={sidebarBorder}
-              overflow="hidden"
-              boxShadow="sm"
-            >
-              {/* Stats */}
-              <Box px={5} py={4} borderBottomWidth={1} borderColor={dividerColor}>
-                <HStack spacing={6}>
-                  <VStack align="start" spacing={0}>
-                    <HStack spacing={1.5}>
-                      <Icon as={FiGrid} boxSize={3} color={countColor} />
-                      <Text fontSize="2xs" color={countColor} textTransform="uppercase" letterSpacing="wider" fontWeight="semibold">
-                        {t("pages.guilds.statsGuilds")}
-                      </Text>
-                    </HStack>
-                    <Text
-                      fontSize="2xl"
-                      fontWeight="extrabold"
-                      color="text.strong"
-                      lineHeight={1.2}
-                    >
-                      {guilds.length}
-                    </Text>
-                  </VStack>
+          <VStack spacing={6} align="stretch">
 
-                  <VStack align="start" spacing={0}>
-                    <HStack spacing={1.5}>
-                      <Icon as={FiUsers} boxSize={3} color={countColor} />
-                      <Text fontSize="2xs" color={countColor} textTransform="uppercase" letterSpacing="wider" fontWeight="semibold">
-                        {t("pages.guilds.statsMembers")}
-                      </Text>
-                    </HStack>
-                    <Text
-                      fontSize="2xl"
-                      fontWeight="extrabold"
-                      color="text.strong"
-                      lineHeight={1.2}
-                    >
-                      {isLoading ? "..." : totalMembers}
-                    </Text>
-                  </VStack>
-                </HStack>
-              </Box>
-
-              {/* Guild list — vertical on md+, horizontal scroll on mobile */}
-              <Box
-                overflowX={{ base: "auto", md: "hidden" }}
-                overflowY={{ base: "hidden", md: "auto" }}
-              >
-                <Flex
-                  direction={{ base: "row", md: "column" }}
-                  w={{ base: "100%", md: "auto" }}
-                  minW={{ base: "max-content", md: "auto" }}
-                >
+            {/* ── Sélecteur de guilde ── */}
+            <Box>
+              <Flex justify="space-between" align="baseline" mb={3} gap={3} wrap="wrap">
+                <Text fontSize="xs" fontWeight="bold" textTransform="uppercase" letterSpacing="widest" color="text.muted">
+                  {t("pages.guilds.pickGuild")}
+                </Text>
+                <Text fontSize="sm" color="text.muted">
+                  {t("pages.guilds.summary", { guilds: guilds.length, members: isLoading ? "…" : totalMembers })}
+                </Text>
+              </Flex>
+              <Box overflowX="auto" mx={{ base: -4, md: 0 }} px={{ base: 4, md: 0 }} pb={1}>
+                <HStack spacing={3} minW="max-content" role="tablist" aria-label={t("pages.guilds.pickGuild")}>
                   {guilds.map((guild) => {
                     const isSelected = selectedGuild?._id === guild._id;
                     return (
                       <Box
                         key={guild._id}
                         as="button"
+                        role="tab"
+                        aria-selected={isSelected}
                         onClick={() => setSelectedGuild(guild)}
+                        display="flex"
+                        alignItems="center"
+                        gap={3}
+                        minW="150px"
                         px={4}
                         py={3}
-                        borderBottomWidth={{ base: 0, md: "1px" }}
-                        borderRightWidth={{ base: "1px", md: 0 }}
-                        borderColor={dividerColor}
-                        bg={isSelected ? itemActiveBg : "transparent"}
-                        _hover={{ bg: isSelected ? itemActiveBg : itemHoverBg }}
-                        transition="background 0.15s"
-                        position="relative"
+                        borderRadius="xl"
+                        borderWidth="1px"
+                        borderColor={isSelected ? "purple.400" : "border.subtle"}
+                        bg={isSelected ? "rgba(159, 122, 234, 0.12)" : "bg.card"}
+                        boxShadow={isSelected ? "0 0 0 1px var(--chakra-colors-purple-400)" : undefined}
+                        transition="border-color 0.15s, transform 0.15s"
+                        _hover={{ borderColor: "purple.400", transform: "translateY(-2px)" }}
                         textAlign="left"
-                        flex={{ base: 1, md: "none" }}
-                        minW={{ base: "80px", md: "auto" }}
-                        w={{ base: "auto", md: "100%" }}
                       >
-                        {/* Active indicator */}
-                        {isSelected && (
-                          <Box
-                            position="absolute"
-                            left={{ base: 0, md: 0 }}
-                            top={{ base: 0, md: 0 }}
-                            bottom={{ base: 0, md: 0 }}
-                            right={{ base: 0, md: "auto" }}
-                            w={{ base: "100%", md: "3px" }}
-                            h={{ base: "3px", md: "100%" }}
-                            bgGradient="linear(to-b, purple.400, pink.400)"
-                          />
-                        )}
-
-                        <HStack spacing={3} justify="space-between">
-                          <HStack spacing={3}>
-                            <Box w="32px" h="32px" flexShrink={0}>
-                              {!imageErrors[guild._id] ? (
-                                <Image
-                                  src={`${bucketUrl}/guilds/${guild.name}.png`}
-                                  alt={guild.name}
-                                  w="32px"
-                                  h="32px"
-                                  objectFit="contain"
-                                  onError={() =>
-                                    setImageErrors((prev) => ({
-                                      ...prev,
-                                      [guild._id]: true,
-                                    }))
-                                  }
-                                />
-                              ) : (
-                                <Flex
-                                  w="32px"
-                                  h="32px"
-                                  align="center"
-                                  justify="center"
-                                  bgGradient="linear(to-br, purple.500, pink.400)"
-                                  borderRadius="md"
-                                >
-                                  <Text fontSize="xs" color="white" fontWeight="bold">
-                                    {guild.name.charAt(0)}
-                                  </Text>
-                                </Flex>
-                              )}
-                            </Box>
-                            <Text
-                              fontSize="sm"
-                              fontWeight={isSelected ? "bold" : "medium"}
-                              color={isSelected ? "purple.300" : undefined}
-                              whiteSpace="nowrap"
-                              overflow="hidden"
-                              textOverflow="ellipsis"
-                            >
-                              {guild.name}
-                            </Text>
-                          </HStack>
-
-                          <Icon
-                            as={FiChevronRight}
-                            color="purple.400"
-                            boxSize={4}
-                            opacity={isSelected ? 1 : 0}
-                            transition="opacity 0.15s"
-                            display={{ base: "none", md: "block" }}
-                          />
-                        </HStack>
+                        <GuildLogo
+                          guild={guild}
+                          size="36px"
+                          hasError={imageErrors[guild._id]}
+                          onError={() => setImageErrors((prev) => ({ ...prev, [guild._id]: true }))}
+                        />
+                        <Box minW={0}>
+                          <Text fontWeight="bold" color={isSelected ? "purple.300" : "text.strong"} noOfLines={1}>
+                            Schrift {guild.name}
+                          </Text>
+                          <Text fontSize="xs" color="text.muted">
+                            {guildMemberCounts?.[guild._id] ?? 0} {t("pages.guilds.memberPlural")}
+                          </Text>
+                        </Box>
                       </Box>
                     );
                   })}
-                </Flex>
+                </HStack>
               </Box>
             </Box>
 
-            {/* ── Main panel ── */}
-            <Box
-              flex={1}
-              bg={panelBg}
-              borderRadius="xl"
-              borderWidth={1}
-              borderColor={sidebarBorder}
-              overflow="hidden"
-              boxShadow="sm"
-            >
-              {/* Panel header */}
-              {selectedGuild && (
-                <Box
-                  px={8}
-                  py={4}
-                  borderBottomWidth={1}
-                  borderColor={dividerColor}
-                  bg={panelHeaderBg}
+            {selectedGuild && (
+              <>
+                {/* ── Bandeau de la guilde ── */}
+                <Flex
+                  bg="bg.card"
+                  borderWidth="1px"
+                  borderColor="border.subtle"
+                  borderRadius="2xl"
+                  boxShadow="md"
+                  p={{ base: 4, md: 6 }}
+                  gap={5}
+                  direction={{ base: "column", md: "row" }}
+                  align={{ base: "stretch", md: "center" }}
+                  justify="space-between"
                 >
-                  <HStack spacing={4}>
-                    {!imageErrors[selectedGuild._id] && (
-                      <Image
-                        src={`${bucketUrl}/guilds/${selectedGuild.name}.png`}
-                        alt={selectedGuild.name}
-                        h="32px"
-                        w="auto"
-                        onError={() =>
-                          setImageErrors((prev) => ({
-                            ...prev,
-                            [selectedGuild._id]: true,
-                          }))
-                        }
-                      />
-                    )}
-                    <VStack align="start" spacing={0}>
-                      <HStack spacing={2}>
-                        <Text fontSize="md" fontWeight="bold">
+                  <HStack spacing={4} minW={0}>
+                    <GuildLogo
+                      guild={selectedGuild}
+                      size="64px"
+                      hasError={imageErrors[selectedGuild._id]}
+                      onError={() => setImageErrors((prev) => ({ ...prev, [selectedGuild._id]: true }))}
+                    />
+                    <Box minW={0}>
+                      <HStack spacing={3} wrap="wrap">
+                        <Text
+                          as="h2"
+                          fontSize={{ base: "2xl", md: "3xl" }}
+                          fontWeight="extrabold"
+                          letterSpacing="tight"
+                          lineHeight="short"
+                          bgGradient="linear(to-r, purple.300, blue.400)"
+                          bgClip="text"
+                        >
                           Schrift {selectedGuild.name}
                         </Text>
                         {currentGuildRank && rankings.length > 0 && (
@@ -343,116 +286,129 @@ const GuildesPage = () => {
                             colorScheme={currentGuildRank.rank === 1 ? "yellow" : "purple"}
                             variant="subtle"
                             borderRadius="full"
-                            fontSize="2xs"
-                            px={2}
+                            fontSize="xs"
+                            px={2.5}
+                            py={0.5}
                           >
                             #{currentGuildRank.rank} / {rankings.length}
                           </Badge>
                         )}
                       </HStack>
-                      <Text fontSize="xs" color={countColor}>
-                        {guildMemberCounts?.[selectedGuild._id] || 0}{" "}
-                        {t("pages.guilds.memberPlural")}
-                      </Text>
-                    </VStack>
-                  </HStack>
-                </Box>
-              )}
-
-              {/* Org chart */}
-              <Box px={4} minH="500px">
-                {isLoadingMembers ? (
-                  <Flex justify="center" align="center" h="400px">
-                    <Text fontSize="md" color="gray.500" fontWeight="medium">
-                      {t("pages.guilds.loading")}
-                    </Text>
-                  </Flex>
-                ) : (
-                  <GuildOrgChart members={members} />
-                )}
-              </Box>
-
-              {/* Guild stats */}
-              {selectedGuild && (
-                <Box px={6} pb={8}>
-                  <Divider mb={6} borderColor={dividerColor} />
-                  <HStack justify="space-between" align="center" mb={4}>
-                    <Text
-                      fontSize="xs"
-                      fontWeight="semibold"
-                      textTransform="uppercase"
-                      letterSpacing="wider"
-                      color={countColor}
-                    >
-                      {t("pages.guilds.statsSection")}
-                    </Text>
-                    <Box minW="180px">
-                      <CycleSelect
-                        cycles={cycles}
-                        value={selectedCycleId}
-                        onChange={setSelectedCycleId}
-                        allowDeselect
-                        size="sm"
-                        showActiveBadge
-                      />
+                      <HStack spacing={4} mt={1} fontSize="sm" color="text.muted" wrap="wrap">
+                        <HStack spacing={1.5}>
+                          <Icon as={FiUsers} boxSize={3.5} aria-hidden />
+                          <Text>{guildMemberCounts?.[selectedGuild._id] ?? 0} {t("pages.guilds.memberPlural")}</Text>
+                        </HStack>
+                        {leaderNames && (
+                          <HStack spacing={1.5} minW={0}>
+                            <Icon as={FaCrown} boxSize={3.5} color="purple.400" aria-hidden />
+                            <Text noOfLines={1}>{leaderNames}</Text>
+                          </HStack>
+                        )}
+                      </HStack>
                     </Box>
                   </HStack>
-                  <SimpleGrid columns={{ base: 2, sm: 3, md: 5 }} gap={3}>
-                    {[
-                      { label: t("pages.guilds.statAvgScore"), icon: FiBarChart2, gradient: "linear(to-br, orange.400, red.400)", value: guildStats ? formatScore(guildStats.averageScore) : null },
-                      { label: t("pages.guilds.statBestScore"), icon: FiAward, gradient: "linear(to-br, yellow.400, orange.400)", value: guildStats ? formatScore(guildStats.bestScore) : null },
-                      { label: t("pages.guilds.statTotalParticipations"), icon: FiTarget, gradient: "linear(to-br, blue.400, purple.500)", value: guildStats ? guildStats.totalScores.toLocaleString("fr-FR") : null },
-                      { label: t("pages.guilds.statTotalPoints"), icon: FiTrendingUp, gradient: "linear(to-br, purple.500, pink.400)", value: guildStats ? formatScore(guildStats.totalPoints) : null },
-                      {
-                        label: t("pages.guilds.statClearRate"),
-                        icon: FiCheckCircle, gradient: "linear(to-br, green.400, teal.400)",
-                        value: guildStats ? `${guildStats.clearRate}%` : null,
-                        tooltip: t("pages.guilds.statClearRateTooltip"),
-                      },
-                    ].map(({ label, icon, gradient, value, tooltip }) => (
-                      <StatCard key={label} label={label} icon={icon} gradient={gradient} value={value} tooltip={tooltip} isLoading={isLoadingStats} />
-                    ))}
-                  </SimpleGrid>
 
-                  {/* Objectifs du cycle */}
-                  <Box mt={2}>
-                    <GuildGoals guildId={selectedGuild._id} cycleId={selectedCycleId || undefined} />
-                  </Box>
-
-                  {/* Top membres + Distribution */}
-                  <SimpleGrid columns={{ base: 1, md: 2 }} gap={4} mt={2}>
-                    <GuildTopMembers
-                      guildId={selectedGuild._id}
-                      cycleId={selectedCycleId || undefined}
+                  <Box w={{ base: "100%", md: "220px" }} flexShrink={0}>
+                    <Text fontSize="xs" color="text.muted" mb={1}>{t("pages.guilds.cycleLabel")}</Text>
+                    <CycleSelect
+                      cycles={cycles}
+                      value={selectedCycleId}
+                      onChange={setSelectedCycleId}
+                      allowDeselect
+                      size="sm"
+                      showActiveBadge
                     />
-                    <GuildScoreDistribution
-                      guildId={selectedGuild._id}
-                      cycleId={selectedCycleId || undefined}
-                    />
-                  </SimpleGrid>
-
-                  {/* Évolution */}
-                  <Box mt={4}>
-                    <GuildEvolution guildId={selectedGuild._id} />
                   </Box>
+                </Flex>
 
-                  {/* Classement hebdomadaire */}
-                  {selectedCycleObj && maxWeeks > 0 && (
-                    <Box mt={4}>
-                      <GuildWeeklyRanking
-                        guildName={selectedGuild.name}
-                        cycleName={selectedCycleObj.name}
-                        cycleId={selectedCycleObj._id ?? ""}
-                        maxWeeks={maxWeeks}
-                        weekNumber={selectedWeeklyWeek}
-                        onWeekChange={setSelectedWeeklyWeek}
-                      />
-                    </Box>
-                  )}
-                </Box>
-              )}
-            </Box>
-          </Flex>
+                {/* ── Sous-onglets ── */}
+                <Tabs
+                  index={TAB_KEYS.indexOf(activeTab)}
+                  onChange={(index) => setActiveTab(TAB_KEYS[index])}
+                  variant="soft-rounded"
+                  colorScheme="purple"
+                  size="sm"
+                  isLazy
+                >
+                  <TabList gap={1} flexWrap="wrap">
+                    <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                      <Icon as={FiGrid} aria-hidden />{t("pages.guilds.tabOverview")}
+                    </Tab>
+                    <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                      <Icon as={FiUsers} aria-hidden />{t("pages.guilds.tabMembers")}
+                    </Tab>
+                    <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                      <Icon as={FiActivity} aria-hidden />{t("pages.guilds.tabStats")}
+                    </Tab>
+                  </TabList>
+
+                  <TabPanels>
+                    {/* Aperçu */}
+                    <TabPanel px={0} pt={5}>
+                      <VStack spacing={4} align="stretch">
+                        <SimpleGrid columns={{ base: 2, sm: 3, md: 5 }} gap={3}>
+                          {[
+                            { label: t("pages.guilds.statAvgScore"), icon: FiBarChart2, gradient: "linear(to-br, orange.400, red.400)", value: guildStats ? formatScore(guildStats.averageScore) : null },
+                            { label: t("pages.guilds.statBestScore"), icon: FiAward, gradient: "linear(to-br, yellow.400, orange.400)", value: guildStats ? formatScore(guildStats.bestScore) : null },
+                            { label: t("pages.guilds.statTotalParticipations"), icon: FiTarget, gradient: "linear(to-br, blue.400, purple.500)", value: guildStats ? guildStats.totalScores.toLocaleString("fr-FR") : null },
+                            { label: t("pages.guilds.statTotalPoints"), icon: FiTrendingUp, gradient: "linear(to-br, purple.500, pink.400)", value: guildStats ? formatScore(guildStats.totalPoints) : null },
+                            {
+                              label: t("pages.guilds.statClearRate"),
+                              icon: FiCheckCircle, gradient: "linear(to-br, green.400, teal.400)",
+                              value: guildStats ? `${guildStats.clearRate}%` : null,
+                              tooltip: t("pages.guilds.statClearRateTooltip"),
+                            },
+                          ].map(({ label, icon, gradient, value, tooltip }) => (
+                            <StatCard key={label} label={label} icon={icon} gradient={gradient} value={value} tooltip={tooltip} isLoading={isLoadingStats} />
+                          ))}
+                        </SimpleGrid>
+
+                        <GuildGoals guildId={selectedGuild._id} cycleId={selectedCycleId || undefined} />
+
+                        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+                          <GuildTopMembers guildId={selectedGuild._id} cycleId={selectedCycleId || undefined} />
+                          <GuildScoreDistribution guildId={selectedGuild._id} cycleId={selectedCycleId || undefined} />
+                        </SimpleGrid>
+                      </VStack>
+                    </TabPanel>
+
+                    {/* Membres */}
+                    <TabPanel px={0} pt={5}>
+                      <Box bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="2xl" px={4} minH="400px">
+                        {isLoadingMembers ? (
+                          <Flex justify="center" align="center" h="400px">
+                            <Text fontSize="md" color="text.muted" fontWeight="medium">
+                              {t("pages.guilds.loading")}
+                            </Text>
+                          </Flex>
+                        ) : (
+                          <GuildOrgChart members={members} />
+                        )}
+                      </Box>
+                    </TabPanel>
+
+                    {/* Statistiques */}
+                    <TabPanel px={0} pt={5}>
+                      <VStack spacing={4} align="stretch">
+                        <GuildEvolution guildId={selectedGuild._id} />
+                        {selectedCycleObj && maxWeeks > 0 && (
+                          <GuildWeeklyRanking
+                            guildName={selectedGuild.name}
+                            cycleName={selectedCycleObj.name}
+                            cycleId={selectedCycleObj._id ?? ""}
+                            maxWeeks={maxWeeks}
+                            weekNumber={selectedWeeklyWeek}
+                            onWeekChange={setSelectedWeeklyWeek}
+                          />
+                        )}
+                      </VStack>
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
+              </>
+            )}
+          </VStack>
         </Container>
       </Box>
     </>
