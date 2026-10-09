@@ -421,27 +421,10 @@
       "perPage": "Per page"
     },
     "guildTabsList": {
-      "guildDisabled": "disabled",
-      "membersCount": "members",
       "noMemberInGuild": "No members in this guild",
       "roleMembre": "Member",
       "roleSousChef": "Sub-Leader",
-      "roleChef": "Leader",
-      "moveStay": "Stay",
-      "ariaDeleteMember": "Delete",
-      "dialogDeleteTitle": "Confirm deletion",
-      "dialogDeleteBody": "Are you sure you want to remove the member \"{{name}}\"? This action is irreversible.",
-      "noGuildAvailable": "No guild available.",
-      "toastMemberRemovedTitle": "Member removed",
-      "toastMemberRemovedDesc": "The member was successfully removed",
-      "toastDeleteError": "Error deleting member",
-      "toastRoleChangedTitle": "Role updated",
-      "toastRoleChangedDesc": "is now",
-      "toastRoleError": "Error updating role",
-      "toastMovedTitle": "Member moved",
-      "toastMovedDesc": "has been moved to",
-      "toastMovedFallback": "the new guild",
-      "toastMoveError": "Error moving member"
+      "roleChef": "Leader"
     },
     "podiumSection": {
       "heading": "🏆 Players Podium",
