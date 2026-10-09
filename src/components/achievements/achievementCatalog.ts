@@ -1,4 +1,4 @@
-import type { AchievementCategory, AchievementTier, AchievementUnit } from "@/interfaces";
+import type { AchievementCategory, AchievementTier, AchievementUnit, ITopAchievement, IUserAccountAchievements } from "@/interfaces";
 
 // Métadonnées d'affichage des succès : ordre des catégories et icône de chaque succès. Les textes
 // sont dans les fichiers de traduction (achievements.<code>.name / .description).
@@ -79,4 +79,24 @@ export const formatAchievementValue = (value: number, unit: AchievementUnit): st
     default:
       return value.toLocaleString("fr-FR");
   }
+};
+
+// Succès le plus rare débloqué par un compte (à rareté égale, le palier le plus élevé),
+// au même format que celui renvoyé par le podium.
+export const findTopAchievement = (
+  accounts: IUserAccountAchievements[],
+  bbsId?: string
+): ITopAchievement | null => {
+  const account = accounts.find((a) => a.bbs_id === bbsId) ?? accounts.find((a) => a.is_primary) ?? accounts[0];
+  let best: ITopAchievement | null = null;
+  for (const achievement of account?.achievements ?? []) {
+    for (const tier of achievement.tiers) {
+      if (tier.unlocked_at == null) continue;
+      const isRarer = !best
+        || tier.rarity < best.rarity
+        || (tier.rarity === best.rarity && TIER_ORDER.indexOf(tier.tier) > TIER_ORDER.indexOf(best.tier));
+      if (isRarer) best = { code: achievement.code, name: achievement.name ?? "", tier: tier.tier, rarity: tier.rarity };
+    }
+  }
+  return best;
 };

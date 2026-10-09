@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardBody, Text, VStack, Wrap, WrapItem } from "@chakra-ui/react";
+import { Badge, Button, HStack, Text, Wrap, WrapItem } from "@chakra-ui/react";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { IBbsAccount } from "@/interfaces";
@@ -8,7 +8,6 @@ interface UserAccountSwitcherProps {
   activeBbsId?: string;
 }
 
-const cardBg = "bg.card";
 const mutedText = "text.muted";
 
 // Sélecteur de compte bbs : un même joueur peut avoir plusieurs comptes (alts), chacun avec ses
@@ -24,13 +23,11 @@ export const UserAccountSwitcher = ({ accounts, activeBbsId }: UserAccountSwitch
   });
 
   return (
-    <Card mb={6} bg={cardBg} borderRadius="xl" boxShadow="lg">
-      <CardBody py={4}>
-        <VStack align="stretch" spacing={2}>
-          <Text fontSize="sm" fontWeight="semibold" color={mutedText}>
+    <HStack spacing={2} align="center" flexWrap="wrap">
+          <Text fontSize="xs" fontWeight="semibold" color={mutedText}>
             {t("pages.user.accountsLabel")}
           </Text>
-          <Wrap spacing={2}>
+          <Wrap spacing={1.5}>
             {accounts.map((account) => {
               const isActive = account.bbs_id === activeBbsId;
               const nameKey = account.bbs_name || account.bbs_id;
@@ -45,9 +42,9 @@ export const UserAccountSwitcher = ({ accounts, activeBbsId }: UserAccountSwitch
                   <Button
                     as={RouterLink}
                     to={to}
-                    size="sm"
+                    size="xs"
                     borderRadius="full"
-                    colorScheme={isActive ? "blue" : "gray"}
+                    colorScheme={isActive ? "purple" : "gray"}
                     variant={isActive ? "solid" : "outline"}
                     _hover={{ textDecoration: "none", color: "white" }}
                   >
@@ -67,8 +64,6 @@ export const UserAccountSwitcher = ({ accounts, activeBbsId }: UserAccountSwitch
               );
             })}
           </Wrap>
-        </VStack>
-      </CardBody>
-    </Card>
+    </HStack>
   );
 };
