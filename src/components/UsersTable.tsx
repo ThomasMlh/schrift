@@ -1,11 +1,12 @@
 import {
     Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
     Text, Input, InputGroup, InputLeftElement, Spinner,
-    useColorMode, Badge, Flex, IconButton, useDisclosure, Tooltip, Skeleton
+    useColorMode, Badge, Flex, IconButton, useDisclosure, Tooltip, Skeleton,
+    SkeletonCircle, SimpleGrid, Divider
 } from "@chakra-ui/react";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { SearchIcon, EditIcon, NotAllowedIcon, CheckCircleIcon, StarIcon } from "@chakra-ui/icons";
+import { SearchIcon, EditIcon, NotAllowedIcon, CheckCircleIcon, StarIcon, RepeatIcon } from "@chakra-ui/icons";
 import type { IUser } from "../interfaces";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
 import EditUserModal from "./EditUserModal";
@@ -14,6 +15,7 @@ import UnbanUserModal from "./UnbanUserModal";
 import CreateManualUserModal from "./CreateManualUserModal";
 import { UserDisplay } from "./ui/UserDisplay";
 import { CustomSelect } from "./ui/CustomSelect";
+import { PlayerGridCard } from "./user/PlayerGridCard";
 import { useGuilds, useUsers, useUserAccounts } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
 
@@ -202,16 +204,43 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
 
     return (
         <VStack spacing={6} align="stretch" w="100%">
-            {/* Contrôles de filtrage */}
-            <VStack spacing={4} align="stretch">
-                {/* Première ligne - Recherche */}
-                <Flex justify="center">
-                    <InputGroup maxW="500px">
+            {/* Filtres : guildes en pastilles, puis recherche, rôle et nombre par page */}
+            <Box bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="xl" p={{ base: 3, md: 4 }}>
+                <Flex justify="space-between" align="center" gap={3} wrap="wrap">
+                    <HStack spacing={2} flexWrap="wrap" role="group" aria-label={t("components.usersTable.filterAllGuilds")}>
+                        {[{ _id: "", name: t("components.usersTable.filterAllGuildsShort") }, ...guilds].map((guild) => {
+                            const isActive = selectedGuildId === guild._id;
+                            return (
+                                <Button
+                                    key={guild._id || "all"}
+                                    size="sm"
+                                    borderRadius="full"
+                                    variant={isActive ? "solid" : "outline"}
+                                    colorScheme={isActive ? "purple" : "gray"}
+                                    aria-pressed={isActive}
+                                    onClick={() => handleGuildChange(guild._id)}
+                                >
+                                    {guild._id ? `Schrift ${guild.name}` : guild.name}
+                                </Button>
+                            );
+                        })}
+                    </HStack>
+                    {pagination && (
+                        <Text fontSize="sm" color="text.muted">
+                            {t("components.usersTable.resultsCount", { count: pagination.totalCount })}
+                        </Text>
+                    )}
+                </Flex>
+
+                <Divider my={{ base: 3, md: 4 }} borderColor="border.subtle" />
+
+                <Flex direction={{ base: "column", md: "row" }} gap={3} align={{ base: "stretch", md: "center" }}>
+                    <InputGroup flex={1} maxW={{ md: "420px" }}>
                         <InputLeftElement pointerEvents="none">
                             {isLoading ? (
-                                <Spinner size="sm" color="blue.500" />
+                                <Spinner size="sm" color="purple.400" />
                             ) : (
-                                <SearchIcon color="gray.300" />
+                                <SearchIcon color="text.muted" />
                             )}
                         </InputLeftElement>
                         <Input
@@ -220,113 +249,78 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </InputGroup>
-                </Flex>
 
-                {/* Deuxième ligne - Filtres */}
-                <Flex
-                    direction={{ base: "column", md: "row" }}
-                    gap={4}
-                    justify="center"
-                    align="center"
-                    wrap="wrap"
-                >
-                    {/* Filtre par guilde */}
-                    <CustomSelect
-                        placeholder={t("components.usersTable.filterAllGuilds")}
-                        value={selectedGuildId}
-                        onChange={(value) => handleGuildChange(value)}
-                        options={guilds.map((guild) => ({
-                            value: guild._id,
-                            label: guild.name
-                        }))}
-                        maxW="200px"
-                    />
-
-                    {/* Filtre par rôle */}
-                    <CustomSelect
-                        placeholder={t("components.usersTable.filterAllRoles")}
-                        value={selectedRole}
-                        onChange={(value) => handleRoleChange(value)}
-                        options={[
-                            { value: "chef", label: t("components.guildTabsList.roleChef") },
-                            { value: "sous-chef", label: t("components.guildTabsList.roleSousChef") },
-                            { value: "membre", label: t("components.guildTabsList.roleMembre") }
-                        ]}
-                        maxW="150px"
-                    />
-
-                    {/* Éléments par page */}
-                    <CustomSelect
-                        value={String(itemsPerPage)}
-                        onChange={(value) => handleItemsPerPageChange(parseInt(value))}
-                        options={[
-                            { value: "10", label: t("components.usersTable.perPage", { count: 10 }) },
-                            { value: "20", label: t("components.usersTable.perPage", { count: 20 }) },
-                            { value: "50", label: t("components.usersTable.perPage", { count: 50 }) },
-                            { value: "100", label: t("components.usersTable.perPage", { count: 100 }) }
-                        ]}
-                        allowDeselect={false}
-                        maxW="150px"
-                    />
-
-                    <Button onClick={resetFilters} variant="outline" minW="120px">
-                        {t("common.reset")}
-                    </Button>
+                    <HStack spacing={3} flexWrap="wrap" justify={{ base: "space-between", md: "flex-start" }}>
+                        <CustomSelect
+                            placeholder={t("components.usersTable.filterAllRoles")}
+                            value={selectedRole}
+                            onChange={(value) => handleRoleChange(value)}
+                            options={[
+                                { value: "chef", label: t("components.guildTabsList.roleChef") },
+                                { value: "sous-chef", label: t("components.guildTabsList.roleSousChef") },
+                                { value: "membre", label: t("components.guildTabsList.roleMembre") }
+                            ]}
+                            w="160px"
+                        />
+                        <CustomSelect
+                            value={String(itemsPerPage)}
+                            onChange={(value) => handleItemsPerPageChange(parseInt(value))}
+                            options={[
+                                { value: "10", label: t("components.usersTable.perPage", { count: 10 }) },
+                                { value: "20", label: t("components.usersTable.perPage", { count: 20 }) },
+                                { value: "50", label: t("components.usersTable.perPage", { count: 50 }) },
+                                { value: "100", label: t("components.usersTable.perPage", { count: 100 }) }
+                            ]}
+                            allowDeselect={false}
+                            w="140px"
+                        />
+                        <Tooltip label={t("common.reset")}>
+                            <IconButton
+                                aria-label={t("common.reset")}
+                                icon={<RepeatIcon />}
+                                variant="ghost"
+                                onClick={resetFilters}
+                            />
+                        </Tooltip>
+                    </HStack>
 
                     {isAdminMode && (
-                        <Button onClick={onCreateModalOpen} colorScheme="purple" minW="180px">
+                        <Button onClick={onCreateModalOpen} colorScheme="purple" ml={{ md: "auto" }}>
                             + Créer un joueur
                         </Button>
                     )}
                 </Flex>
-            </VStack>
+            </Box>
 
-            {/* Filtres actifs */}
-            {(searchTerm || selectedGuildId || selectedRole) && (
-                <Box
-                    p={3}
-                    borderRadius="lg"
-                    bg={isDark ? 'rgba(124,58,237,0.08)' : 'purple.50'}
-                    border="1px solid"
-                    borderColor={isDark ? 'purple.700' : 'purple.200'}
-                >
-                    <HStack spacing={2} flexWrap="wrap">
-                        <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
-                            textTransform="uppercase" color={isDark ? 'purple.400' : 'purple.600'}>
-                            {t("components.usersTable.activeFilters")}
-                        </Text>
-                        {searchTerm && (
-                            <Badge colorScheme="purple" variant={badgeVariant}>
-                                {searchTerm}
-                            </Badge>
-                        )}
-                        {selectedGuildId && (
-                            <Badge colorScheme="purple" variant={badgeVariant}>
-                                {getGuildName(selectedGuildId)}
-                            </Badge>
-                        )}
-                        {selectedRole && (
-                            <Badge colorScheme={getRoleBadgeColor(selectedRole)} variant={badgeVariant}>
-                                {getRoleLabel(selectedRole)}
-                            </Badge>
-                        )}
-                    </HStack>
-                </Box>
+            {/* Liste publique : grille de cartes, une par compte */}
+            {!isAdminMode && (
+                isLoading ? (
+                    <SimpleGrid columns={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing={3}>
+                        {Array.from({ length: 8 }).map((_, i) => (
+                            <HStack key={i} bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={4} spacing={3}>
+                                <SkeletonCircle size="12" />
+                                <VStack align="start" spacing={2} flex={1}>
+                                    <Skeleton height="16px" width="70%" />
+                                    <Skeleton height="14px" width="50%" borderRadius="full" />
+                                </VStack>
+                            </HStack>
+                        ))}
+                    </SimpleGrid>
+                ) : (
+                    <SimpleGrid columns={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing={3}>
+                        {users.map((user: IUser) => (
+                            <PlayerGridCard
+                                key={user.bbs_id ? `${user._id}-${user.bbs_id}` : user._id}
+                                player={user}
+                                guildName={user.guilde_id ? guilds.find(g => g._id === user.guilde_id)?.name : undefined}
+                            />
+                        ))}
+                    </SimpleGrid>
+                )
             )}
 
-            {/* Informations sur les résultats */}
-            {pagination && (
-                <Text fontSize="sm" color="gray.600">
-                    {t("components.usersTable.paginationInfo", {
-                        totalCount: pagination.totalCount,
-                        currentPage: pagination.currentPage,
-                        totalPages: pagination.totalPages,
-                        itemsOnPage: pagination.itemsOnPage
-                    })}
-                </Text>
-            )}
-
-            {/* Tableau des utilisateurs */}
+            {/* Tableau des utilisateurs (admin) */}
+            {isAdminMode && (
             <Box
                 overflowX="auto"
                 bg={bgColor}
@@ -483,6 +477,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                     </Tbody>
                 </Table>
             </Box>
+            )}
 
             {/* Pagination */}
             {pagination && (

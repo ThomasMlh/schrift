@@ -376,8 +376,6 @@
       "filterAllGuilds": "All guilds",
       "filterAllRoles": "All roles",
       "perPage": "{{count}} / page",
-      "activeFilters": "Active filters:",
-      "paginationInfo": "{{totalCount}} player(s) found - Page {{currentPage}} of {{totalPages}} - Showing {{itemsOnPage}} result(s)",
       "colPlayer": "Player",
       "colGuild": "Guild",
       "colRole": "Role",
@@ -390,7 +388,10 @@
       "ariaLabelEdit": "Edit player",
       "ariaLabelBan": "Ban player",
       "ariaLabelUnban": "Unban player",
-      "noResults": "No player found"
+      "noResults": "No player found",
+      "filterAllGuildsShort": "All",
+      "resultsCount_one": "{{count}} player",
+      "resultsCount_other": "{{count}} players"
     },
     "charactersTable": {
       "searchPlaceholder": "Search for a character...",
