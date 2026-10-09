@@ -4,7 +4,6 @@ import {
   Box,
   Flex,
   HStack,
-  Image,
   Text,
   Icon,
   SimpleGrid,
@@ -29,57 +28,21 @@ import { GuildTopMembers } from "@/components/guild/GuildTopMembers";
 import { GuildScoreDistribution } from "@/components/guild/GuildScoreDistribution";
 import { GuildEvolution } from "@/components/guild/GuildEvolution";
 import { GuildGoals } from "@/components/guild/GuildGoals";
+import { GuildLogo } from "@/components/guild/GuildLogo";
 import { GuildWeeklyRanking } from "@/components/guild/GuildWeeklyRanking";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import type { IGuild } from "../interfaces";
 import { useTranslation } from "react-i18next";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
-import { bucketUrl } from "@/utils/apiRequest";
 
 const TAB_KEYS = ["overview", "members", "stats"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
-
-interface GuildLogoProps {
-  guild: IGuild;
-  size: string;
-  hasError?: boolean;
-  onError: () => void;
-}
-
-/** Logo de la guilde, ou sa lettre sur fond dégradé si l'image manque */
-const GuildLogo = ({ guild, size, hasError, onError }: GuildLogoProps) =>
-  hasError ? (
-    <Flex
-      w={size}
-      h={size}
-      flexShrink={0}
-      align="center"
-      justify="center"
-      bgGradient="linear(to-br, purple.500, pink.400)"
-      borderRadius="lg"
-    >
-      <Text fontSize="sm" color="white" fontWeight="bold">
-        {guild.name.charAt(0)}
-      </Text>
-    </Flex>
-  ) : (
-    <Image
-      src={`${bucketUrl}/guilds/${guild.name}.png`}
-      alt={guild.name}
-      w={size}
-      h={size}
-      flexShrink={0}
-      objectFit="contain"
-      onError={onError}
-    />
-  );
 
 const GuildesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { guilds } = useGuilds(true);
   const [selectedGuild, setSelectedGuild] = useState<IGuild | null>(null);
-  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [selectedCycleId, setSelectedCycleId] = useState<string>("");
   const [selectedWeeklyWeek, setSelectedWeeklyWeek] = useState(1);
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
@@ -234,12 +197,7 @@ const GuildesPage = () => {
                         _hover={{ borderColor: "purple.400", transform: "translateY(-2px)" }}
                         textAlign="left"
                       >
-                        <GuildLogo
-                          guild={guild}
-                          size="36px"
-                          hasError={imageErrors[guild._id]}
-                          onError={() => setImageErrors((prev) => ({ ...prev, [guild._id]: true }))}
-                        />
+                        <GuildLogo guild={guild} size="36px" />
                         <Box minW={0}>
                           <Text fontWeight="bold" color={isSelected ? "purple.300" : "text.strong"} noOfLines={1}>
                             Schrift {guild.name}
@@ -271,12 +229,7 @@ const GuildesPage = () => {
                   justify="space-between"
                 >
                   <HStack spacing={4} minW={0}>
-                    <GuildLogo
-                      guild={selectedGuild}
-                      size="64px"
-                      hasError={imageErrors[selectedGuild._id]}
-                      onError={() => setImageErrors((prev) => ({ ...prev, [selectedGuild._id]: true }))}
-                    />
+                    <GuildLogo guild={selectedGuild} size="64px" />
                     <Box minW={0}>
                       <HStack spacing={3} wrap="wrap">
                         <Text
