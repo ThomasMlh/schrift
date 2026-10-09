@@ -73,7 +73,7 @@ const GuildsAdminSection = () => {
   };
 
   return (
-    <Container maxW="100vw" w="100%" px={0} py={8}>
+    <Container maxW="100vw" w="100%" px={0} py={0}>
       <Flex justify="center" w="100%" px={0}>
         <AdminFormsSection
           guilds={guilds}

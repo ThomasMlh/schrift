@@ -45,3 +45,14 @@ export const ADMIN_TABS: AdminTab[] = [
 ];
 
 export const getAdminTab = (key: AdminPage) => ADMIN_TABS.find((tab) => tab.key === key);
+
+// Phrase d'explication affichée sous le titre des sections qui n'ont pas leur propre en-tête
+export const ADMIN_SECTION_DESCRIPTIONS: Partial<Record<AdminPage, string>> = {
+  guilds: "Créer, renommer, désactiver les guildes et gérer leurs membres.",
+  draft: "Simuler une nouvelle répartition des joueurs, puis appliquer les mouvements entre guildes.",
+  users: "Comptes Discord du site avec leurs comptes BBS, guildes et rôles ; modifier ou bannir un joueur.",
+  banned: "Joueurs bannis du site, avec la raison et la possibilité de les débannir.",
+  notifications: "Salons Discord et types de notifications envoyés par le bot, pour le site et pour chaque guilde.",
+  activity: "Journal de tout ce qui s'est passé sur le site : scores, guildes, cycles, bannissements…",
+  messages: "Envoyer un message dans un salon Discord au nom du bot.",
+};

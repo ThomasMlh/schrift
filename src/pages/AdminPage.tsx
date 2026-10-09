@@ -24,7 +24,8 @@ import { useSearchParams } from "react-router-dom";
 import type { AdminPage as IAdminPage } from "../interfaces";
 import { useAuth } from "../providers/AuthProvider";
 import { useDeclineAlerts, useGuilds, useScoreAnomalies, useUsers } from "@/hooks/useAPI";
-import { ADMIN_TABS } from "@/components/admin/adminTabs";
+import { ADMIN_SECTION_DESCRIPTIONS, ADMIN_TABS, getAdminTab } from "@/components/admin/adminTabs";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { AdminSidebar, AdminSectionSelect } from "@/components/admin/AdminSidebar";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { useBotHealth } from "@/components/admin/useBotHealth";
@@ -222,7 +223,17 @@ const AdminPage = () => {
 
         <Box flex={1} minW={0}>
           <AdminSectionSelect tabs={visibleTabs} current={currentPage} onChange={handleTabChange} counters={counters} />
-          <VStack align="stretch" spacing={0}>{renderPage()}</VStack>
+          <VStack align="stretch" spacing={6}>
+            {/* En-tête commun pour les sections qui n'ont pas le leur */}
+            {ADMIN_SECTION_DESCRIPTIONS[currentPage] && (
+              <SectionHeader
+                title={getAdminTab(currentPage)?.label ?? ""}
+                icon={getAdminTab(currentPage)?.icon}
+                description={ADMIN_SECTION_DESCRIPTIONS[currentPage]}
+              />
+            )}
+            {renderPage()}
+          </VStack>
         </Box>
       </Flex>
     </Box>
