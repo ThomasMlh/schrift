@@ -14,7 +14,7 @@ import { CycleSelect } from "@/components/ui/CycleSelect";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { getUserAvatarUrl } from "@/utils/discord";
 import { DraftReplacementPanel } from "@/components/draft/DraftReplacementPanel";
-import { getGuildColor } from "@/components/DraftSection";
+import { getGuildColor } from "@/components/draft/guildColors";
 
 type RankingType = "average" | "total";
 
