@@ -199,7 +199,16 @@ const GuildesPage = () => {
                   {t("pages.guilds.summary", { guilds: guilds.length, members: isLoading ? "…" : totalMembers })}
                 </Text>
               </Flex>
-              <Box overflowX="auto" mx={{ base: -4, md: 0 }} px={{ base: 4, md: 0 }} pb={1}>
+              {/* Marge intérieure : le défilement horizontal rognerait sinon le contour
+                  de la guilde sélectionnée et son léger soulèvement au survol */}
+              <Box
+                overflowX="auto"
+                mx={{ base: -4, md: -1 }}
+                px={{ base: 4, md: 1 }}
+                mt={-1}
+                pt={1.5}
+                pb={2}
+              >
                 <HStack spacing={3} minW="max-content" role="tablist" aria-label={t("pages.guilds.pickGuild")}>
                   {guilds.map((guild) => {
                     const isSelected = selectedGuild?._id === guild._id;
