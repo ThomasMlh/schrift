@@ -36,10 +36,20 @@ const RotationPreparationSection = () => {
   const headerBg = "bg.subtle";
 
   const cycle = data ? cycles.find((c) => c._id === data.cycle._id) : undefined;
-  const rotationOptions = (cycle?.rotations ?? []).map((r) => ({
-    value: r.rotation_id,
-    label: `R${r.position} · ${r.killer}${r.attack ? ` (${r.attack})` : ""} · ${r.start_date}`,
-  }));
+  // Rotation : position et killer, avec la pastille de couleur d'attaque (sans la date)
+  const rotationOptions = (cycle?.rotations ?? []).map((r) => {
+    const label = `R${r.position} · ${r.killer}`;
+    return {
+      value: r.rotation_id,
+      label,
+      content: (
+        <HStack spacing={2}>
+          {r.attack && <AttackTypeBadge attackType={r.attack} size="10px" />}
+          <Text as="span">{label}</Text>
+        </HStack>
+      ),
+    };
+  });
   const guildOptions = selectableGuilds.map((g) => ({ value: g._id, label: g.name }));
 
   return (
@@ -55,8 +65,15 @@ const RotationPreparationSection = () => {
               </Box>
             )}
             {rotationOptions.length > 0 && (
-              <Box minW="260px">
-                <CustomSelect value={rotationId || data?.rotation.rotation_id || ""} onChange={setRotationId} options={rotationOptions} allowDeselect={false} size="md" />
+              <Box minW="200px">
+                <CustomSelect
+                  value={rotationId || data?.rotation.rotation_id || ""}
+                  onChange={setRotationId}
+                  options={rotationOptions}
+                  renderSelected={(option) => option.content ?? option.label}
+                  allowDeselect={false}
+                  size="md"
+                />
               </Box>
             )}
           </>}
