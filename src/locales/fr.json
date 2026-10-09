@@ -329,21 +329,15 @@
     },
     "characterDetail": {
       "backToCharacters": "Retour aux personnages",
-      "viewAllCharacters": "Voir tous les personnages",
       "notFound": "Personnage introuvable",
       "errorLoading": "Erreur lors du chargement du personnage",
       "errorTitle": "Erreur",
       "errorDesc": "Impossible de charger les informations du personnage",
-      "labelAffinity": "Affinité",
-      "labelType": "Type",
-      "labelSearch": "Recherche",
       "headingCategories": "Catégories",
       "headingKillers": "Tueurs",
       "headingSoulTraits": "Traits d'âme",
       "headingStats": "Statistiques",
       "headingImmunities": "Immunités",
-      "headingInfo": "Informations",
-      "labelCreatedAt": "Créé le",
       "labelResurrection": "Résurrection",
       "headingVisuals": "Ressources visuelles",
       "labelBanner": "Bannière",
@@ -351,7 +345,15 @@
       "labelArtwork": "Artwork",
       "labelPhrase": "Phrase",
       "tooltipDownload": "Télécharger",
-      "tooltipExpand": "Ouvrir en grand"
+      "tooltipExpand": "Ouvrir en grand",
+      "releasedOn": "sorti le {{date}}",
+      "compare": "Comparer",
+      "headingCombat": "Profil de combat",
+      "headingRotations": "Rotations où ses killers servent (cycle en cours)",
+      "rotationsNone": "Aucune rotation restante de ce cycle ne correspond à ses killers.",
+      "rotationNow": "En cours",
+      "rotationSameColor": "Même couleur",
+      "statScaleHint": "Les barres comparent chaque stat au meilleur personnage de la base."
     }
   },
   "components": {

@@ -329,21 +329,15 @@
     },
     "characterDetail": {
       "backToCharacters": "Back to characters",
-      "viewAllCharacters": "View all characters",
       "notFound": "Character not found",
       "errorLoading": "Error loading character",
       "errorTitle": "Error",
       "errorDesc": "Unable to load character information",
-      "labelAffinity": "Affinity",
-      "labelType": "Type",
-      "labelSearch": "Search",
       "headingCategories": "Categories",
       "headingKillers": "Killers",
       "headingSoulTraits": "Soul Traits",
       "headingStats": "Statistics",
       "headingImmunities": "Immunities",
-      "headingInfo": "Information",
-      "labelCreatedAt": "Released on",
       "labelResurrection": "Resurrection",
       "headingVisuals": "Visual resources",
       "labelBanner": "Banner",
@@ -351,7 +345,15 @@
       "labelArtwork": "Artwork",
       "labelPhrase": "Phrase",
       "tooltipDownload": "Download",
-      "tooltipExpand": "Enlarge"
+      "tooltipExpand": "Enlarge",
+      "releasedOn": "released on {{date}}",
+      "compare": "Compare",
+      "headingCombat": "Combat profile",
+      "headingRotations": "Rotations where its killers help (current cycle)",
+      "rotationsNone": "No remaining rotation of this cycle matches its killers.",
+      "rotationNow": "Now",
+      "rotationSameColor": "Same colour",
+      "statScaleHint": "Bars compare each stat to the best character in the database."
     }
   },
   "components": {
