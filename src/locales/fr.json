@@ -340,9 +340,13 @@
       "toastErrorTitle": "Erreur de connexion"
     },
     "notFound": {
-      "title": "Page introuvable",
-      "message": "La page que vous cherchez n'existe pas.",
-      "backHome": "Retour à l'accueil"
+      "title": "Perdu dans le Dangai",
+      "message": "Cette page s'est égarée entre deux mondes. Elle n'existe pas, ou plus.",
+      "backHome": "Retour à l'accueil",
+      "orGoTo": "Ou direction",
+      "linkPodium": "Podium",
+      "linkCycles": "Cycles",
+      "linkGuilds": "Guildes"
     },
     "characterDetail": {
       "backToCharacters": "Retour aux personnages",
