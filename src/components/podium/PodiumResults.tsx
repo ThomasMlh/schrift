@@ -109,33 +109,6 @@ const extractTop3ForPedestal = (
   return [];
 };
 
-// Score affiché pour un joueur, comme dans PlayerCard
-const playerScore = (p: IPodiumPlayer, podiumType?: PodiumType) =>
-  p.score !== undefined
-    ? p.score ?? 0
-    : podiumType === "max_scores"
-    ? p.totalScore ?? p.averageScore ?? 0
-    : p.averageScore ?? p.totalScore ?? 0;
-
-// Écart de score avec le rang juste au-dessus, calculé sur la page entière (top 3 compris).
-// Pas d'écart en progression (classement en %), ni en semaine ou en mode miss.
-const buildGapToAbove = (
-  data: IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse
-) => {
-  const scoreByRank = new Map<number, number>();
-  if (isPodiumResponse(data) && data.meta.podiumType !== "progression") {
-    for (const p of data.data as IPodiumPlayer[]) {
-      scoreByRank.set(p.rank, playerScore(p, data.meta.podiumType));
-    }
-  }
-  return (rank: number) => {
-    const above = scoreByRank.get(rank - 1);
-    const score = scoreByRank.get(rank);
-    // Pas d'écart pour un miss (score 0), il n'aurait pas de sens
-    return above != null && score != null && score > 0 ? above - score : undefined;
-  };
-};
-
 const PlayerList = ({
   displayMode,
   podiumData,
@@ -155,8 +128,6 @@ const PlayerList = ({
     : (podiumData.data ?? []);
 
   if (listData.length === 0) return null;
-
-  const gapToAbove = buildGapToAbove(podiumData);
 
   return (
     <VStack spacing={2} align="stretch">
@@ -183,7 +154,6 @@ const PlayerList = ({
               player={player as IPodiumPlayer}
               showGuildName={showGuildName}
               podiumType={podiumData.meta.podiumType}
-              gapToAbove={gapToAbove(player.rank)}
             />
           ))
         : null}
@@ -316,8 +286,6 @@ export const PodiumResults = ({
 
               if (allData.length === 0) return null;
 
-              const gapToAbove = buildGapToAbove(podiumData);
-
               const renderList = (items: typeof allData) => {
                 if (displayMode === "weekly" && isWeeklyResponse(podiumData)) {
                   return items.map((p) => (
@@ -344,7 +312,6 @@ export const PodiumResults = ({
                       player={p as IPodiumPlayer}
                       showGuildName={showGuildName}
                       podiumType={podiumData.meta.podiumType}
-                      gapToAbove={gapToAbove(p.rank)}
                     />
                   ));
                 }
