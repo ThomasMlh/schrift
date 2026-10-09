@@ -5,10 +5,10 @@ import {
   Heading,
   Text,
   Box,
-  Avatar,
   Badge,
-  useColorMode,
   Button,
+  Grid,
+  Icon,
   Flex,
   useToast,
   Image,
@@ -24,14 +24,16 @@ import { AffinityIcon } from "../components/ui/AffinityIcon";
 import { KillerIcon } from "../components/ui/KillerIcon";
 import { CategoryIcon } from "../components/ui/CategoryIcon";
 import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
-import { getStatIcon } from "@/utils/characterIcons";
 import { SEOHead } from "../components/SEOHead";
 import { useCharacter, useBuilds } from "@/hooks/useAPI";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { useTranslation } from "react-i18next";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { bucketUrl } from "@/utils/apiRequest";
-import { SectionCard } from "@/components/character/SectionCard";
+import { Pill, SectionCard, TraitRow } from "@/components/character/SectionCard";
+import { CharacterStats } from "@/components/character/CharacterStats";
+import { CharacterRotations } from "@/components/character/CharacterRotations";
+import { FiActivity, FiBarChart2, FiCrosshair, FiShield } from "react-icons/fi";
 import { CharacterVisuals } from "@/components/character/CharacterVisuals";
 import { CharacterBuilds } from "@/components/character/CharacterBuilds";
 
@@ -49,9 +51,6 @@ const CharacterDetailPage = () => {
     limit: 20
   });
 
-  // Hooks UI
-  const { colorMode } = useColorMode();
-  const isDark = colorMode === 'dark';
 
   const [lightbox, setLightbox] = useState<{ src: string; label: string } | null>(null);
   const [selectedBuild, setSelectedBuild] = useState<IBuild | null>(null);
@@ -210,321 +209,156 @@ const CharacterDetailPage = () => {
       />
       <Container maxW="container.lg" py={8}>
         <VStack spacing={6} align="stretch">
-          {/* Back button */}
           <Breadcrumbs items={[
             { label: t("nav.home"), to: "/" },
             { label: t("nav.characters"), to: "/personnages" },
             { label: character.name },
           ]} />
-          <Button
-            leftIcon={<ArrowBackIcon />}
-            variant="ghost"
-            colorScheme="purple"
-            alignSelf="flex-start"
-            borderRadius="full"
-            onClick={() => navigate("/personnages")}
-          >
-            {t("pages.characterDetail.backToCharacters")}
-          </Button>
 
-          {/* Main card */}
-          <Box
-            bg={isDark ? 'gray.800' : 'white'}
-            borderRadius="2xl"
-            border="1px solid"
-            borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
-            overflow="hidden"
-            boxShadow={isDark ? '0 4px 24px rgba(0,0,0,0.4)' : '0 4px 16px rgba(0,0,0,0.08)'}
-          >
-            {/* Hero */}
+          {/* En-tête : artwork en bannière, vignette, nom et badges */}
+          <Box bg="bg.card" borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" overflow="hidden" boxShadow="md">
+            {/* Artwork entier (contain) sur un fond du même artwork flouté, pour ne rien rogner */}
             <Box
+              h={{ base: "180px", sm: "240px", md: "320px" }}
+              bgGradient="linear(to-r, purple.600, blue.500)"
               position="relative"
               overflow="hidden"
-              py={10}
-              px={8}
-              bg={isDark ? 'rgba(124,58,237,0.10)' : 'purple.50'}
-              borderBottom="1px solid"
-              borderColor={isDark ? 'whiteAlpha.100' : 'gray.100'}
             >
-              {/* Blurred artwork background */}
-              {character._id && (
-                <Box
-                  position="absolute"
-                  top={0} left={0} right={0} bottom={0}
-                  backgroundImage={`url(${bucketUrl}/characters/artwork/${character._id}.png)`}
-                  backgroundSize="cover"
-                  backgroundPosition="center top"
-                  opacity={isDark ? 0.06 : 0.08}
-                  sx={{ filter: 'blur(24px)' }}
-                />
-              )}
-              <VStack spacing={4} position="relative">
-                {/* Avatar with gradient ring */}
-                <Box
-                  p="3px"
-                  borderRadius="full"
-                  bg="linear-gradient(135deg, #7C3AED, #4F46E5)"
-                  boxShadow="0 0 30px rgba(124,58,237,0.35)"
-                >
-                  {character._id ? (
-                    <Avatar
-                      size="2xl"
-                      src={`${bucketUrl}/characters/thumb/${character._id}.png`}
-                      name={character.name}
-                      border="3px solid"
-                      borderColor={isDark ? 'gray.800' : 'white'}
-                    />
-                  ) : (
-                    <Box
-                      w="96px" h="96px"
-                      bg={isDark ? 'gray.700' : 'gray.200'}
-                      borderRadius="full"
-                      display="flex" alignItems="center" justifyContent="center"
-                      fontSize="2xl"
-                      border="3px solid"
-                      borderColor={isDark ? 'gray.800' : 'white'}
-                    >
-                      ?
-                    </Box>
-                  )}
-                </Box>
-
-                {/* Name */}
-                <Heading
-                  size="xl"
-                  textAlign="center"
-                  bgGradient={isDark ? "linear(to-r, #C4B5FD, #818CF8)" : "linear(to-r, #7C3AED, #4F46E5)"}
-                  bgClip="text"
-                >
-                  {character.name}
-                </Heading>
-
-                {/* Badges row */}
-                <Flex flexWrap="wrap" gap={2} justify="center" align="center">
-                  {character.rarity && (
-                    <Badge
-                      px={3} py={1} borderRadius="full"
-                      bg="linear-gradient(135deg, #7C3AED, #4F46E5)"
-                      color="white" fontWeight="bold" fontSize="xs"
-                    >
-                      {character.rarity}
-                    </Badge>
-                  )}
-                  {character.affinity && (
-                    <AffinityIcon affinity={character.affinity} size="20px" showLabel={true} />
-                  )}
-                  {character.attack_type && (
-                    <AttackTypeBadge attackType={character.attack_type} size="20px" />
-                  )}
-                  {character.search_name && (
-                    <Badge px={3} py={1} borderRadius="full" variant="outline"
-                      colorScheme="gray" fontFamily="mono" fontSize="xs">
-                      {character.search_name}
-                    </Badge>
-                  )}
-                </Flex>
-              </VStack>
+              <Box
+                position="absolute"
+                inset="-20px"
+                backgroundImage={`url(${bucketUrl}/characters/artwork/${character._id}.png)`}
+                backgroundSize="cover"
+                backgroundPosition="center"
+                filter="blur(18px) brightness(0.6)"
+                aria-hidden
+              />
+              <Image
+                src={`${bucketUrl}/characters/artwork/${character._id}.png`}
+                alt={`Artwork ${character.name}`}
+                position="absolute"
+                inset={0}
+                w="100%"
+                h="100%"
+                objectFit="contain"
+                fallback={<Box />}
+              />
             </Box>
-
-            {/* Body */}
-            <Box p={6}>
-              <Flex direction={{ base: "column", lg: "row" }} gap={5} align="stretch">
-                {/* Left column */}
-                <VStack spacing={4} flex={1} align="stretch">
-                  {character.categories && character.categories.length > 0 && (
-                    <SectionCard
-                      label={`${t("pages.characterDetail.headingCategories")} (${character.categories.length})`}
-                      accentColor="purple.400"
-                      isDark={isDark}
-                    >
-                      <Flex wrap="wrap" gap={2}>
-                        {character.categories.map((category, index) => (
-                          <HStack
-                            key={index} spacing={1}
-                            bg={isDark ? 'whiteAlpha.50' : 'purple.50'}
-                            px={3} py={1} borderRadius="full"
-                          >
-                            <CategoryIcon category={category} size="16px" showLabel={false} />
-                            <Text fontSize="sm" color={isDark ? 'purple.300' : 'purple.700'}>
-                              {t(`factions.${category}`, category)}
-                            </Text>
-                          </HStack>
-                        ))}
-                      </Flex>
-                    </SectionCard>
-                  )}
-
-                  {character.killers && character.killers.length > 0 && (
-                    <SectionCard
-                      label={`${t("pages.characterDetail.headingKillers")} (${character.killers.length})`}
-                      accentColor="orange.400"
-                      isDark={isDark}
-                    >
-                      <Flex wrap="wrap" gap={2}>
-                        {character.killers.map((killer, index) => (
-                          <HStack
-                            key={index} spacing={1}
-                            bg={isDark ? 'whiteAlpha.50' : 'orange.50'}
-                            px={3} py={1} borderRadius="full"
-                          >
-                            <KillerIcon killer={killer} size="20px" showLabel={false} />
-                            <Text fontSize="sm" color={isDark ? 'orange.300' : 'orange.700'}>
-                              {t(`factions.${killer}`, killer)}
-                            </Text>
-                          </HStack>
-                        ))}
-                      </Flex>
-                    </SectionCard>
-                  )}
-
-                  {character.soul_traits && character.soul_traits.length > 0 && (
-                    <SectionCard
-                      label={`${t("pages.characterDetail.headingSoulTraits")} (${character.soul_traits.length})`}
-                      accentColor="pink.400"
-                      isDark={isDark}
-                    >
-                      <Flex wrap="wrap" gap={2}>
-                        {character.soul_traits.map((trait: string, index: number) => (
-                          <Badge key={index} colorScheme="pink" variant="subtle"
-                            borderRadius="full" px={3} py={1} fontSize="sm">
-                            {trait}
-                          </Badge>
-                        ))}
-                      </Flex>
-                    </SectionCard>
-                  )}
-                </VStack>
-
-                {/* Right column */}
-                <VStack spacing={4} flex={1} align="stretch">
-                  {character.stats && (
-                    <SectionCard
-                      label={t("pages.characterDetail.headingStats")}
-                      accentColor="blue.400"
-                      isDark={isDark}
-                    >
-                      <VStack spacing={3} align="stretch">
-                        {character.stats.end && (
-                          <HStack justify="space-between">
-                            <HStack spacing={2}>
-                              <Image src={getStatIcon("end")!} alt={t("stats.end")} boxSize="20px" />
-                              <Text fontSize="md" fontWeight="medium">{t("stats.end")}</Text>
-                            </HStack>
-                            <Badge colorScheme="green" variant="solid" borderRadius="full" px={3}>
-                              {character.stats.end}
-                            </Badge>
-                          </HStack>
-                        )}
-                        {character.stats.atk && (
-                          <HStack justify="space-between">
-                            <HStack spacing={2}>
-                              <Image src={getStatIcon("atk")!} alt={t("stats.atk")} boxSize="20px" />
-                              <Text fontSize="md" fontWeight="medium">{t("stats.atk")}</Text>
-                            </HStack>
-                            <Badge colorScheme="red" variant="solid" borderRadius="full" px={3}>
-                              {character.stats.atk}
-                            </Badge>
-                          </HStack>
-                        )}
-                        {character.stats.def && (
-                          <HStack justify="space-between">
-                            <HStack spacing={2}>
-                              <Image src={getStatIcon("def")!} alt={t("stats.def")} boxSize="20px" />
-                              <Text fontSize="md" fontWeight="medium">{t("stats.def")}</Text>
-                            </HStack>
-                            <Badge colorScheme="blue" variant="solid" borderRadius="full" px={3}>
-                              {character.stats.def}
-                            </Badge>
-                          </HStack>
-                        )}
-                        {character.stats.cct && (
-                          <HStack justify="space-between">
-                            <HStack spacing={2}>
-                              <Image src={getStatIcon("cct")!} alt={t("stats.cct")} boxSize="20px" />
-                              <Text fontSize="md" fontWeight="medium">{t("stats.cct")}</Text>
-                            </HStack>
-                            <Badge colorScheme="yellow" variant="solid" borderRadius="full" px={3}>
-                              {character.stats.cct}
-                            </Badge>
-                          </HStack>
-                        )}
-                        {character.stats.pre && (
-                          <HStack justify="space-between">
-                            <HStack spacing={2}>
-                              <Image src={getStatIcon("pre")!} alt={t("stats.pre")} boxSize="20px" />
-                              <Text fontSize="md" fontWeight="medium">{t("stats.pre")}</Text>
-                            </HStack>
-                            <Badge colorScheme="purple" variant="solid" borderRadius="full" px={3}>
-                              {character.stats.pre}
-                            </Badge>
-                          </HStack>
-                        )}
-                      </VStack>
-                    </SectionCard>
-                  )}
-
-                  {character.immunities && character.immunities.length > 0 && (
-                    <SectionCard
-                      label={t("pages.characterDetail.headingImmunities")}
-                      accentColor="teal.400"
-                      isDark={isDark}
-                    >
-                      <Flex wrap="wrap" gap={2}>
-                        {character.immunities.map((immunity: string, index: number) => (
-                          <Badge key={index} colorScheme="teal" variant="subtle"
-                            borderRadius="full" px={3} py={1} fontSize="sm">
-                            {immunity}
-                          </Badge>
-                        ))}
-                      </Flex>
-                    </SectionCard>
-                  )}
-
-                  <SectionCard
-                    label={t("pages.characterDetail.headingInfo")}
-                    accentColor="gray.400"
-                    isDark={isDark}
-                  >
-                    <VStack spacing={2} align="stretch">
-                      {character.created_at && (
-                        <HStack justify="space-between">
-                          <Text fontSize="md" color={isDark ? 'gray.400' : 'gray.500'}>
-                            {t("pages.characterDetail.labelCreatedAt")}
-                          </Text>
-                          <Text fontSize="md" fontWeight="medium">{character.release_date}</Text>
-                        </HStack>
-                      )}
-                      {character.resurrection_release && (
-                        <HStack justify="space-between">
-                          <Text fontSize="md" color={isDark ? 'gray.400' : 'gray.500'}>
-                            {t("pages.characterDetail.labelResurrection")}
-                          </Text>
-                          <Text fontSize="md" fontWeight="medium">{character.resurrection_release}</Text>
-                        </HStack>
-                      )}
-                    </VStack>
-                  </SectionCard>
+            <Flex
+              px={{ base: 4, md: 6 }}
+              pb={5}
+              gap={4}
+              direction={{ base: "column", md: "row" }}
+              align={{ base: "stretch", md: "flex-end" }}
+              justify="space-between"
+            >
+              <Flex gap={4} align="flex-end" minW={0}>
+                <Image
+                  src={`${bucketUrl}/characters/thumb/${character._id}.png`}
+                  alt={character.name}
+                  boxSize={{ base: "88px", md: "112px" }}
+                  borderRadius="xl"
+                  borderWidth="4px"
+                  borderColor="bg.card"
+                  bg="bg.inset"
+                  objectFit="cover"
+                  mt={{ base: -10, md: -14 }}
+                  flexShrink={0}
+                  position="relative"
+                  zIndex={1}
+                  fallback={<Box boxSize={{ base: "88px", md: "112px" }} borderRadius="xl" bg="bg.inset" mt={{ base: -10, md: -14 }} position="relative" zIndex={1} />}
+                />
+                <VStack align="start" spacing={2} minW={0} pt={2}>
+                  <Heading as="h1" size={{ base: "md", md: "lg" }} letterSpacing="tight" color="text.strong">
+                    {character.name}
+                  </Heading>
+                  <Flex wrap="wrap" gap={2} align="center">
+                    {character.rarity && (
+                      <Badge colorScheme="purple" variant="solid" borderRadius="full" px={2.5}>{character.rarity}</Badge>
+                    )}
+                    {character.affinity && <AffinityIcon affinity={character.affinity} size="18px" showLabel />}
+                    {character.attack_type && (
+                      <HStack spacing={1.5}>
+                        <AttackTypeBadge attackType={character.attack_type} size="14px" />
+                        <Text fontSize="sm" color="text.secondary">{t(`attackTypes.${character.attack_type}`, character.attack_type)}</Text>
+                      </HStack>
+                    )}
+                    {character.release_date && (
+                      <Text fontSize="sm" color="text.muted">· {t("pages.characterDetail.releasedOn", { date: character.release_date })}</Text>
+                    )}
+                  </Flex>
                 </VStack>
               </Flex>
-            </Box>
+              <Button
+                as={RouterLink}
+                to={`/comparateur?type=characters&characters=${character._id}`}
+                size="sm"
+                variant="outline"
+                leftIcon={<Icon as={FiBarChart2} />}
+                flexShrink={0}
+              >
+                {t("pages.characterDetail.compare")}
+              </Button>
+            </Flex>
           </Box>
 
+          <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={5} alignItems="start">
+            {/* Stats */}
+            {character.stats && (
+              <SectionCard title={t("pages.characterDetail.headingStats")} icon={FiActivity}>
+                <CharacterStats stats={character.stats} />
+              </SectionCard>
+            )}
+
+            {/* Profil de combat */}
+            <SectionCard title={t("pages.characterDetail.headingCombat")} icon={FiShield}>
+              <VStack align="stretch" spacing={4}>
+                {(character.killers?.length ?? 0) > 0 && (
+                  <TraitRow label={t("pages.characterDetail.headingKillers")}>
+                    {character.killers!.map((killer) => (
+                      <Pill key={killer} icon={<KillerIcon killer={killer} size="18px" showLabel={false} />}>
+                        {t(`factions.${killer}`, killer)}
+                      </Pill>
+                    ))}
+                  </TraitRow>
+                )}
+                {(character.categories?.length ?? 0) > 0 && (
+                  <TraitRow label={t("pages.characterDetail.headingCategories")}>
+                    {character.categories!.map((category) => (
+                      <Pill key={category} icon={<CategoryIcon category={category} size="16px" showLabel={false} />}>
+                        {t(`factions.${category}`, category)}
+                      </Pill>
+                    ))}
+                  </TraitRow>
+                )}
+                {(character.soul_traits?.length ?? 0) > 0 && (
+                  <TraitRow label={t("pages.characterDetail.headingSoulTraits")}>
+                    {character.soul_traits!.map((trait) => <Pill key={trait}>{trait}</Pill>)}
+                  </TraitRow>
+                )}
+                {(character.immunities?.length ?? 0) > 0 && (
+                  <TraitRow label={t("pages.characterDetail.headingImmunities")}>
+                    {character.immunities!.map((immunity) => <Pill key={immunity}>{immunity}</Pill>)}
+                  </TraitRow>
+                )}
+                {character.resurrection_release && (
+                  <TraitRow label={t("pages.characterDetail.labelResurrection")}>
+                    <Text fontSize="sm" color="text.body">{character.resurrection_release}</Text>
+                  </TraitRow>
+                )}
+              </VStack>
+            </SectionCard>
+          </Grid>
+
+          {/* Rotations du cycle en cours où ses killers servent */}
+          {(character.killers?.length ?? 0) > 0 && (
+            <SectionCard title={t("pages.characterDetail.headingRotations")} icon={FiCrosshair}>
+              <CharacterRotations character={character} />
+            </SectionCard>
+          )}
+
           <CharacterVisuals character={character} onDownload={handleDownload} onOpen={openLightbox} />
-
           <CharacterBuilds builds={characterBuilds} isLoading={buildsLoading} onSelect={setSelectedBuild} />
-
-          {/* Bottom navigation */}
-          <Flex justify="center">
-            <Button
-              as={RouterLink}
-              to="/personnages"
-              colorScheme="purple"
-              variant="outline"
-              borderRadius="full"
-            >
-              {t("pages.characterDetail.viewAllCharacters")}
-            </Button>
-          </Flex>
         </VStack>
       </Container>
 

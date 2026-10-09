@@ -43,8 +43,9 @@ export const AttackTypeFilter = ({
         as={Button}
         rightIcon={<ChevronDownIcon />}
         variant="outline"
-        maxW="300px"
-        w="auto"
+        w="100%"
+        minW={0}
+        sx={{ "& > span:first-of-type": { minW: 0, overflow: "hidden" } }}
         h="40px"
         justifyContent="space-between"
         bg={theme.buttonBg}
@@ -55,9 +56,9 @@ export const AttackTypeFilter = ({
           boxShadow: "0 0 0 1px #3182ce"
         }}
       >
-        <HStack spacing={2}>
+        <HStack spacing={2} minW={0}>
           <AttackTypeBadge attackType={selectedAttackType} size="16px" />
-          <Text fontSize="sm">{getDisplayText(selectedAttackType)}</Text>
+          <Text fontSize="sm" noOfLines={1}>{getDisplayText(selectedAttackType)}</Text>
         </HStack>
       </MenuButton>
       <MenuList maxH="200px" overflowY="auto" bg={theme.menuBg} borderColor={theme.menuBorderColor}>

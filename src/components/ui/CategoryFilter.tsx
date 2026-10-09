@@ -33,8 +33,9 @@ export const CategoryFilter = ({
         as={Button}
         rightIcon={<ChevronDownIcon />}
         variant="outline"
-        maxW="300px"
-        w="auto"
+        w="100%"
+        minW={0}
+        sx={{ "& > span:first-of-type": { minW: 0, overflow: "hidden" } }}
         h="40px"
         justifyContent="space-between"
         bg={theme.buttonBg}
@@ -45,16 +46,16 @@ export const CategoryFilter = ({
           boxShadow: "0 0 0 1px #3182ce"
         }}
       >
-        <HStack spacing={2}>
+        <HStack spacing={2} minW={0}>
           {selectedCategory ? (
             <>
               <CategoryIcon category={selectedCategory} size="20px" />
-              <Text fontSize="sm">{t(`factions.${selectedCategory}`, selectedCategory)}</Text>
+              <Text fontSize="sm" noOfLines={1}>{t(`factions.${selectedCategory}`, selectedCategory)}</Text>
             </>
           ) : (
             <>
               <CategoryIcon category={"Toutes"} size="20px" />
-              <Text fontSize="sm">{t("factions.allCategories")}</Text>
+              <Text fontSize="sm" noOfLines={1}>{t("factions.allCategories")}</Text>
             </>
           )}
         </HStack>
