@@ -33,8 +33,9 @@ export const AffinityFilter = ({
         as={Button}
         rightIcon={<ChevronDownIcon />}
         variant="outline"
-        maxW="300px"
-        w="auto"
+        w="100%"
+        minW={0}
+        sx={{ "& > span:first-of-type": { minW: 0, overflow: "hidden" } }}
         h="40px"
         justifyContent="space-between"
         bg={theme.buttonBg}
@@ -45,16 +46,16 @@ export const AffinityFilter = ({
           boxShadow: "0 0 0 1px #3182ce"
         }}
       >
-        <HStack spacing={2}>
+        <HStack spacing={2} minW={0}>
           {selectedAffinity ? (
             <>
               <AffinityIcon affinity={selectedAffinity} size="20px" />
-              <Text fontSize="sm">{t(`affinities.${selectedAffinity}`, selectedAffinity)}</Text>
+              <Text fontSize="sm" noOfLines={1}>{t(`affinities.${selectedAffinity}`, selectedAffinity)}</Text>
             </>
           ) : (
             <>
               <AffinityIcon affinity={"Goton"} size="20px" />
-              <Text fontSize="sm">{t("affinities.allAffinities")}</Text>
+              <Text fontSize="sm" noOfLines={1}>{t("affinities.allAffinities")}</Text>
             </>
           )}
         </HStack>

@@ -146,21 +146,11 @@ export const CharactersTable = () => {
           )}
         </Flex>
 
-        <SimpleGrid columns={{ base: 2, md: 5 }} spacing={3} mt={3}>
+        <SimpleGrid columns={{ base: 2, md: 4 }} spacing={3} mt={3}>
           <AffinityFilter selectedAffinity={selectedAffinity} affinities={affinities} onAffinityChange={setSelectedAffinity} />
           <CategoryFilter selectedCategory={selectedCategory} categories={categories} onCategoryChange={setSelectedCategory} />
           <KillerFilter selectedKiller={selectedKiller} killers={killers} onKillerChange={setSelectedKiller} />
           <AttackTypeFilter selectedAttackType={selectedAttackType} onAttackTypeChange={setSelectedAttackType} />
-          <CustomSelect
-            value={String(itemsPerPage)}
-            onChange={(val) => setItemsPerPage(Number(val))}
-            options={[
-              { value: "24", label: "24 / page" },
-              { value: "48", label: "48 / page" },
-              { value: "96", label: "96 / page" },
-            ]}
-            allowDeselect={false}
-          />
         </SimpleGrid>
 
         {hasFilters && (
@@ -179,11 +169,23 @@ export const CharactersTable = () => {
         )}
       </Box>
 
-      {pagination && (
-        <Text fontSize="sm" color="text.muted" px={1}>
-          {t("components.charactersTable.resultsCount", { count: pagination.totalCount })}
+      <Flex justify="space-between" align="center" gap={3} px={1}>
+        <Text fontSize="sm" color="text.muted">
+          {pagination ? t("components.charactersTable.resultsCount", { count: pagination.totalCount }) : ""}
         </Text>
-      )}
+        <CustomSelect
+          value={String(itemsPerPage)}
+          onChange={(val) => setItemsPerPage(Number(val))}
+          options={[
+            { value: "24", label: "24 / page" },
+            { value: "48", label: "48 / page" },
+            { value: "96", label: "96 / page" },
+          ]}
+          allowDeselect={false}
+          size="sm"
+          w="120px"
+        />
+      </Flex>
 
       {/* ── Grille ── */}
       {isLoading ? (
