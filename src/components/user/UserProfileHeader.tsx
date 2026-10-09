@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { Avatar, Badge, Box, Flex, HStack, Text, VStack } from "@chakra-ui/react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Avatar, Badge, Box, Flex, HStack, Image, Text, VStack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import type { IUser, ITopAchievement } from "@/interfaces";
 import { formatRoleName } from "@/utils/user";
@@ -39,6 +39,11 @@ export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountS
     ? getUserAvatarUrl({ discord_id: user.discord_id, avatar: user.avatar }) || undefined
     : undefined;
   const displayName = user.bbs_name || user.global_name;
+  const [bannerFailed, setBannerFailed] = useState(false);
+  const hasBanner = Boolean(bannerUrl) && !bannerFailed;
+
+  // Nouvelle bannière (autre joueur ou autre compte) : on retente le chargement
+  useEffect(() => setBannerFailed(false), [bannerUrl]);
 
   return (
     <Box
@@ -50,17 +55,28 @@ export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountS
       overflow="hidden"
       mb={6}
     >
-      {/* Bandeau : plus haut quand le joueur a une bannière Discord (format 600×240),
-          pour qu'on en voie l'essentiel ; simple liseré dégradé sinon */}
+      {/* Bandeau : plus haut quand la bannière Discord se charge (format 600×240), pour qu'on
+          en voie l'essentiel ; simple liseré dégradé sinon, y compris si l'image a disparu
+          côté Discord (hash enregistré mais périmé). */}
       <Box
-        h={bannerUrl ? { base: "140px", sm: "180px", md: "240px" } : { base: "90px", md: "120px" }}
+        position="relative"
+        h={hasBanner ? { base: "140px", sm: "180px", md: "240px" } : { base: "90px", md: "120px" }}
         bgGradient="linear(to-r, purple.600, blue.500)"
-        {...(bannerUrl && {
-          backgroundImage: `url('${bannerUrl}')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        })}
-      />
+        transition="height 0.2s"
+      >
+        {bannerUrl && !bannerFailed && (
+          <Image
+            src={bannerUrl}
+            alt=""
+            position="absolute"
+            inset={0}
+            w="100%"
+            h="100%"
+            objectFit="cover"
+            onError={() => setBannerFailed(true)}
+          />
+        )}
+      </Box>
 
       <Flex
         px={{ base: 4, md: 6 }}
