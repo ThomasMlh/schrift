@@ -9,20 +9,20 @@ import {
   Tr,
   Th,
   Td,
-  Badge,
-  useColorMode,
   Icon,
-  Flex,
 } from "@chakra-ui/react";
-import { FiTrendingUp, FiTrendingDown, FiMinus } from "react-icons/fi";
+import type { IconType } from "react-icons";
+import { FaCrown } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { getBestValue } from "./bestValue";
 
 export interface TableMetricDef {
   label: string;
-  icon: string;
+  icon: IconType;
   getDisplayValue: (stats: Record<string, unknown>) => string;
   getRawValue: (stats: Record<string, unknown>) => number;
   inverse?: boolean; // lower raw value = better
+  unit?: "percent"; // l'écart s'affiche alors en points
 }
 
 export interface TableEntityDef {
@@ -35,96 +35,95 @@ interface ComparisonDataTableProps {
   entities: TableEntityDef[];
   metrics: TableMetricDef[];
   heading: string;
-  accentBg?: string;
 }
 
-export const ComparisonDataTable = ({
-  entities,
-  metrics,
-  heading,
-  accentBg,
-}: ComparisonDataTableProps) => {
-  const { colorMode } = useColorMode();
-  const isDark = colorMode === "dark";
-  const bgColor = "bg.card";
-  const tableBg = "bg.muted";
-  const borderColor = "border.subtle";
-  const defaultAccentBg = isDark ? "rgba(49,130,206,0.08)" : "blue.50";
+const compact = (n: number) => {
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000_000) return `${(abs / 1_000_000_000).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} B`;
+  if (abs >= 1_000_000) return `${(abs / 1_000_000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} M`;
+  if (abs >= 10_000) return `${Math.round(abs / 1_000).toLocaleString("fr-FR")} k`;
+  return Math.round(abs).toLocaleString("fr-FR");
+};
+
+// Écart avec la meilleure valeur, toujours exprimé comme un retard ("−2,1 M", "+3 pts" si plus bas = mieux)
+const formatGap = (gap: number, metric: TableMetricDef) => {
+  const sign = metric.inverse ? "+" : "−";
+  return metric.unit === "percent"
+    ? `${sign}${Math.abs(gap).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} pts`
+    : `${sign}${compact(gap)}`;
+};
+
+// Tableau métrique × entité : la meilleure valeur de chaque ligne est sur fond de la couleur
+// du gagnant, les autres affichent leur écart avec elle.
+export const ComparisonDataTable = ({ entities, metrics, heading }: ComparisonDataTableProps) => {
   const { t } = useTranslation();
 
-  const getBest = (metric: TableMetricDef): number | null => {
-    const values = entities
-      .filter((e) => e.stats)
-      .map((e) => metric.getRawValue(e.stats));
-    if (!values.length) return null;
-    return metric.inverse ? Math.min(...values) : Math.max(...values);
-  };
-
-  const getComparisonIcon = (rawValue: number, metric: TableMetricDef) => {
-    const best = getBest(metric);
-    if (best === null || rawValue === best) return <Icon as={FiTrendingUp} color="green.500" />;
-    const pct = metric.inverse
-      ? (best / (rawValue || 1)) * 100
-      : (rawValue / (best || 1)) * 100;
-    if (pct >= 90) return <Icon as={FiMinus} color="yellow.500" />;
-    return <Icon as={FiTrendingDown} color="red.500" />;
-  };
-
   return (
-    <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={5} h="100%" display="flex" flexDirection="column">
-      <VStack spacing={4} align="stretch" flex={1}>
-        <Text fontSize="lg" fontWeight="bold">{heading}</Text>
+    <Box bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={5} h="100%">
+      <VStack spacing={4} align="stretch">
+        <Text fontSize="lg" fontWeight="bold" color="text.strong">{heading}</Text>
+
         <Box overflowX="auto">
-          <Table variant="simple" size="sm">
-            <Thead bg={tableBg}>
+          <Table size="sm">
+            <Thead>
               <Tr>
-                <Th borderColor={borderColor} minW="150px">
-                  {t("components.comparatorCharts.colMetric")}
-                </Th>
+                <Th minW="150px">{t("components.comparatorCharts.colMetric")}</Th>
                 {entities.map((entity, i) => (
-                  <Th key={i} borderColor={borderColor} textAlign="center">
-                    <VStack spacing={1}>
-                      <Box w={3} h={3} borderRadius="full" bg={entity.color} />
-                      <Text fontSize="xs" fontWeight="bold">{entity.name}</Text>
-                    </VStack>
+                  <Th key={i} textAlign="center" textTransform="none" letterSpacing="normal">
+                    <HStack spacing={1.5} justify="center">
+                      <Box w={2.5} h={2.5} borderRadius="full" bg={entity.color} flexShrink={0} />
+                      <Text fontSize="xs" fontWeight="bold" color="text.strong" noOfLines={1}>{entity.name}</Text>
+                    </HStack>
                   </Th>
                 ))}
               </Tr>
             </Thead>
             <Tbody>
               {metrics.map((metric, mi) => {
-                const best = getBest(metric);
+                const best = getBestValue(entities, metric);
+                const winners = entities.filter((e) => e.stats && best !== null && metric.getRawValue(e.stats) === best);
+                const isTie = winners.length > 1;
                 return (
-                  <Tr key={mi} _hover={{ bg: tableBg }} transition="all 0.2s">
-                    <Td borderColor={borderColor} fontWeight="medium">
+                  <Tr key={mi} _hover={{ bg: "bg.hover" }}>
+                    <Td py={3}>
                       <HStack spacing={2}>
-                        <Text fontSize="sm">{metric.icon}</Text>
-                        <Text fontSize="sm">{metric.label}</Text>
+                        <Icon as={metric.icon} color="text.muted" boxSize={4} aria-hidden />
+                        <Text fontSize="sm" fontWeight="medium">{metric.label}</Text>
                       </HStack>
                     </Td>
                     {entities.map((entity, ei) => {
-                      const stats = entity.stats;
-                      const displayValue = stats ? metric.getDisplayValue(stats) : "N/A";
-                      const rawValue = stats ? metric.getRawValue(stats) : 0;
-                      const isTop = !!stats && best !== null && rawValue === best;
-
+                      if (!entity.stats) {
+                        return <Td key={ei} textAlign="center"><Text fontSize="sm" color="text.muted">—</Text></Td>;
+                      }
+                      const raw = metric.getRawValue(entity.stats);
+                      const isTop = best !== null && raw === best;
                       return (
-                        <Td key={ei} borderColor={borderColor} textAlign="center">
-                          <Flex direction="column" align="center" justify="center" gap={1}>
-                            {isTop && (
-                              <Badge colorScheme="green" fontSize="2xs" px={2} borderRadius="full">
-                                {t("components.comparatorCharts.badgeBest")}
-                              </Badge>
-                            )}
-                            <Text
-                              fontSize="sm"
-                              fontWeight={isTop ? "bold" : "normal"}
-                              color={isTop ? "green.500" : undefined}
-                            >
-                              {displayValue}
-                            </Text>
-                            {stats && !metric.inverse && getComparisonIcon(rawValue, metric)}
-                          </Flex>
+                        <Td key={ei} textAlign="center" py={2}>
+                          {isTop ? (
+                            <VStack spacing={0}>
+                              <HStack
+                                spacing={1}
+                                px={2.5}
+                                py={1}
+                                borderRadius="md"
+                                bg={`${entity.color}33`}
+                                borderWidth="1px"
+                                borderColor={entity.color}
+                              >
+                                {!isTie && <Icon as={FaCrown} boxSize={3} color={entity.color} aria-label={t("components.comparatorCharts.badgeBest")} />}
+                                <Text fontSize="sm" fontWeight="bold" color="text.strong">
+                                  {metric.getDisplayValue(entity.stats)}
+                                </Text>
+                              </HStack>
+                            </VStack>
+                          ) : (
+                            <VStack spacing={0}>
+                              <Text fontSize="sm" color="text.body">{metric.getDisplayValue(entity.stats)}</Text>
+                              {best !== null && (
+                                <Text fontSize="2xs" color="text.muted">{formatGap(best - raw, metric)}</Text>
+                              )}
+                            </VStack>
+                          )}
                         </Td>
                       );
                     })}
@@ -133,13 +132,6 @@ export const ComparisonDataTable = ({
               })}
             </Tbody>
           </Table>
-        </Box>
-        <Box p={3} borderRadius="lg" bg={accentBg ?? defaultAccentBg}>
-          <Text fontSize="xs" color="gray.600" _dark={{ color: "gray.400" }}>
-            💡 {t("components.comparatorCharts.tableFooterPrefix")}{" "}
-            <Badge colorScheme="green" fontSize="2xs">{t("components.comparatorCharts.badgeBest")}</Badge>{" "}
-            {t("components.comparatorCharts.tableFooterSuffix")}
-          </Text>
         </Box>
       </VStack>
     </Box>

@@ -3,18 +3,16 @@ import {
   VStack,
   HStack,
   Text,
-  IconButton,
-  Badge,
   Avatar,
   Input,
   InputGroup,
   InputLeftElement,
   Spinner,
   Flex,
-  useColorMode,
 } from "@chakra-ui/react";
-import { CloseIcon, SearchIcon } from "@chakra-ui/icons";
+import { SearchIcon } from "@chakra-ui/icons";
 import { useState, useRef, useEffect } from "react";
+import { SelectionSlots } from "./SelectionSlots";
 import { useTranslation } from "react-i18next";
 import { useCharacters } from "@/hooks/useAPI";
 import { AffinityIcon } from "../ui/AffinityIcon";
@@ -44,8 +42,6 @@ export const MultiCharacterSelector = ({
   maxCharacters = 5,
   entityColors = DEFAULT_COLORS,
 }: MultiCharacterSelectorProps) => {
-  const { colorMode } = useColorMode();
-  const isDark = colorMode === "dark";
   const bgColor = "bg.card";
   const borderColor = "border.subtle";
   const mutedText = "text.muted";
@@ -86,95 +82,27 @@ export const MultiCharacterSelector = ({
   };
 
   return (
-    <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={4}>
-      <VStack spacing={4} align="stretch">
-        <HStack justify="space-between">
-          <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={mutedText}>
-            {t("components.multiCharacterSelector.heading")}
-          </Text>
-          <Badge
-            colorScheme={selectedCharacters.length >= maxCharacters ? "red" : "green"}
-            variant="subtle"
-            fontSize="xs"
-            borderRadius="full"
-          >
-            {selectedCharacters.length}/{maxCharacters}
-          </Badge>
-        </HStack>
-
-        {/* Selected characters */}
-        <VStack spacing={2} align="stretch">
-          {selectedCharacters.map((sc, index) => {
-            const color = entityColors[index % entityColors.length];
-            return (
-              <Box
-                key={sc.id}
-                px={3}
-                py={2}
-                borderRadius="xl"
-                borderWidth="1px"
-                borderColor={borderColor}
-                borderLeftWidth="3px"
-                borderLeftColor={color}
-                bg={isDark ? "rgba(255,255,255,0.03)" : "gray.50"}
-                transition="all 0.15s ease"
-                _hover={{ transform: "translateX(3px)", borderColor: color }}
-              >
-                <HStack justify="space-between">
-                  <HStack spacing={3}>
-                    <Box w={2} h={2} borderRadius="full" bg={color} flexShrink={0} />
-                    <Avatar
-                      size="xs"
-                      src={`${bucketUrl}/characters/thumb/${sc.id}.png`}
-                      name={sc.character.name}
-                      bg="gray.200"
-                    />
-                    <Text fontSize="sm" fontWeight="medium">{sc.character.name}</Text>
-                    {sc.character.affinity && (
-                      <AffinityIcon affinity={sc.character.affinity} size="14px" />
-                    )}
-                    {sc.character.attack_type && (
-                      <AttackTypeBadge attackType={sc.character.attack_type} size="14px" />
-                    )}
-                  </HStack>
-                  <IconButton
-                    icon={<CloseIcon boxSize={2.5} />}
-                    aria-label={t("components.multiCharacterSelector.ariaRemove")}
-                    size="xs"
-                    colorScheme="red"
-                    variant="ghost"
-                    onClick={() => onRemoveCharacter(sc.id)}
-                  />
-                </HStack>
-              </Box>
-            );
-          })}
-
-          {selectedCharacters.length === 0 && (
-            <Box
-              p={5}
-              textAlign="center"
-              borderRadius="lg"
-              borderWidth="2px"
-              borderStyle="dashed"
-              borderColor={borderColor}
-            >
-              <Text color={mutedText} fontSize="sm">
-                {t("components.multiCharacterSelector.empty")}
-              </Text>
-              <Text color={mutedText} fontSize="xs" mt={1} opacity={0.7}>
-                {t("components.multiCharacterSelector.emptyHint", { max: maxCharacters })}
-              </Text>
-            </Box>
-          )}
-        </VStack>
-
-        {/* Search input */}
-        {selectedCharacters.length < maxCharacters && (
+    <SelectionSlots
+      title={t("components.multiCharacterSelector.heading")}
+      max={maxCharacters}
+      onRemove={onRemoveCharacter}
+      removeLabel={t("components.multiCharacterSelector.ariaRemove")}
+      addLabel={t("components.multiCharacterSelector.addLabel")}
+      addFieldId="comparator-add-character"
+      items={selectedCharacters.map((sc, index) => ({
+        id: sc.id,
+        color: entityColors[index % entityColors.length],
+        content: (
+          <HStack spacing={2}>
+            <Avatar size="xs" src={`${bucketUrl}/characters/thumb/${sc.id}.png`} name={sc.character.name} bg="gray.200" />
+            <Text fontSize="sm" fontWeight="semibold" noOfLines={1}>{sc.character.name}</Text>
+            {sc.character.affinity && <AffinityIcon affinity={sc.character.affinity} size="14px" />}
+            {sc.character.attack_type && <AttackTypeBadge attackType={sc.character.attack_type} size="12px" />}
+          </HStack>
+        ),
+      }))}
+    >
           <Box position="relative" ref={menuRef}>
-            <Text fontSize="xs" fontWeight="medium" mb={2} color={mutedText}>
-              {t("components.multiCharacterSelector.addLabel")}
-            </Text>
             <InputGroup size="sm">
               <InputLeftElement pointerEvents="none">
                 {isLoading && isOpen ? <Spinner size="xs" /> : <SearchIcon color="gray.400" boxSize={3} />}
@@ -256,14 +184,6 @@ export const MultiCharacterSelector = ({
               </Box>
             )}
           </Box>
-        )}
-
-        {selectedCharacters.length >= maxCharacters && (
-          <Text fontSize="xs" color="orange.400" textAlign="center">
-            {t("components.multiCharacterSelector.limitReached", { max: maxCharacters })}
-          </Text>
-        )}
-      </VStack>
-    </Box>
+    </SelectionSlots>
   );
 };
