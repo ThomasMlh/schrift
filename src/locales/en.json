@@ -340,9 +340,13 @@
       "toastErrorTitle": "Login error"
     },
     "notFound": {
-      "title": "Page not found",
-      "message": "The page you are looking for does not exist.",
-      "backHome": "Back to home"
+      "title": "Lost in the Dangai",
+      "message": "This page wandered off between two worlds. It doesn't exist, or no longer does.",
+      "backHome": "Back to home",
+      "orGoTo": "Or head to",
+      "linkPodium": "Podium",
+      "linkCycles": "Cycles",
+      "linkGuilds": "Guilds"
     },
     "characterDetail": {
       "backToCharacters": "Back to characters",
