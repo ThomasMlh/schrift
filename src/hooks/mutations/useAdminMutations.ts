@@ -44,5 +44,23 @@ export const useAdminMutations = () => {
     return { totalUploaded };
   };
 
-  return { updateCharacters, checkBotHealth, uploadImages };
+  // Demande au bot de resynchroniser bannières, avatars et pseudos Discord (peut prendre 1-2 min)
+  const syncDiscordProfiles = async () => {
+    return request<{
+      success: boolean;
+      total: number;
+      updated: number;
+      unchanged: number;
+      null_set: number;
+      missing_on_server: number;
+      lookup_errors: number;
+      patch_errors: number;
+      servers?: string[];
+      changed_players?: { name: string; discord_id: string; changes: string[] }[];
+    }>(`${apiUrl}/api/admin/sync-profiles`, {
+      method: 'POST',
+    }, { fallbackError: 'Erreur lors de la synchronisation des profils Discord' });
+  };
+
+  return { updateCharacters, checkBotHealth, uploadImages, syncDiscordProfiles };
 };

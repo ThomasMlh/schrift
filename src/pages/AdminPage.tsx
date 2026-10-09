@@ -2,7 +2,7 @@ import {
   Box, Flex, Heading, HStack, VStack, Text, Button, Menu, MenuButton, MenuList, MenuItem, Icon, Tooltip, useToast,
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
-import { FiCpu, FiImage, FiRefreshCw, FiTool } from "react-icons/fi";
+import { FiCpu, FiImage, FiRefreshCw, FiTool, FiUsers } from "react-icons/fi";
 import { useAdminMutations } from "@/hooks/mutations/useAdminMutations";
 import GuildsAdminSection from "../components/GuildsAdminSection";
 import DraftSection from "../components/DraftSection";
@@ -33,7 +33,7 @@ import { useBotHealth } from "@/components/admin/useBotHealth";
 const AdminPage = () => {
   // Détection des permissions utilisateur
   const { isAdmin: isFullAdmin, isGuildManager, managedGuildIds } = useAuth();
-  const { updateCharacters, uploadImages } = useAdminMutations();
+  const { updateCharacters, uploadImages, syncDiscordProfiles } = useAdminMutations();
 
   // Onglets autorisés selon le rôle : tout pour un admin, sinon les onglets non réservés
   const visibleTabs = useMemo(
@@ -64,6 +64,7 @@ const AdminPage = () => {
   };
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [isSyncingProfiles, setIsSyncingProfiles] = useState(false);
   const toast = useToast();
 
   // État du bot (admins) et compteurs de la navigation
@@ -88,6 +89,37 @@ const AdminPage = () => {
       toast({ title: (error as Error).message || "Erreur lors de la mise à jour des personnages", status: "error" });
     } finally {
       setIsUpdatingCharacters(false);
+    }
+  };
+
+  const handleSyncProfiles = async () => {
+    setIsSyncingProfiles(true);
+    const pending = toast({
+      title: "Synchronisation des profils Discord…",
+      description: "Le bot relit le profil de chaque joueur, cela peut prendre une à deux minutes.",
+      status: "loading",
+      duration: null,
+    });
+    try {
+      const result = await syncDiscordProfiles();
+      toast.close(pending);
+      const errors = result.lookup_errors + result.patch_errors;
+      toast({
+        title: result.updated > 0 ? `${result.updated} profil${result.updated > 1 ? "s" : ""} mis à jour` : "Tous les profils étaient déjà à jour",
+        description: [
+          `${result.total} joueurs vérifiés`,
+          result.null_set > 0 ? `${result.null_set} bannière${result.null_set > 1 ? "s" : ""} retirée${result.null_set > 1 ? "s" : ""}` : null,
+          errors > 0 ? `${errors} erreur${errors > 1 ? "s" : ""}` : null,
+        ].filter(Boolean).join(" · "),
+        status: errors > 0 ? "warning" : "success",
+        duration: 8000,
+        isClosable: true,
+      });
+    } catch (error: unknown) {
+      toast.close(pending);
+      toast({ title: (error as Error).message || "Erreur lors de la synchronisation des profils", status: "error", isClosable: true });
+    } finally {
+      setIsSyncingProfiles(false);
     }
   };
 
@@ -195,7 +227,7 @@ const AdminPage = () => {
                   borderRadius="full"
                   leftIcon={<Icon as={FiTool} />}
                   rightIcon={<ChevronDownIcon />}
-                  isLoading={isUpdatingCharacters || isUploadingImages}
+                  isLoading={isUpdatingCharacters || isUploadingImages || isSyncingProfiles}
                   loadingText="En cours…"
                 >
                   Outils
@@ -203,6 +235,9 @@ const AdminPage = () => {
                 <MenuList>
                   <MenuItem icon={<Icon as={FiRefreshCw} />} onClick={handleUpdateCharacters}>
                     Synchroniser les personnages
+                  </MenuItem>
+                  <MenuItem icon={<Icon as={FiUsers} />} onClick={handleSyncProfiles}>
+                    Synchroniser les profils Discord
                   </MenuItem>
                   <MenuItem icon={<Icon as={FiImage} />} onClick={handleUploadImages}>
                     Envoyer les images
