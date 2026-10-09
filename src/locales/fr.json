@@ -238,11 +238,8 @@
       "memberSingular": "joueur",
       "memberPlural": "joueurs",
       "loading": "Chargement...",
-      "statsGuilds": "Guildes",
-      "statsMembers": "Membres au total",
       "orgNoMembers": "Aucun membre dans cette guilde",
       "orgSectionMembers": "Membres",
-      "statsSection": "Statistiques",
       "statAvgScore": "Score Moyen",
       "statBestScore": "Meilleur Score",
       "statTotalParticipations": "Participations",
@@ -275,7 +272,13 @@
       "goalHelp_average": "Moyenne des scores de la guilde sur le cycle (en points)",
       "goalHelp_clear_rate": "Part des scores à 617M ou plus (en %)",
       "goalHelp_records": "Nombre de records personnels battus par les membres",
-      "goalHelp_participation": "Part des rotations terminées jouées par les membres (en %)"
+      "goalHelp_participation": "Part des rotations terminées jouées par les membres (en %)",
+      "pickGuild": "Choisir une guilde",
+      "summary": "{{guilds}} guildes · {{members}} membres",
+      "cycleLabel": "Cycle affiché",
+      "tabOverview": "Aperçu",
+      "tabMembers": "Membres",
+      "tabStats": "Statistiques"
     },
     "user": {
       "loadingProfile": "Chargement du profil...",
