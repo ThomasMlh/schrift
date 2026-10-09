@@ -50,9 +50,10 @@ export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountS
       overflow="hidden"
       mb={6}
     >
-      {/* Bandeau */}
+      {/* Bandeau : plus haut quand le joueur a une bannière Discord (format 600×240),
+          pour qu'on en voie l'essentiel ; simple liseré dégradé sinon */}
       <Box
-        h={{ base: "90px", md: "120px" }}
+        h={bannerUrl ? { base: "140px", sm: "180px", md: "240px" } : { base: "90px", md: "120px" }}
         bgGradient="linear(to-r, purple.600, blue.500)"
         {...(bannerUrl && {
           backgroundImage: `url('${bannerUrl}')`,
