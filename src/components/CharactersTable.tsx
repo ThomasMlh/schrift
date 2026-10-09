@@ -1,12 +1,13 @@
 import {
-  Box, Table, Thead, Tbody, Tr, Th, Td, Button, HStack, VStack,
-  Text, Input, InputGroup, InputLeftElement,
-  useColorMode, Badge, Flex, Avatar, Tooltip, SimpleGrid, Skeleton
+  Box, Button, VStack, Text, Input, InputGroup, InputLeftElement, Flex, SimpleGrid, Skeleton,
+  Icon, Tag, TagLabel, TagCloseButton, Wrap, WrapItem,
 } from "@chakra-ui/react";
+import { FiCrosshair, FiSearch } from "react-icons/fi";
+import { CharacterCard } from "./character/CharacterCard";
+import { useCurrentRotation } from "@/hooks/useCurrentRotation";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { SearchIcon } from "@chakra-ui/icons";
-import { useCharacters } from "@/hooks/useAPI";
+import { useCharacters, useCycles } from "@/hooks/useAPI";
 import { AffinityIcon } from "./ui/AffinityIcon";
 import { KillerIcon } from "./ui/KillerIcon";
 import { CategoryIcon } from "./ui/CategoryIcon";
@@ -16,11 +17,9 @@ import { CategoryFilter } from "./ui/CategoryFilter";
 import { KillerFilter } from "./ui/KillerFilter";
 import { AttackTypeFilter } from "./ui/AttackTypeFilter";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
-import CustomLink from "./ui/CustomLink";
 import { CharactersKillers, CharactersCategories, CharactersAffinities } from "../utils/chractersData";
 import { CustomSelect } from "./ui/CustomSelect";
 import { useTranslation } from "react-i18next";
-import { bucketUrl } from "../utils/apiRequest";
 
 export const CharactersTable = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -33,15 +32,12 @@ export const CharactersTable = () => {
   const [selectedKiller, setSelectedKiller] = useState(searchParams.get('killer') || "");
   const [selectedAttackType, setSelectedAttackType] = useState(searchParams.get('attack_type') || "");
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'));
-  const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('limit') || '20'));
+  const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('limit') || '24'));
 
   const affinities = CharactersAffinities;
   const categories = CharactersCategories;
   const killers = CharactersKillers;
 
-  const { colorMode } = useColorMode();
-  const isDark = colorMode === 'dark';
-  const borderColor = isDark ? 'whiteAlpha.100' : 'gray.200';
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedSearch(searchTerm), 500);
@@ -50,6 +46,9 @@ export const CharactersTable = () => {
 
   // Reset page when filters change
   useEffect(() => { setCurrentPage(1); }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage]);
+
+  const { cycles, isLoading: cyclesLoading } = useCycles({ limit: 5 });
+  const { currentRotation } = useCurrentRotation(cycles, cyclesLoading);
 
   const { characters, pagination, isLoading } = useCharacters({
     page: currentPage,
@@ -69,7 +68,7 @@ export const CharactersTable = () => {
     if (selectedCategory) params.set('category', selectedCategory);
     if (selectedKiller) params.set('killer', selectedKiller);
     if (selectedAttackType) params.set('attack_type', selectedAttackType);
-    if (itemsPerPage !== 20) params.set('limit', itemsPerPage.toString());
+    if (itemsPerPage !== 24) params.set('limit', itemsPerPage.toString());
     if (currentPage !== 1) params.set('page', currentPage.toString());
     setSearchParams(params, { replace: true });
   }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage, currentPage, setSearchParams]);
@@ -88,331 +87,128 @@ export const CharactersTable = () => {
     setSearchParams({});
   };
 
+  const hasFilters = Boolean(searchTerm || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType);
+  const rotationAttack = currentRotation?.attack === "R" || currentRotation?.attack === "B" ? currentRotation.attack : "";
+  const isRotationFilterActive = Boolean(currentRotation)
+    && selectedKiller === currentRotation?.killer
+    && selectedAttackType === rotationAttack;
+
+  // Règle killer + attaque sur la rotation en cours (ou les retire si déjà appliqués)
+  const applyRotationFilter = () => {
+    if (!currentRotation) return;
+    if (isRotationFilterActive) {
+      setSelectedKiller("");
+      setSelectedAttackType("");
+    } else {
+      setSelectedKiller(currentRotation.killer);
+      setSelectedAttackType(rotationAttack);
+    }
+  };
+
+  const filterTag = (key: string, icon: React.ReactNode, label: string, onClear: () => void) => (
+    <WrapItem key={key}>
+      <Tag size="sm" borderRadius="full" colorScheme="purple" variant="subtle">
+        {icon && <Box mr={1.5} display="inline-flex">{icon}</Box>}
+        <TagLabel>{label}</TagLabel>
+        <TagCloseButton onClick={onClear} />
+      </Tag>
+    </WrapItem>
+  );
+
   return (
     <VStack spacing={5} align="stretch" w="100%">
-
       {/* ── Filtres ── */}
-      <Box
-        bg={isDark ? 'rgba(255,255,255,0.03)' : 'white'}
-        borderRadius="xl"
-        borderWidth="1px"
-        borderColor={borderColor}
-        p={5}
-      >
-        <VStack spacing={4} align="stretch">
-          {/* Recherche */}
-          <InputGroup>
+      <Box bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={{ base: 3, md: 4 }}>
+        <Flex gap={3} direction={{ base: "column", md: "row" }} align={{ base: "stretch", md: "center" }}>
+          <InputGroup flex={1}>
             <InputLeftElement pointerEvents="none">
-              <SearchIcon color={isDark ? 'gray.500' : 'gray.400'} />
+              <Icon as={FiSearch} color="text.muted" />
             </InputLeftElement>
             <Input
               placeholder={t("components.charactersTable.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              bg={isDark ? 'rgba(255,255,255,0.04)' : 'gray.50'}
-              borderColor={borderColor}
-              _hover={{ borderColor: isDark ? 'whiteAlpha.300' : 'gray.300' }}
-              _focus={{ borderColor: 'purple.400', boxShadow: '0 0 0 1px var(--chakra-colors-purple-400)' }}
               borderRadius="lg"
             />
           </InputGroup>
-
-          {/* Filtres avancés */}
-          <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 5 }} spacing={3}>
-            <Box>
-              <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={isDark ? 'gray.500' : 'gray.400'} mb={1.5}>
-                {t("components.charactersTable.filterAffinity")}
-              </Text>
-              <AffinityFilter
-                selectedAffinity={selectedAffinity}
-                affinities={affinities}
-                onAffinityChange={setSelectedAffinity}
-                variant="ghost"
-              />
-            </Box>
-            <Box>
-              <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={isDark ? 'gray.500' : 'gray.400'} mb={1.5}>
-                {t("components.charactersTable.filterCategory")}
-              </Text>
-              <CategoryFilter
-                selectedCategory={selectedCategory}
-                categories={categories}
-                onCategoryChange={setSelectedCategory}
-                variant="ghost"
-              />
-            </Box>
-            <Box>
-              <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={isDark ? 'gray.500' : 'gray.400'} mb={1.5}>
-                {t("components.charactersTable.filterKiller")}
-              </Text>
-              <KillerFilter
-                selectedKiller={selectedKiller}
-                killers={killers}
-                onKillerChange={setSelectedKiller}
-                variant="ghost"
-              />
-            </Box>
-            <Box>
-              <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={isDark ? 'gray.500' : 'gray.400'} mb={1.5}>
-                {t("components.charactersTable.filterType")}
-              </Text>
-              <AttackTypeFilter
-                selectedAttackType={selectedAttackType}
-                onAttackTypeChange={setSelectedAttackType}
-                variant="ghost"
-              />
-            </Box>
-            <Box>
-              <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest" color={isDark ? 'gray.500' : 'gray.400'} mb={1.5}>
-                {t("components.charactersTable.perPage")}
-              </Text>
-              <CustomSelect
-                value={String(itemsPerPage)}
-                onChange={(val) => setItemsPerPage(Number(val))}
-                options={[
-                  { value: "10", label: "10 / page" },
-                  { value: "20", label: "20 / page" },
-                  { value: "50", label: "50 / page" },
-                  { value: "100", label: "100 / page" },
-                ]}
-                allowDeselect={false}
-                variant="ghost"
-              />
-            </Box>
-          </SimpleGrid>
-
-          {/* Barre d'actions + filtres actifs */}
-          {(searchTerm || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType) && (
-            <Flex align="center" justify="space-between" flexWrap="wrap" gap={3}
-              pt={3} borderTopWidth="1px" borderTopColor={borderColor}
+          {currentRotation && (
+            <Button
+              onClick={applyRotationFilter}
+              variant={isRotationFilterActive ? "solid" : "outline"}
+              colorScheme="purple"
+              borderRadius="lg"
+              flexShrink={0}
+              leftIcon={rotationAttack ? <AttackTypeBadge attackType={rotationAttack} size="12px" /> : <Icon as={FiCrosshair} />}
+              aria-pressed={isRotationFilterActive}
             >
-              <HStack spacing={2} flexWrap="wrap">
-                <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="widest"
-                  color={isDark ? 'purple.400' : 'purple.600'}>
-                  {t("components.charactersTable.activeFilters")}
-                </Text>
-                {searchTerm && (
-                  <Badge colorScheme="blue" variant={isDark ? 'solid' : 'subtle'} borderRadius="md">
-                    {t("components.charactersTable.filterSearch")}: {searchTerm}
-                  </Badge>
-                )}
-                {selectedAffinity && (
-                  <HStack spacing={1}>
-                    <AffinityIcon affinity={selectedAffinity} size="16px" />
-                    <Badge colorScheme="green" variant={isDark ? 'solid' : 'subtle'} borderRadius="md">
-                      {selectedAffinity}
-                    </Badge>
-                  </HStack>
-                )}
-                {selectedCategory && (
-                  <HStack spacing={1}>
-                    <CategoryIcon category={selectedCategory} size="16px" />
-                    <Badge colorScheme="purple" variant={isDark ? 'solid' : 'subtle'} borderRadius="md">
-                      {selectedCategory}
-                    </Badge>
-                  </HStack>
-                )}
-                {selectedKiller && (
-                  <HStack spacing={1}>
-                    <KillerIcon killer={selectedKiller} size="16px" />
-                    <Badge colorScheme="orange" variant={isDark ? 'solid' : 'subtle'} borderRadius="md">
-                      {selectedKiller}
-                    </Badge>
-                  </HStack>
-                )}
-                {selectedAttackType && (
-                  <HStack spacing={1}>
-                    <AttackTypeBadge attackType={selectedAttackType} size="14px" />
-                    <Badge colorScheme="cyan" variant={isDark ? 'solid' : 'subtle'} borderRadius="md">
-                      {selectedAttackType === 'R'
-                        ? t("components.charactersTable.attackRed")
-                        : t("components.charactersTable.attackBlue")}
-                    </Badge>
-                  </HStack>
-                )}
-              </HStack>
-              <Button size="sm" colorScheme="red" variant="ghost" onClick={resetFilters} borderRadius="lg">
-                Reset
-              </Button>
-            </Flex>
+              {t("components.charactersTable.rotationShortcut", { killer: t(`factions.${currentRotation.killer}`, currentRotation.killer) })}
+            </Button>
           )}
-        </VStack>
+        </Flex>
+
+        <SimpleGrid columns={{ base: 2, md: 5 }} spacing={3} mt={3}>
+          <AffinityFilter selectedAffinity={selectedAffinity} affinities={affinities} onAffinityChange={setSelectedAffinity} />
+          <CategoryFilter selectedCategory={selectedCategory} categories={categories} onCategoryChange={setSelectedCategory} />
+          <KillerFilter selectedKiller={selectedKiller} killers={killers} onKillerChange={setSelectedKiller} />
+          <AttackTypeFilter selectedAttackType={selectedAttackType} onAttackTypeChange={setSelectedAttackType} />
+          <CustomSelect
+            value={String(itemsPerPage)}
+            onChange={(val) => setItemsPerPage(Number(val))}
+            options={[
+              { value: "24", label: "24 / page" },
+              { value: "48", label: "48 / page" },
+              { value: "96", label: "96 / page" },
+            ]}
+            allowDeselect={false}
+          />
+        </SimpleGrid>
+
+        {hasFilters && (
+          <Flex mt={3} gap={2} align="center" wrap="wrap">
+            <Wrap spacing={2} flex={1}>
+              {searchTerm && filterTag("search", <Icon as={FiSearch} />, searchTerm, () => setSearchTerm(""))}
+              {selectedAffinity && filterTag("affinity", <AffinityIcon affinity={selectedAffinity} size="14px" />, selectedAffinity, () => setSelectedAffinity(""))}
+              {selectedCategory && filterTag("category", <CategoryIcon category={selectedCategory} size="14px" />, t(`factions.${selectedCategory}`, selectedCategory), () => setSelectedCategory(""))}
+              {selectedKiller && filterTag("killer", <KillerIcon killer={selectedKiller} size="14px" />, `${t("components.charactersTable.filterKiller")} ${t(`factions.${selectedKiller}`, selectedKiller)}`, () => setSelectedKiller(""))}
+              {selectedAttackType && filterTag("attack", <AttackTypeBadge attackType={selectedAttackType} size="10px" />, selectedAttackType === "R" ? t("components.charactersTable.attackRed") : t("components.charactersTable.attackBlue"), () => setSelectedAttackType(""))}
+            </Wrap>
+            <Button size="xs" variant="ghost" colorScheme="red" borderRadius="full" onClick={resetFilters}>
+              {t("components.charactersTable.clearAll")}
+            </Button>
+          </Flex>
+        )}
       </Box>
 
-      {/* ── Infos résultats ── */}
       {pagination && (
-        <Flex justify="space-between" align="center" px={1}>
-          <Text fontSize="sm" color={isDark ? 'gray.400' : 'gray.500'}>
-            <Text as="span" fontWeight="semibold" color={isDark ? 'purple.300' : 'purple.600'}>
-              {pagination.totalCount}
-            </Text>{' '}
-            {t("components.charactersTable.paginationCharacters")}
-          </Text>
-          <Text fontSize="xs" color={isDark ? 'gray.500' : 'gray.400'}>
-            {t("components.charactersTable.paginationPage")} {pagination.currentPage} {t("components.charactersTable.paginationOf")} {pagination.totalPages}
-          </Text>
-        </Flex>
+        <Text fontSize="sm" color="text.muted" px={1}>
+          {t("components.charactersTable.resultsCount", { count: pagination.totalCount })}
+        </Text>
       )}
 
-      {/* ── Tableau ── */}
-      <Box
-        bg={isDark ? 'gray.800' : 'white'}
-        borderRadius="xl"
-        borderWidth="1px"
-        borderColor={borderColor}
-        overflow="hidden"
-      >
-        <Box overflowX="auto">
-            <Table variant="simple" size="sm">
-              <Thead>
-                <Tr bg={isDark ? 'rgba(255,255,255,0.04)' : 'gray.50'}>
-                  <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'} py={3}>
-                    {t("components.charactersTable.colCharacter")}
-                  </Th>
-                  <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'} py={3}>
-                    {t("components.charactersTable.colAffinity")}
-                  </Th>
-                  <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'} py={3}>
-                    {t("components.charactersTable.colCategories")}
-                  </Th>
-                  <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'} py={3}>
-                    {t("components.charactersTable.colKillers")}
-                  </Th>
-                  <Th fontSize="2xs" letterSpacing="widest" color={isDark ? 'gray.400' : 'gray.500'} py={3}>
-                    {t("components.charactersTable.colAttackType")}
-                  </Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {isLoading ? (
-                  Array.from({ length: 8 }).map((_, i) => (
-                    <Tr key={i}>
-                      <Td py={3} minW="200px">
-                        <HStack spacing={3}>
-                          <Skeleton boxSize="32px" borderRadius="md" />
-                          <Skeleton height="16px" width="120px" />
-                        </HStack>
-                      </Td>
-                      <Td py={3}><Skeleton boxSize="22px" borderRadius="full" /></Td>
-                      <Td py={3} minW="120px">
-                        <HStack spacing={1.5}>
-                          <Skeleton boxSize="20px" borderRadius="md" />
-                          <Skeleton boxSize="20px" borderRadius="md" />
-                        </HStack>
-                      </Td>
-                      <Td py={3} minW="120px">
-                        <HStack spacing={1.5}>
-                          <Skeleton boxSize="20px" borderRadius="md" />
-                          <Skeleton boxSize="20px" borderRadius="md" />
-                        </HStack>
-                      </Td>
-                      <Td py={3}><Skeleton height="20px" width="36px" borderRadius="md" /></Td>
-                    </Tr>
-                  ))
-                ) : characters.length === 0 ? (
-                  <Tr>
-                    <Td colSpan={5} py={16} textAlign="center">
-                      <Flex direction="column" align="center" gap={3}>
-                        <Text fontSize="3xl">⚔️</Text>
-                        <Text fontWeight="semibold" color={isDark ? 'gray.300' : 'gray.600'}>
-                          {t("components.charactersTable.noResults")}
-                        </Text>
-                        <Text fontSize="sm" color={isDark ? 'gray.500' : 'gray.400'}>
-                          {t("components.charactersTable.noResultsHint")}
-                        </Text>
-                      </Flex>
-                    </Td>
-                  </Tr>
-                ) : (
-                  characters.map((character) => (
-                    <Tr
-                      key={character._id}
-                      borderLeftWidth="2px"
-                      borderLeftColor="transparent"
-                      transition="all 0.15s ease"
-                      _hover={{
-                        bg: isDark ? 'rgba(124,58,237,0.07)' : 'purple.50',
-                        borderLeftColor: 'purple.400',
-                      }}
-                    >
-                      {/* Personnage */}
-                      <Td py={3} minW="200px">
-                        <HStack spacing={3}>
-                          <Avatar
-                            size="sm"
-                            src={character._id ? `${bucketUrl}/characters/thumb/${character._id}.png` : undefined}
-                            name={character.name}
-                            borderRadius="md"
-                            bg={isDark ? 'gray.700' : 'gray.200'}
-                          />
-                          <CustomLink to={`/personnage/${character._id}`} text={character.name} />
-                        </HStack>
-                      </Td>
+      {/* ── Grille ── */}
+      {isLoading ? (
+        <SimpleGrid columns={{ base: 2, sm: 3, md: 4, lg: 6 }} spacing={3}>
+          {Array.from({ length: 12 }).map((_, i) => (
+            <Box key={i} borderRadius="xl" overflow="hidden" borderWidth="1px" borderColor="border.subtle">
+              <Skeleton aspectRatio={1} />
+              <Box p={3}><Skeleton h="14px" w="80%" /><Skeleton h="14px" w="40%" mt={2} /></Box>
+            </Box>
+          ))}
+        </SimpleGrid>
+      ) : characters.length === 0 ? (
+        <Flex direction="column" align="center" gap={2} py={16} bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle">
+          <Icon as={FiSearch} boxSize={8} color="text.muted" />
+          <Text fontWeight="semibold" color="text.secondary">{t("components.charactersTable.noResults")}</Text>
+          <Text fontSize="sm" color="text.muted">{t("components.charactersTable.noResultsHint")}</Text>
+        </Flex>
+      ) : (
+        <SimpleGrid columns={{ base: 2, sm: 3, md: 4, lg: 6 }} spacing={3}>
+          {characters.map((character) => (
+            <CharacterCard key={character._id} character={character} />
+          ))}
+        </SimpleGrid>
+      )}
 
-                      {/* Affinité */}
-                      <Td py={3}>
-                        {character.affinity && (
-                          <Tooltip label={character.affinity} hasArrow placement="top">
-                            <Box display="inline-block">
-                              <AffinityIcon affinity={character.affinity} size="22px" showLabel={false} />
-                            </Box>
-                          </Tooltip>
-                        )}
-                      </Td>
-
-                      {/* Catégories */}
-                      <Td py={3} minW="120px">
-                        {character.categories && character.categories.length > 0 && (
-                          <Flex gap={1.5} flexWrap="wrap" maxW="160px">
-                            {character.categories.slice(0, 4).map((category, index) => (
-                              <Tooltip key={index} label={category} hasArrow placement="top">
-                                <Box>
-                                  <CategoryIcon category={category} size="20px" showLabel={false} />
-                                </Box>
-                              </Tooltip>
-                            ))}
-                            {character.categories.length > 4 && (
-                              <Text fontSize="2xs" color={isDark ? 'gray.400' : 'gray.500'} alignSelf="center">
-                                +{character.categories.length - 4}
-                              </Text>
-                            )}
-                          </Flex>
-                        )}
-                      </Td>
-
-                      {/* Killers */}
-                      <Td py={3} minW="120px">
-                        {character.killers && character.killers.length > 0 && (
-                          <Flex gap={1.5} flexWrap="wrap" maxW="160px">
-                            {character.killers.slice(0, 4).map((killer, index) => (
-                              <Tooltip key={index} label={killer} hasArrow placement="top">
-                                <Box>
-                                  <KillerIcon killer={killer} size="20px" showLabel={false} />
-                                </Box>
-                              </Tooltip>
-                            ))}
-                            {character.killers.length > 4 && (
-                              <Text fontSize="2xs" color={isDark ? 'gray.400' : 'gray.500'} alignSelf="center">
-                                +{character.killers.length - 4}
-                              </Text>
-                            )}
-                          </Flex>
-                        )}
-                      </Td>
-
-                      {/* Type d'attaque */}
-                      <Td py={3}>
-                        <AttackTypeBadge attackType={character.attack_type} size="18px" />
-                      </Td>
-                    </Tr>
-                  ))
-                )}
-              </Tbody>
-            </Table>
-          </Box>
-      </Box>
-
-      {/* Pagination */}
       {pagination && (
         <PaginationComponent
           currentPage={pagination.currentPage}
@@ -426,4 +222,4 @@ export const CharactersTable = () => {
       )}
     </VStack>
   );
-}
+};
