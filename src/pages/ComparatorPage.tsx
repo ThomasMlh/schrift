@@ -34,6 +34,7 @@ import { ComparisonSummary } from "@/components/comparator/ComparisonSummary";
 import type { IconType } from "react-icons";
 import { useUserAccounts, useCycles, useGuilds, fetchUserStats, fetchGuildStats } from "@/hooks/useAPI";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
+import { apiUrl } from "@/utils/apiRequest";
 import type { IUser, IGuild } from "@/interfaces";
 import type { IUserStats, IGuildStats } from "@/hooks/useAPI";
 import { FiRefreshCw, FiUsers, FiShield, FiCalendar, FiBookOpen } from "react-icons/fi";
@@ -141,6 +142,25 @@ const ComparatorPage: React.FC = () => {
     }
   }, [users, guilds, comparisonType, searchParams]);
 
+  // characters=<id>,<id> (lien « Comparer » de la fiche personnage) : chargés une seule fois
+  const charactersInitRef = useRef(false);
+  useEffect(() => {
+    if (charactersInitRef.current) return;
+    charactersInitRef.current = true;
+    const ids = searchParams.get("characters")?.split(",").filter(Boolean).slice(0, 5) || [];
+    if (comparisonType !== "characters" || ids.length === 0) return;
+    Promise.all(ids.map((id) =>
+      fetch(`${apiUrl}/api/characters/${id}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((body) => (body?.data ? { id, character: body.data as SelectedCharacter["character"] } : null))
+        .catch(() => null)
+    )).then((loaded) => {
+      const valid = loaded.filter((c): c is SelectedCharacter => c !== null);
+      if (valid.length > 0) setSelectedCharacters(valid);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Sync URL
   useEffect(() => {
     const params = new URLSearchParams();
@@ -149,11 +169,13 @@ const ComparatorPage: React.FC = () => {
       params.set("players", selectedPlayers.map((p) => p.id).join(","));
     else if (comparisonType === "guilds" && selectedGuilds.length > 0)
       params.set("guilds", selectedGuilds.map((g) => g.guild.name).join(","));
+    else if (comparisonType === "characters" && selectedCharacters.length > 0)
+      params.set("characters", selectedCharacters.map((c) => c.id).join(","));
     const cycleObj = selectedCycleId ? cycles.find(c => c._id === selectedCycleId) : undefined;
     if (cycleObj) params.set("cycle_name", cycleSlug(cycleObj.name, cycleObj.year));
     else if (selectedCycleId) params.set("cycle_name", selectedCycleId);
     setSearchParams(params);
-  }, [comparisonType, selectedPlayers, selectedGuilds, selectedCycleId, cycles, setSearchParams]);
+  }, [comparisonType, selectedPlayers, selectedGuilds, selectedCharacters, selectedCycleId, cycles, setSearchParams]);
 
   const loadPlayersStats = async () => {
     if (selectedPlayers.length < 2) {
