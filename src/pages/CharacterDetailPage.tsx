@@ -218,19 +218,32 @@ const CharacterDetailPage = () => {
 
           {/* En-tête : artwork en bannière, vignette, nom et badges */}
           <Box bg="bg.card" borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" overflow="hidden" boxShadow="md">
-            <Box h={{ base: "120px", md: "180px" }} bgGradient="linear(to-r, purple.600, blue.500)" position="relative">
+            {/* Artwork entier (contain) sur un fond du même artwork flouté, pour ne rien rogner */}
+            <Box
+              h={{ base: "180px", sm: "240px", md: "320px" }}
+              bgGradient="linear(to-r, purple.600, blue.500)"
+              position="relative"
+              overflow="hidden"
+            >
+              <Box
+                position="absolute"
+                inset="-20px"
+                backgroundImage={`url(${bucketUrl}/characters/artwork/${character._id}.png)`}
+                backgroundSize="cover"
+                backgroundPosition="center"
+                filter="blur(18px) brightness(0.6)"
+                aria-hidden
+              />
               <Image
                 src={`${bucketUrl}/characters/artwork/${character._id}.png`}
-                alt=""
+                alt={`Artwork ${character.name}`}
                 position="absolute"
                 inset={0}
                 w="100%"
                 h="100%"
-                objectFit="cover"
-                objectPosition="center 20%"
+                objectFit="contain"
                 fallback={<Box />}
               />
-              <Box position="absolute" inset={0} bgGradient="linear(to-t, blackAlpha.600, transparent 60%)" />
             </Box>
             <Flex
               px={{ base: 4, md: 6 }}
@@ -252,7 +265,9 @@ const CharacterDetailPage = () => {
                   objectFit="cover"
                   mt={{ base: -10, md: -14 }}
                   flexShrink={0}
-                  fallback={<Box boxSize={{ base: "88px", md: "112px" }} borderRadius="xl" bg="bg.inset" mt={{ base: -10, md: -14 }} />}
+                  position="relative"
+                  zIndex={1}
+                  fallback={<Box boxSize={{ base: "88px", md: "112px" }} borderRadius="xl" bg="bg.inset" mt={{ base: -10, md: -14 }} position="relative" zIndex={1} />}
                 />
                 <VStack align="start" spacing={2} minW={0} pt={2}>
                   <Heading as="h1" size={{ base: "md", md: "lg" }} letterSpacing="tight" color="text.strong">
