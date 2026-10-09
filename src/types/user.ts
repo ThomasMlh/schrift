@@ -1,3 +1,4 @@
+import type { ITopAchievement } from "./records";
 // Utilisateurs et comptes de jeu (bbs)
 import type { IPagination, Role } from "./common";
 
@@ -40,6 +41,7 @@ export interface IUser {
   is_banned?: boolean;
   ban_reason?: string;
   banned_at?: string;
+  top_achievement?: ITopAchievement | null; // succès le plus rare (liste publique des comptes)
 }
 
 export interface IUsersResponse {
