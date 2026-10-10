@@ -7,22 +7,16 @@ import {
   Heading,
   Button,
   HStack,
-  Avatar,
   useDisclosure,
   Alert,
   AlertIcon,
   Icon,
-  SimpleGrid,
-  Card,
-  CardBody,
-  IconButton,
   Tooltip,
-  Badge,
 } from "@chakra-ui/react";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { AddIcon, EditIcon, CalendarIcon } from "@chakra-ui/icons";
+import { AddIcon } from "@chakra-ui/icons";
 import { useBuilds, useCycles, useRotations } from "../../hooks/useAPI";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
 import { FiSearch } from "react-icons/fi";
@@ -30,22 +24,12 @@ import BuildCreationModal from "../ui/BuildCreationModal";
 import { BuildDetailModal } from "../ui/BuildDetailModal";
 import { Pagination } from "../ui/Pagination";
 import { useAuth } from "../../providers/AuthProvider";
-import { UserDisplay } from "../ui/UserDisplay";
 import { CustomSelect } from "../ui/CustomSelect";
 import { AttackTypeBadge } from "../ui/AttackTypeBadge";
 import { AlterationImage } from "../ui/AlterationImage";
 import type { IBuild } from "../../interfaces";
 import { PageLoader } from "../ui/PageLoader";
-import { bucketUrl } from "../../utils/apiRequest";
-
-const formatDate = (dateString?: string) => {
-  if (!dateString) return "N/A";
-  return new Date(dateString).toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-};
+import { BuildRow } from "./BuildRow";
 
 const RotationsBuildsGuide = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -271,161 +255,20 @@ const RotationsBuildsGuide = () => {
         </Box>
       ) : (
         <>
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-            {builds.map((build) => {
-              const rotation = rotations.find((r) => r._id === build.rotation_id);
-              return (
-                <Card
+          <Box bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" overflow="hidden">
+            <VStack spacing={0} align="stretch" divider={<Divider borderColor="border.subtle" />}>
+              {builds.map((build) => (
+                <BuildRow
                   key={build._id}
-                  bg={bgColor}
-                  borderWidth="1px"
-                  borderColor={borderColor}
-                  borderRadius="xl"
-                  overflow="hidden"
-                  transition="all 0.2s ease"
-                  _hover={{ borderColor: "purple.400", transform: "translateY(-2px)" }}
-                  cursor="pointer"
-                  onClick={() => handleOpenBuild(build)}
-                >
-                  {/* Card header — rotation */}
-                  <Box
-                    px={4} py={3}
-                    bg="bg.subtle"
-                    borderBottomWidth="1px"
-                    borderBottomColor="border.subtle"
-                  >
-                    {rotation ? (
-                      <HStack spacing={2} justify="space-between">
-                        <HStack spacing={2} minW={0}>
-                          <Text fontSize="sm" fontWeight="bold" noOfLines={1} color="text.strong">
-                            {t(`factions.${rotation.killer}`, rotation.killer)}
-                          </Text>
-                          <AttackTypeBadge attackType={rotation.attack} />
-                          <AlterationImage alteration={rotation.alteration} size="16px" />
-                        </HStack>
-                        {canEditBuild(build) && (
-                          <Tooltip label={t("common.edit")} placement="top">
-                            <IconButton
-                              aria-label={t("components.rotationsBuildsGuide.ariaEditBuild")}
-                              icon={<EditIcon />}
-                              size="xs"
-                              variant="ghost"
-                              onClick={(e) => handleEditBuild(build, e)}
-                              flexShrink={0}
-                            />
-                          </Tooltip>
-                        )}
-                      </HStack>
-                    ) : (
-                      <Text fontSize="sm" color={mutedText} fontStyle="italic">
-                        {t("components.rotationsBuildsGuide.titleAllBuilds")}
-                      </Text>
-                    )}
-                  </Box>
-
-                  <CardBody p={4}>
-                    <VStack align="stretch" spacing={3}>
-                      {/* Author + date */}
-                      <HStack justify="space-between" align="center">
-                        {build.user ? (
-                          <UserDisplay user={build.user} />
-                        ) : (
-                          <Badge colorScheme="gray" variant="subtle" fontSize="xs">
-                            {t("components.rotationsBuildsGuide.anonymous")}
-                          </Badge>
-                        )}
-                        <HStack spacing={1} color={mutedText} flexShrink={0}>
-                          <Icon as={CalendarIcon} boxSize={3} />
-                          <Text fontSize="xs">{formatDate(build.created_at)}</Text>
-                        </HStack>
-                      </HStack>
-
-                      {/* Description */}
-                      {build.description && (
-                        <Text
-                          fontSize="sm"
-                          color="text.secondary"
-                          noOfLines={3}
-                          lineHeight="short"
-                        >
-                          {build.description}
-                        </Text>
-                      )}
-
-                      <Divider borderColor={borderColor} />
-
-                      {/* Composition */}
-                      <Box>
-                        <Text
-                          fontSize="2xs" fontWeight="bold" textTransform="uppercase"
-                          letterSpacing="widest" color={mutedText} mb={2}
-                        >
-                          {t("components.rotationsBuildsGuide.composition")}
-                        </Text>
-                        <HStack spacing={2} align="flex-start">
-                          {build.team?.slice(0, 3).map((member, idx) => {
-                            const positionColors = ["purple", "blue", "teal"] as const;
-                            const posColor = positionColors[idx % 3];
-                            return (
-                              <VStack key={idx} spacing={1} flex={1} align="center" minW={0}>
-                                <Box position="relative">
-                                  <Tooltip label={member.character?.name || "?"} placement="top" hasArrow>
-                                    <Avatar
-                                      size="lg"
-                                      borderRadius="xl"
-                                      src={`${bucketUrl}/characters/thumb/${member.character?._id}.png`}
-                                      name={member.character?.name || "?"}
-                                      bg="bg.inset"
-                                      borderWidth="2px"
-                                      borderColor={`${posColor}.400`}
-                                    />
-                                  </Tooltip>
-                                  <Badge
-                                    position="absolute"
-                                    top="-4px"
-                                    left="-4px"
-                                    colorScheme={posColor}
-                                    borderRadius="full"
-                                    fontSize="2xs"
-                                    px={1}
-                                    lineHeight="16px"
-                                    minW="16px"
-                                    textAlign="center"
-                                    zIndex={1}
-                                  >
-                                    {member.position}
-                                  </Badge>
-                                </Box>
-                                <Text fontSize="2xs" fontWeight="medium" noOfLines={1} textAlign="center" w="full">
-                                  {member.character?.name || "?"}
-                                </Text>
-                                {member.links && member.links.length > 0 && (
-                                  <HStack spacing={0.5} flexWrap="wrap" justify="center">
-                                    {member.links.slice(0, 3).map((link, lIdx) => (
-                                      <Tooltip key={lIdx} label={link.character?.name || "?"} placement="top" hasArrow>
-                                        <Avatar
-                                          size="xs"
-                                          src={`${bucketUrl}/characters/thumb/${link.character?._id}.png`}
-                                          name={link.character?.name || "?"}
-                                          bg="bg.inset"
-                                          borderWidth="1px"
-                                          borderColor="border.subtle"
-                                        />
-                                      </Tooltip>
-                                    ))}
-                                  </HStack>
-                                )}
-                              </VStack>
-                            );
-                          })}
-                        </HStack>
-                      </Box>
-                    </VStack>
-                  </CardBody>
-                </Card>
-              );
-            })}
-          </SimpleGrid>
+                  build={build}
+                  rotation={rotations.find((r) => r._id === build.rotation_id)}
+                  canEdit={Boolean(canEditBuild(build))}
+                  onOpen={handleOpenBuild}
+                  onEdit={handleEditBuild}
+                />
+              ))}
+            </VStack>
+          </Box>
 
           {pagination && pagination.totalPages > 1 && (
             <Pagination
