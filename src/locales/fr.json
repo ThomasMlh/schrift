@@ -11,7 +11,23 @@
     "admin": "Admin",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
-    "myProfile": "Mon profil"
+    "myProfile": "Mon profil",
+    "more": "Plus",
+    "annonces": "Annonces du jeu",
+    "groupExplore": "Explorer",
+    "groupCompete": "Compétition",
+    "groupResources": "Ressources",
+    "groupAccount": "Compte",
+    "language": "Langue",
+    "theme": "Thème",
+    "themeLight": "Clair",
+    "themeDark": "Sombre",
+    "toggleTheme": "Changer de thème",
+    "accountMenu": "Menu du compte",
+    "roleAdmin": "Admin",
+    "roleGuildManager": "Chef de guilde",
+    "roleMember": "Membre",
+    "loginHint": "Connectez-vous avec Discord pour accéder à votre profil."
   },
   "auth": {
     "login": "Se connecter",
@@ -22,7 +38,8 @@
   },
   "footer": {
     "copyrights": "Copyrights",
-    "disclaimer": "BLEACH © Tite Kubo/Shueisha, TV TOKYO, dentsu, Pierrot BLEACH Brave Souls © KLabGames Neither BBS-Schrift, nor its creator, are affiliated with any of the aforementioned parties."
+    "disclaimer": "BLEACH © Tite Kubo/Shueisha, TV TOKYO, dentsu, Pierrot BLEACH Brave Souls © KLabGames Neither BBS-Schrift, nor its creator, are affiliated with any of the aforementioned parties.",
+    "tagline": "Site communautaire de suivi des scores Bleach: Brave Souls."
   },
   "common": {
     "loading": "Chargement...",

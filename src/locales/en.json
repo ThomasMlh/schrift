@@ -11,7 +11,23 @@
     "admin": "Admin",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "myProfile": "My profile"
+    "myProfile": "My profile",
+    "more": "More",
+    "annonces": "Game news",
+    "groupExplore": "Explore",
+    "groupCompete": "Competition",
+    "groupResources": "Resources",
+    "groupAccount": "Account",
+    "language": "Language",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "toggleTheme": "Toggle theme",
+    "accountMenu": "Account menu",
+    "roleAdmin": "Admin",
+    "roleGuildManager": "Guild leader",
+    "roleMember": "Member",
+    "loginHint": "Log in with Discord to access your profile."
   },
   "auth": {
     "login": "Log in",
@@ -22,7 +38,8 @@
   },
   "footer": {
     "copyrights": "Copyrights",
-    "disclaimer": "BLEACH © Tite Kubo/Shueisha, TV TOKYO, dentsu, Pierrot BLEACH Brave Souls © KLabGames Neither BBS-Schrift, nor its creator, are affiliated with any of the aforementioned parties."
+    "disclaimer": "BLEACH © Tite Kubo/Shueisha, TV TOKYO, dentsu, Pierrot BLEACH Brave Souls © KLabGames Neither BBS-Schrift, nor its creator, are affiliated with any of the aforementioned parties.",
+    "tagline": "Community score tracker for Bleach: Brave Souls."
   },
   "common": {
     "loading": "Loading...",
