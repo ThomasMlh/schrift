@@ -1,6 +1,8 @@
 import { Avatar, Badge, Box, Button, Flex, HStack, Icon, IconButton, Text, Tooltip, VStack } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
-import { FiChevronRight } from "react-icons/fi";
+import { FiChevronRight, FiClock } from "react-icons/fi";
+import { ScoreBadge } from "../ui/ScoreBadge";
+import { formatChrono } from "@/utils/chrono";
 import { useTranslation } from "react-i18next";
 import type { IBuild } from "@/interfaces";
 import { bucketUrl } from "@/utils/apiRequest";
@@ -32,6 +34,9 @@ const thumb = (id?: string) => (id ? `${bucketUrl}/characters/thumb/${id}.png` :
 export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit }: BuildRowProps) => {
   const { t } = useTranslation();
   const team = [...(build.team ?? [])].sort((a, b) => a.position - b.position).slice(0, 3);
+  const totalTime = build.time_normal_wave != null && build.time_extra_wave != null
+    ? build.time_normal_wave + build.time_extra_wave
+    : build.time_normal_wave ?? build.time_extra_wave ?? null;
 
   return (
     <Flex
@@ -68,6 +73,17 @@ export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit }: BuildRowP
           </>
         ) : (
           <Text fontSize="sm" color="text.muted" fontStyle="italic">{t("components.rotationsBuildsGuide.titleAllBuilds")}</Text>
+        )}
+        {(build.score != null || totalTime != null) && (
+          <HStack spacing={2} mt={2} flexWrap="wrap">
+            {build.score != null && <ScoreBadge score={build.score} fontSize="xs" />}
+            {totalTime != null && (
+              <HStack spacing={1} color="text.muted">
+                <Icon as={FiClock} boxSize={3} />
+                <Text fontSize="xs">{formatChrono(totalTime)}</Text>
+              </HStack>
+            )}
+          </HStack>
         )}
       </Box>
 
