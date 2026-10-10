@@ -134,7 +134,7 @@ export const PodiumFilters = ({
         >
           {/* Type de classement (uniquement en mode cycle complet) */}
           {displayMode === "cycle" && (
-            <ButtonGroup isAttached size="sm" variant="outline">
+            <ButtonGroup isAttached size="sm" variant="outline" w={{ base: "100%", sm: "auto" }}>
               {RANKING_ORDER.map((type) => (
                 <Button
                   key={type}
@@ -142,6 +142,15 @@ export const PodiumFilters = ({
                   colorScheme={cycleRankingType === type ? "purple" : "gray"}
                   variant={cycleRankingType === type ? "solid" : "outline"}
                   aria-pressed={cycleRankingType === type}
+                  // Sur mobile, les 3 boutons se partagent la largeur et leur texte peut passer à la ligne
+                  flex={{ base: 1, sm: "initial" }}
+                  minW={0}
+                  h="auto"
+                  minH="32px"
+                  py={1.5}
+                  whiteSpace={{ base: "normal", sm: "nowrap" }}
+                  fontSize={{ base: "xs", sm: "sm" }}
+                  lineHeight="short"
                 >
                   {rankingLabels[type]}
                 </Button>
