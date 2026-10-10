@@ -28,7 +28,7 @@ import {
 } from "@chakra-ui/react";
 import { FiAward, FiFileText, FiImage, FiUsers } from "react-icons/fi";
 import { BuildScreenshotPicker } from "./BuildScreenshotPicker";
-import { chronoInputValue, formatChrono, parseChrono } from "@/utils/chrono";
+import { chronoInputValue, parseChrono } from "@/utils/chrono";
 import { bucketUrl } from "@/utils/apiRequest";
 
 // Même plafond que l'API (scores plausibles d'une rotation)
@@ -339,7 +339,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
   const extraWave = parseChrono(extraWaveInput);
   const normalInvalid = normalWave !== null && Number.isNaN(normalWave);
   const extraInvalid = extraWave !== null && Number.isNaN(extraWave);
-  const totalWaves = normalWave != null && extraWave != null && !normalInvalid && !extraInvalid ? normalWave + extraWave : null;
 
   const existingScreenshotUrl = buildToEdit?.screenshot && !screenshotRemoved ? `${bucketUrl}/builds/${buildToEdit.screenshot}` : null;
   const screenshotPreview = newScreenshot ?? existingScreenshotUrl;
@@ -571,7 +570,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
                       />
                       <FormErrorMessage>{t("components.buildCreationModal.scoreInvalid")}</FormErrorMessage>
                     </FormControl>
-                    <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={4} alignItems="end">
+                    <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4} alignItems="start" maxW="520px">
                       <FormControl isInvalid={normalInvalid}>
                         <FormLabel fontSize="sm">{t("components.buildCreationModal.timeNormalWave")}</FormLabel>
                         <Input inputMode="decimal" placeholder="56.598" value={normalWaveInput} onChange={(e) => setNormalWaveInput(e.target.value)} />
@@ -582,12 +581,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
                         <Input inputMode="decimal" placeholder="1:02.345" value={extraWaveInput} onChange={(e) => setExtraWaveInput(e.target.value)} />
                         <FormErrorMessage>{t("components.buildCreationModal.chronoInvalid")}</FormErrorMessage>
                       </FormControl>
-                      <Box pb={2}>
-                        <Text fontSize="xs" color="text.muted" textTransform="uppercase" letterSpacing="wide" fontWeight="semibold">
-                          {t("components.buildCreationModal.timeTotal")}
-                        </Text>
-                        <Text fontSize="lg" fontWeight="extrabold" color="text.strong">{formatChrono(totalWaves)}</Text>
-                      </Box>
                     </SimpleGrid>
                     <Text fontSize="xs" color="text.muted">{t("components.buildCreationModal.chronoFormat")}</Text>
                   </VStack>

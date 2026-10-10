@@ -534,7 +534,6 @@
       "score": "Score",
       "timeNormalWave": "Vague normale",
       "timeExtraWave": "Vague extra",
-      "timeTotal": "Total",
       "screenshot": "Capture d'écran",
       "screenshotOpen": "Agrandir"
     },
@@ -572,7 +571,6 @@
       "scoreInvalid": "Le score doit être un nombre entier jusqu'à 625 000 000.",
       "timeNormalWave": "Chrono vague normale",
       "timeExtraWave": "Chrono vague extra",
-      "timeTotal": "Total",
       "chronoInvalid": "Format attendu : 56.598 ou 1:02.345",
       "chronoFormat": "Chronos en secondes au millième près : 56.598, ou 1:02.345 au-delà d'une minute.",
       "toastResultInvalid": "Vérifiez le score et les chronos dans l'onglet Résultat."

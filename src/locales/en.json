@@ -534,7 +534,6 @@
       "score": "Score",
       "timeNormalWave": "Normal wave",
       "timeExtraWave": "Extra wave",
-      "timeTotal": "Total",
       "screenshot": "Screenshot",
       "screenshotOpen": "Enlarge"
     },
@@ -572,7 +571,6 @@
       "scoreInvalid": "The score must be a whole number up to 625,000,000.",
       "timeNormalWave": "Normal wave timer",
       "timeExtraWave": "Extra wave timer",
-      "timeTotal": "Total",
       "chronoInvalid": "Expected format: 56.598 or 1:02.345",
       "chronoFormat": "Timers in seconds to the millisecond: 56.598, or 1:02.345 above one minute.",
       "toastResultInvalid": "Check the score and timers in the Result tab."

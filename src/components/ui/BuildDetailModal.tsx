@@ -100,9 +100,6 @@ export const BuildDetailModal = ({
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const screenshotUrl = build?.screenshot ? `${bucketUrl}/builds/${build.screenshot}` : null;
   const hasResult = build != null && (build.score != null || build.time_normal_wave != null || build.time_extra_wave != null);
-  const totalTime = build?.time_normal_wave != null && build?.time_extra_wave != null
-    ? build.time_normal_wave + build.time_extra_wave
-    : null;
 
   const handleEdit = () => {
     if (build && onEdit) {
@@ -169,7 +166,7 @@ export const BuildDetailModal = ({
             <VStack align="stretch" spacing={5}>
               {/* Résultat : score et chronos */}
               {hasResult && (
-                <SimpleGrid columns={{ base: 2, md: totalTime != null ? 4 : 3 }} spacing={3}>
+                <SimpleGrid columns={{ base: 2, md: 3 }} spacing={3}>
                   {build.score != null && (
                     <ResultTile label={t("components.buildDetailModal.score")}>
                       <ScoreBadge score={build.score} fontSize="md" />
@@ -183,11 +180,6 @@ export const BuildDetailModal = ({
                   {build.time_extra_wave != null && (
                     <ResultTile label={t("components.buildDetailModal.timeExtraWave")}>
                       {formatChrono(build.time_extra_wave)}
-                    </ResultTile>
-                  )}
-                  {totalTime != null && (
-                    <ResultTile label={t("components.buildDetailModal.timeTotal")}>
-                      {formatChrono(totalTime)}
                     </ResultTile>
                   )}
                 </SimpleGrid>
