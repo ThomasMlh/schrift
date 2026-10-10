@@ -33,6 +33,9 @@ import { bucketUrl } from "@/utils/apiRequest";
 
 // Même plafond que l'API (scores plausibles d'une rotation)
 const MAX_BUILD_SCORE = 625_000_000;
+
+// "612480300" → "612,480,300"
+const formatScoreDigits = (digits: string) => digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAPIMutations } from "../../hooks/useAPIMutations";
 import { DescriptionTextarea } from "./DescriptionTextarea";
@@ -332,7 +335,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
   }, [usedCharacterIds, team]);
 
   // Résultat saisi : score en chiffres (espaces tolérés), chronos en secondes
-  const scoreDigits = scoreInput.replace(/[\s.]/g, "");
+  const scoreDigits = scoreInput;
   const scoreValue = scoreDigits ? Number(scoreDigits) : null;
   const scoreInvalid = scoreDigits !== "" && (!/^\d+$/.test(scoreDigits) || (scoreValue ?? 0) > MAX_BUILD_SCORE);
   const normalWave = parseChrono(normalWaveInput);
@@ -563,9 +566,10 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
                       <FormLabel fontSize="sm">{t("components.buildCreationModal.score")}</FormLabel>
                       <Input
                         inputMode="numeric"
-                        placeholder="612 480 300"
-                        value={scoreInput}
-                        onChange={(e) => setScoreInput(e.target.value)}
+                        placeholder="612,480,300"
+                        // Virgules tous les 3 chiffres pendant la frappe, comme la saisie groupée
+                        value={formatScoreDigits(scoreInput)}
+                        onChange={(e) => setScoreInput(e.target.value.replace(/\D/g, ""))}
                         maxW="260px"
                       />
                       <FormErrorMessage>{t("components.buildCreationModal.scoreInvalid")}</FormErrorMessage>
