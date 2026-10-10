@@ -61,7 +61,7 @@ export const MobileNavDrawer = ({ isOpen, onClose }: MobileNavDrawerProps) => {
         display="flex"
         w="100%"
         justifyContent="flex-start"
-        h="44px"
+        h={10}
         flexShrink={0}
         px={3}
         borderRadius="lg"
