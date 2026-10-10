@@ -16,6 +16,7 @@ export { useAccessoryMutations } from './mutations/useAccessoryMutations';
 export { useSettingsMutations } from './mutations/useSettingsMutations';
 export { usePodiumMutations } from './mutations/usePodiumMutations';
 export { useDiscordMutations } from './mutations/useDiscordMutations';
+export { useAlbumMutations } from './mutations/useAlbumMutations';
 
 import { useCycleMutations } from './mutations/useCycleMutations';
 import { useGuildMutations } from './mutations/useGuildMutations';

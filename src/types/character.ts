@@ -42,3 +42,22 @@ export interface ISkill {
   description?: string;
   icon?: string;
 }
+
+// Album de personnages d'un compte bbs : <character _id> → spé (1 dès qu'il est possédé, jusqu'à 5)
+export interface IAlbum {
+  bbs_id: string;
+  characters: Record<string, number>;
+  updated_at: string | null;
+}
+
+// Entrée légère du catalogue de personnages utilisé par la grille de l'album
+export interface IAlbumCharacter {
+  _id: string;
+  name: string;
+  search_name?: string;
+  version?: string;
+  affinity?: string;
+  attack_type?: string;
+  killers?: string[];
+  categories?: string[];
+}
