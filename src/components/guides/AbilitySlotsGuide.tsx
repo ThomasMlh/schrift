@@ -1,6 +1,5 @@
 import {
   VStack,
-  Heading,
   Box,
   Text,
   Table,
@@ -9,8 +8,7 @@ import {
   Tr,
   Th,
   Td,
-  useColorModeValue,
-  useColorMode,
+  Icon,
   Alert,
   AlertIcon,
   AlertTitle,
@@ -28,58 +26,35 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
-import { SearchIcon, StarIcon } from "@chakra-ui/icons";
+import { StarIcon } from "@chakra-ui/icons";
+import { FiCheck, FiSearch } from "react-icons/fi";
 import { useAbilitySlotsGuide } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "../ui/PageLoader";
 import type { IGuideAbilitySlot } from "@/interfaces";
 
-const CATEGORY_COLORS = [
-  "blue", "orange", "purple", "teal", "pink", "green", "cyan", "yellow", "red", "gray",
-];
-
-const hashColor = (key: string) => {
-  const sum = key.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-  return CATEGORY_COLORS[sum % CATEGORY_COLORS.length];
-};
-
-const StarValue = ({ value, isDark }: { value: string; isDark: boolean }) => {
+const StarValue = ({ value }: { value: string }) => {
   if (!value) {
-    return <Text color={isDark ? "whiteAlpha.300" : "gray.300"}>—</Text>;
+    return <Text color="text.muted">—</Text>;
   }
   if (value === "Obtenu") {
     return (
-      <Badge colorScheme="green" variant="subtle" borderRadius="full" px={2}>
-        ✓ {value}
+      <Badge colorScheme="green" variant="subtle" borderRadius="full" px={2} display="inline-flex" alignItems="center" gap={1}>
+        <Icon as={FiCheck} aria-hidden /> {value}
       </Badge>
     );
   }
   if (value.startsWith("+")) {
-    return (
-      <Text fontWeight="bold" color={isDark ? "green.300" : "green.600"}>
-        {value}
-      </Text>
-    );
+    return <Text fontWeight="bold" color="green.400">{value}</Text>;
   }
   if (value.includes("%")) {
-    return (
-      <Text fontWeight="semibold" color={isDark ? "purple.200" : "purple.700"}>
-        {value}
-      </Text>
-    );
+    return <Text fontWeight="semibold" color="accent">{value}</Text>;
   }
   return <Text fontWeight="medium">{value}</Text>;
 };
 
 const AbilitySlotsGuide = () => {
-  const { colorMode } = useColorMode();
-  const isDark = colorMode === "dark";
-  const bgColor = "bg.card";
   const borderColor = "border.subtle";
-  const rowHoverBg = useColorModeValue("purple.50", "whiteAlpha.50");
-  const rowStripeBg = "bg.subtle";
-  const mutedText = useColorModeValue("gray.500", "gray.400");
-  const panelBg = "bg.card";
 
   const { t } = useTranslation();
   const { abilitySlotsData, isLoading: loading, error } = useAbilitySlotsGuide();
@@ -106,7 +81,6 @@ const AbilitySlotsGuide = () => {
     return Array.from(byCategory.entries()).map(([category, items]) => ({
       category,
       items,
-      color: hashColor(category),
     }));
   }, [abilitySlotsData, search]);
 
@@ -143,53 +117,51 @@ const AbilitySlotsGuide = () => {
 
   return (
     <VStack spacing={6} align="stretch">
-      {/* Header */}
-      <Flex align="center" justify="space-between" wrap="wrap" gap={3}>
-        <Box>
-          <Heading size="sm" mb={1} color={isDark ? "purple.300" : "purple.600"}>
-            {t("components.abilitySlotsGuide.heading")}
-          </Heading>
-          <Text fontSize="xs" color={mutedText}>
-            {t("components.abilitySlotsGuide.description")}
-          </Text>
-        </Box>
-        <Badge
-          colorScheme="purple"
-          variant={isDark ? "subtle" : "solid"}
-          fontSize="sm"
-          px={3}
-          py={1.5}
-          borderRadius="xl"
-        >
-          {totalRows} {t("components.abilitySlotsGuide.rowsUnit")}
-        </Badge>
-      </Flex>
-
-      {/* Search */}
-      <InputGroup maxW={{ base: "100%", md: "320px" }}>
-        <InputLeftElement pointerEvents="none">
-          <SearchIcon color={mutedText} boxSize={3.5} />
-        </InputLeftElement>
-        <Input
-          placeholder={t("components.abilitySlotsGuide.searchPlaceholder")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          bg={bgColor}
-          borderColor={borderColor}
-          size="sm"
-          borderRadius="lg"
-        />
-      </InputGroup>
+      {/* En-tête et recherche (la recherche reste visible au défilement) */}
+      <Box
+        position="sticky"
+        // Sous la barre de navigation, elle-même collante en haut de page
+        top="calc(var(--sait, 0px) + 64px)"
+        zIndex={2}
+        bg="bg.card"
+        borderRadius="xl"
+        borderWidth="1px"
+        borderColor={borderColor}
+        p={4}
+      >
+        <Flex align={{ base: "stretch", md: "center" }} justify="space-between" direction={{ base: "column", md: "row" }} gap={3}>
+          <Box>
+            <HStack spacing={2} mb={1}>
+              <Text fontWeight="bold" color="text.strong">{t("components.abilitySlotsGuide.heading")}</Text>
+              <Badge colorScheme="purple" variant="subtle" borderRadius="full" px={2}>
+                {totalRows} {t("components.abilitySlotsGuide.rowsUnit")}
+              </Badge>
+            </HStack>
+            <Text fontSize="sm" color="text.secondary">{t("components.abilitySlotsGuide.description")}</Text>
+          </Box>
+          <InputGroup maxW={{ base: "100%", md: "300px" }} flexShrink={0}>
+            <InputLeftElement pointerEvents="none">
+              <Icon as={FiSearch} color="text.muted" />
+            </InputLeftElement>
+            <Input
+              placeholder={t("components.abilitySlotsGuide.searchPlaceholder")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              borderRadius="lg"
+            />
+          </InputGroup>
+        </Flex>
+      </Box>
 
       {/* Category groups */}
       {groups.length === 0 && (
-        <Text fontSize="sm" color={mutedText} textAlign="center" py={8}>
+        <Text fontSize="sm" color="text.muted" textAlign="center" py={8}>
           {t("components.abilitySlotsGuide.noResults")}
         </Text>
       )}
 
       <Accordion allowMultiple defaultIndex={groups.map((_, i) => i)}>
-        {groups.map(({ category, items, color }) => (
+        {groups.map(({ category, items }) => (
           <AccordionItem
             key={category}
             border="1px solid"
@@ -197,19 +169,14 @@ const AbilitySlotsGuide = () => {
             borderRadius="xl"
             overflow="hidden"
             mb={4}
-            bg={panelBg}
+            bg="bg.card"
           >
-            <Box h="3px" bgGradient={`linear(90deg, ${color}.500, ${color}.300)`} />
-            <AccordionButton
-              py={3}
-              _hover={{ bg: isDark ? "whiteAlpha.50" : "gray.50" }}
-            >
+            <AccordionButton py={3} _hover={{ bg: "bg.hover" }}>
               <HStack flex="1" spacing={3} textAlign="left">
-                <Box w={2.5} h={2.5} borderRadius="full" bg={`${color}.500`} flexShrink={0} />
-                <Text fontWeight="bold" fontSize="sm">
+                <Text fontWeight="bold" fontSize="sm" color="text.strong">
                   {category}
                 </Text>
-                <Badge colorScheme={color} variant="subtle" borderRadius="full" fontSize="2xs">
+                <Badge colorScheme="purple" variant="subtle" borderRadius="full" fontSize="2xs">
                   {items.length}
                 </Badge>
               </HStack>
@@ -221,18 +188,16 @@ const AbilitySlotsGuide = () => {
                   <Thead position="sticky" top={0} zIndex={1}>
                     <Tr>
                       <Th
-                        bg={isDark ? "whiteAlpha.50" : `${color}.50`}
+                        bg="bg.subtle"
                         borderColor={borderColor}
-                        color={isDark ? `${color}.200` : `${color}.700`}
                       >
                         {t("components.abilitySlotsGuide.colName")}
                       </Th>
                       {["★", "★★", "★★★"].map((label) => (
                         <Th
                           key={label}
-                          bg={isDark ? "whiteAlpha.50" : `${color}.50`}
+                          bg="bg.subtle"
                           borderColor={borderColor}
-                          color={isDark ? `${color}.200` : `${color}.700`}
                           textAlign="center"
                         >
                           <HStack justify="center" spacing={0.5}>
@@ -248,21 +213,21 @@ const AbilitySlotsGuide = () => {
                     {items.map((row, idx) => (
                       <Tr
                         key={row._id}
-                        bg={idx % 2 === 1 ? rowStripeBg : "transparent"}
-                        _hover={{ bg: rowHoverBg }}
+                        bg={idx % 2 === 1 ? "bg.subtle" : "transparent"}
+                        _hover={{ bg: "bg.hover" }}
                         transition="background 0.15s"
                       >
                         <Td borderColor={borderColor} fontSize="sm">
                           {row.name}
                         </Td>
                         <Td borderColor={borderColor} textAlign="center" fontSize="sm">
-                          <StarValue value={row.star1} isDark={isDark} />
+                          <StarValue value={row.star1} />
                         </Td>
                         <Td borderColor={borderColor} textAlign="center" fontSize="sm">
-                          <StarValue value={row.star2} isDark={isDark} />
+                          <StarValue value={row.star2} />
                         </Td>
                         <Td borderColor={borderColor} textAlign="center" fontSize="sm">
-                          <StarValue value={row.star3} isDark={isDark} />
+                          <StarValue value={row.star3} />
                         </Td>
                       </Tr>
                     ))}
