@@ -58,8 +58,12 @@ export const MobileNavDrawer = ({ isOpen, onClose }: MobileNavDrawerProps) => {
         to={item.path}
         onClick={onClose}
         variant="ghost"
+        display="flex"
+        w="100%"
         justifyContent="flex-start"
         h={11}
+        minH={11}
+        flexShrink={0}
         px={3}
         borderRadius="lg"
         fontSize="sm"
@@ -120,14 +124,14 @@ export const MobileNavDrawer = ({ isOpen, onClose }: MobileNavDrawerProps) => {
           )}
 
           {/* Liens */}
-          <VStack spacing={0.5} align="stretch" mt={2}>
+          <Box mt={2}>
             {groups.map((group) => {
               const items = visible.filter((item) => item.group === group);
               if (!items.length) return null;
               return (
                 <Box key={group}>
                   <SectionLabel>{t(NAV_GROUP_LABELS[group])}</SectionLabel>
-                  <VStack spacing={0.5} align="stretch">{items.map(renderLink)}</VStack>
+                  {items.map(renderLink)}
                 </Box>
               );
             })}
@@ -137,7 +141,7 @@ export const MobileNavDrawer = ({ isOpen, onClose }: MobileNavDrawerProps) => {
                 {renderLink(adminItem)}
               </Box>
             )}
-          </VStack>
+          </Box>
 
           {/* Préférences */}
           <VStack spacing={3} align="stretch" mt={4} pt={4} px={1} borderTopWidth="1px" borderColor="border.subtle">
