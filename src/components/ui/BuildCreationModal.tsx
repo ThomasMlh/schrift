@@ -12,8 +12,28 @@ import {
   Text,
   Box,
   Alert,
-  AlertIcon
+  AlertIcon,
+  Badge,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Icon,
+  Input,
+  SimpleGrid,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
 } from "@chakra-ui/react";
+import { FiAward, FiFileText, FiImage, FiUsers } from "react-icons/fi";
+import { BuildScreenshotPicker } from "./BuildScreenshotPicker";
+import { chronoInputValue, parseChrono } from "@/utils/chrono";
+import { bucketUrl } from "@/utils/apiRequest";
+import { formatWithCommas } from "@/utils/format";
+
+// Même plafond que l'API (scores plausibles d'une rotation)
+const MAX_BUILD_SCORE = 625_000_000;
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAPIMutations } from "../../hooks/useAPIMutations";
 import { DescriptionTextarea } from "./DescriptionTextarea";
@@ -39,7 +59,7 @@ interface TeamMember {
 }
 
 const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdit }: BuildCreationModalProps) => {
-  const { createBuild, updateBuild } = useAPIMutations();
+  const { createBuild, updateBuild, uploadBuildScreenshot, deleteBuildScreenshot } = useAPIMutations();
   const { token } = useAuth();
   const { t } = useTranslation();
   const [description, setDescription] = useState("");
@@ -49,6 +69,15 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     { id_character: "", position: 3, links: [], skills: [], accessories: [] },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Résultat (champs texte, convertis à l'envoi) et capture d'écran
+  const [scoreInput, setScoreInput] = useState("");
+  const [normalWaveInput, setNormalWaveInput] = useState("");
+  const [extraWaveInput, setExtraWaveInput] = useState("");
+  // Nouvelle capture (data URL) ; null = aucune nouvelle capture
+  const [newScreenshot, setNewScreenshot] = useState<string | null>(null);
+  // Capture existante retirée par l'utilisateur
+  const [screenshotRemoved, setScreenshotRemoved] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
   const toast = useToast();
   const isEditMode = !!buildToEdit;
   const buildId = buildToEdit?._id;
@@ -89,15 +118,26 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
         }
         
         setTeam(editTeam);
+        setScoreInput(buildToEdit.score != null ? String(buildToEdit.score) : "");
+        setNormalWaveInput(chronoInputValue(buildToEdit.time_normal_wave));
+        setExtraWaveInput(chronoInputValue(buildToEdit.time_extra_wave));
       } else {
         // Mode création : réinitialiser
         setDescription("");
+        setScoreInput("");
+        setNormalWaveInput("");
+        setExtraWaveInput("");
         setTeam([
           { id_character: "", position: 1, links: [], skills: [], accessories: [] },
           { id_character: "", position: 2, links: [], skills: [], accessories: [] },
           { id_character: "", position: 3, links: [], skills: [], accessories: [] },
         ]);
       }
+    }
+    if (isOpen) {
+      setNewScreenshot(null);
+      setScreenshotRemoved(false);
+      setActiveTab(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, buildId]); // Ne dépendre que de l'ID au lieu de tout l'objet buildToEdit
@@ -292,6 +332,44 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     );
   }, [usedCharacterIds, team]);
 
+  // Résultat saisi : score en chiffres (espaces tolérés), chronos en secondes
+  const scoreDigits = scoreInput;
+  const scoreValue = scoreDigits ? Number(scoreDigits) : null;
+  const scoreInvalid = scoreDigits !== "" && (!/^\d+$/.test(scoreDigits) || (scoreValue ?? 0) > MAX_BUILD_SCORE);
+  const normalWave = parseChrono(normalWaveInput);
+  const extraWave = parseChrono(extraWaveInput);
+  const normalInvalid = normalWave !== null && Number.isNaN(normalWave);
+  const extraInvalid = extraWave !== null && Number.isNaN(extraWave);
+
+  const existingScreenshotUrl = buildToEdit?.screenshot && !screenshotRemoved ? `${bucketUrl}/builds/${buildToEdit.screenshot}` : null;
+  const screenshotPreview = newScreenshot ?? existingScreenshotUrl;
+  const handleScreenshotChange = (dataUrl: string | null) => {
+    setNewScreenshot(dataUrl);
+    if (!dataUrl) setScreenshotRemoved(true);
+  };
+
+  const filledCount = team.filter((m) => m.id_character).length;
+  const hasResult = scoreValue != null || normalWave != null || extraWave != null;
+
+  // Envoie, remplace ou retire la capture une fois le build enregistré. Un échec n'annule pas
+  // l'enregistrement du build : on prévient simplement l'utilisateur.
+  const saveScreenshot = async (savedBuildId: string) => {
+    try {
+      if (newScreenshot) {
+        await uploadBuildScreenshot(savedBuildId, newScreenshot);
+      } else if (screenshotRemoved && buildToEdit?.screenshot) {
+        await deleteBuildScreenshot(savedBuildId);
+      }
+    } catch (error) {
+      toast({
+        title: t("components.buildScreenshot.saveError"),
+        description: (error as Error).message,
+        status: "warning",
+        duration: 6000,
+      });
+    }
+  };
+
   const handleSubmit = async () => {
     // Vérifier que l'utilisateur est connecté
     if (!token) {
@@ -315,6 +393,23 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
       });
       return;
     }
+
+    if (scoreInvalid || normalInvalid || extraInvalid) {
+      setActiveTab(1);
+      toast({
+        title: t("components.buildCreationModal.toastValidationTitle"),
+        description: t("components.buildCreationModal.toastResultInvalid"),
+        status: "error",
+        duration: 5000,
+      });
+      return;
+    }
+
+    const resultPayload = {
+      score: scoreValue,
+      time_normal_wave: normalWave,
+      time_extra_wave: extraWave,
+    };
 
     // Filtrer les membres sans personnage et valider les links
     const filteredTeam = team
@@ -340,7 +435,9 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
           rotation_id: rotationId,
           description: description.trim(),
           team: filteredTeam,
+          ...resultPayload,
         });
+        await saveScreenshot(buildToEdit._id!);
 
         toast({
           title: t("components.buildCreationModal.toastSuccessEditTitle"),
@@ -350,11 +447,13 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
         });
       } else {
         // Mode création
-        await createBuild({
+        const created = await createBuild({
           rotation_id: rotationId,
           description: description.trim(),
           team: filteredTeam,
-        });
+          ...resultPayload,
+        }) as { data?: { _id?: string } };
+        if (created?.data?._id) await saveScreenshot(created.data._id);
 
         toast({
           title: t("components.buildCreationModal.toastSuccessCreateTitle"),
@@ -383,58 +482,132 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     <Modal isOpen={isOpen} onClose={onClose} size="4xl" scrollBehavior="inside">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader boxShadow={"lg"}>{isEditMode ? t("components.buildCreationModal.titleEdit") : t("components.buildCreationModal.titleCreate")}</ModalHeader>
+        <ModalHeader borderBottomWidth="1px" borderColor="border.subtle">{isEditMode ? t("components.buildCreationModal.titleEdit") : t("components.buildCreationModal.titleCreate")}</ModalHeader>
         <ModalCloseButton />
         <ModalBody py={4}>
-          <VStack spacing={6} align="stretch">
-            <Alert status="info" borderRadius="md">
+          <VStack spacing={4} align="stretch">
+            <Alert status="info" borderRadius="md" py={2}>
               <AlertIcon />
               <Text fontSize="sm">
-                {isEditMode 
+                {isEditMode
                   ? t("components.buildCreationModal.alertEdit")
                   : t("components.buildCreationModal.alertCreate")
                 }
               </Text>
             </Alert>
 
-            <DescriptionTextarea 
-              value={description} 
-              onChange={setDescription} 
-            />
+            <Tabs index={activeTab} onChange={setActiveTab} variant="soft-rounded" colorScheme="purple" size="sm" isLazy={false}>
+              <TabList gap={1} flexWrap="wrap" mb={4}>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                  <Icon as={FiUsers} aria-hidden />
+                  {t("components.buildCreationModal.tabTeam")}
+                  <Badge colorScheme={filledCount > 0 ? "purple" : "gray"} variant="subtle" borderRadius="full">{filledCount}/3</Badge>
+                </Tab>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                  <Icon as={FiAward} aria-hidden />
+                  {t("components.buildCreationModal.tabResult")}
+                  {(scoreInvalid || normalInvalid || extraInvalid)
+                    ? <Box w="8px" h="8px" borderRadius="full" bg="red.400" />
+                    : hasResult && <Box w="8px" h="8px" borderRadius="full" bg="green.400" />}
+                </Tab>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                  <Icon as={FiImage} aria-hidden />
+                  {t("components.buildCreationModal.tabScreenshot")}
+                  {screenshotPreview && <Box w="8px" h="8px" borderRadius="full" bg="green.400" />}
+                </Tab>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                  <Icon as={FiFileText} aria-hidden />
+                  {t("components.buildCreationModal.tabNotes")}
+                  {description.trim() && <Box w="8px" h="8px" borderRadius="full" bg="green.400" />}
+                </Tab>
+              </TabList>
 
-            <Box>
-              <Text fontWeight="bold" mb={3}>
-                {t("components.buildCreationModal.teamComposition")}
-              </Text>
+              <TabPanels>
+                {/* Équipe : une position par sous-onglet */}
+                <TabPanel p={0}>
+                  <Tabs variant="line" colorScheme="purple" size="sm">
+                    <TabList>
+                      {team.map((member) => (
+                        <Tab key={member.position} fontWeight="semibold">
+                          {t("components.buildCreationModal.position", { pos: member.position })}
+                          {member.id_character && <Box ml={2} w="6px" h="6px" borderRadius="full" bg="green.400" />}
+                        </Tab>
+                      ))}
+                    </TabList>
+                    <TabPanels>
+                      {team.map((member, index) => (
+                        <TabPanel key={member.position} px={0}>
+                          <TeamMemberCard
+                            member={member}
+                            excludedCharacterIds={excludedIdsPerMember[index] || []}
+                            onCharacterChange={handleCharacterChange}
+                            onAddLink={handleAddLink}
+                            onRemoveLink={handleRemoveLink}
+                            onLinkChange={handleLinkChange}
+                            onSkillsChange={handleSkillsChange}
+                            onAddAccessory={handleAddAccessory}
+                            onRemoveAccessory={handleRemoveAccessory}
+                            onAccessoryChange={handleAccessoryChange}
+                            getUsedAccessoryIds={getUsedAccessoryIds}
+                          />
+                        </TabPanel>
+                      ))}
+                    </TabPanels>
+                  </Tabs>
+                </TabPanel>
 
-              <VStack spacing={4} align="stretch">
-                {team.map((member, index) => (
-                    <TeamMemberCard
-                      key={member.position}
-                      member={member}
-                      excludedCharacterIds={excludedIdsPerMember[index] || []}
-                      onCharacterChange={handleCharacterChange}
-                      onAddLink={handleAddLink}
-                      onRemoveLink={handleRemoveLink}
-                      onLinkChange={handleLinkChange}
-                      onSkillsChange={handleSkillsChange}
-                      onAddAccessory={handleAddAccessory}
-                      onRemoveAccessory={handleRemoveAccessory}
-                      onAccessoryChange={handleAccessoryChange}
-                      getUsedAccessoryIds={getUsedAccessoryIds}
-                    />
-                ))}
-              </VStack>
-            </Box>
+                {/* Résultat */}
+                <TabPanel p={0}>
+                  <VStack align="stretch" spacing={4}>
+                    <Text fontSize="sm" color="text.muted">{t("components.buildCreationModal.resultHint")}</Text>
+                    <FormControl isInvalid={scoreInvalid}>
+                      <FormLabel fontSize="sm">{t("components.buildCreationModal.score")}</FormLabel>
+                      <Input
+                        inputMode="numeric"
+                        placeholder="612,480,300"
+                        // Virgules tous les 3 chiffres pendant la frappe, comme la saisie groupée
+                        value={formatWithCommas(scoreInput)}
+                        onChange={(e) => setScoreInput(e.target.value.replace(/\D/g, ""))}
+                        maxW="260px"
+                      />
+                      <FormErrorMessage>{t("components.buildCreationModal.scoreInvalid")}</FormErrorMessage>
+                    </FormControl>
+                    <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4} alignItems="start" maxW="520px">
+                      <FormControl isInvalid={normalInvalid}>
+                        <FormLabel fontSize="sm">{t("components.buildCreationModal.timeNormalWave")}</FormLabel>
+                        <Input inputMode="decimal" placeholder="56.598" value={normalWaveInput} onChange={(e) => setNormalWaveInput(e.target.value)} />
+                        <FormErrorMessage>{t("components.buildCreationModal.chronoInvalid")}</FormErrorMessage>
+                      </FormControl>
+                      <FormControl isInvalid={extraInvalid}>
+                        <FormLabel fontSize="sm">{t("components.buildCreationModal.timeExtraWave")}</FormLabel>
+                        <Input inputMode="decimal" placeholder="1:02.345" value={extraWaveInput} onChange={(e) => setExtraWaveInput(e.target.value)} />
+                        <FormErrorMessage>{t("components.buildCreationModal.chronoInvalid")}</FormErrorMessage>
+                      </FormControl>
+                    </SimpleGrid>
+                    <Text fontSize="xs" color="text.muted">{t("components.buildCreationModal.chronoFormat")}</Text>
+                  </VStack>
+                </TabPanel>
+
+                {/* Capture d'écran */}
+                <TabPanel p={0}>
+                  <BuildScreenshotPicker value={screenshotPreview} onChange={handleScreenshotChange} />
+                </TabPanel>
+
+                {/* Notes */}
+                <TabPanel p={0}>
+                  <DescriptionTextarea value={description} onChange={setDescription} />
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
           </VStack>
         </ModalBody>
 
-        <ModalFooter boxShadow={"0 -6px 12px -4px rgba(0,0,0,0.15)"}>
+        <ModalFooter borderTopWidth="1px" borderColor="border.subtle">
           <Button variant="ghost" mr={3} onClick={onClose} isDisabled={isSubmitting}>
             {t("components.buildCreationModal.buttonCancel")}
           </Button>
           <Button
-            colorScheme="orange"
+            colorScheme="purple"
             onClick={handleSubmit}
             isLoading={isSubmitting}
             loadingText={isEditMode ? t("components.buildCreationModal.loadingEdit") : t("components.buildCreationModal.loadingCreate")}

@@ -520,33 +520,28 @@
     },
     "buildDetailModal": {
       "title": "Build Details",
-      "createdBy": "Created by:",
-      "anonymousUser": "Anonymous user",
-      "rotation": "Rotation:",
-      "description": "Description:",
-      "noDescription": "No description",
-      "status": "Status:",
-      "statusValid": "✓ Validated",
-      "statusPending": "⏱ Awaiting validation",
-      "teamComposition": "Team composition:",
-      "position": "Position {{pos}}",
+      "description": "Notes",
+      "statusValid": "Validated",
+      "statusPending": "Pending validation",
+      "teamComposition": "Team composition",
       "characterFallback": "Character {{id}}",
       "skills": "Skills:",
       "accessories": "Accessories:",
       "links": "Links:",
-      "dates": "Dates:",
-      "dateCreated": "Created:",
-      "dateModified": "Modified:",
-      "dateValidated": "Validated:",
+      "dateModified": "Updated on",
       "buttonEdit": "Edit",
-      "buttonClose": "Close"
+      "buttonClose": "Close",
+      "score": "Score",
+      "timeNormalWave": "Normal wave",
+      "timeExtraWave": "Extra wave",
+      "screenshot": "Screenshot",
+      "screenshotOpen": "Enlarge"
     },
     "buildCreationModal": {
       "titleCreate": "Create a Build",
       "titleEdit": "Edit Build",
       "alertCreate": "Your build will be submitted for validation by an administrator before being publicly visible.",
       "alertEdit": "After modification, your build will be re-submitted for validation by an administrator.",
-      "teamComposition": "Team Composition",
       "buttonCancel": "Cancel",
       "buttonCreate": "Create Build",
       "buttonEdit": "Edit Build",
@@ -565,7 +560,20 @@
       "toastSuccessEditDesc": "Your build has been modified and will be re-validated by an administrator.",
       "toastErrorTitle": "Error",
       "toastErrorDescCreate": "Unable to create the build",
-      "toastErrorDescEdit": "Unable to edit the build"
+      "toastErrorDescEdit": "Unable to edit the build",
+      "tabTeam": "Team",
+      "tabResult": "Result",
+      "tabScreenshot": "Screenshot",
+      "tabNotes": "Notes",
+      "position": "Position {{pos}}",
+      "resultHint": "Optional: the score reached on the rotation with this build and the timers of both waves.",
+      "score": "Score",
+      "scoreInvalid": "The score must be a whole number up to 625,000,000.",
+      "timeNormalWave": "Normal wave timer",
+      "timeExtraWave": "Extra wave timer",
+      "chronoInvalid": "Expected format: 56.598 or 1:02.345",
+      "chronoFormat": "Timers in seconds to the millisecond: 56.598, or 1:02.345 above one minute.",
+      "toastResultInvalid": "Check the score and timers in the Result tab."
     },
     "descriptionTextarea": {
       "label": "Description (optional)",
@@ -786,6 +794,16 @@
     },
     "podiumPedestal": {
       "medal": "Rank {{rank}} medal"
+    },
+    "buildScreenshot": {
+      "dropzone": "Drop a screenshot here",
+      "hint": "or click to choose a file, or paste it with Ctrl+V",
+      "preview": "Screenshot preview",
+      "replace": "Replace",
+      "remove": "Remove",
+      "notAnImage": "This file is not an image",
+      "readError": "Unable to read this image",
+      "saveError": "The build is saved, but the screenshot could not be uploaded"
     }
   },
   "affinities": {

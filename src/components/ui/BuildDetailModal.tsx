@@ -14,12 +14,21 @@ import {
   Badge,
   Image,
   Divider,
+  Flex,
+  SimpleGrid,
   Grid,
   GridItem,
   Tooltip,
   Icon,
 } from "@chakra-ui/react";
-import { EditIcon, CalendarIcon, CheckCircleIcon, TimeIcon } from "@chakra-ui/icons";
+import { EditIcon, CheckCircleIcon, TimeIcon } from "@chakra-ui/icons";
+import { useState, type ReactNode } from "react";
+import { FiMaximize2 } from "react-icons/fi";
+import { AttackTypeBadge } from "./AttackTypeBadge";
+import { AlterationImage } from "./AlterationImage";
+import { ScoreBadge } from "./ScoreBadge";
+import { ImageLightbox } from "./ImageLightbox";
+import { formatChrono } from "@/utils/chrono";
 import { UserDisplay } from "./UserDisplay";
 import { AffinityIcon } from "./AffinityIcon";
 import type { IBuild } from "../../interfaces";
@@ -36,6 +45,28 @@ interface BuildDetailModalProps {
 
 const POSITION_COLORS = ["purple", "blue", "teal"] as const;
 
+// Tuile du résultat (score, chronos)
+const ResultTile = ({ label, children }: { label: string; children: ReactNode }) => (
+  <Box bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="border.subtle" px={3} py={2.5}>
+    <Text fontSize="xs" color="text.muted" textTransform="uppercase" letterSpacing="wide" fontWeight="semibold">{label}</Text>
+    <Box fontSize="lg" fontWeight="extrabold" color="text.strong" mt={0.5}>{children}</Box>
+  </Box>
+);
+
+const downloadImage = async (src: string, filename: string) => {
+  try {
+    const blob = await (await fetch(src)).blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    window.open(src, "_blank");
+  }
+};
+
 export const BuildDetailModal = ({
   isOpen,
   onClose,
@@ -43,9 +74,8 @@ export const BuildDetailModal = ({
   onEdit,
 }: BuildDetailModalProps) => {
   const cardBg = "bg.card";
-  const cardBorder = "bg.inset";
+  const cardBorder = "border.subtle";
   const sectionBg = "bg.muted";
-  const headerBg = "bg.page";
   const linkCardBg = "bg.muted";
   const mutedText = "text.muted";
   const { currentUser } = useAuth();
@@ -67,6 +97,10 @@ export const BuildDetailModal = ({
     currentUser &&
     (build.user_id === currentUser._id || currentUser.is_admin);
 
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const screenshotUrl = build?.screenshot ? `${bucketUrl}/builds/${build.screenshot}` : null;
+  const hasResult = build != null && (build.score != null || build.time_normal_wave != null || build.time_extra_wave != null);
+
   const handleEdit = () => {
     if (build && onEdit) {
       onEdit(build);
@@ -78,74 +112,117 @@ export const BuildDetailModal = ({
     <Modal isOpen={isOpen} onClose={onClose} size="6xl" scrollBehavior="inside">
       <ModalOverlay backdropFilter="blur(4px)" />
       <ModalContent borderRadius="xl" overflow="hidden">
-        {/* Header with rotation info */}
-        <ModalHeader bg={headerBg} borderBottomWidth="1px" borderColor={cardBorder} pb={4}>
-          <VStack align="stretch" spacing={3}>
-            <HStack justify="space-between" align="flex-start" pr={8}>
-              <VStack align="start" spacing={1}>
-                <Text fontSize="lg" fontWeight="bold">
-                  {t("components.buildDetailModal.title")}
-                </Text>
-                {build?.user && <UserDisplay user={build.user} />}
-              </VStack>
-              {build?.isValid !== undefined && build.user?.is_admin && (
-                <Badge
-                  colorScheme={build.isValid ? "green" : "yellow"}
-                  fontSize="sm"
-                  px={3}
-                  py={1}
-                  borderRadius="full"
-                  display="flex"
-                  alignItems="center"
-                  gap={1}
-                >
-                  <Icon as={build.isValid ? CheckCircleIcon : TimeIcon} boxSize={3} />
-                  {build.isValid
-                    ? t("components.buildDetailModal.statusValid")
-                    : t("components.buildDetailModal.statusPending")}
-                </Badge>
+        {/* En-tête : rotation, auteur et statut */}
+        <ModalHeader borderBottomWidth="1px" borderColor="border.subtle" pb={4}>
+          <Flex justify="space-between" align={{ base: "flex-start", md: "center" }} gap={3} pr={8} direction={{ base: "column", md: "row" }}>
+            <Box minW={0}>
+              {build?.rotation ? (
+                <HStack spacing={2} flexWrap="wrap">
+                  <AttackTypeBadge attackType={build.rotation.attack} size="14px" />
+                  <Text fontSize="xl" fontWeight="extrabold" color="text.strong">
+                    {t(`factions.${build.rotation.killer}`, build.rotation.killer)}
+                  </Text>
+                  {build.rotation.alteration && (
+                    <HStack spacing={1.5}>
+                      <AlterationImage alteration={build.rotation.alteration} size="18px" />
+                      <Text fontSize="sm" fontWeight="medium" color="text.secondary">
+                        {t(`alterations.${build.rotation.alteration}`, build.rotation.alteration)}
+                      </Text>
+                    </HStack>
+                  )}
+                </HStack>
+              ) : (
+                <Text fontSize="xl" fontWeight="extrabold">{t("components.buildDetailModal.title")}</Text>
               )}
-            </HStack>
-
-            {build?.rotation && (
-              <HStack spacing={2} flexWrap="wrap">
-                <Badge colorScheme="blue" px={3} py={1} borderRadius="full" fontSize="sm">
-                  {t(`factions.${build.rotation.killer}`, build.rotation.killer)}
-                </Badge>
-                <Badge colorScheme="green" px={3} py={1} borderRadius="full" fontSize="sm">
-                  {t(`attackTypes.${build.rotation.attack}`, build.rotation.attack)}
-                </Badge>
-                <Badge colorScheme="orange" px={3} py={1} borderRadius="full" fontSize="sm">
-                  {t(`alterations.${build.rotation.alteration}`, build.rotation.alteration)}
-                </Badge>
+              <HStack spacing={3} mt={1} fontSize="sm" fontWeight="normal" color="text.muted" flexWrap="wrap">
+                {build?.user && <UserDisplay user={build.user} avatarSize="xs" textSize="sm" />}
+                <Text>{formatDate(build?.created_at)}</Text>
               </HStack>
+            </Box>
+            {build && canEdit && (
+              <Badge
+                colorScheme={build.isValid ? "green" : "yellow"}
+                variant="subtle"
+                px={2.5}
+                py={1}
+                borderRadius="full"
+                display="flex"
+                alignItems="center"
+                gap={1}
+                flexShrink={0}
+              >
+                <Icon as={build.isValid ? CheckCircleIcon : TimeIcon} boxSize={3} />
+                {build.isValid
+                  ? t("components.buildDetailModal.statusValid")
+                  : t("components.buildDetailModal.statusPending")}
+              </Badge>
             )}
-          </VStack>
+          </Flex>
         </ModalHeader>
         <ModalCloseButton top={4} right={4} />
 
         <ModalBody p={5}>
           {build && (
             <VStack align="stretch" spacing={5}>
-              {/* Description */}
-              {build.description && (
+              {/* Résultat : score et chronos */}
+              {hasResult && (
+                <SimpleGrid columns={{ base: 2, md: 3 }} spacing={3}>
+                  {build.score != null && (
+                    <ResultTile label={t("components.buildDetailModal.score")}>
+                      <ScoreBadge score={build.score} fontSize="md" commas />
+                    </ResultTile>
+                  )}
+                  {build.time_normal_wave != null && (
+                    <ResultTile label={t("components.buildDetailModal.timeNormalWave")}>
+                      {formatChrono(build.time_normal_wave)}
+                    </ResultTile>
+                  )}
+                  {build.time_extra_wave != null && (
+                    <ResultTile label={t("components.buildDetailModal.timeExtraWave")}>
+                      {formatChrono(build.time_extra_wave)}
+                    </ResultTile>
+                  )}
+                </SimpleGrid>
+              )}
+
+              {/* Capture d'écran */}
+              {screenshotUrl && (
                 <Box
-                  p={4}
-                  bg={sectionBg}
-                  borderRadius="lg"
-                  borderLeftWidth="3px"
-                  borderLeftColor="blue.400"
+                  as="button"
+                  onClick={() => setLightboxOpen(true)}
+                  borderRadius="xl"
+                  overflow="hidden"
+                  borderWidth="1px"
+                  borderColor="border.subtle"
+                  bg="bg.inset"
+                  position="relative"
+                  role="group"
+                  aria-label={t("components.buildDetailModal.screenshotOpen")}
                 >
-                  <Text fontSize="sm" color={mutedText} mb={1} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide">
-                    {t("components.buildDetailModal.description")}
-                  </Text>
-                  <Text whiteSpace="pre-wrap">{build.description}</Text>
+                  <Image src={screenshotUrl} alt={t("components.buildDetailModal.screenshot")} w="100%" maxH="420px" objectFit="contain" />
+                  <HStack
+                    position="absolute"
+                    bottom={2}
+                    right={2}
+                    spacing={1}
+                    px={2}
+                    py={1}
+                    borderRadius="md"
+                    bg="blackAlpha.700"
+                    color="white"
+                    fontSize="xs"
+                    opacity={0.85}
+                    _groupHover={{ opacity: 1 }}
+                  >
+                    <Icon as={FiMaximize2} />
+                    <Text>{t("components.buildDetailModal.screenshotOpen")}</Text>
+                  </HStack>
                 </Box>
               )}
 
               {/* Team composition */}
               <Box>
-                <Text fontWeight="bold" fontSize="md" mb={3}>
+                <Text fontWeight="bold" color="text.strong" mb={3}>
                   {t("components.buildDetailModal.teamComposition")}
                 </Text>
                 <Grid
@@ -246,7 +323,7 @@ export const BuildDetailModal = ({
                                         py={0.5}
                                         borderRadius="md"
                                       >
-                                        ⚡ {skillName}
+                                        {skillName}
                                       </Badge>
                                     );
                                   })}
@@ -350,54 +427,29 @@ export const BuildDetailModal = ({
                 </Grid>
               </Box>
 
-              {/* Dates */}
-              <HStack
-                spacing={4}
-                p={3}
-                bg={sectionBg}
-                borderRadius="lg"
-                flexWrap="wrap"
-              >
-                <HStack spacing={1.5} color={mutedText}>
-                  <CalendarIcon boxSize={3} />
-                  <Text fontSize="md">
-                    <Text as="span" fontWeight="semibold">
-                      {t("components.buildDetailModal.dateCreated")}
-                    </Text>{" "}
-                    {formatDate(build.created_at)}
+              {/* Notes */}
+              {build.description && (
+                <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="border.subtle">
+                  <Text fontSize="xs" color="text.muted" mb={1} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide">
+                    {t("components.buildDetailModal.description")}
                   </Text>
-                </HStack>
-                {build.updated_at && (
-                  <HStack spacing={1.5} color={mutedText}>
-                    <TimeIcon boxSize={3} />
-                    <Text fontSize="md">
-                      <Text as="span" fontWeight="semibold">
-                        {t("components.buildDetailModal.dateModified")}
-                      </Text>{" "}
-                      {formatDate(build.updated_at)}
-                    </Text>
-                  </HStack>
-                )}
-                {build.isValid && build.validated_at && (
-                  <HStack spacing={1.5} color="green.500">
-                    <CheckCircleIcon boxSize={3} />
-                    <Text fontSize="md">
-                      <Text as="span" fontWeight="semibold">
-                        {t("components.buildDetailModal.dateValidated")}
-                      </Text>{" "}
-                      {formatDate(build.validated_at)}
-                    </Text>
-                  </HStack>
-                )}
-              </HStack>
+                  <Text whiteSpace="pre-wrap" color="text.body">{build.description}</Text>
+                </Box>
+              )}
+
+              {build.updated_at && build.updated_at !== build.created_at && (
+                <Text fontSize="xs" color="text.muted">
+                  {t("components.buildDetailModal.dateModified")} {formatDate(build.updated_at)}
+                </Text>
+              )}
             </VStack>
           )}
         </ModalBody>
 
-        <ModalFooter borderTopWidth="1px" borderColor={cardBorder} bg={headerBg}>
+        <ModalFooter borderTopWidth="1px" borderColor="border.subtle">
           <HStack spacing={3}>
             {canEdit && onEdit && (
-              <Button leftIcon={<EditIcon />} colorScheme="blue" onClick={handleEdit} size="sm">
+              <Button leftIcon={<EditIcon />} colorScheme="purple" onClick={handleEdit} size="sm">
                 {t("components.buildDetailModal.buttonEdit")}
               </Button>
             )}
@@ -407,6 +459,13 @@ export const BuildDetailModal = ({
           </HStack>
         </ModalFooter>
       </ModalContent>
+      <ImageLightbox
+        src={lightboxOpen ? screenshotUrl : null}
+        label={t("components.buildDetailModal.screenshot")}
+        characterName={build?.rotation ? t(`factions.${build.rotation.killer}`, build.rotation.killer) : "build"}
+        onClose={() => setLightboxOpen(false)}
+        onDownload={downloadImage}
+      />
     </Modal>
   );
 };

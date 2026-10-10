@@ -1,6 +1,7 @@
 import { Avatar, Badge, Box, Button, Flex, HStack, Icon, IconButton, Text, Tooltip, VStack } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
 import { FiChevronRight } from "react-icons/fi";
+import { ScoreBadge } from "../ui/ScoreBadge";
 import { useTranslation } from "react-i18next";
 import type { IBuild } from "@/interfaces";
 import { bucketUrl } from "@/utils/apiRequest";
@@ -68,6 +69,11 @@ export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit }: BuildRowP
           </>
         ) : (
           <Text fontSize="sm" color="text.muted" fontStyle="italic">{t("components.rotationsBuildsGuide.titleAllBuilds")}</Text>
+        )}
+        {build.score != null && (
+          <Box mt={2}>
+            <ScoreBadge score={build.score} fontSize="xs" commas />
+          </Box>
         )}
       </Box>
 
