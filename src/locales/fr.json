@@ -514,9 +514,9 @@
       "noBuildsForRotation": "Aucun build trouvé pour cette rotation",
       "noBuildsAvailable": "Aucun build disponible. Sélectionnez une rotation pour voir les builds.",
       "anonymous": "Anonyme",
-      "composition": "COMPOSITION",
       "ariaEditBuild": "Modifier le build",
-      "currentRotation": "Rotation en cours"
+      "currentRotation": "Rotation en cours",
+      "view": "Voir"
     },
     "buildDetailModal": {
       "title": "Détails du Build",
