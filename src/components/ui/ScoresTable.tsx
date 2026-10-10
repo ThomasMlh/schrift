@@ -122,7 +122,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                     <CustomLink to={`/cycle/${cycle?._id}`} text={cycle ? `${cycle.name} ${cycle.year}` : "Cycle inconnu"} textSize="sm" />
                   </Td>
                 )}
-                <Td py={2} isNumeric><ScoreBadge score={score.score} /></Td>
+                <Td py={2} isNumeric><ScoreBadge commas score={score.score} /></Td>
                 <Td py={2}>
                   <Tooltip label={score.created_at ? new Date(score.created_at).toLocaleString("fr-FR") : "Date inconnue"} hasArrow>
                     <Text fontSize="sm" color="text.muted" w="fit-content">{formatDay(score.created_at)}</Text>
@@ -145,7 +145,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
           <Box key={score._id} px={3} py={3} borderTopWidth={idx > 0 ? "1px" : 0} borderColor="border.subtle">
             <HStack justify="space-between" align="start" spacing={3}>
               <Box minW={0}><UserDisplay user={user} /></Box>
-              <ScoreBadge score={score.score} />
+              <ScoreBadge commas score={score.score} />
             </HStack>
             <HStack justify="space-between" mt={2} spacing={3}>
               <VStack align="start" spacing={0.5} minW={0}>

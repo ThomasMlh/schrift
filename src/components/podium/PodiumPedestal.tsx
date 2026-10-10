@@ -190,7 +190,7 @@ const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProp
             average={player.progression.average}
           />
         ) : (
-          <ScoreBadge
+          <ScoreBadge commas
             score={player.displayScore}
             forceBlue={player.forceBlueScore}
             fontSize={{ base: "xs", md: "sm" }}

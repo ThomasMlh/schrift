@@ -1,4 +1,5 @@
 import { Box, HStack, VStack, Text, Avatar, Badge, Tooltip, useColorModeValue } from "@chakra-ui/react";
+import { formatWithCommas } from "@/utils/format";
 import type { IPodiumMissPlayer } from "@/interfaces";
 import { getUserAvatarUrl } from "@/utils/discord";
 import { buildPlayerUrl } from "@/utils/playerUrl";
@@ -24,7 +25,7 @@ const PlayerCardMiss = ({ player, showGuildName = false }: PlayerCardMissProps) 
   const tooltipLabel = player.missed_rotations
     .slice()
     .sort((a, b) => a.rotation_position - b.rotation_position)
-    .map((r) => `R${r.rotation_position}: ${r.score.toLocaleString("fr-FR")}`)
+    .map((r) => `R${r.rotation_position}: ${formatWithCommas(r.score ?? 0)}`)
     .join("  •  ");
 
   return (
@@ -82,7 +83,7 @@ const PlayerCardMiss = ({ player, showGuildName = false }: PlayerCardMissProps) 
               {player.total_misses} miss
             </Badge>
             <Text fontSize="xs" color={negScoreColor} fontWeight="medium">
-              {player.total_negative_score.toLocaleString("fr-FR")}
+              {formatWithCommas(player.total_negative_score ?? 0)}
             </Text>
           </VStack>
         </Tooltip>

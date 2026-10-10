@@ -95,7 +95,7 @@ const PlayerCard = ({
               average={player.averageScore}
             />
           ) : (
-            <ScoreBadge
+            <ScoreBadge commas
               score={isRotationMode ? player.score || 0 : cycleScore}
               forceBlue={!isRotationMode}
               fontSize={{ base: "xs", md: "sm" }}

@@ -1,4 +1,5 @@
 import { Box, HStack, VStack, Text, Avatar, Badge, Tooltip, useColorModeValue } from "@chakra-ui/react";
+import { formatWithCommas } from "@/utils/format";
 import type { IPodiumWeeklyPlayer } from "@/interfaces";
 import { ScoreBadge } from "./ScoreBadge";
 import { getUserAvatarUrl } from "@/utils/discord";
@@ -77,19 +78,19 @@ const PlayerCardWeekly = ({ player, showGuildName = false }: PlayerCardWeeklyPro
 
         {/* Score total + sous-scores au survol */}
         <Tooltip
-          label={`R1: ${player.rotation1_score.toLocaleString("fr-FR")} • R2: ${player.rotation2_score.toLocaleString("fr-FR")}`}
+          label={`R1: ${formatWithCommas(player.rotation1_score ?? 0)} • R2: ${formatWithCommas(player.rotation2_score ?? 0)}`}
           placement="left"
           hasArrow
         >
           <VStack spacing={0} align="end" flexShrink={0}>
-            <ScoreBadge
+            <ScoreBadge commas
               score={player.week_total_score}
               forceBlue={true}
               fontSize={{ base: "xs", md: "sm" }}
             />
             <Text fontSize="xs" color={subScoreColor}>
-              {player.rotation1_score.toLocaleString("fr-FR")} +{" "}
-              {player.rotation2_score.toLocaleString("fr-FR")}
+              {formatWithCommas(player.rotation1_score ?? 0)} +{" "}
+              {formatWithCommas(player.rotation2_score ?? 0)}
             </Text>
           </VStack>
         </Tooltip>
