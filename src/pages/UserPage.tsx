@@ -33,7 +33,6 @@ import { UserGuildContribution } from "@/components/user/UserGuildContribution";
 import { UserPositionPerformance } from "@/components/user/UserPositionPerformance";
 import { BanDetailsCard } from "@/components/user/BanDetailsCard";
 import { UserTypeAnalysis } from "@/components/user/UserTypeAnalysis";
-import { UserWeeklySection } from "@/components/user/UserWeeklySection";
 import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock, FiHexagon, FiTarget } from "react-icons/fi";
 import { UserKillerRecords } from "@/components/user/UserKillerRecords";
 import { UserAchievements } from "@/components/achievements/UserAchievements";
@@ -290,18 +289,6 @@ const UserPage = () => {
                 tooltip={t("pages.user.statBestScoreHelp")}
               />
             </SimpleGrid>
-
-            {/* Semaine en cours */}
-            {selectedCycle && (() => {
-              const cycleObj = cycles.find((c) => c._id === selectedCycle);
-              return cycleObj ? (
-                <UserWeeklySection
-                  cycle={cycleObj}
-                  cycleId={selectedCycle}
-                  allRotations={stats.allRotations}
-                />
-              ) : null;
-            })()}
 
             {/* Onglets */}
             <Tabs
