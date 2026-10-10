@@ -69,6 +69,10 @@ export interface IBuild {
   user_id?: string;
   user?: IUser;
   team: IBuildTeamMember[];
+  score?: number | null; // score obtenu sur la rotation avec ce build
+  time_normal_wave?: number | null; // chrono de la vague normale, en secondes (56.598)
+  time_extra_wave?: number | null; // chrono de la vague extra, en secondes
+  screenshot?: string | null; // nom du fichier dans bucket/builds/
   validated_at?: string;
   validated_by?: string;
   created_at?: string;

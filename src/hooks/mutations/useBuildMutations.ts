@@ -8,6 +8,13 @@ interface BuildTeamMember {
   links?: Array<{ id_character: string }>;
 }
 
+// Résultat facultatif d'un build ; null efface la valeur
+interface BuildResult {
+  score?: number | null;
+  time_normal_wave?: number | null;
+  time_extra_wave?: number | null;
+}
+
 export const useBuildMutations = () => {
   const { token } = useAuth();
   const request = useMemo(() => makeRequest(token), [token]);
@@ -16,7 +23,7 @@ export const useBuildMutations = () => {
     rotation_id: string;
     description?: string;
     team: BuildTeamMember[];
-  }) => {
+  } & BuildResult) => {
     const result = await request(`${apiUrl}/api/builds`, {
       method: 'POST',
       body: JSON.stringify(buildData),
@@ -29,7 +36,7 @@ export const useBuildMutations = () => {
     rotation_id?: string;
     description?: string;
     team?: BuildTeamMember[];
-  }) => {
+  } & BuildResult) => {
     const result = await request(`${apiUrl}/api/builds/${buildId}`, {
       method: 'PATCH',
       body: JSON.stringify(buildData),
@@ -55,5 +62,23 @@ export const useBuildMutations = () => {
     return true;
   };
 
-  return { createBuild, updateBuild, validateBuild, deleteBuild };
+  // Capture d'écran : image en data URL, convertie et stockée par l'API sur le bucket
+  const uploadBuildScreenshot = async (buildId: string, image: string) => {
+    const result = await request<{ success: boolean; screenshot: string }>(`${apiUrl}/api/builds/${buildId}/screenshot`, {
+      method: 'POST',
+      body: JSON.stringify({ image }),
+    }, { fallbackError: "Erreur lors de l'envoi de la capture" });
+    await invalidateKeys(`${apiUrl}/api/builds`);
+    return result;
+  };
+
+  const deleteBuildScreenshot = async (buildId: string) => {
+    await request(`${apiUrl}/api/builds/${buildId}/screenshot`, {
+      method: 'DELETE',
+    }, { fallbackError: 'Erreur lors de la suppression de la capture' });
+    await invalidateKeys(`${apiUrl}/api/builds`);
+    return true;
+  };
+
+  return { createBuild, updateBuild, validateBuild, deleteBuild, uploadBuildScreenshot, deleteBuildScreenshot };
 };
