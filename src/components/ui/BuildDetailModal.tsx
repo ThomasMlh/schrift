@@ -169,7 +169,7 @@ export const BuildDetailModal = ({
                 <SimpleGrid columns={{ base: 2, md: 3 }} spacing={3}>
                   {build.score != null && (
                     <ResultTile label={t("components.buildDetailModal.score")}>
-                      <ScoreBadge score={build.score} fontSize="md" />
+                      <ScoreBadge score={build.score} fontSize="md" commas />
                     </ResultTile>
                   )}
                   {build.time_normal_wave != null && (

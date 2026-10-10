@@ -1,12 +1,14 @@
 import { Badge, Box } from "@chakra-ui/react";
+import { formatWithCommas } from "@/utils/format";
 
 interface ScoreBadgeProps {
     score: number;
     fontSize?: string | { base?: string; md?: string };
     forceBlue?: boolean; // Nouvelle prop pour forcer la couleur bleue
+    commas?: boolean; // Séparateur de milliers en virgules (612,480,300) au lieu du format du navigateur
 }
 
-export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" }, forceBlue = false }: ScoreBadgeProps) => {
+export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" }, forceBlue = false, commas = false }: ScoreBadgeProps) => {
     // Vérification de sécurité
     if (score === undefined || score === null || score === 0) {
         return <Badge colorScheme="gray" fontSize={fontSize}>Miss</Badge>;
@@ -21,7 +23,7 @@ export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" }, for
                 fontWeight="bold"
                 fontSize={fontSize}
             >
-                {score.toLocaleString()}
+                {commas ? formatWithCommas(score) : score.toLocaleString()}
             </Badge>
         );
     }
@@ -122,7 +124,7 @@ export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" }, for
                     }
                 }}
             >
-                {score.toLocaleString()}
+                {commas ? formatWithCommas(score) : score.toLocaleString()}
             </Box>
         );
     }
@@ -136,7 +138,7 @@ export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" }, for
             fontWeight="bold"
             fontSize={fontSize}
         >
-            {score?.toLocaleString()}
+            {commas ? formatWithCommas(score) : score?.toLocaleString()}
         </Badge>
     );
 };

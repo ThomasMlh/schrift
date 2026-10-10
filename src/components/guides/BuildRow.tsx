@@ -72,7 +72,7 @@ export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit }: BuildRowP
         )}
         {build.score != null && (
           <Box mt={2}>
-            <ScoreBadge score={build.score} fontSize="xs" />
+            <ScoreBadge score={build.score} fontSize="xs" commas />
           </Box>
         )}
       </Box>
