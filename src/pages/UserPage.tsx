@@ -33,9 +33,10 @@ import { UserGuildContribution } from "@/components/user/UserGuildContribution";
 import { UserPositionPerformance } from "@/components/user/UserPositionPerformance";
 import { BanDetailsCard } from "@/components/user/BanDetailsCard";
 import { UserTypeAnalysis } from "@/components/user/UserTypeAnalysis";
-import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock, FiHexagon, FiTarget } from "react-icons/fi";
+import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock, FiHexagon, FiTarget, FiGrid } from "react-icons/fi";
 import { UserKillerRecords } from "@/components/user/UserKillerRecords";
 import { UserAchievements } from "@/components/achievements/UserAchievements";
+import { UserAlbum } from "@/components/user/UserAlbum";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -58,7 +59,7 @@ const UserPage = () => {
 
   // Onglets : clé d'URL → index. Les anciennes clés (tendance, top-rotations, records)
   // renvoient vers l'onglet qui contient désormais leur section.
-  const TAB_NAMES = ["vue-ensemble", "performances", "evolution", "succes"];
+  const TAB_NAMES = ["vue-ensemble", "performances", "evolution", "succes", "album"];
   const TAB_MAP: Record<string, number> = {
     "vue-ensemble": 0,
     "tendance": 0,
@@ -67,6 +68,7 @@ const UserPage = () => {
     "records": 1,
     "evolution": 2,
     "succes": 3,
+    "album": 4,
   };
 
   // Déterminer l'onglet actif depuis l'URL
@@ -169,6 +171,8 @@ const UserPage = () => {
 
 
   const cardBg = "bg.card";
+  // Le propriétaire du compte (connecté via Discord) ou un admin peut remplir l'album
+  const canEditAlbum = isAdmin || (!!currentUser?._id && currentUser._id === userId);
 
 
   if (loading) {
@@ -318,6 +322,9 @@ const UserPage = () => {
                 <Tab color="text.secondary" fontWeight="semibold" gap={2}>
                   <Icon as={FiHexagon} aria-hidden />{t("pages.user.tabAchievements")}
                 </Tab>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                  <Icon as={FiGrid} aria-hidden />{t("pages.user.tabAlbum")}
+                </Tab>
               </TabList>
 
               <TabPanels>
@@ -392,28 +399,37 @@ const UserPage = () => {
                 <TabPanel p={0}>
                   <UserAchievements userId={userId} bbsId={matchedBbsId} />
                 </TabPanel>
+
+                {/* Album de personnages du compte */}
+                <TabPanel p={0}>
+                  <UserAlbum bbsId={user.bbs_id ?? undefined} canEdit={canEditAlbum} />
+                </TabPanel>
               </TabPanels>
             </Tabs>
           </VStack>
         ) : (
-          <Center mt={8}>
-            <Card bg={cardBg} borderRadius="xl" boxShadow="lg" maxW="md">
-              <CardBody textAlign="center" py={10}>
-                <Icon as={FiBarChart2} boxSize={16} color="gray.400" mb={4} />
-                <Text
-                  fontSize="xl"
-                  fontWeight="semibold"
-                  color="gray.600"
-                  mb={2}
-                >
-                  {t("pages.user.noStatsTitle")}
-                </Text>
-                <Text fontSize="md" color="gray.500">
-                  {t("pages.user.noStatsDescription")}
-                </Text>
-              </CardBody>
-            </Card>
-          </Center>
+          <VStack spacing={8} align="stretch">
+            <Center mt={8}>
+              <Card bg={cardBg} borderRadius="xl" boxShadow="lg" maxW="md">
+                <CardBody textAlign="center" py={10}>
+                  <Icon as={FiBarChart2} boxSize={16} color="gray.400" mb={4} />
+                  <Text
+                    fontSize="xl"
+                    fontWeight="semibold"
+                    color="gray.600"
+                    mb={2}
+                  >
+                    {t("pages.user.noStatsTitle")}
+                  </Text>
+                  <Text fontSize="md" color="gray.500">
+                    {t("pages.user.noStatsDescription")}
+                  </Text>
+                </CardBody>
+              </Card>
+            </Center>
+            {/* Sans scores il n'y a pas d'onglets : l'album reste accessible sous l'encart */}
+            <UserAlbum bbsId={user.bbs_id ?? undefined} canEdit={canEditAlbum} />
+          </VStack>
         )}
       </Container>
     </>
