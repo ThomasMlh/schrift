@@ -1,11 +1,7 @@
 import {
   VStack,
-  Heading,
   Box,
   Text,
-  SimpleGrid,
-  Card,
-  CardBody,
   Badge,
   Flex,
   Alert,
@@ -15,7 +11,6 @@ import {
   Progress,
   HStack,
   Image,
-  useColorMode,
 } from "@chakra-ui/react";
 import { useOrbGuide } from "@/hooks/useAPI";
 import { useTranslation } from "react-i18next";
@@ -27,36 +22,13 @@ interface OrbSource {
   amount: number;
 }
 
-const CATEGORY_COLORS = [
-  "purple", "blue", "green", "orange", "cyan",
-  "red", "pink", "teal", "yellow", "gray",
-];
-
-const PROGRESS_TRACK_COLORS: Record<string, string> = {
-  purple: "rgba(168,85,247,0.15)",
-  blue: "rgba(59,130,246,0.15)",
-  green: "rgba(34,197,94,0.15)",
-  orange: "rgba(251,146,60,0.15)",
-  cyan: "rgba(6,182,212,0.15)",
-  red: "rgba(239,68,68,0.15)",
-  pink: "rgba(236,72,153,0.15)",
-  teal: "rgba(20,184,166,0.15)",
-  yellow: "rgba(234,179,8,0.15)",
-  gray: "rgba(156,163,175,0.15)",
-};
-
 const OrbFarmingGuide = () => {
-  const { colorMode } = useColorMode();
-  const isDark = colorMode === "dark";
-  const bgColor = "bg.card";
-  const borderColor = "border.subtle";
-  const mutedText = "text.muted";
 
   const { t } = useTranslation();
   const { orbData, isLoading: loading, error } = useOrbGuide();
 
   if (loading) {
-    return <PageLoader color="purple.500" height="400px" />;
+    return <PageLoader color="purple.400" height="400px" />;
   }
 
   if (error) {
@@ -84,154 +56,94 @@ const OrbFarmingGuide = () => {
     return null;
   }
 
-  const maxAmount = Math.max(...orbData.data.map((s: OrbSource) => s.amount));
+  // Sources de la plus rentable à la moins rentable
+  const sources = [...orbData.data].sort((x: OrbSource, y: OrbSource) => y.amount - x.amount);
+  const total = orbData.totalOrbes || sources.reduce((sum, src) => sum + src.amount, 0);
+  const share = (amount: number) => (total ? Math.round((amount / total) * 100) : 0);
 
   return (
-    <VStack spacing={6} align="stretch">
-
-      {/* Header */}
-      <Flex align="center" justify="space-between" wrap="wrap" gap={3}>
-        <Box>
-          <Heading size="sm" mb={1} color={isDark ? "purple.300" : "purple.600"}>
-            {t("components.orbFarmingGuide.heading")}
-          </Heading>
-          <Text fontSize="xs" color={mutedText}>
-            {t("components.orbFarmingGuide.description", {
-              total: orbData.totalOrbes.toLocaleString()
-            })}
-          </Text>
-        </Box>
-        <Badge
-          colorScheme="purple"
-          variant={isDark ? "subtle" : "solid"}
-          fontSize="lg"
-          px={4}
-          py={2}
-          borderRadius="xl"
-        >
-          {orbData.totalOrbes.toLocaleString()} {t("components.orbFarmingGuide.orbsUnit")}
-        </Badge>
-      </Flex>
-
-      {/* Cards */}
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-        {orbData.data.map((source: OrbSource, index: number) => {
-          const color = CATEGORY_COLORS[index % CATEGORY_COLORS.length];
-          const progressBg = PROGRESS_TRACK_COLORS[color] ?? "rgba(168,85,247,0.1)";
-          const pct = Math.round((source.amount / maxAmount) * 100);
-
-          return (
-            <Card
-              key={index}
-              bg={bgColor}
-              borderWidth="1px"
-              borderColor={borderColor}
-              borderRadius="xl"
-              overflow="hidden"
-              transition="all 0.15s ease"
-              _hover={{
-                borderColor: isDark ? "whiteAlpha.300" : "gray.300",
-                boxShadow: `0 0 16px ${progressBg}, 0 4px 12px rgba(0,0,0,0.08)`,
-                transform: "translateY(-2px)",
-              }}
-            >
-              {/* Color accent bar */}
-              <Box h="3px" bgGradient={`linear(90deg, ${color}.500, ${color}.300)`} />
-              <CardBody p={4}>
-                <VStack align="stretch" spacing={3}>
-                  <Flex justify="space-between" align="flex-start" gap={2}>
-                    <Text fontWeight="semibold" fontSize="sm" lineHeight="short" flex={1}>
-                      {source.title}
-                    </Text>
-                    <Badge
-                      colorScheme={color}
-                      variant="subtle"
-                      fontSize="sm"
-                      fontWeight="bold"
-                      px={2}
-                      borderRadius="lg"
-                      flexShrink={0}
-                    >
-                      {source.amount}
-                    </Badge>
-                  </Flex>
-
-                  {/* Progress bar */}
-                  <Box>
-                    <Box
-                      bg={progressBg}
-                      borderRadius="full"
-                      h="4px"
-                      overflow="hidden"
-                    >
-                      <Box
-                        h="100%"
-                        w={`${pct}%`}
-                        bgGradient={`linear(90deg, ${color}.500, ${color}.300)`}
-                        borderRadius="full"
-                        transition="width 0.4s ease"
-                      />
-                    </Box>
-                  </Box>
-
-                  <Text fontSize="xs" color={mutedText} lineHeight="short">
-                    {source.description}
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-          );
-        })}
-      </SimpleGrid>
-
-      {/* Total banner */}
-      <Box
-        p={5}
+    <VStack spacing={5} align="stretch">
+      {/* En-tête : explication et total mensuel */}
+      <Flex
+        bg="bg.card"
         borderRadius="xl"
         borderWidth="1px"
-        borderColor={isDark ? "purple.700" : "purple.200"}
-        bg={isDark ? "rgba(168,85,247,0.08)" : "purple.50"}
-        boxShadow={isDark ? "0 0 24px rgba(168,85,247,0.12)" : "none"}
+        borderColor="border.subtle"
+        p={5}
+        gap={4}
+        direction={{ base: "column", md: "row" }}
+        justify="space-between"
+        align={{ base: "stretch", md: "center" }}
       >
-        <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
+        <Box maxW="2xl">
+          <Text fontWeight="bold" color="text.strong" mb={1}>{t("components.orbFarmingGuide.heading")}</Text>
+          <Text fontSize="sm" color="text.secondary">
+            {t("components.orbFarmingGuide.description", { total: total.toLocaleString("fr-FR") })}
+          </Text>
+          <Text fontSize="xs" color="text.muted" mt={1}>{t("components.orbFarmingGuide.totalDescription")}</Text>
+        </Box>
+        <HStack spacing={3} flexShrink={0}>
+          <Image src="/orb.png" alt="" boxSize="40px" />
           <Box>
-            <Text fontWeight="bold" fontSize="sm" color={isDark ? "purple.300" : "purple.700"} mb={1}>
+            <Text fontSize="xs" color="text.muted" textTransform="uppercase" letterSpacing="wide" fontWeight="semibold">
               {t("components.orbFarmingGuide.totalHeading")}
             </Text>
-            <Text fontSize="xs" color={mutedText}>
-              {t("components.orbFarmingGuide.totalDescription")}
+            <Text fontSize="2xl" fontWeight="extrabold" color="text.strong" lineHeight={1.1}>
+              {total.toLocaleString("fr-FR")} <Text as="span" fontSize="sm" color="text.muted" fontWeight="semibold">{t("components.orbFarmingGuide.orbsUnit")}</Text>
             </Text>
           </Box>
-          <HStack spacing={2}>
-            <Image src="/orb.png" alt={t("components.orbFarmingGuide.orbsUnit")} boxSize="36px" />
-            <Heading size="lg" color={isDark ? "purple.300" : "purple.600"}>
-              {orbData.totalOrbes.toLocaleString()}
-            </Heading>
-            <Text fontSize="sm" color={mutedText} alignSelf="flex-end" pb={1}>
-              {t("components.orbFarmingGuide.orbsUnit")}
-            </Text>
-          </HStack>
-        </Flex>
+        </HStack>
+      </Flex>
 
-        {/* Progress global */}
-        <Box mt={4}>
-          <Flex justify="space-between" mb={1}>
-            <Text fontSize="2xs" color={mutedText} textTransform="uppercase" letterSpacing="widest">
-              {t("components.orbFarmingGuide.heading")}
-            </Text>
-            <Text fontSize="2xs" color={isDark ? "purple.300" : "purple.600"} fontWeight="bold">
-              {orbData.data.length} sources
-            </Text>
-          </Flex>
-          <Progress
-            value={100}
-            colorScheme="purple"
-            size="sm"
-            borderRadius="full"
-            bg={isDark ? "whiteAlpha.100" : "purple.100"}
-          />
-        </Box>
-      </Box>
+      {/* Sources */}
+      <VStack align="stretch" spacing={2}>
+        {sources.map((source: OrbSource, index: number) => {
+          const isBest = index === 0;
+          return (
+            <Box
+              key={source.title}
+              bg="bg.card"
+              borderRadius="xl"
+              borderWidth={isBest ? "2px" : "1px"}
+              borderColor={isBest ? "purple.400" : "border.subtle"}
+              p={4}
+            >
+              <Flex justify="space-between" align="start" gap={3}>
+                <HStack spacing={3} align="start" minW={0}>
+                  <Text fontSize="sm" fontWeight="bold" color="text.muted" w="24px" flexShrink={0}>#{index + 1}</Text>
+                  <Box minW={0}>
+                    <HStack spacing={2}>
+                      <Text fontWeight="semibold" color="text.strong">{source.title}</Text>
+                      {isBest && (
+                        <Badge colorScheme="purple" variant="subtle" borderRadius="full" px={2}>
+                          {t("components.orbFarmingGuide.bestSource")}
+                        </Badge>
+                      )}
+                    </HStack>
+                    <Text fontSize="sm" color="text.secondary" mt={0.5}>{source.description}</Text>
+                  </Box>
+                </HStack>
+                <Box textAlign="right" flexShrink={0}>
+                  <HStack spacing={1} justify="flex-end">
+                    <Image src="/orb.png" alt="" boxSize="16px" />
+                    <Text fontWeight="extrabold" color="text.strong">{source.amount.toLocaleString("fr-FR")}</Text>
+                  </HStack>
+                  <Text fontSize="xs" color="text.muted">{share(source.amount)} %</Text>
+                </Box>
+              </Flex>
+              <Progress
+                value={share(source.amount)}
+                size="xs"
+                colorScheme="purple"
+                bg="bg.inset"
+                borderRadius="full"
+                mt={3}
+                aria-label={`${source.title} : ${share(source.amount)} %`}
+              />
+            </Box>
+          );
+        })}
+      </VStack>
     </VStack>
   );
 };

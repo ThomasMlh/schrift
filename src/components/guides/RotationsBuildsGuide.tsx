@@ -18,13 +18,14 @@ import {
   IconButton,
   Tooltip,
   Badge,
-  useColorMode,
 } from "@chakra-ui/react";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AddIcon, EditIcon, CalendarIcon } from "@chakra-ui/icons";
-import { useBuilds, useRotations } from "../../hooks/useAPI";
+import { useBuilds, useCycles, useRotations } from "../../hooks/useAPI";
+import { useCurrentRotation } from "@/hooks/useCurrentRotation";
+import { FiSearch } from "react-icons/fi";
 import BuildCreationModal from "../ui/BuildCreationModal";
 import { BuildDetailModal } from "../ui/BuildDetailModal";
 import { Pagination } from "../ui/Pagination";
@@ -56,8 +57,6 @@ const RotationsBuildsGuide = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isDetailOpen, onOpen: onDetailOpen, onClose: onDetailClose } = useDisclosure();
 
-  const { colorMode } = useColorMode();
-  const isDark = colorMode === "dark";
   const bgColor = "bg.card";
   const borderColor = "border.subtle";
   const mutedText = "text.muted";
@@ -68,6 +67,8 @@ const RotationsBuildsGuide = () => {
   const isAuthenticated = !!currentUser;
 
   const { rotations, isLoading: isLoadingRotations } = useRotations();
+  const { cycles, isLoading: isLoadingCycles } = useCycles({ limit: 5 });
+  const { currentRotation } = useCurrentRotation(cycles, isLoadingCycles);
 
   const activeRotation = useMemo(
     () => (selectedRotation ? rotations.find((r) => r._id === selectedRotation) : undefined),
@@ -197,6 +198,22 @@ const RotationsBuildsGuide = () => {
             />
           </Box>
 
+          {currentRotation?.rotation_id && (
+            <Button
+              size="sm"
+              flexShrink={0}
+              variant={selectedRotation === currentRotation.rotation_id ? "solid" : "outline"}
+              colorScheme="purple"
+              leftIcon={<AttackTypeBadge attackType={currentRotation.attack} size="10px" />}
+              onClick={() => {
+                setSelectedRotation(selectedRotation === currentRotation.rotation_id ? "" : currentRotation.rotation_id);
+                setCurrentPage(1);
+              }}
+              aria-pressed={selectedRotation === currentRotation.rotation_id}
+            >
+              {t("components.rotationsBuildsGuide.currentRotation")}
+            </Button>
+          )}
           {isAuthenticated && (
             <Tooltip
               label={!selectedRotation ? t("components.rotationsBuildsGuide.selectRotationHint") : ""}
@@ -206,7 +223,7 @@ const RotationsBuildsGuide = () => {
             >
               <Button
                 leftIcon={<AddIcon />}
-                colorScheme="orange"
+                colorScheme="purple"
                 onClick={handleCreateBuild}
                 isDisabled={!selectedRotation}
                 size="sm"
@@ -239,13 +256,13 @@ const RotationsBuildsGuide = () => {
 
       {/* Build list */}
       {isLoading ? (
-        <PageLoader color="orange.500" height="250px" />
+        <PageLoader color="purple.400" height="250px" />
       ) : builds.length === 0 ? (
         <Box
           bg={bgColor} p={8} borderRadius="xl" borderWidth="1px"
           borderColor={borderColor} textAlign="center"
         >
-          <Text fontSize="2xl" mb={3}>🔍</Text>
+          <Icon as={FiSearch} boxSize={8} color="text.muted" mb={3} />
           <Text color={mutedText} fontSize="sm">
             {selectedRotation
               ? t("components.rotationsBuildsGuide.noBuildsForRotation")
@@ -266,25 +283,21 @@ const RotationsBuildsGuide = () => {
                   borderRadius="xl"
                   overflow="hidden"
                   transition="all 0.2s ease"
-                  _hover={{
-                    borderColor: isDark ? "orange.700" : "orange.300",
-                    boxShadow: "0 0 16px rgba(251,146,60,0.15), 0 4px 12px rgba(0,0,0,0.1)",
-                    transform: "translateY(-2px)",
-                  }}
+                  _hover={{ borderColor: "purple.400", transform: "translateY(-2px)" }}
                   cursor="pointer"
                   onClick={() => handleOpenBuild(build)}
                 >
                   {/* Card header — rotation */}
                   <Box
                     px={4} py={3}
-                    bg={isDark ? "rgba(251,146,60,0.06)" : "orange.50"}
+                    bg="bg.subtle"
                     borderBottomWidth="1px"
-                    borderBottomColor={isDark ? "whiteAlpha.100" : "orange.100"}
+                    borderBottomColor="border.subtle"
                   >
                     {rotation ? (
                       <HStack spacing={2} justify="space-between">
                         <HStack spacing={2} minW={0}>
-                          <Text fontSize="sm" fontWeight="bold" noOfLines={1} color={isDark ? "orange.300" : "orange.600"}>
+                          <Text fontSize="sm" fontWeight="bold" noOfLines={1} color="text.strong">
                             {t(`factions.${rotation.killer}`, rotation.killer)}
                           </Text>
                           <AttackTypeBadge attackType={rotation.attack} />
@@ -296,7 +309,6 @@ const RotationsBuildsGuide = () => {
                               aria-label={t("components.rotationsBuildsGuide.ariaEditBuild")}
                               icon={<EditIcon />}
                               size="xs"
-                              colorScheme="orange"
                               variant="ghost"
                               onClick={(e) => handleEditBuild(build, e)}
                               flexShrink={0}
@@ -332,7 +344,7 @@ const RotationsBuildsGuide = () => {
                       {build.description && (
                         <Text
                           fontSize="sm"
-                          color={isDark ? "gray.300" : "gray.600"}
+                          color="text.secondary"
                           noOfLines={3}
                           lineHeight="short"
                         >
@@ -359,10 +371,11 @@ const RotationsBuildsGuide = () => {
                                 <Box position="relative">
                                   <Tooltip label={member.character?.name || "?"} placement="top" hasArrow>
                                     <Avatar
-                                      size="md"
+                                      size="lg"
+                                      borderRadius="xl"
                                       src={`${bucketUrl}/characters/thumb/${member.character?._id}.png`}
                                       name={member.character?.name || "?"}
-                                      bg={isDark ? "gray.700" : "gray.200"}
+                                      bg="bg.inset"
                                       borderWidth="2px"
                                       borderColor={`${posColor}.400`}
                                     />
@@ -394,9 +407,9 @@ const RotationsBuildsGuide = () => {
                                           size="xs"
                                           src={`${bucketUrl}/characters/thumb/${link.character?._id}.png`}
                                           name={link.character?.name || "?"}
-                                          bg={isDark ? "gray.700" : "gray.200"}
+                                          bg="bg.inset"
                                           borderWidth="1px"
-                                          borderColor={isDark ? "whiteAlpha.200" : "gray.300"}
+                                          borderColor="border.subtle"
                                         />
                                       </Tooltip>
                                     ))}

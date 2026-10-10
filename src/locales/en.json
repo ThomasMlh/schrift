@@ -197,17 +197,12 @@
       "weeklyWeekOption": "Week {{n}}"
     },
     "guides": {
-      "title": "Guides",
       "seoTitle": "Schrift BBS - Guides",
       "seoDescription": "Complete guides for Bleach Brave Souls: rotations, recommended teams, orb farming and more.",
       "heroTitle": "BBS Guides",
       "heroDescription": "Discover our complete guides to improve your gaming experience",
-      "tabRotationsBuilds": "🔄 Rotations & Builds",
-      "tabRotationsBuildsDescription": "Community-validated builds for each rotation",
-      "tabRotationsBuildsBadge": "Community",
+      "tabRotationsBuilds": "Rotations & Builds",
       "tabOrbs": "Orb Farming",
-      "tabOrbsDescription": "Complete guide to maximize your in-game orbs",
-      "tabOrbsBadge": "Resources",
       "orbIconAlt": "Orb Icon",
       "tabAbilitySlots": "Ability Slots"
     },
@@ -510,8 +505,6 @@
       "ariaRemove": "Remove guild"
     },
     "rotationsBuildsGuide": {
-      "heading": "🛠️ Community Builds",
-      "description": "Discover the best team compositions validated by the community and share yours!",
       "loginAlert": "Log in to create and share your own builds with the community.",
       "filterLabel": "Filter by rotation",
       "filterPlaceholder": "All rotations",
@@ -522,7 +515,8 @@
       "noBuildsAvailable": "No builds available. Select a rotation to see builds.",
       "anonymous": "Anonymous",
       "composition": "COMPOSITION",
-      "ariaEditBuild": "Edit build"
+      "ariaEditBuild": "Edit build",
+      "currentRotation": "Current rotation"
     },
     "buildDetailModal": {
       "title": "Build Details",
@@ -581,15 +575,15 @@
       "heading": "Orb Farming Guide",
       "description": "Here are all the recurring monthly orb sources. The total can reach {{total}} orbs/month not counting one-time sources.",
       "errorTitle": "Loading error",
-      "totalHeading": "📊 Monthly recurring total",
+      "totalHeading": "Monthly total",
       "totalDescription": "Not counting one-time sources (new characters, story, special events)",
-      "orbsUnit": "orbs"
+      "orbsUnit": "orbs",
+      "bestSource": "Best source"
     },
     "abilitySlotsGuide": {
       "heading": "Ability Slots",
       "description": "Obtainable value ranges for each ability slot, based on its rarity level (★, ★★, ★★★).",
       "errorTitle": "Loading error",
-      "colCategory": "Category",
       "colName": "Name",
       "rowsUnit": "abilities",
       "searchPlaceholder": "Search an ability...",
