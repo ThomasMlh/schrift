@@ -2,10 +2,13 @@ import {
   Container,
   Box,
   VStack,
-  ButtonGroup,
-  Button,
   Image,
+  Icon,
+  Tabs,
+  TabList,
+  Tab,
 } from "@chakra-ui/react";
+import { FiLayers, FiStar } from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { SEOHead } from "../components/SEOHead";
@@ -21,13 +24,11 @@ const GuidesPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const bgColor = "bg.card";
-  const borderColor = "border.subtle";
 
-  const SECTIONS: { id: SectionId; icon: React.ReactElement; label: string; colorScheme: string }[] = [
-    { id: "rotations-builds", icon: <span>⚔️</span>, label: t("pages.guides.tabRotationsBuilds"), colorScheme: "orange" },
-    { id: "orbs", icon: <Image src="/orb.png" alt={t("pages.guides.orbIconAlt")} boxSize="18px" />, label: t("pages.guides.tabOrbs"), colorScheme: "purple" },
-    { id: "ability-slots", icon: <span>🎯</span>, label: t("pages.guides.tabAbilitySlots"), colorScheme: "purple" },
+  const SECTIONS: { id: SectionId; icon: React.ReactElement; label: string }[] = [
+    { id: "rotations-builds", icon: <Icon as={FiLayers} />, label: t("pages.guides.tabRotationsBuilds") },
+    { id: "orbs", icon: <Image src="/orb.png" alt={t("pages.guides.orbIconAlt")} boxSize="18px" />, label: t("pages.guides.tabOrbs") },
+    { id: "ability-slots", icon: <Icon as={FiStar} />, label: t("pages.guides.tabAbilitySlots") },
   ];
 
   const getInitialSection = (): SectionId => {
@@ -66,25 +67,24 @@ const GuidesPage = () => {
         <Container maxW="container.xl" px={{ base: 4, md: 6 }} py={8}>
           <VStack spacing={5} align="stretch">
 
-            {/* Navigation toolbar */}
-            <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={3}>
-              <ButtonGroup size="sm" spacing={2} isAttached display={{ base: "flex", md: "inline-flex" }} flexDir={{base: "column", md: "row"}}>
-                {SECTIONS.map((sec) => {
-                  const isActive = activeSection === sec.id;
-                  return (
-                    <Button
-                      key={sec.id}
-                      variant={isActive ? "solid" : "outline"}
-                      colorScheme={isActive ? sec.colorScheme : "gray"}
-                      leftIcon={sec.icon}
-                      onClick={() => handleSectionChange(sec.id)}
-                      borderRadius={{ base: "none", md: "md" }}
-                    >
+            {/* Navigation entre les guides (défile horizontalement sur mobile) */}
+            <Box overflowX="auto" mx={{ base: -4, md: 0 }} px={{ base: 4, md: 0 }}>
+              <Tabs
+                index={SECTION_IDS.indexOf(activeSection)}
+                onChange={(i) => handleSectionChange(SECTION_IDS[i])}
+                variant="soft-rounded"
+                colorScheme="purple"
+                size="sm"
+              >
+                <TabList gap={1} w="max-content">
+                  {SECTIONS.map((sec) => (
+                    <Tab key={sec.id} color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap">
+                      {sec.icon}
                       {sec.label}
-                    </Button>
-                  );
-                })}
-              </ButtonGroup>
+                    </Tab>
+                  ))}
+                </TabList>
+              </Tabs>
             </Box>
 
             {/* Content */}

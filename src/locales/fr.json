@@ -197,17 +197,12 @@
       "weeklyWeekOption": "Semaine {{n}}"
     },
     "guides": {
-      "title": "Guides",
       "seoTitle": "Schrift BBS - Guides",
       "seoDescription": "Guides complets pour Bleach Brave Souls : rotations, équipes recommandées, farming d'orbes et plus encore.",
       "heroTitle": "Guides BBS",
       "heroDescription": "Découvrez nos guides complets pour améliorer votre expérience de jeu",
-      "tabRotationsBuilds": "🔄 Rotations & Builds",
-      "tabRotationsBuildsDescription": "Builds validés par la communauté pour chaque rotation",
-      "tabRotationsBuildsBadge": "Communauté",
+      "tabRotationsBuilds": "Rotations & Builds",
       "tabOrbs": "Farm d'Orbes",
-      "tabOrbsDescription": "Guide complet pour maximiser vos orbes en jeu",
-      "tabOrbsBadge": "Ressources",
       "orbIconAlt": "Icône Orbe",
       "tabAbilitySlots": "Emplacements de capacités"
     },
@@ -510,8 +505,6 @@
       "ariaRemove": "Retirer la guilde"
     },
     "rotationsBuildsGuide": {
-      "heading": "🛠️ Builds de la Communauté",
-      "description": "Découvrez les meilleures compositions d'équipes validées par la communauté et partagez les vôtres !",
       "loginAlert": "Connectez-vous pour créer et partager vos propres builds avec la communauté.",
       "filterLabel": "Filtrer par rotation",
       "filterPlaceholder": "Toutes les rotations",
@@ -522,7 +515,8 @@
       "noBuildsAvailable": "Aucun build disponible. Sélectionnez une rotation pour voir les builds.",
       "anonymous": "Anonyme",
       "composition": "COMPOSITION",
-      "ariaEditBuild": "Modifier le build"
+      "ariaEditBuild": "Modifier le build",
+      "currentRotation": "Rotation en cours"
     },
     "buildDetailModal": {
       "title": "Détails du Build",
@@ -581,15 +575,15 @@
       "heading": "Guide du Farm d'Orbes",
       "description": "Voici toutes les sources d'orbes mensuelles récurrentes. Le total peut atteindre {{total}} orbes/mois sans compter les sources ponctuelles.",
       "errorTitle": "Erreur de chargement",
-      "totalHeading": "📊 Total mensuel récurrent",
+      "totalHeading": "Total mensuel",
       "totalDescription": "Sans compter les sources ponctuelles (nouveaux persos, story, events spéciaux)",
-      "orbsUnit": "orbes"
+      "orbsUnit": "orbes",
+      "bestSource": "Meilleure source"
     },
     "abilitySlotsGuide": {
       "heading": "Emplacements de capacités",
       "description": "Plages de valeurs obtenables pour chaque emplacement de capacité, selon son niveau de rareté (★, ★★, ★★★).",
       "errorTitle": "Erreur de chargement",
-      "colCategory": "Catégorie",
       "colName": "Nom",
       "rowsUnit": "capacités",
       "searchPlaceholder": "Rechercher une capacité...",
