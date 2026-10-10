@@ -1,6 +1,5 @@
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { HStack, Image, Text } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import { BRAND_GRADIENT } from "./navConfig";
 
 interface BrandLogoProps {
   label?: string;
@@ -8,7 +7,7 @@ interface BrandLogoProps {
   onClick?: () => void;
 }
 
-// Pastille dégradée « S » suivie du nom du site
+// Icône du site suivie du nom en dégradé violet
 export const BrandLogo = ({ label = "Schrift", linked = true, onClick }: BrandLogoProps) => (
   <HStack
     as={linked ? Link : "div"}
@@ -18,23 +17,15 @@ export const BrandLogo = ({ label = "Schrift", linked = true, onClick }: BrandLo
     flexShrink={0}
     _hover={{ textDecoration: "none" }}
   >
-    <Box
-      w={8}
-      h={8}
-      borderRadius="lg"
-      bgGradient={BRAND_GRADIENT}
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      color="white"
-      fontWeight="black"
-      fontSize="md"
-      boxShadow="0 2px 10px rgba(124,58,237,0.35)"
-      aria-hidden
+    <Image src="/android-chrome-192x192.png" alt="" boxSize={8} borderRadius="full" aria-hidden />
+    <Text
+      fontWeight="extrabold"
+      fontSize="lg"
+      letterSpacing="tight"
+      bgGradient="linear(to-r, #7C3AED, #4F46E5)"
+      _dark={{ bgGradient: "linear(to-r, #C4B5FD, #818CF8)" }}
+      bgClip="text"
     >
-      S
-    </Box>
-    <Text fontWeight="extrabold" fontSize="lg" letterSpacing="tight" color="text.strong">
       {label}
     </Text>
   </HStack>
