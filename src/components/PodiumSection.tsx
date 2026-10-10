@@ -86,7 +86,7 @@ export const PodiumSection: React.FC = () => {
                 rainbowText={player.rank === 1}
               />
 
-              <ScoreBadge
+              <ScoreBadge commas
                 score={player.averageScore ?? 0}
               />
               <Text fontSize="sm" color="gray.500">

@@ -1,4 +1,5 @@
 import { Box, HStack, Icon, Text, useColorModeValue } from "@chakra-ui/react";
+import { formatWithCommas } from "@/utils/format";
 import { FiTrendingDown } from "react-icons/fi";
 import type {
   IPodiumResponse,
@@ -64,7 +65,7 @@ export const PodiumInfo = ({
           </Text>
           {podiumData.meta.averageScore != null && (
             <Text fontSize="sm" fontWeight="semibold" color={accentColor}>
-              ø {podiumData.meta.averageScore.toLocaleString("fr-FR")}
+              ø {formatWithCommas(podiumData.meta.averageScore ?? 0)}
             </Text>
           )}
           <Text fontSize="xs" color={mutedText}>
@@ -114,7 +115,7 @@ export const PodiumInfo = ({
             </HStack>
           ))}
           <Text fontSize="sm" fontWeight="semibold" color={accentColor}>
-            ø {podiumData.meta.averageWeekScore?.toLocaleString("fr-FR")}
+            ø {podiumData.meta.averageWeekScore != null ? formatWithCommas(podiumData.meta.averageWeekScore) : "—"}
           </Text>
           <Text fontSize="xs" color={mutedText}>
             {t("components.podiumInfo.totalPlayers", { count: podiumData.meta.totalPlayers })}
