@@ -38,6 +38,10 @@ interface DraftProposalGuild {
   // Guilde figée : membres actuels inchangés, hors répartition
   locked?: boolean;
   member_count?: number;
+  // Moyenne du score de classement des joueurs de la guilde avant / après la draft
+  // (absentes des entrées d'historique antérieures à leur ajout)
+  average_before?: number | null;
+  average_after?: number | null;
 }
 
 interface DraftProposalResponse {
@@ -66,6 +70,40 @@ interface HistoryEntryFull extends HistoryEntry {
 }
 
 const DEFAULT_GUILD_ORDER = ["A", "C", "B", "E", "D"];
+
+const formatAverage = (value: number | null | undefined) =>
+  value == null ? "—" : value.toLocaleString("fr-FR");
+
+// Moyenne de la guilde avant → après la draft, avec l'écart en %, pour voir si la draft change
+// vraiment quelque chose
+const GuildAverageRow = ({ guild, mutedText }: { guild: DraftProposalGuild; mutedText: string }) => {
+  const { average_before: before, average_after: after } = guild;
+  if (before === undefined && after === undefined) return null;
+
+  const delta = before != null && after != null && before > 0 ? ((after - before) / before) * 100 : null;
+  const deltaColor = delta == null || Math.abs(delta) < 0.05 ? mutedText : delta > 0 ? "green.400" : "red.400";
+  const deltaLabel = delta == null
+    ? null
+    : `${delta > 0 ? "+" : ""}${delta.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+
+  return (
+    <Flex px={3} py={1.5} gap={2} align="center" wrap="wrap" fontSize="xs" fontFamily="mono" borderBottomWidth="1px" borderColor="border.subtle">
+      <Text color={mutedText}>Moy.</Text>
+      <Tooltip label="Moyenne des membres actuels de la guilde" hasArrow>
+        <Text color={mutedText}>{formatAverage(before)}</Text>
+      </Tooltip>
+      <Text color={mutedText}>→</Text>
+      <Tooltip label="Moyenne des joueurs proposés par la draft" hasArrow>
+        <Text fontWeight="semibold">{formatAverage(after)}</Text>
+      </Tooltip>
+      {guild.locked ? (
+        <Text color={mutedText}>(inchangée)</Text>
+      ) : deltaLabel && (
+        <Text fontWeight="bold" color={deltaColor}>{deltaLabel}</Text>
+      )}
+    </Flex>
+  );
+};
 
 // Outil admin en lecture seule : simule une répartition des 5 guildes sur un cycle donné, en
 // classant tous leurs membres actuels par score et en les répartissant par paquets de 20 dans
@@ -568,6 +606,7 @@ const DraftProposalSection = () => {
                           </Text>
                         </Box>
                       </HStack>
+                      <GuildAverageRow guild={g} mutedText={mutedText} />
 
                       <VStack align="stretch" spacing={0}>
                         {g.players.map((p, i) => (
@@ -576,6 +615,9 @@ const DraftProposalSection = () => {
                             spacing={2}
                             px={3}
                             py={1.5}
+                            // Hauteur des boutons 📌/✕ (xs = 24px) + padding : les lignes des
+                            // guildes figées, sans boutons, restent alignées avec les autres colonnes
+                            minH="36px"
                             bg={isMatch(p) ? matchBg : (i % 2 === 1 ? rowAltBg : undefined)}
                             opacity={normalizedSearch && !isMatch(p) ? 0.4 : 1}
                             _hover={{ bg: hoverBg }}
