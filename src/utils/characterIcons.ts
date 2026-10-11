@@ -1,3 +1,6 @@
+// bucketUrl : passe par le proxy Discord en Activity (/.proxy/bucket), https sinon
+import { bucketUrl } from "./apiRequest";
+
 // Mapping des affinités avec leurs icônes
 const affinitySlugMap: Record<string, string> = {
   "Force": "force",
@@ -54,7 +57,7 @@ const categorySlugMap: Record<string, string> = {
  */
 export const getAffinityIcon = (affinity: string): string | null => {
   const slug = affinitySlugMap[affinity] || "goton";
-  return `http://bucket.bbs-schrift.fr/affinity/${slug}.png`;
+  return `${bucketUrl}/affinity/${slug}.png`;
 };
 
 /**
@@ -72,7 +75,7 @@ export const getKillerIcon = (killer: string): string | null => {
   }
   const slug = killerSlugMap[base] || "all";
   const plusPart = isPlus ? "-plus" : "";
-  return `http://bucket.bbs-schrift.fr/killers/killer-${slug}${plusPart}.png`;
+  return `${bucketUrl}/killers/killer-${slug}${plusPart}.png`;
 };
 
 /**
@@ -82,7 +85,7 @@ export const getKillerIcon = (killer: string): string | null => {
  */
 export const getCategoryIcon = (category: string): string => {
   const slug = categorySlugMap[category] || "tous";
-  return `http://bucket.bbs-schrift.fr/categories/cat-${slug}.png`;
+  return `${bucketUrl}/categories/cat-${slug}.png`;
 };
 
 /**
@@ -116,5 +119,5 @@ export const getAllCategories = () => {
  */
 export const getStatIcon = (stat: string): string | null => {
   const slug = statSlugMap[stat as keyof typeof statSlugMap] || null;
-  return slug ? `http://bucket.bbs-schrift.fr/stats/${slug}.png` : null;
+  return slug ? `${bucketUrl}/stats/${slug}.png` : null;
 };
