@@ -615,6 +615,9 @@ const DraftProposalSection = () => {
                             spacing={2}
                             px={3}
                             py={1.5}
+                            // Hauteur des boutons 📌/✕ (xs = 24px) + padding : les lignes des
+                            // guildes figées, sans boutons, restent alignées avec les autres colonnes
+                            minH="36px"
                             bg={isMatch(p) ? matchBg : (i % 2 === 1 ? rowAltBg : undefined)}
                             opacity={normalizedSearch && !isMatch(p) ? 0.4 : 1}
                             _hover={{ bg: hoverBg }}
