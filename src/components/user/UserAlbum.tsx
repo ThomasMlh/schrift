@@ -15,6 +15,7 @@ import { KillerFilter } from "@/components/ui/KillerFilter";
 import { AttackTypeFilter } from "@/components/ui/AttackTypeFilter";
 import { CharactersAffinities, CharactersCategories, CharactersKillers } from "@/utils/chractersData";
 import { bucketUrl } from "@/utils/apiRequest";
+import { getAffinityIcon } from "@/utils/characterIcons";
 import type { IAlbumCharacter } from "@/interfaces";
 
 const MAX_SPE = 5;
@@ -76,6 +77,25 @@ const AlbumThumb = ({ character, spe }: { character: IAlbumCharacter; spe: numbe
       filter={spe > 0 ? undefined : "grayscale(1)"}
       opacity={spe > 0 ? 1 : 0.35}
     />
+    {/* Affinité visible sans survol : certaines versions d'un perso partagent le même visuel */}
+    {character.affinity && (
+      <Box
+        as="img"
+        src={getAffinityIcon(character.affinity) ?? undefined}
+        alt={character.affinity}
+        position="absolute"
+        top="3px"
+        left="3px"
+        w="18px"
+        h="18px"
+        p="1px"
+        borderRadius="full"
+        bg="blackAlpha.600"
+        loading="lazy"
+        decoding="async"
+        opacity={spe > 0 ? 1 : 0.6}
+      />
+    )}
     {spe > 0 && (
       <Box position="absolute" bottom={0} left={0} right={0} py={1} bgGradient="linear(to-t, blackAlpha.800, transparent)">
         <SpePips spe={spe} />
