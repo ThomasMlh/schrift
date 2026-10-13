@@ -104,14 +104,15 @@ export const BulkScoreRow = memo(({
     if (layout === "grid") {
         return (
             <Box p={2.5} borderRadius="lg" borderWidth="1px" borderColor={borderColor} bg="bg.subtle">
-                <Box minW={0} mb={2}>
-                    <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />
-                    {referenceText}
-                </Box>
-                <HStack spacing={1.5}>
-                    {input}
+                {/* Pseudo et alerte sur la même ligne, le champ prend toute la largeur dessous */}
+                <HStack align="start" spacing={2} mb={2}>
+                    <Box flex={1} minW={0}>
+                        <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />
+                        {referenceText}
+                    </Box>
                     {statusIcon}
                 </HStack>
+                {input}
             </Box>
         );
     }
