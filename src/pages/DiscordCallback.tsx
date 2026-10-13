@@ -14,19 +14,18 @@ const DiscordCallback = () => {
   const hasProcessed = useRef(false);
 
   useEffect(() => {
-    // Éviter la double exécution
+    // Prevent double execution
     if (hasProcessed.current) return;
     hasProcessed.current = true;
 
     const processDiscordCallback = async () => {
       try {
-        // Récupérer le code et le state depuis les paramètres URL
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         const error = urlParams.get('error');
         const returnedState = urlParams.get('state');
         
-        // Vérifier si l'utilisateur a refusé l'autorisation
+        // The user declined the authorization
         if (error) {
           throw new Error(`Autorisation refusée: ${error}`);
         }
@@ -35,12 +34,12 @@ const DiscordCallback = () => {
           throw new Error('Code d\'autorisation manquant');
         }
 
-        // Vérifier le state anti-CSRF
+        // Anti-CSRF state check
         const savedState = sessionStorage.getItem('oauth_state');
         sessionStorage.removeItem('oauth_state');
 
         if (!savedState) {
-          // Pas de flow OAuth en cours (URL obsolète ou restaurée par le navigateur)
+          // No OAuth flow in progress (stale URL or restored by the browser)
           navigate('/');
           return;
         }
@@ -49,7 +48,7 @@ const DiscordCallback = () => {
           throw new Error('Vérification de sécurité échouée (state invalide)');
         }
 
-        // Envoyer le code au backend (le backend détermine lui-même la redirect_uri)
+        // Send the code to the API (it determines the redirect_uri itself)
         const response = await fetch(`${apiUrl}/api/auth/discord/callback`, {
           method: 'POST',
           headers: {
@@ -70,7 +69,6 @@ const DiscordCallback = () => {
 
         const data = await response.json();
         
-        // Stocker le token JWT et le refresh token via le context
         login(data.token, data.refreshToken);
         
         toast({
@@ -79,7 +77,7 @@ const DiscordCallback = () => {
           status: "success"
         });
         
-        // Rediriger vers la page d'origine ou l'accueil
+        // Redirect to the original page or home
         const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
         sessionStorage.removeItem('redirectAfterLogin');
         navigate(redirectPath);

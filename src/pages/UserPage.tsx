@@ -48,8 +48,8 @@ import { findTopAchievement } from "@/components/achievements/achievementCatalog
 const UserPage = () => {
   const { bbs_name } = useParams<{ bbs_name: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
-  // Désambiguïsation quand plusieurs comptes partagent le même bbs_name (ex: alts d'un même joueur) :
-  // ?compte=<bbs_id> cible le compte exact, prioritaire sur la résolution par nom.
+  // Disambiguation when several accounts share a bbs_name (e.g. alts of the same player):
+  // ?compte=<bbs_id> targets the exact account and takes precedence over name resolution.
   const accountIdParam = searchParams.get("compte") || undefined;
   const { user: resolvedUser, matchedBbsId, isLoading: resolvingUser } = useUserByBBSName(bbs_name, accountIdParam);
   const userId = resolvedUser?._id;
@@ -57,8 +57,8 @@ const UserPage = () => {
   const { isAdmin, currentUser } = useAuth();
   const { t } = useTranslation();
 
-  // Onglets : clé d'URL → index. Les anciennes clés (tendance, top-rotations, records)
-  // renvoient vers l'onglet qui contient désormais leur section.
+  // Tabs: URL key -> index. Legacy keys (tendance, top-rotations, records) map to the tab that now
+  // holds their section.
   const TAB_NAMES = ["vue-ensemble", "performances", "evolution", "succes", "album"];
   const TAB_MAP: Record<string, number> = {
     "vue-ensemble": 0,
@@ -71,15 +71,13 @@ const UserPage = () => {
     "album": 4,
   };
 
-  // Déterminer l'onglet actif depuis l'URL
   const tabParam = searchParams.get("tab");
   const tabIndex = tabParam && TAB_MAP[tabParam] !== undefined ? TAB_MAP[tabParam] : 0;
 
-  // Handler pour changer d'onglet
   const handleTabChange = (index: number) => {
     const newParams = new URLSearchParams(searchParams);
     if (index === 0) {
-      // Retirer le paramètre tab pour l'onglet par défaut
+      // The default tab has no tab parameter
       newParams.delete("tab");
     } else {
       newParams.set("tab", TAB_NAMES[index]);
@@ -87,14 +85,13 @@ const UserPage = () => {
     setSearchParams(newParams);
   };
 
-  // Utilisation des hooks
   const {
     user: userData,
     isLoading: userLoading,
     error: userError
   } = useUser(userId);
-  // Le compte affiché n'est pas forcément le principal : si l'URL pointe vers le bbs_name d'un
-  // alt, on veut montrer SA guilde/rôle/pseudo, pas ceux du miroir racine (compte principal).
+  // The viewed account is not necessarily the main one: when the URL targets an alt's bbs_name, show
+  // ITS guild/role/name, not the root mirror (main account).
   const viewedAccount = userData?.bbs_accounts?.find(a => a.bbs_id === matchedBbsId);
   const viewedGuildeId = viewedAccount?.guilde_id ?? userData?.guilde_id;
   const { guildName, isLoading: guildLoading } = useGuild(viewedGuildeId);
@@ -104,13 +101,13 @@ const UserPage = () => {
     selectedCycle,
     matchedBbsId
   );
-  // Succès le plus rare du compte consulté, affiché à côté du pseudo
+  // Rarest achievement of the viewed account, shown next to the name
   const { accounts: achievementAccounts } = useUserAchievements(userId);
   const topAchievement = findTopAchievement(achievementAccounts, matchedBbsId);
-  // Stats sans filtre de cycle — uniquement pour l'évolution temporelle globale
+  // Stats without a cycle filter, only for the overall evolution
   const { stats: globalStats } = useUserStats(userId, undefined, matchedBbsId);
 
-  // Résolution du slug cycle depuis l'URL → _id (prioritaire sur le défaut)
+  // Resolve the cycle slug from the URL into its _id (takes precedence over the default)
   useEffect(() => {
     if (!cycles.length) return;
     const slug = searchParams.get("cycle_name");
@@ -120,7 +117,7 @@ const UserPage = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cycles]);
 
-  // Sélectionner le cycle le plus récent par défaut si rien dans l'URL
+  // Default to the most recent cycle when the URL has none
   useEffect(() => {
     if (cycles.length > 0 && !selectedCycle && !searchParams.get("cycle_name")) {
       const sorted = [...cycles].sort((a, b) => {
@@ -136,7 +133,7 @@ const UserPage = () => {
     }
   }, [cycles, selectedCycle, searchParams]);
 
-  // Sync cycle sélectionné dans l'URL (par slug)
+  // Keep the selected cycle in sync in the URL (by slug)
   useEffect(() => {
     const newParams = new URLSearchParams(searchParams);
     const cycleObj = cycles.find(c => c._id === selectedCycle);
@@ -151,8 +148,8 @@ const UserPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCycle]);
 
-  // Enrichir l'utilisateur avec l'avatar et le nom de guilde, en affichant les infos du compte
-  // consulté (bbs_name/guilde/rôle) plutôt que celles du compte principal si c'est un alt.
+  // Enrich the user with the avatar and guild name, showing the viewed account's details
+  // (bbs_name/guild/role) rather than the main account's when it is an alt.
   const user = userData
     ? {
         ...userData,
@@ -171,7 +168,7 @@ const UserPage = () => {
 
 
   const cardBg = "bg.card";
-  // Le propriétaire du compte (connecté via Discord) ou un admin peut remplir l'album
+  // The account owner (logged in through Discord) or an admin can fill the album
   const canEditAlbum = isAdmin || (!!currentUser?._id && currentUser._id === userId);
 
 
@@ -244,7 +241,7 @@ const UserPage = () => {
           }
         />
 
-        {/* Détails du bannissement - visible uniquement par les admins */}
+        {/* Ban details, admins only */}
         {isAdmin && user.is_banned && <BanDetailsCard user={user} />}
 
         {statsLoading ? (
@@ -258,7 +255,6 @@ const UserPage = () => {
           </VStack>
         ) : stats && stats.totalScores > 0 ? (
           <VStack spacing={6}>
-            {/* Statistiques principales */}
             <SimpleGrid
               columns={{ base: 2, lg: 4 }}
               spacing={4}
@@ -294,7 +290,6 @@ const UserPage = () => {
               />
             </SimpleGrid>
 
-            {/* Onglets */}
             <Tabs
               w="full"
               variant="soft-rounded"
@@ -328,7 +323,6 @@ const UserPage = () => {
               </TabList>
 
               <TabPanels>
-                {/* Aperçu */}
                 <TabPanel p={0}>
                   <VStack spacing={6} align="stretch">
                     <UserStatsOverview
@@ -337,12 +331,11 @@ const UserPage = () => {
                       hasGuild={!!user?.guilde_id}
                     />
 
-                    {/* Tendance récente (cycle choisi uniquement) */}
+                    {/* Recent trend (selected cycle only) */}
                     {stats.recentTrend && selectedCycle && (
                       <UserRecentTrend recentTrend={stats.recentTrend} />
                     )}
 
-                    {/* Contribution à la guilde */}
                     {globalStats?.guildContribution && globalStats.guildContribution.byCycle.length > 0 && (
                       <UserGuildContribution
                         historicalContribution={globalStats.guildContribution}
@@ -356,7 +349,6 @@ const UserPage = () => {
                       />
                     )}
 
-                    {/* Rivaux */}
                     {stats.rivals && stats.rivals.length > 0 && user && (
                       <UserRivals
                         rivals={stats.rivals}
@@ -367,21 +359,21 @@ const UserPage = () => {
                       />
                     )}
 
-                    {/* Performance par période du cycle */}
+                    {/* Performance by cycle period */}
                     {globalStats?.performanceByQuartile && globalStats.performanceByQuartile.length >= 2 && (
                       <UserPositionPerformance
                         performanceByQuartile={globalStats.performanceByQuartile}
                       />
                     )}
 
-                    {/* Performance par type d'attaque / altération */}
+                    {/* Performance by attack type / alteration */}
                     {(stats.performanceByAttack || stats.performanceByAlteration) && (
                       <UserTypeAnalysis stats={stats} />
                     )}
                   </VStack>
                 </TabPanel>
 
-                {/* Performances : graphique, top rotations, records par killer */}
+                {/* Performances: chart, top rotations, records per killer */}
                 <TabPanel p={0}>
                   <VStack spacing={6} align="stretch">
                     <UserPerformances stats={stats} />
@@ -390,17 +382,14 @@ const UserPage = () => {
                   </VStack>
                 </TabPanel>
 
-                {/* Évolution sur les cycles */}
                 <TabPanel p={0}>
                   <UserTemporalEvolution temporalEvolution={globalStats?.temporalEvolution ?? []} />
                 </TabPanel>
 
-                {/* Succès du compte */}
                 <TabPanel p={0}>
                   <UserAchievements userId={userId} bbsId={matchedBbsId} />
                 </TabPanel>
 
-                {/* Album de personnages du compte */}
                 <TabPanel p={0}>
                   <UserAlbum bbsId={user.bbs_id ?? undefined} canEdit={canEditAlbum} />
                 </TabPanel>
@@ -427,7 +416,7 @@ const UserPage = () => {
                 </CardBody>
               </Card>
             </Center>
-            {/* Sans scores il n'y a pas d'onglets : l'album reste accessible sous l'encart */}
+            {/* Without scores there are no tabs: the album stays available below the notice */}
             <UserAlbum bbsId={user.bbs_id ?? undefined} canEdit={canEditAlbum} />
           </VStack>
         )}

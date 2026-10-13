@@ -37,8 +37,8 @@ const PodiumPage = () => {
   const toast = useToast();
   const { t } = useTranslation();
   const hasLoadedFromURL = useRef(false);
-  // applyFilters réécrit l'URL avec new URLSearchParams(...) et ne connaît pas "capture" :
-  // on le lit une seule fois au montage pour survivre à ces réécritures.
+  // applyFilters rewrites the URL with new URLSearchParams(...) and does not know about "capture":
+  // read it once on mount so it survives these rewrites.
   const isCaptureRef = useRef(searchParams.get("capture") === "1");
 
   const [podiumData, setPodiumData] = useState<
@@ -93,8 +93,8 @@ const PodiumPage = () => {
     "about": { "@type": "Game", "name": "Bleach Brave Souls" }
   };
 
-  // Applique les filtres : met à jour l'URL et charge le podium en une seule opération.
-  // Les valeurs non fournies dans `overrides` sont lues depuis le state courant.
+  // Applies the filters: updates the URL and loads the podium in a single step.
+  // Values missing from `overrides` are read from the current state.
   const applyFilters = async (overrides: FilterOverrides = {}) => {
     const mode = overrides.mode ?? displayMode;
     const rankingType = overrides.rankingType ?? cycleRankingType;
@@ -153,7 +153,7 @@ const PodiumPage = () => {
     applyFilters({ cycleId, rotationId: "", weekNumber: "" });
   };
 
-  // Chargement initial depuis l'URL
+  // Initial load from the URL
   useEffect(() => {
     if (hasLoadedFromURL.current) return;
 
@@ -165,7 +165,7 @@ const PodiumPage = () => {
     const currentGuildName = searchParams.get("guild_name") || "";
     const currentWeekNumber = searchParams.get("week_number") || "";
 
-    // Résolution slug → _id
+    // Resolve the slug into its _id
     const resolvedCycleId = currentCycleSlug && cycles.length > 0
       ? (cycleFromSlug(cycles, currentCycleSlug)?._id ?? currentCycleSlug)
       : currentCycleSlug;
@@ -203,7 +203,6 @@ const PodiumPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cycles, cyclesLoading]);
 
-  // ── Handlers ──────────────────────────────────────────────────────────────────
 
   const handleModeChange = (mode: DisplayMode) => {
     setDisplayMode(mode);
@@ -285,12 +284,12 @@ const PodiumPage = () => {
     ? Math.floor(selectedCycle.rotations.length / 2)
     : 0;
 
-  // Rendu minimal (sans hero/filtres) utilisé par le bot Discord pour capturer
-  // une image du podium à envoyer automatiquement dans un salon.
+  // Minimal render (no hero or filters) used by the Discord bot to capture a podium image that is
+  // posted automatically in a channel.
   const isCapture = isCaptureRef.current;
   if (isCapture) {
-    // L'id "podium-capture" n'apparaît qu'une fois les données chargées : c'est le
-    // signal attendu par le bot (Playwright) pour ne pas screenshoter le skeleton.
+    // The "podium-capture" id only appears once data is loaded: it is the signal the bot (Playwright)
+    // waits for so it does not screenshot the skeleton.
     return (
       <Box w="1100px">
         {podiumData ? (

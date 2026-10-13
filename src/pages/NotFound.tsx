@@ -16,7 +16,6 @@ const NotFound = () => {
     <Container maxW="container.md" py={{ base: 16, md: 24 }}>
       <VStack spacing={6} textAlign="center">
         <Box position="relative">
-          {/* Halo derrière le 404 */}
           <Box
             position="absolute"
             inset="15%"
