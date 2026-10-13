@@ -202,7 +202,6 @@ export interface IRotationPreparation {
 
 // Repères d'un compte dans la saisie groupée (GET /scores/bulk-context)
 export interface BulkEntryReference {
-  last_score: number | null;
   usual_score: number | null;
   base_raw: number | null;
 }

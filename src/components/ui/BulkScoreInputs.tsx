@@ -41,10 +41,9 @@ export const BulkScoreRow = memo(({
     const status = getRowStatus(value, reference, isDifferential, thresholds);
     const style = status ? STATUS_STYLE[status.level] : null;
 
-    const referenceParts = [
-        isDifferential && reference?.base_raw != null ? `Base ${formatScore(reference.base_raw)}` : null,
-        reference?.last_score != null ? `Dernier ${formatScore(reference.last_score)}` : null,
-    ].filter(Boolean);
+    // Seul repère affiché : la base de la semaine sur une rotation différentielle (l'habitude du
+    // joueur est donnée par le message de l'alerte)
+    const baseRaw = isDifferential ? reference?.base_raw ?? null : null;
 
     const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
         const values = parsePastedColumn(e.clipboardData.getData("text"));
@@ -63,17 +62,11 @@ export const BulkScoreRow = memo(({
 
     const borderColor = status?.level === "error" ? "red.400" : status?.level === "warn" ? "orange.400" : "border.subtle";
 
-    const referenceText = (
-        <Tooltip
-            label={reference?.usual_score != null ? `Habituel sur ce killer : ${formatScore(reference.usual_score)}` : undefined}
-            hasArrow
-            openDelay={300}
-        >
-            <Text fontSize="xs" color="text.muted" fontFamily="mono" noOfLines={1} mt={0.5}>
-                {referenceParts.length > 0 ? referenceParts.join(" · ") : "Pas d'historique sur ce killer"}
-            </Text>
-        </Tooltip>
-    );
+    const referenceText = isDifferential ? (
+        <Text fontSize="xs" color="text.muted" fontFamily="mono" noOfLines={1} mt={0.5}>
+            {baseRaw != null ? `Base ${formatScore(baseRaw)}` : "Base non saisie"}
+        </Text>
+    ) : null;
 
     const input = (
         <Input

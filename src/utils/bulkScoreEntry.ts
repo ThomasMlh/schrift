@@ -47,12 +47,11 @@ export const getRowStatus = (
     }
 
     const usual = reference?.usual_score;
-    if (usual && thresholds) {
-        const ratio = points / usual;
-        if (ratio > thresholds.above || ratio < thresholds.below) {
-            return { level: "warn", message: `${ratioLabel(ratio)} par rapport à son habitude (${formatScore(usual)})` };
-        }
+    if (!usual || !thresholds) return { level: "ok", message: "Pas d'historique sur ce killer pour comparer" };
+    const ratio = points / usual;
+    if (ratio > thresholds.above || ratio < thresholds.below) {
+        return { level: "warn", message: `${ratioLabel(ratio)} par rapport à son habitude (${formatScore(usual)})` };
     }
-    return { level: "ok", message: "Cohérent avec ses scores habituels" };
+    return { level: "ok", message: `Cohérent avec son habitude (${formatScore(usual)})` };
 };
 
