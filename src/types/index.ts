@@ -1,4 +1,4 @@
-// Types partagés du front, découpés par thème.
+// Shared front-end types, split by domain.
 export type * from "./common";
 export type * from "./guild";
 export type * from "./discord";

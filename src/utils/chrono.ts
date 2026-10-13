@@ -1,6 +1,6 @@
-// Chronos des vagues d'un build : stockés en secondes au millième près (56.598).
+// Build wave times, stored in seconds with millisecond precision (56.598).
 
-/** "56.598 s" sous une minute, "1:02.345" au-delà. */
+/** "56.598 s" under a minute, "1:02.345" above. */
 export const formatChrono = (seconds?: number | null): string => {
   if (seconds == null || !Number.isFinite(seconds)) return "—";
   if (seconds < 60) return `${seconds.toFixed(3)} s`;
@@ -10,8 +10,8 @@ export const formatChrono = (seconds?: number | null): string => {
 };
 
 /**
- * Lit une saisie de chrono : "56.598", "56,598" ou "1:02.345". Renvoie les secondes, null si le
- * champ est vide, ou NaN si la saisie est invalide.
+ * Parses a time input: "56.598", "56,598" or "1:02.345". Returns seconds, null when the field is
+ * empty, or NaN when the input is invalid.
  */
 export const parseChrono = (input: string): number | null => {
   const value = input.trim().replace(",", ".");
@@ -24,6 +24,6 @@ export const parseChrono = (input: string): number | null => {
   return Math.round((minutes * 60 + seconds) * 1000) / 1000;
 };
 
-/** Valeur initiale du champ de saisie à partir des secondes stockées. */
+/** Initial input value from the stored seconds. */
 export const chronoInputValue = (seconds?: number | null): string =>
   seconds == null ? "" : seconds < 60 ? String(seconds) : formatChrono(seconds);

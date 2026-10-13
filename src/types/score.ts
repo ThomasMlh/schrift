@@ -1,4 +1,4 @@
-// Scores, baisses de régime et contrôle des scores
+// Scores, declines and score control
 import type { IPagination } from "./common";
 import type { ICycle, IRotationTemplate } from "./cycle";
 import type { IUser } from "./user";
@@ -55,8 +55,7 @@ export interface IScoreDetailApiResponse {
   };
 }
 
-// Baisses de régime (espace chefs/admins) : derniers scores comparés à l'habitude du joueur
-// sur les mêmes killers
+// Declines (leader/admin area): latest scores compared with the player's usual level on the same killers
 export interface IDeclineSample {
   cycle_id: string;
   cycle_name: string | null;
@@ -83,7 +82,7 @@ export interface IDeclineAlert {
   samples: IDeclineSample[];
 }
 
-// Contrôle des scores (espace chefs/admins) : scores à vérifier et historique des modifications
+// Score control (leader/admin area): scores to review and change history
 export type ScoreAnomalyType = "above_killer_record" | "far_above_usual" | "far_below_usual" | "missing_base" | "same_value";
 
 export interface IScoreAnomaly {
@@ -143,7 +142,7 @@ export interface IScoreHistoryEntry {
   created_at: string;
 }
 
-// Scores manquants d'un cycle pour les membres actuels d'une guilde (espace chefs)
+// Missing scores of a cycle for a guild's current members (leader area)
 export interface IMissingScoreMember {
   user_id: string;
   bbs_id: string;
@@ -170,7 +169,7 @@ export interface IMissingScoresResponse {
   rotations: IMissingScoreRotation[];
 }
 
-// Fiche de préparation d'une rotation : historique de chaque membre sur le killer
+// Rotation preparation sheet: each member's history on the killer
 export interface IPreparationMember {
   user_id: string;
   bbs_id: string;
@@ -200,13 +199,13 @@ export interface IRotationPreparation {
 }
 
 
-// Repères d'un compte dans la saisie groupée (GET /scores/bulk-context)
+// Bulk entry references of an account (GET /scores/bulk-context)
 export interface BulkEntryReference {
   usual_score: number | null;
   base_raw: number | null;
 }
 
-// Seuils d'alerte de la saisie groupée (identiques à l'outil « scores à vérifier »)
+// Bulk entry alert thresholds (same as the score review tool)
 export interface BulkEntryThresholds {
   above: number;
   below: number;

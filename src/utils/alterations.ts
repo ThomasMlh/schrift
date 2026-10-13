@@ -1,4 +1,4 @@
-// Mapping des altérations avec leurs images
+// Alteration name -> image
 const alterationImages = {
   "ralentissement": "https://i.ibb.co/7CKHhnD/ralentissement.png",
   "poison": "https://i.ibb.co/4pwFWtd/poison.png",
@@ -12,9 +12,7 @@ const alterationImages = {
 };
 
 /**
- * Récupère l'URL de l'image d'une altération
- * @param alteration - Le nom de l'altération
- * @returns L'URL de l'image ou null si non trouvée
+ * Image URL of an alteration, or null when unknown
  */
 export const getAlterationImage = (alteration: string): string | null => {
   const normalizedAlteration = alteration.toLowerCase().trim();
@@ -22,8 +20,7 @@ export const getAlterationImage = (alteration: string): string | null => {
 };
 
 /**
- * Récupère toutes les altérations disponibles avec leurs images
- * @returns Objet avec toutes les altérations et leurs URLs d'images
+ * Every alteration with its image URL
  */
 export const getAllAlterations = () => {
   return alterationImages;

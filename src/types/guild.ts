@@ -1,16 +1,16 @@
-// Guildes
+// Guilds
 import type { NotificationType } from "./common";
 
 export interface IGuild {
   _id: string;
   name: string;
   disabled?: boolean;
-  discord_channel_id?: string; // salon "chef" (accès restreint)
-  discord_general_channel_id?: string; // salon général, tous les membres
+  discord_channel_id?: string; // Leaders' channel (restricted access)
+  discord_general_channel_id?: string; // General channel, all members
   disabled_notification_types?: NotificationType[];
 }
 
-// Objectifs d'une guilde sur un cycle
+// Guild goals on a cycle
 export type GuildGoalType = "average" | "clear_rate" | "records" | "participation";
 
 export interface IGuildGoal {

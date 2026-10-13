@@ -1,9 +1,8 @@
-// Builds, accessoires et guides
+// Builds, accessories and guides
 import type { ISkill } from "./character";
 import type { IPagination } from "./common";
 import type { IUser } from "./user";
 
-// Interfaces pour les accessories
 export interface IAccessory {
   _id: string;
   name: string;
@@ -22,7 +21,6 @@ export interface IBuildAccessory {
   subeffect?: IAccessorySubeffect;
 }
 
-// Interfaces pour les builds/teams
 export interface IBuildLink {
   id_character: string;
   character?: {
@@ -38,9 +36,9 @@ export interface IBuildLink {
 
 export interface IBuildTeamMember {
   id_character: string;
-  position: number; // 1, 2 ou 3
+  position: number; // 1, 2 or 3
   links?: IBuildLink[];
-  skills?: string[] | ISkill[]; // Array d'IDs ou d'objets enrichis
+  skills?: string[] | ISkill[]; // Ids or populated objects
   accessories?: IBuildAccessory[];
   character?: {
     _id: string;
@@ -69,10 +67,10 @@ export interface IBuild {
   user_id?: string;
   user?: IUser;
   team: IBuildTeamMember[];
-  score?: number | null; // score obtenu sur la rotation avec ce build
-  time_normal_wave?: number | null; // chrono de la vague normale, en secondes (56.598)
-  time_extra_wave?: number | null; // chrono de la vague extra, en secondes
-  screenshot?: string | null; // nom du fichier dans bucket/builds/
+  score?: number | null; // Score obtained on the rotation with this build
+  time_normal_wave?: number | null; // Normal wave time, in seconds (56.598)
+  time_extra_wave?: number | null; // Extra wave time, in seconds
+  screenshot?: string | null; // File name in bucket/builds/
   validated_at?: string;
   validated_by?: string;
   created_at?: string;

@@ -1,4 +1,4 @@
-// Salons, membres et emojis Discord (messagerie depuis le site)
+// Discord channels, members and emojis (messaging from the site)
 
 export interface IDiscordChannelMember {
   id: string;
@@ -11,7 +11,7 @@ export interface IDiscordChannel {
   name: string;
   guild_id: string;
   guild_name: string;
-  category: string | null; // nom de la catégorie Discord ; null si le salon n'en a pas
+  category: string | null; // Discord category name; null when the channel has none
   members: IDiscordChannelMember[];
 }
 
@@ -20,5 +20,5 @@ export interface IDiscordEmoji {
   name: string;
   animated: boolean;
   url: string;
-  guild_id: string; // serveur Discord auquel appartient l'emoji
+  guild_id: string; // Discord server the emoji belongs to
 }

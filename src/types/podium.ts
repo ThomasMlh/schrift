@@ -1,4 +1,4 @@
-// Podiums (cycle, rotation, semaine, miss)
+// Podiums (cycle, rotation, week, misses)
 import type { IPagination } from "./common";
 import type { ITopAchievement } from "./records";
 
@@ -11,26 +11,26 @@ export interface IRankInfo {
 
 export interface IPodiumPlayer {
   rank: number;
-  top_achievement?: ITopAchievement | null; // succès le plus rare du compte
+  top_achievement?: ITopAchievement | null; // Rarest achievement of the account
   user_id: string;
   bbs_id?: string;
   bbs_name?: string;
   discord_id?: string;
   global_name: string;
-  score?: number; // Score individuel (si rotation spécifiée)
+  score?: number; // Single score (when a rotation is specified)
   raw_score?: number;
   is_differential?: boolean;
-  averageScore?: number; // Moyenne des scores (si mode cycle en moyenne)
-  totalScore?: number; // Somme des scores (si mode cycle en max)
-  previousAverageScore?: number; // Moyenne au cycle précédent (classement progression)
-  progression?: number; // Écart de moyenne avec le cycle précédent (classement progression)
-  progressionPercent?: number; // Écart en % (classement progression)
-  totalScores: number; // Nombre de scores pris en compte pour la moyenne
+  averageScore?: number; // Average score (cycle mode, average ranking)
+  totalScore?: number; // Sum of scores (cycle mode, total ranking)
+  previousAverageScore?: number; // Average on the previous cycle (progression ranking)
+  progression?: number; // Average change versus the previous cycle (progression ranking)
+  progressionPercent?: number; // Change in % (progression ranking)
+  totalScores: number; // Number of scores included in the average
   totalRawScore?: number;
   avatar?: string;
   hasUser: boolean;
   username: string;
-  guild_name?: string; // Nom de la guilde du joueur
+  guild_name?: string; // Player's guild name
 }
 
 export interface IPodiumData {
@@ -53,8 +53,8 @@ export type PodiumType = "individual_scores" | "average_scores" | "max_scores" |
 
 export interface IPodiumResponse {
   success: boolean;
-  podium?: IPodiumPlayer[]; // Nouvelle API retourne podium
-  data?: IPodiumPlayer[]; // Ancienne API retournait data
+  podium?: IPodiumPlayer[]; // Current API field
+  data?: IPodiumPlayer[]; // Legacy API field
   pagination: IPagination;
   filters: {
     cycle_name: string;
@@ -83,7 +83,7 @@ export interface IPodiumResponse {
   };
 }
 
-// Interfaces pour le podium weekly
+// Weekly podium
 export interface IPodiumWeeklyPlayer {
   rank: number;
   top_achievement?: ITopAchievement | null;
@@ -125,7 +125,7 @@ export interface IPodiumWeeklyResponse {
   };
 }
 
-// Interfaces pour le podium misses
+// Misses podium
 export interface IPodiumMissPlayer {
   rank: number;
   user_id: string;

@@ -1,9 +1,9 @@
-// Redirige vers l'autorisation Discord ; la page actuelle est rouverte après la connexion
+// Redirects to the Discord authorization; the current page is reopened after login
 export const startDiscordLogin = () => {
   const discordClientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
   const redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI || `${window.location.origin}/discord-callback`;
 
-  // State anti-CSRF vérifié au retour sur /discord-callback
+  // Anti-CSRF state, checked on /discord-callback
   const state = crypto.randomUUID();
   sessionStorage.setItem("oauth_state", state);
 

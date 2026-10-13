@@ -1,9 +1,9 @@
 import type { ITopAchievement } from "./records";
-// Utilisateurs et comptes de jeu (bbs)
+// Users and game (bbs) accounts
 import type { IPagination, Role } from "./common";
 
-// Un compte bbs (principal ou alt) rattaché à un user. guilde_id/role sont propres à CE compte —
-// un même user peut avoir un compte chef d'une guilde et un autre simple membre d'une autre.
+// A bbs account (main or alt) attached to a user. guilde_id/role belong to THIS account: one user can
+// lead a guild with one account and be a regular member of another guild with a second one.
 export interface IBbsAccount {
   bbs_id: string;
   bbs_name?: string | null;
@@ -13,8 +13,8 @@ export interface IBbsAccount {
   linked_at?: string;
 }
 
-// Un grant chef/sous-chef embarqué dans le JWT, un par compte ayant un rôle élevé — permet de
-// scoper la saisie de scores à la/les guilde(s) réellement gérée(s) via CE compte.
+// A leader/officer grant embedded in the JWT, one per account with an elevated role, so score entry
+// is scoped to the guild(s) actually managed through THAT account.
 export interface IGuildRoleGrant {
   bbs_id: string;
   guilde_id: string;
@@ -41,7 +41,7 @@ export interface IUser {
   is_banned?: boolean;
   ban_reason?: string;
   banned_at?: string;
-  top_achievement?: ITopAchievement | null; // succès le plus rare (liste publique des comptes)
+  top_achievement?: ITopAchievement | null; // Rarest achievement (public account list)
 }
 
 export interface IUsersResponse {
