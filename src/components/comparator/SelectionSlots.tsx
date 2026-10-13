@@ -16,14 +16,14 @@ interface SelectionSlotsProps {
   onRemove: (id: string) => void;
   removeLabel: string;
   addLabel: string;
-  // Champ de recherche / sélection pour ajouter un élément
+  // Search/select field used to add an item
   children: ReactNode;
-  // Id du conteneur du champ d'ajout : un emplacement vide met le focus dessus
+  // Id of the add field container: an empty slot focuses it
   addFieldId: string;
 }
 
-// Emplacements de sélection du comparateur : un emplacement par élément choisi, dans la couleur
-// qu'il aura sur les graphiques, et des emplacements vides qui renvoient au champ d'ajout.
+// Comparator selection slots: one slot per selected item, in the color it has on the charts,
+// and empty slots that focus the add field.
 export const SelectionSlots = ({
   title, items, max, onRemove, removeLabel, addLabel, children, addFieldId,
 }: SelectionSlotsProps) => {

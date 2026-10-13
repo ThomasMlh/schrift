@@ -4,17 +4,15 @@ import { formatWithCommas } from "@/utils/format";
 interface ScoreBadgeProps {
     score: number;
     fontSize?: string | { base?: string; md?: string };
-    forceBlue?: boolean; // Nouvelle prop pour forcer la couleur bleue
-    commas?: boolean; // Séparateur de milliers en virgules (612,480,300) au lieu du format du navigateur
+    forceBlue?: boolean; // Forces the blue color
+    commas?: boolean; // Comma thousands separator (612,480,300) instead of the browser locale format
 }
 
 export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" }, forceBlue = false, commas = false }: ScoreBadgeProps) => {
-    // Vérification de sécurité
     if (score === undefined || score === null || score === 0) {
         return <Badge colorScheme="gray" fontSize={fontSize}>Miss</Badge>;
     }
 
-    // Si forceBlue est activé, retourner directement un badge bleu
     if (forceBlue) {
         return (
             <Badge
@@ -30,7 +28,7 @@ export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" }, for
 
     const getScoreStyle = (value: number) => {
         if (value >= 621000000) {
-            // Arc-en-ciel (buff QG)
+            // Rainbow (HQ buff)
             return {
                 textGradient: "linear-gradient(90deg, #ff6b6b, #ffa07a, #ffd966, #90ee90, #87ceeb, #9370db)",
                 bgSize: "300% 300%",
@@ -39,56 +37,56 @@ export const ScoreBadge = ({ score, fontSize = { base: "sm", md: "medium" }, for
                 isRainbow: true
             };
         } else if (value >= 580000000) {
-            // Bleu (Clear Vague Extra 5 et 6)
+            // Blue (Extra Wave 5 and 6 clear)
             return {
                 colorScheme: "blue",
                 variant: "solid",
                 isRainbow: false
             };
         } else if (value >= 540000000) {
-            // Violet (Clear Vague Extra 3 et 4)
+            // Purple (Extra Wave 3 and 4 clear)
             return {
                 colorScheme: "purple",
                 variant: "solid",
                 isRainbow: false
             };
         } else if (value >= 430000000) {
-            // Vert (Clear Vague Extra 1 et 2)
+            // Green (Extra Wave 1 and 2 clear)
             return {
                 colorScheme: "green",
                 variant: "solid",
                 isRainbow: false
             };
         } else if (value >= 350000000) {
-            // Teal (Clear Cauchemar)
+            // Teal (Nightmare clear)
             return {
                 colorScheme: "teal",
                 variant: "solid",
                 isRainbow: false
             };
         } else if (value >= 210000000) {
-            // Jaune (Clear Très Difficile)
+            // Yellow (Very Hard clear)
             return {
                 colorScheme: "yellow",
                 variant: "solid",
                 isRainbow: false
             };
         } else if (value >= 100000000) {
-            // Orange (Clear Difficile)
+            // Orange (Hard clear)
             return {
                 colorScheme: "orange",
                 variant: "solid",
                 isRainbow: false
             };
         } else if (value >= 22500000) {
-            // Rouge (Clear Normal)
+            // Red (Normal clear)
             return {
                 colorScheme: "red",
                 variant: "solid",
                 isRainbow: false
             };
         } else {
-            // Marron (Non clear normal)
+            // Brown (Normal not cleared)
             return {
                 bg: "#8B4513",
                 color: "white",

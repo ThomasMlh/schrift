@@ -27,7 +27,7 @@ interface DraftProposalPlayer {
   averageScore: number;
   totalScore: number;
   totalScores: number;
-  overallRank: number | null; // null pour les membres d'une guilde figée
+  overallRank: number | null; // null for members of a locked guild
   currentGuildName: string | null;
   isPinned?: boolean;
 }
@@ -35,11 +35,11 @@ interface DraftProposalPlayer {
 interface DraftProposalGuild {
   guild_name: string;
   players: DraftProposalPlayer[];
-  // Guilde figée : membres actuels inchangés, hors répartition
+  // Locked guild: current members kept, excluded from the draft
   locked?: boolean;
   member_count?: number;
-  // Moyenne du score de classement des joueurs de la guilde avant / après la draft
-  // (absentes des entrées d'historique antérieures à leur ajout)
+  // Average ranking score of the guild's players before / after the draft
+  // (missing from history entries created before this was added)
   average_before?: number | null;
   average_after?: number | null;
 }
@@ -74,8 +74,7 @@ const DEFAULT_GUILD_ORDER = ["A", "C", "B", "E", "D"];
 const formatAverage = (value: number | null | undefined) =>
   value == null ? "—" : value.toLocaleString("fr-FR");
 
-// Moyenne de la guilde avant → après la draft, avec l'écart en %, pour voir si la draft change
-// vraiment quelque chose
+// Guild average before -> after the draft, with the change in %
 const GuildAverageRow = ({ guild, mutedText }: { guild: DraftProposalGuild; mutedText: string }) => {
   const { average_before: before, average_after: after } = guild;
   if (before === undefined && after === undefined) return null;
@@ -105,10 +104,9 @@ const GuildAverageRow = ({ guild, mutedText }: { guild: DraftProposalGuild; mute
   );
 };
 
-// Outil admin en lecture seule : simule une répartition des 5 guildes sur un cycle donné, en
-// classant tous leurs membres actuels par score et en les répartissant par paquets de 20 dans
-// l'ordre de guildes choisi. Ne modifie rien — juste une proposition à appliquer à la main via
-// l'onglet Draft si elle est validée.
+// Read-only admin tool: simulates a split of the guilds on a given cycle by ranking all their
+// current members by score and filling guilds by chunks of 20 in the chosen order. Nothing is
+// changed; the proposal is applied manually from the Draft tab.
 const DraftProposalSection = () => {
   const { token, isAdmin } = useAuth();
   const toast = useToast();
@@ -140,9 +138,9 @@ const DraftProposalSection = () => {
   const [selectedCycleId, setSelectedCycleId] = useState("");
   const [rankingType, setRankingType] = useState<RankingType>("average");
   const [guildOrder, setGuildOrder] = useState<string[]>(DEFAULT_GUILD_ORDER);
-  // Répartition complète (paquets de 20) ou remplacement ciblé de quelques joueurs d'une guilde
+  // Full split (chunks of 20) or targeted replacement of a few players of one guild
   const [mode, setMode] = useState<"full" | "replacement">("full");
-  // Guildes figées : elles gardent leurs membres actuels et sont sautées dans la répartition
+  // Locked guilds keep their current members and are skipped by the split
   const [lockedGuilds, setLockedGuilds] = useState<Set<string>>(new Set());
   const [result, setResult] = useState<DraftProposalResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -152,8 +150,8 @@ const DraftProposalSection = () => {
   const [loadingHistoryId, setLoadingHistoryId] = useState<string | null>(null);
   const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
 
-  // "Et si" : bbs_id -> nom affiché, pour retrouver qui exclure/épingler même une fois que sa
-  // ligne a disparu du tableau après une régénération.
+  // What-if lists: bbs_id -> display name, so excluded/pinned players can still be shown after
+  // their row disappears on regeneration.
   const [excluded, setExcluded] = useState<Map<string, string>>(new Map());
   const [pinned, setPinned] = useState<Map<string, string>>(new Map());
 
@@ -185,7 +183,7 @@ const DraftProposalSection = () => {
       const data = await response.json();
       if (response.ok && data.success) setHistory(data.entries);
     } catch {
-      // silencieux : l'historique est un bonus, pas une fonctionnalité critique
+      // Ignored: the history is a convenience, not a critical feature
     }
   }, [authHeaders]);
 
@@ -244,8 +242,7 @@ const DraftProposalSection = () => {
   const selectedCycle = cycles.find((c) => c._id === selectedCycleId);
   const guildOptions = guilds.map((g) => ({ value: g.name, label: g.name }));
 
-  // Même code couleur par guilde que l'onglet Draft juste en dessous (indexé dans le même
-  // ordre, celui de useGuilds), plutôt qu'une palette propre à ce tableau.
+  // Same guild colors as the Draft tab below (same order, from useGuilds)
   const guildColorMap = useMemo(() => {
     const map: Record<string, string> = {};
     guilds.forEach((g, i) => { map[g.name] = getGuildColor(i); });
@@ -615,8 +612,8 @@ const DraftProposalSection = () => {
                             spacing={2}
                             px={3}
                             py={1.5}
-                            // Hauteur des boutons 📌/✕ (xs = 24px) + padding : les lignes des
-                            // guildes figées, sans boutons, restent alignées avec les autres colonnes
+                            // Height of the pin/exclude buttons (xs = 24px) plus padding, so locked guild rows,
+                            // which have no buttons, stay aligned with the other columns
                             minH="36px"
                             bg={isMatch(p) ? matchBg : (i % 2 === 1 ? rowAltBg : undefined)}
                             opacity={normalizedSearch && !isMatch(p) ? 0.4 : 1}

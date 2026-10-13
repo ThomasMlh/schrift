@@ -42,8 +42,8 @@ interface ScoresFiltersProps {
 
 const rotationLabel = (r: ICycleRotation) => `#${r.position} · ${r.killer}`;
 
-// Filtres de l'onglet Scores : guildes en pastilles, puis joueur, cycle et rotation,
-// et les filtres actifs en tags qu'on retire d'un clic.
+// Scores tab filters: guild chips, then player, cycle and rotation, with active filters shown as
+// removable tags.
 export const ScoresFilters = ({
     scoreSearchQuery,
     filterCycleId,
@@ -67,7 +67,6 @@ export const ScoresFilters = ({
 
     return (
         <Box bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={{ base: 3, md: 4 }}>
-            {/* Guildes + nombre de résultats */}
             <Flex justify="space-between" align="center" gap={3} wrap="wrap">
                 {guilds.length > 1 ? (
                     <HStack spacing={2} flexWrap="wrap" role="group" aria-label="Filtrer par guilde">
@@ -144,7 +143,6 @@ export const ScoresFilters = ({
                 />
             </SimpleGrid>
 
-            {/* Filtres actifs */}
             {activeFiltersCount > 0 && (
                 <Flex mt={3} gap={2} align="center" wrap="wrap">
                     <Wrap spacing={2} flex={1}>

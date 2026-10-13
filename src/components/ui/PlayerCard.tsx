@@ -46,7 +46,6 @@ const PlayerCard = ({
       _hover={{ borderColor: hoverBorderColor, transform: "translateX(2px)" }}
     >
       <HStack spacing={3} justify="space-between">
-        {/* Rang */}
         <Text
           fontWeight="bold"
           fontSize="sm"
@@ -58,7 +57,6 @@ const PlayerCard = ({
           #{player.rank}
         </Text>
 
-        {/* Avatar */}
         <Avatar
           size="sm"
           src={avatarUrl}
@@ -66,7 +64,6 @@ const PlayerCard = ({
           flexShrink={0}
         />
 
-        {/* Nom + Guilde */}
         <VStack spacing={0} align="start" flex={1} overflow="hidden" minW={0}>
           <HStack spacing={1.5} maxW="100%" minW={0}>
             <CustomLink
@@ -86,7 +83,6 @@ const PlayerCard = ({
           )}
         </VStack>
 
-        {/* Score */}
         <Box flexShrink={0}>
           {podiumType === "progression" && player.progressionPercent != null ? (
             <ProgressionBadge

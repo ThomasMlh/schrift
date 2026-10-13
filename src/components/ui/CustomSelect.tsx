@@ -12,8 +12,8 @@ import { useDragToScroll } from "@/hooks/useDragToScroll";
 interface SelectOption {
     value: string;
     label: string;
-    content?: ReactNode; // Pour afficher du contenu personnalisé
-    group?: string; // Groupe optionnel pour regroupement
+    content?: ReactNode; // Custom option content
+    group?: string; // Optional group name
 }
 
 interface CustomSelectProps {
@@ -71,7 +71,7 @@ export const CustomSelect = ({
 
     const { onMouseDown: handleDragStart, consumedDrag } = useDragToScroll(dropdownRef);
 
-    // Gérer le clic en dehors du composant
+    // Close on outside click
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as Node;
@@ -92,7 +92,7 @@ export const CustomSelect = ({
         };
     }, [isOpen]);
 
-    // Calculer la position du dropdown par rapport au trigger
+    // Menu position relative to the trigger
     const updateMenuPosition = useCallback(() => {
         if (triggerRef.current) {
             const rect = triggerRef.current.getBoundingClientRect();
@@ -101,7 +101,7 @@ export const CustomSelect = ({
             const desiredMaxH = 250;
             const margin = 8;
 
-            // Ouvrir vers le haut s'il n'y a pas assez de place en bas mais plus de place en haut
+            // Open upwards when there is not enough room below but more room above
             const openUp = spaceBelow < desiredMaxH && spaceAbove > spaceBelow;
             const availableSpace = openUp ? spaceAbove - margin : spaceBelow - margin;
             const maxH = Math.min(desiredMaxH, Math.max(100, availableSpace));
@@ -138,14 +138,14 @@ export const CustomSelect = ({
         };
     }, [isOpen, updateMenuPosition]);
 
-    // Focus sur l'input de recherche quand le menu s'ouvre
+    // Focus the search input when the menu opens
     useEffect(() => {
         if (isOpen && enableSearch && searchInputRef.current) {
             searchInputRef.current.focus();
         }
     }, [isOpen, enableSearch]);
 
-    // Réinitialiser la recherche et le highlight quand on ferme le menu
+    // Reset the search and highlight when the menu closes
     useEffect(() => {
         if (!isOpen) {
             setSearchTerm("");
@@ -170,14 +170,13 @@ export const CustomSelect = ({
         }
     };
 
-    // Construire la liste plate de toutes les options (pour la navigation clavier)
+    // Flat list of every option, for keyboard navigation
     const getAllOptions = useCallback(() => {
         const all: SelectOption[] = [];
-        // Options de déselection en premier si allowDeselect
+        // Deselect option first when allowDeselect
         if (allowDeselect) {
             all.push({ value: '', label: t('common.noSelection') });
         }
-        // Options non groupées
         const ug: SelectOption[] = [];
         const go: { [key: string]: SelectOption[] } = {};
         const filtered = enableSearch && !onSearchChange
@@ -203,7 +202,6 @@ export const CustomSelect = ({
         return all;
     }, [options, allowDeselect, enableSearch, onSearchChange, searchTerm, t]);
 
-    // Scroll l'option highlighted dans la vue
     const scrollHighlightedIntoView = useCallback((index: number) => {
         if (!dropdownRef.current) return;
         const items = dropdownRef.current.querySelectorAll('[data-option-index]');
@@ -213,7 +211,7 @@ export const CustomSelect = ({
         }
     }, []);
 
-    // Gestion clavier pour l'accessibilité
+    // Keyboard handling for accessibility
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (isDisabled) return;
         const allOptions = getAllOptions();
@@ -221,12 +219,11 @@ export const CustomSelect = ({
             case 'Enter':
                 e.preventDefault();
                 if (isOpen && highlightedIndex >= 0 && highlightedIndex < allOptions.length) {
-                    // Confirmer la sélection
                     handleSelect(allOptions[highlightedIndex].value);
                 } else {
                     setIsOpen(!isOpen);
                     if (!isOpen) {
-                        // Positionner le highlight sur la valeur actuelle
+                        // Highlight the current value
                         const idx = allOptions.findIndex(o => o.value === value);
                         setHighlightedIndex(idx >= 0 ? idx : 0);
                     }
@@ -273,7 +270,7 @@ export const CustomSelect = ({
         }
     };
 
-    // Filtrer les options localement si pas de callback API
+    // Filter locally when there is no API search callback
     const filteredOptions = enableSearch && !onSearchChange
         ? options.filter(option => 
             option.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -292,7 +289,6 @@ export const CustomSelect = ({
     const backgroundOption = theme.scrollbarThumb;
     const backgroundOptionHover = theme.scrollbarThumbHover;
 
-    // Tailles selon le size prop
     const sizeProps = {
         sm: { px: 2, py: 2, minH: "32px", fontSize: "sm" },
         md: { px: 3, py: 2.5, minH: "40px", fontSize: "md" },
@@ -301,7 +297,6 @@ export const CustomSelect = ({
 
     const currentSizeProps = sizeProps[size];
 
-    // Grouper les options par groupe si défini
     const groupedOptions: { [key: string]: SelectOption[] } = {};
     const ungroupedOptions: SelectOption[] = [];
 
@@ -320,7 +315,6 @@ export const CustomSelect = ({
         <Box position="relative" ref={menuRef} maxW={maxW} minW={minW} w={w} flex={flex}>
             <Box ref={triggerRef}>
             {selectedOption ? (
-                // Affichage quand une option est sélectionnée
                 <Flex
                     w="100%"
                     px={currentSizeProps.px}
@@ -363,7 +357,6 @@ export const CustomSelect = ({
                     />
                 </Flex>
             ) : (
-                // Bouton par défaut quand aucune option n'est sélectionnée
                 <Button
                     w="100%"
                     justifyContent="space-between"
@@ -429,7 +422,6 @@ export const CustomSelect = ({
                         },
                     }}
                 >
-                    {/* Champ de recherche */}
                     {enableSearch && (
                         <Box 
                             p={2} 
@@ -457,7 +449,6 @@ export const CustomSelect = ({
                         </Text>
                     ) : (
                         <>
-                            {/* Option de déselection */}
                             {allowDeselect && (
                                 <Flex
                                     key="deselect-option"
@@ -480,7 +471,6 @@ export const CustomSelect = ({
                                 </Flex>
                             )}
                             
-                            {/* Options non groupées */}
                             {ungroupedOptions.length > 0 && ungroupedOptions.map((option, idx) => {
                                 const flatIndex = (allowDeselect ? 1 : 0) + idx;
                                 return (
@@ -511,7 +501,6 @@ export const CustomSelect = ({
                                 );
                             })}
 
-                            {/* Options groupées */}
                             {(() => {
                                 let runningIndex = (allowDeselect ? 1 : 0) + ungroupedOptions.length;
                                 return Object.entries(groupedOptions)
@@ -581,7 +570,6 @@ export const CustomSelect = ({
                                     });
                             })()}
 
-                            {/* Message si aucune option */}
                             {ungroupedOptions.length === 0 && Object.keys(groupedOptions).length === 0 && (
                                 <Text px={currentSizeProps.px} py={3} color={placeholderColor} textAlign="center" fontSize={currentSizeProps.fontSize}>
                                     {searchTerm ? t("components.customSelect.noResults") : t("components.customSelect.noOptions")}

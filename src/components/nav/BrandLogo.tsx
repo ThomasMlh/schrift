@@ -7,7 +7,7 @@ interface BrandLogoProps {
   onClick?: () => void;
 }
 
-// Icône du site suivie du nom en dégradé violet
+// Site icon followed by the name in a purple gradient
 export const BrandLogo = ({ label = "Schrift", linked = true, onClick }: BrandLogoProps) => (
   <HStack
     as={linked ? Link : "div"}

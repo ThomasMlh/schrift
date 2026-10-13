@@ -36,15 +36,13 @@ export const PodiumSection: React.FC = () => {
     authenticated: true,
   });
 
-  // Hooks UI
   const bgColor = "bg.card";
   const borderColor = "border.default";
   const shadowColor = useColorModeValue("lg", "dark-lg");
 
-  // Sélectionner le cycle le plus récent par défaut quand les cycles sont chargés
+  // Default to the most recent cycle once cycles are loaded
   useEffect(() => {
     if (!cyclesLoading && cycles.length > 0 && !selectedCycleId) {
-      // Trier par date de création décroissante pour avoir le plus récent en premier
       const sortedCycles = [...cycles].sort((a: ICycle, b: ICycle) => {
         if (a.created_at && b.created_at) {
           return (
@@ -114,7 +112,6 @@ export const PodiumSection: React.FC = () => {
       mx="auto"
     >
       <VStack spacing={6} align="stretch">
-        {/* En-tête */}
         <VStack spacing={4} textAlign="center">
           <Heading size="lg">{t("components.podiumSection.heading")}</Heading>
           <Text color="gray.600" fontSize="sm">
@@ -122,9 +119,7 @@ export const PodiumSection: React.FC = () => {
           </Text>
         </VStack>
 
-        {/* Filtres */}
         <Stack direction={{ base: "column", md: "row" }} spacing={3} align="stretch">
-          {/* Sélection du cycle */}
           <Box flex={1}>
             <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
               {t("components.podiumSection.cycleLabel")}
@@ -139,7 +134,6 @@ export const PodiumSection: React.FC = () => {
             />
           </Box>
 
-          {/* Sélection de la guilde */}
           <Box flex={1}>
             <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
               {t("components.podiumSection.guildLabel")}
@@ -161,7 +155,6 @@ export const PodiumSection: React.FC = () => {
           </Box>
         </Stack>
 
-        {/* Informations du filtre actuel */}
         {selectedCycle && (
           <Alert status="info" borderRadius="md">
             <AlertIcon />
@@ -177,7 +170,6 @@ export const PodiumSection: React.FC = () => {
           </Alert>
         )}
 
-        {/* Contenu du podium */}
         {!selectedCycleId ? (
           <Alert status="info" borderRadius="md">
             <AlertIcon />
@@ -192,7 +184,7 @@ export const PodiumSection: React.FC = () => {
           <PageLoader label={t("components.podiumSection.loading")} height="200px" />
         ) : podium && podium.length > 0 ? (
           <>
-            {/* Affichage mobile : toujours en colonne unique */}
+            {/* Mobile: always a single column */}
             <Box display={{ base: "block", lg: "none" }}>
               <VStack spacing={3} align="stretch">
                 {podium.map((player) =>
@@ -201,11 +193,10 @@ export const PodiumSection: React.FC = () => {
               </VStack>
             </Box>
 
-            {/* Affichage desktop */}
             <Box display={{ base: "none", lg: "block" }}>
               {podium.length === 10 &&
               selectedGuildId === "global" ? (
-                // 2 colonnes pour 10 joueurs en mode Global seulement
+                // Two columns for the 10 players in Global mode only
                 <HStack spacing={4} align="start">
                   <VStack spacing={3} align="stretch" flex={1}>
                     {podium
@@ -219,7 +210,6 @@ export const PodiumSection: React.FC = () => {
                   </VStack>
                 </HStack>
               ) : (
-                // Colonne unique
                 <VStack spacing={3} align="stretch">
                   {podium.map((player) =>
                     renderPlayerCard(player)
@@ -235,7 +225,6 @@ export const PodiumSection: React.FC = () => {
           </Alert>
         )}
 
-        {/* Stats supplémentaires */}
         {meta && selectedCycleId && (
           <Text fontSize="xs" color="gray.500" textAlign="center">
             {meta.totalPlayers} joueur

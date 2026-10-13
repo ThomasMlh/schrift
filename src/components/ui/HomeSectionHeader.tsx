@@ -7,7 +7,7 @@ interface HomeSectionHeaderProps {
   subtitle?: string;
 }
 
-/** En-tête des blocs de la page d'accueil : pastille d'icône dégradée, titre et sous-titre. */
+/** Home page section header: gradient icon chip, title and subtitle. */
 export const HomeSectionHeader = ({ icon, title, subtitle }: HomeSectionHeaderProps) => (
   <HStack spacing={3} mb={4} align="center">
     <Box

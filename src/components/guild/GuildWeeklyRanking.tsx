@@ -64,7 +64,6 @@ export const GuildWeeklyRanking = ({
       borderColor={borderColor}
       overflow="hidden"
     >
-      {/* Header */}
       <HStack
         px={5}
         py={3}
@@ -102,7 +101,6 @@ export const GuildWeeklyRanking = ({
         </HStack>
       </HStack>
 
-      {/* List */}
       <VStack spacing={0} align="stretch" px={0} divider={<Divider borderColor={borderColor} />}>
         {isLoading
           ? Array.from({ length: 5 }).map((_, i) => (

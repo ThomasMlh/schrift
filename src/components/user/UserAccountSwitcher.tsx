@@ -10,9 +10,9 @@ interface UserAccountSwitcherProps {
 
 const mutedText = "text.muted";
 
-// Sélecteur de compte bbs : un même joueur peut avoir plusieurs comptes (alts), chacun avec ses
-// propres stats. bbs_name n'étant pas garanti unique, chaque lien porte ?compte=<bbs_id> pour
-// cibler le compte exact ; la surbrillance se base aussi sur le bbs_id.
+// bbs account switcher: a player can own several accounts (alts), each with its own stats.
+// bbs_name is not guaranteed unique, so each link carries ?compte=<bbs_id> to target the exact
+// account; the highlight is also based on bbs_id.
 export const UserAccountSwitcher = ({ accounts, activeBbsId }: UserAccountSwitcherProps) => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();

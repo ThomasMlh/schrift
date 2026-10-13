@@ -59,7 +59,7 @@ const RotationsBuildsGuide = () => {
     [selectedRotation, rotations]
   );
 
-  // Init from URL
+  // Initialize from the URL
   useEffect(() => {
     const rotationParam = searchParams.get("rotation");
     const pageParam = searchParams.get("page");
@@ -79,7 +79,7 @@ const RotationsBuildsGuide = () => {
     authenticated: false,
   });
 
-  // Open detail modal from URL
+  // Open the detail modal from the URL
   useEffect(() => {
     const buildParam = searchParams.get("build");
     if (buildParam && builds.length > 0 && !selectedBuild && isInitialLoad) {
@@ -93,7 +93,7 @@ const RotationsBuildsGuide = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [builds, searchParams, isInitialLoad]);
 
-  // Sync URL
+  // Keep the URL in sync
   useEffect(() => {
     if (isInitialLoad) return;
     const params = new URLSearchParams();
@@ -140,7 +140,6 @@ const RotationsBuildsGuide = () => {
   return (
     <VStack spacing={5} align="stretch">
 
-      {/* Toolbar: filter + create */}
       <Box bg={bgColor} borderRadius="xl" borderWidth="1px" borderColor={borderColor} p={4}>
         <Flex gap={3} align="flex-end" wrap="wrap">
           <Box flex={1} minW="200px">
@@ -219,7 +218,6 @@ const RotationsBuildsGuide = () => {
           )}
         </Flex>
 
-        {/* Active rotation info */}
         {activeRotation && (
           <HStack spacing={2} mt={3} pt={3} borderTopWidth="1px" borderTopColor={borderColor}>
             <Heading size="sm">
@@ -238,7 +236,6 @@ const RotationsBuildsGuide = () => {
         </Alert>
       )}
 
-      {/* Build list */}
       {isLoading ? (
         <PageLoader color="purple.400" height="250px" />
       ) : builds.length === 0 ? (
@@ -284,7 +281,6 @@ const RotationsBuildsGuide = () => {
         </>
       )}
 
-      {/* Modals */}
       {(selectedRotation || buildToEdit) && (
         <BuildCreationModal
           isOpen={isOpen}

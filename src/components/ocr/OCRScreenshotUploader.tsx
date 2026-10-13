@@ -58,7 +58,7 @@ export const OCRScreenshotUploader = ({
 
   const processFiles = async (files: File[]) => {
     const maxFiles = 10;
-    const maxSize = 10 * 1024 * 1024; // 10MB (avant compression)
+    const maxSize = 10 * 1024 * 1024; // 10MB (before compression)
 
     if (screenshots.length + files.length > maxFiles) {
       alert(`Maximum ${maxFiles} screenshots autorisés`);
@@ -85,7 +85,7 @@ export const OCRScreenshotUploader = ({
         reader.readAsDataURL(file);
       });
 
-      // Compresser l'image pour rester sous la limite Vercel (4.5MB total)
+      // Compress to stay under the Vercel request limit (4.5MB total)
       const compressedData = await compressImage(rawDataUrl, 1400, 0.7);
 
       newScreenshots.push({
@@ -137,7 +137,6 @@ export const OCRScreenshotUploader = ({
             </VStack>
           </Alert>
 
-          {/* Drop zone */}
           <Box
             borderWidth="2px"
             borderStyle="dashed"
@@ -170,7 +169,6 @@ export const OCRScreenshotUploader = ({
             </Text>
           </Box>
 
-          {/* Preview grid */}
           {screenshots.length > 0 && (
             <Box>
               <HStack justify="space-between" mb={4}>

@@ -26,11 +26,10 @@ export const UserStatsRadarChart = ({
   const textColor = useColorModeValue("#4a5568", "#cbd5e0");
   const gridColor = useColorModeValue("#f0f0f0", "#2d3748");
 
-  // Prendre toutes les rotations triées par score décroissant
   const sortedRotations = [...rotations]
     .sort((a, b) => b.averageScore - a.averageScore);
 
-  // Calculer le pourcentage par rapport au meilleur score
+  // Percentage relative to the best score
   const maxScore = sortedRotations[0]?.averageScore || 1;
 
   const data = sortedRotations.map((rotation) => ({
@@ -40,15 +39,14 @@ export const UserStatsRadarChart = ({
     attack: rotation.rotation_attack
   }));
 
-  // Couleurs par type d'attaque
   const getColorByAttack = (attack: string) => {
     switch (attack) {
       case "B":
-        return "#4299E1"; // Bleu
+        return "#4299E1";
       case "R":
-        return "#F56565"; // Rouge
+        return "#F56565";
       default:
-        return "#9F7AEA"; // Violet
+        return "#9F7AEA";
     }
   };
 

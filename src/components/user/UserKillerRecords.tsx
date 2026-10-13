@@ -7,12 +7,12 @@ import { AlterationImage } from "@/components/ui/AlterationImage";
 
 interface UserKillerRecordsProps {
   userId?: string;
-  // Compte bbs affiché sur la page (un alt si l'URL pointe vers lui) ; à défaut, le compte principal.
+  // bbs account shown on the page (an alt when the URL targets it); defaults to the main account.
   bbsId?: string;
 }
 
-// Onglet "Records" de la page joueur : meilleur score du compte sur chaque killer, tous cycles
-// confondus (les scores différentiels sans score de base, non comparables, sont écartés côté API).
+// Player page "Records" tab: the account's best score on each killer across all cycles
+// (differential scores without a base score are not comparable and are filtered out by the API).
 export const UserKillerRecords = ({ userId, bbsId }: UserKillerRecordsProps) => {
   const { t } = useTranslation();
   const { accounts, isLoading } = useUserRecords(userId);
@@ -24,7 +24,7 @@ export const UserKillerRecords = ({ userId, bbsId }: UserKillerRecordsProps) => 
   if (isLoading) return <Skeleton h="240px" borderRadius="lg" />;
 
   const account = accounts.find((a) => a.bbs_id === bbsId) ?? accounts.find((a) => a.is_primary) ?? accounts[0];
-  // Meilleur record en tête (l'API renvoie les killers par ordre alphabétique)
+  // Best record first (the API returns killers alphabetically)
   const records = [...(account?.records ?? [])].sort((a, b) => b.score - a.score);
 
   return (

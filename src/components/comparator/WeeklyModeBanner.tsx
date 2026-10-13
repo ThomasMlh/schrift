@@ -7,7 +7,7 @@ interface WeeklyModeBannerProps {
   cycle?: ICycle;
 }
 
-// Rappel du mode hebdomadaire : semaine choisie et ses deux rotations
+// Weekly mode reminder: selected week and its two rotations
 export const WeeklyModeBanner = ({ week, cycle }: WeeklyModeBannerProps) => (
     <Box
       bg="purple.50"

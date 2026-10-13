@@ -14,14 +14,14 @@ import { UserDisplay } from "./ui/UserDisplay";
 import { GuildLogo } from "./guild/GuildLogo";
 import { AddMemberModal, ConfirmDialog, GuildNameModal } from "./admin/guilds/GuildAdminDialogs";
 
-// Nombre maximum de membres par guilde
+// Maximum number of members per guild
 const GUILD_CAPACITY = 20;
 
 const ROLE_ORDER: Record<Role, number> = { chef: 1, "sous-chef": 2, membre: 3 };
 
 const memberName = (member: IUser) => member.bbs_name || member.global_name || member.username || "";
 
-// Chef, puis sous-chefs, puis membres ; ordre alphabétique dans chaque rôle
+// Leader, then officers, then members; alphabetical within each role
 const sortMembers = (members: IUser[]) =>
   [...members].sort((a, b) =>
     (ROLE_ORDER[a.role] - ROLE_ORDER[b.role])
@@ -35,8 +35,8 @@ type PendingConfirm =
   | { kind: "toggle-guild"; guild: IGuild }
   | { kind: "remove-member"; guild: IGuild; member: IUser };
 
-// Onglet Guildes de l'administration : on choisit une guilde, puis on la gère (nom, statut,
-// suppression) et ses membres (ajout, rôle, déplacement, retrait) au même endroit.
+// Admin Guilds tab: pick a guild, then manage it (name, status, deletion) and its members
+// (add, role, move, remove) in one place.
 const GuildsAdminSection = () => {
   const { t } = useTranslation();
   const toast = useToast();
@@ -83,7 +83,6 @@ const GuildsAdminSection = () => {
     }
   };
 
-  // ── Actions sur la guilde ──
   const handleCreate = async (name: string) => {
     await run(() => createGuild({ name }), "Guilde créée", "Erreur lors de la création de la guilde");
   };
@@ -92,7 +91,6 @@ const GuildsAdminSection = () => {
     await run(() => updateGuild(selected._id, { name }), "Guilde renommée", "Erreur lors du renommage");
   };
 
-  // ── Actions sur les membres ──
   const handleAddMember = async (userId: string, role: Role) => {
     if (!selected) return;
     await run(async () => {
@@ -121,7 +119,6 @@ const GuildsAdminSection = () => {
 
   return (
     <VStack align="stretch" spacing={5}>
-      {/* ── Guildes ── */}
       <Box overflowX="auto" mx={{ base: -3, md: -1 }} px={{ base: 3, md: 1 }} mt={-1} pt={1.5} pb={2}>
         <HStack spacing={3} minW="max-content" role="tablist" aria-label="Guildes">
           {guildsLoading && guilds.length === 0 && Array.from({ length: 4 }).map((_, i) => (
@@ -188,7 +185,6 @@ const GuildsAdminSection = () => {
 
       {selected && (
         <Box bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="2xl" overflow="hidden">
-          {/* ── Bandeau de la guilde ── */}
           <Flex
             px={{ base: 4, md: 6 }}
             py={5}
@@ -254,7 +250,6 @@ const GuildsAdminSection = () => {
             </HStack>
           </Flex>
 
-          {/* ── Membres ── */}
           <Box px={{ base: 3, md: 6 }} py={4}>
             <InputGroup size="sm" maxW={{ md: "320px" }} mb={3}>
               <InputLeftElement pointerEvents="none"><Icon as={FiSearch} color="text.muted" /></InputLeftElement>
@@ -340,7 +335,6 @@ const GuildsAdminSection = () => {
         </Box>
       )}
 
-      {/* ── Fenêtres ── */}
       <GuildNameModal
         isOpen={createModal.isOpen}
         onClose={createModal.onClose}

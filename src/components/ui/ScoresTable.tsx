@@ -26,7 +26,7 @@ interface ScoresTableProps {
   cycles: ICycle[];
   isAdmin: boolean;
   isGuildManager: boolean;
-  // Masque la colonne Cycle (ex : quand la liste est déjà filtrée sur un cycle)
+  // Hides the Cycle column (e.g. when the list is already filtered on a cycle)
   hideCycle?: boolean;
   onEditScore: (score: IScore) => void;
   onDeleteScore: (score: IScore) => void;
@@ -70,7 +70,7 @@ const Actions = ({ score, onEdit, onDelete }: { score: IScore; onEdit: (s: IScor
   </HStack>
 );
 
-// Liste des scores : tableau compact sur grand écran, petites cartes sur mobile
+// Scores list: compact table on large screens, small cards on mobile
 const ScoresTable: React.FC<ScoresTableProps> = ({
   scores,
   users,
@@ -85,10 +85,9 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
 
   const rows: ScoreRow[] = scores.map((score) => {
     const owner = users.find((u) => u._id === score.user_id);
-    // Le nom/compte affichés doivent être ceux qui ont réellement produit CE score, pas le
-    // compte bbs principal actuel du user — un compte peut avoir été transféré à un autre
-    // user depuis (les scores restent volontairement sous l'ancien user_id, cf. account
-    // transfer), ou le user peut avoir plusieurs comptes bbs dans la même guilde.
+    // Show the account that actually produced THIS score, not the user's current main account: an
+    // account may have been transferred to another user since (scores intentionally stay under the old
+    // user_id), or the user may own several bbs accounts in the same guild.
     const user = owner
       ? { ...owner, bbs_name: score.bbs_name || owner.bbs_name, bbs_id: score.bbs_id || owner.bbs_id }
       : undefined;
@@ -99,7 +98,6 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
 
   return (
     <>
-      {/* Grand écran : tableau */}
       <Box display={{ base: "none", lg: "block" }} overflowX="auto">
         <Table size="sm">
           <Thead>
@@ -139,7 +137,6 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
         </Table>
       </Box>
 
-      {/* Mobile : cartes */}
       <VStack display={{ base: "flex", lg: "none" }} spacing={0} align="stretch">
         {rows.map(({ score, user, cycle, rotation }, idx) => (
           <Box key={score._id} px={3} py={3} borderTopWidth={idx > 0 ? "1px" : 0} borderColor="border.subtle">

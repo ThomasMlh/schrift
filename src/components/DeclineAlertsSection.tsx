@@ -15,9 +15,9 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const formatScore = (n: number) => n.toLocaleString("fr-FR");
 
-// Espace chefs/admins : membres dont les derniers scores sont nettement sous leur habitude. Chaque
-// score récent est comparé à la moyenne du joueur sur le MÊME killer lors des cycles précédents
-// (les killers n'ont pas tous la même échelle de points) ; le calcul est fait côté API.
+// Leader/admin view: members whose latest scores are well below their usual level. Each recent
+// score is compared with the player's average on the SAME killer in previous cycles (killers do
+// not share the same point scale); the computation is done by the API.
 const DeclineAlertsSection = () => {
   const { isAdmin, managedGuildIds } = useAuth();
   const { guilds } = useGuilds(true);

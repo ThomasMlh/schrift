@@ -23,19 +23,19 @@ const SPE_LEVELS = Array.from({ length: MAX_SPE }, (_, i) => i + 1);
 
 type OwnershipFilter = "all" | "owned" | "missing";
 
-// Même logique que le filtre serveur de la page Personnages : sous-chaîne insensible à la casse,
-// pour que "Capitaine" retrouve aussi "Capitaine +"
+// Same logic as the server-side filter of the Characters page: case-insensitive substring, so that
+// "Capitaine" also matches "Capitaine +"
 const matchesAny = (values: string[] | undefined, selected: string) =>
   !selected || (values ?? []).some((v) => v.toLowerCase().includes(selected.toLowerCase()));
 
 interface UserAlbumProps {
-  // Compte bbs affiché sur la page (un alt si l'URL pointe vers lui)
+  // bbs account shown on the page (an alt when the URL targets it)
   bbsId?: string;
-  // Propriétaire du compte ou admin : peut cocher les persos et régler leur spé
+  // Account owner or admin: can tick characters and set their spec
   canEdit: boolean;
 }
 
-// Pastilles de spé (1 à 5) en bas de la vignette
+// Spec pips (1 to 5) at the bottom of the thumbnail
 const SpePips = ({ spe }: { spe: number }) => (
   <HStack spacing="3px" justify="center">
     {SPE_LEVELS.map((level) => (
@@ -51,8 +51,8 @@ const SpePips = ({ spe }: { spe: number }) => (
   </HStack>
 );
 
-// Vignette d'un perso : en couleur s'il est possédé, grisée sinon.
-// <img> natif (pas le Image de Chakra avec fallback, qui précharge chaque vignette en JS).
+// Character thumbnail: in color when owned, greyed out otherwise.
+// Native <img> (not Chakra's Image with fallback, which preloads every thumbnail in JS).
 const AlbumThumb = ({ character, spe }: { character: IAlbumCharacter; spe: number }) => (
   <Box
     position="relative"
@@ -77,7 +77,7 @@ const AlbumThumb = ({ character, spe }: { character: IAlbumCharacter; spe: numbe
       filter={spe > 0 ? undefined : "grayscale(1)"}
       opacity={spe > 0 ? 1 : 0.35}
     />
-    {/* Affinité visible sans survol : certaines versions d'un perso partagent le même visuel */}
+    {/* Affinity visible without hovering: some versions of a character share the same artwork */}
     {character.affinity && (
       <Box
         as="img"
@@ -108,14 +108,14 @@ interface AlbumTileProps {
   character: IAlbumCharacter;
   spe: number;
   canEdit: boolean;
-  // Une seule vignette porte un Popover à la fois : celle qu'on vient de cliquer
+  // Only one tile holds a Popover at a time: the one just clicked
   isActive: boolean;
   onOpen: (characterId: string) => void;
   onClose: () => void;
   onChange: (characterId: string, spe: number) => void;
 }
 
-// Mémoïsée : changer la spé d'un perso ne re-rend que sa vignette, pas les 300 autres
+// Memoized: changing a character's spec only re-renders its own tile, not the 300 others
 const AlbumTile = memo(({ character, spe, canEdit, isActive, onOpen, onClose, onChange }: AlbumTileProps) => {
   const { t } = useTranslation();
   const label = character.version || character.name;
@@ -174,7 +174,7 @@ const AlbumTile = memo(({ character, spe, canEdit, isActive, onOpen, onClose, on
   );
 });
 
-// Onglet "Album" de la page joueur : persos possédés par le compte et leur spé
+// Player page "Album" tab: characters owned by the account and their spec
 export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
   const { t } = useTranslation();
   const toast = useToast();
@@ -188,7 +188,7 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
   const [attackType, setAttackType] = useState("");
   const [ownership, setOwnership] = useState<OwnershipFilter>("all");
   const [activeId, setActiveId] = useState<string | null>(null);
-  // La recherche filtre la grille en différé pour que la saisie reste fluide
+  // The search filters the grid deferred so typing stays responsive
   const deferredSearch = useDeferredValue(search);
 
   const owned = useMemo(() => album?.characters ?? {}, [album]);
@@ -215,14 +215,14 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
     });
   }, [characters, owned, deferredSearch, affinity, category, killer, attackType, ownership]);
 
-  // Dernières valeurs lues par handleChange sans qu'il change d'identité (sinon memo inutile)
+  // Latest values read by handleChange without changing its identity (otherwise memo is useless)
   const latest = useRef({ setCharacterSpe, toast, t });
   latest.current = { setCharacterSpe, toast, t };
 
   const closeTile = useCallback(() => setActiveId(null), []);
 
-  // Mise à jour optimiste : la vignette change tout de suite. La réponse serveur n'est pas
-  // réappliquée (évite un second rendu) ; on resynchronise seulement en cas d'erreur.
+  // Optimistic update: the tile changes immediately. The server response is not re-applied (avoids
+  // a second render); data is only resynced on error.
   const handleChange = useCallback(async (characterId: string, spe: number) => {
     if (!bbsId) return;
     mutate((current) => {

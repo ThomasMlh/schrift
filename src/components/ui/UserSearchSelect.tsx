@@ -19,9 +19,8 @@ interface UserSearchSelectProps {
     onSearchChange: (query: string) => void;
     placeholder?: string;
     guilds?: IGuild[];
-    // Clé d'identification d'un item — par défaut _id (1 user = 1 item). Les appelants qui
-    // listent des comptes bbs plutôt que des users (plusieurs items peuvent partager le même
-    // _id) doivent passer une clé unique par compte, ex: (u) => u.bbs_id.
+    // Item key, _id by default (one user = one item). Callers listing bbs accounts rather than users
+    // (several items may share an _id) must pass a per-account key, e.g. (u) => u.bbs_id.
     getItemId?: (user: IUser) => string;
 }
 
@@ -45,7 +44,6 @@ export const UserSearchSelect = ({
 
     const selectedUser = users?.find(user => getItemId(user) === selectedUserId);
 
-    // Créer une map des guildes pour un accès rapide
     const guildMap = useMemo(() => {
         const map: Record<string, string> = {};
         guilds?.forEach(guild => {
@@ -56,12 +54,10 @@ export const UserSearchSelect = ({
         return map;
     }, [guilds]);
 
-    // Fonction helper pour obtenir le nom de la guilde
     const getGuildName = (user: IUser) => {
         return user.guilde_id ? guildMap[user.guilde_id] : null;
     };
 
-    // Filtrer les utilisateurs selon la recherche
     useEffect(() => {
         if (!users) {
             setFilteredUsers([]);
@@ -82,8 +78,8 @@ export const UserSearchSelect = ({
         }
     }, [searchQuery, users]);
 
-    // Gérer le clic en dehors du composant — le menu est en Portal (hors de menuRef), donc il
-    // faut aussi exclure dropdownRef pour ne pas fermer le menu au clic dedans.
+    // Close on outside click. The menu is portaled (outside menuRef), so dropdownRef must be excluded
+    // too, otherwise clicking inside the menu would close it.
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as Node;
@@ -97,7 +93,6 @@ export const UserSearchSelect = ({
 
         if (isOpen) {
             document.addEventListener('mousedown', handleClickOutside);
-            // Focus sur l'input quand le menu s'ouvre
             setTimeout(() => inputRef.current?.focus(), 0);
         }
 
@@ -106,8 +101,8 @@ export const UserSearchSelect = ({
         };
     }, [isOpen]);
 
-    // Calcule la position du menu par rapport au trigger (en Portal, donc en coordonnées document)
-    // — évite que le menu soit rogné par un ancêtre en overflow:hidden (ex: un Modal), cf. CustomSelect.
+    // Menu position relative to the trigger (portaled, so in document coordinates), so an ancestor with
+    // overflow:hidden (e.g. a Modal) cannot clip it; see CustomSelect.
     const updateMenuPosition = useCallback(() => {
         if (!triggerRef.current) return;
         const rect = triggerRef.current.getBoundingClientRect();
@@ -141,16 +136,15 @@ export const UserSearchSelect = ({
     const handleUserSelect = (user: IUser) => {
         onUserSelect(getItemId(user));
         setIsOpen(false);
-        onSearchChange(''); // Reset search
+        onSearchChange('');
     };
 
     const handleDeselect = (e: React.MouseEvent) => {
-        e.stopPropagation(); // Empêcher l'ouverture du menu
+        e.stopPropagation(); // Do not open the menu
         onUserSelect('');
-        onSearchChange(''); // Reset search
+        onSearchChange('');
     };
 
-    // const bgColor = useColorModeValue('white', 'gray.700');
     const borderColor = useColorModeValue('gray.200', 'gray.600');
     const hoverBg = useColorModeValue('gray.50', 'gray.600');
     const menuBg = useColorModeValue('white', 'gray.800');
@@ -160,7 +154,6 @@ export const UserSearchSelect = ({
         <Box position="relative" ref={menuRef}>
             <Box ref={triggerRef}>
             {selectedUser ? (
-                // Affichage quand un utilisateur est sélectionné
                 <Flex
                     w="100%"
                     px={2}
@@ -207,7 +200,6 @@ export const UserSearchSelect = ({
                     </Flex>
                 </Flex>
             ) : (
-                // Bouton par défaut quand aucun utilisateur n'est sélectionné
                 <Button
                     w="100%"
                     justifyContent="space-between"
@@ -249,7 +241,6 @@ export const UserSearchSelect = ({
                     display="flex"
                     flexDirection="column"
                 >
-                    {/* Input de recherche intégré */}
                     <Box p={2} borderBottom="1px solid" borderColor={borderColor} bg={menuBg} position="sticky" top={0} zIndex={1}>
                         <InputGroup size="sm">
                             <InputLeftElement pointerEvents="none">
@@ -271,9 +262,7 @@ export const UserSearchSelect = ({
                         </InputGroup>
                     </Box>
 
-                    {/* Liste des utilisateurs */}
                     <Box overflowY="auto">
-                        {/* Option de déselection */}
                         <Flex
                             p={3}
                             cursor="pointer"

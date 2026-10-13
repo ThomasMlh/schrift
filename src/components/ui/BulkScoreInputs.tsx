@@ -4,8 +4,8 @@ import type { IUser, BulkEntryReference, BulkEntryThresholds } from "../../inter
 import { UserDisplay } from "./UserDisplay";
 import { formatScore, getRowStatus, parsePastedColumn, parseScore } from "@/utils/bulkScoreEntry";
 
-// Saisie d'un score de la saisie groupée (BulkScoreModal), en ligne (vue liste) ou en carte
-// (vue grille), et icônes du sélecteur de vue.
+// Bulk score entry input (BulkScoreModal), as a row (list view) or a card (grid view),
+// and the view switch icons.
 
 export type ViewMode = "list" | "grid";
 
@@ -29,7 +29,7 @@ interface BulkScoreRowProps {
     layout: ViewMode;
 }
 
-// Passe au champ suivant de la liste avec Entrée
+// Enter moves to the next field
 const focusRow = (index: number) => {
     const next = document.querySelector<HTMLInputElement>(`[data-bulk-score-index="${index}"]`);
     next?.focus();
@@ -41,8 +41,8 @@ export const BulkScoreRow = memo(({
     const status = getRowStatus(value, reference, isDifferential, thresholds);
     const style = status ? STATUS_STYLE[status.level] : null;
 
-    // Seul repère affiché : la base de la semaine sur une rotation différentielle (l'habitude du
-    // joueur est donnée par le message de l'alerte)
+    // Only reference shown: the week's base on a differential rotation (the player's usual score is
+    // in the alert message)
     const baseRaw = isDifferential ? reference?.base_raw ?? null : null;
 
     const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
@@ -60,7 +60,7 @@ export const BulkScoreRow = memo(({
         }
     };
 
-    // Fond légèrement relevé, sans cadre : la bordure ne sert qu'à signaler une alerte
+    // Slightly raised background without a frame; the border only signals an alert
     const borderColor = status?.level === "error" ? "red.400" : status?.level === "warn" ? "orange.400" : "transparent";
 
     const referenceText = isDifferential ? (
@@ -104,7 +104,7 @@ export const BulkScoreRow = memo(({
     if (layout === "grid") {
         return (
             <Box p={2.5} borderRadius="lg" borderWidth="1px" borderColor={borderColor} bg="bg.subtle">
-                {/* Pseudo et alerte sur la même ligne, le champ prend toute la largeur dessous */}
+                {/* Name and alert on the same line, the field takes the full width below */}
                 <HStack align="start" spacing={2} mb={2}>
                     <Box flex={1} minW={0}>
                         <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />

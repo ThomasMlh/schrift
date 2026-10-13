@@ -39,7 +39,7 @@ export const LoginButton = ({ fullWidth = false }: { fullWidth?: boolean }) => {
   );
 };
 
-// Avatar cliquable de la barre du haut : profil, admin et déconnexion dans un menu
+// Top bar avatar: profile, admin and logout in a menu
 export const UserMenu = () => {
   const { t } = useTranslation();
   const { isLoggedIn, isAdmin, canSeeAdmin, avatar, displayName, roleLabel, profileUrl, handleLogout } = useNavAccount();

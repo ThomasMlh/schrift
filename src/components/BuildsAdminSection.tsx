@@ -102,7 +102,6 @@ const BuildsAdminSection = () => {
       <VStack spacing={6} align="stretch">
         <SectionHeader title="Gestion des builds" description="Validez, modifiez ou supprimez les builds proposés." />
 
-        {/* Filtres */}
         <Box bg={bgColor} p={4} borderRadius="xl" borderWidth="1px" borderColor={borderColor}>
           <HStack spacing={4}>
             <Box>
@@ -126,7 +125,6 @@ const BuildsAdminSection = () => {
           </HStack>
         </Box>
 
-        {/* Table */}
         {isLoading ? (
           <PageLoader color="orange.500" height="200px" />
         ) : builds.length === 0 ? (
@@ -267,7 +265,6 @@ const BuildsAdminSection = () => {
               </Table>
             </Box>
 
-            {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
               <Pagination
                 currentPage={currentPage}
@@ -283,14 +280,12 @@ const BuildsAdminSection = () => {
         )}
       </VStack>
 
-      {/* Modal de visualisation */}
       <BuildDetailModal 
         isOpen={isViewOpen}
         onClose={onViewClose}
         build={selectedBuild}
       />
 
-      {/* Dialog de confirmation de suppression */}
       <AlertDialog isOpen={isDeleteOpen} leastDestructiveRef={cancelRef} onClose={onDeleteClose}>
         <AlertDialogOverlay>
           <AlertDialogContent>

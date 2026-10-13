@@ -41,16 +41,13 @@ export const SkillSearchSelect = ({
   const hoverBg = useColorModeValue("gray.50", "gray.600");
   const menuBg = "bg.card";
 
-  // Utiliser le hook pour récupérer les skills avec recherche
   const { skills, isLoading } = useSkills(searchTerm);
 
-  // Filtrer les skills déjà sélectionnés
   const availableSkills = skills.filter((skill) => !value.includes(skill._id));
 
-  // Récupérer les skills sélectionnés
   const selectedSkills = skills.filter((skill) => value.includes(skill._id));
 
-  // Gérer le clic en dehors
+  // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -90,7 +87,6 @@ export const SkillSearchSelect = ({
 
   return (
     <Box w="100%">
-      {/* Affichage des skills sélectionnés */}
       {selectedSkills.length > 0 && (
         <HStack spacing={2} mb={2} flexWrap="wrap">
           {selectedSkills.map((skill) => (
@@ -111,7 +107,6 @@ export const SkillSearchSelect = ({
         </HStack>
       )}
 
-      {/* Input de recherche */}
       {canAddMore && (
         <Box position="relative" ref={menuRef}>
           <InputGroup size={size}>
@@ -128,7 +123,6 @@ export const SkillSearchSelect = ({
             />
           </InputGroup>
 
-          {/* Menu déroulant */}
           {isOpen && !isDisabled && (
             <Box
               position="absolute"

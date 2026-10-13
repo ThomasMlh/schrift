@@ -3,7 +3,7 @@ import EmojiPicker, { Categories, EmojiStyle, Theme } from "emoji-picker-react";
 import type { EmojiClickData } from "emoji-picker-react";
 import type { IDiscordEmoji } from "@/interfaces";
 
-// Libellés FR des catégories ; "custom" regroupe les emojis du serveur Discord.
+// French category labels; "custom" holds the Discord server emojis.
 const CATEGORIES = [
   { category: Categories.CUSTOM, name: "Serveur" },
   { category: Categories.SUGGESTED, name: "Récents" },
@@ -20,15 +20,15 @@ const CATEGORIES = [
 interface DiscordEmojiPickerProps {
   serverEmojis: IDiscordEmoji[];
   isDark: boolean;
-  // Reçoit le texte à insérer : le caractère Unicode, ou le jeton Discord <:nom:id> / <a:nom:id>.
+  // Receives the text to insert: the Unicode character, or the Discord token <:name:id> / <a:name:id>.
   onPick: (token: string) => void;
 }
 
-// Chargé à la demande (React.lazy) depuis DiscordMessageSection : la librairie embarque toute
-// la base d'emojis Unicode, inutile de l'imposer tant que le sélecteur n'est pas ouvert.
+// Lazy-loaded from DiscordMessageSection: the library ships the whole Unicode emoji set, so it is
+// only loaded once the picker is opened.
 const DiscordEmojiPicker: React.FC<DiscordEmojiPickerProps> = ({ serverEmojis, isDark, onPick }) => {
-  // La librairie passe les noms en minuscules et ne renvoie que l'id au clic : on retrouve
-  // l'emoji d'origine par son id pour avoir le vrai nom et savoir s'il est animé.
+  // The library lowercases names and only returns the id on click: look the emoji up by id to get
+  // its real name and whether it is animated.
   const emojiById = useMemo(() => new Map(serverEmojis.map((e) => [e.id, e])), [serverEmojis]);
   const customEmojis = useMemo(
     () => serverEmojis.map((e) => ({ id: e.id, names: [e.name], imgUrl: e.url })),

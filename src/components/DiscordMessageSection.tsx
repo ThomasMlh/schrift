@@ -12,11 +12,11 @@ const DiscordEmojiPicker = lazy(() => import("./DiscordEmojiPicker"));
 
 const UNCATEGORIZED_LABEL = "Sans catégorie";
 const MENTION_PATTERN = /<@(\d+)>/g;
-// Mention <@id> OU emoji custom <:nom:id> / <a:nom:id> (animé) — pour l'aperçu.
+// Mention <@id> or custom emoji <:name:id> / <a:name:id> (animated), for the preview.
 const PREVIEW_TOKEN_PATTERN = /<@(\d+)>|<(a?):(\w+):(\d+)>/g;
 
-// Regroupe les salons par catégorie Discord, dans l'ordre d'arrivée (déjà trié côté bot
-// comme la sidebar Discord : catégorie puis position du salon dedans).
+// Groups channels by Discord category, keeping the bot's order (category, then channel position,
+// like the Discord sidebar).
 const groupByCategory = (channels: IDiscordChannel[]): [string, IDiscordChannel[]][] => {
   const groups = new Map<string, IDiscordChannel[]>();
   for (const channel of channels) {
@@ -27,9 +27,8 @@ const groupByCategory = (channels: IDiscordChannel[]): [string, IDiscordChannel[
   return Array.from(groups.entries());
 };
 
-// Repère un "@" juste avant le curseur, sans espace entre les deux : c'est une mention en
-// cours de frappe. Renvoie sa position de départ et le texte tapé après le "@" (le filtre),
-// ou null si le curseur n'est pas dans ce contexte (pas de "@" récent, ou espace tapé après).
+// Detects an "@" right before the cursor with no space in between, i.e. a mention being typed.
+// Returns its start position and the text typed after the "@" (the filter), or null otherwise.
 const detectMentionInProgress = (text: string, cursorPos: number): { start: number; query: string } | null => {
   const upToCursor = text.slice(0, cursorPos);
   const atIndex = upToCursor.lastIndexOf('@');
@@ -39,9 +38,8 @@ const detectMentionInProgress = (text: string, cursorPos: number): { start: numb
   return { start: atIndex, query: between };
 };
 
-// Rend les jetons Discord de façon lisible, pour un aperçu de ce qui sera réellement envoyé :
-// <@id> devient "@Pseudo" (résolu via la liste des membres du salon), et un emoji custom
-// <:nom:id> / <a:nom:id> devient son image (servie par le CDN Discord à partir de l'id).
+// Renders Discord tokens readably to preview what will actually be sent: <@id> becomes "@Name"
+// (resolved from the channel members) and a custom emoji becomes its image from the Discord CDN.
 const renderPreview = (text: string, members: IDiscordChannelMember[]): ReactNode[] => {
   const memberById = new Map(members.map((m) => [m.id, m]));
   const parts: ReactNode[] = [];
@@ -80,16 +78,13 @@ const renderPreview = (text: string, members: IDiscordChannelMember[]): ReactNod
   return parts;
 };
 
-// Onglet admin "Messages" : choisir un salon Discord parmi ceux accessibles à l'utilisateur
-// (tous pour un admin, uniquement ceux de sa/ses guildes pour un chef/sous-chef — filtré côté
-// API), puis composer un message libre en mentionnant des membres directement dans le texte
-// (taper "@" ouvre une liste de suggestions, comme sur Discord/Slack).
+// Admin "Messages" tab: pick a Discord channel the user can access (all channels for an admin,
+// only their guild channels for a leader/officer, filtered by the API) and write a free-form message,
+// mentioning members inline (typing "@" opens suggestions, like Discord or Slack).
 //
-// Une mention choisie insère directement le ping Discord natif <@id> dans le texte — pas un
-// "@Pseudo" à reconvertir plus tard : ça évite toute la classe de bugs liée au matching par
-// pseudo (ex: pseudos "fancy font" en Unicode non-ASCII que \b ne reconnaissait pas). Comme
-// <@id> n'est pas lisible tel quel, un aperçu sous la zone de texte résout chaque <@id> en
-// "@Pseudo" pour que l'admin voie ce qui sera réellement envoyé avant de cliquer sur Envoyer.
+// A picked mention inserts the native Discord ping <@id> rather than "@Name": this avoids name
+// matching bugs (e.g. non-ASCII "fancy font" names). Since <@id> is not readable as is, a preview
+// below the textarea resolves each <@id> to "@Name" before sending.
 const DiscordMessageSection: React.FC = () => {
   const { channels, isLoading } = useDiscordChannels();
   const { emojis } = useDiscordEmojis();
@@ -111,7 +106,7 @@ const DiscordMessageSection: React.FC = () => {
 
   const channelGroups = useMemo(() => groupByCategory(channels), [channels]);
   const selectedChannel = channels.find((c) => c.id === channelId) || null;
-  // Seuls les emojis du serveur Discord du salon choisi sont proposés.
+  // Only the emojis of the selected channel's server are offered.
   const serverEmojis = useMemo(
     () => (selectedChannel ? emojis.filter((e) => e.guild_id === selectedChannel.guild_id) : []),
     [emojis, selectedChannel]
@@ -158,8 +153,8 @@ const DiscordMessageSection: React.FC = () => {
     });
   };
 
-  // Insère un emoji à la position du curseur. Le textarea conserve sa sélection même après
-  // avoir perdu le focus (clic dans le sélecteur), donc selectionStart reste fiable ici.
+  // Inserts an emoji at the cursor. The textarea keeps its selection after losing focus (click in
+  // the picker), so selectionStart is still reliable here.
   const insertEmoji = (token: string) => {
     const textarea = textareaRef.current;
     const start = textarea?.selectionStart ?? content.length;
@@ -271,8 +266,8 @@ const DiscordMessageSection: React.FC = () => {
                   px={3} py={2}
                   cursor="pointer"
                   _hover={{ bg: hoverBg }}
-                  // onMouseDown (pas onClick) : se déclenche avant le onBlur du textarea, qui
-                  // fermerait sinon la liste avant que le clic soit pris en compte.
+                  // onMouseDown rather than onClick: it fires before the textarea's onBlur, which would otherwise
+                  // close the list before the click registers.
                   onMouseDown={(e) => { e.preventDefault(); insertMention(m); }}
                 >
                   <Text fontSize="sm">

@@ -25,12 +25,12 @@ const toUTCKey = (date: Date): string =>
 const toLocalKey = (date: Date): string =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
-// Bar color driven by attack type
+// Bar color driven by the attack type
 const getAttackColor = (attack: string): { solid: string; bg: string } => {
   const a = attack?.toUpperCase();
-  if (a === "R") return { solid: "#E53E3E", bg: "rgba(229,62,62,0.12)" };   // red
-  if (a === "B") return { solid: "#3182CE", bg: "rgba(49,130,206,0.12)" };  // blue
-  return { solid: "#DD6B20", bg: "rgba(221,107,32,0.12)" };                 // melee / orange
+  if (a === "R") return { solid: "#E53E3E", bg: "rgba(229,62,62,0.12)" };
+  if (a === "B") return { solid: "#3182CE", bg: "rgba(49,130,206,0.12)" };
+  return { solid: "#DD6B20", bg: "rgba(221,107,32,0.12)" };                 // Melee
 };
 
 // Used for past-cycle bars and legend swatches
@@ -100,7 +100,6 @@ const RotationCalendar = ({ initialMonth }: RotationCalendarProps) => {
   const textColor = isDark ? "rgba(255,255,255,0.9)" : "#2D3748";
   const subColor = isDark ? "rgba(255,255,255,0.4)" : "#A0AEC0";
 
-  // Two tracks: index 0 = Mardi-Jeudi, index 1 = Vendredi-Dimanche
   const dayIndex = useMemo(() => {
     const index = new Map<string, DayTracks>();
 
@@ -197,7 +196,6 @@ const RotationCalendar = ({ initialMonth }: RotationCalendarProps) => {
 
   return (
     <Box>
-      {/* Month navigation */}
       <Flex justify="space-between" align="center" mb={4}>
         <IconButton
           aria-label={t("pages.cycles.calendarPrevMonth")}
@@ -234,7 +232,6 @@ const RotationCalendar = ({ initialMonth }: RotationCalendarProps) => {
         />
       </Flex>
 
-      {/* Day headers */}
       <Box display="grid" gridTemplateColumns="repeat(7, 1fr)" mb={1}>
         {dayNames.map((name) => (
           <Box key={name} textAlign="center" py={2}>
@@ -251,7 +248,6 @@ const RotationCalendar = ({ initialMonth }: RotationCalendarProps) => {
         ))}
       </Box>
 
-      {/* Calendar grid */}
       <Box
         display="grid"
         gridTemplateColumns="repeat(7, 1fr)"
@@ -286,7 +282,6 @@ const RotationCalendar = ({ initialMonth }: RotationCalendarProps) => {
             >
               {date && (
                 <>
-                  {/* Date number */}
                   <Box px={2} pt={1.5} pb={1}>
                     <Box
                       w={6}
@@ -308,10 +303,9 @@ const RotationCalendar = ({ initialMonth }: RotationCalendarProps) => {
                     </Box>
                   </Box>
 
-                  {/* Two track bars pushed to bottom */}
                   <Box mt="auto" pb={1.5}>
                     {tracks.map((entry, trackIdx) => {
-                      // Empty track slot — keeps vertical alignment intact
+                      // Empty track slot, keeps the vertical alignment
                       if (!entry) {
                         return (
                           <Box
@@ -434,7 +428,6 @@ const RotationCalendar = ({ initialMonth }: RotationCalendarProps) => {
         })}
       </Box>
 
-      {/* Legend */}
       {visibleCycles.length > 0 && (
         <Flex
           gap={3}

@@ -1,6 +1,6 @@
 import type { TableEntityDef, TableMetricDef } from "./ComparisonDataTable";
 
-// Valeur la meilleure d'une métrique parmi les entités qui ont des stats
+// Best value of a metric among the entities that have stats
 export const getBestValue = (entities: TableEntityDef[], metric: TableMetricDef): number | null => {
   const values = entities.filter((e) => e.stats).map((e) => metric.getRawValue(e.stats));
   if (!values.length) return null;

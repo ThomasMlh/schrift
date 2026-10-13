@@ -22,7 +22,7 @@ export interface RadarMetricDef {
   key: string;
   label: string;
   getRawValue: (stats: Record<string, unknown>) => number;
-  absolute?: boolean; // already 0-100, skip normalization
+  absolute?: boolean; // Already 0-100, skip normalization
 }
 
 export interface RadarEntityDef {

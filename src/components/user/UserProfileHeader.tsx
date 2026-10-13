@@ -7,13 +7,13 @@ import { getDiscordBannerUrl, getUserAvatarUrl } from "@/utils/discord";
 import { TopAchievementBadge } from "@/components/achievements/TopAchievementBadge";
 
 interface UserProfileHeaderProps {
-  // Utilisateur enrichi avec le compte consulté (pseudo, guilde et rôle de l'alt le cas échéant)
+  // User enriched with the viewed account (alt name, guild and role when relevant)
   user: IUser;
-  // Succès le plus rare du compte consulté
+  // Rarest achievement of the viewed account
   topAchievement?: ITopAchievement | null;
-  // Choix du cycle, affiché à droite
+  // Cycle selector, shown on the right
   cycleControl?: ReactNode;
-  // Sélecteur de compte (alts), affiché sous le rôle
+  // Account switcher (alts), shown below the role
   accountSwitcher?: ReactNode;
 }
 
@@ -30,8 +30,8 @@ const getRoleBadgeColor = (role: string) => {
   }
 };
 
-// En-tête de la page joueur : bannière Discord (ou dégradé) en bandeau, avatar, pseudo,
-// meilleur succès, guilde et rôle, avec le choix du cycle et des comptes.
+// Player page header: Discord banner (or gradient), avatar, name, top achievement, guild and role,
+// with the cycle and account selectors.
 export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountSwitcher }: UserProfileHeaderProps) => {
   const { t } = useTranslation();
   const bannerUrl = user.discord_id && user.banner ? getDiscordBannerUrl(user.discord_id, user.banner) : null;
@@ -42,7 +42,7 @@ export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountS
   const [bannerFailed, setBannerFailed] = useState(false);
   const hasBanner = Boolean(bannerUrl) && !bannerFailed;
 
-  // Nouvelle bannière (autre joueur ou autre compte) : on retente le chargement
+  // New banner (other player or account): retry loading
   useEffect(() => setBannerFailed(false), [bannerUrl]);
 
   return (
@@ -55,9 +55,7 @@ export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountS
       overflow="hidden"
       mb={6}
     >
-      {/* Bandeau : plus haut quand la bannière Discord se charge (format 600×240), pour qu'on
-          en voie l'essentiel ; simple liseré dégradé sinon, y compris si l'image a disparu
-          côté Discord (hash enregistré mais périmé). */}
+      {/* Taller strip when the Discord banner loads (600×240); otherwise a thin gradient line, including when the Discord image is gone (stale hash) */}
       <Box
         position="relative"
         h={hasBanner ? { base: "140px", sm: "180px", md: "240px" } : { base: "90px", md: "120px" }}

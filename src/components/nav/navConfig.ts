@@ -18,10 +18,10 @@ export interface NavItem {
   path: string;
   icon: IconType;
   group: NavGroup;
-  // Affiché directement dans la barre du haut (sinon dans le menu « Plus »)
+  // Shown directly in the top bar (otherwise in the "More" menu)
   primary?: boolean;
   adminOrGuildManagerOnly?: boolean;
-  // Lien présent seulement dans le pied de page
+  // Link only shown in the footer
   footerOnly?: boolean;
 }
 
@@ -47,5 +47,5 @@ export const NAV_GROUP_LABELS: Record<NavGroup, string> = {
 export const isActivePath = (pathname: string, path: string) =>
   path === "/" ? pathname === "/" : pathname.startsWith(path);
 
-// Gradient de la marque, repris par le logo et le bouton de connexion
+// Brand gradient, used by the logo and the login button
 export const BRAND_GRADIENT = "linear(to-br, #7C3AED, #4F46E5)";

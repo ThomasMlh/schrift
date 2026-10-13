@@ -45,7 +45,7 @@ interface BuildDetailModalProps {
 
 const POSITION_COLORS = ["purple", "blue", "teal"] as const;
 
-// Tuile du résultat (score, chronos)
+// Result tile (score, times)
 const ResultTile = ({ label, children }: { label: string; children: ReactNode }) => (
   <Box bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="border.subtle" px={3} py={2.5}>
     <Text fontSize="xs" color="text.muted" textTransform="uppercase" letterSpacing="wide" fontWeight="semibold">{label}</Text>
@@ -112,7 +112,7 @@ export const BuildDetailModal = ({
     <Modal isOpen={isOpen} onClose={onClose} size="6xl" scrollBehavior="inside">
       <ModalOverlay backdropFilter="blur(4px)" />
       <ModalContent borderRadius="xl" overflow="hidden">
-        {/* En-tête : rotation, auteur et statut */}
+        {/* Header: rotation, author and status */}
         <ModalHeader borderBottomWidth="1px" borderColor="border.subtle" pb={4}>
           <Flex justify="space-between" align={{ base: "flex-start", md: "center" }} gap={3} pr={8} direction={{ base: "column", md: "row" }}>
             <Box minW={0}>
@@ -164,7 +164,6 @@ export const BuildDetailModal = ({
         <ModalBody p={5}>
           {build && (
             <VStack align="stretch" spacing={5}>
-              {/* Résultat : score et chronos */}
               {hasResult && (
                 <SimpleGrid columns={{ base: 2, md: 3 }} spacing={3}>
                   {build.score != null && (
@@ -185,7 +184,6 @@ export const BuildDetailModal = ({
                 </SimpleGrid>
               )}
 
-              {/* Capture d'écran */}
               {screenshotUrl && (
                 <Box
                   as="button"
@@ -220,7 +218,6 @@ export const BuildDetailModal = ({
                 </Box>
               )}
 
-              {/* Team composition */}
               <Box>
                 <Text fontWeight="bold" color="text.strong" mb={3}>
                   {t("components.buildDetailModal.teamComposition")}
@@ -244,7 +241,6 @@ export const BuildDetailModal = ({
                           _hover={{ boxShadow: "md", borderColor: `${positionColor}.300` }}
                           transition="all 0.2s"
                         >
-                          {/* Character header */}
                           <Box position="relative">
                             <Image
                               src={`${bucketUrl}/characters/full/${member.character?._id}.png`}
@@ -304,7 +300,6 @@ export const BuildDetailModal = ({
                           </Box>
 
                           <VStack align="stretch" spacing={0} divider={<Divider />}>
-                            {/* Skills */}
                             {member.skills && member.skills.length > 0 && (
                               <Box p={3}>
                                 <Text fontSize="xs" fontWeight="semibold" color={mutedText} textTransform="uppercase" letterSpacing="wide" mb={2}>
@@ -331,7 +326,6 @@ export const BuildDetailModal = ({
                               </Box>
                             )}
 
-                            {/* Accessories */}
                             {member.accessories && member.accessories.length > 0 && (
                               <Box p={3}>
                                 <Text fontSize="xs" fontWeight="semibold" color={mutedText} textTransform="uppercase" letterSpacing="wide" mb={2}>
@@ -370,7 +364,6 @@ export const BuildDetailModal = ({
                               </Box>
                             )}
 
-                            {/* Links */}
                             {member.links && member.links.length > 0 && (
                               <Box p={3}>
                                 <Text fontSize="xs" fontWeight="semibold" color={mutedText} textTransform="uppercase" letterSpacing="wide" mb={2}>
@@ -427,7 +420,6 @@ export const BuildDetailModal = ({
                 </Grid>
               </Box>
 
-              {/* Notes */}
               {build.description && (
                 <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="border.subtle">
                   <Text fontSize="xs" color="text.muted" mb={1} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide">

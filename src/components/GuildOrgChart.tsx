@@ -65,7 +65,6 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
         transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
         _hover={{ transform: "translateY(-4px)" }}
       >
-        {/* Glow effect behind card */}
         {isLead && (
           <Box
             position="absolute"
@@ -113,7 +112,6 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
           }
         >
           <VStack spacing={3}>
-            {/* Role icon */}
             {config.icon && (
               <Icon as={config.icon} boxSize={isLead ? 5 : 4} color={config.glow} aria-hidden />
             )}
@@ -123,7 +121,6 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
               avatarSize={isLead ? "lg" : "md"}
               textSize={isLead ? "md" : "sm"}
             />
-            {/* Modern role tag */}
             <Text
               fontSize="2xs"
               fontWeight="bold"
@@ -175,17 +172,14 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
 
   return (
     <Flex direction="column" align="center" w="100%" gap={2} py={8}>
-      {/* Chef */}
       {chef && (
         <MemberCard member={chef} roleLabel="Chef" isLead />
       )}
 
-      {/* Connector to sous-chefs */}
       {chef && sousChefs.length > 0 && (
         <HorizontalBranch count={sousChefs.length} />
       )}
 
-      {/* Sous-chefs */}
       {sousChefs.length > 0 && (
         <Flex gap={{ base: 4, md: 6 }} justify="center" wrap="wrap">
           {sousChefs.map((sc) => (
@@ -194,12 +188,10 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
         </Flex>
       )}
 
-      {/* Connector to members */}
       {(chef || sousChefs.length > 0) && regularMembers.length > 0 && (
         <Connector height="40px" />
       )}
 
-      {/* Section label for regular members */}
       {regularMembers.length > 0 && (
         <Text
           fontSize="xs"
@@ -213,7 +205,6 @@ export const GuildOrgChart: React.FC<GuildOrgChartProps> = ({ members }) => {
         </Text>
       )}
 
-      {/* Regular members grid */}
       {regularMembers.length > 0 && (
         <Flex wrap="wrap" justify="center" gap={4} maxW="1100px">
           {regularMembers.map((member) => (

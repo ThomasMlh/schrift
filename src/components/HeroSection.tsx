@@ -5,7 +5,7 @@ interface HeroSectionProps {
   title: string;
   description?: string;
   size?: "sm" | "md" | "lg";
-  /** Contenu optionnel sous la description (boutons, infos) */
+  /** Optional content below the description (buttons, info) */
   children?: ReactNode;
 }
 

@@ -23,7 +23,7 @@ interface AccessorySearchSelectProps {
   value?: { id_accessory: string; id_subeffect?: string };
   onChange: (accessory: { id_accessory: string; id_subeffect?: string }) => void;
   placeholder?: string;
-  excludeIds?: string[]; // IDs des accessoires déjà sélectionnés pour ce personnage
+  excludeIds?: string[]; // Ids of the accessories already selected for this character
 }
 
 export const AccessorySearchSelect = ({
@@ -47,7 +47,6 @@ export const AccessorySearchSelect = ({
   const hoverBg = useColorModeValue("gray.50", "gray.600");
   const menuBg = "bg.card";
 
-  // Filtrer les accessoires disponibles (exclure ceux déjà sélectionnés)
   const availableAccessories = accessories.filter(
     (acc) => !excludeIds.includes(acc._id) || acc._id === value?.id_accessory
   );
@@ -55,7 +54,7 @@ export const AccessorySearchSelect = ({
   const selectedAccessory = accessories.find((a) => a._id === value?.id_accessory);
   const selectedSubeffect = subeffects.find((s) => s._id === value?.id_subeffect);
 
-  // Gérer le clic en dehors pour l'accessoire
+  // Close the accessory menu on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (accessoryMenuRef.current && !accessoryMenuRef.current.contains(event.target as Node)) {
@@ -73,7 +72,7 @@ export const AccessorySearchSelect = ({
     };
   }, [isAccessoryOpen]);
 
-  // Gérer le clic en dehors pour le sous-effet
+  // Close the sub-effect menu on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (subeffectMenuRef.current && !subeffectMenuRef.current.contains(event.target as Node)) {
@@ -109,11 +108,9 @@ export const AccessorySearchSelect = ({
 
   return (
     <VStack spacing={2} align="stretch" w="100%">
-      {/* Sélection de l'accessoire principal */}
       <FormControl>
         <FormLabel fontSize="sm">Accessoire</FormLabel>
         <Box position="relative" ref={accessoryMenuRef} w="100%">
-          {/* Affichage quand un accessoire est sélectionné */}
           {selectedAccessory && !isAccessoryOpen ? (
             <HStack
               p={2}
@@ -141,7 +138,6 @@ export const AccessorySearchSelect = ({
               </Badge>
             </HStack>
           ) : (
-            /* Input de recherche */
             <InputGroup size="sm">
               <InputLeftElement pointerEvents="none">
                 {isLoading ? <Spinner size="sm" /> : <SearchIcon color="gray.400" />}
@@ -156,7 +152,6 @@ export const AccessorySearchSelect = ({
             </InputGroup>
           )}
 
-          {/* Menu déroulant */}
           {isAccessoryOpen && (
             <Box
               position="absolute"
@@ -215,12 +210,11 @@ export const AccessorySearchSelect = ({
         </Box>
       </FormControl>
 
-      {/* Sélection du sous-effet (optionnel) */}
+      {/* Sub-effect (optional) */}
       {value?.id_accessory && (
         <FormControl>
           <FormLabel fontSize="sm">Sous-effet (optionnel)</FormLabel>
           <Box position="relative" ref={subeffectMenuRef} w="100%">
-            {/* Affichage quand un sous-effet est sélectionné */}
             {selectedSubeffect && !isSubeffectOpen ? (
               <HStack
                 p={2}
@@ -238,7 +232,6 @@ export const AccessorySearchSelect = ({
                 </Badge>
               </HStack>
             ) : (
-              /* Input de recherche */
               <InputGroup size="sm">
                 <InputLeftElement pointerEvents="none">
                   {isLoadingSubeffects ? <Spinner size="sm" /> : <SearchIcon color="gray.400" />}
@@ -253,7 +246,6 @@ export const AccessorySearchSelect = ({
               </InputGroup>
             )}
 
-            {/* Menu déroulant */}
             {isSubeffectOpen && (
               <Box
                 position="absolute"

@@ -21,7 +21,6 @@ interface ComparisonEntityProps {
   comparisonType: "players" | "guilds";
 }
 
-// Composant pour le rendu d'une entité de comparaison
 const ComparisonEntity: React.FC<ComparisonEntityProps> = ({
   entityId,
   entityData,
@@ -57,7 +56,6 @@ const ComparisonEntity: React.FC<ComparisonEntityProps> = ({
         boxShadow: "2xl"
       }}
     >
-      {/* Barre de gradient en haut */}
       <Box
         position="absolute"
         top={0}
@@ -126,7 +124,6 @@ const ComparisonEntity: React.FC<ComparisonEntityProps> = ({
 
       <CardBody pt={4}>
         <VStack spacing={4} align="stretch">
-          {/* Statistique principale */}
           <Box
             p={4}
             borderRadius="xl"
@@ -144,7 +141,6 @@ const ComparisonEntity: React.FC<ComparisonEntityProps> = ({
                 {stats.averageScore.toLocaleString("fr-FR")}
               </Text>
             </Box>
-            {/* Pattern de fond */}
             <Box
               position="absolute"
               top="-50%"
@@ -157,7 +153,6 @@ const ComparisonEntity: React.FC<ComparisonEntityProps> = ({
             />
           </Box>
 
-          {/* Autres statistiques */}
           <Grid templateColumns="repeat(2, 1fr)" gap={3}>
             <Box
               p={3}
@@ -189,7 +184,6 @@ const ComparisonEntity: React.FC<ComparisonEntityProps> = ({
             </Box>
           </Grid>
 
-          {/* Min/Max avec barres */}
           <VStack spacing={2} align="stretch">
             <Box>
               <HStack justify="space-between" mb={1}>

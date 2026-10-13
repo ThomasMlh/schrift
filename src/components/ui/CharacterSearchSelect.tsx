@@ -52,19 +52,16 @@ export const CharacterSearchSelect = ({
   const hoverBg = useColorModeValue("gray.50", "gray.600");
   const menuBg = "bg.card";
 
-  // Récupérer les personnages avec recherche API
   const { characters, isLoading } = useCharacters({
     limit: 50,
     searchQuery: searchTerm || undefined,
   });
 
-  // Récupérer le personnage sélectionné si on a un value
   const { character: currentCharacter } = useCharacter(value || undefined);
 
-  // Charger le personnage sélectionné au montage ou quand value change
+  // Resolve the selected character on mount or when value changes
   useEffect(() => {
     if (value) {
-      // Chercher dans les personnages chargés
       const found = characters.find((c) => c._id === value);
       if (found) {
         setSelectedCharacter(found);
@@ -76,10 +73,9 @@ export const CharacterSearchSelect = ({
     }
   }, [value, characters, currentCharacter]);
 
-  // Filtrer les personnages exclus
   const filteredCharacters = characters.filter((char) => !excludeIds.includes(char._id));
 
-  // Gérer le clic en dehors
+  // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -115,7 +111,6 @@ export const CharacterSearchSelect = ({
 
   return (
     <Box position="relative" ref={menuRef} w="100%">
-      {/* Affichage quand un personnage est sélectionné */}
       {selectedCharacter && !isOpen ? (
         <HStack
           p={size === "sm" ? 2 : 3}
@@ -145,7 +140,6 @@ export const CharacterSearchSelect = ({
           )}
         </HStack>
       ) : (
-        /* Input de recherche */
         <InputGroup size={size}>
           <InputLeftElement pointerEvents="none">
             {isLoading ? <Spinner size="sm" /> : <SearchIcon color="gray.400" />}
@@ -161,7 +155,6 @@ export const CharacterSearchSelect = ({
         </InputGroup>
       )}
 
-      {/* Menu déroulant */}
       {isOpen && !isDisabled && (
         <Box
           position="absolute"

@@ -10,8 +10,7 @@ interface CharacterVisualsProps {
   onOpen: (src: string, label: string) => void;
 }
 
-// Visuels du personnage (bannière, attaque spéciale, artwork, phrase) avec téléchargement et
-// agrandissement
+// Character visuals (banner, special attack, artwork, quote) with download and zoom
 export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVisualsProps) => {
   const { t } = useTranslation();
   const { colorMode } = useColorMode();

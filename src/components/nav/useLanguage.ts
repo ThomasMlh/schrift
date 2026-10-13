@@ -14,7 +14,7 @@ export const useLanguage = () => {
     try {
       localStorage.setItem("schrift-lang", code);
     } catch {
-      // Stockage indisponible : la langue reste valable pour la session
+      // Storage unavailable: the language only applies to this session
     }
   };
 

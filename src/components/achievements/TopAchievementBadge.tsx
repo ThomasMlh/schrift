@@ -9,7 +9,7 @@ interface TopAchievementBadgeProps {
   size?: number;
 }
 
-// Petit badge du succès le plus rare d'un joueur, affiché à côté de son pseudo dans les classements
+// Small badge of a player's rarest achievement, shown next to their name in rankings
 export const TopAchievementBadge = ({ achievement, size = 20 }: TopAchievementBadgeProps) => {
   const { t } = useTranslation();
   if (!achievement) return null;

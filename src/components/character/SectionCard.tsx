@@ -8,7 +8,7 @@ interface SectionCardProps {
   children: ReactNode;
 }
 
-// Bloc de la fiche personnage : titre avec icône, contenu dans une carte
+// Character page section: title with icon, content in a card
 export const SectionCard = ({ title, icon, children }: SectionCardProps) => (
   <Box bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={5}>
     <HStack spacing={2} mb={4}>
@@ -19,7 +19,7 @@ export const SectionCard = ({ title, icon, children }: SectionCardProps) => (
   </Box>
 );
 
-// Ligne « libellé : pastilles » du profil de combat
+// "Label: chips" row of the combat profile
 export const TraitRow = ({ label, children }: { label: string; children: ReactNode }) => (
   <Box>
     <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color="text.muted" mb={2}>
@@ -29,7 +29,7 @@ export const TraitRow = ({ label, children }: { label: string; children: ReactNo
   </Box>
 );
 
-// Pastille d'une caractéristique (killer, catégorie, trait…)
+// Chip for a single trait (killer, category, soul trait…)
 export const Pill = ({ icon, children }: { icon?: ReactNode; children: ReactNode }) => (
   <HStack spacing={1.5} px={3} py={1} borderRadius="full" bg="bg.subtle" borderWidth="1px" borderColor="border.subtle">
     {icon}

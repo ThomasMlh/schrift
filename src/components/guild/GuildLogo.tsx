@@ -8,7 +8,7 @@ interface GuildLogoProps {
   size: string;
 }
 
-/** Logo de la guilde, ou sa lettre sur fond dégradé si l'image manque */
+/** Guild logo, or its letter on a gradient when the image is missing */
 export const GuildLogo = ({ guild, size }: GuildLogoProps) => {
   const [hasError, setHasError] = useState(false);
 

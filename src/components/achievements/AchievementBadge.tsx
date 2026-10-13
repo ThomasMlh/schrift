@@ -11,7 +11,7 @@ interface AchievementBadgeProps {
   label?: string;
 }
 
-// Couleurs de chaque rareté : dégradé (sombre → clair), contour et couleur de l'icône
+// Colors of each tier: gradient (dark to light), rim and icon color
 const TIER_STYLES: Record<AchievementTier, { stops: [string, string, string]; rim: string; ink: string }> = {
   bronze: { stops: ["#7A3E16", "#C77B43", "#F1BF93"], rim: "#5C2C0E", ink: "#4A230B" },
   silver: { stops: ["#5F6773", "#B9C1CC", "#F4F6F9"], rim: "#474D57", ink: "#353A42" },
@@ -22,9 +22,9 @@ const TIER_STYLES: Record<AchievementTier, { stops: [string, string, string]; ri
 const HEX_OUTER = "50,3 93,27 93,73 50,97 7,73 7,27";
 const HEX_INNER = "50,13 84,32 84,68 50,87 16,68 16,32";
 
-// Badge de succès en hexagone : la couleur donne la rareté, l'icône donne le succès. Un succès
-// non obtenu est grisé avec un cadenas ; le platine a un reflet animé (coupé si l'utilisateur
-// demande moins d'animations).
+// Hexagonal achievement badge: the color shows the tier, the icon the achievement. A locked
+// achievement is greyed out with a padlock; platinum has an animated shine (disabled when the user
+// prefers reduced motion).
 export const AchievementBadge = ({ tier, icon, locked = false, size = 64, label }: AchievementBadgeProps) => {
   const id = useId().replace(/:/g, "");
   const lockedA = useColorModeValue("#C9CDD8", "#3A3F52");

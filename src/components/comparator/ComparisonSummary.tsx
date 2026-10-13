@@ -8,8 +8,8 @@ interface ComparisonSummaryProps {
   metrics: TableMetricDef[];
 }
 
-// Une carte par entité comparée : nombre de métriques où elle est (à égalité ou seule) la
-// meilleure. Celle qui en gagne le plus, sans égalité, porte une couronne.
+// One card per compared entity: number of metrics where it is the best (alone or tied).
+// The one winning the most, without a tie, gets a crown.
 export const ComparisonSummary = ({ entities, metrics }: ComparisonSummaryProps) => {
   const wins = entities.map((entity) =>
     entity.stats

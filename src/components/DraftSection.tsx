@@ -66,11 +66,9 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   const [selectedTargetGuild, setSelectedTargetGuild] = useState<string>("");
   const [isExecuting, setIsExecuting] = useState(false);
 
-  // Pool unifié (guilde source déduite du joueur choisi) : toujours chargé, pas seulement
-  // quand "sans guilde" est sélectionné comme avant l'étape "Depuis" fusionnée.
+  // Unified pool (the source guild is inferred from the selected player), always loaded
   const { users: guildlessUsers, isLoading: guildlessLoading } = useGuildlessUsers(true);
 
-  // ── Couleurs ────────────────────────────────────────────────────────────────
   const cardBg = "bg.card";
   const sidebarBg     = useColorModeValue("gray.50", "gray.850");
   const borderColor   = useColorModeValue("gray.200", "gray.700");
@@ -81,9 +79,8 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
   const emptyBg = "bg.muted";
   const guildCardBg = "bg.elevated";
 
-  // ── Données dérivées ────────────────────────────────────────────────────────
-  // On drafte des comptes bbs, pas des users : un compte sans bbs_id (guilde/rôle assignés
-  // avant liaison du compte de jeu) n'a rien à envoyer au backend, on l'exclut du pool.
+  // Drafts work on bbs accounts, not users: an account without bbs_id (guild/role assigned before
+  // the game account was linked) cannot be sent to the API, so it is left out of the pool.
   const allMembers = useMemo(() => {
     const members: (IUser & { guildId: string })[] = [];
     for (const [guildId, guildMembers] of Object.entries(membersByGuild)) {
@@ -97,8 +94,8 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     return members;
   }, [membersByGuild, guildlessUsers]);
 
-  // Pool de joueurs proposé au select unique (tous membres + sans guilde confondus), moins
-  // ceux déjà présents dans le draft en cours.
+  // Players offered in the select (all members and guildless accounts), minus those already
+  // in the current draft.
   const availableUsers = useMemo(() => {
     const draftedBbsIds = new Set(draftMoves.map((m) => m.bbsId));
     return allMembers.filter((member) => !draftedBbsIds.has(member.bbs_id!));
@@ -133,14 +130,12 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     return map;
   }, [guilds]);
 
-  // Compte sélectionné (pour affichage avatar) — identifié par bbs_id, pas par user._id, car un
-  // même user peut apparaître plusieurs fois dans la liste (un par compte).
+  // Selected account, identified by bbs_id rather than user._id since a user can appear once per account.
   const selectedUserData = useMemo(
     () => availableUsers.find((u) => u.bbs_id === selectedBbsId) ?? null,
     [availableUsers, selectedBbsId]
   );
 
-  // ── Actions ─────────────────────────────────────────────────────────────────
   const addMove = useCallback(() => {
     if (!selectedBbsId || !selectedTargetGuild) return;
     const user = allMembers.find((m) => m.bbs_id === selectedBbsId);
@@ -218,13 +213,12 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     }
   };
 
-  // ── Helper avatar ────────────────────────────────────────────────────────────
   const getAvatarUrl = (user: IUser) =>
     user.avatar && user.discord_id
       ? `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.webp?size=64`
       : undefined;
 
-  // ── Ligne enrichie du select joueur (avatar + guilde + rôle) ──────────────────
+  // Player select option: avatar, guild and role
   const renderPlayerOption = (user: IUser & { guildId: string }) => {
     const guild = user.guildId ? guildMap[user.guildId] : null;
     const color = user.guildId ? guildColorMap[user.guildId] : "gray";
@@ -256,12 +250,10 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     );
   };
 
-  // ── Chargement ───────────────────────────────────────────────────────────────
   if (membersLoading) {
     return <PageLoader color="orange.500" height="200px" />;
   }
 
-  // ── Rendu ────────────────────────────────────────────────────────────────────
   return (
     <Box w="100%" maxW="1100px" mx="auto">
       <Grid
@@ -269,7 +261,6 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
         gap={5}
         alignItems="start"
       >
-        {/* ── Colonne gauche : Guildes ──────────────────────────────────────── */}
         <GridItem>
           <Box
             bg={sidebarBg}
@@ -345,7 +336,6 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                 );
               })}
 
-              {/* Sans guilde */}
               <Box
                 bg={guildCardBg}
                 borderRadius="xl"
@@ -366,11 +356,9 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
           </Box>
         </GridItem>
 
-        {/* ── Colonne droite : Formulaire + Transferts ─────────────────────── */}
         <GridItem>
           <VStack spacing={4} align="stretch">
 
-            {/* Header */}
             <Flex align="center" justify="space-between">
               <HStack spacing={3}>
                 <Text fontSize="xl" fontWeight="bold">Draft de Guildes</Text>
@@ -387,7 +375,6 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
               )}
             </Flex>
 
-            {/* ── Formulaire de transfert ───────────────────────────────────── */}
             <Box
               bg={cardBg}
               borderRadius="xl"
@@ -399,13 +386,11 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                 Nouveau transfert
               </Text>
 
-              {/* 2 étapes visuelles */}
               <Grid
                 templateColumns={{ base: "1fr", md: "1fr auto 1fr auto" }}
                 gap={3}
                 alignItems="end"
               >
-                {/* Étape 1 : Joueur (recherche globale, guilde source déduite) */}
                 <Box>
                   <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>
                     Joueur
@@ -428,12 +413,10 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                   />
                 </Box>
 
-                {/* Flèche */}
                 <Box display={{ base: "none", md: "flex" }} alignItems="center" pb={1}>
                   <ArrowForwardIcon color={selectedBbsId ? "orange.400" : "gray.300"} boxSize={4} />
                 </Box>
 
-                {/* Étape 2 : Vers */}
                 <Box>
                   <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>Vers</Text>
                   <CustomSelect
@@ -461,7 +444,6 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                   />
                 </Box>
 
-                {/* Bouton ajouter */}
                 <Tooltip label={!selectedBbsId || !selectedTargetGuild ? "Remplissez tous les champs" : "Ajouter ce transfert"} hasArrow>
                   <Button
                     leftIcon={<AddIcon boxSize={3} />}
@@ -480,7 +462,6 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
               </Grid>
             </Box>
 
-            {/* ── Liste des transferts ──────────────────────────────────────── */}
             {draftMoves.length > 0 ? (
               <Box
                 bg={cardBg}
@@ -516,7 +497,6 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                   ))}
                 </VStack>
 
-                {/* Overflow warning */}
                 {hasOverflow && (
                   <Box px={5} pb={3} pt={2}>
                     <Alert status="error" borderRadius="lg" py={2} fontSize="sm">
@@ -526,7 +506,6 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                   </Box>
                 )}
 
-                {/* Actions */}
                 <Flex justify="flex-end" gap={3} px={5} pb={5} pt={2}>
                   <Button variant="ghost" size="sm" borderRadius="lg" onClick={clearDraft}>
                     Annuler
@@ -566,7 +545,6 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
         </GridItem>
       </Grid>
 
-      {/* ── Modal de confirmation ─────────────────────────────────────────────── */}
       <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
         <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
         <ModalContent borderRadius="xl" bg={modalBg} mx={4}>
@@ -598,7 +576,6 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
               ))}
             </VStack>
 
-            {/* Impact guildes */}
             {guilds.some((g) => (membersByGuild[g._id]?.length || 0) !== (projectedCounts[g._id] || 0)) && (
               <Box mt={4}>
                 <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={2}>

@@ -11,12 +11,12 @@ import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { AlterationImage } from "@/components/ui/AlterationImage";
 
 interface MissingScoresPanelProps {
-  // Guilde ciblée ; vide si l'admin n'en a pas encore choisi une
+  // Target guild; empty until the admin picks one
   guildId: string;
 }
 
-// Scores manquants : pour chaque rotation terminée du cycle, les membres actuels de la guilde sans
-// score, avec saisie directe (même route que la saisie classique, donc même calcul différentiel).
+// Missing scores: for each finished rotation of the cycle, the current guild members without a
+// score, with direct entry (same route as the regular entry, so the same differential computation).
 export const MissingScoresPanel = ({ guildId }: MissingScoresPanelProps) => {
   const toast = useToast();
   const { cycles } = useCycles({ authenticated: true });

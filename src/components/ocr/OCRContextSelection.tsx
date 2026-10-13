@@ -63,7 +63,7 @@ export const OCRContextSelection = ({
 
   const rotationOptions = rotations.map((r: ICycleRotation) => ({
     value: r.rotation_id || r._id || "",
-    // Texte utilisé par la recherche du select ; l'affichage passe par RotationLabel
+    // Text used by the select search; RotationLabel handles the display
     label: `#${r.position} ${r.killer}`,
     content: <RotationLabel rotation={r} showDate />,
   }));

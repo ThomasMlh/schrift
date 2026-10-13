@@ -56,7 +56,7 @@ interface ExistingCyclesListProps {
   onEditCycle: (cycle: ICycle) => void;
 }
 
-/** Mini timeline bar showing rotations as colored segments */
+/** Compact timeline showing rotations as colored segments */
 const RotationTimeline = ({ rotations }: { rotations: ICycle["rotations"] }) => {
   if (!rotations || rotations.length === 0) return null;
 
@@ -179,7 +179,6 @@ const ExistingCyclesList = ({
   );
   const statBg = useColorModeValue("gray.50", "transparent");
 
-  // Computed stats
   const totalRotations = useMemo(
     () =>
       Array.isArray(cycles)
@@ -188,7 +187,6 @@ const ExistingCyclesList = ({
     [cycles]
   );
 
-  // Filtered cycles
   const filteredCycles = useMemo(() => {
     if (!Array.isArray(cycles)) return [];
     if (!searchQuery.trim()) return cycles;
@@ -244,7 +242,6 @@ const ExistingCyclesList = ({
     }
   };
 
-  // Get date range string for a cycle
   const getCycleDateRange = (cycle: ICycle): string | null => {
     if (!cycle.rotations || cycle.rotations.length === 0) return null;
     const first = cycle.rotations[0]?.start_date;
@@ -255,7 +252,6 @@ const ExistingCyclesList = ({
 
   return (
     <VStack spacing={5} align="stretch">
-      {/* Stats Bar */}
       {Array.isArray(cycles) && cycles.length > 0 && (
         <StatGroup
           bg={statBg}
@@ -293,7 +289,6 @@ const ExistingCyclesList = ({
         </StatGroup>
       )}
 
-      {/* Toolbar */}
       <HStack spacing={3}>
         <InputGroup size="sm" maxW="300px">
           <InputLeftElement pointerEvents="none">
@@ -340,7 +335,6 @@ const ExistingCyclesList = ({
         </Tooltip>
       </HStack>
 
-      {/* Content */}
       {isLoading ? (
         <PageLoader label={t("pages.cycles.loading")} color="blue.400" height="250px" />
       ) : !Array.isArray(cycles) || cycles.length === 0 ? (
@@ -399,14 +393,12 @@ const ExistingCyclesList = ({
                   transform: "translateY(-1px)",
                 }}
               >
-                {/* Card Header with gradient accent */}
                 <Box
                   bgGradient={headerGradient}
                   h="3px"
                 />
 
                 <VStack spacing={3} p={4} align="stretch">
-                  {/* Title row */}
                   <HStack justify="space-between" align="start">
                     <VStack align="start" spacing={0} flex={1}>
                       <HStack spacing={2} align="center">
@@ -449,10 +441,8 @@ const ExistingCyclesList = ({
                     </HStack>
                   </HStack>
 
-                  {/* Timeline bar */}
                   <RotationTimeline rotations={cycle.rotations} />
 
-                  {/* Period legend */}
                   <HStack spacing={4} fontSize="2xs" color="gray.500">
                     <HStack spacing={1}>
                       <Box w="8px" h="8px" borderRadius="full" bg="blue.400" />
@@ -464,7 +454,6 @@ const ExistingCyclesList = ({
                     </HStack>
                   </HStack>
 
-                  {/* Expandable details */}
                   {isExpanded && (
                     <Box
                       mt={1}
@@ -485,7 +474,6 @@ const ExistingCyclesList = ({
                     </Box>
                   )}
 
-                  {/* Action bar */}
                   <HStack
                     spacing={1}
                     pt={1}
@@ -557,7 +545,6 @@ const ExistingCyclesList = ({
         </SimpleGrid>
       )}
 
-      {/* Delete confirmation dialog */}
       <AlertDialog
         isOpen={isOpen}
         leastDestructiveRef={cancelRef}

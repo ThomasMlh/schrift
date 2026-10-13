@@ -74,7 +74,7 @@ export const CycleCreationModal = ({
       return;
     }
 
-    // Vérifier que toutes les rotations ont des dates
+    // Every rotation needs dates
     const incompleteRotations = selectedRotations.filter(r => !r.start_date || !r.end_date);
     if (incompleteRotations.length > 0) {
       toast({

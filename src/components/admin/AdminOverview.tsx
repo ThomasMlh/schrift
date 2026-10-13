@@ -18,7 +18,7 @@ import { BoldMarkdownText } from "@/components/ui/BoldMarkdownText";
 import type { BotHealth } from "./useBotHealth";
 
 interface AdminOverviewProps {
-  // Guildes gérées (toutes pour un admin, les siennes pour un chef)
+  // Managed guilds (all of them for an admin, their own for a leader)
   guilds: IGuild[];
   isAdmin: boolean;
   bot: BotHealth;
@@ -60,7 +60,7 @@ const TONE_BORDER: Record<NonNullable<OverviewCardProps["tone"]>, string> = {
   success: "green.400",
 };
 
-// Carte de la vue d'ensemble : chiffre clé, explication, et lien vers l'onglet concerné
+// Overview card: key figure, explanation and link to the related tab
 const OverviewCard = ({ icon, gradient, label, value, hint, isLoading, tone = "default", onClick, action }: OverviewCardProps) => (
   <Box
     as={onClick ? "button" : "div"}
@@ -106,7 +106,7 @@ interface GuildMissing {
   lastPosition: number | null;
 }
 
-// Scores manquants d'une guilde sur le cycle en cours ; remonte les chiffres au parent
+// Missing scores of one guild on the current cycle; reports the figures to the parent
 const GuildMissingRow = ({ guild, onLoaded, onClick }: {
   guild: IGuild;
   onLoaded: (guildId: string, value: GuildMissing) => void;
@@ -163,7 +163,7 @@ const BOT_LABELS: Record<BotHealth["status"], string> = {
   unknown: "—",
 };
 
-// Page d'arrivée de l'administration : ce qui demande de l'attention, en un coup d'œil
+// Admin landing page: what needs attention, at a glance
 export const AdminOverview = ({ guilds, isAdmin, bot, onNavigate }: AdminOverviewProps) => {
   const { t } = useTranslation();
   const { cycles, isLoading: cyclesLoading } = useCycles({ limit: 5, authenticated: true });
@@ -264,7 +264,6 @@ export const AdminOverview = ({ guilds, isAdmin, bot, onNavigate }: AdminOvervie
       </SimpleGrid>
 
       <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={4}>
-        {/* Scores manquants par guilde */}
         <Box bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={4}>
           <Flex justify="space-between" align="center" mb={2}>
             <Text fontWeight="bold" color="text.strong">Scores manquants par guilde</Text>
@@ -288,7 +287,6 @@ export const AdminOverview = ({ guilds, isAdmin, bot, onNavigate }: AdminOvervie
           )}
         </Box>
 
-        {/* Dernière activité */}
         <Box bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={4}>
           <Flex justify="space-between" align="center" mb={2}>
             <Text fontWeight="bold" color="text.strong">Dernière activité</Text>

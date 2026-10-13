@@ -1,5 +1,5 @@
-// Palette de couleurs Chakra assignées par index de guilde, partagée par l'onglet Draft et la
-// proposition de draft pour garder le même code couleur par guilde.
+// Chakra color palette assigned by guild index, shared by the Draft tab and the draft proposal
+// so each guild keeps the same color.
 export const GUILD_COLORS = ["purple", "blue", "teal", "green", "orange", "pink", "cyan", "red"] as const;
 export type GuildColor = typeof GUILD_COLORS[number];
 

@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Text } from "@chakra-ui/react";
 
-// Rend "**texte**" en gras, sans dépendance markdown — juste ce qu'il faut pour le journal d'activité.
+// Renders "**text**" in bold without a markdown dependency, enough for the activity log.
 export const BoldMarkdownText = ({ text }: { text: string }) => (
   <>
     {text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>

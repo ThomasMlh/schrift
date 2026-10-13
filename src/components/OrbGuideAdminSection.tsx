@@ -60,7 +60,7 @@ const OrbGuideAdminSection = () => {
     }
   };
 
-  // Entrée en attente de confirmation de suppression
+  // Entry awaiting delete confirmation
   const [toDelete, setToDelete] = useState<{ id: string; title: string } | null>(null);
 
   const handleDelete = async () => {

@@ -26,7 +26,6 @@ export const Pagination = ({
     const renderPaginationButtons = () => {
         const buttons = [];
 
-        // Bouton précédent
         buttons.push(
             <Button
                 key="prev"
@@ -38,11 +37,10 @@ export const Pagination = ({
             </Button>
         );
 
-        // Calcul des pages à afficher
         let startPage = Math.max(1, currentPage - 2);
         let endPage = Math.min(totalPages, currentPage + 2);
 
-        // Ajuster si on est près du début ou de la fin
+        // Shift the window near the first or last page
         if (currentPage <= 3) {
             endPage = Math.min(5, totalPages);
         }
@@ -50,7 +48,6 @@ export const Pagination = ({
             startPage = Math.max(1, totalPages - 4);
         }
 
-        // Première page si pas visible
         if (startPage > 1) {
             buttons.push(
                 <Button 
@@ -67,7 +64,6 @@ export const Pagination = ({
             }
         }
 
-        // Pages du milieu
         for (let page = startPage; page <= endPage; page++) {
             buttons.push(
                 <Button
@@ -81,7 +77,6 @@ export const Pagination = ({
             );
         }
 
-        // Dernière page si pas visible
         if (endPage < totalPages) {
             if (endPage < totalPages - 1) {
                 buttons.push(<Text key="ellipsis2">...</Text>);
@@ -98,7 +93,6 @@ export const Pagination = ({
             );
         }
 
-        // Bouton suivant
         buttons.push(
             <Button
                 key="next"

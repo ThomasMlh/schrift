@@ -88,7 +88,7 @@ export const OCRResultsValidation = ({
   onReset,
   isSubmitting
 }: OCRResultsValidationProps) => {
-  // État pour gérer les modifications utilisateur (bbs_id identifie le compte précis, user_id son propriétaire)
+  // User edits (bbs_id identifies the exact account, user_id its owner)
   const [editedResults, setEditedResults] = useState<Map<string, { user_id: string; bbs_id: string; score: number }>>(
     new Map()
   );
@@ -99,7 +99,7 @@ export const OCRResultsValidation = ({
   const bgColor = "bg.card";
   const borderColor = "border.default";
 
-  // Formatage des scores avec virgules (ex: 1234567 → 1,234,567)
+  // Formats scores with commas (e.g. 1234567 -> 1,234,567)
   const formatNumber = (value: string | number): string => {
     const numValue = typeof value === "string" ? parseFloat(value) || 0 : value;
     return numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -115,8 +115,8 @@ export const OCRResultsValidation = ({
     0
   );
 
-  // Un compte par ligne (bbs_id = valeur unique du select), pas un user par ligne — un user avec
-  // plusieurs comptes dans la même guilde apparaît donc plusieurs fois, chacun sélectionnable.
+  // One row per account (bbs_id is the select value), not per user: a user with several accounts
+  // in the same guild appears once per account.
   const membersWithAccount = guildMembers.filter(m => m.bbs_id);
   const memberOptions = membersWithAccount.map(m => ({
     value: m.bbs_id!,
@@ -175,7 +175,7 @@ export const OCRResultsValidation = ({
           scores.push({
             user_id: data.user_id,
             bbs_id: data.bbs_id,
-            raw_score: data.score, // Le score détecté est le raw_score
+            raw_score: data.score, // The detected score is the raw score
             screenshot_index: screenshot.index
           });
         }
@@ -186,7 +186,7 @@ export const OCRResultsValidation = ({
   };
 
   const canSubmit = () => {
-    // Vérifier que tous les joueurs ont un compte (bbs_id) et un score valide
+    // Every player needs an account (bbs_id) and a valid score
     return results.every(screenshot =>
       screenshot.players.every(player => {
         const data = getPlayerData(screenshot, player);
@@ -214,7 +214,6 @@ export const OCRResultsValidation = ({
               </Text>
             </Box>
 
-            {/* Statistiques */}
             <Alert status={needsReview > 0 ? "warning" : "success"} borderRadius="md">
               <AlertIcon />
               <VStack align="start" spacing={1}>
@@ -236,7 +235,6 @@ export const OCRResultsValidation = ({
               </VStack>
             </Alert>
 
-            {/* Liste des screenshots avec résultats */}
             <Accordion allowMultiple defaultIndex={[0]}>
               {results.map((screenshot) => (
                 <AccordionItem key={screenshot.index} borderColor={borderColor}>
@@ -275,7 +273,7 @@ export const OCRResultsValidation = ({
                   </AccordionButton>
 
                   <AccordionPanel pb={4} overflow="visible">
-                    {/* Layout mobile : cartes empilées */}
+                    {/* Mobile layout: stacked cards */}
                     <Box display={{ base: "flex", md: "none" }} flexDirection="column" gap={3}>
                       {screenshot.players.map((player) => {
                         const data = getPlayerData(screenshot, player);
@@ -333,7 +331,7 @@ export const OCRResultsValidation = ({
                       })}
                     </Box>
 
-                    {/* Layout desktop : tableau */}
+                    {/* Desktop layout: table */}
                     <Box display={{ base: "none", md: "block" }} overflowX="auto">
                       <Table variant="simple" size="sm">
                         <Thead>
@@ -404,7 +402,6 @@ export const OCRResultsValidation = ({
               ))}
             </Accordion>
 
-            {/* Actions */}
             <VStack spacing={2} align="stretch" display={{ base: "flex", md: "none" }}>
               <Button
                 colorScheme="green"
@@ -478,7 +475,6 @@ export const OCRResultsValidation = ({
         </CardBody>
       </Card>
 
-      {/* Modal image plein écran */}
       <Modal isOpen={isOpen} onClose={onClose} size="6xl">
         <ModalOverlay />
         <ModalContent>

@@ -45,7 +45,6 @@ export const UserPositionPerformance = ({
     count: q.count
   }));
 
-  // Identifier le meilleur quartile
   const best = [...performanceByQuartile].sort((a, b) => b.averageScore - a.averageScore)[0];
   const worst = [...performanceByQuartile].sort((a, b) => a.averageScore - b.averageScore)[0];
   const trend = best.quartile.startsWith("Q1") || best.quartile.startsWith("Q2") ? "début" : "fin";

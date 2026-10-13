@@ -36,10 +36,8 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
   const tooltipBg = "bg.elevated";
   const tooltipBorder = "border.default";
 
-  // État pour le filtre d'année
   const [selectedYear, setSelectedYear] = useState<string>("all");
 
-  // Extraire les années disponibles
   const availableYears = useMemo(() => {
     if (!temporalEvolution || temporalEvolution.length === 0) return [];
     const years = new Set<number>();
@@ -51,7 +49,7 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
     return Array.from(years).sort((a, b) => a - b);
   }, [temporalEvolution]);
 
-  // Filtrer les données par année (déjà triées chronologiquement depuis le backend)
+  // Filter by year (data is already sorted chronologically by the API)
   const filteredData = useMemo(() => {
     if (!temporalEvolution || temporalEvolution.length === 0) return [];
     if (selectedYear === "all") {
@@ -73,15 +71,14 @@ export const UserTemporalEvolution = ({ temporalEvolution }: UserTemporalEvoluti
     );
   }
 
-  // Formater les données pour le graphique
   const chartData = filteredData.map((item) => ({
     name: selectedYear === "all" && item.year 
       ? `${item.cycle_name} (${item.year})`
       : item.cycle_name,
-    score: Math.round(item.averageScore / 1000000), // Convertir en millions
+    score: Math.round(item.averageScore / 1000000), // In millions
     scoreCount: item.scoreCount,
     year: item.year,
-    cycleName: item.cycle_name // Garder le nom original pour le tooltip
+    cycleName: item.cycle_name // Original name, for the tooltip
   }));
 
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { cycleName?: string; name?: string; year?: number; scoreCount?: number }; value: number; name: string }> }) => {

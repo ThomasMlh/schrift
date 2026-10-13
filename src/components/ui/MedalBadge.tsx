@@ -12,7 +12,7 @@ interface MedalBadgeProps {
   size?: number;
 }
 
-/** Médaille dessinée (ruban + disque gravé du rang), sans dépendre d'une police d'emoji. */
+/** Drawn medal (ribbon + engraved rank disc), independent of any emoji font. */
 export const MedalBadge = ({ rank, size = 28 }: MedalBadgeProps) => {
   const { t } = useTranslation();
   const c = MEDALS[rank];
@@ -28,10 +28,8 @@ export const MedalBadge = ({ rank, size = 28 }: MedalBadgeProps) => {
             <stop offset="100%" stopColor={c.dark} />
           </radialGradient>
         </defs>
-        {/* Ruban */}
         <path d="M8 0h7l3 13h-7z" fill={c.ribbon} />
         <path d="M24 0h-7l-3 13h7z" fill={c.ribbon} opacity="0.75" />
-        {/* Disque */}
         <circle cx="16" cy="25" r="13" fill={`url(#${id})`} stroke={c.dark} strokeWidth="1.5" />
         <circle cx="16" cy="25" r="9.5" fill="none" stroke={c.light} strokeOpacity="0.6" strokeWidth="1" />
         <text

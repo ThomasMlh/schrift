@@ -41,13 +41,12 @@ interface TransferScoreModalProps {
 export const TransferScoreModal = ({ isOpen, onClose, cycles, guilds }: TransferScoreModalProps) => {
     const toast = useToast();
     const { transferScoreAccount } = useAPIMutations();
-    // Roster global (tous comptes, toutes guildes confondues) — un joueur transféré de guilde en
-    // cours de cycle doit rester trouvable comme compte source ou cible, quelle que soit sa
-    // guilde actuelle.
+    // Global roster (every account, every guild): a player who changed guild during the cycle must
+    // still be selectable as the source or target account, whatever their current guild.
     const { accounts: accountRoster } = useUserAccounts({ authenticated: true, limit: 1000, enabled: isOpen });
 
     const [selectedCycleId, setSelectedCycleId] = useState("");
-    const [selectedRotationId, setSelectedRotationId] = useState(""); // _id Mongo de la rotation (CustomSelect)
+    const [selectedRotationId, setSelectedRotationId] = useState(""); // Rotation Mongo _id (CustomSelect)
     const [sourceBbsId, setSourceBbsId] = useState("");
     const [sourceSearchQuery, setSourceSearchQuery] = useState("");
     const [targetBbsId, setTargetBbsId] = useState("");
@@ -92,9 +91,9 @@ export const TransferScoreModal = ({ isOpen, onClose, cycles, guilds }: Transfer
 
         setIsSubmitting(true);
         try {
-            // Endpoint dédié : contrairement à updateScore (PUT /:id), le compte cible n'a pas besoin
-            // d'appartenir à la guilde actuelle du score — c'est tout l'intérêt du transfert (réattribuer
-            // un score historique à un compte qui a depuis changé de guilde). guild_id ne bouge pas.
+            // Dedicated endpoint: unlike updateScore (PUT /:id), the target account does not need to belong to
+            // the score's current guild, which is the point of a transfer (reassigning a past score to an
+            // account that has since changed guild). guild_id is kept.
             await transferScoreAccount(sourceScore._id!, {
                 target_user_id: targetAccount._id,
                 target_bbs_id: targetAccount.bbs_id!,
@@ -120,7 +119,6 @@ export const TransferScoreModal = ({ isOpen, onClose, cycles, guilds }: Transfer
         }
     };
 
-    // ── Couleurs ─────────────────────────────────────────────────────────────
     const modalBg = "bg.card";
     const borderColor = "border.subtle";
     const mutedText   = useColorModeValue("gray.500", "gray.400");
@@ -148,7 +146,6 @@ export const TransferScoreModal = ({ isOpen, onClose, cycles, guilds }: Transfer
                             de la saisie.
                         </Text>
 
-                        {/* ── Cycle + Rotation ───────────────────────────── */}
                         <FormControl isRequired>
                             <FormLabel fontSize="sm" color={mutedText} mb={1.5}>Cycle</FormLabel>
                             <CycleSelect
@@ -182,7 +179,6 @@ export const TransferScoreModal = ({ isOpen, onClose, cycles, guilds }: Transfer
 
                         <Divider borderColor={borderColor} />
 
-                        {/* ── Compte source ─────────────────────────────── */}
                         <FormControl isRequired>
                             <FormLabel fontSize="sm" color={mutedText} mb={1.5}>Compte source (score actuel)</FormLabel>
                             <UserSearchSelect
@@ -197,7 +193,6 @@ export const TransferScoreModal = ({ isOpen, onClose, cycles, guilds }: Transfer
                             />
                         </FormControl>
 
-                        {/* ── État du score trouvé ──────────────────────── */}
                         {sourceBbsId && selectedRotation && (
                             isLoadingScore ? (
                                 <HStack color={mutedText} fontSize="sm">
@@ -222,7 +217,6 @@ export const TransferScoreModal = ({ isOpen, onClose, cycles, guilds }: Transfer
 
                         <Divider borderColor={borderColor} />
 
-                        {/* ── Compte cible ──────────────────────────────── */}
                         <FormControl isRequired>
                             <FormLabel fontSize="sm" color={mutedText} mb={1.5}>Compte cible (à qui l'attribuer)</FormLabel>
                             <UserSearchSelect
@@ -243,7 +237,6 @@ export const TransferScoreModal = ({ isOpen, onClose, cycles, guilds }: Transfer
                             </Text>
                         )}
 
-                        {/* ── Récapitulatif ──────────────────────────────── */}
                         {canSubmit && (
                             <Box bg={previewBg} borderRadius="xl" borderWidth="1px" borderColor={borderColor} borderLeftWidth="3px" borderLeftColor="teal.400" p={3}>
                                 <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={2}>

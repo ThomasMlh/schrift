@@ -59,8 +59,8 @@ const ACTION_OPTIONS = [
   ...Object.entries(ACTION_LABELS).map(([value, { label }]) => ({ value, label })),
 ];
 
-// Espace chefs/admins : scores probablement mal saisis à vérifier, et historique de toutes les
-// modifications de scores (qui, quand, avant/après). Un chef ne voit que ses guildes.
+// Leader/admin view: scores that were probably mistyped, and the history of every score change
+// (who, when, before/after). A leader only sees their own guilds.
 const ScoreControlSection = () => {
   const { isAdmin, managedGuildIds } = useAuth();
   const { guilds } = useGuilds(true);
@@ -91,7 +91,7 @@ const ScoreControlSection = () => {
     { value: "", label: isAdmin ? "Toutes les guildes" : "Toutes mes guildes" },
     ...selectableGuilds.map((g) => ({ value: g._id, label: g.name })),
   ];
-  // Les scores manquants portent sur une seule guilde : celle choisie, ou la seule gérée par le chef
+  // Missing scores cover a single guild: the selected one, or the only guild the leader manages
   const singleGuildId = guildId || (selectableGuilds.length === 1 ? selectableGuilds[0]._id : "");
 
   const handleReview = async (anomaly: IScoreAnomaly) => {

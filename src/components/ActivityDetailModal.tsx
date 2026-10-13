@@ -11,8 +11,7 @@ interface ActivityDetailModalProps {
     onClose: () => void;
 }
 
-// Une ligne label/valeur, masquée si la valeur est absente — évite d'afficher des champs vides
-// pour les types de notif dont certains champs ne sont pas toujours renseignés.
+// Label/value row, hidden when the value is missing (some notification types leave fields empty)
 const Field: React.FC<{ label: string; value?: React.ReactNode }> = ({ label, value }) =>
     value === undefined || value === null || value === "" ? null : (
         <HStack
@@ -30,8 +29,7 @@ const fmtDate = (v: unknown): string | undefined => {
     return isNaN(d.getTime()) ? v : d.toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
 };
 
-// Rendu du corps de la modal, spécifique à chaque type de notification puisque la forme
-// de `data` varie beaucoup (liste de scores, liste de mouvements de draft, stats de sync...).
+// Modal body per notification type, since the shape of `data` varies widely between types
 const DetailBody: React.FC<{ type: string; data: Record<string, unknown> }> = ({ type, data }) => {
     const s = (key: string): string | undefined =>
         typeof data[key] === "string" || typeof data[key] === "number" ? String(data[key]) : undefined;

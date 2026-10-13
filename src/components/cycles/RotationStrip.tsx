@@ -4,9 +4,9 @@ import type { ICycleRotation } from "@/interfaces";
 
 interface RotationStripProps {
   rotations: ICycleRotation[];
-  /** Nombre de rotations déjà jouées : les suivantes sont estompées. Absent = toutes pleines. */
+  /** Number of rotations already played: the following ones are faded. Omitted = all solid. */
   doneCount?: number;
-  /** Index de la rotation en cours ou à venir, entourée */
+  /** Index of the current or upcoming rotation, outlined */
   activeIndex?: number;
   height?: string;
 }
@@ -18,7 +18,7 @@ const attackBg = (attack: string) => {
   return { bgGradient: "linear(to-r, red.400 50%, blue.400 50%)" };
 };
 
-/** Frise des rotations d'un cycle : un segment par rotation, coloré selon le type d'attaque. */
+/** Strip of a cycle's rotations: one segment per rotation, colored by attack type. */
 export const RotationStrip = ({ rotations, doneCount, activeIndex = -1, height = "8px" }: RotationStripProps) => {
   const { t } = useTranslation();
 

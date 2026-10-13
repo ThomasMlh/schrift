@@ -8,8 +8,8 @@ interface ProgressionBadgeProps {
   fontSize?: string | { base?: string; md?: string };
 }
 
-// Écart de moyenne avec le cycle précédent (classement "progression"). Le signe et la flèche
-// portent le sens, pas seulement la couleur ; l'infobulle donne les deux moyennes.
+// Average change versus the previous cycle ("progression" ranking). The sign and arrow carry the
+// direction, not only the color; the tooltip shows both averages.
 export const ProgressionBadge = ({ percent, previousAverage, average, fontSize = { base: "xs", md: "sm" } }: ProgressionBadgeProps) => {
   const { t } = useTranslation();
   const arrow = percent > 0 ? "▲" : percent < 0 ? "▼" : "■";
