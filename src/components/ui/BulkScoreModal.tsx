@@ -7,13 +7,11 @@ import {
     ModalBody,
     ModalCloseButton,
     Button,
-    VStack,
     HStack,
     Text,
     useToast,
     Box,
     Center,
-    Badge,
     Flex,
     SimpleGrid,
     Progress,
@@ -25,7 +23,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { IUser, ICycle, IGuild, IScore, IScoreFormData, ICycleRotation } from "../../interfaces";
 import { useGuildMembers, useScores, useBulkEntryContext } from "@/hooks/useAPI";
 import { getRotationRealDates } from "@/utils/cycleHelpers";
-import { AttackTypeBadge } from "./AttackTypeBadge";
+import { RotationLabel } from "./RotationLabel";
 import { CycleSelect } from "./CycleSelect";
 import { CustomSelect } from "./CustomSelect";
 import { useTranslation } from "react-i18next";
@@ -257,18 +255,14 @@ const BulkScoreModal = ({
 
     const rotationOptions = (selectedCycle?.rotations ?? []).map((rotation: ICycleRotation) => ({
         value: rotation.rotation_id,
-        label: `Rotation #${rotation.position} - ${rotation.killer}`,
+        // Texte utilisé par la recherche du select
+        label: `#${rotation.position} ${rotation.killer}`,
         content: (
-            <VStack align="start" spacing={0.5} w="100%">
-                <HStack spacing={2}>
-                    <Text fontWeight="medium">Rotation #{rotation.position} - {rotation.killer}</Text>
-                    <AttackTypeBadge attackType={rotation.attack} />
-                    {rotation.rotation_id === currentRotation?.rotation_id && (
-                        <Badge colorScheme="green" fontSize="2xs">Dernière</Badge>
-                    )}
-                </HStack>
-                <Text fontSize="xs" color="text.muted">{rotation.start_date} - {rotation.end_date}</Text>
-            </VStack>
+            <RotationLabel
+                rotation={rotation}
+                showDate
+                badge={rotation.rotation_id === currentRotation?.rotation_id ? "Dernière" : undefined}
+            />
         ),
     }));
 
@@ -322,12 +316,7 @@ const BulkScoreModal = ({
                             options={rotationOptions}
                             renderSelected={(option) => {
                                 const rotation = selectedCycle?.rotations.find((r: ICycleRotation) => r.rotation_id === option.value);
-                                return rotation ? (
-                                    <HStack spacing={2} minW={0}>
-                                        <Text isTruncated>#{rotation.position} {rotation.killer}</Text>
-                                        <AttackTypeBadge attackType={rotation.attack} />
-                                    </HStack>
-                                ) : <Text>{option.label}</Text>;
+                                return rotation ? <RotationLabel rotation={rotation} /> : <Text>{option.label}</Text>;
                             }}
                             allowDeselect={false}
                         />
