@@ -5,35 +5,31 @@ import {
     ModalHeader,
     ModalFooter,
     ModalBody,
+    ModalCloseButton,
     Button,
-    VStack,
     HStack,
     Text,
-    FormControl,
-    FormLabel,
     useToast,
     Box,
     Center,
-    useColorMode,
-    Badge,
     Flex,
-    Stat,
-    StatLabel,
-    StatNumber,
     SimpleGrid,
+    Progress,
     IconButton,
     Tooltip,
 } from "@chakra-ui/react";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { IUser, ICycle, IGuild, IScore, IScoreFormData, ICycleRotation } from "../../interfaces";
-import { useGuildMembers, useScores } from "@/hooks/useAPI";
-import { AttackTypeBadge } from "./AttackTypeBadge";
+import { useGuildMembers, useScores, useBulkEntryContext } from "@/hooks/useAPI";
+import { getRotationRealDates } from "@/utils/cycleHelpers";
+import { RotationLabel } from "./RotationLabel";
 import { CycleSelect } from "./CycleSelect";
 import { CustomSelect } from "./CustomSelect";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "./PageLoader";
-import { ScoreRow, ScoreCard, ListIcon, GridIcon, type ViewMode } from "./BulkScoreInputs";
+import { BulkScoreRow, ListIcon, GridIcon, type ViewMode } from "./BulkScoreInputs";
+import { formatScore } from "@/utils/bulkScoreEntry";
 
 interface BulkScoreModalProps {
     isOpen: boolean;
@@ -46,6 +42,37 @@ interface BulkScoreModalProps {
     userGuildId?: string;
 }
 
+// Valeurs indexées par bbs_id (le compte), pas user_id : un même user peut avoir plusieurs comptes
+// bbs dans la même guilde, et chacun garde sa propre valeur. null = case vide, rien n'est envoyé.
+type ScoreValues = Record<string, number | null>;
+
+// Assez large pour une guilde avec ses alts (la liste des scores est paginée à 20 par défaut)
+const EXISTING_SCORES_LIMIT = 200;
+
+// Choix liste / grille mémorisé dans le navigateur (simple confort, ignoré si le stockage est indisponible)
+const VIEW_MODE_KEY = "bulkScoreModal.viewMode";
+const readViewMode = (): ViewMode => {
+    try {
+        return localStorage.getItem(VIEW_MODE_KEY) === "grid" ? "grid" : "list";
+    } catch {
+        return "list";
+    }
+};
+
+// Rotation pré-sélectionnée : la dernière déjà commencée (celle en cours, ou celle qui vient de se
+// terminer entre deux rotations), jamais une rotation à venir dont personne n'a encore de score
+const findLatestStartedRotation = (cycles: ICycle[], now = new Date()) => {
+    let latest: { cycle: ICycle; rotation: ICycleRotation; start: number } | null = null;
+    for (const cycle of cycles) {
+        for (const rotation of cycle.rotations ?? []) {
+            if (!rotation.start_date || !rotation.end_date) continue;
+            const start = getRotationRealDates(rotation.start_date, rotation.end_date).realStartDate.getTime();
+            if (start <= now.getTime() && (!latest || start > latest.start)) latest = { cycle, rotation, start };
+        }
+    }
+    return latest;
+};
+
 const BulkScoreModal = ({
     isOpen,
     onClose,
@@ -53,542 +80,355 @@ const BulkScoreModal = ({
     guilds,
     onSubmit,
     isSubmitting = false,
-
     isGuildRestricted = false,
     userGuildId
 }: BulkScoreModalProps) => {
     const toast = useToast();
-    const { colorMode } = useColorMode();
-    const isDark = colorMode === 'dark';
     const { t } = useTranslation();
-
-    const modalBg        = isDark ? '#1a1b2e' : 'white';
-    const sectionBg      = isDark ? 'rgba(124,58,237,0.08)' : 'purple.50';
-    const sectionBorder  = isDark ? 'rgba(124,58,237,0.25)' : 'purple.100';
-    const rowBg          = isDark ? 'rgba(255,255,255,0.03)' : 'white';
-    const rowBorder      = isDark ? 'whiteAlpha.80' : 'gray.100';
-    const rowActiveBg    = isDark ? 'rgba(124,58,237,0.08)' : 'purple.50';
-    const rowActiveBorder = isDark ? 'purple.700' : 'purple.200';
-    const summaryBg      = isDark ? 'rgba(124,58,237,0.12)' : 'purple.50';
-    const summaryBorder  = isDark ? 'purple.700' : 'purple.200';
-    const guildBoxBg     = isDark ? 'blue.900' : 'blue.50';
-    const guildTextColor = isDark ? 'blue.200' : 'blue.700';
 
     const [selectedGuildId, setSelectedGuildId] = useState<string>(isGuildRestricted ? userGuildId || "" : "");
     const [selectedCycleId, setSelectedCycleId] = useState<string>("");
     const [selectedRotationId, setSelectedRotationId] = useState<string>("");
-    // Indexé par bbs_id (le compte), pas user_id : un même user peut avoir plusieurs comptes
-    // bbs dans la même guilde, et chacun doit garder sa propre valeur.
-    const [scores, setScores] = useState<{ [bbsId: string]: number }>({});
-    const [hasExistingScores, setHasExistingScores] = useState(false);
-    const [displayedMembers, setDisplayedMembers] = useState<IUser[]>([]);
-    const [viewMode, setViewMode] = useState<ViewMode>('list');
-    
-    // Charger les membres avec le hook
-    const { members: guildMembers = [], isLoading } = useGuildMembers(
-        selectedGuildId || undefined,
-        true
-    );
-    
-    // Charger les scores existants avec le hook
+    const [values, setValues] = useState<ScoreValues>({});
+    const [initialValues, setInitialValues] = useState<ScoreValues>({});
+    const [isConfirmingClose, setIsConfirmingClose] = useState(false);
+    const [viewMode, setViewMode] = useState<ViewMode>(readViewMode);
+
+    const changeViewMode = (mode: ViewMode) => {
+        setViewMode(mode);
+        try {
+            localStorage.setItem(VIEW_MODE_KEY, mode);
+        } catch {
+            // stockage indisponible : le choix vaut pour cette session seulement
+        }
+    };
+    // Sélection (guilde|cycle|rotation) dont les valeurs ont été initialisées : une revalidation
+    // des données ne doit pas écraser ce qui a été tapé entre-temps
+    const initializedKey = useRef<string | null>(null);
+
+    const latestStarted = useMemo(() => findLatestStartedRotation(cycles), [cycles]);
+    const currentCycle = latestStarted?.cycle ?? null;
+    const currentRotation = latestStarted?.rotation ?? null;
+
+    const { members: guildMembers = [], isLoading: isLoadingMembers } = useGuildMembers(selectedGuildId || undefined, true);
     const { scores: existingScoresData = [], isLoading: isLoadingScores } = useScores({
         guild_id: selectedGuildId,
         cycle_id: selectedCycleId,
         rotation_id: selectedRotationId,
+        limit: EXISTING_SCORES_LIMIT,
         authenticated: true
     });
 
-    // Réinitialiser la guilde sélectionnée quand le modal s'ouvre
+    const isComplete = Boolean(selectedGuildId && selectedCycleId && selectedRotationId);
+    const selectionKey = isComplete ? `${selectedGuildId}|${selectedCycleId}|${selectedRotationId}` : null;
+
+    // À l'ouverture : guilde imposée pour un chef, cycle et rotation en cours pré-sélectionnés
     useEffect(() => {
-        if (isOpen) {
-            setSelectedGuildId(isGuildRestricted ? userGuildId || "" : "");
-        }
+        if (!isOpen) return;
+        setSelectedGuildId(isGuildRestricted ? userGuildId || "" : "");
+        setSelectedCycleId(currentCycle?._id ?? "");
+        setSelectedRotationId(currentRotation?.rotation_id ?? "");
+        setValues({});
+        setInitialValues({});
+        setIsConfirmingClose(false);
+        initializedKey.current = null;
+        // Uniquement à l'ouverture : le cycle courant arrivant plus tard est géré juste après
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, isGuildRestricted, userGuildId]);
 
-    // Déterminer la liste des membres à afficher et initialiser les scores
+    // Cycles chargés après l'ouverture : on complète la pré-sélection si rien n'a été choisi
     useEffect(() => {
-        if (!selectedGuildId || !selectedCycleId || !selectedRotationId) {
-            if (displayedMembers.length > 0 || Object.keys(scores).length > 0) {
-                setDisplayedMembers([]);
-                setScores({});
-                setHasExistingScores(false);
-            }
-            return;
-        }
-
-        if (isLoading || isLoadingScores) {
-            return;
-        }
-
-        const newScores: { [bbsId: string]: number } = {};
-        let membersToDisplay: IUser[] = [];
-        let foundExistingScores = false;
-
-        // Si des scores existent déjà, utiliser uniquement les joueurs de ces scores
-        if (existingScoresData.length > 0) {
-            // Extraire les utilisateurs des scores existants
-            existingScoresData.forEach((score: IScore & { user?: IUser | IUser[] }) => {
-                if (score.user) {
-                    // score.user peut être un tableau ou un objet selon le pipeline MongoDB
-                    const user = Array.isArray(score.user) ? score.user[0] : score.user;
-                    if (user) {
-                        // Le bbs_id/bbs_name du COMPTE qui a joué ce score prime sur le miroir du user
-                        // (utile si le score appartient à un alt, pas au compte principal actuel).
-                        const bbsId = score.bbs_id || user.bbs_id;
-                        membersToDisplay.push({
-                            ...user,
-                            bbs_id: bbsId,
-                            bbs_name: score.bbs_name || user.bbs_name
-                        });
-                        if (bbsId) newScores[bbsId] = score.raw_score || 0;
-                        if (score.raw_score > 0) {
-                            foundExistingScores = true;
-                        }
-                    }
-                }
-            });
-        } else {
-            // Sinon, utiliser la liste des membres actuels de la guilde
-            if (Array.isArray(guildMembers) && guildMembers.length > 0) {
-                guildMembers.forEach((user: IUser) => {
-                    if (user.bbs_id) newScores[user.bbs_id] = 0;
-                });
-                membersToDisplay = guildMembers;
-            }
-        }
-
-        // Ne mettre à jour que si les membres ont changé
-        const membersChanged = membersToDisplay.length !== displayedMembers.length || 
-            membersToDisplay.some((m, i) => m._id !== displayedMembers[i]?._id);
-
-        if (membersChanged) {
-            setDisplayedMembers(membersToDisplay);
-            setScores(newScores);
-            setHasExistingScores(foundExistingScores);
-        }
+        if (!isOpen || selectedCycleId || !currentCycle) return;
+        setSelectedCycleId(currentCycle._id ?? "");
+        setSelectedRotationId(currentRotation?.rotation_id ?? "");
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedGuildId, selectedCycleId, selectedRotationId, guildMembers, existingScoresData, isLoading, isLoadingScores]);
+    }, [isOpen, currentCycle, currentRotation]);
+
+    // Membres affichés : tous les comptes actuels de la guilde, plus ceux qui ont déjà un score sur
+    // cette rotation sans être (ou plus être) dans la guilde
+    const displayedMembers = useMemo<IUser[]>(() => {
+        if (!isComplete) return [];
+        const byBbsId = new Map<string, IUser>();
+        for (const member of guildMembers) {
+            if (member.bbs_id) byBbsId.set(member.bbs_id, member);
+        }
+        for (const score of existingScoresData as (IScore & { user?: IUser | IUser[] })[]) {
+            const user = Array.isArray(score.user) ? score.user[0] : score.user;
+            // Le bbs_id/bbs_name du COMPTE qui a joué ce score prime sur le miroir du user
+            const bbsId = score.bbs_id || user?.bbs_id;
+            if (!user || !bbsId || byBbsId.has(bbsId)) continue;
+            byBbsId.set(bbsId, { ...user, bbs_id: bbsId, bbs_name: score.bbs_name || user.bbs_name });
+        }
+        return [...byBbsId.values()];
+    }, [isComplete, guildMembers, existingScoresData]);
+
+    const existingByBbsId = useMemo(() => {
+        const map = new Map<string, number>();
+        for (const score of existingScoresData as IScore[]) {
+            if (score.bbs_id) map.set(score.bbs_id, score.raw_score ?? 0);
+        }
+        return map;
+    }, [existingScoresData]);
+
+    // Initialise les valeurs (scores existants pré-remplis) une seule fois par sélection
+    useEffect(() => {
+        if (!selectionKey || isLoadingMembers || isLoadingScores) return;
+        if (initializedKey.current === selectionKey) return;
+        initializedKey.current = selectionKey;
+        const initial: ScoreValues = {};
+        for (const member of displayedMembers) {
+            initial[member.bbs_id!] = existingByBbsId.get(member.bbs_id!) ?? null;
+        }
+        setValues(initial);
+        setInitialValues(initial);
+    }, [selectionKey, isLoadingMembers, isLoadingScores, displayedMembers, existingByBbsId]);
+
+    const bbsIds = useMemo(() => displayedMembers.map((m) => m.bbs_id!).filter(Boolean), [displayedMembers]);
+    const { isDifferential, thresholds, references } = useBulkEntryContext(
+        selectedGuildId || undefined, selectedCycleId || undefined, selectedRotationId || undefined, bbsIds
+    );
 
     const selectedCycle = cycles.find(cycle => cycle._id === selectedCycleId);
     const selectedGuild = guilds.find(guild => guild._id === selectedGuildId);
 
-    const handleScoreChange = useCallback((bbsId: string, score: number) => {
-        setScores(prev => ({
-            ...prev,
-            [bbsId]: score
-        }));
+    const handleScoreChange = useCallback((bbsId: string, value: number | null) => {
+        setValues(prev => ({ ...prev, [bbsId]: value }));
     }, []);
 
+    // Collage d'une colonne de scores (tableur, Discord…) : remplit à partir de la ligne visée
+    const handlePasteColumn = useCallback((startIndex: number, pasted: (number | null)[]) => {
+        setValues(prev => {
+            const next = { ...prev };
+            pasted.forEach((value, offset) => {
+                const member = displayedMembers[startIndex + offset];
+                if (member?.bbs_id) next[member.bbs_id] = value;
+            });
+            return next;
+        });
+        const overflow = startIndex + pasted.length - displayedMembers.length;
+        if (overflow > 0) {
+            toast({ title: `${overflow} valeur(s) collée(s) en trop ignorée(s)`, status: "warning", duration: 3000 });
+        }
+    }, [displayedMembers, toast]);
+
+    const dirtyCount = useMemo(
+        () => Object.keys(values).filter((id) => values[id] !== initialValues[id]).length,
+        [values, initialValues]
+    );
+    const filledIds = useMemo(() => bbsIds.filter((id) => values[id] != null), [bbsIds, values]);
+    const totalScore = useMemo(() => filledIds.reduce((sum, id) => sum + (values[id] ?? 0), 0), [filledIds, values]);
+
     const handleSubmit = () => {
-        if (!selectedGuildId || !selectedCycleId || !selectedRotationId) {
-            toast({
-                title: "Erreur",
-                description: "Veuillez sélectionner une guilde, un cycle et une rotation",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+        if (!isComplete) {
+            toast({ title: "Sélectionnez une guilde, un cycle et une rotation", status: "error", duration: 3000 });
+            return;
+        }
+        if (filledIds.length === 0) {
+            toast({ title: "Aucun score saisi", status: "warning", duration: 3000 });
             return;
         }
 
-        const membersWithoutAccount = displayedMembers.filter((m) => !m.bbs_id);
-        if (membersWithoutAccount.length > 0) {
-            toast({
-                title: "Compte bbs manquant",
-                description: `${membersWithoutAccount.length} membre(s) n'ont pas de compte bbs lié et ne peuvent pas recevoir de score.`,
-                status: "error",
-                duration: 4000,
-                isClosable: true,
-            });
-            return;
-        }
-
-        // Créer les données de scores pour tous les membres affichés
-        const scoresData: IScoreFormData[] = displayedMembers.map((member: IUser) => ({
-            user_id: member._id,
-            bbs_id: member.bbs_id!,
-            cycle_id: selectedCycleId,
-            rotation_id: selectedRotationId,
-            guild_id: selectedGuildId,
-            raw_score: scores[member.bbs_id!] || 0
-        }));
-
-        if (scoresData.length === 0) {
-            toast({
-                title: "Attention",
-                description: "Aucun membre trouvé",
-                status: "warning",
-                duration: 3000,
-                isClosable: true,
-            });
-            return;
-        }
+        // Seules les cases remplies sont envoyées : une case vide ne crée pas de score à 0
+        const scoresData: IScoreFormData[] = displayedMembers
+            .filter((member) => member.bbs_id && values[member.bbs_id] != null)
+            .map((member) => ({
+                user_id: member._id,
+                bbs_id: member.bbs_id!,
+                cycle_id: selectedCycleId,
+                rotation_id: selectedRotationId,
+                guild_id: selectedGuildId,
+                raw_score: values[member.bbs_id!]!,
+            }));
 
         onSubmit(scoresData);
     };
 
+    // Fermeture : confirmation si des valeurs saisies ne sont pas enregistrées
     const handleClose = () => {
-        if (!isGuildRestricted) {
-            setSelectedGuildId("");
+        if (isSubmitting) return;
+        if (dirtyCount > 0 && !isConfirmingClose) {
+            setIsConfirmingClose(true);
+            return;
         }
-        setSelectedCycleId("");
-        setSelectedRotationId("");
-        setScores({});
-        setHasExistingScores(false);
-        setDisplayedMembers([]);
         onClose();
     };
 
-    const canSubmit = selectedGuildId && selectedCycleId && selectedRotationId && displayedMembers.length > 0;
+    const rotationOptions = (selectedCycle?.rotations ?? []).map((rotation: ICycleRotation) => ({
+        value: rotation.rotation_id,
+        // Texte utilisé par la recherche du select
+        label: `#${rotation.position} ${rotation.killer}`,
+        content: (
+            <RotationLabel
+                rotation={rotation}
+                showDate
+                badge={rotation.rotation_id === currentRotation?.rotation_id ? "Dernière" : undefined}
+            />
+        ),
+    }));
 
-    const totalScore = useMemo(() => Object.values(scores).reduce((acc, v) => acc + (v || 0), 0), [scores]);
-    const scoredCount = useMemo(() => Object.values(scores).filter(v => v > 0).length, [scores]);
-
-    const formatNumber = useCallback((value: string | number): string => {
-        const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
-        return numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    }, []);
-
-    const parseNumber = useCallback((value: string): string => {
-        return value.replace(/,/g, '');
-    }, []);
+    const isLoading = isComplete && (isLoadingMembers || isLoadingScores);
+    const total = displayedMembers.length;
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} size="4xl" scrollBehavior="inside">
+        <Modal isOpen={isOpen} onClose={handleClose} size={viewMode === "grid" ? "4xl" : "3xl"} scrollBehavior="inside" closeOnOverlayClick={!isSubmitting}>
             <ModalOverlay bg="blackAlpha.700" />
-            <ModalContent bg={modalBg} borderRadius="2xl" overflow="hidden" border="1px solid" borderColor={sectionBorder}>
-
-                {/* ── Header ── */}
-                <ModalHeader px={6} pt={6} pb={4} borderBottom="1px solid" borderColor={sectionBorder}>
-                    <HStack spacing={3} align="center">
-                        <Box
-                            w={9} h={9} borderRadius="xl"
-                            bgGradient="linear(135deg, #7C3AED, #4F46E5)"
-                            display="flex" alignItems="center" justifyContent="center"
-                            fontSize="lg" flexShrink={0}
-                        >
-                            📊
-                        </Box>
-                        <Box>
-                            <Text
-                                fontSize="lg" fontWeight="bold"
-                                sx={{
-                                    background: isDark
-                                        ? 'linear-gradient(135deg, #C4B5FD, #818CF8)'
-                                        : 'linear-gradient(135deg, #7C3AED, #4F46E5)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                    backgroundClip: 'text',
-                                }}
-                            >
-                                Saisie groupée des scores
-                            </Text>
-                            <Text fontSize="xs" color={isDark ? 'gray.400' : 'gray.500'} fontWeight="normal">
-                                Saisissez les scores de tous les membres en une seule opération
-                            </Text>
-                        </Box>
-                    </HStack>
-                </ModalHeader>
-
-                <ModalBody px={6} py={5}>
-                    <VStack spacing={5} align="stretch">
-
-                        {/* ── Config card ── */}
-                        <Box
-                            p={4} borderRadius="xl" bg={sectionBg}
-                            border="1px solid" borderColor={sectionBorder}
-                        >
-                            <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
-                                textTransform="uppercase" color={isDark ? 'purple.400' : 'purple.600'} mb={3}>
-                                Configuration
-                            </Text>
-                            <VStack spacing={3} align="stretch">
-                                {/* Guilde */}
-                                {!isGuildRestricted ? (
-                                    <FormControl>
-                                        <FormLabel fontSize="xs" color={isDark ? 'gray.400' : 'gray.500'} mb={1}>Guilde</FormLabel>
-                                        <CustomSelect
-                                            placeholder="Sélectionnez une guilde"
-                                            value={selectedGuildId}
-                                            onChange={setSelectedGuildId}
-                                            isDisabled={isSubmitting}
-                                            options={guilds.map((guild: IGuild) => ({
-                                                value: guild._id,
-                                                label: guild.name
-                                            }))}
-                                            allowDeselect={false}
-                                            size="md"
-                                            variant="modal"
-                                        />
-                                    </FormControl>
-                                ) : selectedGuild && (
-                                    <Box px={3} py={2} bg={guildBoxBg} borderRadius="lg">
-                                        <Text fontSize="2xs" color={guildTextColor} fontWeight="semibold" letterSpacing="wide" textTransform="uppercase" mb={0.5}>
-                                            Guilde assignée
-                                        </Text>
-                                        <Text fontWeight="bold">{selectedGuild.name}</Text>
-                                    </Box>
-                                )}
-
-                                {/* Cycle */}
-                                <FormControl>
-                                    <FormLabel fontSize="xs" color={isDark ? 'gray.400' : 'gray.500'} mb={1}>Cycle</FormLabel>
-                                    <CycleSelect
-                                        cycles={cycles}
-                                        value={selectedCycleId}
-                                        onChange={setSelectedCycleId}
-                                        placeholder="Sélectionnez un cycle"
-                                        isDisabled={isSubmitting}
-                                        allowDeselect={true}
-                                        showActiveBadge={true}
-                                        size="md"
-                                        variant="modal"
-                                    />
-                                </FormControl>
-
-                                {/* Rotation */}
-                                {selectedCycle && (
-                                    <FormControl>
-                                        <FormLabel fontSize="xs" color={isDark ? 'gray.400' : 'gray.500'} mb={1}>Rotation</FormLabel>
-                                        <CustomSelect
-                                            placeholder="Sélectionnez une rotation"
-                                            value={selectedRotationId}
-                                            onChange={setSelectedRotationId}
-                                            isDisabled={isSubmitting}
-                                            size="md"
-                                            variant="modal"
-                                            options={selectedCycle.rotations.map((rotation: ICycleRotation) => ({
-                                                value: rotation.rotation_id,
-                                                label: `Rotation #${rotation.position} - ${rotation.killer} ${rotation.attack === "R" ? "🔴" : rotation.attack === "B" ? "🔵" : "🟠 Mêlée"}`,
-                                                content: (
-                                                    <VStack align="start" spacing={1} w="100%">
-                                                        <HStack spacing={2} w="100%">
-                                                            <Text fontWeight="medium">
-                                                                Rotation #{rotation.position} - {rotation.killer}
-                                                            </Text>
-                                                            <AttackTypeBadge attackType={rotation.attack} />
-                                                        </HStack>
-                                                        <Text fontSize="sm" color="gray.500">
-                                                            {rotation.start_date} - {rotation.end_date} • {rotation.period}
-                                                        </Text>
-                                                    </VStack>
-                                                )
-                                            }))}
-                                            renderSelected={(option) => {
-                                                const rotation = selectedCycle.rotations.find((r: ICycleRotation) => r._id === option.value);
-                                                const index = selectedCycle.rotations.findIndex((r: ICycleRotation) => r._id === option.value);
-                                                return rotation ? (
-                                                    <HStack spacing={2} w="100%">
-                                                        <Text>Rotation #{index + 1} - {rotation.killer}</Text>
-                                                        <AttackTypeBadge attackType={rotation.attack} />
-                                                        <Text>({rotation.start_date} - {rotation.end_date})</Text>
-                                                    </HStack>
-                                                ) : <Text>{option.label}</Text>;
-                                            }}
-                                            allowDeselect={false}
-                                        />
-                                    </FormControl>
-                                )}
-                            </VStack>
-                        </Box>
-
-                        {/* ── Summary strip ── */}
-                        {selectedGuild && selectedCycle && selectedRotationId && (() => {
-                            const rotation = selectedCycle.rotations.find((r: ICycleRotation) => r.rotation_id === selectedRotationId);
-                            return (
-                                <Box
-                                    px={4} py={3} borderRadius="xl"
-                                    bg={summaryBg} border="1px solid" borderColor={summaryBorder}
-                                >
-                                    <HStack spacing={4} flexWrap="wrap">
-                                        <HStack spacing={1.5}>
-                                            <Text fontSize="xs" color={isDark ? 'purple.300' : 'purple.500'} fontWeight="semibold">🏰</Text>
-                                            <Text fontSize="xs" fontWeight="semibold">{selectedGuild.name}</Text>
-                                        </HStack>
-                                        <Text fontSize="xs" color={isDark ? 'whiteAlpha.400' : 'gray.300'}>•</Text>
-                                        <HStack spacing={1.5}>
-                                            <Text fontSize="xs" color={isDark ? 'purple.300' : 'purple.500'} fontWeight="semibold">🔄</Text>
-                                            <Text fontSize="xs" fontWeight="semibold">{selectedCycle.name} {selectedCycle.year ? `(${selectedCycle.year})` : ''}</Text>
-                                        </HStack>
-                                        {rotation && (
-                                            <>
-                                                <Text fontSize="xs" color={isDark ? 'whiteAlpha.400' : 'gray.300'}>•</Text>
-                                                <HStack spacing={1.5}>
-                                                    <Text fontSize="xs" fontWeight="semibold">
-                                                        Rot. #{rotation.position} — {rotation.killer}
-                                                    </Text>
-                                                    <AttackTypeBadge attackType={rotation.attack} />
-                                                </HStack>
-                                            </>
-                                        )}
-                                        {hasExistingScores && (
-                                            <Badge colorScheme="green" borderRadius="full" fontSize="2xs" ml="auto">
-                                                ✓ Scores existants
-                                            </Badge>
-                                        )}
-                                    </HStack>
-                                </Box>
-                            );
-                        })()}
-
-                        {/* ── Score rows ── */}
-                        {isLoading || isLoadingScores ? (
-                            <PageLoader
-                                label={isLoading
-                                    ? t("components.bulkScoreModal.loadingMembers")
-                                    : t("components.bulkScoreModal.loadingScores")
-                                }
-                                color="purple.400"
-                                height="200px"
+            <ModalContent bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle">
+                <ModalHeader px={5} pt={5} pb={4} borderBottomWidth="1px" borderColor="border.subtle">
+                    <Text fontSize="lg" fontWeight="bold" color="text.strong">Saisie groupée des scores</Text>
+                    <Text fontSize="xs" fontWeight="normal" color="text.muted" mb={4}>
+                        Entrée pour passer au joueur suivant · coller une colonne de scores remplit la liste
+                    </Text>
+                    <SimpleGrid columns={{ base: 1, md: 3 }} spacing={2} fontWeight="normal">
+                        {isGuildRestricted ? (
+                            <Flex align="center" px={3} h="40px" borderRadius="lg" borderWidth="1px" borderColor="border.subtle">
+                                <Text fontSize="sm" isTruncated>{selectedGuild?.name ?? "—"}</Text>
+                            </Flex>
+                        ) : (
+                            <CustomSelect
+                                placeholder="Guilde"
+                                value={selectedGuildId}
+                                onChange={setSelectedGuildId}
+                                isDisabled={isSubmitting}
+                                options={guilds.map((guild: IGuild) => ({ value: guild._id, label: guild.name }))}
+                                allowDeselect={false}
+                                size="md"
+                                variant="default"
                             />
-                        ) : displayedMembers.length > 0 ? (
-                            <Box>
-                                <HStack justify="space-between" align="center" mb={3}>
-                                    <Text fontSize="xs" fontWeight="semibold" letterSpacing="widest"
-                                        textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
-                                        Membres — {displayedMembers.length}
-                                    </Text>
-                                    <HStack spacing={2}>
-                                        <Text fontSize="xs" color={isDark ? 'purple.300' : 'purple.600'}>
-                                            {scoredCount} / {displayedMembers.length} saisis
-                                        </Text>
-                                        <HStack spacing={0.5}>
-                                            <Tooltip label="Vue liste" placement="top" hasArrow openDelay={400}>
-                                                <IconButton
-                                                    aria-label="Vue liste"
-                                                    icon={<ListIcon />}
-                                                    size="xs"
-                                                    variant={viewMode === 'list' ? 'solid' : 'ghost'}
-                                                    colorScheme={viewMode === 'list' ? 'purple' : 'gray'}
-                                                    borderRadius="md"
-                                                    onClick={() => setViewMode('list')}
-                                                />
-                                            </Tooltip>
-                                            <Tooltip label="Vue grille" placement="top" hasArrow openDelay={400}>
-                                                <IconButton
-                                                    aria-label="Vue grille"
-                                                    icon={<GridIcon />}
-                                                    size="xs"
-                                                    variant={viewMode === 'grid' ? 'solid' : 'ghost'}
-                                                    colorScheme={viewMode === 'grid' ? 'purple' : 'gray'}
-                                                    borderRadius="md"
-                                                    onClick={() => setViewMode('grid')}
-                                                />
-                                            </Tooltip>
-                                        </HStack>
-                                    </HStack>
-                                </HStack>
-                                {viewMode === 'list' ? (
-                                    <VStack spacing={1.5} align="stretch">
-                                        {displayedMembers.map((member: IUser, idx: number) => (
-                                            <ScoreRow
-                                                key={member.bbs_id}
-                                                member={member}
-                                                index={idx}
-                                                score={scores[member.bbs_id!] || 0}
-                                                onChange={handleScoreChange}
-                                                isDisabled={isSubmitting || isLoadingScores}
-                                                isDark={isDark}
-                                                rowBg={rowBg}
-                                                rowBorder={rowBorder}
-                                                rowActiveBg={rowActiveBg}
-                                                rowActiveBorder={rowActiveBorder}
-                                                formatNumber={formatNumber}
-                                                parseNumber={parseNumber}
-                                            />
-                                        ))}
-                                    </VStack>
-                                ) : (
-                                    <SimpleGrid columns={4} spacing={2}>
-                                        {displayedMembers.map((member: IUser) => (
-                                            <ScoreCard
-                                                key={member.bbs_id}
-                                                member={member}
-                                                score={scores[member.bbs_id!] || 0}
-                                                onChange={handleScoreChange}
-                                                isDisabled={isSubmitting || isLoadingScores}
-                                                isDark={isDark}
-                                                rowBg={rowBg}
-                                                rowBorder={rowBorder}
-                                                rowActiveBg={rowActiveBg}
-                                                rowActiveBorder={rowActiveBorder}
-                                                formatNumber={formatNumber}
-                                                parseNumber={parseNumber}
-                                            />
-                                        ))}
-                                    </SimpleGrid>
-                                )}
-                            </Box>
-                        ) : selectedGuildId ? (
-                            <Center p={8}>
-                                <Text color="gray.500" fontSize="sm">Aucun membre trouvé pour cette guilde</Text>
-                            </Center>
-                        ) : null}
+                        )}
+                        <CycleSelect
+                            cycles={cycles}
+                            value={selectedCycleId}
+                            onChange={(id) => { setSelectedCycleId(id); setSelectedRotationId(""); }}
+                            placeholder="Cycle"
+                            isDisabled={isSubmitting}
+                            allowDeselect={false}
+                            showActiveBadge={true}
+                            size="md"
+                            variant="default"
+                        />
+                        <CustomSelect
+                            placeholder="Rotation"
+                            value={selectedRotationId}
+                            onChange={setSelectedRotationId}
+                            isDisabled={isSubmitting || !selectedCycle}
+                            size="md"
+                            variant="default"
+                            options={rotationOptions}
+                            renderSelected={(option) => {
+                                const rotation = selectedCycle?.rotations.find((r: ICycleRotation) => r.rotation_id === option.value);
+                                return rotation ? <RotationLabel rotation={rotation} /> : <Text>{option.label}</Text>;
+                            }}
+                            allowDeselect={false}
+                        />
+                    </SimpleGrid>
+                </ModalHeader>
+                <ModalCloseButton isDisabled={isSubmitting} />
 
-                    </VStack>
+                <ModalBody px={5} py={4}>
+                    {!isComplete ? (
+                        <Center py={10}>
+                            <Text fontSize="sm" color="text.muted">Choisissez une guilde, un cycle et une rotation</Text>
+                        </Center>
+                    ) : isLoading ? (
+                        <PageLoader
+                            label={isLoadingMembers ? t("components.bulkScoreModal.loadingMembers") : t("components.bulkScoreModal.loadingScores")}
+                            color="purple.400"
+                            height="200px"
+                        />
+                    ) : total === 0 ? (
+                        <Center py={10}>
+                            <Text fontSize="sm" color="text.muted">Aucun membre trouvé pour cette guilde</Text>
+                        </Center>
+                    ) : (
+                        <Box>
+                            <Flex justify="space-between" align="center" gap={3} mb={2}>
+                                <Text fontSize="xs" color="text.muted">
+                                    {isDifferential
+                                        ? "Rotation différentielle : saisissez le cumul de la semaine, le score de base est déduit automatiquement."
+                                        : `${total} compte(s)`}
+                                </Text>
+                                <HStack spacing={0.5} flexShrink={0}>
+                                    {([["list", "Vue liste", ListIcon], ["grid", "Vue grille", GridIcon]] as const).map(([mode, label, ViewIcon]) => (
+                                        <Tooltip key={mode} label={label} placement="top" hasArrow openDelay={400}>
+                                            <IconButton
+                                                aria-label={label}
+                                                icon={<ViewIcon />}
+                                                size="xs"
+                                                variant={viewMode === mode ? "solid" : "ghost"}
+                                                colorScheme={viewMode === mode ? "purple" : "gray"}
+                                                onClick={() => changeViewMode(mode)}
+                                            />
+                                        </Tooltip>
+                                    ))}
+                                </HStack>
+                            </Flex>
+                            <SimpleGrid columns={viewMode === "grid" ? { base: 1, sm: 2, md: 4 } : 1} spacing={viewMode === "grid" ? 2 : 1.5}>
+                                {displayedMembers.map((member, idx) => (
+                                    <BulkScoreRow
+                                        key={member.bbs_id}
+                                        member={member}
+                                        index={idx}
+                                        value={values[member.bbs_id!] ?? null}
+                                        isDirty={values[member.bbs_id!] !== initialValues[member.bbs_id!]}
+                                        reference={references?.[member.bbs_id!]}
+                                        isDifferential={isDifferential}
+                                        thresholds={thresholds}
+                                        isDisabled={isSubmitting}
+                                        onChange={handleScoreChange}
+                                        onPasteColumn={handlePasteColumn}
+                                        layout={viewMode}
+                                    />
+                                ))}
+                            </SimpleGrid>
+                        </Box>
+                    )}
                 </ModalBody>
 
-                {/* ── Footer ── */}
-                <ModalFooter
-                    px={6} py={4}
-                    borderTop="1px solid" borderColor={sectionBorder}
-                    bg={sectionBg}
-                >
-                    <Flex w="100%" align="center" justify="space-between" gap={4} wrap="wrap">
-                        {/* Live total */}
-                        {displayedMembers.length > 0 ? (
-                            <Stat flex="unset">
-                                <StatLabel fontSize="2xs" letterSpacing="widest" textTransform="uppercase"
-                                    color={isDark ? 'gray.400' : 'gray.500'}>
-                                    Total cumulé
-                                </StatLabel>
-                                <StatNumber
-                                    fontSize="lg"
-                                    sx={{
-                                        background: isDark
-                                            ? 'linear-gradient(135deg, #C4B5FD, #818CF8)'
-                                            : 'linear-gradient(135deg, #7C3AED, #4F46E5)',
-                                        WebkitBackgroundClip: 'text',
-                                        WebkitTextFillColor: 'transparent',
-                                        backgroundClip: 'text',
-                                    }}
+                <ModalFooter px={5} py={3} borderTopWidth="1px" borderColor="border.subtle" bg="bg.subtle">
+                    {isConfirmingClose ? (
+                        <Flex w="100%" align="center" justify="space-between" gap={3} wrap="wrap">
+                            <Text fontSize="sm" color="text.strong">
+                                {dirtyCount} score(s) saisi(s) non enregistré(s). Fermer quand même ?
+                            </Text>
+                            <HStack spacing={2}>
+                                <Button size="sm" variant="ghost" onClick={() => setIsConfirmingClose(false)}>Continuer la saisie</Button>
+                                <Button size="sm" colorScheme="red" onClick={onClose}>Abandonner</Button>
+                            </HStack>
+                        </Flex>
+                    ) : (
+                        <Flex w="100%" align="center" justify="space-between" gap={4} wrap="wrap">
+                            <Box minW="180px" flex="1">
+                                {total > 0 && (
+                                    <>
+                                        <HStack spacing={3} fontSize="xs" color="text.muted" mb={1}>
+                                            <Text><Text as="span" fontWeight="bold" color="text.strong">{filledIds.length}</Text> / {total} saisis</Text>
+                                            <Text sx={{ fontVariantNumeric: "tabular-nums" }}>Total {formatScore(totalScore)}</Text>
+                                        </HStack>
+                                        <Progress value={(filledIds.length / total) * 100} size="xs" colorScheme="purple" borderRadius="full" maxW="260px" />
+                                    </>
+                                )}
+                            </Box>
+                            <HStack spacing={2}>
+                                <Button variant="ghost" size="sm" onClick={handleClose} isDisabled={isSubmitting}>
+                                    Annuler
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    colorScheme="purple"
+                                    onClick={handleSubmit}
+                                    isLoading={isSubmitting}
+                                    loadingText="Envoi…"
+                                    isDisabled={!isComplete || filledIds.length === 0}
                                 >
-                                    {totalScore.toLocaleString()}
-                                </StatNumber>
-                            </Stat>
-                        ) : <Box />}
-
-                        <HStack spacing={2}>
-                            <Button
-                                variant="ghost" size="sm" borderRadius="full"
-                                onClick={handleClose} isDisabled={isSubmitting}
-                            >
-                                Annuler
-                            </Button>
-                            <Button
-                                size="sm"
-                                borderRadius="full"
-                                sx={{
-                                    background: canSubmit
-                                        ? 'linear-gradient(135deg, #7C3AED, #4F46E5)'
-                                        : undefined,
-                                    color: canSubmit ? 'white' : undefined,
-                                    _hover: canSubmit ? { background: 'linear-gradient(135deg, #6D28D9, #4338CA)' } : undefined,
-                                }}
-                                colorScheme={canSubmit ? undefined : "gray"}
-                                onClick={handleSubmit}
-                                isLoading={isSubmitting}
-                                loadingText="Envoi…"
-                                isDisabled={!canSubmit}
-                            >
-                                Enregistrer {displayedMembers.length > 0 ? `(${displayedMembers.length})` : ''}
-                            </Button>
-                        </HStack>
-                    </Flex>
+                                    Enregistrer{filledIds.length > 0 ? ` (${filledIds.length})` : ""}
+                                </Button>
+                            </HStack>
+                        </Flex>
+                    )}
                 </ModalFooter>
             </ModalContent>
         </Modal>
     );
-}
+};
 
 export default BulkScoreModal;

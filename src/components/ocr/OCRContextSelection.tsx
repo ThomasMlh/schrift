@@ -16,6 +16,7 @@ import {
 import { useState, useEffect } from "react";
 import { CycleSelect } from "../ui/CycleSelect";
 import { CustomSelect } from "../ui/CustomSelect";
+import { RotationLabel } from "../ui/RotationLabel";
 import type { ICycle, IGuild, ICycleRotation } from "@/interfaces";
 import { useScreenshotters } from "@/hooks/useAPI";
 import { FiArrowRight } from "react-icons/fi";
@@ -60,14 +61,12 @@ export const OCRContextSelection = ({
     label: g.name
   }));
 
-  const rotationOptions = rotations.map((r: ICycleRotation) => {
-    const killerAttack = r.killer && r.attack ? ` - ${r.killer} ${r.attack === "R" ? "🔴" : r.attack === "B" ? "🔵" : r.attack}` : '';
-
-    return {
-      value: r.rotation_id || r._id || "",
-      label: `Rotation ${r.position}${killerAttack} (du ${r.start_date} au ${r.end_date})`
-    };
-  });
+  const rotationOptions = rotations.map((r: ICycleRotation) => ({
+    value: r.rotation_id || r._id || "",
+    // Texte utilisé par la recherche du select ; l'affichage passe par RotationLabel
+    label: `#${r.position} ${r.killer}`,
+    content: <RotationLabel rotation={r} showDate />,
+  }));
 
   const screenshotterOptions = screenshotters.map((s) => ({
     value: s.id,
@@ -131,6 +130,10 @@ export const OCRContextSelection = ({
               value={selectedRotationId}
               onChange={setSelectedRotationId}
               options={rotationOptions}
+              renderSelected={(option) => {
+                const rotation = rotations.find((r: ICycleRotation) => (r.rotation_id || r._id) === option.value);
+                return rotation ? <RotationLabel rotation={rotation} /> : <Text>{option.label}</Text>;
+              }}
               placeholder="Sélectionner une rotation"
               isDisabled={!selectedCycleId}
             />

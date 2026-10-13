@@ -1,141 +1,143 @@
-import { Box, Flex, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, Text, VStack } from "@chakra-ui/react";
-import { memo, type SVGProps } from "react";
-import type { IUser } from "../../interfaces";
+import { Box, Flex, HStack, Input, Text, Tooltip } from "@chakra-ui/react";
+import { memo, type ClipboardEvent, type KeyboardEvent, type SVGProps } from "react";
+import type { IUser, BulkEntryReference, BulkEntryThresholds } from "../../interfaces";
 import { UserDisplay } from "./UserDisplay";
+import { formatScore, getRowStatus, parsePastedColumn, parseScore } from "@/utils/bulkScoreEntry";
 
-// Ligne (vue liste) et carte (vue grille) de saisie d'un score, et icônes du sélecteur de vue,
-// utilisées par BulkScoreModal.
+// Saisie d'un score de la saisie groupée (BulkScoreModal), en ligne (vue liste) ou en carte
+// (vue grille), et icônes du sélecteur de vue.
 
-export type ViewMode = 'list' | 'grid';
+export type ViewMode = "list" | "grid";
 
-interface ScoreRowProps {
+const STATUS_STYLE = {
+    ok: { icon: "✓", color: "green.400" },
+    warn: { icon: "⚠", color: "orange.400" },
+    error: { icon: "✕", color: "red.400" },
+} as const;
+
+interface BulkScoreRowProps {
     member: IUser;
     index: number;
-    score: number;
-    onChange: (bbsId: string, value: number) => void;
+    value: number | null;
+    isDirty: boolean;
+    reference?: BulkEntryReference;
+    isDifferential: boolean;
+    thresholds?: BulkEntryThresholds;
     isDisabled: boolean;
-    isDark: boolean;
-    rowBg: string;
-    rowBorder: string;
-    rowActiveBg: string;
-    rowActiveBorder: string;
-    formatNumber: (v: string | number) => string;
-    parseNumber: (v: string) => string;
+    onChange: (bbsId: string, value: number | null) => void;
+    onPasteColumn: (index: number, values: (number | null)[]) => void;
+    layout: ViewMode;
 }
 
-interface ScoreCardProps {
-    member: IUser;
-    score: number;
-    onChange: (bbsId: string, value: number) => void;
-    isDisabled: boolean;
-    isDark: boolean;
-    rowBg: string;
-    rowBorder: string;
-    rowActiveBg: string;
-    rowActiveBorder: string;
-    formatNumber: (v: string | number) => string;
-    parseNumber: (v: string) => string;
-}
+// Passe au champ suivant de la liste avec Entrée
+const focusRow = (index: number) => {
+    const next = document.querySelector<HTMLInputElement>(`[data-bulk-score-index="${index}"]`);
+    next?.focus();
+};
 
-export const ScoreRow = memo(({
-    member, index, score, onChange, isDisabled,
-    isDark, rowBg, rowBorder, rowActiveBg, rowActiveBorder,
-    formatNumber, parseNumber
-}: ScoreRowProps) => {
-    const hasScore = score > 0;
+export const BulkScoreRow = memo(({
+    member, index, value, isDirty, reference, isDifferential, thresholds, isDisabled, onChange, onPasteColumn, layout,
+}: BulkScoreRowProps) => {
+    const status = getRowStatus(value, reference, isDifferential, thresholds);
+    const style = status ? STATUS_STYLE[status.level] : null;
+
+    // Seul repère affiché : la base de la semaine sur une rotation différentielle (l'habitude du
+    // joueur est donnée par le message de l'alerte)
+    const baseRaw = isDifferential ? reference?.base_raw ?? null : null;
+
+    const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
+        const values = parsePastedColumn(e.clipboardData.getData("text"));
+        if (values.length > 1) {
+            e.preventDefault();
+            onPasteColumn(index, values);
+        }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            focusRow(index + 1);
+        }
+    };
+
+    // Fond légèrement relevé, sans cadre : la bordure ne sert qu'à signaler une alerte
+    const borderColor = status?.level === "error" ? "red.400" : status?.level === "warn" ? "orange.400" : "transparent";
+
+    const referenceText = isDifferential ? (
+        <Text fontSize="xs" color="text.muted" fontFamily="mono" noOfLines={1} mt={0.5}>
+            {baseRaw != null ? `Base ${formatScore(baseRaw)}` : "Base non saisie"}
+        </Text>
+    ) : null;
+
+    const input = (
+        <Input
+            data-bulk-score-index={index}
+            size="sm"
+            w={layout === "grid" ? "100%" : { base: "130px", sm: "160px" }}
+            flexShrink={0}
+            inputMode="numeric"
+            textAlign="right"
+            fontFamily="mono"
+            borderRadius="lg"
+            placeholder="Score"
+            bg="bg.card"
+            borderColor={isDirty ? "purple.400" : "border.default"}
+            _placeholder={{ color: "text.muted" }}
+            value={formatScore(value)}
+            onChange={(e) => onChange(member.bbs_id!, parseScore(e.target.value))}
+            onPaste={handlePaste}
+            onKeyDown={handleKeyDown}
+            onFocus={(e) => e.target.select()}
+            isDisabled={isDisabled}
+            focusBorderColor="purple.400"
+        />
+    );
+
+    const statusIcon = (
+        <Tooltip label={status?.message} hasArrow isDisabled={!status}>
+            <Text w="16px" flexShrink={0} textAlign="center" fontWeight="bold" color={style?.color}>
+                {style?.icon ?? ""}
+            </Text>
+        </Tooltip>
+    );
+
+    if (layout === "grid") {
+        return (
+            <Box p={2.5} borderRadius="lg" borderWidth="1px" borderColor={borderColor} bg="bg.subtle">
+                {/* Pseudo et alerte sur la même ligne, le champ prend toute la largeur dessous */}
+                <HStack align="start" spacing={2} mb={2}>
+                    <Box flex={1} minW={0}>
+                        <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />
+                        {referenceText}
+                    </Box>
+                    {statusIcon}
+                </HStack>
+                {input}
+            </Box>
+        );
+    }
+
     return (
         <Flex
             align="center"
             gap={3}
-            px={3} py={2.5}
+            px={3}
+            py={2}
             borderRadius="lg"
-            border="1px solid"
-            bg={hasScore ? rowActiveBg : rowBg}
-            borderColor={hasScore ? rowActiveBorder : rowBorder}
-            transition="background 0.1s, border-color 0.1s"
+            borderWidth="1px"
+            borderColor={borderColor}
+            bg="bg.subtle"
         >
-            <Text
-                fontSize="2xs" fontWeight="bold" minW="18px" textAlign="right"
-                color={isDark ? 'whiteAlpha.300' : 'gray.300'}
-            >
+            <Text fontSize="xs" color="text.muted" minW="20px" textAlign="right" sx={{ fontVariantNumeric: "tabular-nums" }}>
                 {index + 1}
             </Text>
             <Box flex={1} minW={0}>
                 <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />
+                {referenceText}
             </Box>
-            <NumberInput
-                size="sm"
-                min={0}
-                max={9999999999}
-                step={10000000}
-                value={score}
-                onChange={(_, value) => onChange(member.bbs_id!, value)}
-                isDisabled={isDisabled}
-                w="160px"
-                flexShrink={0}
-                format={formatNumber}
-                parse={parseNumber}
-            >
-                <NumberInputField
-                    borderRadius="lg"
-                    textAlign="right"
-                    sx={{ fontVariantNumeric: 'tabular-nums' }}
-                    borderColor={hasScore ? (isDark ? 'purple.600' : 'purple.300') : undefined}
-                    _focus={{ borderColor: 'purple.500', boxShadow: '0 0 0 1px var(--chakra-colors-purple-500)' }}
-                    onFocus={(e) => e.target.select()}
-                />
-                <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                </NumberInputStepper>
-            </NumberInput>
+            {input}
+            {statusIcon}
         </Flex>
-    );
-});
-
-export const ScoreCard = memo(({
-    member, score, onChange, isDisabled,
-    isDark, rowBg, rowBorder, rowActiveBg, rowActiveBorder,
-    formatNumber, parseNumber
-}: ScoreCardProps) => {
-    const hasScore = score > 0;
-    return (
-        <Box
-            p={3}
-            borderRadius="lg"
-            border="1px solid"
-            bg={hasScore ? rowActiveBg : rowBg}
-            borderColor={hasScore ? rowActiveBorder : rowBorder}
-            transition="background 0.1s, border-color 0.1s"
-        >
-            <VStack spacing={2} align="stretch">
-                <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />
-                <NumberInput
-                    size="sm"
-                    min={0}
-                    max={9999999999}
-                    step={10000000}
-                    value={score}
-                    onChange={(_, value) => onChange(member.bbs_id!, value)}
-                    isDisabled={isDisabled}
-                    format={formatNumber}
-                    parse={parseNumber}
-                >
-                    <NumberInputField
-                        borderRadius="lg"
-                        textAlign="right"
-                        sx={{ fontVariantNumeric: 'tabular-nums' }}
-                        borderColor={hasScore ? (isDark ? 'purple.600' : 'purple.300') : undefined}
-                        _focus={{ borderColor: 'purple.500', boxShadow: '0 0 0 1px var(--chakra-colors-purple-500)' }}
-                        onFocus={(e) => e.target.select()}
-                    />
-                    <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                    </NumberInputStepper>
-                </NumberInput>
-            </VStack>
-        </Box>
     );
 });
 
@@ -155,4 +157,3 @@ export const GridIcon = (props: SVGProps<SVGSVGElement>) => (
         <rect x="9.5" y="9.5" width="6.5" height="6.5" rx="1" />
     </svg>
 );
-
