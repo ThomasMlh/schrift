@@ -276,7 +276,7 @@ const BulkScoreModal = ({
     const total = displayedMembers.length;
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} size="3xl" scrollBehavior="inside" closeOnOverlayClick={!isSubmitting}>
+        <Modal isOpen={isOpen} onClose={handleClose} size={viewMode === "grid" ? "4xl" : "3xl"} scrollBehavior="inside" closeOnOverlayClick={!isSubmitting}>
             <ModalOverlay bg="blackAlpha.700" />
             <ModalContent bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle">
                 <ModalHeader px={5} pt={5} pb={4} borderBottomWidth="1px" borderColor="border.subtle">
@@ -373,7 +373,7 @@ const BulkScoreModal = ({
                                     ))}
                                 </HStack>
                             </Flex>
-                            <SimpleGrid columns={viewMode === "grid" ? { base: 1, sm: 2, md: 3 } : 1} spacing={viewMode === "grid" ? 2 : 1.5}>
+                            <SimpleGrid columns={viewMode === "grid" ? { base: 1, sm: 2, md: 4 } : 1} spacing={viewMode === "grid" ? 2 : 1.5}>
                                 {displayedMembers.map((member, idx) => (
                                     <BulkScoreRow
                                         key={member.bbs_id}
