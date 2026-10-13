@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { useState, useCallback } from 'react';
-import type { IScoresResponse, IPodiumResponse, IPodiumWeeklyResponse, IPodiumMissesResponse, PodiumRankingType } from '../../interfaces';
+import type { IScoresResponse, IPodiumResponse, IPodiumWeeklyResponse, IPodiumMissesResponse, PodiumRankingType, BulkEntryReference, BulkEntryThresholds } from '../../interfaces';
 import { apiUrl, fetcher, useAuthenticatedFetcher } from './shared';
 
 export const useScores = (options?: {
@@ -122,4 +122,26 @@ export const usePodiumFetch = () => {
   }, []);
 
   return { fetchPodium, isLoading, error };
+};
+
+// Repères de la saisie groupée (dernier score, habituel, base différentielle) des comptes affichés
+export const useBulkEntryContext = (guildId?: string, cycleId?: string, rotationId?: string, bbsIds: string[] = []) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const url = guildId && cycleId && rotationId && bbsIds.length > 0
+    ? `${apiUrl}/api/scores/bulk-context?guild_id=${encodeURIComponent(guildId)}&cycle_id=${encodeURIComponent(cycleId)}&rotation_id=${encodeURIComponent(rotationId)}&bbs_ids=${bbsIds.map(encodeURIComponent).join(',')}`
+    : null;
+
+  const { data, isLoading } = useSWR<{
+    success: boolean;
+    is_differential: boolean;
+    thresholds: BulkEntryThresholds;
+    accounts: Record<string, BulkEntryReference>;
+  }>(url, authenticatedFetcher, { revalidateOnFocus: false });
+
+  return {
+    isDifferential: data?.is_differential ?? false,
+    thresholds: data?.thresholds,
+    references: data?.accounts,
+    isLoading,
+  };
 };
