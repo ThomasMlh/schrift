@@ -3,15 +3,13 @@ import { DiscordSDK } from '@discord/embedded-app-sdk';
 const CLIENT_ID = import.meta.env.VITE_DISCORD_CLIENT_ID as string;
 
 /**
- * Discord ajoute `frame_id` à l'URL uniquement quand la page est chargée dans
- * l'iframe d'une Activity. En navigation web normale, ce paramètre est absent.
+ * Discord only adds `frame_id` to the URL when the page runs inside an Activity iframe.
  */
 export const isDiscordActivity = (): boolean =>
   new URLSearchParams(window.location.search).has('frame_id');
 
-// Le constructeur de DiscordSDK lit `frame_id` dans l'URL et lève une erreur s'il est
-// absent : il ne doit donc JAMAIS être instancié en navigation web normale, seulement
-// une fois qu'on sait déjà être dans l'iframe Activity (isDiscordActivity() === true).
+// The DiscordSDK constructor reads `frame_id` from the URL and throws when it is missing,
+// so it must only be created once isDiscordActivity() is true.
 let discordSdk: DiscordSDK | null = null;
 const getDiscordSdk = (): DiscordSDK => {
   if (!discordSdk) {
@@ -21,8 +19,8 @@ const getDiscordSdk = (): DiscordSDK => {
 };
 
 /**
- * Handshake + authentification automatique pour le contexte Discord Activity.
- * À appeler uniquement quand isDiscordActivity() est vrai.
+ * Runs the handshake and authentication for the Discord Activity context.
+ * Only call when isDiscordActivity() is true.
  */
 export const setupDiscordActivity = async (
   login: (token: string, refreshToken?: string) => void
@@ -35,7 +33,7 @@ export const setupDiscordActivity = async (
     response_type: 'code',
     state: '',
     prompt: 'none',
-    // Mêmes scopes que le flow web classique (voir schrift-api src/routes/auth.js)
+    // Same scopes as the web OAuth flow (see schrift-api src/routes/auth.js)
     scope: ['identify', 'guilds', 'connections'],
   });
 

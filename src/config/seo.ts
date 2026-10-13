@@ -1,4 +1,3 @@
-// Configuration SEO centralisée
 export const siteConfig = {
   name: "Schrift BBS",
   description: "Plateforme de gestion des guildes et scores pour Bleach Brave Souls",
