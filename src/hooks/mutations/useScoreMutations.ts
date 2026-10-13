@@ -33,7 +33,7 @@ export const useScoreMutations = () => {
     return true;
   };
 
-  // Marque un score signalé "à vérifier" comme correct (il réapparaît si sa valeur change)
+  // Marks a score flagged for review as correct (it comes back if its value changes)
   const reviewScoreAnomaly = async (scoreId: string) => {
     await request(`${apiUrl}/api/scores/${scoreId}/anomaly-review`, {
       method: 'POST',
@@ -51,8 +51,8 @@ export const useScoreMutations = () => {
     return result;
   };
 
-  // Réattribue un score existant à un autre compte bbs — contrairement à updateScore, le compte
-  // cible n'a pas besoin d'appartenir à la guilde actuelle du score (cf. commentaire de la route).
+  // Reassigns an existing score to another bbs account. Unlike updateScore, the target account does
+  // not need to belong to the score's current guild (see the route comment).
   const transferScoreAccount = async (scoreId: string, params: { target_user_id: string; target_bbs_id: string }) => {
     const result = await request(`${apiUrl}/api/scores/${scoreId}/transfer-account`, {
       method: 'PUT',

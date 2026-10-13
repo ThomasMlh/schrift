@@ -124,7 +124,7 @@ export const usePodiumFetch = () => {
   return { fetchPodium, isLoading, error };
 };
 
-// Repères de la saisie groupée (dernier score, habituel, base différentielle) des comptes affichés
+// Bulk entry references (usual score, differential base) of the displayed accounts
 export const useBulkEntryContext = (guildId?: string, cycleId?: string, rotationId?: string, bbsIds: string[] = []) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const url = guildId && cycleId && rotationId && bbsIds.length > 0

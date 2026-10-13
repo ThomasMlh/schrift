@@ -8,7 +8,7 @@ export const useAlbumMutations = () => {
   const { token } = useAuth();
   const request = useMemo(() => makeRequest(token), [token]);
 
-  // spe = 0 retire le perso de l'album
+  // spe = 0 removes the character from the album
   const setCharacterSpe = (bbsId: string, characterId: string, spe: number) =>
     request<{ success: boolean; data: IAlbum }>(`${albumUrl(bbsId)}/characters/${characterId}`, {
       method: 'PUT',

@@ -2,8 +2,8 @@ import useSWR from 'swr';
 import type { IRotationHistory, IUserAccountAchievements, IUserAccountRecords } from '../../interfaces';
 import { apiUrl, fetcher } from './shared';
 
-// Historique d'un killer sur tous les cycles (records, moyennes par cycle, score à battre).
-// guildId restreint records/moyennes à la guilde ; cycleId sert à calculer le score à battre.
+// History of a killer across all cycles (records, per-cycle averages, score to beat).
+// guildId restricts records/averages to the guild; cycleId is used for the score to beat.
 export const useRotationHistory = (rotationId?: string, guildId?: string, cycleId?: string) => {
   const params = new URLSearchParams();
   if (guildId) params.set('guild_id', guildId);
@@ -19,7 +19,7 @@ export const useRotationHistory = (rotationId?: string, guildId?: string, cycleI
   return { history: data?.data ?? null, isLoading, error };
 };
 
-// Records personnels (meilleur score par killer) de chaque compte bbs d'un joueur.
+// Personal records (best score per killer) of each bbs account of a player.
 export const useUserRecords = (userId?: string) => {
   const url = userId ? `${apiUrl}/api/users/${userId}/records` : null;
 
@@ -32,7 +32,7 @@ export const useUserRecords = (userId?: string) => {
   return { accounts: data?.data ?? [], isLoading, error };
 };
 
-// Succès de chaque compte bbs d'un joueur, avec la rareté de chaque palier.
+// Achievements of each bbs account of a player, with the rarity of each tier.
 export const useUserAchievements = (userId?: string) => {
   const url = userId ? `${apiUrl}/api/users/${userId}/achievements` : null;
 

@@ -16,15 +16,14 @@ export const useScoreManagement = ({ users, cycles }: UseScoreManagementProps) =
 
     const sm = (key: string) => `hooks.scoreManagement.${key}`;
 
-    // États du formulaire (édition uniquement — la création à l'unité se fait via la saisie
-    // groupée ; les cas de compte parti de la guilde se corrigent via "Transférer un score")
+    // Form state (edit only: single scores are created through the bulk entry, and accounts that left
+    // the guild are fixed with "Transfer a score")
     const [selectedCycleId, setSelectedCycleId] = useState("");
     const [selectedRotationId, setSelectedRotationId] = useState("");
     const [selectedUserId, setSelectedUserId] = useState("");
     const [userSearchQuery, setUserSearchQuery] = useState("");
     const [scoreValue, setScoreValue] = useState<number>(0);
 
-    // États pour l'édition et suppression
     const [editingScore, setEditingScore] = useState<IScore | null>(null);
     const [scoreToDelete, setScoreToDelete] = useState<IScore | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -32,7 +31,7 @@ export const useScoreManagement = ({ users, cycles }: UseScoreManagementProps) =
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [isOCRModalOpen, setIsOCRModalOpen] = useState(false);
 
-    // État de chargement unifié — une seule action à la fois
+    // Single loading state: one action at a time
     type LoadingAction = 'delete' | 'update' | 'bulk' | null;
     const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
     const isDeleting = loadingAction === 'delete';
@@ -70,8 +69,7 @@ export const useScoreManagement = ({ users, cycles }: UseScoreManagementProps) =
             return null;
         }
 
-        // Le score est rattaché au compte bbs principal du user (pas de sélecteur d'alt pour
-        // l'instant côté saisie manuelle/bulk).
+        // The score is attached to the user's main bbs account (no alt selector in manual/bulk entry yet).
         const bbsId = selectedUser.bbs_id;
         if (!bbsId) {
             toast({
@@ -218,7 +216,6 @@ export const useScoreManagement = ({ users, cycles }: UseScoreManagementProps) =
     };
 
     return {
-        // États du formulaire
         selectedCycleId,
         setSelectedCycleId,
         selectedRotationId,
@@ -230,7 +227,6 @@ export const useScoreManagement = ({ users, cycles }: UseScoreManagementProps) =
         scoreValue,
         setScoreValue,
 
-        // États des modals
         editingScore,
         scoreToDelete,
         setScoreToDelete,
@@ -243,12 +239,10 @@ export const useScoreManagement = ({ users, cycles }: UseScoreManagementProps) =
         isOCRModalOpen,
         setIsOCRModalOpen,
 
-        // États de chargement
         isDeleting,
         isUpdating,
         isBulkSubmitting,
 
-        // Handlers
         handleDeleteScore,
         handleEditScore,
         handleUpdateScore,

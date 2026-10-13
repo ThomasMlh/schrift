@@ -2,8 +2,8 @@ import useSWR from 'swr';
 import type { NotificationType } from '../../interfaces';
 import { apiUrl, useAuthenticatedFetcher } from './shared';
 
-// Référence stable pour ne pas casser l'égalité par référence tant que `data` n'est pas chargé
-// (un `|| []` inline créerait un nouveau tableau à chaque render et boucle les useEffect qui en dépendent).
+// Stable reference so referential equality holds while `data` is loading (an inline `|| []` would
+// create a new array on every render and loop the effects depending on it).
 const EMPTY_TYPES: NotificationType[] = [];
 
 export const useNotificationSettings = () => {

@@ -13,8 +13,8 @@ export const usePodiumMutations = () => {
   const { token } = useAuth();
   const request = useMemo(() => makeRequest(token), [token]);
 
-  // guildName absent = publie pour toutes les guildes actives, chacune dans son salon général.
-  // includeSnapshot : capture du podium ; includeSummary : bilan écrit (top 3, records, progression).
+  // Without guildName, publishes for every active guild, each in its general channel.
+  // includeSnapshot: podium capture; includeSummary: written summary (top 3, records, progression).
   const publishCycleRecap = async (params: {
     cycleName: string;
     year: number;

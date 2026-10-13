@@ -8,7 +8,7 @@ interface BuildTeamMember {
   links?: Array<{ id_character: string }>;
 }
 
-// Résultat facultatif d'un build ; null efface la valeur
+// Optional build result; null clears the value
 interface BuildResult {
   score?: number | null;
   time_normal_wave?: number | null;
@@ -62,7 +62,7 @@ export const useBuildMutations = () => {
     return true;
   };
 
-  // Capture d'écran : image en data URL, convertie et stockée par l'API sur le bucket
+  // Screenshot: data URL image, converted and stored on the bucket by the API
   const uploadBuildScreenshot = async (buildId: string, image: string) => {
     const result = await request<{ success: boolean; screenshot: string }>(`${apiUrl}/api/builds/${buildId}/screenshot`, {
       method: 'POST',

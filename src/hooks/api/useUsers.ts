@@ -43,9 +43,8 @@ export const useUsers = (options?: {
   };
 };
 
-// Liste par compte bbs (pas par user) — un même joueur avec plusieurs comptes apparaît une fois
-// par compte, chacun avec sa propre guilde/rôle. Utilisé par la liste publique des joueurs, pour
-// rester cohérent avec le classement/rosters de guilde qui sont déjà par compte.
+// List per bbs account (not per user): a player with several accounts appears once per account, each
+// with its own guild/role. Used by the public player list, consistent with rankings and guild rosters.
 export const useUserAccounts = (options?: {
   authenticated?: boolean;
   enabled?: boolean;
@@ -91,9 +90,9 @@ export const useUser = (userId: string | undefined) => {
   return { user: data?.user, isLoading, error, mutate };
 };
 
-// bbs_name n'est PAS garanti unique (deux comptes, alts d'un même joueur ou non, peuvent avoir le
-// même pseudo) : c'est le chemin "joli" par défaut, mais bbsId — quand fourni (ex: ?compte=... dans
-// l'URL) — prend le dessus et cible le compte exact, sans ambiguïté possible sur le nom.
+// bbs_name is NOT guaranteed unique (two accounts, alts of one player or not, may share a name).
+// It is the default readable path, but bbsId, when provided (e.g. ?compte=... in the URL), takes
+// precedence and targets the exact account.
 export const useUserByBBSName = (bbs_name: string | undefined, bbsId?: string) => {
   const { users, isLoading } = useUsers({ search: bbs_name, limit: 10, authenticated: false });
 
@@ -248,8 +247,8 @@ export interface IUserStats {
   performanceByAlteration?: { alteration: string; averageScore: number; count: number }[];
 }
 
-// bbsId optionnel : scope les stats à un compte précis (défaut serveur = compte principal).
-// Chaque compte bbs a son propre historique/classement, jamais fusionné entre alts.
+// Optional bbsId scopes the stats to one account (server default = main account). Each bbs account
+// has its own history and ranking, never merged across alts.
 const buildUserStatsUrl = (userId: string, cycleId?: string, bbsId?: string) => {
   const params = new URLSearchParams();
   if (cycleId) params.set('cycle_id', cycleId);

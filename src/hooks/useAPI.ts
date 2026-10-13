@@ -1,6 +1,6 @@
 /**
- * Facade de compatibilité — agrège tous les hooks de lecture par domaine.
- * Importer directement le hook de domaine si on n'a besoin que d'un sous-ensemble.
+ * Compatibility facade re-exporting every read hook by domain.
+ * Import the domain hook directly when only a subset is needed.
  */
 export * from './api/useCycles';
 export * from './api/useGuilds';
