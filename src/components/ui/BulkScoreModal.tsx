@@ -17,6 +17,8 @@ import {
     Flex,
     SimpleGrid,
     Progress,
+    IconButton,
+    Tooltip,
 } from "@chakra-ui/react";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
@@ -28,7 +30,7 @@ import { CycleSelect } from "./CycleSelect";
 import { CustomSelect } from "./CustomSelect";
 import { useTranslation } from "react-i18next";
 import { PageLoader } from "./PageLoader";
-import { BulkScoreRow } from "./BulkScoreInputs";
+import { BulkScoreRow, ListIcon, GridIcon, type ViewMode } from "./BulkScoreInputs";
 import { formatScore } from "@/utils/bulkScoreEntry";
 
 interface BulkScoreModalProps {
@@ -48,6 +50,16 @@ type ScoreValues = Record<string, number | null>;
 
 // Assez large pour une guilde avec ses alts (la liste des scores est paginée à 20 par défaut)
 const EXISTING_SCORES_LIMIT = 200;
+
+// Choix liste / grille mémorisé dans le navigateur (simple confort, ignoré si le stockage est indisponible)
+const VIEW_MODE_KEY = "bulkScoreModal.viewMode";
+const readViewMode = (): ViewMode => {
+    try {
+        return localStorage.getItem(VIEW_MODE_KEY) === "grid" ? "grid" : "list";
+    } catch {
+        return "list";
+    }
+};
 
 // Rotation pré-sélectionnée : la dernière déjà commencée (celle en cours, ou celle qui vient de se
 // terminer entre deux rotations), jamais une rotation à venir dont personne n'a encore de score
@@ -82,6 +94,16 @@ const BulkScoreModal = ({
     const [values, setValues] = useState<ScoreValues>({});
     const [initialValues, setInitialValues] = useState<ScoreValues>({});
     const [isConfirmingClose, setIsConfirmingClose] = useState(false);
+    const [viewMode, setViewMode] = useState<ViewMode>(readViewMode);
+
+    const changeViewMode = (mode: ViewMode) => {
+        setViewMode(mode);
+        try {
+            localStorage.setItem(VIEW_MODE_KEY, mode);
+        } catch {
+            // stockage indisponible : le choix vaut pour cette session seulement
+        }
+    };
     // Sélection (guilde|cycle|rotation) dont les valeurs ont été initialisées : une revalidation
     // des données ne doit pas écraser ce qui a été tapé entre-temps
     const initializedKey = useRef<string | null>(null);
@@ -329,28 +351,47 @@ const BulkScoreModal = ({
                             <Text fontSize="sm" color="text.muted">Aucun membre trouvé pour cette guilde</Text>
                         </Center>
                     ) : (
-                        <VStack spacing={1.5} align="stretch">
-                            {isDifferential && (
-                                <Text fontSize="xs" color="text.muted" mb={1}>
-                                    Rotation différentielle : saisissez le cumul de la semaine, le score de base est déduit automatiquement.
+                        <Box>
+                            <Flex justify="space-between" align="center" gap={3} mb={2}>
+                                <Text fontSize="xs" color="text.muted">
+                                    {isDifferential
+                                        ? "Rotation différentielle : saisissez le cumul de la semaine, le score de base est déduit automatiquement."
+                                        : `${total} compte(s)`}
                                 </Text>
-                            )}
-                            {displayedMembers.map((member, idx) => (
-                                <BulkScoreRow
-                                    key={member.bbs_id}
-                                    member={member}
-                                    index={idx}
-                                    value={values[member.bbs_id!] ?? null}
-                                    isDirty={values[member.bbs_id!] !== initialValues[member.bbs_id!]}
-                                    reference={references?.[member.bbs_id!]}
-                                    isDifferential={isDifferential}
-                                    thresholds={thresholds}
-                                    isDisabled={isSubmitting}
-                                    onChange={handleScoreChange}
-                                    onPasteColumn={handlePasteColumn}
-                                />
-                            ))}
-                        </VStack>
+                                <HStack spacing={0.5} flexShrink={0}>
+                                    {([["list", "Vue liste", ListIcon], ["grid", "Vue grille", GridIcon]] as const).map(([mode, label, ViewIcon]) => (
+                                        <Tooltip key={mode} label={label} placement="top" hasArrow openDelay={400}>
+                                            <IconButton
+                                                aria-label={label}
+                                                icon={<ViewIcon />}
+                                                size="xs"
+                                                variant={viewMode === mode ? "solid" : "ghost"}
+                                                colorScheme={viewMode === mode ? "purple" : "gray"}
+                                                onClick={() => changeViewMode(mode)}
+                                            />
+                                        </Tooltip>
+                                    ))}
+                                </HStack>
+                            </Flex>
+                            <SimpleGrid columns={viewMode === "grid" ? { base: 1, sm: 2, md: 3 } : 1} spacing={viewMode === "grid" ? 2 : 1.5}>
+                                {displayedMembers.map((member, idx) => (
+                                    <BulkScoreRow
+                                        key={member.bbs_id}
+                                        member={member}
+                                        index={idx}
+                                        value={values[member.bbs_id!] ?? null}
+                                        isDirty={values[member.bbs_id!] !== initialValues[member.bbs_id!]}
+                                        reference={references?.[member.bbs_id!]}
+                                        isDifferential={isDifferential}
+                                        thresholds={thresholds}
+                                        isDisabled={isSubmitting}
+                                        onChange={handleScoreChange}
+                                        onPasteColumn={handlePasteColumn}
+                                        layout={viewMode}
+                                    />
+                                ))}
+                            </SimpleGrid>
+                        </Box>
                     )}
                 </ModalBody>
 
