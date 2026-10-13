@@ -60,7 +60,8 @@ export const BulkScoreRow = memo(({
         }
     };
 
-    const borderColor = status?.level === "error" ? "red.400" : status?.level === "warn" ? "orange.400" : "border.subtle";
+    // Fond légèrement relevé, sans cadre : la bordure ne sert qu'à signaler une alerte
+    const borderColor = status?.level === "error" ? "red.400" : status?.level === "warn" ? "orange.400" : "transparent";
 
     const referenceText = isDifferential ? (
         <Text fontSize="xs" color="text.muted" fontFamily="mono" noOfLines={1} mt={0.5}>
@@ -78,14 +79,16 @@ export const BulkScoreRow = memo(({
             textAlign="right"
             fontFamily="mono"
             borderRadius="lg"
-            placeholder="—"
+            placeholder="Score"
+            bg="bg.card"
+            borderColor={isDirty ? "purple.400" : "border.default"}
+            _placeholder={{ color: "text.muted" }}
             value={formatScore(value)}
             onChange={(e) => onChange(member.bbs_id!, parseScore(e.target.value))}
             onPaste={handlePaste}
             onKeyDown={handleKeyDown}
             onFocus={(e) => e.target.select()}
             isDisabled={isDisabled}
-            borderColor={isDirty ? "purple.400" : undefined}
             focusBorderColor="purple.400"
         />
     );
@@ -100,7 +103,7 @@ export const BulkScoreRow = memo(({
 
     if (layout === "grid") {
         return (
-            <Box p={2.5} borderRadius="lg" borderWidth="1px" borderColor={borderColor} bg={value != null ? "bg.subtle" : "transparent"}>
+            <Box p={2.5} borderRadius="lg" borderWidth="1px" borderColor={borderColor} bg="bg.subtle">
                 <Box minW={0} mb={2}>
                     <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />
                     {referenceText}
@@ -122,7 +125,7 @@ export const BulkScoreRow = memo(({
             borderRadius="lg"
             borderWidth="1px"
             borderColor={borderColor}
-            bg={value != null ? "bg.subtle" : "transparent"}
+            bg="bg.subtle"
         >
             <Text fontSize="xs" color="text.muted" minW="20px" textAlign="right" sx={{ fontVariantNumeric: "tabular-nums" }}>
                 {index + 1}

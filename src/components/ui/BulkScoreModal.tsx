@@ -298,7 +298,7 @@ const BulkScoreModal = ({
                                 options={guilds.map((guild: IGuild) => ({ value: guild._id, label: guild.name }))}
                                 allowDeselect={false}
                                 size="md"
-                                variant="modal"
+                                variant="default"
                             />
                         )}
                         <CycleSelect
@@ -310,7 +310,7 @@ const BulkScoreModal = ({
                             allowDeselect={false}
                             showActiveBadge={true}
                             size="md"
-                            variant="modal"
+                            variant="default"
                         />
                         <CustomSelect
                             placeholder="Rotation"
@@ -318,7 +318,7 @@ const BulkScoreModal = ({
                             onChange={setSelectedRotationId}
                             isDisabled={isSubmitting || !selectedCycle}
                             size="md"
-                            variant="modal"
+                            variant="default"
                             options={rotationOptions}
                             renderSelected={(option) => {
                                 const rotation = selectedCycle?.rotations.find((r: ICycleRotation) => r.rotation_id === option.value);
@@ -413,7 +413,7 @@ const BulkScoreModal = ({
                                     <>
                                         <HStack spacing={3} fontSize="xs" color="text.muted" mb={1}>
                                             <Text><Text as="span" fontWeight="bold" color="text.strong">{filledIds.length}</Text> / {total} saisis</Text>
-                                            <Text fontFamily="mono">Total {formatScore(totalScore)}</Text>
+                                            <Text sx={{ fontVariantNumeric: "tabular-nums" }}>Total {formatScore(totalScore)}</Text>
                                         </HStack>
                                         <Progress value={(filledIds.length / total) * 100} size="xs" colorScheme="purple" borderRadius="full" maxW="260px" />
                                     </>

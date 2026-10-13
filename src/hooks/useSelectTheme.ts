@@ -42,7 +42,7 @@ export const useSelectTheme = (variant: SelectVariant = "default"): SelectTheme 
   const ghostScrollbarThumbHover = useColorModeValue("gray.400", "whiteAlpha.400");
 
   // ── modal (violet) ────────────────────────────────────────────────────────
-  // Matches BulkScoreModal: modalBg #1a1b2e, accent purple #7C3AED / #4F46E5
+  // Fond violet #1a1b2e de l'ancienne BulkScoreModal (qui utilise désormais "default") ; plus utilisée
   const modalButtonBg = useColorModeValue("purple.50", "rgba(124,58,237,0.12)");
   const modalBorderColor = useColorModeValue("purple.200", "rgba(124,58,237,0.35)");
   const modalHoverBorderColor = useColorModeValue("purple.400", "rgba(124,58,237,0.6)");
