@@ -1,4 +1,4 @@
-import { Badge, HStack, Text } from "@chakra-ui/react";
+import { Badge, Box, HStack, Text } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import type { ICycleRotation } from "@/interfaces";
 import { getRotationRealDates } from "@/utils/cycleHelpers";
@@ -8,7 +8,7 @@ interface RotationLabelProps {
     rotation: ICycleRotation;
     // Date courte de début, alignée à droite (liste des options)
     showDate?: boolean;
-    // Petit badge après le killer (ex : « Dernière »)
+    // Petit badge aligné à droite (ex : « Dernière »), à la place de la date pour laisser la place au killer
     badge?: string;
 }
 
@@ -25,15 +25,19 @@ export const RotationLabel = ({ rotation, showDate = false, badge }: RotationLab
 
     return (
         <HStack spacing={2} w="100%" minW={0}>
-            <Text fontSize="sm" fontWeight="bold" color="text.muted" minW="30px" sx={{ fontVariantNumeric: "tabular-nums" }}>
+            <Text fontSize="sm" fontWeight="bold" color="text.muted" minW="30px" flexShrink={0} sx={{ fontVariantNumeric: "tabular-nums" }}>
                 #{rotation.position}
             </Text>
-            <AttackTypeBadge attackType={rotation.attack} size="10px" />
-            <Text fontSize="sm" fontWeight="semibold" color="text.strong" noOfLines={1}>
+            {/* Le flex ne doit jamais écraser la pastille quand la ligne manque de place */}
+            <Box flexShrink={0} display="flex">
+                <AttackTypeBadge attackType={rotation.attack} size="10px" />
+            </Box>
+            <Text fontSize="sm" fontWeight="semibold" color="text.strong" noOfLines={1} minW={0}>
                 {t(`factions.${rotation.killer}`, rotation.killer)}
             </Text>
-            {badge && <Badge colorScheme="green" fontSize="2xs" flexShrink={0}>{badge}</Badge>}
-            {startDate && (
+            {badge ? (
+                <Badge colorScheme="green" fontSize="2xs" ml="auto" flexShrink={0}>{badge}</Badge>
+            ) : startDate && (
                 <Text fontSize="xs" color="text.muted" ml="auto" flexShrink={0}>
                     {formatShortDate(startDate)}
                 </Text>
