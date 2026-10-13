@@ -1,158 +1,112 @@
-import { Box, Flex, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, Text, VStack } from "@chakra-ui/react";
-import { memo, type SVGProps } from "react";
-import type { IUser } from "../../interfaces";
+import { Box, Flex, Input, Text, Tooltip } from "@chakra-ui/react";
+import { memo, type ClipboardEvent, type KeyboardEvent } from "react";
+import type { IUser, BulkEntryReference, BulkEntryThresholds } from "../../interfaces";
 import { UserDisplay } from "./UserDisplay";
+import { formatScore, getRowStatus, parsePastedColumn, parseScore } from "@/utils/bulkScoreEntry";
 
-// Ligne (vue liste) et carte (vue grille) de saisie d'un score, et icônes du sélecteur de vue,
-// utilisées par BulkScoreModal.
+// Ligne de saisie d'un score de la saisie groupée (BulkScoreModal).
 
-export type ViewMode = 'list' | 'grid';
+const STATUS_STYLE = {
+    ok: { icon: "✓", color: "green.400" },
+    warn: { icon: "⚠", color: "orange.400" },
+    error: { icon: "✕", color: "red.400" },
+} as const;
 
-interface ScoreRowProps {
+interface BulkScoreRowProps {
     member: IUser;
     index: number;
-    score: number;
-    onChange: (bbsId: string, value: number) => void;
+    value: number | null;
+    isDirty: boolean;
+    reference?: BulkEntryReference;
+    isDifferential: boolean;
+    thresholds?: BulkEntryThresholds;
     isDisabled: boolean;
-    isDark: boolean;
-    rowBg: string;
-    rowBorder: string;
-    rowActiveBg: string;
-    rowActiveBorder: string;
-    formatNumber: (v: string | number) => string;
-    parseNumber: (v: string) => string;
+    onChange: (bbsId: string, value: number | null) => void;
+    onPasteColumn: (index: number, values: (number | null)[]) => void;
 }
 
-interface ScoreCardProps {
-    member: IUser;
-    score: number;
-    onChange: (bbsId: string, value: number) => void;
-    isDisabled: boolean;
-    isDark: boolean;
-    rowBg: string;
-    rowBorder: string;
-    rowActiveBg: string;
-    rowActiveBorder: string;
-    formatNumber: (v: string | number) => string;
-    parseNumber: (v: string) => string;
-}
+// Passe au champ suivant de la liste avec Entrée
+const focusRow = (index: number) => {
+    const next = document.querySelector<HTMLInputElement>(`[data-bulk-score-index="${index}"]`);
+    next?.focus();
+};
 
-export const ScoreRow = memo(({
-    member, index, score, onChange, isDisabled,
-    isDark, rowBg, rowBorder, rowActiveBg, rowActiveBorder,
-    formatNumber, parseNumber
-}: ScoreRowProps) => {
-    const hasScore = score > 0;
+export const BulkScoreRow = memo(({
+    member, index, value, isDirty, reference, isDifferential, thresholds, isDisabled, onChange, onPasteColumn,
+}: BulkScoreRowProps) => {
+    const status = getRowStatus(value, reference, isDifferential, thresholds);
+    const style = status ? STATUS_STYLE[status.level] : null;
+
+    const referenceParts = [
+        isDifferential && reference?.base_raw != null ? `Base ${formatScore(reference.base_raw)}` : null,
+        reference?.last_score != null ? `Dernier ${formatScore(reference.last_score)}` : null,
+    ].filter(Boolean);
+
+    const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
+        const values = parsePastedColumn(e.clipboardData.getData("text"));
+        if (values.length > 1) {
+            e.preventDefault();
+            onPasteColumn(index, values);
+        }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            focusRow(index + 1);
+        }
+    };
+
     return (
         <Flex
             align="center"
             gap={3}
-            px={3} py={2.5}
+            px={3}
+            py={2}
             borderRadius="lg"
-            border="1px solid"
-            bg={hasScore ? rowActiveBg : rowBg}
-            borderColor={hasScore ? rowActiveBorder : rowBorder}
-            transition="background 0.1s, border-color 0.1s"
+            borderWidth="1px"
+            borderColor={status?.level === "error" ? "red.400" : status?.level === "warn" ? "orange.400" : "border.subtle"}
+            bg={value != null ? "bg.subtle" : "transparent"}
         >
-            <Text
-                fontSize="2xs" fontWeight="bold" minW="18px" textAlign="right"
-                color={isDark ? 'whiteAlpha.300' : 'gray.300'}
-            >
+            <Text fontSize="xs" color="text.muted" minW="20px" textAlign="right" sx={{ fontVariantNumeric: "tabular-nums" }}>
                 {index + 1}
             </Text>
             <Box flex={1} minW={0}>
                 <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />
+                <Tooltip
+                    label={reference?.usual_score != null ? `Habituel sur ce killer : ${formatScore(reference.usual_score)}` : undefined}
+                    hasArrow
+                    openDelay={300}
+                >
+                    <Text fontSize="xs" color="text.muted" fontFamily="mono" noOfLines={1} mt={0.5}>
+                        {referenceParts.length > 0 ? referenceParts.join(" · ") : "Pas d'historique sur ce killer"}
+                    </Text>
+                </Tooltip>
             </Box>
-            <NumberInput
+            <Input
+                data-bulk-score-index={index}
                 size="sm"
-                min={0}
-                max={9999999999}
-                step={10000000}
-                value={score}
-                onChange={(_, value) => onChange(member.bbs_id!, value)}
-                isDisabled={isDisabled}
-                w="160px"
+                w={{ base: "130px", sm: "160px" }}
                 flexShrink={0}
-                format={formatNumber}
-                parse={parseNumber}
-            >
-                <NumberInputField
-                    borderRadius="lg"
-                    textAlign="right"
-                    sx={{ fontVariantNumeric: 'tabular-nums' }}
-                    borderColor={hasScore ? (isDark ? 'purple.600' : 'purple.300') : undefined}
-                    _focus={{ borderColor: 'purple.500', boxShadow: '0 0 0 1px var(--chakra-colors-purple-500)' }}
-                    onFocus={(e) => e.target.select()}
-                />
-                <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                </NumberInputStepper>
-            </NumberInput>
+                inputMode="numeric"
+                textAlign="right"
+                fontFamily="mono"
+                borderRadius="lg"
+                placeholder="—"
+                value={formatScore(value)}
+                onChange={(e) => onChange(member.bbs_id!, parseScore(e.target.value))}
+                onPaste={handlePaste}
+                onKeyDown={handleKeyDown}
+                onFocus={(e) => e.target.select()}
+                isDisabled={isDisabled}
+                borderColor={isDirty ? "purple.400" : undefined}
+                focusBorderColor="purple.400"
+            />
+            <Tooltip label={status?.message} hasArrow isDisabled={!status}>
+                <Text w="16px" flexShrink={0} textAlign="center" fontWeight="bold" color={style?.color}>
+                    {style?.icon ?? ""}
+                </Text>
+            </Tooltip>
         </Flex>
     );
 });
-
-export const ScoreCard = memo(({
-    member, score, onChange, isDisabled,
-    isDark, rowBg, rowBorder, rowActiveBg, rowActiveBorder,
-    formatNumber, parseNumber
-}: ScoreCardProps) => {
-    const hasScore = score > 0;
-    return (
-        <Box
-            p={3}
-            borderRadius="lg"
-            border="1px solid"
-            bg={hasScore ? rowActiveBg : rowBg}
-            borderColor={hasScore ? rowActiveBorder : rowBorder}
-            transition="background 0.1s, border-color 0.1s"
-        >
-            <VStack spacing={2} align="stretch">
-                <UserDisplay user={member} avatarSize="xs" showUsername={false} asLink={false} />
-                <NumberInput
-                    size="sm"
-                    min={0}
-                    max={9999999999}
-                    step={10000000}
-                    value={score}
-                    onChange={(_, value) => onChange(member.bbs_id!, value)}
-                    isDisabled={isDisabled}
-                    format={formatNumber}
-                    parse={parseNumber}
-                >
-                    <NumberInputField
-                        borderRadius="lg"
-                        textAlign="right"
-                        sx={{ fontVariantNumeric: 'tabular-nums' }}
-                        borderColor={hasScore ? (isDark ? 'purple.600' : 'purple.300') : undefined}
-                        _focus={{ borderColor: 'purple.500', boxShadow: '0 0 0 1px var(--chakra-colors-purple-500)' }}
-                        onFocus={(e) => e.target.select()}
-                    />
-                    <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                    </NumberInputStepper>
-                </NumberInput>
-            </VStack>
-        </Box>
-    );
-});
-
-export const ListIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" {...props}>
-        <rect x="0" y="2" width="16" height="2.5" rx="1" />
-        <rect x="0" y="6.75" width="16" height="2.5" rx="1" />
-        <rect x="0" y="11.5" width="16" height="2.5" rx="1" />
-    </svg>
-);
-
-export const GridIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" {...props}>
-        <rect x="0" y="0" width="6.5" height="6.5" rx="1" />
-        <rect x="9.5" y="0" width="6.5" height="6.5" rx="1" />
-        <rect x="0" y="9.5" width="6.5" height="6.5" rx="1" />
-        <rect x="9.5" y="9.5" width="6.5" height="6.5" rx="1" />
-    </svg>
-);
-
