@@ -1,108 +1,23 @@
 import {
-  Box, Button, ButtonGroup, Flex, Grid, HStack, Input, InputGroup, InputLeftElement, Popover,
-  PopoverArrow, PopoverBody, PopoverContent, PopoverTrigger, Progress, SimpleGrid, Skeleton, Text, VStack,
-  useToast,
+  Box, Button, ButtonGroup, Flex, Grid, HStack, Popover, PopoverArrow, PopoverBody, PopoverContent,
+  PopoverTrigger, Progress, Skeleton, Text, VStack, useToast,
 } from "@chakra-ui/react";
 import { memo, useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { FiSearch } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import { useAlbum, useCharacterCatalog } from "@/hooks/useAPI";
 import { useAlbumMutations } from "@/hooks/useAPIMutations";
-import { AffinityFilter } from "@/components/ui/AffinityFilter";
-import { CategoryFilter } from "@/components/ui/CategoryFilter";
-import { KillerFilter } from "@/components/ui/KillerFilter";
-import { AttackTypeFilter } from "@/components/ui/AttackTypeFilter";
-import { CharactersAffinities, CharactersCategories, CharactersKillers } from "@/utils/chractersData";
-import { bucketUrl } from "@/utils/apiRequest";
-import { getAffinityIcon } from "@/utils/characterIcons";
+import { AlbumThumb } from "@/components/album/AlbumThumb";
+import { AlbumFilters } from "@/components/album/AlbumFilters";
+import { EMPTY_ALBUM_FILTERS, MAX_SPE, SPE_LEVELS, filterAlbumCharacters } from "@/utils/albumFilters";
 import type { IAlbumCharacter } from "@/interfaces";
-
-const MAX_SPE = 5;
-const SPE_LEVELS = Array.from({ length: MAX_SPE }, (_, i) => i + 1);
-
-type OwnershipFilter = "all" | "owned" | "missing";
-
-// Same logic as the server-side filter of the Characters page: case-insensitive substring, so that
-// "Capitaine" also matches "Capitaine +"
-const matchesAny = (values: string[] | undefined, selected: string) =>
-  !selected || (values ?? []).some((v) => v.toLowerCase().includes(selected.toLowerCase()));
 
 interface UserAlbumProps {
   // bbs account shown on the page (an alt when the URL targets it)
   bbsId?: string;
-  // Account owner or admin: can tick characters and set their spec
+  // Account owner or admin
   canEdit: boolean;
 }
-
-// Spec pips (1 to 5) at the bottom of the thumbnail
-const SpePips = ({ spe }: { spe: number }) => (
-  <HStack spacing="3px" justify="center">
-    {SPE_LEVELS.map((level) => (
-      <Box
-        key={level}
-        w="7px"
-        h="7px"
-        borderRadius="full"
-        bg={level <= spe ? "yellow.300" : "whiteAlpha.400"}
-        boxShadow={level <= spe ? "0 0 4px rgba(250, 204, 21, 0.8)" : undefined}
-      />
-    ))}
-  </HStack>
-);
-
-// Character thumbnail: in color when owned, greyed out otherwise.
-// Native <img> (not Chakra's Image with fallback, which preloads every thumbnail in JS).
-const AlbumThumb = ({ character, spe }: { character: IAlbumCharacter; spe: number }) => (
-  <Box
-    position="relative"
-    aspectRatio={1}
-    borderRadius="lg"
-    overflow="hidden"
-    bg="bg.inset"
-    borderWidth="2px"
-    borderColor={spe === MAX_SPE ? "yellow.400" : spe > 0 ? "purple.400" : "border.subtle"}
-    transition="transform 0.15s"
-    _hover={{ transform: "translateY(-2px)" }}
-  >
-    <Box
-      as="img"
-      src={`${bucketUrl}/characters/thumb/${character._id}.png`}
-      alt={character.name}
-      w="100%"
-      h="100%"
-      objectFit="cover"
-      loading="lazy"
-      decoding="async"
-      filter={spe > 0 ? undefined : "grayscale(1)"}
-      opacity={spe > 0 ? 1 : 0.35}
-    />
-    {/* Affinity visible without hovering: some versions of a character share the same artwork */}
-    {character.affinity && (
-      <Box
-        as="img"
-        src={getAffinityIcon(character.affinity) ?? undefined}
-        alt={character.affinity}
-        position="absolute"
-        top="3px"
-        left="3px"
-        w="18px"
-        h="18px"
-        p="1px"
-        borderRadius="full"
-        bg="blackAlpha.600"
-        loading="lazy"
-        decoding="async"
-        opacity={spe > 0 ? 1 : 0.6}
-      />
-    )}
-    {spe > 0 && (
-      <Box position="absolute" bottom={0} left={0} right={0} py={1} bgGradient="linear(to-t, blackAlpha.800, transparent)">
-        <SpePips spe={spe} />
-      </Box>
-    )}
-  </Box>
-);
 
 interface AlbumTileProps {
   character: IAlbumCharacter;
@@ -181,15 +96,10 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
   const { characters, isLoading: catalogLoading } = useCharacterCatalog();
   const { album, isLoading: albumLoading, mutate } = useAlbum(bbsId);
   const { setCharacterSpe } = useAlbumMutations();
-  const [search, setSearch] = useState("");
-  const [affinity, setAffinity] = useState("");
-  const [category, setCategory] = useState("");
-  const [killer, setKiller] = useState("");
-  const [attackType, setAttackType] = useState("");
-  const [ownership, setOwnership] = useState<OwnershipFilter>("all");
+  const [filters, setFilters] = useState(EMPTY_ALBUM_FILTERS);
   const [activeId, setActiveId] = useState<string | null>(null);
-  // The search filters the grid deferred so typing stays responsive
-  const deferredSearch = useDeferredValue(search);
+  // Deferred so typing in the search stays responsive
+  const deferredFilters = useDeferredValue(filters);
 
   const owned = useMemo(() => album?.characters ?? {}, [album]);
 
@@ -201,19 +111,10 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
     };
   }, [characters, owned]);
 
-  const visibleCharacters = useMemo(() => {
-    const term = deferredSearch.trim().toLowerCase();
-    return characters.filter((c) => {
-      const spe = owned[c._id] ?? 0;
-      if (ownership === "owned" && spe === 0) return false;
-      if (ownership === "missing" && spe > 0) return false;
-      if (affinity && c.affinity !== affinity) return false;
-      if (attackType && c.attack_type !== attackType) return false;
-      if (!matchesAny(c.categories, category) || !matchesAny(c.killers, killer)) return false;
-      if (!term) return true;
-      return [c.name, c.search_name, c.version].some((s) => s?.toLowerCase().includes(term));
-    });
-  }, [characters, owned, deferredSearch, affinity, category, killer, attackType, ownership]);
+  const visibleCharacters = useMemo(
+    () => filterAlbumCharacters(characters, deferredFilters, (id) => (owned[id] ?? 0) > 0),
+    [characters, owned, deferredFilters],
+  );
 
   // Latest values read by handleChange without changing its identity (otherwise memo is useless)
   const latest = useRef({ setCharacterSpe, toast, t });
@@ -244,16 +145,6 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
 
   if (catalogLoading || albumLoading) return <Skeleton h="320px" borderRadius="xl" />;
 
-  const hasFilters = Boolean(search || affinity || category || killer || attackType || ownership !== "all");
-  const resetFilters = () => {
-    setSearch("");
-    setAffinity("");
-    setCategory("");
-    setKiller("");
-    setAttackType("");
-    setOwnership("all");
-  };
-
   const total = characters.length;
   const percent = total > 0 ? Math.round((ownedCount / total) * 100) : 0;
 
@@ -279,39 +170,15 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
         <Progress value={percent} size="sm" colorScheme="purple" borderRadius="full" />
       </Box>
 
-      <Box>
-        <Flex gap={3} wrap="wrap">
-          <InputGroup flex="1 1 220px">
-            <InputLeftElement pointerEvents="none"><FiSearch /></InputLeftElement>
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t("pages.user.albumSearchPlaceholder")}
-            />
-          </InputGroup>
-          <ButtonGroup size="md" isAttached variant="outline">
-            {(["all", "owned", "missing"] as const).map((key) => (
-              <Button
-                key={key}
-                colorScheme={ownership === key ? "purple" : "gray"}
-                variant={ownership === key ? "solid" : "outline"}
-                onClick={() => setOwnership(key)}
-              >
-                {t(`pages.user.albumFilter_${key}`)}
-              </Button>
-            ))}
-          </ButtonGroup>
-          {hasFilters && (
-            <Button variant="ghost" onClick={resetFilters}>{t("common.reset")}</Button>
-          )}
-        </Flex>
-        <SimpleGrid columns={{ base: 2, md: 4 }} spacing={3} mt={3}>
-          <AffinityFilter selectedAffinity={affinity} affinities={CharactersAffinities} onAffinityChange={setAffinity} />
-          <CategoryFilter selectedCategory={category} categories={CharactersCategories} onCategoryChange={setCategory} />
-          <KillerFilter selectedKiller={killer} killers={CharactersKillers} onKillerChange={setKiller} />
-          <AttackTypeFilter selectedAttackType={attackType} onAttackTypeChange={setAttackType} />
-        </SimpleGrid>
-      </Box>
+      <AlbumFilters
+        value={filters}
+        onChange={setFilters}
+        ownershipLabels={{
+          all: t("pages.user.albumFilter_all"),
+          owned: t("pages.user.albumFilter_owned"),
+          missing: t("pages.user.albumFilter_missing"),
+        }}
+      />
 
       {visibleCharacters.length === 0 ? (
         <Text fontSize="sm" color="text.muted" textAlign="center" py={8}>{t("pages.user.albumEmpty")}</Text>
