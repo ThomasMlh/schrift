@@ -37,6 +37,7 @@ import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock, FiHexagon, FiT
 import { UserKillerRecords } from "@/components/user/UserKillerRecords";
 import { UserAchievements } from "@/components/achievements/UserAchievements";
 import { UserAlbum } from "@/components/user/UserAlbum";
+import { AlbumNudge } from "@/components/user/AlbumNudge";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -243,6 +244,10 @@ const UserPage = () => {
 
         {/* Ban details, admins only */}
         {isAdmin && user.is_banned && <BanDetailsCard user={user} />}
+
+        {currentUser?._id === userId && stats && stats.totalScores > 0 && tabIndex !== TAB_MAP.album && (
+          <AlbumNudge bbsId={user.bbs_id ?? undefined} onOpen={() => handleTabChange(TAB_MAP.album)} />
+        )}
 
         {statsLoading ? (
           <VStack spacing={6}>

@@ -8,15 +8,17 @@ export const useBuilds = (options?: {
   rotation_id?: string;
   character_id?: string;
   isValid?: boolean;
+  playable_by?: string;
   authenticated?: boolean;
 }) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
-  const { page = 1, limit = 20, rotation_id, character_id, isValid, authenticated = false } = options || {};
+  const { page = 1, limit = 20, rotation_id, character_id, isValid, playable_by, authenticated = false } = options || {};
 
   let url = `${apiUrl}/api/builds?page=${page}&limit=${limit}`;
   if (rotation_id) url += `&rotation_id=${encodeURIComponent(rotation_id)}`;
   if (character_id) url += `&character_id=${encodeURIComponent(character_id)}`;
   if (isValid !== undefined) url += `&isValid=${isValid}`;
+  if (playable_by) url += `&playable_by=${encodeURIComponent(playable_by)}`;
 
   const { data, error, isLoading, mutate } = useSWR<IBuildsResponse>(
     url,

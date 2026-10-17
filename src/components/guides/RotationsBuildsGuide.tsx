@@ -12,14 +12,17 @@ import {
   AlertIcon,
   Icon,
   Tooltip,
+  Link,
 } from "@chakra-ui/react";
 import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AddIcon } from "@chakra-ui/icons";
 import { useBuilds, useCycles, useRotations } from "../../hooks/useAPI";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
-import { FiSearch } from "react-icons/fi";
+import { FiCheckCircle, FiSearch } from "react-icons/fi";
+import { useMyAlbum } from "@/hooks/useMyAlbum";
+import { albumTabUrl } from "@/utils/buildOwnership";
 import BuildCreationModal from "../ui/BuildCreationModal";
 import { BuildDetailModal } from "../ui/BuildDetailModal";
 import { Pagination } from "../ui/Pagination";
@@ -50,6 +53,10 @@ const RotationsBuildsGuide = () => {
   const { currentUser } = useAuth();
   const isAuthenticated = !!currentUser;
 
+  const { accounts, account, owned, hasAlbum, isLoading: isLoadingAlbum, selectAccount } = useMyAlbum();
+  const [playableOnly, setPlayableOnly] = useState(false);
+  const isPlayableFilterOn = playableOnly && hasAlbum && !!account;
+
   const { rotations, isLoading: isLoadingRotations } = useRotations();
   const { cycles, isLoading: isLoadingCycles } = useCycles({ limit: 5 });
   const { currentRotation } = useCurrentRotation(cycles, isLoadingCycles);
@@ -76,6 +83,7 @@ const RotationsBuildsGuide = () => {
     limit: 10,
     rotation_id: selectedRotation || undefined,
     isValid: true,
+    playable_by: isPlayableFilterOn ? account?.bbs_id : undefined,
     authenticated: false,
   });
 
@@ -218,6 +226,38 @@ const RotationsBuildsGuide = () => {
           )}
         </Flex>
 
+        {account && (
+          <Flex gap={3} mt={3} align="center" wrap="wrap">
+            <Tooltip label={t("components.buildOwnership.fillAlbumFirst")} hasArrow isDisabled={hasAlbum}>
+              <Button
+                size="sm"
+                variant={isPlayableFilterOn ? "solid" : "outline"}
+                colorScheme="purple"
+                leftIcon={<Icon as={FiCheckCircle} />}
+                onClick={() => { setPlayableOnly(!playableOnly); setCurrentPage(1); }}
+                isDisabled={!hasAlbum}
+                aria-pressed={isPlayableFilterOn}
+              >
+                {t("components.buildOwnership.playableFilter")}
+              </Button>
+            </Tooltip>
+            {accounts.length > 1 && (
+              <Box w="200px">
+                <CustomSelect
+                  size="sm"
+                  value={account.bbs_id}
+                  onChange={(bbsId) => { selectAccount(bbsId); setCurrentPage(1); }}
+                  options={accounts.map((a) => ({ value: a.bbs_id, label: a.bbs_name || a.bbs_id }))}
+                  allowDeselect={false}
+                />
+              </Box>
+            )}
+            {hasAlbum && (
+              <Text fontSize="xs" color={mutedText}>{t("components.buildOwnership.legend")}</Text>
+            )}
+          </Flex>
+        )}
+
         {activeRotation && (
           <HStack spacing={2} mt={3} pt={3} borderTopWidth="1px" borderTopColor={borderColor}>
             <Heading size="sm">
@@ -228,6 +268,18 @@ const RotationsBuildsGuide = () => {
           </HStack>
         )}
       </Box>
+
+      {account && !hasAlbum && !isLoadingAlbum && (
+        <Alert status="info" borderRadius="lg" fontSize="sm" py={2}>
+          <AlertIcon />
+          <Text>
+            {t("components.buildOwnership.fillAlbumHint")}{" "}
+            <Link as={RouterLink} to={albumTabUrl(account)} color="accent" fontWeight="semibold">
+              {t("components.buildOwnership.fillAlbumLink")}
+            </Link>
+          </Text>
+        </Alert>
+      )}
 
       {!isAuthenticated && (
         <Alert status="info" borderRadius="lg" fontSize="sm" py={2}>
@@ -245,7 +297,9 @@ const RotationsBuildsGuide = () => {
         >
           <Icon as={FiSearch} boxSize={8} color="text.muted" mb={3} />
           <Text color={mutedText} fontSize="sm">
-            {selectedRotation
+            {isPlayableFilterOn
+              ? t("components.buildOwnership.noPlayableBuild")
+              : selectedRotation
               ? t("components.rotationsBuildsGuide.noBuildsForRotation")
               : t("components.rotationsBuildsGuide.noBuildsAvailable")}
           </Text>
@@ -262,6 +316,7 @@ const RotationsBuildsGuide = () => {
                   canEdit={Boolean(canEditBuild(build))}
                   onOpen={handleOpenBuild}
                   onEdit={handleEditBuild}
+                  owned={hasAlbum ? owned : undefined}
                 />
               ))}
             </VStack>
