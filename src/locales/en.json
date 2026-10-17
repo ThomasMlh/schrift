@@ -273,7 +273,20 @@
       "cycleLabel": "Displayed cycle",
       "tabOverview": "Overview",
       "tabMembers": "Members",
-      "tabStats": "Statistics"
+      "tabStats": "Statistics",
+      "tabAlbum": "Album",
+      "albumTitle": "Guild album",
+      "albumSubtitle": "Who owns which character. Click a character to see its owners and their spec.",
+      "albumFilled": "/ {{total}} accounts filled their album",
+      "albumCovered": "{{covered}} / {{total}} characters owned",
+      "albumWithout": "No album:",
+      "albumNobodyFilled": "No member has filled their album yet. Everyone can do it from the Album tab of their player page.",
+      "albumNoOwner": "Nobody in the guild owns it.",
+      "albumSpe": "Spec {{spe}}",
+      "albumUnknown_one": "{{count}} account has not filled its album.",
+      "albumUnknown_other": "{{count}} accounts have not filled their album.",
+      "albumFilter_owned": "Owned",
+      "albumFilter_missing": "Nobody"
     },
     "user": {
       "loadingProfile": "Loading profile...",

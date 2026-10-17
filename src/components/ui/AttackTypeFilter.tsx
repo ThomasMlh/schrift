@@ -38,7 +38,7 @@ export const AttackTypeFilter = ({
   };
 
   return (
-    <Menu>
+    <Menu matchWidth>
       <MenuButton
         as={Button}
         rightIcon={<ChevronDownIcon />}

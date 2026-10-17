@@ -1,5 +1,6 @@
 // Characters and skills
 import type { IPagination } from "./common";
+import type { IUser } from "./user";
 
 export interface ICharacter {
   _id: string;
@@ -47,6 +48,11 @@ export interface IAlbum {
   bbs_id: string;
   characters: Record<string, number>;
   updated_at: string | null;
+}
+
+// Guild account with its album; characters is null when the account never filled it
+export interface IGuildAlbumMember extends IUser {
+  characters: Record<string, number> | null;
 }
 
 // Lightweight character catalog entry used by the album grid

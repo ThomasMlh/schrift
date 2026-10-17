@@ -17,7 +17,7 @@ import {
 import { FaCrown } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { FiUsers, FiGrid, FiActivity, FiBarChart2, FiAward, FiTarget, FiTrendingUp, FiCheckCircle } from "react-icons/fi";
+import { FiUsers, FiGrid, FiActivity, FiBarChart2, FiAward, FiTarget, FiTrendingUp, FiCheckCircle, FiBookOpen } from "react-icons/fi";
 import { StatCard } from "../components/ui/StatCard";
 import { SEOHead } from "../components/SEOHead";
 import { HeroSection } from "../components/HeroSection";
@@ -30,13 +30,14 @@ import { GuildEvolution } from "@/components/guild/GuildEvolution";
 import { GuildGoals } from "@/components/guild/GuildGoals";
 import { GuildLogo } from "@/components/guild/GuildLogo";
 import { GuildWeeklyRanking } from "@/components/guild/GuildWeeklyRanking";
+import { GuildAlbum } from "@/components/guild/GuildAlbum";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import type { IGuild } from "../interfaces";
 import { useTranslation } from "react-i18next";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 
-const TAB_KEYS = ["overview", "members", "stats"] as const;
+const TAB_KEYS = ["overview", "members", "stats", "album"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
 
 const GuildesPage = () => {
@@ -299,6 +300,9 @@ const GuildesPage = () => {
                     <Tab color="text.secondary" fontWeight="semibold" gap={2}>
                       <Icon as={FiActivity} aria-hidden />{t("pages.guilds.tabStats")}
                     </Tab>
+                    <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                      <Icon as={FiBookOpen} aria-hidden />{t("pages.guilds.tabAlbum")}
+                    </Tab>
                   </TabList>
 
                   <TabPanels>
@@ -358,6 +362,10 @@ const GuildesPage = () => {
                           />
                         )}
                       </VStack>
+                    </TabPanel>
+
+                    <TabPanel px={0} pt={5}>
+                      <GuildAlbum guildId={selectedGuild._id} />
                     </TabPanel>
                   </TabPanels>
                 </Tabs>
