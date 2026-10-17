@@ -19,7 +19,7 @@ import {
 import { FiCalendar, FiRepeat, FiSearch, FiShield } from "react-icons/fi";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import { CustomSelect } from "@/components/ui/CustomSelect";
-import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
+import { rotationSelectOptions, renderSelectedRotation } from "@/utils/rotationOptions";
 import type { ICycle, ICycleRotation, IPagination, IGuild } from "@/interfaces";
 
 interface ScoresFiltersProps {
@@ -123,17 +123,8 @@ export const ScoresFilters = ({
                 />
 
                 <CustomSelect
-                    options={availableRotations.map((r) => ({
-                        value: r.rotation_id,
-                        label: rotationLabel(r),
-                        content: (
-                            <HStack spacing={2}>
-                                <AttackTypeBadge attackType={r.attack} size="10px" />
-                                <Text as="span">{rotationLabel(r)}</Text>
-                            </HStack>
-                        ),
-                    }))}
-                    renderSelected={(option) => option.content ?? option.label}
+                    options={rotationSelectOptions(availableRotations)}
+                    renderSelected={renderSelectedRotation(availableRotations)}
                     value={filterRotationId}
                     onChange={onRotationChange}
                     placeholder={filterCycleId ? "Toutes les rotations" : "Choisir un cycle d'abord"}

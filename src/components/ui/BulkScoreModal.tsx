@@ -23,7 +23,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { IUser, ICycle, IGuild, IScore, IScoreFormData, ICycleRotation } from "../../interfaces";
 import { useGuildMembers, useScores, useBulkEntryContext } from "@/hooks/useAPI";
 import { getRotationRealDates } from "@/utils/cycleHelpers";
-import { RotationLabel } from "./RotationLabel";
+import { rotationSelectOptions, renderSelectedRotation } from "@/utils/rotationOptions";
 import { CycleSelect } from "./CycleSelect";
 import { CustomSelect } from "./CustomSelect";
 import { useTranslation } from "react-i18next";
@@ -253,18 +253,11 @@ const BulkScoreModal = ({
         onClose();
     };
 
-    const rotationOptions = (selectedCycle?.rotations ?? []).map((rotation: ICycleRotation) => ({
-        value: rotation.rotation_id,
-        // Text used by the select search
-        label: `#${rotation.position} ${rotation.killer}`,
-        content: (
-            <RotationLabel
-                rotation={rotation}
-                showDate
-                badge={rotation.rotation_id === currentRotation?.rotation_id ? "Dernière" : undefined}
-            />
-        ),
-    }));
+    const cycleRotations = selectedCycle?.rotations ?? [];
+    const rotationOptions = rotationSelectOptions(
+        cycleRotations,
+        (rotation) => rotation.rotation_id === currentRotation?.rotation_id ? "Dernière" : undefined,
+    );
 
     const isLoading = isComplete && (isLoadingMembers || isLoadingScores);
     const total = displayedMembers.length;
@@ -314,10 +307,7 @@ const BulkScoreModal = ({
                             size="md"
                             variant="default"
                             options={rotationOptions}
-                            renderSelected={(option) => {
-                                const rotation = selectedCycle?.rotations.find((r: ICycleRotation) => r.rotation_id === option.value);
-                                return rotation ? <RotationLabel rotation={rotation} /> : <Text>{option.label}</Text>;
-                            }}
+                            renderSelected={renderSelectedRotation(cycleRotations)}
                             allowDeselect={false}
                         />
                     </SimpleGrid>

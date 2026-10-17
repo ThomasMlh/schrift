@@ -3,7 +3,6 @@ import {
   Flex,
   Box,
   HStack,
-  Text,
   Tabs,
   TabList,
   Tab,
@@ -16,8 +15,8 @@ import {
 import { RepeatIcon } from "@chakra-ui/icons";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import { CustomSelect } from "@/components/ui/CustomSelect";
-import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
-import type { ICycle, IGuild, ICycleRotation, PodiumRankingType } from "@/interfaces";
+import { rotationSelectOptions, renderSelectedRotation } from "@/utils/rotationOptions";
+import type { ICycle, IGuild, PodiumRankingType } from "@/interfaces";
 import { ScoreLegend } from "@/components/ui/ScoreLegend";
 import { useTranslation } from "react-i18next";
 
@@ -89,9 +88,6 @@ export const PodiumFilters = ({
     max: t("components.podiumFilters.rankingMax"),
     progression: t("components.podiumFilters.rankingProgression"),
   };
-
-  const rotationLabel = (rotation: ICycleRotation) =>
-    `#${rotation.position} · ${t(`factions.${rotation.killer}`, rotation.killer)}`;
 
   return (
     <Box bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="xl" p={{ base: 3, md: 4 }}>
@@ -173,16 +169,8 @@ export const PodiumFilters = ({
               placeholder={t("components.podiumFilters.selectRotationPlaceholder")}
               value={selectedRotationId}
               onChange={onRotationChange}
-              options={selectedCycle.rotations.map((rotation: ICycleRotation) => ({
-                value: rotation.rotation_id,
-                label: rotationLabel(rotation),
-                content: (
-                  <HStack spacing={2}>
-                    <AttackTypeBadge attackType={rotation.attack} size="10px" />
-                    <Text as="span">{rotationLabel(rotation)}</Text>
-                  </HStack>
-                ),
-              }))}
+              options={rotationSelectOptions(selectedCycle.rotations)}
+              renderSelected={renderSelectedRotation(selectedCycle.rotations)}
               allowDeselect={false}
               size="md"
               w={SELECT_W}

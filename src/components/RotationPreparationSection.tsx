@@ -6,6 +6,7 @@ import { useCycles, useGuilds, useRotationPreparation } from "@/hooks/useAPI";
 import { useAuth } from "@/providers/AuthProvider";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
+import { rotationSelectOptions, renderSelectedRotation } from "@/utils/rotationOptions";
 import { AlterationImage } from "@/components/ui/AlterationImage";
 import { getScoreDisplayValue } from "@/utils/scores";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -36,20 +37,8 @@ const RotationPreparationSection = () => {
   const headerBg = "bg.subtle";
 
   const cycle = data ? cycles.find((c) => c._id === data.cycle._id) : undefined;
-  // Rotation: position and killer, with the attack color dot (no date)
-  const rotationOptions = (cycle?.rotations ?? []).map((r) => {
-    const label = `R${r.position} · ${r.killer}`;
-    return {
-      value: r.rotation_id,
-      label,
-      content: (
-        <HStack spacing={2}>
-          {r.attack && <AttackTypeBadge attackType={r.attack} size="10px" />}
-          <Text as="span">{label}</Text>
-        </HStack>
-      ),
-    };
-  });
+  const cycleRotations = cycle?.rotations ?? [];
+  const rotationOptions = rotationSelectOptions(cycleRotations);
   const guildOptions = selectableGuilds.map((g) => ({ value: g._id, label: g.name }));
 
   return (
@@ -70,7 +59,7 @@ const RotationPreparationSection = () => {
                   value={rotationId || data?.rotation.rotation_id || ""}
                   onChange={setRotationId}
                   options={rotationOptions}
-                  renderSelected={(option) => option.content ?? option.label}
+                  renderSelected={renderSelectedRotation(cycleRotations)}
                   allowDeselect={false}
                   size="md"
                 />
