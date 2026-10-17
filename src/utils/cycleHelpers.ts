@@ -7,10 +7,7 @@ export const cycleFromSlug = (cycles: ICycle[], slug: string): ICycle | undefine
   cycles.find(c => cycleSlug(c.name, c.year) === slug);
 
 /**
- * Calcule les vraies dates d'une rotation en tenant compte du fuseau horaire de Paris
- * @param startDate - Date de début au format DD/MM/YYYY
- * @param endDate - Date de fin au format DD/MM/YYYY
- * @returns Les dates réelles de début et de fin
+ * Actual start and end dates of a rotation (DD/MM/YYYY), in the Paris time zone
  */
 export const getRotationRealDates = (startDate: string, endDate: string) => {
     const createParisDate = (dateStr: string, baseHourUTC: number, dayOffset: number = 0) => {
@@ -27,10 +24,7 @@ export const getRotationRealDates = (startDate: string, endDate: string) => {
 };
 
 /**
- * Détermine si un cycle est actif
- * Un cycle est actif s'il a une rotation en cours OU une rotation à venir
- * @param cycle - Le cycle à vérifier
- * @returns true si le cycle est actif, false sinon
+ * Formats a date as DD/MM/YYYY
  */
 export const formatRotationDate = (date: Date): string => {
     const day = date.getDate().toString().padStart(2, '0');
@@ -46,7 +40,7 @@ export const calculateRotationPeriod = (startDate: string, endDate: string): "Ma
         const end   = new Date(parseInt(ey), parseInt(em) - 1, parseInt(ed));
         if (start.getDay() === 2 && end.getDay() === 4) return "Mardi-Jeudi";
         if (start.getDay() === 5 && end.getDay() === 0) return "Vendredi-Dimanche";
-    } catch { /* fallback */ }
+    } catch { /* Defaults to Mardi-Jeudi */ }
     return "Mardi-Jeudi";
 };
 
@@ -57,7 +51,7 @@ export const calculateAllRotationDates = (rotations: ICycleRotation[], firstStar
 
         for (let i = 0; i < rotations.length; i++) {
             const isEven = (i + 1) % 2 === 0;
-            const targetDay = isEven ? 5 : 2; // vendredi ou mardi
+            const targetDay = isEven ? 5 : 2; // Friday or Tuesday
             while (current.getDay() !== targetDay) current.setDate(current.getDate() + 1);
 
             const end = new Date(current);
@@ -89,7 +83,6 @@ export const isCycleActive = (cycle: ICycle): boolean => {
         return false;
     }
     
-    // Vérifier s'il y a une rotation actuellement en cours
     const hasActiveRotation = cycle.rotations.some(rotation => {
         if (!rotation.start_date || !rotation.end_date) {
             return false;
@@ -107,7 +100,6 @@ export const isCycleActive = (cycle: ICycle): boolean => {
         return true;
     }
     
-    // Si pas de rotation en cours, vérifier s'il y a une rotation à venir
     const hasUpcomingRotation = cycle.rotations.some(rotation => {
         if (!rotation.start_date || !rotation.end_date) {
             return false;

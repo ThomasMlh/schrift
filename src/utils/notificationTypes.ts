@@ -1,6 +1,6 @@
 import type { NotificationType } from "@/interfaces";
 
-// Miroir de schrift-api/src/utils/notificationTypes.js — garder les deux listes synchronisées.
+// Mirror of schrift-api/src/utils/notificationTypes.js: keep both lists in sync.
 export const NOTIFICATION_TYPES: NotificationType[] = [
   "scores", "podium_snapshot", "score_edit", "rotation_transfer", "character_update", "image_upload",
   "ban", "draft", "guild_toggle", "build_proposal", "build_delete", "cycle_change",

@@ -44,7 +44,7 @@ export const useAdminMutations = () => {
     return { totalUploaded };
   };
 
-  // Demande au bot de resynchroniser bannières, avatars et pseudos Discord (peut prendre 1-2 min)
+  // Asks the bot to resync Discord banners, avatars and names (may take 1-2 min)
   const syncDiscordProfiles = async () => {
     return request<{
       success: boolean;

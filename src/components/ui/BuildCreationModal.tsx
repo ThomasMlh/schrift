@@ -32,7 +32,7 @@ import { chronoInputValue, parseChrono } from "@/utils/chrono";
 import { bucketUrl } from "@/utils/apiRequest";
 import { formatWithCommas } from "@/utils/format";
 
-// Même plafond que l'API (scores plausibles d'une rotation)
+// Same cap as the API (plausible rotation scores)
 const MAX_BUILD_SCORE = 625_000_000;
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAPIMutations } from "../../hooks/useAPIMutations";
@@ -69,13 +69,13 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     { id_character: "", position: 3, links: [], skills: [], accessories: [] },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Résultat (champs texte, convertis à l'envoi) et capture d'écran
+  // Result (text fields, converted on submit) and screenshot
   const [scoreInput, setScoreInput] = useState("");
   const [normalWaveInput, setNormalWaveInput] = useState("");
   const [extraWaveInput, setExtraWaveInput] = useState("");
-  // Nouvelle capture (data URL) ; null = aucune nouvelle capture
+  // New screenshot (data URL); null = no new screenshot
   const [newScreenshot, setNewScreenshot] = useState<string | null>(null);
-  // Capture existante retirée par l'utilisateur
+  // Existing screenshot removed by the user
   const [screenshotRemoved, setScreenshotRemoved] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const toast = useToast();
@@ -83,23 +83,20 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
   const buildId = buildToEdit?._id;
 
   useEffect(() => {
-    // Réinitialiser ou pré-remplir le formulaire quand la modal s'ouvre
+    // Reset or prefill the form when the modal opens
     if (isOpen) {
       if (buildToEdit) {
-        // Mode édition : pré-remplir avec les données existantes
         setDescription(buildToEdit.description || "");
         
-        // Préparer les 3 positions
         const editTeam: TeamMember[] = [
           { id_character: "", position: 1, links: [], skills: [], accessories: [] },
           { id_character: "", position: 2, links: [], skills: [], accessories: [] },
           { id_character: "", position: 3, links: [], skills: [], accessories: [] },
         ];
         
-        // Remplir avec les données du build
         if (buildToEdit.team && Array.isArray(buildToEdit.team)) {
           buildToEdit.team.forEach((member: IBuildTeamMember) => {
-            const position = member.position - 1; // Index 0-based
+            const position = member.position - 1; // 0-based index
             if (position >= 0 && position < 3) {
               editTeam[position] = {
                 id_character: member.character?._id || member.id_character || "",
@@ -122,7 +119,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
         setNormalWaveInput(chronoInputValue(buildToEdit.time_normal_wave));
         setExtraWaveInput(chronoInputValue(buildToEdit.time_extra_wave));
       } else {
-        // Mode création : réinitialiser
         setDescription("");
         setScoreInput("");
         setNormalWaveInput("");
@@ -140,9 +136,8 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
       setActiveTab(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, buildId]); // Ne dépendre que de l'ID au lieu de tout l'objet buildToEdit
+  }, [isOpen, buildId]); // Depend on the id only, not on the whole buildToEdit object
 
-  // Mémoriser les personnages déjà utilisés pour éviter les recalculs
   const usedCharacterIds = useMemo(() => {
     const usedIds = new Set<string>();
     team.forEach((member) => {
@@ -160,7 +155,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
 
   const handleCharacterChange = useCallback((position: number, characterId: string) => {
     setTeam((prev) => {
-      // Vérifier si le personnage est déjà utilisé ailleurs
       const usedIds = new Set<string>();
       prev.forEach((member) => {
         if (member.id_character) {
@@ -175,7 +169,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
       
       const currentMember = prev.find((m) => m.position === position);
       
-      // Exclure l'ID actuel du membre pour permettre de reselectionner le même
+      // Ignore the member's own character so it can be selected again
       if (currentMember?.id_character) {
         usedIds.delete(currentMember.id_character);
       }
@@ -187,7 +181,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
           status: "warning",
           duration: 3000,
         });
-        return prev; // Ne pas modifier l'état
+        return prev;
       }
 
       return prev.map((member) =>
@@ -218,7 +212,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
 
   const handleLinkChange = useCallback((position: number, linkIndex: number, characterId: string) => {
     setTeam((prev) => {
-      // Vérifier si le personnage est déjà utilisé ailleurs
       const usedIds = new Set<string>();
       prev.forEach((member) => {
         if (member.id_character) {
@@ -233,7 +226,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
       
       const currentMember = prev.find((m) => m.position === position);
       
-      // Exclure l'ID actuel du link pour permettre de le reselectionner
+      // Ignore the link's own character so it can be selected again
       if (currentMember?.links[linkIndex]?.id_character) {
         usedIds.delete(currentMember.links[linkIndex].id_character);
       }
@@ -245,7 +238,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
           status: "warning",
           duration: 3000,
         });
-        return prev; // Ne pas modifier l'état
+        return prev;
       }
 
       return prev.map((member) =>
@@ -269,7 +262,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     );
   }, []);
 
-  // Gestion des accessoires
   const handleAddAccessory = useCallback((position: number) => {
     setTeam((prev) =>
       prev.map((member) =>
@@ -324,7 +316,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
       .filter((id) => id !== "");
   }, [team]);
 
-  // Mémoriser les exclusions pour chaque membre pour éviter de casser memo()
+  // Memoized per-member exclusions, to keep memo() effective
   const excludedIdsPerMember = useMemo(() => {
     const allUsedIds = Array.from(usedCharacterIds);
     return team.map((member) => 
@@ -332,7 +324,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     );
   }, [usedCharacterIds, team]);
 
-  // Résultat saisi : score en chiffres (espaces tolérés), chronos en secondes
+  // Entered result: score as digits (spaces allowed), times in seconds
   const scoreDigits = scoreInput;
   const scoreValue = scoreDigits ? Number(scoreDigits) : null;
   const scoreInvalid = scoreDigits !== "" && (!/^\d+$/.test(scoreDigits) || (scoreValue ?? 0) > MAX_BUILD_SCORE);
@@ -351,8 +343,8 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
   const filledCount = team.filter((m) => m.id_character).length;
   const hasResult = scoreValue != null || normalWave != null || extraWave != null;
 
-  // Envoie, remplace ou retire la capture une fois le build enregistré. Un échec n'annule pas
-  // l'enregistrement du build : on prévient simplement l'utilisateur.
+  // Uploads, replaces or removes the screenshot once the build is saved. A failure does not undo
+  // the build save; the user is only warned.
   const saveScreenshot = async (savedBuildId: string) => {
     try {
       if (newScreenshot) {
@@ -371,7 +363,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
   };
 
   const handleSubmit = async () => {
-    // Vérifier que l'utilisateur est connecté
     if (!token) {
       toast({
         title: t("components.buildCreationModal.toastAuthTitle"),
@@ -382,7 +373,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
       return;
     }
 
-    // Validation
     const hasAtLeastOneCharacter = team.some((member) => member.id_character !== "");
     if (!hasAtLeastOneCharacter) {
       toast({
@@ -411,7 +401,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
       time_extra_wave: extraWave,
     };
 
-    // Filtrer les membres sans personnage et valider les links
+    // Drop members without a character and validate links
     const filteredTeam = team
       .filter((member) => member.id_character !== "")
       .map((member) => ({
@@ -430,7 +420,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
 
     try {
       if (isEditMode) {
-        // Mode édition
         await updateBuild(buildToEdit._id!, {
           rotation_id: rotationId,
           description: description.trim(),
@@ -446,7 +435,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
           duration: 5000,
         });
       } else {
-        // Mode création
         const created = await createBuild({
           rotation_id: rotationId,
           description: description.trim(),
@@ -523,7 +511,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
               </TabList>
 
               <TabPanels>
-                {/* Équipe : une position par sous-onglet */}
+                {/* Team: one position per sub-tab */}
                 <TabPanel p={0}>
                   <Tabs variant="line" colorScheme="purple" size="sm">
                     <TabList>
@@ -556,7 +544,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
                   </Tabs>
                 </TabPanel>
 
-                {/* Résultat */}
                 <TabPanel p={0}>
                   <VStack align="stretch" spacing={4}>
                     <Text fontSize="sm" color="text.muted">{t("components.buildCreationModal.resultHint")}</Text>
@@ -565,7 +552,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
                       <Input
                         inputMode="numeric"
                         placeholder="612,480,300"
-                        // Virgules tous les 3 chiffres pendant la frappe, comme la saisie groupée
+                        // Commas every 3 digits while typing, like the bulk entry
                         value={formatWithCommas(scoreInput)}
                         onChange={(e) => setScoreInput(e.target.value.replace(/\D/g, ""))}
                         maxW="260px"
@@ -588,12 +575,10 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
                   </VStack>
                 </TabPanel>
 
-                {/* Capture d'écran */}
                 <TabPanel p={0}>
                   <BuildScreenshotPicker value={screenshotPreview} onChange={handleScreenshotChange} />
                 </TabPanel>
 
-                {/* Notes */}
                 <TabPanel p={0}>
                   <DescriptionTextarea value={description} onChange={setDescription} />
                 </TabPanel>

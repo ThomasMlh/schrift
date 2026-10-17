@@ -7,7 +7,7 @@ import BuildsAdminSection from "./BuildsAdminSection";
 import AbilitySlotsAdminSection from "./AbilitySlotsAdminSection";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
-// Composant wrapper pour les sections de guides pliables
+// Collapsible wrapper for a guide form
 interface GuideFormWrapperProps {
   title: string;
   formName: string;
@@ -67,7 +67,6 @@ const GuidesAdminSection = () => {
       </Box>
 
       <VStack spacing={6} w="100%" px={4}>
-        {/* Guide des Orbes */}
         <GuideFormWrapper
           title="📚 Guide des Orbes"
           formName="orbGuide"
@@ -80,7 +79,6 @@ const GuidesAdminSection = () => {
           <OrbGuideAdminSection />
         </GuideFormWrapper>
 
-        {/* Guide des Rotations & Builds */}
         <GuideFormWrapper
           title="🔄 Guide des Rotations & Builds"
           formName="rotationGuide"
@@ -93,7 +91,6 @@ const GuidesAdminSection = () => {
           <BuildsAdminSection />
         </GuideFormWrapper>
 
-        {/* Emplacements de capacités */}
         <GuideFormWrapper
           title="🎯 Emplacements de capacités"
           formName="abilitySlotsGuide"
@@ -106,8 +103,6 @@ const GuidesAdminSection = () => {
           <AbilitySlotsAdminSection />
         </GuideFormWrapper>
 
-        {/* Futur: Autres guides */}
-        {/* Vous pouvez ajouter d'autres guides ici en suivant le même pattern */}
       </VStack>
     </Container>
   );

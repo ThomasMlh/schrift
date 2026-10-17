@@ -30,13 +30,11 @@ const CyclesSection = () => {
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  // Supprimer un cycle
   const handleDeleteCycle = async (cycleId: string): Promise<void> => {
     await deleteCycle(cycleId);
     await mutateCycles();
   };
 
-  // Ouvrir le modal en mode édition
   const handleOpenEdit = (cycle: ICycle) => {
     setEditingCycleId(cycle._id || null);
     setCycleName(cycle.name);
@@ -50,7 +48,6 @@ const CyclesSection = () => {
     onOpen();
   };
 
-  // Ouvrir le modal en mode création
   const handleOpenCreate = () => {
     setEditingCycleId(null);
     setCycleName("");
@@ -59,9 +56,8 @@ const CyclesSection = () => {
     onOpen();
   };
 
-  // Ajouter une rotation sélectionnée
   const addRotation = (template: IRotationTemplate) => {
-    // Calculer automatiquement la période selon la position
+    // The period is derived from the position
     const position = selectedRotations.length + 1;
     const period = position % 2 === 1 ? "Mardi-Jeudi" : "Vendredi-Dimanche";
 
@@ -78,10 +74,9 @@ const CyclesSection = () => {
     setSelectedRotations([...selectedRotations, newRotation]);
   };
 
-  // Supprimer une rotation
   const removeRotation = (index: number) => {
     const newRotations = selectedRotations.filter((_, i) => i !== index);
-    // Mettre à jour les positions et périodes après suppression
+    // Re-number positions and periods after removal
     const rotationsWithUpdatedPositions = newRotations.map((rotation, i) => ({
       ...rotation,
       position: i + 1,
@@ -90,7 +85,6 @@ const CyclesSection = () => {
     setSelectedRotations(rotationsWithUpdatedPositions);
   };
 
-  // Gestion du drag and drop
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
@@ -98,17 +92,16 @@ const CyclesSection = () => {
     const [reorderedItem] = newRotations.splice(result.source.index, 1);
     newRotations.splice(result.destination.index, 0, reorderedItem);
 
-    // Mettre à jour toutes les positions après le drag & drop
     const rotationsWithUpdatedPositions = newRotations.map((rotation, index) => ({
       ...rotation,
       position: index + 1
     }));
 
-    // Si on a 20 rotations et que la première rotation a une date de début, recalculer toutes les dates
+    // With a full cycle (20 rotations) and a known first start date, recompute every date
     if (rotationsWithUpdatedPositions.length === 20 && rotationsWithUpdatedPositions[0]?.start_date) {
       calculateAllRotationDates(rotationsWithUpdatedPositions, rotationsWithUpdatedPositions[0].start_date);
     } else {
-      // Sinon, recalculer seulement les périodes basées sur les positions
+      // Otherwise only recompute the periods from the positions
       rotationsWithUpdatedPositions.forEach((rotation, index) => {
         rotation.period = (index + 1) % 2 === 1 ? "Mardi-Jeudi" as const : "Vendredi-Dimanche" as const;
       });
@@ -117,16 +110,15 @@ const CyclesSection = () => {
     setSelectedRotations(rotationsWithUpdatedPositions);
   };
 
-  // Mettre à jour une rotation
   const updateRotation = (index: number, field: keyof ICycleRotation, value: string) => {
     const newRotations = [...selectedRotations];
     newRotations[index] = { ...newRotations[index], [field]: value };
 
-    // Si on modifie la start_date de la première rotation et qu'on a 20 rotations
+    // Changing the first start date of a full cycle shifts every date
     if (field === 'start_date' && index === 0 && selectedRotations.length === 20 && value) {
       calculateAllRotationDates(newRotations, value);
     } else if (field === 'start_date' || field === 'end_date') {
-      // Pour les autres rotations, recalculer seulement la période de cette rotation
+      // Other rotations: only recompute this rotation's period
       const rotation = newRotations[index];
       if (rotation.start_date && rotation.end_date) {
         const period = calculateRotationPeriod(rotation.start_date, rotation.end_date);
@@ -138,7 +130,6 @@ const CyclesSection = () => {
   };
 
 
-  // Soumettre le cycle (création ou édition)
   const submitCycle = async () => {
     if (!cycleName.trim()) {
       toast({ title: "Nom requis", description: "Veuillez saisir un nom pour le cycle", status: "error", duration: 3000 });
@@ -182,7 +173,7 @@ const CyclesSection = () => {
     }
   };
 
-  // Fonction pour télécharger le fichier events.json d'un cycle spécifique
+  // Downloads the events.json of a single cycle
   const downloadCycleEventsJson = (cycle: ICycle) => {
     if (!cycle.rotations || !Array.isArray(cycle.rotations) || cycle.rotations.length === 0) {
       toast({
@@ -194,7 +185,6 @@ const CyclesSection = () => {
       return;
     }
 
-    // Créer la structure des events pour ce cycle spécifique
     const events: IEvent[] = [];
 
     cycle.rotations.forEach((rotation, index) => {
@@ -210,7 +200,6 @@ const CyclesSection = () => {
       });
     });
 
-    // Créer le blob et télécharger
     const dataStr = JSON.stringify(events, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
 
@@ -231,7 +220,7 @@ const CyclesSection = () => {
     });
   };
 
-  // Fonction pour télécharger le fichier events.json (tous les cycles)
+  // Downloads the events.json of every cycle
   const downloadEventsJson = () => {
     if (!Array.isArray(cycles) || cycles.length === 0) {
       toast({
@@ -243,7 +232,6 @@ const CyclesSection = () => {
       return;
     }
 
-    // Créer la structure des events avec toutes les rotations de tous les cycles
     const events: IEvent[] = [];
 
     cycles.forEach((cycle) => {
@@ -263,7 +251,6 @@ const CyclesSection = () => {
       }
     });
 
-    // Créer le blob et télécharger
     const dataStr = JSON.stringify(events, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
 
@@ -300,7 +287,6 @@ const CyclesSection = () => {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={6} align="stretch">
-        {/* Modern header */}
         <SectionHeader
           title="Gestion des cycles"
           description="Créez et gérez les cycles de rotation"
@@ -319,7 +305,6 @@ const CyclesSection = () => {
           </Button>}
         />
 
-        {/* Section d'affichage des cycles existants */}
         <ExistingCyclesList
           cycles={cycles}
           isLoading={isLoadingCycles}
@@ -330,7 +315,6 @@ const CyclesSection = () => {
           onEditCycle={handleOpenEdit}
         />
 
-        {/* Modal de création / édition de cycle */}
         <CycleCreationModal
           isOpen={isOpen}
           onClose={onClose}

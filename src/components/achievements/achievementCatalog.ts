@@ -1,13 +1,13 @@
 import type { AchievementCategory, AchievementTier, AchievementUnit, ITopAchievement, IUserAccountAchievements } from "@/interfaces";
 
-// Métadonnées d'affichage des succès : ordre des catégories et icône de chaque succès. Les textes
-// sont dans les fichiers de traduction (achievements.<code>.name / .description).
+// Achievement display metadata: category order and icon of each achievement. Texts live in the
+// translation files (achievements.<code>.name / .description).
 
 export const CATEGORY_ORDER: AchievementCategory[] = ["scores", "records", "regularity", "progression", "podium", "versatility"];
 
 export const TIER_ORDER: AchievementTier[] = ["bronze", "silver", "gold", "platinum"];
 
-// Tracés d'icônes (viewBox 24, trait sans remplissage), dessinés au centre des badges
+// Icon paths (viewBox 24, stroke only), drawn at the center of the badges
 export const ICON_PATHS: Record<string, string> = {
   sprout: '<path d="M12 21v-9"/><path d="M12 12C12 7.5 8.5 5 4 5c0 4.5 3 7 8 7z"/><path d="M12 10c0-4 3-6.5 8-6.5 0 4.5-3 6.5-8 6.5z"/>',
   bolt: '<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/>',
@@ -67,7 +67,7 @@ export const ACHIEVEMENT_ICONS: Record<string, string> = {
   versatile: "swords",
 };
 
-// Valeur ou seuil lisible selon l'unité du succès
+// Human-readable value or threshold for the achievement's unit
 export const formatAchievementValue = (value: number, unit: AchievementUnit): string => {
   switch (unit) {
     case "score":
@@ -81,8 +81,8 @@ export const formatAchievementValue = (value: number, unit: AchievementUnit): st
   }
 };
 
-// Succès le plus rare débloqué par un compte (à rareté égale, le palier le plus élevé),
-// au même format que celui renvoyé par le podium.
+// Rarest achievement unlocked by an account (highest level on ties), in the same shape as the
+// one returned by the podium.
 export const findTopAchievement = (
   accounts: IUserAccountAchievements[],
   bbsId?: string

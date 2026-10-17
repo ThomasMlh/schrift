@@ -26,7 +26,6 @@ interface PodiumResultsProps {
   selectedGuildName?: string;
 }
 
-// Type guards
 const isWeeklyResponse = (
   data: IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse
 ): data is IPodiumWeeklyResponse => {
@@ -45,7 +44,7 @@ const isPodiumResponse = (
   return !isWeeklyResponse(data) && !isMissesResponse(data);
 };
 
-// Extrait les joueurs top 3 normalisés pour le PodiumPedestal
+// Normalized top 3 players for PodiumPedestal
 const extractTop3ForPedestal = (
   data: IPodiumResponse | IPodiumWeeklyResponse,
   podiumType?: PodiumType,
@@ -118,7 +117,7 @@ const PlayerList = ({
   podiumData: IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse;
   showGuildName: boolean;
 }) => {
-  // Exclure le top 3 de la liste si on est en mode avec podium visuel (page 1)
+  // Leave the top 3 out of the list when the visual podium is shown (page 1)
   const isFirstPage = !podiumData.pagination || podiumData.pagination.currentPage === 1;
   const showPedestal =
     (displayMode === "cycle" || displayMode === "rotation" || displayMode === "weekly") &&
@@ -176,13 +175,11 @@ export const PodiumResults = ({
   if (isLoading) {
     return (
       <VStack spacing={2} align="stretch" px={2} py={4}>
-        {/* Skeleton pedestal */}
         <HStack justify="center" align="flex-end" spacing={4} mb={4}>
           {[80, 110, 80].map((h, i) => (
             <Skeleton key={i} h={`${h}px`} w="90px" borderRadius="lg" />
           ))}
         </HStack>
-        {/* Skeleton rows */}
         {Array.from({ length: 7 }).map((_, i) => (
           <HStack key={i} px={3} py={2} spacing={3}>
             <Skeleton h="16px" w="28px" borderRadius="md" />
@@ -231,12 +228,10 @@ export const PodiumResults = ({
 
   return (
     <VStack spacing={4} align="stretch">
-      {/* Podium visuel Top 3 */}
       {showPedestal && pedestalPlayers.length > 0 && (
         <PodiumPedestal players={pedestalPlayers} showGuildName={showGuildName} />
       )}
 
-      {/* Info pagination */}
       {podiumData.pagination && (
         <Flex justify="space-between" align="center" px={1}>
           <Text fontSize="sm" color="gray.500">
@@ -254,7 +249,6 @@ export const PodiumResults = ({
         </Flex>
       )}
 
-      {/* Séparateur si on a le podium ET la liste */}
       {showPedestal && hasListPlayers && pedestalPlayers.length > 0 && (
         <HStack spacing={3} align="center">
           <Divider />
@@ -265,10 +259,9 @@ export const PodiumResults = ({
         </HStack>
       )}
 
-      {/* Liste des joueurs (desktop 2 colonnes, mobile 1) */}
+      {/* Player list (two columns on desktop, one on mobile) */}
       {hasListPlayers && (
         <>
-          {/* Mobile */}
           <Box display={{ base: "block", lg: "none" }}>
             <PlayerList
               displayMode={displayMode}
@@ -277,7 +270,6 @@ export const PodiumResults = ({
             />
           </Box>
 
-          {/* Desktop */}
           <Box display={{ base: "none", lg: "block" }}>
             {(() => {
               const allData = showPedestal
@@ -318,7 +310,7 @@ export const PodiumResults = ({
                 return null;
               };
 
-              // #4 pleine largeur quand le podium visuel est affiché, puis colonnes équilibrées
+              // #4 spans the full width when the visual podium is shown, then balanced columns
               const showFeaturedFourth = showPedestal && allData[0]?.rank === 4;
               const columnsData = showFeaturedFourth ? allData.slice(1) : allData;
               const useColumns = columnsData.length >= 10;
@@ -364,7 +356,6 @@ export const PodiumResults = ({
         </>
       )}
 
-      {/* Pagination */}
       {podiumData.pagination && (
         <PaginationComponent
           currentPage={podiumData.pagination.currentPage}

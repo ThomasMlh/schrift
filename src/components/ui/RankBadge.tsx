@@ -26,7 +26,7 @@ export const RankBadge = ({ rank, variant = "default" }: RankBadgeProps) => {
     );
   }
 
-  // Couleurs pour les 3 premiers (la médaille est dessinée par MedalBadge)
+  // Colors of the top 3 (the medal itself is drawn by MedalBadge)
   const medals = {
     1: { color: "yellow" },
     2: { color: "gray" },
@@ -35,7 +35,7 @@ export const RankBadge = ({ rank, variant = "default" }: RankBadgeProps) => {
 
   const medal = medals[rank as keyof typeof medals];
 
-  // Variant with-emoji-separated: médaille séparée du badge (PodiumSection)
+  // with-emoji-separated: medal separate from the badge (PodiumSection)
   if (variant === "with-emoji-separated" && medal) {
     return (
       <HStack spacing={2}>
@@ -54,7 +54,7 @@ export const RankBadge = ({ rank, variant = "default" }: RankBadgeProps) => {
     );
   }
 
-  // Variant compact: outline pour ranks > 3
+  // compact: outlined badge for ranks above 3
   if (variant === "compact" && !medal) {
     return (
       <Badge
@@ -70,7 +70,7 @@ export const RankBadge = ({ rank, variant = "default" }: RankBadgeProps) => {
     );
   }
 
-  // Variant default: médaille devant le badge
+  // default: medal before the badge
   if (medal) {
     return (
       <HStack spacing={1.5}>
@@ -90,7 +90,7 @@ export const RankBadge = ({ rank, variant = "default" }: RankBadgeProps) => {
     );
   }
 
-  // Fallback pour ranks > 3 en mode default
+  // default mode, ranks above 3
   return (
     <Badge
       colorScheme="gray"

@@ -1,6 +1,5 @@
-// Comparateur
+// Comparator
 
-// Interfaces pour le comparateur
 export interface IComparisonStats {
   averageScore: number;
   averageRawScore: number;

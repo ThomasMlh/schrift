@@ -19,9 +19,9 @@ export interface PodiumPedestalPlayer {
   guild_name?: string;
   displayScore: number;
   forceBlueScore?: boolean;
-  // Classement progression : le badge affiche l'écart en % plutôt que le score
+  // Progression ranking: the badge shows the % change instead of the score
   progression?: { percent: number; previousAverage?: number; average?: number };
-  // Succès le plus rare du joueur, affiché à côté de son pseudo
+  // Player's rarest achievement, shown next to their name
   top_achievement?: ITopAchievement | null;
 }
 
@@ -63,8 +63,8 @@ const PODIUM_CONFIG = {
   },
 } as const;
 
-// Position/couleur des confettis autour de l'avatar du 1er — valeurs fixes (pas de Math.random)
-// pour éviter tout écart entre le HTML pré-rendu (scripts/prerender.js) et l'hydratation client.
+// Confetti positions/colors around the winner's avatar are fixed (no Math.random) so the
+// prerendered HTML (scripts/prerender.js) matches client hydration.
 const CONFETTI_PIECES = [
   { left: "-20%", top: "0%", rotate: "18deg", delay: "0s", color: "#FFD700" },
   { left: "102%", top: "8%", rotate: "-22deg", delay: "0.35s", color: "#FF6B6B" },
@@ -132,7 +132,6 @@ const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProp
         "@media (prefers-reduced-motion: reduce)": { animation: "none" },
       }}
     >
-      {/* Avatar zone */}
       <VStack
         spacing={2}
         align="center"
@@ -142,7 +141,6 @@ const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProp
       >
         <MedalBadge rank={player.rank as 1 | 2 | 3} size={player.rank === 1 ? 30 : 24} />
 
-        {/* Avatar avec glow (+ confettis pour le 1er) */}
         <Box position="relative">
           {player.rank === 1 && <ConfettiBurst />}
           <Box
@@ -162,7 +160,6 @@ const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProp
           />
         </Box>
 
-        {/* Nom */}
         <VStack spacing={0} align="center" mt={1}>
           <HStack spacing={1} justify="center" maxW="100%" minW={0}>
             <CustomLink
@@ -182,7 +179,6 @@ const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProp
           )}
         </VStack>
 
-        {/* Score */}
         {player.progression ? (
           <ProgressionBadge
             percent={player.progression.percent}
@@ -198,7 +194,7 @@ const PedestalSlot = ({ player, showGuildName, entranceIndex }: PedestalSlotProp
         )}
       </VStack>
 
-      {/* Socle "3D" : dégradé plus riche + biseau lumineux en haut + ombre interne en bas */}
+      {/* 3D-looking base: richer gradient, light bevel on top and inner shadow at the bottom */}
       <Box
         w="100%"
         h={cfg.pedestalHeight}
@@ -236,7 +232,7 @@ export const PodiumPedestal = ({ players, showGuildName = false }: PodiumPedesta
 
   if (top3.length === 0) return null;
 
-  // Affichage: 2e, 1er, 3e (classique)
+  // Display order: 2nd, 1st, 3rd
   const displayOrder = [
     top3.find((p) => p.rank === 2),
     top3.find((p) => p.rank === 1),

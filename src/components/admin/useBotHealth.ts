@@ -10,8 +10,8 @@ export interface BotHealth {
   check: () => Promise<void>;
 }
 
-// État du bot Discord, vérifié automatiquement à l'ouverture (admins uniquement : la route
-// /admin/bot-health leur est réservée) puis à la demande.
+// Discord bot health, checked on open (admins only: /admin/bot-health is restricted to them)
+// and then on demand.
 export const useBotHealth = (enabled: boolean): BotHealth => {
   const { checkBotHealth } = useAdminMutations();
   const [status, setStatus] = useState<BotStatus>(enabled ? "checking" : "unknown");
@@ -32,7 +32,7 @@ export const useBotHealth = (enabled: boolean): BotHealth => {
     } finally {
       setCheckedAt(new Date());
     }
-  // checkBotHealth est recréée à chaque rendu par useAdminMutations : on ne la met pas en dépendance
+  // checkBotHealth is recreated on every render by useAdminMutations, so it is not a dependency
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

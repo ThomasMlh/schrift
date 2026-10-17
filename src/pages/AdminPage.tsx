@@ -31,11 +31,10 @@ import { AdminOverview } from "@/components/admin/AdminOverview";
 import { useBotHealth } from "@/components/admin/useBotHealth";
 
 const AdminPage = () => {
-  // Détection des permissions utilisateur
   const { isAdmin: isFullAdmin, isGuildManager, managedGuildIds } = useAuth();
   const { updateCharacters, uploadImages, syncDiscordProfiles } = useAdminMutations();
 
-  // Onglets autorisés selon le rôle : tout pour un admin, sinon les onglets non réservés
+  // Tabs allowed for the role: everything for an admin, otherwise the non-restricted tabs
   const visibleTabs = useMemo(
     () => (isFullAdmin ? ADMIN_TABS : isGuildManager ? ADMIN_TABS.filter((tab) => !tab.adminOnly) : []),
     [isFullAdmin, isGuildManager]
@@ -44,16 +43,16 @@ const AdminPage = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Onglet initial : celui de l'URL (?tab=...) s'il est autorisé pour ce rôle, sinon la vue
-  // d'ensemble. AdminPage ne monte qu'une fois l'auth résolue (ProtectedRoute attend isAuthLoading),
-  // donc allowedPages est déjà fiable ici — pas besoin d'un effet de correction après coup.
+  // Initial tab: the URL one (?tab=...) when allowed for this role, otherwise the overview.
+  // AdminPage only mounts once auth is resolved (ProtectedRoute waits for isAuthLoading), so
+  // allowedPages is already reliable here.
   const [currentPage, setCurrentPage] = useState<IAdminPage>(() => {
     const urlTab = searchParams.get('tab') as IAdminPage | null;
     if (urlTab && allowedPages.includes(urlTab)) return urlTab;
     return "overview";
   });
 
-  // Change l'onglet et persiste le choix dans l'URL pour survivre à un refresh.
+  // Changes the tab and stores it in the URL so it survives a refresh.
   const handleTabChange = (page: IAdminPage) => {
     setCurrentPage(page);
     setSearchParams(prev => {
@@ -67,7 +66,7 @@ const AdminPage = () => {
   const [isSyncingProfiles, setIsSyncingProfiles] = useState(false);
   const toast = useToast();
 
-  // État du bot (admins) et compteurs de la navigation
+  // Bot health (admins) and navigation counters
   const bot = useBotHealth(isFullAdmin);
   const { guilds: allGuilds } = useGuilds(true);
   const managedGuilds = isFullAdmin ? allGuilds : allGuilds.filter((g) => managedGuildIds.includes(g._id));
@@ -183,7 +182,6 @@ const AdminPage = () => {
 
   return (
     <Box minH="calc(100vh - 60px)" bg="bg.page">
-      {/* En-tête */}
       <Box borderBottomWidth="1px" borderColor="border.faint" px={{ base: 4, md: 6 }} py={{ base: 5, md: 6 }}>
         <Flex align="center" justify="space-between" wrap="wrap" gap={3}>
           <Box>
@@ -252,14 +250,14 @@ const AdminPage = () => {
         </Flex>
       </Box>
 
-      {/* Navigation groupée : colonne à gauche sur grand écran, liste déroulante sur mobile/tablette */}
+      {/* Grouped navigation: left column on large screens, dropdown on mobile/tablet */}
       <Flex align="flex-start" gap={6} pt={6} pb={10} px={{ base: 3, md: 6 }}>
         <AdminSidebar tabs={visibleTabs} current={currentPage} onChange={handleTabChange} counters={counters} />
 
         <Box flex={1} minW={0}>
           <AdminSectionSelect tabs={visibleTabs} current={currentPage} onChange={handleTabChange} counters={counters} />
           <VStack align="stretch" spacing={6}>
-            {/* En-tête commun pour les sections qui n'ont pas le leur */}
+            {/* Shared header for sections that have none */}
             {ADMIN_SECTION_DESCRIPTIONS[currentPage] && (
               <SectionHeader
                 title={getAdminTab(currentPage)?.label ?? ""}

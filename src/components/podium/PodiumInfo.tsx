@@ -43,7 +43,7 @@ export const PodiumInfo = ({
   const accentColor = useColorModeValue("blue.600", "blue.300");
   const redAccent = useColorModeValue("red.600", "red.400");
 
-  /* ─── Rotation mode ─── */
+  /* Rotation mode */
   if (
     displayMode === "rotation" &&
     isPodiumResponse(podiumData) &&
@@ -76,7 +76,7 @@ export const PodiumInfo = ({
     );
   }
 
-  /* ─── Cycle mode, classement progression ─── */
+  /* Cycle mode, progression ranking */
   if (displayMode === "cycle" && isPodiumResponse(podiumData) && podiumData.meta.podiumType === "progression") {
     const previous = podiumData.meta.previousCycle;
     return (
@@ -93,7 +93,7 @@ export const PodiumInfo = ({
     );
   }
 
-  /* ─── Weekly mode ─── */
+  /* Weekly mode */
   if (displayMode === "weekly" && isWeeklyResponse(podiumData)) {
     return (
       <Box px={4} py={3} bg={filterBg} borderRadius="lg">
@@ -125,7 +125,7 @@ export const PodiumInfo = ({
     );
   }
 
-  /* ─── Misses mode ─── */
+  /* Misses mode */
   if (displayMode === "misses" && isMissesResponse(podiumData)) {
     return (
       <Box px={4} py={3} bg={filterBg} borderRadius="lg">

@@ -72,27 +72,23 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
     const toast = useToast();
     const { transferRotation } = useAPIMutations();
 
-    // ── Form state ───────────────────────────────────────────────────────────
     const [selectedCycleId, setSelectedCycleId] = useState("");
     const [sourceRotationId, setSourceRotationId] = useState("");
     const [targetRotationId, setTargetRotationId] = useState("");
     const [selectedGuildId, setSelectedGuildId] = useState("");
 
-    // ── Preview state ────────────────────────────────────────────────────────
     const [isPreviewLoading, setIsPreviewLoading] = useState(false);
     const [preview, setPreview] = useState<TransferPreviewResult | null>(null);
     const [previewConflicts, setPreviewConflicts] = useState<TransferConflict[] | null>(null);
     const [previewGenericError, setPreviewGenericError] = useState<string | null>(null);
 
-    // ── Transfer state ───────────────────────────────────────────────────────
     const [isTransferring, setIsTransferring] = useState(false);
 
-    // ── Derived ─────────────────────────────────────────────────────────────
     const selectedCycle = cycles.find(c => c._id === selectedCycleId);
     const sourceRotation = selectedCycle?.rotations.find(r => r.rotation_id === sourceRotationId);
     const targetRotation = selectedCycle?.rotations.find(r => r.rotation_id === targetRotationId);
 
-    // Reset enfant quand le cycle change
+    // Reset the child selections when the cycle changes
     useEffect(() => {
         setSourceRotationId("");
         setTargetRotationId("");
@@ -101,7 +97,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
         setPreviewGenericError(null);
     }, [selectedCycleId]);
 
-    // Reset target + preview quand la source change
+    // Reset the target and preview when the source changes
     useEffect(() => {
         setTargetRotationId("");
         setPreview(null);
@@ -109,14 +105,14 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
         setPreviewGenericError(null);
     }, [sourceRotationId]);
 
-    // Efface le preview quand les sélections changent
+    // Clear the preview when the selection changes
     useEffect(() => {
         setPreview(null);
         setPreviewConflicts(null);
         setPreviewGenericError(null);
     }, [targetRotationId, selectedGuildId]);
 
-    // Auto-fetch dry_run dès que les 3 champs sont remplis
+    // Fetch a dry run as soon as the three fields are filled
     useEffect(() => {
         if (!selectedCycleId || !sourceRotationId || !targetRotationId) return;
 
@@ -139,7 +135,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                 if (!cancelled) {
                     const typed = result as TransferPreviewResult;
                     setPreview(typed);
-                    // Les conflits sont maintenant des warnings (écrasement), pas des blockers
+                    // Conflicts are warnings (overwrite), not blockers
                     if (typed.conflicts?.length) {
                         setPreviewConflicts(typed.conflicts);
                     }
@@ -157,7 +153,6 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
         return () => { cancelled = true; };
     }, [selectedCycleId, sourceRotationId, targetRotationId, selectedGuildId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // ── Handlers ─────────────────────────────────────────────────────────────
     const handleTransfer = async () => {
         if (!preview) return;
 
@@ -203,7 +198,6 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
         onClose();
     };
 
-    // ── Couleurs ─────────────────────────────────────────────────────────────
     const modalBg      = isDark ? "#1a1b2e" : "white";
     const sectionBg    = isDark ? "rgba(234,88,12,0.08)"  : "orange.50";
     const sectionBorder = isDark ? "rgba(234,88,12,0.25)" : "orange.200";
@@ -212,7 +206,6 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
     const rowOkBg     = isDark ? "rgba(34,197,94,0.06)"   : "green.50";
     const rowOkBorder = isDark ? "green.700"              : "green.200";
 
-    // ── Options pour les selects ──────────────────────────────────────────────
     const makeRotationOptions = (rotations: ICycleRotation[], excludeId?: string) =>
         rotations
             .filter(r => r.rotation_id !== excludeId)
@@ -230,7 +223,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                 )
             }));
 
-    // Les conflits sont des warnings (écrasement autorisé), pas des blockers
+    // Conflicts are warnings (overwrite allowed), not blockers
     const canTransfer = !!preview && !previewGenericError && !isPreviewLoading && (preview.scoreCount ?? 0) > 0;
 
     return (
@@ -238,10 +231,8 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
             <ModalOverlay bg="blackAlpha.700" />
             <ModalContent bg={modalBg} borderRadius="2xl" overflow="hidden" border="1px solid" borderColor={sectionBorder}>
 
-                {/* Barre accent */}
                 <Box h="3px" bgGradient="linear(to-r, #EA580C, #F59E0B)" />
 
-                {/* ── Header ─────────────────────────────────────────────────────── */}
                 <ModalHeader px={6} pt={5} pb={4} borderBottom="1px solid" borderColor={sectionBorder}>
                     <HStack spacing={3}>
                         <Box
@@ -272,11 +263,9 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                     </HStack>
                 </ModalHeader>
 
-                {/* ── Body ───────────────────────────────────────────────────────── */}
                 <ModalBody px={6} py={5}>
                     <VStack spacing={4} align="stretch">
 
-                        {/* Config */}
                         <Box p={4} borderRadius="xl" bg={sectionBg} border="1px solid" borderColor={sectionBorder}>
                             <Text fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
                                 textTransform="uppercase" color={isDark ? "orange.300" : "orange.600"} mb={3}>
@@ -284,7 +273,6 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                             </Text>
                             <VStack spacing={3} align="stretch">
 
-                                {/* Cycle */}
                                 <FormControl>
                                     <FormLabel fontSize="xs" color={isDark ? "gray.400" : "gray.500"} mb={1}>Cycle</FormLabel>
                                     <CycleSelect
@@ -301,7 +289,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
 
                                 {selectedCycle && (
                                     <>
-                                        {/* Guilde optionnelle */}
+                                        {/* Optional guild */}
                                         <FormControl>
                                             <FormLabel fontSize="xs" color={isDark ? "gray.400" : "gray.500"} mb={1}>
                                                 Guilde{" "}
@@ -319,7 +307,6 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                                             />
                                         </FormControl>
 
-                                        {/* Rotation source */}
                                         <FormControl>
                                             <FormLabel fontSize="xs" color={isDark ? "gray.400" : "gray.500"} mb={1}>
                                                 Rotation source{" "}
@@ -336,7 +323,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                                             />
                                         </FormControl>
 
-                                        {/* Rotation cible (visible seulement si source choisie) */}
+                                        {/* Target rotation (only once a source is chosen) */}
                                         {sourceRotationId && (
                                             <FormControl>
                                                 <FormLabel fontSize="xs" color={isDark ? "gray.400" : "gray.500"} mb={1}>
@@ -359,7 +346,6 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                             </VStack>
                         </Box>
 
-                        {/* ── Zone de preview ─────────────────────────────────────────── */}
                         {selectedCycleId && sourceRotationId && targetRotationId && (
                             <Box>
                                 {isPreviewLoading ? (
@@ -377,10 +363,8 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                                     </Alert>
 
                                 ) : preview ? (
-                                    /* Aperçu OK */
                                     <VStack spacing={3} align="stretch">
 
-                                        {/* Barre récap */}
                                         <Flex px={4} py={3} borderRadius="xl"
                                             bg={sectionBg} border="1px solid" borderColor={sectionBorder}
                                             align="center" justify="space-between" wrap="wrap" gap={2}
@@ -406,7 +390,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                                             </HStack>
                                         </Flex>
 
-                                        {/* Avertissement parité */}
+                                        {/* Parity warning */}
                                         {preview.parityChanged && (
                                             <Alert status="warning" borderRadius="xl" variant="left-accent" fontSize="sm">
                                                 <AlertIcon />
@@ -415,7 +399,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                                             </Alert>
                                         )}
 
-                                        {/* Avertissement écrasement */}
+                                        {/* Overwrite warning */}
                                         {previewConflicts && previewConflicts.length > 0 && (
                                             <VStack spacing={2} align="stretch">
                                                 <Alert status="warning" borderRadius="xl" variant="left-accent" fontSize="sm">
@@ -451,7 +435,6 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                                             </VStack>
                                         )}
 
-                                        {/* Liste des scores */}
                                         <VStack spacing={1.5} align="stretch">
                                             {preview.preview?.map((p: TransferPreviewItem) => (
                                                 <Flex key={p.user_id} align="center" gap={3}
@@ -494,7 +477,6 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                     </VStack>
                 </ModalBody>
 
-                {/* ── Footer ─────────────────────────────────────────────────────── */}
                 <ModalFooter px={6} py={4} borderTop="1px solid" borderColor={sectionBorder} bg={sectionBg}>
                     <HStack spacing={2} ml="auto">
                         <Button

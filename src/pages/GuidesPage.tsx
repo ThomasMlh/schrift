@@ -67,7 +67,7 @@ const GuidesPage = () => {
         <Container maxW="container.xl" px={{ base: 4, md: 6 }} py={8}>
           <VStack spacing={5} align="stretch">
 
-            {/* Navigation entre les guides (défile horizontalement sur mobile) */}
+            {/* Guide navigation (scrolls horizontally on mobile) */}
             <Box overflowX="auto" mx={{ base: -4, md: 0 }} px={{ base: 4, md: 0 }}>
               <Tabs
                 index={SECTION_IDS.indexOf(activeSection)}
@@ -87,7 +87,6 @@ const GuidesPage = () => {
               </Tabs>
             </Box>
 
-            {/* Content */}
             {activeSection === "rotations-builds" && <RotationsBuildsGuide />}
             {activeSection === "orbs" && <OrbFarmingGuide />}
             {activeSection === "ability-slots" && <AbilitySlotsGuide />}

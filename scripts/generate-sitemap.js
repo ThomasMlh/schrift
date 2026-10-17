@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-// Routes statiques à inclure dans le sitemap
+// Static routes included in the sitemap
 const staticRoutes = [
   { path: '/', priority: '1.0', changefreq: 'daily' },
   { path: '/personnages', priority: '0.8', changefreq: 'daily' },

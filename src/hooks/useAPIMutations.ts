@@ -1,6 +1,6 @@
 /**
- * Facade de compatibilité — agrège tous les hooks de mutations par domaine.
- * Importer directement le hook de domaine si on n'a besoin que d'un sous-ensemble.
+ * Compatibility facade re-exporting every mutation hook by domain.
+ * Import the domain hook directly when only a subset is needed.
  */
 export { useCycleMutations } from './mutations/useCycleMutations';
 export { useGuildMutations } from './mutations/useGuildMutations';
@@ -27,7 +27,7 @@ import { useOCRMutations } from './mutations/useOCRMutations';
 import { useDraftMutations } from './mutations/useDraftMutations';
 import { usePodiumMutations } from './mutations/usePodiumMutations';
 
-/** Hook combiné — maintient la compatibilité avec l'API existante. */
+/** Combined hook, kept for compatibility with existing callers. */
 export const useAPIMutations = () => ({
   ...useCycleMutations(),
   ...useGuildMutations(),

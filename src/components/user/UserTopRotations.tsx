@@ -35,7 +35,6 @@ export const UserTopRotations = ({ stats }: UserTopRotationsProps) => {
     return null;
   }
 
-  // Trier les rotations par position
   const sortedRotations = [...stats.allRotations].sort((a, b) => {
     if (a.rotation_position !== undefined && b.rotation_position !== undefined) {
       return a.rotation_position - b.rotation_position;
@@ -64,7 +63,6 @@ export const UserTopRotations = ({ stats }: UserTopRotationsProps) => {
         />
       </SimpleGrid>
 
-      {/* Tableau de toutes les rotations du cycle */}
       {sortedRotations.length > 0 && (
         <Card bg={tableBg} borderRadius="xl" boxShadow="md">
           <CardBody>

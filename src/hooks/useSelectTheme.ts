@@ -17,11 +17,10 @@ export interface SelectTheme {
 /**
  * Returns color tokens for select/filter components.
  *
- * - "default" → solid background (white / gray.800), suited for cards and light pages
- * - "ghost"   → semi-transparent background, suited for dark/glass containers
+ * - "default": solid background (white / gray.800), suited for cards and light pages
+ * - "ghost": semi-transparent background, suited for dark/glass containers
  */
 export const useSelectTheme = (variant: SelectVariant = "default"): SelectTheme => {
-  // ── default ──────────────────────────────────────────────────────────────
   const defaultButtonBg = useColorModeValue("white", "gray.800");
   const defaultBorderColor = useColorModeValue("gray.200", "gray.600");
   const defaultHoverBorderColor = useColorModeValue("gray.300", "gray.500");
@@ -31,7 +30,6 @@ export const useSelectTheme = (variant: SelectVariant = "default"): SelectTheme 
   const defaultScrollbarThumb = useColorModeValue("gray.300", "gray.600");
   const defaultScrollbarThumbHover = useColorModeValue("gray.400", "gray.500");
 
-  // ── ghost ─────────────────────────────────────────────────────────────────
   const ghostButtonBg = useColorModeValue("white", "rgba(255,255,255,0.06)");
   const ghostBorderColor = useColorModeValue("gray.200", "whiteAlpha.200");
   const ghostHoverBorderColor = useColorModeValue("gray.300", "whiteAlpha.300");
@@ -41,8 +39,7 @@ export const useSelectTheme = (variant: SelectVariant = "default"): SelectTheme 
   const ghostScrollbarThumb = useColorModeValue("gray.300", "whiteAlpha.300");
   const ghostScrollbarThumbHover = useColorModeValue("gray.400", "whiteAlpha.400");
 
-  // ── modal (violet) ────────────────────────────────────────────────────────
-  // Fond violet #1a1b2e de l'ancienne BulkScoreModal (qui utilise désormais "default") ; plus utilisée
+  // Purple variant, currently unused
   const modalButtonBg = useColorModeValue("purple.50", "rgba(124,58,237,0.12)");
   const modalBorderColor = useColorModeValue("purple.200", "rgba(124,58,237,0.35)");
   const modalHoverBorderColor = useColorModeValue("purple.400", "rgba(124,58,237,0.6)");
@@ -52,8 +49,7 @@ export const useSelectTheme = (variant: SelectVariant = "default"): SelectTheme 
   const modalScrollbarThumb = useColorModeValue("purple.200", "rgba(124,58,237,0.3)");
   const modalScrollbarThumbHover = useColorModeValue("purple.300", "rgba(124,58,237,0.5)");
 
-  // ── modal-orange ─────────────────────────────────────────────────────────
-  // Matches TransferRotationModal: accent orange #EA580C / #F59E0B
+  // Orange variant, matches TransferRotationModal (#EA580C / #F59E0B)
   const orangeButtonBg        = useColorModeValue("orange.50",  "rgba(234,88,12,0.12)");
   const orangeBorderColor     = useColorModeValue("orange.200", "rgba(234,88,12,0.35)");
   const orangeMenuBg          = useColorModeValue("white",      "#1a1b2e");

@@ -7,7 +7,7 @@ import type { AdminPage } from "@/interfaces";
 
 export type AdminTabGroup = "home" | "guilds" | "scores" | "players" | "content" | "communication";
 
-// Groupes de la navigation (dans l'ordre d'affichage). "home" n'a pas de titre de groupe.
+// Navigation groups, in display order. "home" has no group title.
 export const ADMIN_TAB_GROUPS: { key: AdminTabGroup; label: string }[] = [
   { key: "home", label: "" },
   { key: "guilds", label: "Guildes" },
@@ -22,7 +22,7 @@ export interface AdminTab {
   label: string;
   icon: IconType;
   group: AdminTabGroup;
-  // Réservé aux admins (sinon visible aussi par les chefs et sous-chefs)
+  // Admins only (otherwise also visible to leaders and officers)
   adminOnly?: boolean;
 }
 
@@ -46,7 +46,7 @@ export const ADMIN_TABS: AdminTab[] = [
 
 export const getAdminTab = (key: AdminPage) => ADMIN_TABS.find((tab) => tab.key === key);
 
-// Phrase d'explication affichée sous le titre des sections qui n'ont pas leur propre en-tête
+// Description shown under the title of sections that have no header of their own
 export const ADMIN_SECTION_DESCRIPTIONS: Partial<Record<AdminPage, string>> = {
   guilds: "Créer, renommer, désactiver les guildes et gérer leurs membres.",
   draft: "Simuler une nouvelle répartition des joueurs, puis appliquer les mouvements entre guildes.",

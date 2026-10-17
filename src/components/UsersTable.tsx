@@ -27,7 +27,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // États - Initialiser avec les paramètres URL
+    // State initialized from the URL parameters
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
     const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get('search') || "");
     const [selectedGuildId, setSelectedGuildId] = useState("");
@@ -36,10 +36,9 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('limit') || '20'));
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
 
-    // Utiliser useSWR pour les guildes (cache automatique)
     const { guilds } = useGuilds();
 
-    // Résolution guild_name depuis l'URL → _id
+    // Resolve guild_name from the URL into its _id
     useEffect(() => {
         if (!guilds.length) return;
         const name = searchParams.get('guild_name');
@@ -54,7 +53,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
         [guilds, selectedGuildId]
     );
 
-    // Paramètres de filtrage communs aux deux modes
+    // Filters shared by both modes
     const apiOptions = useMemo(() => ({
         authenticated: false,
         page: currentPage,
@@ -64,9 +63,9 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
         ...(selectedRole && { role: selectedRole }),
     }), [currentPage, itemsPerPage, debouncedSearch, selectedGuildId, selectedRole]);
 
-    // Mode admin : une ligne par user Discord (ban/édition sont des actions par identité Discord).
-    // Mode public : une ligne par compte bbs — un joueur avec plusieurs comptes apparaît plusieurs
-    // fois, chacun avec sa propre guilde/rôle, cohérent avec le classement et les rosters de guilde.
+    // Admin mode: one row per Discord user (ban/edit act on the Discord identity).
+    // Public mode: one row per bbs account; a player with several accounts appears once per account,
+    // each with its own guild/role, consistent with rankings and guild rosters.
     const {
         users: adminUsers, pagination: adminPagination,
         isLoading: adminLoading, mutate: adminMutate
@@ -81,7 +80,6 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const isLoading = isAdminMode ? adminLoading : publicLoading;
     const mutate = isAdminMode ? adminMutate : publicMutate;
 
-    // Hooks UI
     const { colorMode } = useColorMode();
     const isDark = colorMode === 'dark';
     const bgColor = isDark ? 'gray.800' : 'white';
@@ -93,7 +91,6 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
     const { isOpen: isUnbanModalOpen, onOpen: onUnbanModalOpen, onClose: onUnbanModalClose } = useDisclosure();
     const { isOpen: isCreateModalOpen, onOpen: onCreateModalOpen, onClose: onCreateModalClose } = useDisclosure();
 
-    // Fonction pour mettre à jour l'URL avec les filtres actuels
     const updateURLParams = (search = "", guildName = "", role = "", limit = itemsPerPage, page = 1) => {
         const params = new URLSearchParams();
 
@@ -106,7 +103,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
         setSearchParams(params);
     };
 
-    // Effet pour le debounce de la recherche
+    // Debounce the search
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             if (debouncedSearch !== searchTerm) {
@@ -120,7 +117,6 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm]);
 
-    // Gestionnaires d'événements
     const handleGuildChange = (guildId: string) => {
         setSelectedGuildId(guildId);
         setCurrentPage(1);
@@ -154,13 +150,11 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
         setSearchParams({});
     };
 
-    // Obtenir le nom de la guilde
     const getGuildName = (guildId: string) => {
         const guild = guilds.find(g => g._id === guildId);
         return guild?.name || t("pages.user.noGuild");
     };
 
-    // Obtenir la couleur du badge selon le rôle
     const getRoleBadgeColor = (role: string) => {
         switch (role) {
             case "chef": return "red";
@@ -179,32 +173,28 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
         }
     };
 
-    // Gestionnaire pour ouvrir le modal d'édition
     const handleEditUser = (user: IUser) => {
         setSelectedUser(user);
         onEditModalOpen();
     };
 
-    // Gestionnaire pour ouvrir le modal de bannissement
     const handleBanUser = (user: IUser) => {
         setSelectedUser(user);
         onBanModalOpen();
     };
 
-    // Gestionnaire pour ouvrir le modal de débannissement
     const handleUnbanUser = (user: IUser) => {
         setSelectedUser(user);
         onUnbanModalOpen();
     };
 
-    // Gestionnaire pour la mise à jour d'un utilisateur
     const handleUserUpdated = () => {
         mutate();
     };
 
     return (
         <VStack spacing={6} align="stretch" w="100%">
-            {/* Filtres : guildes en pastilles, puis recherche, rôle et nombre par page */}
+            {/* Filters: guild chips, then search, role and page size */}
             <Box bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="xl" p={{ base: 3, md: 4 }}>
                 <Flex justify="space-between" align="center" gap={3} wrap="wrap">
                     <HStack spacing={2} flexWrap="wrap" role="group" aria-label={t("components.usersTable.filterAllGuilds")}>
@@ -292,7 +282,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                 </Flex>
             </Box>
 
-            {/* Liste publique : grille de cartes, une par compte */}
+            {/* Public list: card grid, one card per account */}
             {!isAdminMode && (
                 isLoading ? (
                     <SimpleGrid columns={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing={3}>
@@ -319,7 +309,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                 )
             )}
 
-            {/* Tableau des utilisateurs (admin) */}
+            {/* Users table (admin) */}
             {isAdminMode && (
             <Box
                 overflowX="auto"
@@ -479,7 +469,6 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
             </Box>
             )}
 
-            {/* Pagination */}
             {pagination && (
                 <PaginationComponent
                     currentPage={pagination.currentPage}
@@ -492,14 +481,12 @@ const UsersTable: React.FC<UsersTableProps> = ({ isAdminMode = false }) => {
                 />
             )}
 
-            {/* Message si aucun résultat */}
             {!isLoading && users.length === 0 && (
                 <Text textAlign="center" color="gray.500" py={8}>
                     {t("components.usersTable.noResults")}
                 </Text>
             )}
 
-            {/* Modal d'édition d'utilisateur */}
             {isAdminMode && (
                 <>
                     <EditUserModal

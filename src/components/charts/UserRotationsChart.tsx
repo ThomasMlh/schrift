@@ -29,7 +29,6 @@ export const UserRotationsChart = ({ rotations, showAll = false }: UserRotations
   const gridColor = useColorModeValue("#f0f0f0", "#2d3748");
   const textColor = useColorModeValue("#4a5568", "#cbd5e0");
   
-  // Responsive values
   const isMobile = useBreakpointValue({ base: true, md: false }, { fallback: 'md' });
   const fontSize = isMobile ? "10px" : "12px";
   const labelFontSize = isMobile ? "9px" : "11px";
@@ -37,13 +36,13 @@ export const UserRotationsChart = ({ rotations, showAll = false }: UserRotations
   const mobileMargin = { top: 10, right: 5, left: 5, bottom: 10 };
   const desktopMargin = { top: 20, right: 30, left: 20, bottom: 20 };
 
-  // Trier par score moyen et prendre toutes ou les 10 meilleures
+  // Sort by average score and keep all rotations or the top 10
   const sortedRotations = [...rotations]
     .sort((a, b) => b.averageScore - a.averageScore);
   
   const displayRotations = showAll ? sortedRotations : sortedRotations.slice(0, 10);
   
-  // Calculer le meilleur score pour les pourcentages
+  // Best score, used as the 100% reference
   const maxScore = displayRotations.length > 0 ? displayRotations[0].averageScore : 1;
   
   const topRotations = displayRotations.map((rotation) => {
@@ -58,19 +57,17 @@ export const UserRotationsChart = ({ rotations, showAll = false }: UserRotations
     };
   });
 
-  // Couleurs par type d'attaque
   const getColorByAttack = (attack: string) => {
     switch (attack) {
       case "B":
-        return "#4299E1"; // Bleu
+        return "#4299E1";
       case "R":
-        return "#F56565"; // Rouge
+        return "#F56565";
       default:
-        return "#9F7AEA"; // Violet
+        return "#9F7AEA";
     }
   };
 
-  // Fonction pour tronquer les noms trop longs
   const truncateName = (name: string, maxLength: number = 12) => {
     if (name.length <= maxLength) return name;
     return name.substring(0, maxLength - 1) + "…";
@@ -121,7 +118,7 @@ export const UserRotationsChart = ({ rotations, showAll = false }: UserRotations
       : 400;
 
   if (isMobile) {
-    // Version mobile avec barres horizontales
+    // Mobile: horizontal bars
     return (
       <ResponsiveContainer width="100%" height={chartHeight}>
         <BarChart data={topRotations} layout="vertical" margin={mobileMargin}>
@@ -160,7 +157,7 @@ export const UserRotationsChart = ({ rotations, showAll = false }: UserRotations
     );
   }
 
-  // Version desktop avec barres verticales
+  // Desktop: vertical bars
   return (
     <ResponsiveContainer width="100%" height={chartHeight}>
       <BarChart data={topRotations} margin={desktopMargin}>

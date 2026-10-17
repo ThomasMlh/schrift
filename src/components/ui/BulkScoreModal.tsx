@@ -42,14 +42,14 @@ interface BulkScoreModalProps {
     userGuildId?: string;
 }
 
-// Valeurs indexées par bbs_id (le compte), pas user_id : un même user peut avoir plusieurs comptes
-// bbs dans la même guilde, et chacun garde sa propre valeur. null = case vide, rien n'est envoyé.
+// Keyed by bbs_id (the account), not user_id: a user may own several accounts in the same guild.
+// null means an empty field, nothing is sent.
 type ScoreValues = Record<string, number | null>;
 
-// Assez large pour une guilde avec ses alts (la liste des scores est paginée à 20 par défaut)
+// Large enough for a guild with its alts (the scores list is paginated by 20 by default)
 const EXISTING_SCORES_LIMIT = 200;
 
-// Choix liste / grille mémorisé dans le navigateur (simple confort, ignoré si le stockage est indisponible)
+// List/grid choice remembered in the browser (convenience only, ignored when storage is unavailable)
 const VIEW_MODE_KEY = "bulkScoreModal.viewMode";
 const readViewMode = (): ViewMode => {
     try {
@@ -59,8 +59,8 @@ const readViewMode = (): ViewMode => {
     }
 };
 
-// Rotation pré-sélectionnée : la dernière déjà commencée (celle en cours, ou celle qui vient de se
-// terminer entre deux rotations), jamais une rotation à venir dont personne n'a encore de score
+// Preselected rotation: the latest one that has started (the current one, or the one that just
+// ended between two rotations), never an upcoming rotation nobody has a score for yet
 const findLatestStartedRotation = (cycles: ICycle[], now = new Date()) => {
     let latest: { cycle: ICycle; rotation: ICycleRotation; start: number } | null = null;
     for (const cycle of cycles) {
@@ -99,11 +99,11 @@ const BulkScoreModal = ({
         try {
             localStorage.setItem(VIEW_MODE_KEY, mode);
         } catch {
-            // stockage indisponible : le choix vaut pour cette session seulement
+            // Storage unavailable: the choice only applies to this session
         }
     };
-    // Sélection (guilde|cycle|rotation) dont les valeurs ont été initialisées : une revalidation
-    // des données ne doit pas écraser ce qui a été tapé entre-temps
+    // Selection (guild|cycle|rotation) whose values were initialized: a data revalidation must not
+    // overwrite what was typed in the meantime
     const initializedKey = useRef<string | null>(null);
 
     const latestStarted = useMemo(() => findLatestStartedRotation(cycles), [cycles]);
@@ -122,7 +122,7 @@ const BulkScoreModal = ({
     const isComplete = Boolean(selectedGuildId && selectedCycleId && selectedRotationId);
     const selectionKey = isComplete ? `${selectedGuildId}|${selectedCycleId}|${selectedRotationId}` : null;
 
-    // À l'ouverture : guilde imposée pour un chef, cycle et rotation en cours pré-sélectionnés
+    // On open: leader's guild enforced, current cycle and rotation preselected
     useEffect(() => {
         if (!isOpen) return;
         setSelectedGuildId(isGuildRestricted ? userGuildId || "" : "");
@@ -132,11 +132,11 @@ const BulkScoreModal = ({
         setInitialValues({});
         setIsConfirmingClose(false);
         initializedKey.current = null;
-        // Uniquement à l'ouverture : le cycle courant arrivant plus tard est géré juste après
+        // Only on open: a current cycle arriving later is handled by the next effect
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, isGuildRestricted, userGuildId]);
 
-    // Cycles chargés après l'ouverture : on complète la pré-sélection si rien n'a été choisi
+    // Cycles loaded after opening: complete the preselection if nothing was chosen
     useEffect(() => {
         if (!isOpen || selectedCycleId || !currentCycle) return;
         setSelectedCycleId(currentCycle._id ?? "");
@@ -144,8 +144,8 @@ const BulkScoreModal = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, currentCycle, currentRotation]);
 
-    // Membres affichés : tous les comptes actuels de la guilde, plus ceux qui ont déjà un score sur
-    // cette rotation sans être (ou plus être) dans la guilde
+    // Displayed members: every current account of the guild, plus accounts that already have a score
+    // on this rotation without being (or no longer being) in the guild
     const displayedMembers = useMemo<IUser[]>(() => {
         if (!isComplete) return [];
         const byBbsId = new Map<string, IUser>();
@@ -154,7 +154,7 @@ const BulkScoreModal = ({
         }
         for (const score of existingScoresData as (IScore & { user?: IUser | IUser[] })[]) {
             const user = Array.isArray(score.user) ? score.user[0] : score.user;
-            // Le bbs_id/bbs_name du COMPTE qui a joué ce score prime sur le miroir du user
+            // The bbs_id/bbs_name of the ACCOUNT that played the score takes precedence over the user mirror
             const bbsId = score.bbs_id || user?.bbs_id;
             if (!user || !bbsId || byBbsId.has(bbsId)) continue;
             byBbsId.set(bbsId, { ...user, bbs_id: bbsId, bbs_name: score.bbs_name || user.bbs_name });
@@ -170,7 +170,7 @@ const BulkScoreModal = ({
         return map;
     }, [existingScoresData]);
 
-    // Initialise les valeurs (scores existants pré-remplis) une seule fois par sélection
+    // Initialize the values (existing scores prefilled) once per selection
     useEffect(() => {
         if (!selectionKey || isLoadingMembers || isLoadingScores) return;
         if (initializedKey.current === selectionKey) return;
@@ -195,7 +195,7 @@ const BulkScoreModal = ({
         setValues(prev => ({ ...prev, [bbsId]: value }));
     }, []);
 
-    // Collage d'une colonne de scores (tableur, Discord…) : remplit à partir de la ligne visée
+    // Pasting a column of scores (spreadsheet, Discord…) fills from the targeted row
     const handlePasteColumn = useCallback((startIndex: number, pasted: (number | null)[]) => {
         setValues(prev => {
             const next = { ...prev };
@@ -228,7 +228,7 @@ const BulkScoreModal = ({
             return;
         }
 
-        // Seules les cases remplies sont envoyées : une case vide ne crée pas de score à 0
+        // Only filled fields are sent: an empty field does not create a 0 score
         const scoresData: IScoreFormData[] = displayedMembers
             .filter((member) => member.bbs_id && values[member.bbs_id] != null)
             .map((member) => ({
@@ -243,7 +243,7 @@ const BulkScoreModal = ({
         onSubmit(scoresData);
     };
 
-    // Fermeture : confirmation si des valeurs saisies ne sont pas enregistrées
+    // Ask for confirmation when closing with unsaved values
     const handleClose = () => {
         if (isSubmitting) return;
         if (dirtyCount > 0 && !isConfirmingClose) {
@@ -255,7 +255,7 @@ const BulkScoreModal = ({
 
     const rotationOptions = (selectedCycle?.rotations ?? []).map((rotation: ICycleRotation) => ({
         value: rotation.rotation_id,
-        // Texte utilisé par la recherche du select
+        // Text used by the select search
         label: `#${rotation.position} ${rotation.killer}`,
         content: (
             <RotationLabel

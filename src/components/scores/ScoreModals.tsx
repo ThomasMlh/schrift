@@ -7,19 +7,16 @@ import TransferRotationModal from "@/components/ui/TransferRotationModal";
 import type { IScore, IUser, ICycle, IGuild, IScoreFormData } from "@/interfaces";
 
 interface ScoreModalsProps {
-    // Modal d'édition
     isEditModalOpen: boolean;
     onEditModalClose: () => void;
     editingScore: IScore | null;
 
-    // Modal de suppression
     isDeleteModalOpen: boolean;
     onDeleteModalClose: () => void;
     onDeleteConfirm: () => void;
     isDeleting: boolean;
     scoreToDelete: IScore | null;
 
-    // Modal de saisie groupée
     isBulkModalOpen: boolean;
     onBulkModalClose: () => void;
     onBulkSubmit: (data: IScoreFormData[]) => void;
@@ -27,21 +24,18 @@ interface ScoreModalsProps {
     isGuildRestricted: boolean;
     userGuildId: string | undefined;
 
-    // Modal OCR
     isOCRModalOpen: boolean;
     onOCRModalClose: () => void;
 
-    // Modal transfert de rotation
     isTransferModalOpen: boolean;
     onTransferModalClose: () => void;
 
-    // Données communes
     users: IUser[];
     cycles: ICycle[];
     guilds: IGuild[];
     isLoadingCycles: boolean;
 
-    // États du formulaire (édition)
+    // Edit form state
     selectedUserId: string;
     setSelectedUserId: (value: string) => void;
     selectedCycleId: string;
@@ -53,11 +47,9 @@ interface ScoreModalsProps {
     userSearchQuery: string;
     setUserSearchQuery: (value: string) => void;
 
-    // Handlers
     onUpdateScore: () => void;
     isUpdating: boolean;
 
-    // Helpers
     getUserInfo: (userId: string) => IUser | undefined;
     getCycleInfo: (cycleId: string) => ICycle | undefined;
 }
@@ -102,7 +94,6 @@ export const ScoreModals = ({
 }: ScoreModalsProps) => {
     return (
         <>
-            {/* Modal d'édition de score */}
             <ScoreModal
                 isOpen={isEditModalOpen}
                 onClose={onEditModalClose}
@@ -129,7 +120,6 @@ export const ScoreModals = ({
                 isEdit={true}
             />
 
-            {/* Modal de confirmation de suppression */}
             <DeleteConfirmationModal
                 isOpen={isDeleteModalOpen}
                 onClose={onDeleteModalClose}
@@ -148,7 +138,6 @@ export const ScoreModals = ({
                 }
             />
 
-            {/* Modal de saisie groupée */}
             <BulkScoreModal
                 isOpen={isBulkModalOpen}
                 onClose={onBulkModalClose}
@@ -160,7 +149,6 @@ export const ScoreModals = ({
                 userGuildId={userGuildId}
             />
 
-            {/* Modal OCR */}
             <OCRScoreModal
                 isOpen={isOCRModalOpen}
                 onClose={onOCRModalClose}
@@ -170,7 +158,6 @@ export const ScoreModals = ({
                 userGuildId={userGuildId}
             />
 
-            {/* Modal transfert de rotation */}
             <TransferRotationModal
                 isOpen={isTransferModalOpen}
                 onClose={onTransferModalClose}

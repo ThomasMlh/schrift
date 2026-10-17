@@ -5,14 +5,14 @@ interface PageLoaderProps {
   subtitle?: string;
   height?: string;
   color?: string;
-  // "skeleton" (défaut) : contenu en cours de chargement, montre la forme de ce qui arrive.
-  // "spinner" : traitement en cours (connexion, analyse OCR...), avec un message.
+  // "skeleton" (default): content loading, shows the shape of what is coming.
+  // "spinner": processing in progress (login, OCR analysis…), with a message.
   variant?: "skeleton" | "spinner";
 }
 
 const ROW_HEIGHT = 44;
 
-// Nombre de lignes de squelette pour remplir la hauteur demandée ("200px" -> 4 lignes)
+// Number of skeleton rows filling the requested height ("200px" -> 4 rows)
 const rowsFor = (height: string) => {
   const px = height.endsWith("px") ? parseInt(height, 10) : NaN;
   if (!Number.isFinite(px)) return 6;
@@ -41,7 +41,7 @@ export const PageLoader = ({
   const rows = rowsFor(height);
   return (
     <Box minH={height === "auto" ? undefined : height} aria-busy="true" role="status" py={2}>
-      {/* Message de chargement conservé pour les lecteurs d'écran */}
+      {/* Loading message kept for screen readers */}
       <Text position="absolute" w="1px" h="1px" overflow="hidden" sx={{ clip: "rect(0 0 0 0)" }}>
         {label || "Chargement…"}
       </Text>

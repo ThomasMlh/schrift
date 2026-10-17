@@ -117,10 +117,10 @@ const AbilitySlotsGuide = () => {
 
   return (
     <VStack spacing={6} align="stretch">
-      {/* En-tête et recherche (la recherche reste visible au défilement) */}
+      {/* Header and search (the search stays visible while scrolling) */}
       <Box
         position="sticky"
-        // Sous la barre de navigation, elle-même collante en haut de page
+        // Below the navigation bar, which is itself sticky
         top="calc(var(--sait, 0px) + 64px)"
         zIndex={2}
         bg="bg.card"
@@ -153,7 +153,6 @@ const AbilitySlotsGuide = () => {
         </Flex>
       </Box>
 
-      {/* Category groups */}
       {groups.length === 0 && (
         <Text fontSize="sm" color="text.muted" textAlign="center" py={8}>
           {t("components.abilitySlotsGuide.noResults")}

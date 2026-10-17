@@ -70,7 +70,6 @@ export const UserGuildContribution = ({
 
   const avg = historicalContribution.averagePct;
 
-  // Données du cycle sélectionné
   const cycleStat = cycleContribution?.byCycle[0] ?? null;
   const cycleInDifferentGuild = hasSelectedCycle && !cycleContributionLoading && cycleContribution !== undefined && cycleStat === null;
   const cyclePct = cycleStat?.contributionPct;
@@ -99,7 +98,6 @@ export const UserGuildContribution = ({
   return (
     <Card bg={cardBg} borderRadius="xl" boxShadow="md">
       <CardBody>
-        {/* En-tête */}
         <HStack spacing={3} mb={4}>
           <Box
             p={2}
@@ -126,7 +124,6 @@ export const UserGuildContribution = ({
           </VStack>
         </HStack>
 
-        {/* Encart cycle sélectionné */}
         <Box
           mb={5}
           p={4}
@@ -184,7 +181,6 @@ export const UserGuildContribution = ({
           ) : null}
         </Box>
 
-        {/* Graphique historique */}
         {chartData.length >= 2 && (
           <>
             <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedColor} mb={3}>
@@ -222,7 +218,6 @@ export const UserGuildContribution = ({
           </>
         )}
 
-        {/* Note de bas de carte */}
         <HStack spacing={1.5} mt={4} pt={3} borderTop="1px solid" borderColor="bg.inset">
           <Icon as={FiInfo} boxSize={3} color={noteColor} flexShrink={0} />
           <Text fontSize="2xs" color={noteColor}>

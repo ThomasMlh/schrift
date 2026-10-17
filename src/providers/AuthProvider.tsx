@@ -11,9 +11,9 @@ interface AuthContextType {
   isLoggedIn: boolean;
   isAdmin: boolean;
   isGuildManager: boolean;
-  // Un grant par compte bbs chef/sous-chef — un user peut gérer plusieurs guildes via des comptes différents.
+  // One grant per leader/officer bbs account: a user may manage several guilds through different accounts.
   guildRoles: IGuildRoleGrant[];
-  // Raccourci pratique : la liste (dédupliquée) des guilde_id que l'utilisateur peut administrer.
+  // Convenience: the deduplicated guild ids the user can manage.
   managedGuildIds: string[];
   isAuthLoading: boolean;
   token: string | null;
@@ -38,8 +38,8 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Délai maximal d'attente du profil (/api/auth/me) avant d'afficher le site avec les seules
-// infos du token : une API lente (démarrage à froid) ne doit pas bloquer le site.
+// Maximum wait for the profile (/api/auth/me) before showing the site with the token data only:
+// a slow API (cold start) must not block the site.
 const PROFILE_TIMEOUT_MS = 6000;
 
 const tryRefreshToken = async (): Promise<string | null> => {
@@ -70,8 +70,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isGuildManager, setIsGuildManager] = useState(false);
   const [guildRoles, setGuildRoles] = useState<IGuildRoleGrant[]>([]);
-  // En chargement seulement s'il y a une session à restaurer : un visiteur sans token voit le
-  // site immédiatement, un utilisateur connecté le voit une fois son profil chargé.
+  // Loading only when there is a session to restore: a visitor without a token sees the site
+  // immediately, a logged-in user once their profile is loaded.
   const [isAuthLoading, setIsAuthLoading] = useState(() => isDiscordActivity() || !!getToken() || !!getRefreshToken());
   const [token, setTokenState] = useState<string | null>(null);
 
@@ -85,7 +85,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsGuildManager(grants.length > 0);
       setGuildRoles(grants);
 
-      // Construire l'URL de l'avatar si disponible
       let avatarUrl = null;
       if (decoded.avatar && decoded.discord_id) {
         avatarUrl = getDiscordAvatarUrl(decoded.discord_id, decoded.avatar);
@@ -133,7 +132,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       }
     } catch {
-      // Échec ou délai dépassé : on garde les infos du token
+      // On failure or timeout, keep the token data
     } finally {
       clearTimeout(timeoutId);
     }
@@ -144,10 +143,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     if (currentToken && isTokenValid(currentToken)) {
       applyTokenState(currentToken);
-      // Le token ne porte que les droits : pseudo, avatar et comptes viennent du profil
+      // The token only carries permissions: name, avatar and accounts come from the profile
       await fetchUserProfile(currentToken);
     } else if (currentToken || getRefreshToken()) {
-      // Token expiré mais refresh token disponible
+      // Expired token but a refresh token is available
       const newToken = await tryRefreshToken();
       if (newToken) {
         applyTokenState(newToken);
@@ -198,9 +197,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return headers;
   };
 
-  // Vérifier l'authentification au chargement.
-  // En Discord Activity : connexion automatique via le SDK (identité Discord), pas de
-  // redirection navigateur. Hors Activity : flow web classique inchangé.
+  // Check authentication on load.
+  // In a Discord Activity: automatic login through the SDK (Discord identity), no browser redirect.
+  // Outside an Activity: regular web flow.
   useEffect(() => {
     if (isDiscordActivity()) {
       setupDiscordActivity(login).catch((error) => {

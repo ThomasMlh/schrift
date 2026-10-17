@@ -21,8 +21,8 @@ export interface TableMetricDef {
   icon: IconType;
   getDisplayValue: (stats: Record<string, unknown>) => string;
   getRawValue: (stats: Record<string, unknown>) => number;
-  inverse?: boolean; // lower raw value = better
-  unit?: "percent"; // l'écart s'affiche alors en points
+  inverse?: boolean; // Lower raw value is better
+  unit?: "percent"; // The gap is then shown in points
 }
 
 export interface TableEntityDef {
@@ -45,7 +45,7 @@ const compact = (n: number) => {
   return Math.round(abs).toLocaleString("fr-FR");
 };
 
-// Écart avec la meilleure valeur, toujours exprimé comme un retard ("−2,1 M", "+3 pts" si plus bas = mieux)
+// Gap to the best value, always expressed as a deficit ("−2.1 M", "+3 pts" when lower is better)
 const formatGap = (gap: number, metric: TableMetricDef) => {
   const sign = metric.inverse ? "+" : "−";
   return metric.unit === "percent"
@@ -53,8 +53,8 @@ const formatGap = (gap: number, metric: TableMetricDef) => {
     : `${sign}${compact(gap)}`;
 };
 
-// Tableau métrique × entité : la meilleure valeur de chaque ligne est sur fond de la couleur
-// du gagnant, les autres affichent leur écart avec elle.
+// Metric × entity table: the best value of each row uses the winner's color, the others show
+// their gap to it.
 export const ComparisonDataTable = ({ entities, metrics, heading }: ComparisonDataTableProps) => {
   const { t } = useTranslation();
 

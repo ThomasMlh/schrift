@@ -56,7 +56,7 @@ import { bucketUrl } from "@/utils/apiRequest";
 import { RotationKillerHistory } from "@/components/rotation/RotationKillerHistory";
 
 const RotationDetailPage = () => {
-  // cycleId dans l'URL est désormais un slug (ex: "cycle-1-2026")
+  // cycleId in the URL is a slug (e.g. "cycle-1-2026")
   const { cycleId: cycleSlugParam, position } = useParams<{
     cycleId: string;
     position: string;
@@ -74,17 +74,16 @@ const RotationDetailPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
-  // Constante : chaque cycle a toujours 20 rotations
+  // A cycle always has 20 rotations
   const totalRotations = 20;
 
-  // Résolution slug → _id MongoDB (fallback sur l'ID brut pour compatibilité)
+  // Resolve the slug into its MongoDB _id (falls back to the raw id for compatibility)
   const { cycles } = useCycles({ limit: 100 });
   const resolvedCycleId = useMemo(() => {
     if (!cycles.length) return undefined;
     return cycleFromSlug(cycles, cycleSlugParam!)?._id ?? cycleSlugParam;
   }, [cycles, cycleSlugParam]);
 
-  // Utiliser les hooks API
   const { guilds, isLoading: isLoadingGuilds } = useGuilds(false, true);
   const {
     fetchRotationScores,
@@ -96,10 +95,9 @@ const RotationDetailPage = () => {
     isValid: true,
     limit: 20
   });
-  const [selectedGuild, setSelectedGuild] = useState<string>(""); // ID de la guilde ou vide pour "toutes"
+  const [selectedGuild, setSelectedGuild] = useState<string>(""); // Guild id, or empty for all guilds
   const hasInitialData = useRef(false);
 
-  // Hooks UI
   const cardBg = "bg.glass";
   const borderColor = "border.faint";
   const subTextColor = "text.muted";
@@ -108,7 +106,6 @@ const RotationDetailPage = () => {
   const tableHeaderBg = "bg.subtle";
   const rowHoverBg = useColorModeValue("blue.50", "whiteAlpha.100");
 
-  // Fonction pour obtenir le nom de la guilde à partir de l'ID
   const getGuildNameFromId = (guildId?: string): string | undefined => {
     if (!guildId) return undefined;
     const guild = guilds.find((g) => g._id === guildId);
@@ -118,7 +115,6 @@ const RotationDetailPage = () => {
   const loadScores = async (guildFilter?: string) => {
     if (!resolvedCycleId || !position) return;
 
-    // Trouver le nom de la guilde si un filtre est fourni
     let guildName: string | undefined;
     if (guildFilter) {
       const selectedGuildData = guilds.find(
@@ -153,10 +149,10 @@ const RotationDetailPage = () => {
     }
   };
 
-  // Fonction pour créer les informations de rang basées sur le rang du serveur
+  // Rank styling based on the server rank
   const getRankInfo = (rank: number): IRankInfo => {
     if (rank === 1) {
-      // Or pour le #1
+      // Gold for #1
       return {
         rank: 1,
         color: "yellow.600",
@@ -164,7 +160,7 @@ const RotationDetailPage = () => {
         borderColor: "yellow.300"
       };
     } else if (rank === 2) {
-      // Argent pour le #2
+      // Silver for #2
       return {
         rank: 2,
         color: "gray.600",
@@ -172,7 +168,7 @@ const RotationDetailPage = () => {
         borderColor: "gray.300"
       };
     } else if (rank === 3) {
-      // Bronze pour le #3
+      // Bronze for #3
       return {
         rank: 3,
         color: "orange.600",
@@ -180,7 +176,6 @@ const RotationDetailPage = () => {
         borderColor: "orange.300"
       };
     } else {
-      // Pas de podium
       return {
         rank: rank,
         color: "gray.500",
@@ -208,7 +203,7 @@ const RotationDetailPage = () => {
   ) => {
     const newItemsPerPage = parseInt(value);
     setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1); // Reset à la première page
+    setCurrentPage(1);
   };
 
   const handleGuildChange = async (
@@ -216,9 +211,8 @@ const RotationDetailPage = () => {
   ) => {
     const newGuildId = value;
     setSelectedGuild(newGuildId);
-    setCurrentPage(1); // Reset à la première page quand on change le filtre
+    setCurrentPage(1); // Back to the first page when the filter changes
 
-    // Faire la requête API avec le nouveau filtre
     await loadScores(newGuildId);
   };
 
@@ -280,7 +274,6 @@ const RotationDetailPage = () => {
         <Container maxW="container.xl" py={8}>
           <VStack spacing={6} align="stretch">
 
-            {/* Breadcrumbs */}
             {cycle && (
               <Breadcrumbs items={[
                 { label: t("nav.home"), to: "/" },
@@ -290,7 +283,6 @@ const RotationDetailPage = () => {
               ]} />
             )}
 
-            {/* Nav bar */}
             <Flex justify="space-between" align="center" flexWrap="wrap" gap={3}>
               <Button
                 leftIcon={<ArrowBackIcon />}
@@ -340,7 +332,6 @@ const RotationDetailPage = () => {
               </HStack>
             </Flex>
 
-            {/* Rotation info strip */}
             {rotation && (
               <Box
                 bg={statBg}
@@ -402,7 +393,6 @@ const RotationDetailPage = () => {
               </Box>
             )}
 
-            {/* Filter bar */}
             <Box
               bg={cardBg}
               backdropFilter="blur(12px)"
@@ -432,7 +422,6 @@ const RotationDetailPage = () => {
               </Flex>
             </Box>
 
-            {/* Scores table */}
             <Box
               bg={cardBg}
               backdropFilter="blur(12px)"
@@ -523,7 +512,6 @@ const RotationDetailPage = () => {
                     </Table>
                   </TableContainer>
 
-                  {/* Pagination */}
                   <VStack spacing={4} p={4} borderTop="1px solid" borderTopColor={borderColor}>
                     <Flex justify="space-between" align="center" w="100%" flexWrap="wrap" gap={4}>
                       <HStack spacing={2}>
@@ -581,7 +569,7 @@ const RotationDetailPage = () => {
               )}
             </Box>
 
-            {/* Historique de ce killer sur tous les cycles (records, moyennes, score à battre) */}
+            {/* Killer history across all cycles (records, averages, score to beat) */}
             {rotation?._id && (
               <RotationKillerHistory
                 rotationId={rotation._id}
@@ -590,7 +578,7 @@ const RotationDetailPage = () => {
               />
             )}
 
-            {/* Builds validés pour cette rotation */}
+            {/* Validated builds for this rotation */}
             {(buildsLoading || builds.length > 0) && (
               <Box>
                 <Heading size="sm" mb={4} color={labelColor}>

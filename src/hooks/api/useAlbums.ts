@@ -4,7 +4,7 @@ import { apiUrl, fetcher } from './shared';
 
 export const albumUrl = (bbsId: string) => `${apiUrl}/api/albums/${encodeURIComponent(bbsId)}`;
 
-// Album de personnages d'un compte bbs (public)
+// Character album of a bbs account (public)
 export const useAlbum = (bbsId?: string) => {
   const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: IAlbum }>(
     bbsId ? albumUrl(bbsId) : null,
@@ -15,7 +15,7 @@ export const useAlbum = (bbsId?: string) => {
   return { album: data?.data, isLoading, error, mutate };
 };
 
-// Catalogue complet des personnages, léger, pour la grille de l'album
+// Full, lightweight character catalog for the album grid
 export const useCharacterCatalog = () => {
   const { data, error, isLoading } = useSWR<{ success: boolean; data: IAlbumCharacter[] }>(
     `${apiUrl}/api/characters/catalog`,

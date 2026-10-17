@@ -5,7 +5,7 @@ import type {
 } from '../../interfaces';
 import { apiUrl, useAuthenticatedFetcher } from './shared';
 
-// Baisses de régime des membres (chefs : leurs guildes ; admins : toutes, ou guildId).
+// Members' declines (leaders: their guilds; admins: all, or guildId).
 export const useDeclineAlerts = (guildId?: string) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const url = `${apiUrl}/api/scores/decline-alerts${guildId ? `?guild_id=${guildId}` : ''}`;
@@ -19,7 +19,7 @@ export const useDeclineAlerts = (guildId?: string) => {
   return { alerts: data?.alerts ?? [], isLoading, error, mutate };
 };
 
-// Aperçu du bilan de fin de cycle d'une guilde (admin), sans rien envoyer.
+// Preview of a guild's end-of-cycle recap (admin), without sending anything.
 export const useCycleRecapPreview = (cycleId?: string, guildId?: string) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const url = cycleId && guildId ? `${apiUrl}/api/podium/cycle-recap?cycle_id=${cycleId}&guild_id=${guildId}` : null;
@@ -33,7 +33,7 @@ export const useCycleRecapPreview = (cycleId?: string, guildId?: string) => {
   return { recap: data?.recap ?? null, isLoading, error };
 };
 
-// Scores à vérifier (probables erreurs de saisie) sur les cycles récents.
+// Scores to review (probable typos) on recent cycles.
 export const useScoreAnomalies = (guildId?: string) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const url = `${apiUrl}/api/scores/anomalies${guildId ? `?guild_id=${guildId}` : ''}`;
@@ -47,7 +47,7 @@ export const useScoreAnomalies = (guildId?: string) => {
   return { anomalies: data?.anomalies ?? [], isLoading, error, mutate };
 };
 
-// Historique paginé des modifications de scores (chefs : leurs guildes ; admins : tout).
+// Paginated history of score changes (leaders: their guilds; admins: everything).
 export const useScoreHistory = (filters: { guildId?: string; action?: ScoreHistoryAction; page?: number }) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const params = new URLSearchParams({ page: String(filters.page ?? 1), limit: '30' });
@@ -63,7 +63,7 @@ export const useScoreHistory = (filters: { guildId?: string; action?: ScoreHisto
   return { entries: data?.entries ?? [], pagination: data?.pagination ?? null, isLoading, error, mutate };
 };
 
-// Scores manquants d'un cycle (cycle en cours par défaut) pour une guilde.
+// Missing scores of a cycle (current cycle by default) for a guild.
 export const useMissingScores = (guildId?: string, cycleId?: string, enabled = true) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const params = new URLSearchParams();
@@ -75,7 +75,7 @@ export const useMissingScores = (guildId?: string, cycleId?: string, enabled = t
   return { data: data ?? null, isLoading, error, mutate };
 };
 
-// Fiche de préparation d'une rotation (prochaine rotation du cycle en cours par défaut).
+// Rotation preparation sheet (next rotation of the current cycle by default).
 export const useRotationPreparation = (guildId?: string, rotationId?: string, cycleId?: string, enabled = true) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const params = new URLSearchParams();

@@ -37,7 +37,7 @@ const SectionLabel = ({ children }: { children: string }) => (
   </Text>
 );
 
-// Menu latéral mobile : compte en tête, liens par groupe, puis langue, thème et déconnexion
+// Mobile side menu: account first, grouped links, then language, theme and logout
 export const MobileNavDrawer = ({ isOpen, onClose }: MobileNavDrawerProps) => {
   const { t } = useTranslation();
   const { pathname } = useLocation();
@@ -94,7 +94,6 @@ export const MobileNavDrawer = ({ isOpen, onClose }: MobileNavDrawerProps) => {
         </Flex>
 
         <DrawerBody px={3} py={3}>
-          {/* Compte */}
           {isLoggedIn ? (
             <HStack
               as={profileUrl ? Link : "div"}
@@ -122,7 +121,6 @@ export const MobileNavDrawer = ({ isOpen, onClose }: MobileNavDrawerProps) => {
             </VStack>
           )}
 
-          {/* Liens */}
           <Box mt={2}>
             {groups.map((group) => {
               const items = visible.filter((item) => item.group === group);
@@ -142,7 +140,6 @@ export const MobileNavDrawer = ({ isOpen, onClose }: MobileNavDrawerProps) => {
             )}
           </Box>
 
-          {/* Préférences */}
           <VStack spacing={3} align="stretch" mt={4} pt={4} px={1} borderTopWidth="1px" borderColor="border.subtle">
             <HStack justify="space-between">
               <Text fontSize="sm" fontWeight="medium" color="text.secondary">{t("nav.language")}</Text>

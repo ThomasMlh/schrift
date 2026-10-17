@@ -60,14 +60,12 @@ const ScoresSection = () => {
   const { currentUser, isAdmin, isGuildManager, managedGuildIds } = useAuth();
   const scoreManagement = useScoreManagement({ users, cycles });
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
   const handleCycleFilterChange    = (id: string) => { setFilterCycleId(id); setFilterRotationId(""); setCurrentPage(1); };
   const handleRotationFilterChange = (id: string) => { setFilterRotationId(id); setCurrentPage(1); };
   const handleSearchChange         = (s: string)  => { setScoreSearchQuery(s); setCurrentPage(1); };
   const handleGuildFilterChange    = (id: string) => { setFilterGuildId(id); setCurrentPage(1); };
   const handleResetFilters         = () => { setFilterCycleId(""); setFilterRotationId(""); setFilterGuildId(""); setScoreSearchQuery(""); setCurrentPage(1); };
 
-  // ── Données dérivées ─────────────────────────────────────────────────────────
   const selectedCycle      = cycles.find((c) => c._id === filterCycleId);
   const availableRotations = selectedCycle?.rotations || [];
   const activeFiltersCount = [scoreSearchQuery, filterCycleId, filterRotationId, filterGuildId].filter(Boolean).length;
@@ -75,7 +73,6 @@ const ScoresSection = () => {
   const getUserInfo  = (userId: string)  => users.find((u) => u._id === userId);
   const getCycleInfo = (cycleId: string) => cycles.find((c) => c._id === cycleId);
 
-  // ── Couleurs ─────────────────────────────────────────────────────────────────
   const borderColor = "border.subtle";
   const mutedText = "text.muted";
   const tableBg = "bg.card";
@@ -127,7 +124,6 @@ const ScoresSection = () => {
           ) : undefined}
         />
 
-        {/* ── Filtres ───────────────────────────────────────────────────────── */}
         <ScoresFilters
           scoreSearchQuery={scoreSearchQuery}
           filterCycleId={filterCycleId}
@@ -146,7 +142,6 @@ const ScoresSection = () => {
           onResetFilters={handleResetFilters}
         />
 
-        {/* ── Table ─────────────────────────────────────────────────────────── */}
         <Box
           bg={tableBg}
           borderRadius="xl"
@@ -194,7 +189,6 @@ const ScoresSection = () => {
             />
           )}
 
-          {/* Pagination */}
           {pagination && pagination.totalPages > 1 && (
             <Box
               px={4}
@@ -215,7 +209,6 @@ const ScoresSection = () => {
           )}
         </Box>
 
-        {/* ── Modals ────────────────────────────────────────────────────────── */}
         <ScoreModals
           isEditModalOpen={scoreManagement.isEditModalOpen}
           editingScore={scoreManagement.editingScore}
@@ -230,8 +223,8 @@ const ScoresSection = () => {
           onBulkSubmit={scoreManagement.handleBulkScoreSubmit}
           isBulkSubmitting={scoreManagement.isBulkSubmitting}
           isGuildRestricted={!isAdmin && isGuildManager}
-          // Compte principal + comptes chef/sous-chef confondus, cas rare (multi-guildes via alts) : on
-          // ne propose pour l'instant que la première guilde gérée, pas de sélecteur multi-guildes.
+          // Leaders managing several guilds through alts are rare: only the first managed guild is offered,
+          // there is no multi-guild selector yet.
           userGuildId={managedGuildIds[0] || currentUser?.guilde_id}
           isOCRModalOpen={scoreManagement.isOCRModalOpen}
           onOCRModalClose={() => scoreManagement.setIsOCRModalOpen(false)}

@@ -15,8 +15,8 @@ const SCORE_COLORS: Record<string, string> = {
   rainbow: "purple", blue: "blue", purple: "purple", green: "green", teal: "teal", yellow: "yellow", orange: "orange", red: "red", brown: "gray",
 };
 
-// Fiche de préparation d'une rotation (chefs/admins) : pour le killer choisi, le record, la moyenne
-// et le dernier score de chaque membre actuel de la guilde, pour savoir qui est à l'aise ou non.
+// Rotation preparation sheet (leaders/admins): for the chosen killer, the record, average and
+// latest score of each current guild member, to see who is comfortable on it.
 const RotationPreparationSection = () => {
   const { isAdmin, managedGuildIds } = useAuth();
   const { guilds } = useGuilds(true);
@@ -36,7 +36,7 @@ const RotationPreparationSection = () => {
   const headerBg = "bg.subtle";
 
   const cycle = data ? cycles.find((c) => c._id === data.cycle._id) : undefined;
-  // Rotation : position et killer, avec la pastille de couleur d'attaque (sans la date)
+  // Rotation: position and killer, with the attack color dot (no date)
   const rotationOptions = (cycle?.rotations ?? []).map((r) => {
     const label = `R${r.position} · ${r.killer}`;
     return {

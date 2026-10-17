@@ -52,7 +52,7 @@ const GuildesPage = () => {
   const { t } = useTranslation();
 
 
-  // Sélectionner la guilde depuis l'URL (par nom) ou par défaut la première
+  // Select the guild from the URL (by name), defaulting to the first one
   useEffect(() => {
     if (guilds.length > 0 && !selectedGuild) {
       const urlGuildName = searchParams.get("guild_name");
@@ -65,7 +65,7 @@ const GuildesPage = () => {
   const { cycles, isLoading: isLoadingCycles } = useCycles();
   const { currentCycle } = useCurrentRotation(cycles, isLoadingCycles);
 
-  // Résolution du slug cycle depuis l'URL → _id MongoDB (prioritaire sur currentCycle)
+  // Resolve the cycle slug from the URL into its MongoDB _id (takes precedence over currentCycle)
   useEffect(() => {
     if (!cycles.length) return;
     const slug = searchParams.get("cycle_name");
@@ -81,7 +81,7 @@ const GuildesPage = () => {
     }
   }, [currentCycle, selectedCycleId, searchParams]);
 
-  // Sync guilde (par nom) et cycle (par slug) dans l'URL
+  // Keep the guild (by name) and cycle (by slug) in sync in the URL
   useEffect(() => {
     const newParams = new URLSearchParams(searchParams);
     if (selectedGuild?.name) {
@@ -152,7 +152,6 @@ const GuildesPage = () => {
         <Container maxW="container.xl" py={8}>
           <VStack spacing={6} align="stretch">
 
-            {/* ── Sélecteur de guilde ── */}
             <Box>
               <Flex justify="space-between" align="baseline" mb={3} gap={3} wrap="wrap">
                 <Text fontSize="xs" fontWeight="bold" textTransform="uppercase" letterSpacing="widest" color="text.muted">
@@ -162,8 +161,7 @@ const GuildesPage = () => {
                   {t("pages.guilds.summary", { guilds: guilds.length, members: isLoading ? "…" : totalMembers })}
                 </Text>
               </Flex>
-              {/* Marge intérieure : le défilement horizontal rognerait sinon le contour
-                  de la guilde sélectionnée et son léger soulèvement au survol */}
+              {/* Inner padding: horizontal scrolling would otherwise clip the selected guild's outline and its hover lift */}
               <Box
                 overflowX="auto"
                 mx={{ base: -4, md: -1 }}
@@ -215,7 +213,6 @@ const GuildesPage = () => {
 
             {selectedGuild && (
               <>
-                {/* ── Bandeau de la guilde ── */}
                 <Flex
                   bg="bg.card"
                   borderWidth="1px"
@@ -284,7 +281,6 @@ const GuildesPage = () => {
                   </Box>
                 </Flex>
 
-                {/* ── Sous-onglets ── */}
                 <Tabs
                   index={TAB_KEYS.indexOf(activeTab)}
                   onChange={(index) => setActiveTab(TAB_KEYS[index])}
@@ -306,7 +302,6 @@ const GuildesPage = () => {
                   </TabList>
 
                   <TabPanels>
-                    {/* Aperçu */}
                     <TabPanel px={0} pt={5}>
                       <VStack spacing={4} align="stretch">
                         <SimpleGrid columns={{ base: 2, sm: 3, md: 5 }} gap={3}>
@@ -335,7 +330,6 @@ const GuildesPage = () => {
                       </VStack>
                     </TabPanel>
 
-                    {/* Membres */}
                     <TabPanel px={0} pt={5}>
                       <Box bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="2xl" px={4} minH="400px">
                         {isLoadingMembers ? (
@@ -350,7 +344,6 @@ const GuildesPage = () => {
                       </Box>
                     </TabPanel>
 
-                    {/* Statistiques */}
                     <TabPanel px={0} pt={5}>
                       <VStack spacing={4} align="stretch">
                         <GuildEvolution guildId={selectedGuild._id} />

@@ -35,7 +35,7 @@ const formatDateTime = (date: Date) =>
 const formatShortDate = (date: Date) =>
   date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "2-digit" });
 
-/** "2 j 04 h 12 min" (ou "04 h 12 min" sous 24 h) */
+/** "2 j 04 h 12 min" (or "04 h 12 min" under 24 h) */
 const formatCountdown = (ms: number) => {
   const totalMinutes = Math.max(0, Math.floor(ms / 60_000));
   const days = Math.floor(totalMinutes / 1440);
@@ -47,7 +47,7 @@ const formatCountdown = (ms: number) => {
     : `${pad(hours)} h ${pad(minutes)} min`;
 };
 
-/** Heure courante rafraîchie chaque minute, pour le compte à rebours */
+/** Current time, refreshed every minute for the countdown */
 const useNow = () => {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -80,14 +80,14 @@ export const CurrentInfoSection = () => {
 
   const cycle = currentCycle || nextCycle;
   const rotations = (cycle?.rotations ?? []).filter((r) => r.start_date && r.end_date);
-  // Pour un cycle à venir, la rotation mise en avant est la première
+  // For an upcoming cycle, the featured rotation is the first one
   const featured = currentRotation ?? (nextCycle ? rotations[0] ?? null : null);
   const featuredIndex = featured ? rotations.indexOf(featured) : -1;
   const featuredPosition = featured ? featured.position || featuredIndex + 1 : 0;
   const featuredActive = Boolean(currentRotation && isRotationActive);
   const upcoming = featuredIndex >= 0 ? rotations.slice(featuredIndex + 1, featuredIndex + 1 + UPCOMING_COUNT) : [];
 
-  // Avancement : rotations terminées (+ la rotation en cours) sur le total
+  // Progress: finished rotations (plus the current one) out of the total
   const doneCount = featuredIndex >= 0 ? featuredIndex + (featuredActive ? 1 : 0) : 0;
   const progress = rotations.length ? (doneCount / rotations.length) * 100 : 0;
 
@@ -134,7 +134,6 @@ export const CurrentInfoSection = () => {
           </Flex>
         ) : (
           <>
-            {/* Cycle : nom, dates, avancement */}
             <Flex
               px={{ base: 4, md: 6 }} py={5}
               gap={{ base: 4, md: 8 }}
@@ -192,7 +191,6 @@ export const CurrentInfoSection = () => {
             </Flex>
 
             <SimpleGrid columns={{ base: 1, lg: 5 }}>
-              {/* Rotation mise en avant */}
               <Box gridColumn={{ lg: "span 3" }} px={{ base: 4, md: 6 }} py={5}>
                 {featured && featuredDates ? (
                   <VStack align="stretch" spacing={4}>
@@ -274,7 +272,6 @@ export const CurrentInfoSection = () => {
                 )}
               </Box>
 
-              {/* Prochaines rotations */}
               <Box
                 gridColumn={{ lg: "span 2" }}
                 px={{ base: 4, md: 6 }} py={5}

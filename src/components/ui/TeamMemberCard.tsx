@@ -80,7 +80,6 @@ export const TeamMemberCard = memo(({
           />
         </FormControl>
 
-        {/* Links */}
         {member.links.length > 0 && (
           <Box>
             <Text fontSize="sm" fontWeight="medium" mb={2}>
@@ -125,7 +124,6 @@ export const TeamMemberCard = memo(({
           </Button>
         )}
 
-        {/* Skills */}
         {member.id_character && (
           <FormControl>
             <FormLabel fontSize="sm">
@@ -141,7 +139,6 @@ export const TeamMemberCard = memo(({
           </FormControl>
         )}
 
-        {/* Accessories */}
         {member.id_character && (
           <Box>
             <Text fontSize="sm" fontWeight="medium" mb={2}>

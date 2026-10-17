@@ -10,7 +10,7 @@ interface CharacterBuildsProps {
   onSelect: (build: IBuild) => void;
 }
 
-// Builds validés utilisant le personnage (masqué s'il n'y en a aucun)
+// Validated builds using the character (hidden when there are none)
 export const CharacterBuilds = ({ builds, isLoading, onSelect }: CharacterBuildsProps) => {
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";

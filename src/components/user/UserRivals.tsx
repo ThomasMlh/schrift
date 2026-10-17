@@ -46,7 +46,7 @@ export const UserRivals = ({
     return null;
   }
 
-  // Insérer le joueur du profil à sa position correcte selon le rang
+  // Insert the profile's player at their rank position
   const profileEntry = {
     rank: currentUserRank || 0,
     user_id: currentUser._id,
@@ -119,10 +119,8 @@ export const UserRivals = ({
                   gap={2}
                   align="center"
                 >
-                  {/* Section gauche : Rang + Avatar + Nom */}
                   <Flex flex={1} direction="column" gap={2}>
                     <HStack spacing={2} align="center">
-                      {/* Rang avec emoji */}
                       <Flex
                         align="center"
                         justify="center"
@@ -149,7 +147,7 @@ export const UserRivals = ({
                         </Text>
                       </Flex>
 
-                      {/* Guilde (uniquement pour les rivaux) */}
+                      {/* Guild (rivals only) */}
                       {rival.guild_name && (
                         <Box
                           px={3}
@@ -171,7 +169,6 @@ export const UserRivals = ({
                         </Box>
                       )}
 
-                      {/* Avatar et nom */}
                       <UserDisplay
                         user={
                           {
@@ -203,7 +200,6 @@ export const UserRivals = ({
                     </HStack>
                   </Flex>
 
-                  {/* Section droite : Score et différence */}
                   <VStack
                     spacing={2}
                     align="flex-end"
@@ -231,7 +227,6 @@ export const UserRivals = ({
                       </Text>
                     </Box>
 
-                    {/* Différence de score */}
                     {!isProfileUser && (
                       <HStack
                         spacing={2}

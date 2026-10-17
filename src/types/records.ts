@@ -1,6 +1,6 @@
-// Records par killer et succès
+// Killer records and achievements
 
-// Auteur d'un record sur un killer (GET /api/rotations/:id/history)
+// Holder of a record on a killer (GET /api/rotations/:id/history)
 export interface IKillerRecordHolder {
   score: number;
   bbs_id: string;
@@ -26,12 +26,12 @@ export interface IRotationHistory {
   rotation_id: string;
   absolute_record: IKillerRecordHolder | null;
   guild_record: IKillerRecordHolder | null;
-  record_to_beat: IKillerRecordHolder | null; // meilleur score des AUTRES cycles (périmètre guilde si filtrée)
+  record_to_beat: IKillerRecordHolder | null; // Best score of the OTHER cycles (guild scope when filtered)
   current_cycle_best: IKillerRecordHolder | null;
   per_cycle: IRotationHistoryCycle[];
 }
 
-// Record personnel d'un compte bbs sur un killer (GET /api/users/:userId/records)
+// Personal record of a bbs account on a killer (GET /api/users/:userId/records)
 export interface IAccountKillerRecord {
   rotation_id: string;
   killer: string | null;
@@ -51,7 +51,7 @@ export interface IUserAccountRecords {
   records: IAccountKillerRecord[];
 }
 
-// Succès (calculés côté API à partir des scores)
+// Achievements (computed by the API from scores)
 export type AchievementTier = "bronze" | "silver" | "gold" | "platinum";
 
 export type AchievementCategory = "scores" | "records" | "regularity" | "progression" | "podium" | "versatility";
@@ -61,13 +61,13 @@ export type AchievementUnit = "count" | "score" | "billions" | "percent" | "flag
 export interface IAchievementTierState {
   tier: AchievementTier;
   threshold: number;
-  unlocked_at: number | null; // timestamp (ms) de la rotation ou du cycle qui l'a débloqué
-  rarity: number; // % des comptes l'ayant débloqué
+  unlocked_at: number | null; // Timestamp (ms) of the rotation or cycle that unlocked it
+  rarity: number; // % of accounts that unlocked it
 }
 
 export interface IAchievement {
   code: string;
-  name?: string; // nom français (Discord, bot)
+  name?: string; // French name (Discord, bot)
   category: AchievementCategory;
   unit: AchievementUnit;
   value: number;
@@ -83,7 +83,7 @@ export interface IUserAccountAchievements {
   achievements: IAchievement[];
 }
 
-// Succès le plus rare d'un compte, affiché à côté du pseudo dans les classements
+// Rarest achievement of an account, shown next to the name in rankings
 export interface ITopAchievement {
   code: string;
   name: string;

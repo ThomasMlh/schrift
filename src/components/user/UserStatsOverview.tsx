@@ -28,7 +28,6 @@ export const UserStatsOverview = ({
   hasGuild
 }: UserStatsOverviewProps) => {
   const { t } = useTranslation();
-  // Formater la date d'ancienneté
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return t("components.user.statsOverview.dateUnknown");
     const date = new Date(dateString);
@@ -39,7 +38,6 @@ export const UserStatsOverview = ({
     });
   };
 
-  // Calculer le nombre de jours depuis la première participation
   const getDaysSinceFirstParticipation = (dateString: string | null | undefined) => {
     if (!dateString) return null;
     const firstDate = new Date(dateString);
@@ -53,22 +51,18 @@ export const UserStatsOverview = ({
     ? getDaysSinceFirstParticipation(stats.firstParticipation)
     : null;
 
-  // Couleurs pour le mode clair/sombre
   const cardBg = "bg.card";
   const hoverBg = "bg.muted";
 
   return (
     <VStack spacing={6} align="stretch">
-      {/* Classement */}
       <RankingSection
         ranking={stats.ranking}
         guildName={guildName}
         hasGuild={hasGuild}
       />
 
-      {/* Meilleur Score et Score à Améliorer */}
       <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-        {/* Meilleur Score */}
         <Card
           bg={cardBg}
           borderRadius="2xl"
@@ -128,7 +122,6 @@ export const UserStatsOverview = ({
           </CardBody>
         </Card>
 
-        {/* Score à Améliorer */}
         <Card
           bg={cardBg}
           borderRadius="2xl"
@@ -191,9 +184,7 @@ export const UserStatsOverview = ({
 
       <Divider />
 
-      {/* Statistiques secondaires */}
       <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-        {/* Meilleur Cycle */}
         {stats.bestCycle && (
           <Card
             bg={cardBg}
@@ -245,7 +236,6 @@ export const UserStatsOverview = ({
           </Card>
         )}
 
-        {/* Ancienneté */}
         {stats.firstParticipation && (
           <Card
             bg={cardBg}
@@ -294,7 +284,6 @@ export const UserStatsOverview = ({
           </Card>
         )}
 
-        {/* Builds Créés */}
         {stats.buildsCount !== undefined && (
           <Card
             bg={cardBg}
@@ -342,7 +331,6 @@ export const UserStatsOverview = ({
         )}
       </SimpleGrid>
 
-      {/* Taux de miss */}
       {stats.missRate !== undefined && (
         <>
           <Divider />
@@ -409,13 +397,11 @@ export const UserStatsOverview = ({
         </>
       )}
 
-      {/* Consistance & Cycles */}
       {(stats.consistencyScore !== undefined || (stats.temporalEvolution && stats.temporalEvolution.length > 0)) && (
         <>
           <Divider />
           <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
 
-            {/* Score médian */}
             {stats.medianScore !== undefined && (
               <Card bg={cardBg} borderRadius="xl" boxShadow="md" transition="all 0.3s" _hover={{ transform: "translateY(-2px)", boxShadow: "lg", bg: hoverBg }}>
                 <CardBody>
@@ -443,7 +429,6 @@ export const UserStatsOverview = ({
               </Card>
             )}
 
-            {/* Consistance */}
             {stats.consistencyScore !== undefined && (
               <Card bg={cardBg} borderRadius="xl" boxShadow="md" transition="all 0.3s" _hover={{ transform: "translateY(-2px)", boxShadow: "lg", bg: hoverBg }}>
                 <CardBody>
@@ -489,7 +474,6 @@ export const UserStatsOverview = ({
               </Card>
             )}
 
-            {/* Cycles joués */}
             {(stats.cyclesWithFullParticipation !== undefined || (stats.temporalEvolution && stats.temporalEvolution.length > 0)) && (
               <Card bg={cardBg} borderRadius="xl" boxShadow="md" transition="all 0.3s" _hover={{ transform: "translateY(-2px)", boxShadow: "lg", bg: hoverBg }}>
                 <CardBody>

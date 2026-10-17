@@ -38,7 +38,7 @@ interface DraftReplacementPanelProps {
   cycleName: string;
   cycleYear: number;
   rankingType: RankingType;
-  // Ordre des guildes = hiérarchie (la 1re est la meilleure)
+  // Guild order = hierarchy (the first one is the strongest)
   guildOrder: string[];
   authHeaders: HeadersInit;
   guildColorMap: Record<string, string>;
@@ -46,9 +46,9 @@ interface DraftReplacementPanelProps {
 
 const formatScore = (n: number) => n.toLocaleString("fr-FR");
 
-// Remplacement ciblé : on choisit des joueurs d'une guilde, et on obtient des remplaçants de score
-// équivalent ou supérieur, pris seulement dans les guildes inférieures ou parmi les joueurs sans
-// guilde. Simulation en lecture seule, comme la proposition automatique.
+// Targeted replacement: pick players of a guild to get replacements with an equivalent or higher
+// score, taken only from lower guilds or guildless players. Read-only simulation, like the
+// automatic proposal.
 export const DraftReplacementPanel = ({ cycleName, cycleYear, rankingType, guildOrder, authHeaders, guildColorMap }: DraftReplacementPanelProps) => {
   const toast = useToast();
   const [targetGuild, setTargetGuild] = useState(guildOrder[1] ?? guildOrder[0] ?? "");
@@ -83,7 +83,7 @@ export const DraftReplacementPanel = ({ cycleName, cycleYear, rankingType, guild
     return data as ReplacementResponse;
   }, [cycleName, cycleYear, rankingType, guildOrder, targetGuild, tolerance, authHeaders]);
 
-  // Membres de la guilde visée (à cocher), rechargés quand le contexte change
+  // Members of the target guild (to tick), reloaded when the context changes
   useEffect(() => {
     if (!targetGuild || !guildOrder.includes(targetGuild)) return;
     let cancelled = false;

@@ -9,11 +9,11 @@ import { ACHIEVEMENT_ICONS, CATEGORY_ORDER, TIER_ORDER, formatAchievementValue }
 
 interface UserAchievementsProps {
   userId?: string;
-  // Compte bbs affiché sur la page (un alt si l'URL pointe vers lui) ; à défaut, le compte principal.
+  // bbs account shown on the page (an alt when the URL targets it); defaults to the main account.
   bbsId?: string;
 }
 
-// Couleur du texte de chaque rareté, lisible sur fond clair et sombre
+// Text color of each tier, readable on light and dark backgrounds
 const TIER_TEXT: Record<AchievementTier, [string, string]> = {
   bronze: ["#A0602F", "#E0A06E"],
   silver: ["#6B7480", "#C3CBD6"],
@@ -23,8 +23,8 @@ const TIER_TEXT: Record<AchievementTier, [string, string]> = {
 
 const formatDate = (timestamp: number) => new Date(timestamp).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
 
-// Onglet « Succès » de la page joueur : un badge par succès, en couleur au palier atteint ou grisé
-// avec la progression vers le palier suivant, groupés par catégorie.
+// Player page "Achievements" tab: one badge per achievement, colored at the reached tier or greyed
+// out with progress towards the next tier, grouped by category.
 export const UserAchievements = ({ userId, bbsId }: UserAchievementsProps) => {
   const { t } = useTranslation();
   const { accounts, isLoading } = useUserAchievements(userId);

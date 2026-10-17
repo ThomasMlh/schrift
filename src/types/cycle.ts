@@ -1,4 +1,4 @@
-// Cycles, rotations et récap de fin de cycle
+// Cycles, rotations and end-of-cycle recap
 import type { IPagination } from "./common";
 
 export interface IRotationTemplate {
@@ -10,8 +10,8 @@ export interface IRotationTemplate {
 
 export interface ICycleRotation {
   _id?: string;
-  start_date: string; // Format DD/MM/YYYY
-  end_date: string; // Format DD/MM/YYYY
+  start_date: string; // DD/MM/YYYY
+  end_date: string; // DD/MM/YYYY
   period: "Mardi-Jeudi" | "Vendredi-Dimanche";
   killer: string;
   attack: string;
@@ -51,7 +51,7 @@ export interface IEvent {
   period: string;
 }
 
-// Bilan de fin de cycle d'une guilde (aperçu avant publication sur Discord)
+// End-of-cycle recap of a guild (preview before publishing on Discord)
 export interface ICycleRecap {
   guild_name: string;
   cycle_name: string;

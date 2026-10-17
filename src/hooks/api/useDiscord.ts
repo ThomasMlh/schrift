@@ -2,8 +2,8 @@ import useSWR from 'swr';
 import type { IDiscordChannel, IDiscordEmoji } from '../../interfaces';
 import { apiUrl, useAuthenticatedFetcher } from './shared';
 
-// Liste des salons Discord accessibles à l'utilisateur courant (tous pour un admin,
-// uniquement ceux de sa/ses guildes pour un chef/sous-chef — filtré côté API).
+// Discord channels available to the current user (all of them for an admin, only their guild
+// channels for a leader/officer, filtered by the API).
 export const useDiscordChannels = () => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const url = `${apiUrl}/api/discord/channels`;
@@ -17,7 +17,7 @@ export const useDiscordChannels = () => {
   return { channels: data?.channels || [], isLoading, error, mutate };
 };
 
-// Emojis custom des serveurs Discord accessibles (même périmètre que les salons).
+// Custom emojis of the accessible Discord servers (same scope as the channels).
 export const useDiscordEmojis = () => {
   const authenticatedFetcher = useAuthenticatedFetcher();
   const url = `${apiUrl}/api/discord/emojis`;

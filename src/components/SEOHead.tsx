@@ -22,48 +22,40 @@ export const SEOHead = ({
   structuredData,
   noIndex = false
 }: SEOHeadProps) => {
-  // Keywords génériques appliqués à toutes les pages
+  // Generic keywords applied to every page
   const baseKeywords = "Bleach Brave Souls, BBS, Schrift, guildes, scores, BBS-Schrift, BBS Schrift";
   
-  // Combine les keywords de base avec les keywords spécifiques de la page
   const allKeywords = keywords 
     ? `${baseKeywords}, ${keywords}` 
     : baseKeywords;
   
-  // Force la mise à jour du titre lors des changements de route
+  // Force the title update on route changes
   useEffect(() => {
     document.title = title;
   }, [title]);
   
   return (
     <Helmet key={url} prioritizeSeoTags defer={false}>
-      {/* Title */}
       <title>{title}</title>
       <meta property="og:title" content={title} />
       <meta name="twitter:title" content={title} />
       
-      {/* Basic meta tags */}
       <meta name="description" content={description} />
       <meta name="keywords" content={allKeywords} />
       
-      {/* Robots meta - noindex pour pages privées */}
       {noIndex && <meta name="robots" content="noindex, nofollow" />}
       
-      {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
       <meta property="og:image" content={image} />
       
-      {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
       
-      {/* Canonical URL */}
       <link rel="canonical" href={url} />
       
-      {/* Structured Data */}
       {structuredData && (
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}

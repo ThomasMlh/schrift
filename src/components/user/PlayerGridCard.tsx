@@ -8,7 +8,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { TopAchievementBadge } from "@/components/achievements/TopAchievementBadge";
 
 interface PlayerGridCardProps {
-  // Un compte bbs (liste publique : une carte par compte, avec sa guilde et son rôle)
+  // A bbs account (public list: one card per account, with its guild and role)
   player: IUser;
   guildName?: string;
 }
@@ -25,8 +25,8 @@ const ROLE_LABEL_KEYS: Record<string, string> = {
   membre: "components.guildTabsList.roleMembre",
 };
 
-// Carte de la liste publique des joueurs : avatar, pseudo, meilleur succès, guilde et rôle.
-// Entièrement cliquable vers le profil quand on est connecté (les profils demandent un compte).
+// Public player list card: avatar, name, top achievement, guild and role. Fully clickable to the
+// profile when logged in (profiles require an account).
 export const PlayerGridCard = ({ player, guildName }: PlayerGridCardProps) => {
   const { t } = useTranslation();
   const { isLoggedIn } = useAuth();

@@ -6,7 +6,7 @@ interface AdminSidebarProps {
   tabs: AdminTab[];
   current: AdminPage;
   onChange: (page: AdminPage) => void;
-  // Compteurs affichés à droite de certains onglets (ex : bannis, alertes)
+  // Counters shown next to some tabs (e.g. banned users, alerts)
   counters?: Partial<Record<AdminPage, number>>;
 }
 
@@ -15,7 +15,7 @@ const groupedTabs = (tabs: AdminTab[]) =>
     .map((group) => ({ ...group, tabs: tabs.filter((tab) => tab.group === group.key) }))
     .filter((group) => group.tabs.length > 0);
 
-// Navigation de l'administration : colonne à gauche sur grand écran
+// Admin navigation: left column on large screens
 export const AdminSidebar = ({ tabs, current, onChange, counters = {} }: AdminSidebarProps) => (
   <Box
     as="nav"
@@ -102,7 +102,7 @@ export const AdminSidebar = ({ tabs, current, onChange, counters = {} }: AdminSi
   </Box>
 );
 
-// Navigation sur mobile et tablette : liste déroulante groupée
+// Mobile and tablet navigation: grouped dropdown
 export const AdminSectionSelect = ({ tabs, current, onChange, counters = {} }: AdminSidebarProps) => (
   <Box display={{ base: "block", lg: "none" }} mb={4}>
     <Select

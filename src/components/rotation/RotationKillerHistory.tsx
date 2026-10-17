@@ -17,8 +17,8 @@ interface RotationKillerHistoryProps {
   guildId?: string;
 }
 
-// Couleurs validées (contraste, daltonisme) sur fond clair (#FFFFFF) et sombre (#1A202C) :
-// violet de la marque pour "tous les joueurs", vert pour la guilde — fixes quel que soit le filtre.
+// Colors checked for contrast and color blindness on light (#FFFFFF) and dark (#1A202C)
+// backgrounds: brand purple for "all players", green for the guild, regardless of the filter.
 const SERIES_COLORS = {
   light: { all: "#7C3AED", guild: "#38A169" },
   dark: { all: "#9F7AEA", guild: "#38A169" },
@@ -38,9 +38,9 @@ const formatCompact = (n: number) => {
 };
 const cycleLabel = (name: string | null, year: number | null) => [name, year].filter(Boolean).join(" ");
 
-// Section "Historique sur ce killer" de la page de rotation : records et moyennes sur tous les
-// cycles où ce killer est apparu (un document rotation = un killer + type d'attaque, réutilisé
-// d'un cycle à l'autre), et score à battre pour le cycle affiché.
+// "History on this killer" section of the rotation page: records and averages over every cycle
+// where this killer appeared (a rotation document = a killer + attack type, reused across cycles),
+// and the score to beat for the displayed cycle.
 export const RotationKillerHistory = ({ rotationId, cycleId, guildId }: RotationKillerHistoryProps) => {
   const { t } = useTranslation();
   const { colorMode } = useColorMode();
@@ -131,8 +131,8 @@ export const RotationKillerHistory = ({ rotationId, cycleId, guildId }: Rotation
     );
   };
 
-  // Étiquette directe du nom de la série sur le dernier point (en plus de la légende) quand deux
-  // séries sont affichées, pour que l'identité ne repose pas sur la couleur seule.
+  // Labels the series name on its last point (in addition to the legend) when two series are shown,
+  // so identity does not rely on color alone.
   const seriesEndLabel = (name: string) => (props: { x?: number | string; y?: number | string; index?: number }) =>
     props.index === lastIndex && props.x != null && props.y != null ? (
       <text x={Number(props.x) + 8} y={Number(props.y)} dy={4} fontSize={10} fill={axisColor}>{name}</text>

@@ -1,4 +1,4 @@
-// Types transverses : pages, rôles, notifications, pagination, journal d'activité
+// Cross-cutting types: pages, roles, notifications, pagination, activity log
 
 export type Page = "guilds" | "characters";
 

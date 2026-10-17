@@ -4,22 +4,16 @@ import type { IUser } from '../interfaces';
 const TOKEN_KEY = 'userToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 
-/**
- * Récupère le token depuis le localStorage
- */
 export const getToken = (): string | null => {
   return localStorage.getItem(TOKEN_KEY);
 };
 
-/**
- * Récupère le refresh token
- */
 export const getRefreshToken = (): string | null => {
   return localStorage.getItem(REFRESH_TOKEN_KEY);
 };
 
 /**
- * Vérifie si un token est valide (non expiré)
+ * Whether a token is present and not expired
  */
 export const isTokenValid = (token: string | null): boolean => {
   if (!token) return false;
@@ -36,8 +30,7 @@ export const isTokenValid = (token: string | null): boolean => {
 };
 
 /**
- * Décode le token et retourne les informations utilisateur
- * Retourne null si le token est invalide ou absent
+ * Decodes the token into user information, or null when missing or invalid
  */
 export const getUserFromToken = (): IUser | null => {
   const token = getToken();
@@ -52,20 +45,14 @@ export const getUserFromToken = (): IUser | null => {
   }
 };
 
-/**
- * Nettoie tous les tokens du localStorage
- */
 export const clearTokens = (): void => {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
-  // Nettoyer les anciens clés legacy
+  // Legacy keys
   localStorage.removeItem("adminToken");
   localStorage.removeItem("token");
 };
 
-/**
- * Stocke les tokens dans le localStorage
- */
 export const setToken = (token: string): void => {
   localStorage.setItem(TOKEN_KEY, token);
 };

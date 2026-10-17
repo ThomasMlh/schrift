@@ -14,7 +14,7 @@ const bgColor = "bg.card";
 const borderColor = "border.subtle";
 const mutedText = "text.muted";
 
-// Attributs qualitatifs des personnages comparés : affinité, type d'attaque, killers, catégories
+// Qualitative attributes of the compared characters: affinity, attack type, killers, categories
 export const CharacterAttributesTable = ({ selectedCharacters }: CharacterAttributesTableProps) => {
   const { t } = useTranslation();
   return (
@@ -24,7 +24,6 @@ export const CharacterAttributesTable = ({ selectedCharacters }: CharacterAttrib
       </Text>
       <Box overflowX="auto">
         <Box display="grid" gridTemplateColumns={`140px repeat(${selectedCharacters.length}, 1fr)`} gap={2} minW="400px">
-          {/* Header row */}
           <Box />
           {selectedCharacters.map((sc, i) => (
             <Box key={sc.id} textAlign="center">
@@ -33,7 +32,6 @@ export const CharacterAttributesTable = ({ selectedCharacters }: CharacterAttrib
             </Box>
           ))}
 
-          {/* Affinity */}
           <Text fontSize="sm" color={mutedText} alignSelf="center">{t("components.comparatorCharts.metricAffinity")}</Text>
           {selectedCharacters.map((sc) => (
             <Flex key={sc.id} justify="center" align="center" gap={1}>
@@ -43,7 +41,6 @@ export const CharacterAttributesTable = ({ selectedCharacters }: CharacterAttrib
             </Flex>
           ))}
 
-          {/* Attack type */}
           <Text fontSize="sm" color={mutedText} alignSelf="center">{t("components.comparatorCharts.metricAttackType")}</Text>
           {selectedCharacters.map((sc) => (
             <Flex key={sc.id} justify="center" align="center">
@@ -53,7 +50,6 @@ export const CharacterAttributesTable = ({ selectedCharacters }: CharacterAttrib
             </Flex>
           ))}
 
-          {/* Killers */}
           <Text fontSize="sm" color={mutedText} alignSelf="center">{t("components.comparatorCharts.metricKillers")}</Text>
           {selectedCharacters.map((sc) => (
             <Flex key={sc.id} justify="center" flexWrap="wrap" gap={1}>
@@ -63,7 +59,6 @@ export const CharacterAttributesTable = ({ selectedCharacters }: CharacterAttrib
             </Flex>
           ))}
 
-          {/* Categories */}
           <Text fontSize="sm" color={mutedText} alignSelf="center">{t("components.comparatorCharts.metricCategories")}</Text>
           {selectedCharacters.map((sc) => (
             <Flex key={sc.id} justify="center" flexWrap="wrap" gap={1}>

@@ -40,7 +40,6 @@ const PlayerCardMiss = ({ player, showGuildName = false }: PlayerCardMissProps) 
       _hover={{ borderColor: hoverBorderColor, transform: "translateX(2px)" }}
     >
       <HStack spacing={3} justify="space-between">
-        {/* Rang */}
         <Text
           fontWeight="bold"
           fontSize="sm"
@@ -52,7 +51,6 @@ const PlayerCardMiss = ({ player, showGuildName = false }: PlayerCardMissProps) 
           #{player.rank}
         </Text>
 
-        {/* Avatar */}
         <Avatar
           size="sm"
           src={avatarUrl}
@@ -60,7 +58,6 @@ const PlayerCardMiss = ({ player, showGuildName = false }: PlayerCardMissProps) 
           flexShrink={0}
         />
 
-        {/* Nom + Guilde */}
         <VStack spacing={0} align="start" flex={1} overflow="hidden" minW={0}>
           <CustomLink
             to={buildPlayerUrl(player.bbs_name, player.bbs_id)}
@@ -76,7 +73,6 @@ const PlayerCardMiss = ({ player, showGuildName = false }: PlayerCardMissProps) 
           )}
         </VStack>
 
-        {/* Misses + Score négatif */}
         <Tooltip label={tooltipLabel || "Aucun détail"} placement="left" hasArrow>
           <VStack spacing={0} align="end" flexShrink={0}>
             <Badge colorScheme="red" fontSize="sm" px={2} py={0.5} borderRadius="md">

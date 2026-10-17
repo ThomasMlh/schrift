@@ -36,7 +36,6 @@ const PlayerCardWeekly = ({ player, showGuildName = false }: PlayerCardWeeklyPro
       _hover={{ borderColor: hoverBorderColor, transform: "translateX(2px)" }}
     >
       <HStack spacing={3} justify="space-between">
-        {/* Rang */}
         <Text
           fontWeight="bold"
           fontSize="sm"
@@ -48,7 +47,6 @@ const PlayerCardWeekly = ({ player, showGuildName = false }: PlayerCardWeeklyPro
           #{player.rank}
         </Text>
 
-        {/* Avatar */}
         <Avatar
           size="sm"
           src={avatarUrl}
@@ -56,7 +54,6 @@ const PlayerCardWeekly = ({ player, showGuildName = false }: PlayerCardWeeklyPro
           flexShrink={0}
         />
 
-        {/* Nom + Guilde */}
         <VStack spacing={0} align="start" flex={1} overflow="hidden" minW={0}>
           <HStack spacing={1.5} maxW="100%" minW={0}>
             <CustomLink
@@ -76,7 +73,7 @@ const PlayerCardWeekly = ({ player, showGuildName = false }: PlayerCardWeeklyPro
           )}
         </VStack>
 
-        {/* Score total + sous-scores au survol */}
+        {/* Weekly total, with sub-scores on hover */}
         <Tooltip
           label={`R1: ${formatWithCommas(player.rotation1_score ?? 0)} • R2: ${formatWithCommas(player.rotation2_score ?? 0)}`}
           placement="left"

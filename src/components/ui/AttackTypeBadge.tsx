@@ -34,7 +34,7 @@ export const AttackTypeBadge = ({ attackType, size = "16px" }: AttackTypeBadgePr
     );
   }
   
-  // Cercle avec les 2 couleurs (rouge et bleu)
+  // Both colors (red and blue)
   return (
     <Box
       width={size}

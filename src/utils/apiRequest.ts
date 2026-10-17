@@ -1,19 +1,18 @@
 import { mutate } from 'swr';
 import { isDiscordActivity } from '../activity/discordActivity';
 
-// En Discord Activity, tout fetch cross-origin doit passer par le proxy Discord
-// (préfixe /.proxy/<mapping configuré dans le portail>) au lieu de l'URL absolue.
+// In a Discord Activity, every cross-origin fetch must go through the Discord proxy
+// (/.proxy/<mapping configured in the developer portal>) instead of the absolute URL.
 export const apiUrl = isDiscordActivity() ? '/.proxy' : (import.meta.env.VITE_API_BASE_URL as string);
 
-// Même logique pour les images du bucket. Construire l'URL correcte dès le départ (plutôt
-// que de réécrire les <img src> après coup) est nécessaire car certains composants (Chakra
-// Avatar notamment) précherchent l'image via un `new Image()` détaché du DOM avant de
-// l'afficher : une réécriture basée sur un MutationObserver ne verrait jamais cette requête.
+// Same for bucket images. The URL must be right from the start (rather than rewriting <img src>
+// afterwards) because some components (notably Chakra Avatar) preload the image through a detached
+// `new Image()`: a MutationObserver-based rewrite would never see that request.
 export const bucketUrl = isDiscordActivity() ? '/.proxy/bucket' : (import.meta.env.VITE_BUCKET_URL as string);
 
 /**
- * Crée une fonction de requête authentifiée liée au token courant.
- * À appeler avec useMemo(() => makeRequest(token), [token]) dans chaque hook.
+ * Creates an authenticated request function bound to the current token.
+ * Call it with useMemo(() => makeRequest(token), [token]) in each hook.
  */
 export const makeRequest =
   (token: string | null) =>
@@ -38,6 +37,6 @@ export const makeRequest =
     return data as T;
   };
 
-/** Invalide tous les caches SWR dont la clé commence par l'un des préfixes. */
+/** Invalidates every SWR cache whose key starts with one of the prefixes. */
 export const invalidateKeys = (...prefixes: string[]) =>
   mutate((key) => typeof key === 'string' && prefixes.some((p) => key.startsWith(p)));

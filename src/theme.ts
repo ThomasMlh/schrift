@@ -1,12 +1,11 @@
 import { extendTheme } from '@chakra-ui/react'
 
-// Thème du site : mode sombre par défaut, couleurs sémantiques et arrondis communs.
+// Site theme: dark mode by default, semantic colors and shared radii.
 //
-// Couleurs sémantiques : utiliser ces noms (bg="bg.card", color="text.muted"...) plutôt que
-// useColorModeValue(...) avec des couleurs en dur, pour que tout le site reste cohérent entre
-// le thème clair et le thème sombre. Les valeurs reprennent celles déjà utilisées partout.
+// Semantic colors: use these names (bg="bg.card", color="text.muted"…) rather than
+// useColorModeValue(...) with hardcoded colors, so the light and dark themes stay consistent.
 //
-// Arrondis : cartes et blocs en "xl", boutons et champs en "lg", pastilles en "full".
+// Radii: cards and blocks "xl", buttons and fields "lg", chips "full".
 
 const config = {
   initialColorMode: 'dark',
@@ -15,7 +14,7 @@ const config = {
 
 const semanticTokens = {
   colors: {
-    // Fonds
+    // Backgrounds
     'bg.page': { default: 'gray.50', _dark: 'gray.900' },
     'bg.card': { default: 'white', _dark: 'gray.800' },
     'bg.subtle': { default: 'gray.50', _dark: 'whiteAlpha.50' },
@@ -23,19 +22,19 @@ const semanticTokens = {
     'bg.hover': { default: 'gray.100', _dark: 'whiteAlpha.100' },
     'bg.inset': { default: 'gray.100', _dark: 'gray.700' },
     'bg.elevated': { default: 'white', _dark: 'gray.700' },
-    // Carte translucide posée sur un fond décoré (dégradés, bannières)
+    // Translucent card over a decorated background (gradients, banners)
     'bg.glass': { default: 'white', _dark: 'rgba(26,32,44,0.7)' },
-    // Bordures
+    // Borders
     'border.subtle': { default: 'gray.200', _dark: 'gray.700' },
     'border.default': { default: 'gray.200', _dark: 'gray.600' },
     'border.faint': { default: 'gray.200', _dark: 'whiteAlpha.200' },
     'border.strong': { default: 'gray.300', _dark: 'whiteAlpha.300' },
-    // Textes
+    // Text
     'text.strong': { default: 'gray.800', _dark: 'whiteAlpha.900' },
     'text.body': { default: 'gray.700', _dark: 'gray.200' },
     'text.secondary': { default: 'gray.600', _dark: 'gray.300' },
     'text.muted': { default: 'gray.500', _dark: 'gray.400' },
-    // Accent de la marque (violet)
+    // Brand accent (purple)
     'accent': { default: 'purple.600', _dark: 'purple.300' },
   },
 }

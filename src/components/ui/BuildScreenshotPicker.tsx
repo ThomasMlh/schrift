@@ -4,14 +4,14 @@ import { FiImage, FiTrash2, FiUploadCloud } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import { compressImage } from "@/utils/imageCompression";
 
-// Même largeur que la conversion côté API, et une qualité qui garde le texte lisible
+// Same width as the API conversion, with a quality that keeps text readable
 const MAX_DIMENSION = 1600;
 const QUALITY = 0.85;
 
 interface BuildScreenshotPickerProps {
-  // Image affichée : nouvelle capture (data URL) ou capture existante (URL du bucket)
+  // Displayed image: new screenshot (data URL) or existing one (bucket URL)
   value: string | null;
-  // Nouvelle capture choisie (data URL compressée), ou null pour la retirer
+  // New screenshot (compressed data URL), or null to remove it
   onChange: (dataUrl: string | null) => void;
 }
 
@@ -23,7 +23,7 @@ const readFile = (file: File) =>
     reader.readAsDataURL(file);
   });
 
-// Capture d'écran d'un build : glisser-déposer, choix d'un fichier ou collage (Ctrl+V)
+// Build screenshot: drag and drop, file picker or paste (Ctrl+V)
 export const BuildScreenshotPicker = ({ value, onChange }: BuildScreenshotPickerProps) => {
   const { t } = useTranslation();
   const toast = useToast();
@@ -47,7 +47,7 @@ export const BuildScreenshotPicker = ({ value, onChange }: BuildScreenshotPicker
     }
   }, [onChange, t, toast]);
 
-  // Coller une capture depuis le presse-papiers, tant que la zone est affichée
+  // Paste a screenshot from the clipboard while the area is shown
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
       const item = Array.from(e.clipboardData?.items ?? []).find((i) => i.type.startsWith("image/"));

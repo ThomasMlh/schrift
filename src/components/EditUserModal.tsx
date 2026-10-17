@@ -25,18 +25,18 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, gu
     const { users: allUsers } = useUsers({ authenticated: true, limit: 1000 });
     const toast = useToast();
 
-    // Comptes bbs (principal + alts) — édités séparément du formulaire principal
+    // bbs accounts (main + alts), edited separately from the main form
     const [accounts, setAccounts] = useState<IBbsAccount[]>([]);
     const [newAccount, setNewAccount] = useState({ bbs_id: "", bbs_name: "", guilde_id: "", role: "membre" as Role });
-    const [accountActionLoading, setAccountActionLoading] = useState<string | null>(null); // bbs_id en cours d'action, ou "new"
+    const [accountActionLoading, setAccountActionLoading] = useState<string | null>(null); // bbs_id being processed, or "new"
 
-    // Transfert d'un compte vers un autre user (en alt chez la cible)
+    // Account being transferred to another user (as an alt)
     const [transferringBbsId, setTransferringBbsId] = useState<string | null>(null);
     const [transferTargetUserId, setTransferTargetUserId] = useState("");
     const [transferSearchQuery, setTransferSearchQuery] = useState("");
 
-    // Édition locale de l'ID/nom bbs d'un compte, clé = bbs_id ACTUEL du compte (avant renommage).
-    // On ne sauvegarde pas à chaque frappe : un bouton dédié valide bbs_id + bbs_name ensemble.
+    // Local edits of an account's bbs id/name, keyed by the account's CURRENT bbs_id (before renaming).
+    // Not saved on every keystroke: a dedicated button saves bbs_id and bbs_name together.
     const [accountEdits, setAccountEdits] = useState<Record<string, { bbs_id: string; bbs_name: string }>>({});
 
     const getAccountEditValue = (account: IBbsAccount, field: "bbs_id" | "bbs_name") =>
@@ -64,7 +64,6 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, gu
     const mutedLabel = "text.muted";
     const dashedBorder = "border.strong";
 
-    // Initialiser les comptes avec les données de l'utilisateur
     useEffect(() => {
         if (user) {
             setAccounts(user.bbs_accounts || []);

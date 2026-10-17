@@ -44,9 +44,8 @@ export const MultiPlayerSelector = ({
   const [selectedUserId, setSelectedUserId] = useState("");
   const { t } = useTranslation();
 
-  // availableUsers liste des comptes bbs (pas des users) : un joueur avec plusieurs comptes y
-  // apparaît une fois par compte, chacun avec son propre bbs_id — c'est ce bbs_id qui sert de
-  // clé de sélection (deux comptes d'un même joueur partagent le même _id user).
+  // availableUsers lists bbs accounts, not users: a player with several accounts appears once per
+  // account, and the bbs_id is the selection key (accounts of the same player share the user _id).
   const handleUserSelect = (bbsId: string) => {
     const user = availableUsers.find((u) => u.bbs_id === bbsId);
     if (user && selectedPlayers.length < maxPlayers) {

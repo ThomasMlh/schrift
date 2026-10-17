@@ -3,12 +3,10 @@ import { Box, Flex, Spinner } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 
 /**
- * Page /annonce : affiche l'interface des annonces du jeu via le miroir
- * externe urahara-shop.red, qui gere lui-meme le token/device-id et
- * reecrit deja ses liens internes en chemins absolus sur son propre
- * domaine. Simple iframe, aucun proxy ni etat cote schrift-api requis.
- * La langue suit le selecteur global du site (Header) : pas de choix
- * independant ici, le mirror ne supporte de toute facon que fr/en.
+ * /annonce page: shows the in-game announcements through the external urahara-shop.red mirror, which
+ * handles the token/device id itself and already rewrites its internal links. Plain iframe, no proxy
+ * or state needed in schrift-api. The language follows the site-wide selector (the mirror only
+ * supports fr/en).
  */
 
 const NEWS_MIRROR = "https://urahara-shop.red/DataLoad/game/news";

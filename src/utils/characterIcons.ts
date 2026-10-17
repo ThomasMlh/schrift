@@ -1,7 +1,6 @@
-// bucketUrl : passe par le proxy Discord en Activity (/.proxy/bucket), https sinon
+// bucketUrl goes through the Discord proxy in an Activity (/.proxy/bucket), https otherwise
 import { bucketUrl } from "./apiRequest";
 
-// Mapping des affinités avec leurs icônes
 const affinitySlugMap: Record<string, string> = {
   "Force": "force",
   "Vitesse": "vitesse",
@@ -11,7 +10,6 @@ const affinitySlugMap: Record<string, string> = {
   "Goton": "goton"
 };
 
-// Mapping des statistiques avec leurs icônes
 const statSlugMap: Record<string, string> = {
   "atk": "atk",
   "def": "def",
@@ -20,7 +18,6 @@ const statSlugMap: Record<string, string> = {
   "end": "end",
 };
 
-// Mapping des slugs pour les tueurs
 const killerSlugMap: Record<string, string> = {
   "Shinigami": "shini",
   "Capitaine": "cap",
@@ -35,7 +32,6 @@ const killerSlugMap: Record<string, string> = {
   "Toutes": "all"
 };
 
-// Mapping des catégories avec leurs icônes
 const categorySlugMap: Record<string, string> = {
   "Shinigami": "shini",
   "Capitaine": "cap",
@@ -51,9 +47,7 @@ const categorySlugMap: Record<string, string> = {
 };
 
 /**
- * Récupère l'URL de l'icône d'une affinité
- * @param affinity - Le nom de l'affinité
- * @returns L'URL de l'icône ou null si non trouvée
+ * Icon URL of an affinity
  */
 export const getAffinityIcon = (affinity: string): string | null => {
   const slug = affinitySlugMap[affinity] || "goton";
@@ -61,9 +55,7 @@ export const getAffinityIcon = (affinity: string): string | null => {
 };
 
 /**
- * Récupère l'URL de l'icône d'un tueur dynamiquement
- * @param killer - Le nom du tueur
- * @returns L'URL de l'icône ou null si non trouvée
+ * Icon URL of a killer ("+" variants included)
  */
 export const getKillerIcon = (killer: string): string | null => {
   if (!killer) return null;
@@ -79,43 +71,27 @@ export const getKillerIcon = (killer: string): string | null => {
 };
 
 /**
- * Récupère l'URL de l'icône d'une catégorie
- * @param category - Le nom de la catégorie
- * @returns L'URL de l'icône ou null si non trouvée
+ * Icon URL of a category
  */
 export const getCategoryIcon = (category: string): string => {
   const slug = categorySlugMap[category] || "tous";
   return `${bucketUrl}/categories/cat-${slug}.png`;
 };
 
-/**
- * Récupère toutes les affinités disponibles avec leurs icônes
- * @returns Objet avec toutes les affinités et leurs URLs d'icônes
- */
 export const getAllAffinities = () => {
   return affinitySlugMap;
 };
 
-/**
- * Récupère tous les tueurs disponibles avec leurs icônes
- * @returns Objet avec tous les tueurs et leurs URLs d'icônes
- */
 export const getAllKillers = () => {
   return killerSlugMap;
 };
 
-/**
- * Récupère toutes les catégories disponibles avec leurs icônes
- * @returns Objet avec toutes les catégories et leurs URLs d'icônes
- */
 export const getAllCategories = () => {
   return categorySlugMap;
 };
 
 /**
- * Récupère l'URL de l'icône d'une statistique
- * @param stat - Le nom de la statistique
- * @returns L'URL de l'icône ou null si non trouvée
+ * Icon URL of a stat, or null when unknown
  */
 export const getStatIcon = (stat: string): string | null => {
   const slug = statSlugMap[stat as keyof typeof statSlugMap] || null;

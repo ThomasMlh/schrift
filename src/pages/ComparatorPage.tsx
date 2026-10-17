@@ -81,9 +81,8 @@ const ComparatorPage: React.FC = () => {
   const [selectedWeek, setSelectedWeek] = useState(1);
 
   const [userSearch, setUserSearch] = useState("");
-  // Comptes bbs (pas users) : un joueur avec plusieurs comptes apparaît une fois par compte,
-  // chacun avec son propre bbs_name/guilde — nécessaire pour pouvoir comparer deux comptes
-  // d'un même joueur entre eux.
+  // bbs accounts (not users): a player with several accounts appears once per account, each with its
+  // own name/guild, so two accounts of the same player can be compared.
   const { accounts: users = [] } = useUserAccounts({ authenticated: false, limit: 100, search: userSearch || undefined });
   const { guilds = [] } = useGuilds(false);
   const { cycles = [] } = useCycles();
@@ -105,7 +104,7 @@ const ComparatorPage: React.FC = () => {
     [selectedCharacters]
   );
 
-  // Résolution slug cycle depuis l'URL → _id
+  // Resolve the cycle slug from the URL into its _id
   useEffect(() => {
     if (!cycles.length) return;
     const slug = searchParams.get("cycle_name");
@@ -115,15 +114,15 @@ const ComparatorPage: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cycles]);
 
-  // Load from URL on mount — runs once when data first becomes available
+  // Load from the URL once, when data first becomes available
   const initializedRef = useRef(false);
   useEffect(() => {
     if (initializedRef.current || (users.length === 0 && guilds.length === 0)) return;
     initializedRef.current = true;
 
     if (comparisonType === "players") {
-      // players=<bbs_id>,<bbs_id>,... — bbs_id (unique par compte) plutôt que bbs_name
-      // (non garanti unique, notamment entre alts) pour désambiguïser précisément le compte.
+      // players=<bbs_id>,<bbs_id>,...: bbs_id (unique per account) rather than bbs_name (not guaranteed
+      // unique, especially across alts) to target the exact account.
       const bbsIds = searchParams.get("players")?.split(",").filter(Boolean) || [];
       const valid: SelectedPlayer[] = [];
       bbsIds.forEach((bbsId) => {
@@ -142,7 +141,7 @@ const ComparatorPage: React.FC = () => {
     }
   }, [users, guilds, comparisonType, searchParams]);
 
-  // characters=<id>,<id> (lien « Comparer » de la fiche personnage) : chargés une seule fois
+  // characters=<id>,<id> ("Compare" link of the character page): loaded once
   const charactersInitRef = useRef(false);
   useEffect(() => {
     if (charactersInitRef.current) return;
@@ -161,7 +160,7 @@ const ComparatorPage: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Sync URL
+  // Keep the URL in sync
   useEffect(() => {
     const params = new URLSearchParams();
     params.set("type", comparisonType);
@@ -257,7 +256,7 @@ const ComparatorPage: React.FC = () => {
     setSearchParams(new URLSearchParams({ type: comparisonType }));
   };
 
-  // Auto-compare dès que ≥2 joueurs/guildes sont sélectionnés ou que le cycle change
+  // Compare automatically once at least 2 players/guilds are selected or the cycle changes
   useEffect(() => {
     if (comparisonType === "players" && selectedPlayers.length >= 2) {
       loadPlayersStats();
@@ -277,7 +276,7 @@ const ComparatorPage: React.FC = () => {
     setSearchParams(new URLSearchParams({ type }));
   };
 
-  // Derived data for charts
+  // Derived chart data
   const playersData = selectedPlayers.map((p, i) => ({
     name: p.user.bbs_name || p.user.global_name || "Joueur",
     stats: (playersStats.get(p.id) ?? null) as unknown as Record<string, unknown>,
@@ -373,7 +372,7 @@ const ComparatorPage: React.FC = () => {
         <Container maxW="container.xl" py={8}>
           <VStack spacing={5} align="stretch">
 
-            {/* Barre d'outils : type de comparaison, cycle, mode hebdo */}
+            {/* Toolbar: comparison type, cycle, weekly mode */}
             <Flex
               bg="bg.card"
               borderRadius="xl"
@@ -460,7 +459,6 @@ const ComparatorPage: React.FC = () => {
               </Tooltip>
             </Flex>
 
-            {/* Selector */}
             {isPlayers ? (
               <MultiPlayerSelector
                 selectedPlayers={selectedPlayers}
@@ -491,7 +489,6 @@ const ComparatorPage: React.FC = () => {
               />
             )}
 
-            {/* Min 2 alert */}
             {!isLoadingStats && selectedCount < 2 && (
               <Alert status="info" borderRadius="xl" fontSize="sm" py={2}>
                 <AlertIcon />
@@ -503,7 +500,6 @@ const ComparatorPage: React.FC = () => {
               </Alert>
             )}
 
-            {/* Loading */}
             {isLoadingStats && (
               <PageLoader
                 label={t("pages.comparator.loadingStats")}
@@ -512,7 +508,6 @@ const ComparatorPage: React.FC = () => {
               />
             )}
 
-            {/* Character comparison results */}
             {isCharacters && hasCharStats && (
               <>
                 <ComparisonSummary entities={charsData} metrics={charTableMetrics} />
@@ -537,7 +532,6 @@ const ComparatorPage: React.FC = () => {
               </>
             )}
 
-            {/* Résultats joueurs / guildes */}
             {!isLoadingStats && hasResults && !isCharacters && (
               <>
                 {weeklyMode && isPlayers && (

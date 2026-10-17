@@ -44,7 +44,6 @@ export const CharactersTable = () => {
     return () => clearTimeout(id);
   }, [searchTerm]);
 
-  // Reset page when filters change
   useEffect(() => { setCurrentPage(1); }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, itemsPerPage]);
 
   const { cycles, isLoading: cyclesLoading } = useCycles({ limit: 5 });
@@ -60,7 +59,7 @@ export const CharactersTable = () => {
     attackType: selectedAttackType,
   });
 
-  // Sync URL params
+  // Keep the URL in sync with the filters
   useEffect(() => {
     const params = new URLSearchParams();
     if (debouncedSearch.trim()) params.set('search', debouncedSearch.trim());
@@ -93,7 +92,7 @@ export const CharactersTable = () => {
     && selectedKiller === currentRotation?.killer
     && selectedAttackType === rotationAttack;
 
-  // Règle killer + attaque sur la rotation en cours (ou les retire si déjà appliqués)
+  // Toggles the killer and attack filters of the current rotation
   const applyRotationFilter = () => {
     if (!currentRotation) return;
     if (isRotationFilterActive) {
@@ -117,7 +116,6 @@ export const CharactersTable = () => {
 
   return (
     <VStack spacing={5} align="stretch" w="100%">
-      {/* ── Filtres ── */}
       <Box bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={{ base: 3, md: 4 }}>
         <Flex gap={3} direction={{ base: "column", md: "row" }} align={{ base: "stretch", md: "center" }}>
           <InputGroup flex={1}>
@@ -187,7 +185,6 @@ export const CharactersTable = () => {
         />
       </Flex>
 
-      {/* ── Grille ── */}
       {isLoading ? (
         <SimpleGrid columns={{ base: 2, sm: 3, md: 4, lg: 6 }} spacing={3}>
           {Array.from({ length: 12 }).map((_, i) => (

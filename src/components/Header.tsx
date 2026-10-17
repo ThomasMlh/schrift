@@ -21,7 +21,7 @@ import { UserMenu } from "./nav/UserMenu";
 import { ColorModeToggle, LanguageMenu } from "./nav/preferences";
 import { NAV_ITEMS, isActivePath, type NavItem } from "./nav/navConfig";
 
-// Lien de la barre du haut : l'onglet actif est souligné en violet au ras de la barre
+// Top bar link: the active tab is underlined in purple along the bar's bottom edge
 const NavLink = ({ item, active }: { item: NavItem; active: boolean }) => {
   const { t } = useTranslation();
   return (
@@ -77,7 +77,7 @@ export const Header = () => {
       zIndex={10}
       position="sticky"
       top="var(--sait, 0px)"
-      // Même teinte que bg.card, légèrement translucide sous le flou
+      // Same tint as bg.card, slightly translucent under the blur
       bg="rgba(255,255,255,0.9)"
       _dark={{ bg: "rgba(26,32,44,0.9)" }}
       sx={{ backdropFilter: "blur(12px)" }}
@@ -87,7 +87,6 @@ export const Header = () => {
       <Flex h={16} align="center" justify="space-between" gap={4}>
         <BrandLogo />
 
-        {/* Liens (bureau) */}
         <HStack as="ul" listStyleType="none" spacing={0} h="100%" flex={1} minW={0} display={{ base: "none", xl: "flex" }}>
           {primary.map((item) => (
             <Box as="li" key={item.path} h="100%">
@@ -131,7 +130,6 @@ export const Header = () => {
           )}
         </HStack>
 
-        {/* Préférences et compte (bureau) */}
         <HStack spacing={1} flexShrink={0} display={{ base: "none", xl: "flex" }}>
           <LanguageMenu />
           <ColorModeToggle />
@@ -139,7 +137,6 @@ export const Header = () => {
           <UserMenu />
         </HStack>
 
-        {/* Mobile */}
         <IconButton
           display={{ base: "inline-flex", xl: "none" }}
           aria-label={t("nav.openMenu")}

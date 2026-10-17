@@ -5,7 +5,7 @@ import { getStatIcon } from "@/utils/characterIcons";
 
 const STAT_KEYS = ["end", "atk", "def", "cct", "pre"] as const;
 
-// Stats du personnage en tuiles : icône, nom et valeur
+// Character stats as tiles: icon, name and value
 export const CharacterStats = ({ stats }: { stats: ICharacterStats }) => {
   const { t } = useTranslation();
 

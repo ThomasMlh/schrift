@@ -9,8 +9,8 @@ import {
   FiTarget, FiTrendingDown, FiTrendingUp, FiUsers, FiZap,
 } from "react-icons/fi";
 
-// Définitions des métriques du comparateur (radar et tableau) pour les personnages, les joueurs,
-// les guildes et le mode hebdomadaire. Pure configuration, sortie de ComparatorPage.
+// Comparator metric definitions (radar and table) for characters, players, guilds and the
+// weekly mode.
 
 export const ENTITY_COLORS = [
   "#3182CE",
@@ -28,7 +28,7 @@ export const parseStatValue = (val?: string): number => {
 export const useComparatorMetrics = () => {
   const { t } = useTranslation();
 
-  // Character radar & table metrics (computed from selected chars directly)
+  // Character radar and table metrics, computed from the selected characters
   const charRadarMetrics = useMemo<RadarMetricDef[]>(() => [
     { key: "atk", label: t("components.comparatorCharts.radarCharAtk"), getRawValue: (s) => parseStatValue(s.atk as string) },
     { key: "def", label: t("components.comparatorCharts.radarCharDef"), getRawValue: (s) => parseStatValue(s.def as string) },
@@ -45,7 +45,6 @@ export const useComparatorMetrics = () => {
     { label: t("components.comparatorCharts.radarCharPre"), icon: FiCrosshair, getDisplayValue: (s) => formatNumber(parseStatValue(s.pre as string)), getRawValue: (s) => parseStatValue(s.pre as string) },
   ], [t]);
 
-  // Radar metrics
   const playerRadarMetrics = useMemo<RadarMetricDef[]>(() => {
     const P = (s: Record<string, unknown>) => s as unknown as IUserStats;
     return [
@@ -68,7 +67,6 @@ export const useComparatorMetrics = () => {
     ];
   }, [t]);
 
-  // Table metrics
   const playerTableMetrics = useMemo<TableMetricDef[]>(() => {
     const P = (s: Record<string, unknown>) => s as unknown as IUserStats;
     return [

@@ -35,7 +35,7 @@ import type { ICycle } from "@/interfaces";
 const formatDate = (date: Date) =>
   date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
-/** Dates réelles de début et de fin d'un cycle, ou null s'il n'a pas de rotation datée */
+/** Actual start and end dates of a cycle, or null when it has no dated rotation */
 const cycleRange = (cycle: ICycle) => {
   const rotations = (cycle.rotations ?? []).filter((r) => r.start_date && r.end_date);
   if (!rotations.length) return null;
@@ -63,7 +63,7 @@ const CyclesPage = () => {
 
   const totalCount = pagination?.totalCount ?? cycles.length;
 
-  // Cycle en cours mis en avant (il n'apparaît alors plus dans la grille)
+  // Current cycle is featured (it is then left out of the grid)
   const featured = currentCycle;
   const featuredRotations = featured?.rotations ?? [];
   const activeIndex = currentRotation ? featuredRotations.indexOf(currentRotation) : -1;
@@ -105,7 +105,6 @@ const CyclesPage = () => {
         <Container maxW="container.xl" py={8}>
           <VStack spacing={8} align="stretch">
 
-            {/* Barre d'outils */}
             <Flex justify="space-between" align="center" gap={3} wrap="wrap">
               <ButtonGroup size="sm" isAttached variant="outline">
                 <Button
@@ -170,7 +169,6 @@ const CyclesPage = () => {
             ) : (
               <VStack spacing={10} align="stretch">
 
-                {/* Cycle en cours */}
                 {featured && (
                   <Box
                     bg="bg.card"
@@ -260,7 +258,7 @@ const CyclesPage = () => {
                   </Box>
                 )}
 
-                {/* Autres cycles, par année */}
+                {/* Other cycles, by year */}
                 {sortedYears.map((year) => (
                   <VStack key={year} spacing={4} align="stretch">
                     <Flex align="center" gap={3}>

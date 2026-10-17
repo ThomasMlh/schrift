@@ -28,7 +28,6 @@ const BANKS: { key: Bank; label: string; icon: IconType }[] = [
   { key: "affinity", label: "Affinités", icon: FiStar },
 ];
 
-// ─── Modale création / édition accessoire
 
 interface AccessoryFormModalProps {
   accessory: IAccessory | null;
@@ -167,7 +166,6 @@ const AccessoryFormModal = ({
               </HStack>
             </FormControl>
 
-            {/* Navigateur d'images */}
             {isBrowsing && (
               <Box
                 mt={1}
@@ -255,7 +253,6 @@ const AccessoryFormModal = ({
   );
 };
 
-// ─── Image card générique
 
 interface ImageCardProps {
   src: string | null;
@@ -345,7 +342,6 @@ const ImageCard = ({ src, label, sublabel, onEdit }: ImageCardProps) => {
   );
 };
 
-// ─── Onglet Accessoires
 
 const AccessoriesBank = ({ token }: { token: string | null }) => {
   const { accessories, isLoading, mutate: mutateAccessories } = useAccessories();
@@ -407,7 +403,6 @@ const AccessoriesBank = ({ token }: { token: string | null }) => {
   );
 };
 
-// ─── Onglets Killers / Catégories / Affinités
 
 type IconFn = (name: string) => string | null;
 
@@ -432,7 +427,6 @@ const MetaBank = ({
   );
 };
 
-// ─── Section principale
 
 const ImageBankSection = () => {
   const [activeBank, setActiveBank] = useState<Bank>("accessories");

@@ -11,7 +11,7 @@ import { AttackTypeBadge } from "../ui/AttackTypeBadge";
 const formatDay = (date: Date) =>
   date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "2-digit" });
 
-// Rotations restantes du cycle en cours dont le killer fait partie des killers du personnage
+// Remaining rotations of the current cycle whose killer is one of the character's killers
 export const CharacterRotations = ({ character }: { character: ICharacter }) => {
   const { t } = useTranslation();
   const { cycles, isLoading } = useCycles({ limit: 5 });

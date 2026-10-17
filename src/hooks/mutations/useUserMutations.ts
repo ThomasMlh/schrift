@@ -76,8 +76,8 @@ export const useUserMutations = () => {
     return result;
   };
 
-  // bbsId = identifiant ACTUEL du compte (URL). data.bbs_id, s'il est fourni et différent, renomme
-  // le compte (l'historique des scores suit automatiquement, cf. backend).
+  // bbsId = CURRENT account id (URL). data.bbs_id, when provided and different, renames the account
+  // (the score history follows automatically, see the API).
   const updateUserAccount = async (userId: string, bbsId: string, data: Partial<IAccountFormData>) => {
     const result = await request(`${apiUrl}/api/users/${userId}/accounts/${bbsId}`, {
       method: 'PUT',
@@ -103,8 +103,8 @@ export const useUserMutations = () => {
     return result;
   };
 
-  // Transfère un compte bbs d'un user vers un autre, comme alt (jamais principal chez la cible).
-  // L'historique des scores n'est pas réécrit : il reste lié au bbs_id (déjà dénormalisé sur chaque score).
+  // Transfers a bbs account from one user to another as an alt (never as the target's main account).
+  // The score history is not rewritten: it stays linked to the bbs_id stored on each score.
   const transferUserAccount = async (userId: string, bbsId: string, targetUserId: string) => {
     const result = await request(`${apiUrl}/api/users/${userId}/accounts/${bbsId}/transfer`, {
       method: 'POST',

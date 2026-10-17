@@ -2,7 +2,7 @@ import useSWR from 'swr';
 import type { IActivityLogEntry, IActivityResponse } from '../../interfaces';
 import { apiUrl, useAuthenticatedFetcher } from './shared';
 
-// Référence stable — voir la même précaution dans useSettings.ts.
+// Stable reference, same precaution as in useSettings.ts.
 const EMPTY_ACTIVITY: IActivityLogEntry[] = [];
 
 export const useActivity = (options?: {

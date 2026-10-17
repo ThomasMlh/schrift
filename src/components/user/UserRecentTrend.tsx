@@ -61,7 +61,6 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
 
   return (
     <VStack spacing={6} align="stretch">
-      {/* En-tête avec gradient */}
       <Box
         bgGradient={headerBg}
         borderRadius="2xl"
@@ -101,7 +100,6 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
         </VStack>
       </Box>
 
-      {/* Comparaison des moyennes */}
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
         <Box
           bg={cardBg}
@@ -152,7 +150,6 @@ export const UserRecentTrend = ({ recentTrend }: UserRecentTrendProps) => {
 
       <Divider />
 
-      {/* Détails des rotations */}
       <Box>
         <HStack spacing={2} mb={4}>
           <Text fontSize="lg" fontWeight="bold">

@@ -47,9 +47,9 @@ interface ScoreModalProps {
     setScoreValue: (value: number) => void;
     userSearchQuery: string;
     setUserSearchQuery: (query: string) => void;
-    // Compte bbs qui a réellement produit le score édité — peut différer du compte bbs principal
-    // actuel du user (score.user_id ne bouge pas quand un compte est transféré à un autre user,
-    // cf. account transfer) : sans ça, le nom/lien affichés seraient ceux du mauvais compte.
+    // bbs account that actually produced the edited score. It can differ from the user's current main
+    // account (score.user_id does not change when an account is transferred to another user); without
+    // it, the displayed name/link would belong to the wrong account.
     editingScoreBbsName?: string;
     editingScoreBbsId?: string;
     onSubmit: () => void;
@@ -86,7 +86,6 @@ export const ScoreModal = ({
     submitButtonColor = "blue",
     isEdit = false,
 }: ScoreModalProps) => {
-    // ── Données dérivées ─────────────────────────────────────────────────────
     const selectedCycle    = cycles.find((c) => c._id === selectedCycleId);
     const foundUser        = users.find((u) => u._id === selectedUserId);
     const selectedUser     = foundUser && isEdit && editingScoreBbsName
@@ -102,7 +101,6 @@ export const ScoreModal = ({
         !!selectedRotationId &&
         scoreValue >= 0;
 
-    // ── Formatage ────────────────────────────────────────────────────────────
     const formatNumber = (value: string | number): string => {
         const num = typeof value === "string" ? parseFloat(value) || 0 : value;
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -118,7 +116,6 @@ export const ScoreModal = ({
         onClose();
     };
 
-    // ── Couleurs ─────────────────────────────────────────────────────────────
     const modalBg = "bg.card";
     const borderColor = "border.subtle";
     const mutedText     = useColorModeValue("gray.500", "gray.400");
@@ -129,7 +126,6 @@ export const ScoreModal = ({
         ? getUserAvatarUrl(selectedUser) ?? undefined
         : undefined;
 
-    // Label de la rotation
     const rotationLabel = selectedRotation
         ? `#${selectedRotation.position} — ${selectedRotation.killer}`
         : null;
@@ -139,7 +135,6 @@ export const ScoreModal = ({
             <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
             <ModalContent borderRadius="xl" bg={modalBg} mx={4} overflow="hidden">
 
-                {/* Barre accent */}
                 <Box
                     h="3px"
                     bgGradient={
@@ -160,7 +155,6 @@ export const ScoreModal = ({
                 <ModalBody pb={4}>
                     <VStack spacing={4} align="stretch">
 
-                        {/* ── Joueur ─────────────────────────────────────── */}
                         <FormControl isRequired>
                             <FormLabel fontSize="sm" color={mutedText} mb={1.5}>Joueur</FormLabel>
                             {isEdit && selectedUser ? (
@@ -202,7 +196,6 @@ export const ScoreModal = ({
                             )}
                         </FormControl>
 
-                        {/* ── Cycle + Rotation ───────────────────────────── */}
                         <Box
                             bg={isEdit ? lockedBg : undefined}
                             borderRadius={isEdit ? "lg" : undefined}
@@ -273,7 +266,6 @@ export const ScoreModal = ({
 
                         <Divider borderColor={borderColor} />
 
-                        {/* ── Score ──────────────────────────────────────── */}
                         <FormControl isRequired>
                             <FormLabel fontSize="sm" color={mutedText} mb={1.5}>Score</FormLabel>
                             <NumberInput
@@ -301,7 +293,6 @@ export const ScoreModal = ({
                             </NumberInput>
                         </FormControl>
 
-                        {/* ── Prévisualisation ───────────────────────────── */}
                         {canSubmit && (
                             <Box
                                 bg={previewBg}

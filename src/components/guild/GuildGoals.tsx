@@ -23,8 +23,8 @@ const formatValue = (value: number | null, unit: IGuildGoal["unit"]) => {
   return value.toLocaleString("fr-FR");
 };
 
-// Objectifs de la guilde sur le cycle affiché : une barre de progression par objectif. Les admins
-// et les chefs/sous-chefs de la guilde peuvent les modifier.
+// Guild goals for the displayed cycle: one progress bar per goal. Admins and the guild's
+// leader/officers can edit them.
 export const GuildGoals = ({ guildId, cycleId }: GuildGoalsProps) => {
   const { t } = useTranslation();
   const toast = useToast();

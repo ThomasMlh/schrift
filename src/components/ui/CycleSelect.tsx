@@ -39,7 +39,6 @@ export const CycleSelect = ({
     variant = 'default',
     w
 }: CycleSelectProps) => {
-    // Grouper les cycles par année
     const cyclesByYear = cycles.reduce((acc, cycle) => {
         const year = cycle.year || 'Année inconnue';
         if (!acc[year]) acc[year] = [];
@@ -47,14 +46,13 @@ export const CycleSelect = ({
         return acc;
     }, {} as Record<string | number, ICycle[]>);
 
-    // Trier les années par ordre décroissant
     const sortedYears = Object.entries(cyclesByYear)
         .sort(([a], [b]) => Number(b) - Number(a));
 
-    // Créer les options avec grouping par année
+    // Options grouped by year
     const options: SelectOption[] = [];
     sortedYears.forEach(([year, cyclesInYear]) => {
-        // Trier les cycles dans chaque année par date de création décroissante (plus récent en premier)
+        // Most recently created cycle first within each year
         const sortedCyclesInYear = [...cyclesInYear].sort((a, b) => {
             if (a.created_at && b.created_at) {
                 return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -97,7 +95,6 @@ export const CycleSelect = ({
             });
     });
 
-    // Fonction pour rendre l'option sélectionnée avec l'année
     const renderSelected = (option: SelectOption) => {
         const selectedCycle = cycles.find(c => 
             (valueKey === '_id' ? c._id : c.name) === option.value

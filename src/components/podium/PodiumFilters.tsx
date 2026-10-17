@@ -47,7 +47,7 @@ interface PodiumFiltersProps {
   onGuildChange: (guildName: string) => void;
   onItemsPerPageChange: (limit: number) => void;
   onReset: () => void;
-  /** Raccourcis affichés à droite des onglets (cycle en cours, ma guilde…) */
+  /** Shortcuts shown next to the tabs (current cycle, my guild…) */
   shortcuts?: ReactNode;
 }
 
@@ -95,7 +95,6 @@ export const PodiumFilters = ({
 
   return (
     <Box bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="xl" p={{ base: 3, md: 4 }}>
-      {/* Mode d'affichage + raccourcis */}
       <Flex justify="space-between" align="center" gap={3} wrap="wrap">
         <Tabs
           index={MODE_ORDER.indexOf(displayMode)}
@@ -118,7 +117,6 @@ export const PodiumFilters = ({
 
       <Divider my={{ base: 3, md: 4 }} borderColor="border.subtle" />
 
-      {/* Filtres contextuels + réglages */}
       <Flex
         direction={{ base: "column", lg: "row" }}
         gap={3}
@@ -132,7 +130,7 @@ export const PodiumFilters = ({
           wrap="wrap"
           flex={1}
         >
-          {/* Type de classement (uniquement en mode cycle complet) */}
+          {/* Ranking type (full cycle mode only) */}
           {displayMode === "cycle" && (
             <ButtonGroup isAttached size="sm" variant="outline" w={{ base: "100%", sm: "auto" }}>
               {RANKING_ORDER.map((type) => (
@@ -142,7 +140,7 @@ export const PodiumFilters = ({
                   colorScheme={cycleRankingType === type ? "purple" : "gray"}
                   variant={cycleRankingType === type ? "solid" : "outline"}
                   aria-pressed={cycleRankingType === type}
-                  // Sur mobile, les 3 boutons se partagent la largeur et leur texte peut passer à la ligne
+                  // On mobile the three buttons share the width and their label may wrap
                   flex={{ base: 1, sm: "initial" }}
                   minW={0}
                   h="auto"

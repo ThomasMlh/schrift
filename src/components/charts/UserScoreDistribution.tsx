@@ -21,7 +21,6 @@ export const UserScoreDistribution = ({ rotations }: UserScoreDistributionProps)
   const bgColor = "bg.card";
   const textColor = useColorModeValue("#4a5568", "#cbd5e0");
 
-  // Grouper par type d'attaque
   const attackStats = rotations.reduce(
     (acc, rotation) => {
       const type = rotation.rotation_attack;

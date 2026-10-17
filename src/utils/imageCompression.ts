@@ -1,11 +1,11 @@
 /**
- * Compresse une image via Canvas pour réduire la taille du payload.
- * Utilisé avant l'envoi OCR pour rester sous la limite de 4.5MB de Vercel.
+ * Compresses an image through a canvas to reduce the payload size.
+ * Used before OCR uploads to stay under the 4.5MB Vercel limit.
  *
- * @param dataUrl - L'image en base64 data URL
- * @param maxDimension - Dimension maximale (largeur ou hauteur) en px
- * @param quality - Qualité JPEG (0 à 1)
- * @returns L'image compressée en base64 data URL (JPEG)
+ * @param dataUrl - Base64 data URL of the image
+ * @param maxDimension - Maximum width or height, in px
+ * @param quality - JPEG quality (0 to 1)
+ * @returns The compressed image as a base64 JPEG data URL
  */
 export const compressImage = (
   dataUrl: string,
@@ -17,7 +17,6 @@ export const compressImage = (
     img.onload = () => {
       let { width, height } = img;
 
-      // Redimensionner si nécessaire
       if (width > maxDimension || height > maxDimension) {
         if (width > height) {
           height = Math.round((height * maxDimension) / width);
@@ -40,7 +39,6 @@ export const compressImage = (
 
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Convertir en JPEG compressé
       const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
       resolve(compressedDataUrl);
     };

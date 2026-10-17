@@ -6,13 +6,13 @@ interface StatCardProps {
   value: string | null;
   icon?: IconType;
   isLoading?: boolean;
-  /** Explication affichée au survol */
+  /** Explanation shown on hover */
   tooltip?: string;
-  /** Dégradé Chakra de la pastille d'icône, ex. "linear(to-br, purple.500, pink.400)" */
+  /** Chakra gradient of the icon chip, e.g. "linear(to-br, purple.500, pink.400)" */
   gradient?: string;
 }
 
-/** Carte de chiffre clé : libellé + pastille d'icône dégradée en haut, valeur en grand. */
+/** Key figure card: label and gradient icon chip on top, large value. */
 export const StatCard = ({ label, value, icon, isLoading = false, tooltip, gradient = "linear(to-br, purple.500, blue.500)" }: StatCardProps) => (
   <Tooltip label={tooltip} isDisabled={!tooltip} hasArrow placement="top">
     <Box

@@ -43,7 +43,6 @@ const CharacterDetailPage = () => {
   const toast = useToast();
   const { t } = useTranslation();
 
-  // Utiliser useSWR pour le personnage (cache automatique)
   const { character, isLoading, error: fetchError } = useCharacter(id);
   const { builds: characterBuilds, isLoading: buildsLoading } = useBuilds({
     character_id: id,
@@ -116,7 +115,7 @@ const CharacterDetailPage = () => {
     );
   }
 
-  // Génération des métadonnées SEO dynamiques
+  // Dynamic SEO metadata
   const generateSEOData = () => {
     const title = `${character.name} - Détails et Statistiques | Schrift BBS`;
     const description = `Découvrez ${character.name} de Bleach Brave Souls : statistiques, affinité ${character.affinity || ""}, type d'attaque ${character.attack_type || ""}, catégories et informations complètes.`;
@@ -215,9 +214,9 @@ const CharacterDetailPage = () => {
             { label: character.name },
           ]} />
 
-          {/* En-tête : artwork en bannière, vignette, nom et badges */}
+          {/* Header: artwork banner, thumbnail, name and badges */}
           <Box bg="bg.card" borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" overflow="hidden" boxShadow="md">
-            {/* Artwork entier (contain) sur un fond du même artwork flouté, pour ne rien rogner */}
+            {/* Full artwork (contain) over a blurred copy of itself, so nothing is cropped */}
             <Box
               h={{ base: "180px", sm: "240px", md: "320px" }}
               bgGradient="linear(to-r, purple.600, blue.500)"
@@ -303,14 +302,12 @@ const CharacterDetailPage = () => {
           </Box>
 
           <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={5} alignItems="start">
-            {/* Stats */}
             {character.stats && (
               <SectionCard title={t("pages.characterDetail.headingStats")} icon={FiActivity}>
                 <CharacterStats stats={character.stats} />
               </SectionCard>
             )}
 
-            {/* Profil de combat */}
             <SectionCard title={t("pages.characterDetail.headingCombat")} icon={FiShield}>
               <VStack align="stretch" spacing={4}>
                 {(character.killers?.length ?? 0) > 0 && (
@@ -350,7 +347,7 @@ const CharacterDetailPage = () => {
             </SectionCard>
           </Grid>
 
-          {/* Rotations du cycle en cours où ses killers servent */}
+          {/* Rotations of the current cycle where its killers are useful */}
           {(character.killers?.length ?? 0) > 0 && (
             <SectionCard title={t("pages.characterDetail.headingRotations")} icon={FiCrosshair}>
               <CharacterRotations character={character} />

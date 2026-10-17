@@ -37,7 +37,7 @@ const PageFallback = () => (
   </Flex>
 );
 
-// Composant pour protéger les routes admin (admins OU chefs/sous-chefs)
+// Restricts a route to admins and guild leaders/officers
 const ProtectedRoute: React.FC<IProtectedRoute> = ({
   isAuthenticated,
   isAdmin,
@@ -61,7 +61,7 @@ const ProtectedRoute: React.FC<IProtectedRoute> = ({
   return <>{children}</>;
 };
 
-// Composant pour protéger les routes accessibles à tout utilisateur connecté
+// Restricts a route to any logged-in user
 const AuthenticatedRoute: React.FC<{ isAuthenticated: boolean; isLoading: boolean; children: React.ReactNode }> = ({
   isAuthenticated,
   isLoading,
@@ -151,15 +151,13 @@ const AppRoutes = () => {
   );
 };
 
-// Masque le header/footer du site quand la page est chargée en mode capture
-// (?capture=1), utilisé par le bot Discord pour screenshoter uniquement le
-// contenu de la page (ex: podium), sans la nav ni le footer autour.
+// Hides the site header and footer in capture mode (?capture=1), used by the Discord bot
+// to screenshot only the page content (e.g. the podium).
 const AppShell = () => {
   const location = useLocation();
   const { isAuthLoading } = useAuth();
-  // Capturé une seule fois au montage : certaines pages (ex: PodiumPage) réécrivent
-  // l'URL via setSearchParams() sans préserver "capture", ce qui ferait réapparaître
-  // le header/footer en cours de chargement si on relisait location.search à chaque render.
+  // Read once on mount: some pages (e.g. PodiumPage) rewrite the URL through setSearchParams()
+  // without keeping "capture", which would bring the header back while the page loads.
   const isCaptureRef = useRef(new URLSearchParams(location.search).get("capture") === "1");
   const isCapture = isCaptureRef.current;
 
@@ -167,8 +165,8 @@ const AppShell = () => {
     return <AppRoutes />;
   }
 
-  // Session en cours de restauration : on attend le profil plutôt que d'afficher un header
-  // à moitié rempli (pseudo manquant).
+  // While the session is being restored, wait for the profile instead of rendering
+  // a half-filled header.
   if (isAuthLoading) {
     return (
       <Flex minH="100vh" align="center" justify="center">

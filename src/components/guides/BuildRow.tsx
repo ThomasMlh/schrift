@@ -28,8 +28,8 @@ const formatDate = (date?: string) =>
 
 const thumb = (id?: string) => (id ? `${bucketUrl}/characters/thumb/${id}.png` : undefined);
 
-// Une ligne de la liste des builds : rotation à gauche, équipe au centre, auteur et actions à droite.
-// Sur mobile, les trois zones s'empilent.
+// Build list row: rotation on the left, team in the middle, author and actions on the right.
+// The three areas stack on mobile.
 export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit }: BuildRowProps) => {
   const { t } = useTranslation();
   const team = [...(build.team ?? [])].sort((a, b) => a.position - b.position).slice(0, 3);
@@ -50,7 +50,6 @@ export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit }: BuildRowP
       _hover={{ bg: "bg.hover" }}
       _focusVisible={{ outline: "2px solid", outlineColor: "purple.400", outlineOffset: "-2px" }}
     >
-      {/* Rotation */}
       <Box w={{ md: "150px" }} flexShrink={0}>
         {rotation ? (
           <>
@@ -77,7 +76,6 @@ export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit }: BuildRowP
         )}
       </Box>
 
-      {/* Équipe */}
       <Box flex={1} minW={0}>
         <HStack spacing={{ base: 3, md: 4 }} align="flex-start">
           {team.map((member) => (
@@ -135,7 +133,6 @@ export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit }: BuildRowP
         )}
       </Box>
 
-      {/* Auteur et actions */}
       <Flex
         w={{ md: "190px" }}
         flexShrink={0}

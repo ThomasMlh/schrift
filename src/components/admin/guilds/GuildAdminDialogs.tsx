@@ -9,7 +9,6 @@ import { useUsers } from "@/hooks/useAPI";
 import { UserSearchSelect } from "@/components/ui/UserSearchSelect";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 
-// ── Nom de guilde (création ou renommage) ──────────────────────────────────────
 
 interface GuildNameModalProps {
   isOpen: boolean;
@@ -63,7 +62,6 @@ export const GuildNameModal = ({ isOpen, onClose, title, submitLabel, initialNam
   );
 };
 
-// ── Ajout d'un membre ──────────────────────────────────────────────────────────
 
 interface AddMemberModalProps {
   isOpen: boolean;
@@ -76,7 +74,7 @@ interface AddMemberModalProps {
 export const AddMemberModal = ({ isOpen, onClose, guild, guilds, onSubmit }: AddMemberModalProps) => {
   const [userId, setUserId] = useState("");
   const [search, setSearch] = useState("");
-  // Recherche côté API (avec un léger délai) : la liste complète dépasse la taille d'une page
+  // Server-side search (debounced): the full list is larger than one page
   const [debouncedSearch, setDebouncedSearch] = useState("");
   useEffect(() => {
     const id = setTimeout(() => setDebouncedSearch(search.trim()), 300);
@@ -151,7 +149,6 @@ export const AddMemberModal = ({ isOpen, onClose, guild, guilds, onSubmit }: Add
   );
 };
 
-// ── Confirmation générique ─────────────────────────────────────────────────────
 
 interface ConfirmDialogProps {
   isOpen: boolean;

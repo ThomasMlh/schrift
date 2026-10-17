@@ -88,7 +88,6 @@ export const UserTypeAnalysis = ({ stats }: UserTypeAnalysisProps) => {
     <VStack spacing={6} align="stretch">
       <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
 
-        {/* Performance par type d'attaque */}
         {hasAttackData && (
           <Card bg={cardBg} borderRadius="xl" boxShadow="md">
             <CardBody>
@@ -139,7 +138,6 @@ export const UserTypeAnalysis = ({ stats }: UserTypeAnalysisProps) => {
           </Card>
         )}
 
-        {/* Performance par altération */}
         {hasAlterationData && (
           <Card bg={cardBg} borderRadius="xl" boxShadow="md">
             <CardBody>

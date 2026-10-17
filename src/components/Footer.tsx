@@ -14,7 +14,7 @@ export const Footer = () => {
   const { isAdmin, isGuildManager } = useAuth();
   const { current, setLanguage, languages } = useLanguage();
 
-  // L'accueil est déjà le logo ; l'admin reste dans le menu du compte
+  // Home is already the logo; admin stays in the account menu
   const links = NAV_ITEMS.filter((item) => item.path !== "/" && !item.adminOrGuildManagerOnly);
   const canSeeAdmin = isAdmin || isGuildManager;
 
@@ -22,14 +22,12 @@ export const Footer = () => {
     <Box as="footer" w="100%" mt="auto" bg="bg.card" borderTopWidth="1px" borderColor="border.subtle">
       <Box maxW="container.xl" mx="auto" px={{ base: 4, md: 6 }} pt={{ base: 8, md: 10 }} pb={6}>
         <Flex direction={{ base: "column", lg: "row" }} gap={{ base: 8, lg: 16 }}>
-          {/* Marque */}
           <VStack align="start" spacing={3} maxW={{ lg: "sm" }}>
             <BrandLogo label="Schrift BBS" />
             <Text fontSize="sm" color="text.secondary">{t("footer.tagline")}</Text>
             <Text fontSize="xs" color="text.muted" lineHeight="tall">{t("footer.disclaimer")}</Text>
           </VStack>
 
-          {/* Liens */}
           <SimpleGrid columns={{ base: 2, sm: 3 }} spacingX={8} spacingY={6} flex={1}>
             {GROUPS.map((group) => (
               <VStack key={group} as="nav" align="start" spacing={2.5} aria-label={t(NAV_GROUP_LABELS[group])}>

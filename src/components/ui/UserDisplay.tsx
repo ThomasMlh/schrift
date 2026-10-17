@@ -76,8 +76,8 @@ export const UserDisplay = ({
         {asLink ? (
           <CustomLink
             to={user.bbs_name
-              // bbs_name n'est pas garanti unique (deux comptes peuvent avoir le même pseudo,
-              // notamment des alts d'un même joueur) : ?compte=<bbs_id> cible le compte exact.
+              // bbs_name is not guaranteed unique (two accounts can share a name, e.g. alts of the same player):
+              // ?compte=<bbs_id> targets the exact account.
               ? `/joueur/${encodeURIComponent(user.bbs_name)}${user.bbs_id ? `?compte=${encodeURIComponent(user.bbs_id)}` : ""}`
               : undefined}
             text={user.bbs_name || user.global_name}

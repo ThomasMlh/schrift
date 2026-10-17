@@ -9,7 +9,7 @@ import { KillerIcon } from "../ui/KillerIcon";
 
 const MAX_KILLERS = 3;
 
-// Carte de la liste des personnages : grande vignette, nom, affinité et killers
+// Character list card: large thumbnail, name, affinity and killers
 export const CharacterCard = ({ character }: { character: ICharacter }) => {
   const { t } = useTranslation();
   const killers = character.killers ?? [];

@@ -84,18 +84,17 @@ const OCRScoreModal = ({
 
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Étape 1 : Sélection du contexte
+  // Step 1: context selection
   const [selectedGuildId, setSelectedGuildId] = useState("");
   const [selectedCycleId, setSelectedCycleId] = useState("");
   const [selectedRotationId, setSelectedRotationId] = useState("");
   const [selectedScreenshotterId, setSelectedScreenshotterId] = useState("");
 
-  // Étape 3 : Résultats OCR
+  // Step 3: OCR results
   const [ocrResults, setOcrResults] = useState<ScreenshotOCRResult[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Hooks
   const { members: guildMembers = [] } = useGuildMembers(
     selectedGuildId || undefined,
     true
@@ -208,7 +207,6 @@ const OCRScoreModal = ({
         <ModalCloseButton />
         <ModalBody pb={6} px={{ base: 3, md: 6 }}>
           <VStack spacing={{ base: 4, md: 6 }} align="stretch">
-            {/* Stepper */}
             <Stepper index={currentStep} colorScheme="blue" size="sm">
               {steps.map((step, index) => (
                 <Step key={index}>
@@ -228,7 +226,6 @@ const OCRScoreModal = ({
               ))}
             </Stepper>
 
-            {/* Contenu selon l'étape */}
             {currentStep === 0 && (
               <OCRContextSelection
                 cycles={cycles}

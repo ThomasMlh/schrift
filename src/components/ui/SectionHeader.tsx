@@ -4,15 +4,14 @@ import type { IconType } from "react-icons";
 
 interface SectionHeaderProps {
   title: string;
-  // Pictogramme affiché avant le titre
+  // Icon shown before the title
   icon?: IconType;
   description?: ReactNode;
-  // Boutons d'action alignés à droite (sous le titre sur mobile)
+  // Right-aligned action buttons (below the title on mobile)
   actions?: ReactNode;
 }
 
-// En-tête commun des sections de l'administration : titre en dégradé de la marque, description
-// et actions, pour que toutes les sections aient le même rendu.
+// Shared admin section header: title in the brand gradient, description and actions.
 export const SectionHeader = ({ title, icon, description, actions }: SectionHeaderProps) => (
   <Flex
     justify="space-between"

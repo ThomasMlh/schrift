@@ -36,14 +36,13 @@ const CycleDetailPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  // Résolution slug → _id (avec fallback sur l'ID brut pour compatibilité)
+  // Resolve the slug into its _id (falls back to the raw id for compatibility)
   const { cycles } = useCycles({ limit: 100 });
   const resolvedId = useMemo(() => {
     if (!cycles.length) return undefined;
     return cycleFromSlug(cycles, id!)?._id ?? id;
   }, [cycles, id]);
 
-  // Utiliser useSWR pour le cycle (cache automatique)
   const { cycle, isLoading, error: fetchError } = useCycle(resolvedId);
   const [error, setError] = useState<string | null>(null);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -127,7 +126,6 @@ const CycleDetailPage = () => {
         <Container maxW="container.xl" py={8}>
           <VStack spacing={8} align="stretch">
 
-            {/* Breadcrumbs + bouton retour */}
             <Box>
               <Breadcrumbs items={[
                 { label: t("nav.home"), to: "/" },
@@ -146,7 +144,6 @@ const CycleDetailPage = () => {
               </Button>
             </Box>
 
-            {/* Stats strip */}
             {cycle.rotations && cycle.rotations.length > 0 && (
               <Box
                 bg={statBg}
@@ -213,7 +210,6 @@ const CycleDetailPage = () => {
               </Box>
             )}
 
-            {/* Calendrier */}
             <Box>
               <Button
                 leftIcon={<Icon as={FiGrid} />}
@@ -229,7 +225,6 @@ const CycleDetailPage = () => {
               {showCalendar && <RotationCalendar initialMonth={cycleInitialMonth} />}
             </Box>
 
-            {/* Liste des rotations */}
             {cycle.rotations && cycle.rotations.length > 0 && (
               <VStack spacing={2} align="stretch">
                 <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wider" mb={1}>
@@ -254,7 +249,6 @@ const CycleDetailPage = () => {
                       bg: rowHoverBg,
                     }}
                   >
-                    {/* Accent bar */}
                     <Box
                       position="absolute"
                       left={0}
@@ -265,7 +259,7 @@ const CycleDetailPage = () => {
                     />
 
                     <Box pl={5} pr={4} py={3}>
-                      {/* Ligne 1 : position + lien + badge période */}
+                      {/* Line 1: position, link and period badge */}
                       <Flex justify="space-between" align="center" mb={2}>
                         <HStack spacing={2}>
                           <Text fontSize="xs" fontWeight="bold" color="purple.500" minW="24px" textAlign="right">
@@ -289,9 +283,8 @@ const CycleDetailPage = () => {
                         </Badge>
                       </Flex>
 
-                      {/* Ligne 2 : infos */}
+                      {/* Line 2: details */}
                       <Flex gap={2} flexWrap="wrap">
-                        {/* Killer */}
                         <Box flex={1} minW="110px" bg={rowBg} px={3} py={1.5} borderRadius="lg">
                           <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide">
                             {t("pages.cycleDetail.fieldKiller")}
@@ -301,7 +294,6 @@ const CycleDetailPage = () => {
                           </Text>
                         </Box>
 
-                        {/* Attack */}
                         <Box flexShrink={0} bg={rowBg} px={3} py={1.5} borderRadius="lg">
                           <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" mb={1}>
                             {t("pages.cycleDetail.fieldAttack")}
@@ -314,7 +306,6 @@ const CycleDetailPage = () => {
                           </HStack>
                         </Box>
 
-                        {/* Alteration */}
                         <Box flexShrink={0} bg={rowBg} px={3} py={1.5} borderRadius="lg">
                           <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" mb={1}>
                             {t("pages.cycleDetail.fieldAlteration")}
@@ -322,7 +313,6 @@ const CycleDetailPage = () => {
                           <AlterationImage alteration={rotation.alteration} size="20px" showLabel={true} />
                         </Box>
 
-                        {/* Dates */}
                         <Box flexShrink={0} bg={rowBg} px={3} py={1.5} borderRadius="lg">
                           <HStack spacing={1.5} mb={0.5}>
                             <Icon as={FiCalendar} boxSize={3} color="green.500" />

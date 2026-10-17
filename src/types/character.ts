@@ -1,4 +1,4 @@
-// Personnages et compétences
+// Characters and skills
 import type { IPagination } from "./common";
 
 export interface ICharacter {
@@ -35,7 +35,6 @@ export interface ICharactersResponse {
   pagination: IPagination;
 }
 
-// Interface pour les skills
 export interface ISkill {
   _id: string;
   name: string;
@@ -43,14 +42,14 @@ export interface ISkill {
   icon?: string;
 }
 
-// Album de personnages d'un compte bbs : <character _id> → spé (1 dès qu'il est possédé, jusqu'à 5)
+// Character album of a bbs account: <character _id> -> spec (1 once owned, up to 5)
 export interface IAlbum {
   bbs_id: string;
   characters: Record<string, number>;
   updated_at: string | null;
 }
 
-// Entrée légère du catalogue de personnages utilisé par la grille de l'album
+// Lightweight character catalog entry used by the album grid
 export interface IAlbumCharacter {
   _id: string;
   name: string;

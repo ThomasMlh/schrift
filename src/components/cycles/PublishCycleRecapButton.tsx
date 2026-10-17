@@ -22,7 +22,7 @@ const MEDALS: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
 const formatNumber = (n: number) => n.toLocaleString("fr-FR");
 const formatPercent = (n: number) => `${n > 0 ? "+" : ""}${n.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
 
-// Aperçu texte du bilan, au plus près de l'embed envoyé par le bot (format_cycle_recap).
+// Text preview of the recap, as close as possible to the embed sent by the bot (format_cycle_recap).
 const RecapPreview = ({ recap }: { recap: ICycleRecap }) => {
   const evolution = recap.guild_average != null && recap.previous_guild_average
     ? ((recap.guild_average - recap.previous_guild_average) / recap.previous_guild_average) * 100
@@ -56,8 +56,8 @@ const RecapPreview = ({ recap }: { recap: ICycleRecap }) => {
   );
 };
 
-// Publie manuellement le récap de fin d'un cycle dans le salon général d'une guilde ou de toutes :
-// capture du podium final (même mécanisme que le récap automatique par rotation) et/ou bilan écrit.
+// Manually publishes a cycle's end recap in the general channel of one guild or all of them:
+// final podium capture (same mechanism as the automatic rotation recap) and/or written summary.
 export const PublishCycleRecapButton: React.FC<PublishCycleRecapButtonProps> = ({ cycle }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { guilds } = useGuilds(true);

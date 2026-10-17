@@ -10,6 +10,6 @@ export const formatScore = (score: number | undefined | null): string => {
   return formatNumber(score);
 };
 
-/** Chiffres groupés par 3 avec des virgules : 612480300 → "612,480,300" (saisie groupée, builds). */
+/** Digits grouped by 3 with commas: 612480300 -> "612,480,300" (bulk entry, builds). */
 export const formatWithCommas = (value: number | string): string =>
   String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",");

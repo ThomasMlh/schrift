@@ -1,3 +1,3 @@
-// Point d'entrée historique des types : réexporte src/types/ (découpé par thème) pour que les
-// imports existants depuis "@/interfaces" continuent de fonctionner.
+// Legacy entry point for types: re-exports src/types/ (split by domain) so existing imports from
+// "@/interfaces" keep working.
 export type * from "./types";

@@ -34,8 +34,7 @@ export const useGuildMutations = () => {
     return result;
   };
 
-  // channelId n'est pas forcément celui déjà enregistré : sert à tester une valeur avant
-  // de l'avoir sauvegardée.
+  // channelId is not necessarily the saved one: allows testing a value before saving it.
   const testGuildNotification = async (guildId: string, channelId: string) => {
     return request(`${apiUrl}/api/guildes/${guildId}/test-notification`, {
       method: 'POST',
@@ -69,7 +68,7 @@ export const useGuildMutations = () => {
     return result;
   };
 
-  // Remplace les objectifs d'une guilde sur un cycle (liste vide = aucun objectif)
+  // Replaces a guild's goals on a cycle (empty list = no goals)
   const setGuildGoals = async (guildId: string, cycleId: string, goals: { type: GuildGoalType; target: number }[]) => {
     const result = await request(`${apiUrl}/api/guildes/${guildId}/goals`, {
       method: 'PUT',

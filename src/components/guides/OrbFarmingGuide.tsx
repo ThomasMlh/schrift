@@ -56,14 +56,13 @@ const OrbFarmingGuide = () => {
     return null;
   }
 
-  // Sources de la plus rentable à la moins rentable
+  // Most to least profitable sources
   const sources = [...orbData.data].sort((x: OrbSource, y: OrbSource) => y.amount - x.amount);
   const total = orbData.totalOrbes || sources.reduce((sum, src) => sum + src.amount, 0);
   const share = (amount: number) => (total ? Math.round((amount / total) * 100) : 0);
 
   return (
     <VStack spacing={5} align="stretch">
-      {/* En-tête : explication et total mensuel */}
       <Flex
         bg="bg.card"
         borderRadius="xl"
@@ -95,7 +94,6 @@ const OrbFarmingGuide = () => {
         </HStack>
       </Flex>
 
-      {/* Sources */}
       <VStack align="stretch" spacing={2}>
         {sources.map((source: OrbSource, index: number) => {
           const isBest = index === 0;

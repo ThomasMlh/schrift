@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Routes à prérender avec leurs métadonnées SEO et contenu statique
+// Routes to prerender, with their SEO metadata and static content
 const routes = [
   {
     path: 'index.html',
@@ -213,11 +213,9 @@ const routes = [
 ];
 
 function generatePrerenderedHTML(route) {
-  // Lire le template HTML de base
   const templatePath = join(__dirname, '..', 'dist', 'index.html');
   let html = readFileSync(templatePath, 'utf-8');
 
-  // Remplacer les métadonnées SEO principales
   html = html.replace(
     /<title>.*?<\/title>/,
     `<title>${route.title}</title>`
@@ -233,7 +231,6 @@ function generatePrerenderedHTML(route) {
     `<meta name="keywords" content="${route.keywords}">`
   );
 
-  // Mettre à jour Open Graph
   html = html.replace(
     /<meta property="og:title" content="[^"]*"[^>]*>/,
     `<meta property="og:title" content="${route.title}">`
@@ -253,7 +250,6 @@ function generatePrerenderedHTML(route) {
     `<meta property="og:url" content="${url}">`
   );
 
-  // Mettre à jour Twitter
   html = html.replace(
     /<meta name="twitter:title" content="[^"]*"[^>]*>/,
     `<meta name="twitter:title" content="${route.title}">`
@@ -264,13 +260,12 @@ function generatePrerenderedHTML(route) {
     `<meta name="twitter:description" content="${route.description}">`
   );
 
-  // Mettre à jour canonical URL
   html = html.replace(
     /<link rel="canonical" href="[^"]*"[^>]*>/,
     `<link rel="canonical" href="${url}">`
   );
 
-  // Ajouter un indicateur pour le prerendering
+  // Flags the page as prerendered
   html = html.replace(
     '</head>',
     '  <meta name="prerender-status-code" content="200">\n  </head>'
@@ -287,10 +282,8 @@ function prerender() {
       const html = generatePrerenderedHTML(route);
       const outputPath = join(__dirname, '..', 'dist', route.path);
       
-      // Créer le dossier si nécessaire
       mkdirSync(dirname(outputPath), { recursive: true });
       
-      // Écrire le fichier
       writeFileSync(outputPath, html, 'utf-8');
       
       console.log(`✅ Généré: ${route.path}`);
