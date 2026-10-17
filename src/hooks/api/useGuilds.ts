@@ -70,10 +70,14 @@ export const useAllGuildsMembers = (guilds: IGuild[], authenticated: boolean = t
   return { membersByGuild: data || {}, isLoading, error, refresh: mutate };
 };
 
-export const useGuildlessUsers = (enabled: boolean = false) => {
+// The API caps a page at 200 accounts: search server-side rather than loading everything
+export const useGuildlessUsers = (enabled: boolean = false, search: string = "", limit: number = 200) => {
   const authenticatedFetcher = useAuthenticatedFetcher();
-  const url = enabled ? `${apiUrl}/api/users/without-guild?limit=1000` : null;
-  const { data, error, isLoading } = useSWR(url, authenticatedFetcher);
+  const term = search.trim();
+  const url = enabled
+    ? `${apiUrl}/api/users/without-guild?limit=${limit}${term ? `&search=${encodeURIComponent(term)}` : ""}`
+    : null;
+  const { data, error, isLoading } = useSWR(url, authenticatedFetcher, { keepPreviousData: true });
 
   return {
     users: (data?.users || []) as IUser[],
