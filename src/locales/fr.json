@@ -267,7 +267,7 @@
       "goalHelp_average": "Moyenne des scores de la guilde sur le cycle (en points)",
       "goalHelp_clear_rate": "Part des scores à 617M ou plus (en %)",
       "goalHelp_records": "Nombre de records personnels battus par les membres",
-      "goalHelp_participation": "Part des rotations terminées jouées par les membres (en %)",
+      "goalHelp_participation": "Part des rotations terminées jouées par les membres depuis leur arrivée dans la guilde (en %)",
       "pickGuild": "Choisir une guilde",
       "summary": "{{guilds}} guildes · {{members}} membres",
       "cycleLabel": "Cycle affiché",

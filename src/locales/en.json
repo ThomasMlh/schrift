@@ -267,7 +267,7 @@
       "goalHelp_average": "Average score of the guild over the cycle (points)",
       "goalHelp_clear_rate": "Share of scores at 617M or more (%)",
       "goalHelp_records": "Number of personal records beaten by members",
-      "goalHelp_participation": "Share of finished rotations played by members (%)",
+      "goalHelp_participation": "Share of finished rotations played by members since they joined the guild (%)",
       "pickGuild": "Pick a guild",
       "summary": "{{guilds}} guilds · {{members}} members",
       "cycleLabel": "Displayed cycle",
