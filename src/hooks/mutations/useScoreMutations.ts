@@ -79,5 +79,18 @@ export const useScoreMutations = () => {
     return data;
   };
 
-  return { createScore, updateScore, deleteScore, createBulkScores, transferRotation, transferScoreAccount, reviewScoreAnomaly };
+  // The member joined the guild after this rotation: it and the earlier ones are no longer missing
+  const markJoinedAfterRotation = async (guildId: string, params: { bbs_id: string; cycle_id: string; rotation_id: string }) => {
+    const result = await request(`${apiUrl}/api/scores/missing/joined-after?guild_id=${encodeURIComponent(guildId)}`, {
+      method: 'POST',
+      body: JSON.stringify(params),
+    }, { fallbackError: "Erreur lors de l'enregistrement de la date d'arrivée" });
+    await invalidateKeys(`${apiUrl}/api/scores`);
+    return result;
+  };
+
+  return {
+    createScore, updateScore, deleteScore, createBulkScores, transferRotation, transferScoreAccount, reviewScoreAnomaly,
+    markJoinedAfterRotation,
+  };
 };

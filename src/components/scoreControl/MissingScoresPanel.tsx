@@ -1,8 +1,9 @@
 import {
+  AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
   Alert, AlertIcon, Badge, Box, Button, Flex, HStack, NumberInput, NumberInputField, Skeleton, Text, Tooltip, VStack,
   useToast,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useCycles, useMissingScores } from "@/hooks/useAPI";
 import { useScoreMutations } from "@/hooks/useAPIMutations";
 import type { IMissingScoreMember, IMissingScoreRotation } from "@/interfaces";
@@ -20,10 +21,12 @@ interface MissingScoresPanelProps {
 export const MissingScoresPanel = ({ guildId }: MissingScoresPanelProps) => {
   const toast = useToast();
   const { cycles } = useCycles({ authenticated: true });
-  const { createScore } = useScoreMutations();
+  const { createScore, markJoinedAfterRotation } = useScoreMutations();
   const [cycleId, setCycleId] = useState("");
   const [values, setValues] = useState<Record<string, string>>({});
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [pendingJoin, setPendingJoin] = useState<{ rotation: IMissingScoreRotation; member: IMissingScoreMember } | null>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
   const { data, isLoading, error } = useMissingScores(guildId, cycleId || undefined, !!guildId);
 
   const cardBg = "bg.card";
@@ -61,14 +64,31 @@ export const MissingScoresPanel = ({ guildId }: MissingScoresPanelProps) => {
     }
   };
 
+  const markNotYetMember = async () => {
+    if (!data?.cycle || !pendingJoin) return;
+    const { rotation, member } = pendingJoin;
+    setPendingJoin(null);
+    const name = member.bbs_name ?? member.bbs_id;
+    const key = `${rotation.rotation_id}|${member.bbs_id}`;
+    setSavingKey(key);
+    try {
+      await markJoinedAfterRotation(guildId, { bbs_id: member.bbs_id, cycle_id: data.cycle._id, rotation_id: rotation.rotation_id });
+      toast({ title: `${name} retiré des rotations précédant son arrivée`, status: "success", duration: 2500 });
+    } catch (err) {
+      toast({ title: err instanceof Error ? err.message : "Erreur lors de l'enregistrement", status: "error" });
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
   const totalMissing = data?.rotations.reduce((sum, r) => sum + r.missing.length, 0) ?? 0;
 
   return (
     <VStack align="stretch" spacing={4}>
       <Flex justify="space-between" align={{ base: "stretch", md: "center" }} direction={{ base: "column", md: "row" }} gap={3}>
         <Text fontSize="sm" color={mutedText} maxW="2xl">
-          Membres actuels de la guilde sans score sur les rotations terminées. Pour la 2e rotation d'une semaine,
-          saisis le <b>cumul de la semaine</b> affiché en jeu, comme dans la saisie groupée.
+          Membres actuels de la guilde sans score sur les rotations terminées depuis leur arrivée. Pour la 2e rotation
+          d'une semaine, saisis le <b>cumul de la semaine</b> affiché en jeu, comme dans la saisie groupée.
         </Text>
         <Box minW={{ md: "220px" }}>
           <CustomSelect value={cycleId} onChange={setCycleId} options={cycleOptions} allowDeselect={false} size="sm" />
@@ -136,6 +156,11 @@ export const MissingScoresPanel = ({ guildId }: MissingScoresPanelProps) => {
                           Miss
                         </Button>
                       </Tooltip>
+                      <Tooltip label="Le joueur a rejoint la guilde après cette rotation : elle et les précédentes ne comptent plus pour lui" hasArrow>
+                        <Button size="sm" variant="ghost" isDisabled={savingKey === key} onClick={() => setPendingJoin({ rotation, member })}>
+                          Pas encore arrivé
+                        </Button>
+                      </Tooltip>
                     </Flex>
                   );
                 })}
@@ -144,6 +169,23 @@ export const MissingScoresPanel = ({ guildId }: MissingScoresPanelProps) => {
           ))}
         </VStack>
       )}
+
+      <AlertDialog isOpen={!!pendingJoin} leastDestructiveRef={cancelRef} onClose={() => setPendingJoin(null)} isCentered>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="md">
+              {pendingJoin && `${pendingJoin.member.bbs_name ?? pendingJoin.member.bbs_id} n'était pas encore dans la guilde ?`}
+            </AlertDialogHeader>
+            <AlertDialogBody fontSize="sm">
+              {pendingJoin && `La R${pendingJoin.rotation.position} et les rotations précédentes ne seront plus comptées comme manquantes pour ce joueur.`}
+            </AlertDialogBody>
+            <AlertDialogFooter gap={2}>
+              <Button ref={cancelRef} size="sm" variant="ghost" onClick={() => setPendingJoin(null)}>Annuler</Button>
+              <Button size="sm" colorScheme="purple" onClick={markNotYetMember}>Confirmer</Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </VStack>
   );
 };
