@@ -28,7 +28,7 @@ export const KillerFilter = ({
   const { t } = useTranslation();
   const theme = useSelectTheme(variant);
   return (
-    <Menu>
+    <Menu matchWidth>
       <MenuButton 
         as={Button} 
         rightIcon={<ChevronDownIcon />}
