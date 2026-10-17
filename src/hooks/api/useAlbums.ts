@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import type { IAlbum, IAlbumCharacter } from '../../interfaces';
+import type { IAlbum, IAlbumCharacter, IGuildAlbumMember } from '../../interfaces';
 import { apiUrl, fetcher } from './shared';
 
 export const albumUrl = (bbsId: string) => `${apiUrl}/api/albums/${encodeURIComponent(bbsId)}`;
@@ -13,6 +13,16 @@ export const useAlbum = (bbsId?: string) => {
   );
 
   return { album: data?.data, isLoading, error, mutate };
+};
+
+export const useGuildAlbums = (guildId?: string) => {
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: IGuildAlbumMember[] }>(
+    guildId ? `${apiUrl}/api/albums/guild/${encodeURIComponent(guildId)}` : null,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
+
+  return { members: data?.data || [], isLoading, error };
 };
 
 // Full, lightweight character catalog for the album grid

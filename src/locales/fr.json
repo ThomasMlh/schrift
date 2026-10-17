@@ -273,7 +273,20 @@
       "cycleLabel": "Cycle affiché",
       "tabOverview": "Aperçu",
       "tabMembers": "Membres",
-      "tabStats": "Statistiques"
+      "tabStats": "Statistiques",
+      "tabAlbum": "Album",
+      "albumTitle": "Album de la guilde",
+      "albumSubtitle": "Qui possède quel personnage. Clique sur un personnage pour voir ses possesseurs et leur spé.",
+      "albumFilled": "/ {{total}} comptes ont rempli leur album",
+      "albumCovered": "{{covered}} / {{total}} persos possédés",
+      "albumWithout": "Sans album :",
+      "albumNobodyFilled": "Aucun membre n'a encore rempli son album. Chacun peut le faire depuis l'onglet Album de sa page joueur.",
+      "albumNoOwner": "Personne dans la guilde ne le possède.",
+      "albumSpe": "Spé {{spe}}",
+      "albumUnknown_one": "{{count}} compte n'a pas rempli son album.",
+      "albumUnknown_other": "{{count}} comptes n'ont pas rempli leur album.",
+      "albumFilter_owned": "Possédés",
+      "albumFilter_missing": "Personne"
     },
     "user": {
       "loadingProfile": "Chargement du profil...",
