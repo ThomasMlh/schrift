@@ -35,6 +35,7 @@ import type { IBuild } from "../../interfaces";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 import { bucketUrl } from "@/utils/apiRequest";
+import { BuildGuildPlayers } from "@/components/guides/BuildGuildPlayers";
 
 interface BuildDetailModalProps {
   isOpen: boolean;
@@ -419,6 +420,8 @@ export const BuildDetailModal = ({
                   })}
                 </Grid>
               </Box>
+
+              <BuildGuildPlayers build={build} />
 
               {build.description && (
                 <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="border.subtle">

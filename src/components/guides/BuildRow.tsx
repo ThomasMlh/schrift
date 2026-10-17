@@ -8,6 +8,8 @@ import { bucketUrl } from "@/utils/apiRequest";
 import { UserDisplay } from "../ui/UserDisplay";
 import { AttackTypeBadge } from "../ui/AttackTypeBadge";
 import { AlterationImage } from "../ui/AlterationImage";
+import { BuildOwnershipBadge } from "./BuildOwnershipBadge";
+import { getBuildOwnership, ownsCharacter } from "@/utils/buildOwnership";
 
 interface BuildRowRotation {
   killer: string;
@@ -21,6 +23,8 @@ interface BuildRowProps {
   canEdit: boolean;
   onOpen: (build: IBuild) => void;
   onEdit: (build: IBuild, e: React.MouseEvent) => void;
+  // Album of the viewer: shows what they own and greys out the rest
+  owned?: Record<string, number>;
 }
 
 const formatDate = (date?: string) =>
@@ -28,11 +32,14 @@ const formatDate = (date?: string) =>
 
 const thumb = (id?: string) => (id ? `${bucketUrl}/characters/thumb/${id}.png` : undefined);
 
+const missingStyle = { filter: "grayscale(1)", opacity: 0.45 };
+
 // Build list row: rotation on the left, team in the middle, author and actions on the right.
 // The three areas stack on mobile.
-export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit }: BuildRowProps) => {
+export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit, owned }: BuildRowProps) => {
   const { t } = useTranslation();
   const team = [...(build.team ?? [])].sort((a, b) => a.position - b.position).slice(0, 3);
+  const isMissing = (characterId?: string) => !!owned && !ownsCharacter(owned, characterId);
 
   return (
     <Flex
@@ -74,6 +81,11 @@ export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit }: BuildRowP
             <ScoreBadge score={build.score} fontSize="xs" commas />
           </Box>
         )}
+        {owned && (
+          <Box mt={2}>
+            <BuildOwnershipBadge ownership={getBuildOwnership(build, owned)} />
+          </Box>
+        )}
       </Box>
 
       <Box flex={1} minW={0}>
@@ -88,6 +100,7 @@ export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit }: BuildRowP
                     src={thumb(member.character?._id)}
                     name={member.character?.name || "?"}
                     bg="bg.inset"
+                    sx={isMissing(member.id_character) ? missingStyle : undefined}
                   />
                 </Tooltip>
                 <Badge
@@ -118,6 +131,7 @@ export const BuildRow = ({ build, rotation, canEdit, onOpen, onEdit }: BuildRowP
                         bg="bg.inset"
                         borderWidth="1px"
                         borderColor="border.subtle"
+                        sx={isMissing(link.id_character) ? missingStyle : undefined}
                       />
                     </Tooltip>
                   ))}

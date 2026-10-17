@@ -23,6 +23,7 @@ import { AlterationImage } from "./ui/AlterationImage";
 import { useCycles } from "@/hooks/useAPI";
 import { getRotationRealDates } from "@/utils/cycleHelpers";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
+import { FeaturedRotationBuilds } from "./FeaturedRotationBuilds";
 import type { ICycleRotation } from "@/interfaces";
 
 const UPCOMING_COUNT = 3;
@@ -264,6 +265,8 @@ export const CurrentInfoSection = () => {
                         </VStack>
                       </Flex>
                     )}
+
+                    {featured.rotation_id && <FeaturedRotationBuilds rotationId={featured.rotation_id} />}
                   </VStack>
                 ) : (
                   <Text fontSize="sm" color="text.muted">
