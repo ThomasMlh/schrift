@@ -1,7 +1,9 @@
 import {
-  Badge, Box, Flex, Grid, HStack, Popover, PopoverArrow, PopoverBody, PopoverContent, PopoverTrigger,
-  Progress, Skeleton, Text, VStack,
+  Badge, Box, Button, Flex, Grid, HStack, Popover, PopoverArrow, PopoverBody, PopoverContent, PopoverTrigger,
+  Progress, Skeleton, Text, VStack, useToast,
 } from "@chakra-ui/react";
+import { FiCopy } from "react-icons/fi";
+import { useAuth } from "@/providers/AuthProvider";
 import { memo, useCallback, useDeferredValue, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useCharacterCatalog, useGuildAlbums } from "@/hooks/useAPI";
@@ -101,6 +103,9 @@ export const GuildAlbum = ({ guildId }: { guildId: string }) => {
   const { t } = useTranslation();
   const { characters, isLoading: catalogLoading } = useCharacterCatalog();
   const { members, isLoading: membersLoading } = useGuildAlbums(guildId);
+  const { isAdmin, managedGuildIds } = useAuth();
+  const canRemind = isAdmin || managedGuildIds.includes(guildId);
+  const toast = useToast();
   const [filters, setFilters] = useState(EMPTY_ALBUM_FILTERS);
   const [activeId, setActiveId] = useState<string | null>(null);
   const deferredFilters = useDeferredValue(filters);
@@ -136,6 +141,17 @@ export const GuildAlbum = ({ guildId }: { guildId: string }) => {
 
   if (catalogLoading || membersLoading) return <Skeleton h="320px" borderRadius="xl" />;
 
+  // Discord mentions paste as pings; members without a Discord id fall back to their name
+  const copyReminder = async () => {
+    const mentions = [...new Set(withoutAlbum.map((m) => (m.discord_id ? `<@${m.discord_id}>` : displayName(m))))];
+    try {
+      await navigator.clipboard.writeText(`${mentions.join(" ")} ${t("pages.guilds.albumReminderMessage")}`);
+      toast({ status: "success", title: t("pages.guilds.albumReminderCopied"), duration: 2500 });
+    } catch {
+      toast({ status: "error", title: t("pages.guilds.albumReminderCopyError"), duration: 3000 });
+    }
+  };
+
   const coveredCount = characters.filter((c) => ownersByCharacter.has(c._id)).length;
   const fillPercent = members.length > 0 ? Math.round((filled.length / members.length) * 100) : 0;
 
@@ -159,10 +175,17 @@ export const GuildAlbum = ({ guildId }: { guildId: string }) => {
         </Flex>
         <Progress value={fillPercent} size="sm" colorScheme="purple" borderRadius="full" />
         {withoutAlbum.length > 0 && (
-          <Text fontSize="xs" color="text.muted" mt={3}>
-            {t("pages.guilds.albumWithout")}{" "}
-            <Text as="span" color="text.secondary">{withoutAlbum.map(displayName).join(", ")}</Text>
-          </Text>
+          <Flex mt={3} gap={3} align="center" justify="space-between" wrap="wrap">
+            <Text fontSize="xs" color="text.muted" flex="1 1 300px">
+              {t("pages.guilds.albumWithout")}{" "}
+              <Text as="span" color="text.secondary">{withoutAlbum.map(displayName).join(", ")}</Text>
+            </Text>
+            {canRemind && (
+              <Button size="xs" variant="outline" leftIcon={<FiCopy />} onClick={copyReminder} flexShrink={0}>
+                {t("pages.guilds.albumReminderButton")}
+              </Button>
+            )}
+          </Flex>
         )}
       </Box>
 
