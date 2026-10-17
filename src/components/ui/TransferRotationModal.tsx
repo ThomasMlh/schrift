@@ -26,7 +26,7 @@ import { useState, useEffect } from "react";
 import type { ICycle, IGuild, ICycleRotation, IUser } from "../../interfaces";
 import { CycleSelect } from "./CycleSelect";
 import { CustomSelect } from "./CustomSelect";
-import { AttackTypeBadge } from "./AttackTypeBadge";
+import { rotationSelectOptions, renderSelectedRotation } from "@/utils/rotationOptions";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
 
 interface TransferConflict {
@@ -207,21 +207,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
     const rowOkBorder = isDark ? "green.700"              : "green.200";
 
     const makeRotationOptions = (rotations: ICycleRotation[], excludeId?: string) =>
-        rotations
-            .filter(r => r.rotation_id !== excludeId)
-            .map(r => ({
-                value: r.rotation_id,
-                label: `Rotation #${r.position} — ${r.killer}`,
-                content: (
-                    <VStack align="start" spacing={0.5} w="100%">
-                        <HStack spacing={2}>
-                            <Text fontWeight="medium">Rotation #{r.position} — {r.killer}</Text>
-                            <AttackTypeBadge attackType={r.attack} />
-                        </HStack>
-                        <Text fontSize="xs" color="gray.500">{r.start_date} — {r.end_date}</Text>
-                    </VStack>
-                )
-            }));
+        rotationSelectOptions(rotations.filter(r => r.rotation_id !== excludeId));
 
     // Conflicts are warnings (overwrite allowed), not blockers
     const canTransfer = !!preview && !previewGenericError && !isPreviewLoading && (preview.scoreCount ?? 0) > 0;
@@ -317,6 +303,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                                                 value={sourceRotationId}
                                                 onChange={setSourceRotationId}
                                                 options={makeRotationOptions(selectedCycle.rotations)}
+                                                renderSelected={renderSelectedRotation(selectedCycle.rotations)}
                                                 size="md"
                                                 variant="modal-orange"
                                                 allowDeselect={false}
@@ -335,6 +322,7 @@ const TransferRotationModal = ({ isOpen, onClose, cycles, guilds }: TransferRota
                                                     value={targetRotationId}
                                                     onChange={setTargetRotationId}
                                                     options={makeRotationOptions(selectedCycle.rotations, sourceRotationId)}
+                                                    renderSelected={renderSelectedRotation(selectedCycle.rotations)}
                                                     size="md"
                                                     variant="modal-orange"
                                                     allowDeselect={false}
