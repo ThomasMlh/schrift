@@ -30,6 +30,7 @@ import {
 import { AddIcon, ArrowForwardIcon, CheckIcon } from "@chakra-ui/icons";
 import { DraftMoveRow } from "./draft/DraftMoveRow";
 import { useState, useMemo, useCallback } from "react";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type { IGuild, IUser } from "../interfaces";
 import {
   useGuilds,
@@ -40,6 +41,8 @@ import { useAPIMutations } from "@/hooks/useAPIMutations";
 import { CustomSelect } from "./ui/CustomSelect";
 import { PageLoader } from "./ui/PageLoader";
 import { getGuildColor, type GuildColor } from "./draft/guildColors";
+
+type DraftMember = IUser & { guildId: string };
 
 interface DraftMove {
   id: string;
@@ -63,11 +66,15 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
 
   const [draftMoves, setDraftMoves] = useState<DraftMove[]>([]);
   const [selectedBbsId, setSelectedBbsId] = useState<string>("");
+  const [selectedMember, setSelectedMember] = useState<DraftMember | null>(null);
+  const [playerSearch, setPlayerSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(playerSearch, 300);
   const [selectedTargetGuild, setSelectedTargetGuild] = useState<string>("");
   const [isExecuting, setIsExecuting] = useState(false);
 
   // Unified pool (the source guild is inferred from the selected player), always loaded
-  const { users: guildlessUsers, isLoading: guildlessLoading } = useGuildlessUsers(true);
+  const { users: guildlessUsers, isLoading: guildlessLoading } = useGuildlessUsers(true, debouncedSearch);
+  const { totalCount: guildlessCount } = useGuildlessUsers(true, "", 1);
 
   const cardBg = "bg.card";
   const sidebarBg     = useColorModeValue("gray.50", "gray.850");
@@ -81,18 +88,22 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
 
   // Drafts work on bbs accounts, not users: an account without bbs_id (guild/role assigned before
   // the game account was linked) cannot be sent to the API, so it is left out of the pool.
+  // Guild members are filtered locally; guildless accounts are already filtered by the API.
   const allMembers = useMemo(() => {
-    const members: (IUser & { guildId: string })[] = [];
+    const term = debouncedSearch.trim().toLowerCase();
+    const matches = (member: IUser) =>
+      !term || [member.bbs_name, member.global_name, member.username].some((name) => name?.toLowerCase().includes(term));
+    const members: DraftMember[] = [];
     for (const [guildId, guildMembers] of Object.entries(membersByGuild)) {
       for (const member of guildMembers) {
-        if (member.bbs_id) members.push({ ...member, guildId });
+        if (member.bbs_id && matches(member)) members.push({ ...member, guildId });
       }
     }
     for (const user of guildlessUsers) {
       if (user.bbs_id) members.push({ ...user, guildId: "" });
     }
     return members;
-  }, [membersByGuild, guildlessUsers]);
+  }, [membersByGuild, guildlessUsers, debouncedSearch]);
 
   // Players offered in the select (all members and guildless accounts), minus those already
   // in the current draft.
@@ -130,15 +141,19 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     return map;
   }, [guilds]);
 
-  // Selected account, identified by bbs_id rather than user._id since a user can appear once per account.
-  const selectedUserData = useMemo(
-    () => availableUsers.find((u) => u.bbs_id === selectedBbsId) ?? null,
-    [availableUsers, selectedBbsId]
-  );
+  // Kept as an object: a later search can filter the selected account out of the options
+  const selectedUserData = selectedMember;
+  const selectPlayer = (bbsId: string) => {
+    setSelectedBbsId(bbsId);
+    setSelectedMember(availableUsers.find((u) => u.bbs_id === bbsId) ?? null);
+  };
+  const playerOptions = selectedMember && !availableUsers.some((u) => u.bbs_id === selectedMember.bbs_id)
+    ? [selectedMember, ...availableUsers]
+    : availableUsers;
 
   const addMove = useCallback(() => {
     if (!selectedBbsId || !selectedTargetGuild) return;
-    const user = allMembers.find((m) => m.bbs_id === selectedBbsId);
+    const user = selectedMember;
     if (!user) return;
 
     const isRemoval = selectedTargetGuild === "__none__";
@@ -157,8 +172,9 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
 
     setDraftMoves((prev) => [...prev, { id: `${user.bbs_id}-${Date.now()}`, user, bbsId: user.bbs_id!, fromGuild, toGuild }]);
     setSelectedBbsId("");
+    setSelectedMember(null);
     setSelectedTargetGuild("");
-  }, [selectedBbsId, selectedTargetGuild, allMembers, guildMap, toast]);
+  }, [selectedBbsId, selectedTargetGuild, selectedMember, guildMap, toast]);
 
   const removeMove  = (moveId: string) => setDraftMoves((prev) => prev.filter((m) => m.id !== moveId));
 
@@ -219,7 +235,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
       : undefined;
 
   // Player select option: avatar, guild and role
-  const renderPlayerOption = (user: IUser & { guildId: string }) => {
+  const renderPlayerOption = (user: DraftMember) => {
     const guild = user.guildId ? guildMap[user.guildId] : null;
     const color = user.guildId ? guildColorMap[user.guildId] : "gray";
     return (
@@ -348,7 +364,7 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                 <Flex justify="space-between" align="center">
                   <Text fontSize="sm" fontWeight="semibold" color={mutedText}>Sans guilde</Text>
                   <Text fontSize="sm" fontWeight="bold" color={mutedText}>
-                    {guildlessUsers.length}
+                    {guildlessCount}
                   </Text>
                 </Flex>
               </Box>
@@ -398,14 +414,15 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
                   <CustomSelect
                     placeholder="Rechercher un joueur"
                     value={selectedBbsId}
-                    onChange={setSelectedBbsId}
+                    onChange={selectPlayer}
                     size="sm"
                     allowDeselect={false}
                     enableSearch
+                    onSearchChange={setPlayerSearch}
                     accentColor="orange.400"
                     isLoading={guildlessLoading}
                     renderSelected={(option) => option.content}
-                    options={availableUsers.map((u) => ({
+                    options={playerOptions.map((u) => ({
                       value: u.bbs_id!,
                       label: u.bbs_name || u.global_name || u.username,
                       content: renderPlayerOption(u)
