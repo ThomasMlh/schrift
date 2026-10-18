@@ -151,7 +151,8 @@ export const PodiumFilters = ({
                   flex={{ base: 1, sm: "initial" }}
                   minW={0}
                   h="auto"
-                  minH="32px"
+                  // Same height as the md selects next to them
+                  minH="40px"
                   py={1.5}
                   whiteSpace={{ base: "normal", sm: "nowrap" }}
                   fontSize={{ base: "xs", sm: "sm" }}
