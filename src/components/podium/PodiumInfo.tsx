@@ -1,5 +1,5 @@
-import { Box, HStack, Icon, Text, useColorModeValue } from "@chakra-ui/react";
-import { formatWithCommas } from "@/utils/format";
+import { Badge, Box, HStack, Icon, Text, useColorModeValue } from "@chakra-ui/react";
+import { formatMonthKey, formatWithCommas } from "@/utils/format";
 import { FiTrendingDown } from "react-icons/fi";
 import type {
   IPodiumResponse,
@@ -11,7 +11,7 @@ import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import CustomLink from "@/components/ui/CustomLink";
 import { useTranslation } from "react-i18next";
 
-type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
+type DisplayMode = "cycle" | "rotation" | "weekly" | "monthly" | "misses";
 
 interface PodiumInfoProps {
   displayMode: DisplayMode;
@@ -38,7 +38,7 @@ export const PodiumInfo = ({
   selectedCycle,
   filterBg,
 }: PodiumInfoProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const mutedText = useColorModeValue("gray.600", "gray.400");
   const accentColor = useColorModeValue("blue.600", "blue.300");
   const redAccent = useColorModeValue("red.600", "red.400");
@@ -89,6 +89,28 @@ export const PodiumInfo = ({
             })
             : t("components.podiumInfo.progressionNoPreviousCycle")}
         </Text>
+      </Box>
+    );
+  }
+
+  /* Monthly mode: the covered period, so nobody wonders which weeks count */
+  if (displayMode === "monthly" && isPodiumResponse(podiumData) && podiumData.meta.monthInfo) {
+    const info = podiumData.meta.monthInfo;
+    return (
+      <Box px={4} py={3} bg={filterBg} borderRadius="lg">
+        <HStack spacing={4} flexWrap="wrap" justify="center" align="center">
+          <Text fontSize="sm" fontWeight="bold">{formatMonthKey(info.key, i18n.language)}</Text>
+          {info.in_progress && <Badge colorScheme="green">{t("components.podiumInfo.monthInProgress")}</Badge>}
+          <Text fontSize="sm" color={mutedText}>
+            {t("components.podiumInfo.monthPeriod", { start: info.start_date, end: info.end_date })}
+          </Text>
+          <Text fontSize="sm" color={mutedText}>
+            {t("components.podiumInfo.monthWeeks", { count: info.weeks, rotations: info.rotations })}
+          </Text>
+          <Text fontSize="xs" color={mutedText}>
+            {t("components.podiumInfo.totalPlayers", { count: podiumData.meta.totalPlayers })}
+          </Text>
+        </HStack>
       </Box>
     );
   }

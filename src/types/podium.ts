@@ -1,4 +1,4 @@
-// Podiums (cycle, rotation, week, misses)
+// Podiums (cycle, rotation, week, month, misses)
 import type { IPagination } from "./common";
 import type { ITopAchievement } from "./records";
 
@@ -51,21 +51,33 @@ export type PodiumRankingType = "average" | "max" | "progression";
 
 export type PodiumType = "individual_scores" | "average_scores" | "max_scores" | "progression";
 
+// Game weeks (Tuesday to Sunday) belong to the month they start in
+export interface IPodiumMonth {
+  key: string; // YYYY-MM
+  start_date: string;
+  end_date: string;
+  weeks: number;
+  rotations: number;
+  in_progress: boolean;
+}
+
 export interface IPodiumResponse {
   success: boolean;
   podium?: IPodiumPlayer[]; // Current API field
   data?: IPodiumPlayer[]; // Legacy API field
   pagination: IPagination;
   filters: {
-    cycle_name: string;
-    cycle_id: string;
-    rotation_id: string | null;
+    cycle_name?: string;
+    cycle_id?: string;
+    rotation_id?: string | null;
+    month?: string;
     guild_name?: string;
     ranking_type?: PodiumRankingType | null;
   };
   meta: {
     totalPlayers: number;
-    cycleName: string;
+    cycleName?: string;
+    monthInfo?: IPodiumMonth;
     rotationInfo?: {
       _id: string;
       position: number;

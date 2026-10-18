@@ -14,7 +14,7 @@ import type { PodiumPedestalPlayer } from "./PodiumPedestal";
 import { Pagination as PaginationComponent } from "@/components/ui/Pagination";
 import { useTranslation } from "react-i18next";
 
-type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
+type DisplayMode = "cycle" | "rotation" | "weekly" | "monthly" | "misses";
 
 interface PodiumResultsProps {
   displayMode: DisplayMode;
@@ -119,9 +119,7 @@ const PlayerList = ({
 }) => {
   // Leave the top 3 out of the list when the visual podium is shown (page 1)
   const isFirstPage = !podiumData.pagination || podiumData.pagination.currentPage === 1;
-  const showPedestal =
-    (displayMode === "cycle" || displayMode === "rotation" || displayMode === "weekly") &&
-    isFirstPage;
+  const showPedestal = displayMode !== "misses" && isFirstPage;
   const listData = showPedestal
     ? (podiumData.data ?? []).filter((p) => p.rank > 3)
     : (podiumData.data ?? []);
@@ -197,7 +195,9 @@ export const PodiumResults = ({
       <Alert status="warning" borderRadius="md">
         <AlertIcon />
         <Text>
-          {selectedCycleId
+          {displayMode === "monthly"
+            ? t("components.podiumResults.noScoreFound")
+            : selectedCycleId
             ? displayMode === "weekly" && !selectedWeekNumber
               ? t("components.podiumResults.selectWeekFirst")
               : t("components.podiumResults.noScoreFound")
@@ -209,7 +209,7 @@ export const PodiumResults = ({
 
   const isFirstPage = !podiumData.pagination || podiumData.pagination.currentPage === 1;
   const showPedestal =
-    (displayMode === "cycle" || displayMode === "rotation" || displayMode === "weekly") &&
+    displayMode !== "misses" &&
     isFirstPage &&
     podiumData.data.some((p) => p.rank === 1);
 
