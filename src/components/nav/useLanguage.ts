@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { loadLanguage } from "@/i18n";
 
 export const LANGUAGES = [
   { code: "fr", label: "Français", flagSrc: "/flags/fr.png", short: "FR" },
@@ -9,8 +10,9 @@ export const useLanguage = () => {
   const { i18n } = useTranslation();
   const current = LANGUAGES.find((l) => l.code === i18n.language) ?? LANGUAGES[0];
 
-  const setLanguage = (code: string) => {
-    i18n.changeLanguage(code);
+  const setLanguage = async (code: string) => {
+    await loadLanguage(code);
+    await i18n.changeLanguage(code);
     try {
       localStorage.setItem("schrift-lang", code);
     } catch {

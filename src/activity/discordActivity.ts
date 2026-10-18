@@ -1,4 +1,4 @@
-import { DiscordSDK } from '@discord/embedded-app-sdk';
+import type { DiscordSDK } from '@discord/embedded-app-sdk';
 
 const CLIENT_ID = import.meta.env.VITE_DISCORD_CLIENT_ID as string;
 
@@ -9,10 +9,12 @@ export const isDiscordActivity = (): boolean =>
   new URLSearchParams(window.location.search).has('frame_id');
 
 // The DiscordSDK constructor reads `frame_id` from the URL and throws when it is missing,
-// so it must only be created once isDiscordActivity() is true.
+// so it must only be created once isDiscordActivity() is true. Loaded on demand: the website
+// outside Discord never downloads it.
 let discordSdk: DiscordSDK | null = null;
-const getDiscordSdk = (): DiscordSDK => {
+const getDiscordSdk = async (): Promise<DiscordSDK> => {
   if (!discordSdk) {
+    const { DiscordSDK } = await import('@discord/embedded-app-sdk');
     discordSdk = new DiscordSDK(CLIENT_ID);
   }
   return discordSdk;
@@ -25,7 +27,7 @@ const getDiscordSdk = (): DiscordSDK => {
 export const setupDiscordActivity = async (
   login: (token: string, refreshToken?: string) => void
 ): Promise<void> => {
-  const discordSdk = getDiscordSdk();
+  const discordSdk = await getDiscordSdk();
   await discordSdk.ready();
 
   const { code } = await discordSdk.commands.authorize({
