@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
+import { FloatingMenu } from "./FloatingMenu";
 import { useAccessories, useAccessoriesSubeffects } from "../../hooks/useAPI";
 import { bucketUrl } from "../../utils/apiRequest";
 
@@ -38,6 +39,8 @@ export const AccessorySearchSelect = ({
   const [isSubeffectOpen, setIsSubeffectOpen] = useState(false);
   const accessoryMenuRef = useRef<HTMLDivElement>(null);
   const subeffectMenuRef = useRef<HTMLDivElement>(null);
+  const accessoryFloatingRef = useRef<HTMLDivElement>(null);
+  const subeffectFloatingRef = useRef<HTMLDivElement>(null);
 
   const { accessories, isLoading } = useAccessories(accessorySearch);
   const { subeffects, isLoading: isLoadingSubeffects } = useAccessoriesSubeffects(subeffectSearch);
@@ -45,7 +48,6 @@ export const AccessorySearchSelect = ({
   const bgColor = "bg.elevated";
   const borderColor = "border.default";
   const hoverBg = useColorModeValue("gray.50", "gray.600");
-  const menuBg = "bg.card";
 
   const availableAccessories = accessories.filter(
     (acc) => !excludeIds.includes(acc._id) || acc._id === value?.id_accessory
@@ -57,7 +59,8 @@ export const AccessorySearchSelect = ({
   // Close the accessory menu on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (accessoryMenuRef.current && !accessoryMenuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (accessoryMenuRef.current && !accessoryMenuRef.current.contains(target) && !accessoryFloatingRef.current?.contains(target)) {
         setIsAccessoryOpen(false);
         setAccessorySearch("");
       }
@@ -75,7 +78,8 @@ export const AccessorySearchSelect = ({
   // Close the sub-effect menu on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (subeffectMenuRef.current && !subeffectMenuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (subeffectMenuRef.current && !subeffectMenuRef.current.contains(target) && !subeffectFloatingRef.current?.contains(target)) {
         setIsSubeffectOpen(false);
         setSubeffectSearch("");
       }
@@ -153,21 +157,7 @@ export const AccessorySearchSelect = ({
           )}
 
           {isAccessoryOpen && (
-            <Box
-              position="absolute"
-              top="100%"
-              left={0}
-              right={0}
-              zIndex={1000}
-              bg={menuBg}
-              border="1px solid"
-              borderColor={borderColor}
-              borderRadius="md"
-              boxShadow="lg"
-              maxH="300px"
-              overflowY="auto"
-              mt={1}
-            >
+            <FloatingMenu anchorRef={accessoryMenuRef} menuRef={accessoryFloatingRef} maxH={300}>
               {isLoading ? (
                 <Flex justify="center" p={4}>
                   <Spinner size="sm" />
@@ -205,7 +195,7 @@ export const AccessorySearchSelect = ({
                   ))}
                 </VStack>
               )}
-            </Box>
+            </FloatingMenu>
           )}
         </Box>
       </FormControl>
@@ -247,21 +237,7 @@ export const AccessorySearchSelect = ({
             )}
 
             {isSubeffectOpen && (
-              <Box
-                position="absolute"
-                top="100%"
-                left={0}
-                right={0}
-                zIndex={1000}
-                bg={menuBg}
-                border="1px solid"
-                borderColor={borderColor}
-                borderRadius="md"
-                boxShadow="lg"
-                maxH="300px"
-                overflowY="auto"
-                mt={1}
-              >
+              <FloatingMenu anchorRef={subeffectMenuRef} menuRef={subeffectFloatingRef} maxH={300}>
                 {isLoadingSubeffects ? (
                   <Flex justify="center" p={4}>
                     <Spinner size="sm" />
@@ -289,7 +265,7 @@ export const AccessorySearchSelect = ({
                     ))}
                   </VStack>
                 )}
-              </Box>
+              </FloatingMenu>
             )}
           </Box>
         </FormControl>
