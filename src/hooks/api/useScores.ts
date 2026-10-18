@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { useState, useCallback } from 'react';
-import type { IScoresResponse, IPodiumResponse, IPodiumWeeklyResponse, IPodiumMissesResponse, PodiumRankingType, BulkEntryReference, BulkEntryThresholds } from '../../interfaces';
+import type { IScoresResponse, IPodiumResponse, IPodiumWeeklyResponse, IPodiumMissesResponse, IPodiumMonth, PodiumRankingType, BulkEntryReference, BulkEntryThresholds } from '../../interfaces';
 import { apiUrl, fetcher, useAuthenticatedFetcher } from './shared';
 
 export const useScores = (options?: {
@@ -66,33 +66,45 @@ export const usePodium = (options?: {
   };
 };
 
+export const usePodiumMonths = () => {
+  const { data, isLoading } = useSWR<{ success: boolean; months: IPodiumMonth[] }>(
+    `${apiUrl}/api/podium/months`,
+    fetcher,
+    { revalidateOnFocus: false, dedupingInterval: 60000 }
+  );
+  return { months: data?.months ?? [], isLoading };
+};
+
 export const usePodiumFetch = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchPodium = useCallback(async (
-    mode: 'cycle' | 'rotation' | 'weekly' | 'misses',
+    mode: 'cycle' | 'rotation' | 'weekly' | 'monthly' | 'misses',
     cycleName: string,
     options: {
       cycleYear?: number;
       rankingType?: PodiumRankingType;
       rotationId?: string;
       weekNumber?: string;
+      month?: string;
       guildName?: string;
       page?: number;
       limit?: number;
     } = {}
   ): Promise<IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse | null> => {
-    if (!cycleName) return null;
-
-    const { cycleYear, rankingType = 'average', rotationId, weekNumber, guildName, page = 1, limit = 50 } = options;
+    const { cycleYear, rankingType = 'average', rotationId, weekNumber, month, guildName, page = 1, limit = 50 } = options;
+    if (!cycleName && mode !== 'monthly') return null;
     setIsLoading(true);
     setError(null);
 
     try {
       let url = '';
 
-      if (mode === 'weekly') {
+      if (mode === 'monthly') {
+        url = `${apiUrl}/api/podium/monthly?ranking_type=${encodeURIComponent(rankingType)}&page=${page}&limit=${limit}`;
+        if (month) url += `&month=${encodeURIComponent(month)}`;
+      } else if (mode === 'weekly') {
         if (!weekNumber) return null;
         url = `${apiUrl}/api/podium/weekly?cycle_name=${encodeURIComponent(cycleName)}&week_number=${weekNumber}&page=${page}&limit=${limit}`;
       } else if (mode === 'misses') {
@@ -103,7 +115,7 @@ export const usePodiumFetch = () => {
         if (rotationId?.trim()) url += `&rotation_id=${encodeURIComponent(rotationId)}`;
       }
 
-      if (cycleYear) url += `&year=${cycleYear}`;
+      if (cycleYear && mode !== 'monthly') url += `&year=${cycleYear}`;
       if (guildName?.trim()) url += `&guild_name=${encodeURIComponent(guildName.trim())}`;
 
       const response = await fetch(url);
