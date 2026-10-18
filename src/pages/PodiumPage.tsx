@@ -10,7 +10,7 @@ import type {
   PodiumRankingType,
 } from "../interfaces";
 import { SEOHead } from "@/components/SEOHead";
-import { useCycles, useGuilds, usePodiumFetch } from "@/hooks/useAPI";
+import { useCycles, useGuilds, usePodiumFetch, usePodiumMonths } from "@/hooks/useAPI";
 import { PodiumFilters } from "@/components/podium/PodiumFilters";
 import { PodiumInfo } from "@/components/podium/PodiumInfo";
 import { PodiumResults } from "@/components/podium/PodiumResults";
@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/providers/AuthProvider";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 
-type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
+type DisplayMode = "cycle" | "rotation" | "weekly" | "monthly" | "misses";
 type CycleRankingType = PodiumRankingType;
 
 interface FilterOverrides {
@@ -29,6 +29,7 @@ interface FilterOverrides {
   rotationId?: string;
   guildName?: string;
   weekNumber?: string;
+  month?: string;
   limit?: number;
 }
 
@@ -57,6 +58,7 @@ const PodiumPage = () => {
   const [selectedWeekNumber, setSelectedWeekNumber] = useState(
     searchParams.get("week_number") || ""
   );
+  const [selectedMonth, setSelectedMonth] = useState(searchParams.get("month") || "");
   const [selectedGuildName, setSelectedGuildName] = useState(
     searchParams.get("guild_name") || ""
   );
@@ -66,6 +68,7 @@ const PodiumPage = () => {
 
   const { cycles, isLoading: cyclesLoading } = useCycles();
   const { guilds } = useGuilds(false, true);
+  const { months } = usePodiumMonths();
   const { fetchPodium, isLoading, error } = usePodiumFetch();
   const { currentUser, isLoggedIn } = useAuth();
 
@@ -102,12 +105,14 @@ const PodiumPage = () => {
     const rotationId = 'rotationId' in overrides ? (overrides.rotationId ?? '') : selectedRotationId;
     const guildName = overrides.guildName ?? selectedGuildName;
     const weekNumber = 'weekNumber' in overrides ? (overrides.weekNumber ?? '') : selectedWeekNumber;
+    const month = overrides.month ?? selectedMonth;
     const page = overrides.page ?? 1;
     const limit = overrides.limit ?? itemsPerPage;
 
     const params = new URLSearchParams();
     if (mode !== "cycle") params.set("mode", mode);
-    if (mode === "cycle" && rankingType !== "average") params.set("ranking_type", rankingType);
+    if ((mode === "cycle" || mode === "monthly") && rankingType !== "average") params.set("ranking_type", rankingType);
+    if (mode === "monthly" && month) params.set("month", month);
     const cycleObj = cycleId ? cycles.find(c => c._id === cycleId) : undefined;
     if (cycleId) params.set("cycle_name", cycleObj ? cycleSlug(cycleObj.name, cycleObj.year) : cycleId);
     const rotationPos = rotationId && cycleObj
@@ -121,11 +126,15 @@ const PodiumPage = () => {
     setSearchParams(params);
 
     const data = await fetchPodium(mode, cycleObj?.name || "", {
-      cycleYear: cycleObj?.year, rankingType, rotationId, weekNumber, guildName, page, limit,
+      cycleYear: cycleObj?.year, rankingType, rotationId, weekNumber, month, guildName, page, limit,
     });
 
     if (data) {
       setPodiumData(data);
+      // Without a month the API picks the current one: reflect it in the selector
+      if (mode === "monthly" && "filters" in data && data.filters && "month" in data.filters && data.filters.month) {
+        setSelectedMonth(data.filters.month);
+      }
     } else if (error) {
       toast({ title: t("common.error"), description: error, status: "error", duration: 3000 });
     }
@@ -213,9 +222,15 @@ const PodiumPage = () => {
     if (mode === "rotation" && !selectedRotationId && (selectedCycle?.rotations?.length ?? 0) > 0) {
       rotationId = selectedCycle!.rotations[0].rotation_id;
       setSelectedRotationId(rotationId);
-    } else if (mode === "weekly" || mode === "misses") {
+    } else if (mode === "weekly" || mode === "monthly" || mode === "misses") {
       rotationId = "";
       setSelectedRotationId("");
+    }
+
+    let rankingType = cycleRankingType;
+    if (mode === "monthly" && rankingType === "progression") {
+      rankingType = "average";
+      setCycleRankingType(rankingType);
     }
 
     if (mode === "weekly" && !selectedWeekNumber) {
@@ -226,14 +241,14 @@ const PodiumPage = () => {
       setSelectedWeekNumber("");
     }
 
-    if (selectedCycleId) {
-      applyFilters({ mode, rotationId, weekNumber });
+    if (selectedCycleId || mode === "monthly") {
+      applyFilters({ mode, rankingType, rotationId, weekNumber });
     }
   };
 
   const handleCycleRankingTypeChange = (rankingType: CycleRankingType) => {
     setCycleRankingType(rankingType);
-    if (displayMode === "cycle") applyFilters({ rankingType, rotationId: "", weekNumber: "" });
+    if (displayMode === "cycle" || displayMode === "monthly") applyFilters({ rankingType, rotationId: "", weekNumber: "" });
   };
 
   const handleCycleChange = (cycleId: string) => {
@@ -252,6 +267,11 @@ const PodiumPage = () => {
   const handleWeekChange = (weekNumber: string) => {
     setSelectedWeekNumber(weekNumber);
     applyFilters({ mode: "weekly", rotationId: "", weekNumber });
+  };
+
+  const handleMonthChange = (month: string) => {
+    setSelectedMonth(month);
+    applyFilters({ month });
   };
 
   const handleGuildChange = (guildName: string) => {
@@ -274,6 +294,7 @@ const PodiumPage = () => {
     setSelectedCycleId("");
     setSelectedRotationId("");
     setSelectedWeekNumber("");
+    setSelectedMonth("");
     setSelectedGuildName("");
     setSearchParams({});
     setPodiumData(null);
@@ -337,6 +358,8 @@ const PodiumPage = () => {
               ? t("pages.podium.heroDescriptionRotation")
               : displayMode === "weekly"
               ? t("pages.podium.heroDescriptionWeekly")
+              : displayMode === "monthly"
+              ? t("pages.podium.heroDescriptionMonthly")
               : displayMode === "misses"
               ? t("pages.podium.heroDescriptionMisses")
               : cycleRankingType === "max"
@@ -355,17 +378,20 @@ const PodiumPage = () => {
               selectedCycleId={selectedCycleId}
               selectedRotationId={selectedRotationId}
               selectedWeekNumber={selectedWeekNumber}
+              selectedMonth={selectedMonth}
               selectedGuildName={selectedGuildName}
               itemsPerPage={itemsPerPage}
               cycles={cycles}
               guilds={guilds}
               selectedCycle={selectedCycle}
               availableWeeks={availableWeeks}
+              months={months}
               onModeChange={handleModeChange}
               onCycleRankingTypeChange={handleCycleRankingTypeChange}
               onCycleChange={handleCycleChange}
               onRotationChange={handleRotationChange}
               onWeekChange={handleWeekChange}
+              onMonthChange={handleMonthChange}
               onGuildChange={handleGuildChange}
               onItemsPerPageChange={handleItemsPerPageChange}
               onReset={resetFilters}

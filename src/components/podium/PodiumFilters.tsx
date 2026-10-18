@@ -16,15 +16,18 @@ import { RepeatIcon } from "@chakra-ui/icons";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { rotationSelectOptions, renderSelectedRotation } from "@/utils/rotationOptions";
-import type { ICycle, IGuild, PodiumRankingType } from "@/interfaces";
+import type { ICycle, IGuild, IPodiumMonth, PodiumRankingType } from "@/interfaces";
 import { ScoreLegend } from "@/components/ui/ScoreLegend";
 import { useTranslation } from "react-i18next";
+import { formatMonthKey } from "@/utils/format";
 
-type DisplayMode = "cycle" | "rotation" | "weekly" | "misses";
+type DisplayMode = "cycle" | "rotation" | "weekly" | "monthly" | "misses";
 type CycleRankingType = PodiumRankingType;
 
-const MODE_ORDER: DisplayMode[] = ["cycle", "rotation", "weekly", "misses"];
+const MODE_ORDER: DisplayMode[] = ["cycle", "rotation", "weekly", "monthly", "misses"];
 const RANKING_ORDER: CycleRankingType[] = ["average", "max", "progression"];
+// Progression compares two cycles: it has no monthly equivalent
+const MONTHLY_RANKING_ORDER: CycleRankingType[] = ["average", "max"];
 
 interface PodiumFiltersProps {
   displayMode: DisplayMode;
@@ -32,17 +35,20 @@ interface PodiumFiltersProps {
   selectedCycleId: string;
   selectedRotationId: string;
   selectedWeekNumber: string;
+  selectedMonth: string;
   selectedGuildName: string;
   itemsPerPage: number;
   cycles: ICycle[];
   guilds: IGuild[];
   selectedCycle?: ICycle;
   availableWeeks: number;
+  months: IPodiumMonth[];
   onModeChange: (mode: DisplayMode) => void;
   onCycleRankingTypeChange: (rankingType: CycleRankingType) => void;
   onCycleChange: (cycleId: string) => void;
   onRotationChange: (rotationId: string) => void;
   onWeekChange: (weekNumber: string) => void;
+  onMonthChange: (month: string) => void;
   onGuildChange: (guildName: string) => void;
   onItemsPerPageChange: (limit: number) => void;
   onReset: () => void;
@@ -58,28 +64,33 @@ export const PodiumFilters = ({
   selectedCycleId,
   selectedRotationId,
   selectedWeekNumber,
+  selectedMonth,
   selectedGuildName,
   itemsPerPage,
   cycles,
   guilds,
   selectedCycle,
   availableWeeks,
+  months,
   onModeChange,
   onCycleRankingTypeChange,
   onCycleChange,
   onRotationChange,
   onWeekChange,
+  onMonthChange,
   onGuildChange,
   onItemsPerPageChange,
   onReset,
   shortcuts,
 }: PodiumFiltersProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isMonthly = displayMode === "monthly";
 
   const modeLabels: Record<DisplayMode, string> = {
     cycle: t("components.podiumFilters.modeFullCycle"),
     rotation: t("components.podiumFilters.modeByRotation"),
     weekly: t("components.podiumFilters.modeByWeek"),
+    monthly: t("components.podiumFilters.modeByMonth"),
     misses: t("components.podiumFilters.modeMiss"),
   };
 
@@ -126,10 +137,10 @@ export const PodiumFilters = ({
           wrap="wrap"
           flex={1}
         >
-          {/* Ranking type (full cycle mode only) */}
-          {displayMode === "cycle" && (
+          {/* Ranking type (full cycle and monthly modes) */}
+          {(displayMode === "cycle" || isMonthly) && (
             <ButtonGroup isAttached size="sm" variant="outline" w={{ base: "100%", sm: "auto" }}>
-              {RANKING_ORDER.map((type) => (
+              {(isMonthly ? MONTHLY_RANKING_ORDER : RANKING_ORDER).map((type) => (
                 <Button
                   key={type}
                   onClick={() => onCycleRankingTypeChange(type)}
@@ -152,17 +163,29 @@ export const PodiumFilters = ({
             </ButtonGroup>
           )}
 
-          <CycleSelect
-            cycles={cycles}
-            value={selectedCycleId}
-            onChange={onCycleChange}
-            placeholder={t("components.podiumFilters.selectCyclePlaceholder")}
-            valueKey="_id"
-            allowDeselect={false}
-            size="md"
-            showActiveBadge={true}
-            w={{ base: "100%", md: "220px" }}
-          />
+          {isMonthly ? (
+            <CustomSelect
+              placeholder={t("components.podiumFilters.selectMonthPlaceholder")}
+              value={selectedMonth}
+              onChange={onMonthChange}
+              options={months.map((month) => ({ value: month.key, label: formatMonthKey(month.key, i18n.language) }))}
+              allowDeselect={false}
+              size="md"
+              w={{ base: "100%", md: "220px" }}
+            />
+          ) : (
+            <CycleSelect
+              cycles={cycles}
+              value={selectedCycleId}
+              onChange={onCycleChange}
+              placeholder={t("components.podiumFilters.selectCyclePlaceholder")}
+              valueKey="_id"
+              allowDeselect={false}
+              size="md"
+              showActiveBadge={true}
+              w={{ base: "100%", md: "220px" }}
+            />
+          )}
 
           {selectedCycle && displayMode === "rotation" && (
             <CustomSelect
