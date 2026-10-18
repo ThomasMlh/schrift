@@ -62,5 +62,16 @@ export const useAdminMutations = () => {
     }, { fallbackError: 'Erreur lors de la synchronisation des profils Discord' });
   };
 
-  return { updateCharacters, checkBotHealth, uploadImages, syncDiscordProfiles };
+  const createIndexes = async () => {
+    return request<{
+      success: boolean;
+      total: number;
+      created: number;
+      failed: { collection: string; error?: string }[];
+    }>(`${apiUrl}/api/admin/create-indexes`, {
+      method: 'POST',
+    }, { fallbackError: 'Erreur lors de la création des index' });
+  };
+
+  return { updateCharacters, checkBotHealth, uploadImages, syncDiscordProfiles, createIndexes };
 };

@@ -2,7 +2,7 @@ import {
   Box, Flex, Heading, HStack, VStack, Text, Button, Menu, MenuButton, MenuList, MenuItem, Icon, Tooltip, useToast,
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
-import { FiCpu, FiImage, FiRefreshCw, FiTool, FiUsers } from "react-icons/fi";
+import { FiCpu, FiDatabase, FiImage, FiRefreshCw, FiTool, FiUsers } from "react-icons/fi";
 import { useAdminMutations } from "@/hooks/mutations/useAdminMutations";
 import GuildsAdminSection from "../components/GuildsAdminSection";
 import DraftSection from "../components/DraftSection";
@@ -32,7 +32,7 @@ import { useBotHealth } from "@/components/admin/useBotHealth";
 
 const AdminPage = () => {
   const { isAdmin: isFullAdmin, isGuildManager, managedGuildIds } = useAuth();
-  const { updateCharacters, uploadImages, syncDiscordProfiles } = useAdminMutations();
+  const { updateCharacters, uploadImages, syncDiscordProfiles, createIndexes } = useAdminMutations();
 
   // Tabs allowed for the role: everything for an admin, otherwise the non-restricted tabs
   const visibleTabs = useMemo(
@@ -64,6 +64,7 @@ const AdminPage = () => {
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isSyncingProfiles, setIsSyncingProfiles] = useState(false);
+  const [isCreatingIndexes, setIsCreatingIndexes] = useState(false);
   const toast = useToast();
 
   // Bot health (admins) and navigation counters
@@ -119,6 +120,24 @@ const AdminPage = () => {
       toast({ title: (error as Error).message || "Erreur lors de la synchronisation des profils", status: "error", isClosable: true });
     } finally {
       setIsSyncingProfiles(false);
+    }
+  };
+
+  const handleCreateIndexes = async () => {
+    setIsCreatingIndexes(true);
+    try {
+      const result = await createIndexes();
+      toast({
+        title: result.failed.length === 0 ? `${result.created} index à jour` : `${result.failed.length} index en échec sur ${result.total}`,
+        description: result.failed.map((f) => `${f.collection} : ${f.error ?? "erreur inconnue"}`).join(" · ") || undefined,
+        status: result.failed.length === 0 ? "success" : "warning",
+        duration: 8000,
+        isClosable: true,
+      });
+    } catch (error: unknown) {
+      toast({ title: (error as Error).message || "Erreur lors de la création des index", status: "error", isClosable: true });
+    } finally {
+      setIsCreatingIndexes(false);
     }
   };
 
@@ -225,7 +244,7 @@ const AdminPage = () => {
                   borderRadius="full"
                   leftIcon={<Icon as={FiTool} />}
                   rightIcon={<ChevronDownIcon />}
-                  isLoading={isUpdatingCharacters || isUploadingImages || isSyncingProfiles}
+                  isLoading={isUpdatingCharacters || isUploadingImages || isSyncingProfiles || isCreatingIndexes}
                   loadingText="En cours…"
                 >
                   Outils
@@ -239,6 +258,9 @@ const AdminPage = () => {
                   </MenuItem>
                   <MenuItem icon={<Icon as={FiImage} />} onClick={handleUploadImages}>
                     Envoyer les images
+                  </MenuItem>
+                  <MenuItem icon={<Icon as={FiDatabase} />} onClick={handleCreateIndexes}>
+                    Créer les index de la base
                   </MenuItem>
                   <MenuItem icon={<Icon as={FiCpu} />} onClick={() => void bot.check()}>
                     Tester le bot
