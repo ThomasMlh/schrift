@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
+import { FloatingMenu } from "./FloatingMenu";
 import { AffinityIcon } from "./AffinityIcon";
 import { useCharacters, useCharacter } from "../../hooks/useAPI";
 import { bucketUrl } from "../../utils/apiRequest";
@@ -46,11 +47,11 @@ export const CharacterSearchSelect = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const floatingRef = useRef<HTMLDivElement>(null);
 
   const bgColor = "bg.elevated";
   const borderColor = "border.default";
   const hoverBg = useColorModeValue("gray.50", "gray.600");
-  const menuBg = "bg.card";
 
   const { characters, isLoading } = useCharacters({
     limit: 50,
@@ -78,7 +79,8 @@ export const CharacterSearchSelect = ({
   // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (menuRef.current && !menuRef.current.contains(target) && !floatingRef.current?.contains(target)) {
         setIsOpen(false);
         setSearchTerm("");
       }
@@ -156,21 +158,7 @@ export const CharacterSearchSelect = ({
       )}
 
       {isOpen && !isDisabled && (
-        <Box
-          position="absolute"
-          top="100%"
-          left={0}
-          right={0}
-          zIndex={1000}
-          bg={menuBg}
-          border="1px solid"
-          borderColor={borderColor}
-          borderRadius="md"
-          boxShadow="lg"
-          maxH="300px"
-          overflowY="auto"
-          mt={1}
-        >
+        <FloatingMenu anchorRef={menuRef} menuRef={floatingRef} maxH={300}>
           {isLoading ? (
             <Flex justify="center" p={4}>
               <Spinner size="sm" />
@@ -213,7 +201,7 @@ export const CharacterSearchSelect = ({
               ))}
             </VStack>
           )}
-        </Box>
+        </FloatingMenu>
       )}
     </Box>
   );

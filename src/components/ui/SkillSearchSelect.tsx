@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
+import { FloatingMenu } from "./FloatingMenu";
 import { useSkills } from "../../hooks/useAPI";
 
 interface SkillSearchSelectProps {
@@ -35,11 +36,11 @@ export const SkillSearchSelect = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
+  const floatingRef = useRef<HTMLDivElement>(null);
 
   const bgColor = "bg.elevated";
   const borderColor = "border.default";
   const hoverBg = useColorModeValue("gray.50", "gray.600");
-  const menuBg = "bg.card";
 
   const { skills, isLoading } = useSkills(searchTerm);
 
@@ -50,7 +51,8 @@ export const SkillSearchSelect = ({
   // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (menuRef.current && !menuRef.current.contains(target) && !floatingRef.current?.contains(target)) {
         setIsOpen(false);
         setSearchTerm("");
       }
@@ -124,21 +126,7 @@ export const SkillSearchSelect = ({
           </InputGroup>
 
           {isOpen && !isDisabled && (
-            <Box
-              position="absolute"
-              top="100%"
-              left={0}
-              right={0}
-              zIndex={1000}
-              bg={menuBg}
-              border="1px solid"
-              borderColor={borderColor}
-              borderRadius="md"
-              boxShadow="lg"
-              maxH="200px"
-              overflowY="auto"
-              mt={1}
-            >
+            <FloatingMenu anchorRef={menuRef} menuRef={floatingRef} maxH={200}>
               {isLoading ? (
                 <Flex justify="center" p={4}>
                   <Spinner size="sm" />
@@ -173,7 +161,7 @@ export const SkillSearchSelect = ({
                   ))}
                 </VStack>
               )}
-            </Box>
+            </FloatingMenu>
           )}
         </Box>
       )}
