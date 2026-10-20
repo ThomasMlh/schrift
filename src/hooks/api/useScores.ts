@@ -98,11 +98,13 @@ export const usePodiumFetch = () => {
       weekNumber?: string;
       month?: string;
       guildName?: string;
+      // Followed accounts only (overall ranks are kept)
+      bbsIds?: string[];
       page?: number;
       limit?: number;
     } = {}
   ): Promise<IPodiumResponse | IPodiumWeeklyResponse | IPodiumMissesResponse | null> => {
-    const { cycleYear, rankingType = 'average', rotationId, weekNumber, month, guildName, page = 1, limit = 50 } = options;
+    const { cycleYear, rankingType = 'average', rotationId, weekNumber, month, guildName, bbsIds, page = 1, limit = 50 } = options;
     if (!cycleName && mode !== 'monthly') return null;
     setIsLoading(true);
     setError(null);
@@ -126,6 +128,7 @@ export const usePodiumFetch = () => {
 
       if (cycleYear && mode !== 'monthly') url += `&year=${cycleYear}`;
       if (guildName?.trim()) url += `&guild_name=${encodeURIComponent(guildName.trim())}`;
+      if (bbsIds && mode !== 'misses') url += `&bbs_ids=${bbsIds.map(encodeURIComponent).join(',')}`;
 
       const response = await fetch(url);
       if (!response.ok) {

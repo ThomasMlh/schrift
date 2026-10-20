@@ -44,6 +44,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
 import { UserProfileHeader } from "@/components/user/UserProfileHeader";
 import { UserAccountSwitcher } from "@/components/user/UserAccountSwitcher";
+import { FollowButton } from "@/components/user/FollowButton";
 import { findTopAchievement } from "@/components/achievements/achievementCatalog";
 
 const UserPage = () => {
@@ -219,6 +220,7 @@ const UserPage = () => {
         <UserProfileHeader
           user={user}
           topAchievement={topAchievement}
+          followControl={<FollowButton bbsId={matchedBbsId ?? user.bbs_id ?? undefined} />}
           accountSwitcher={
             userData?.bbs_accounts && userData.bbs_accounts.length > 1 ? (
               <UserAccountSwitcher accounts={userData.bbs_accounts} activeBbsId={matchedBbsId} />

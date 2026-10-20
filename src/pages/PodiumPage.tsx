@@ -1,5 +1,5 @@
 import { Container, VStack, Box, useToast, Button, Icon } from "@chakra-ui/react";
-import { FiClock, FiShield } from "react-icons/fi";
+import { FiClock, FiShield, FiStar } from "react-icons/fi";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { HeroSection } from "../components/HeroSection";
@@ -10,7 +10,7 @@ import type {
   PodiumRankingType,
 } from "../interfaces";
 import { SEOHead } from "@/components/SEOHead";
-import { useCycles, useGuilds, usePodiumFetch, usePodiumMonths } from "@/hooks/useAPI";
+import { useCycles, useFollowing, useGuilds, usePodiumFetch, usePodiumMonths } from "@/hooks/useAPI";
 import { PodiumFilters } from "@/components/podium/PodiumFilters";
 import { PodiumInfo } from "@/components/podium/PodiumInfo";
 import { PodiumResults } from "@/components/podium/PodiumResults";
@@ -31,6 +31,7 @@ interface FilterOverrides {
   guildName?: string;
   weekNumber?: string;
   month?: string;
+  followedOnly?: boolean;
   limit?: number;
 }
 
@@ -60,6 +61,7 @@ const PodiumPage = () => {
     searchParams.get("week_number") || ""
   );
   const [selectedMonth, setSelectedMonth] = useState(searchParams.get("month") || "");
+  const [followedOnly, setFollowedOnly] = useState(searchParams.get("suivis") === "1");
   const [selectedGuildName, setSelectedGuildName] = useState(
     searchParams.get("guild_name") || ""
   );
@@ -70,6 +72,8 @@ const PodiumPage = () => {
   const { cycles, isLoading: cyclesLoading } = useCycles();
   const { guilds } = useGuilds(false, true);
   const { months } = usePodiumMonths();
+  const { followedIds } = useFollowing();
+  const followedKey = followedIds.join(",");
   const { fetchPodium, isLoading, error } = usePodiumFetch();
   const { currentUser, isLoggedIn } = useAuth();
 
@@ -107,6 +111,7 @@ const PodiumPage = () => {
     const guildName = overrides.guildName ?? selectedGuildName;
     const weekNumber = 'weekNumber' in overrides ? (overrides.weekNumber ?? '') : selectedWeekNumber;
     const month = overrides.month ?? selectedMonth;
+    const onlyFollowed = overrides.followedOnly ?? followedOnly;
     const page = overrides.page ?? 1;
     const limit = overrides.limit ?? itemsPerPage;
 
@@ -122,12 +127,14 @@ const PodiumPage = () => {
     if (rotationPos !== undefined) params.set("rotation", rotationPos.toString());
     if (weekNumber) params.set("week_number", weekNumber);
     if (guildName) params.set("guild_name", guildName);
+    if (onlyFollowed) params.set("suivis", "1");
     if (limit !== 50) params.set("limit", limit.toString());
     if (page !== 1) params.set("page", page.toString());
     setSearchParams(params);
 
     const data = await fetchPodium(mode, cycleObj?.name || "", {
       cycleYear: cycleObj?.year, rankingType, rotationId, weekNumber, month, guildName, page, limit,
+      bbsIds: onlyFollowed ? followedIds : undefined,
     });
 
     if (data) {
@@ -214,6 +221,12 @@ const PodiumPage = () => {
   }, [cycles, cyclesLoading]);
 
 
+  // The followed list loads after the page: reload once it is known
+  useEffect(() => {
+    if (followedOnly && hasLoadedFromURL.current) applyFilters({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [followedKey]);
+
   const handleModeChange = (mode: DisplayMode) => {
     setDisplayMode(mode);
 
@@ -297,6 +310,7 @@ const PodiumPage = () => {
     setSelectedWeekNumber("");
     setSelectedMonth("");
     setSelectedGuildName("");
+    setFollowedOnly(false);
     setSearchParams({});
     setPodiumData(null);
   };
@@ -408,6 +422,22 @@ const PodiumPage = () => {
                   >
                     {t("components.podiumFilters.shortcutCurrentCycle")}
                   </Button>
+                  {isLoggedIn && followedIds.length > 0 && displayMode !== "misses" && (
+                    <Button
+                      size="xs"
+                      variant={followedOnly ? "solid" : "outline"}
+                      colorScheme="yellow"
+                      borderRadius="full"
+                      leftIcon={<Icon as={FiStar} />}
+                      aria-pressed={followedOnly}
+                      onClick={() => {
+                        setFollowedOnly(!followedOnly);
+                        applyFilters({ followedOnly: !followedOnly });
+                      }}
+                    >
+                      {t("components.podiumFilters.shortcutFollowed")}
+                    </Button>
+                  )}
                   {userGuild && (
                     <Button
                       size="xs"

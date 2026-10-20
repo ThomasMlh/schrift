@@ -15,6 +15,8 @@ interface UserProfileHeaderProps {
   cycleControl?: ReactNode;
   // Account switcher (alts), shown below the role
   accountSwitcher?: ReactNode;
+  // Follow button, shown next to the name
+  followControl?: ReactNode;
 }
 
 const getRoleBadgeColor = (role: string) => {
@@ -32,7 +34,7 @@ const getRoleBadgeColor = (role: string) => {
 
 // Player page header: Discord banner (or gradient), avatar, name, top achievement, guild and role,
 // with the cycle and account selectors.
-export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountSwitcher }: UserProfileHeaderProps) => {
+export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountSwitcher, followControl }: UserProfileHeaderProps) => {
   const { t } = useTranslation();
   const bannerUrl = user.discord_id && user.banner ? getDiscordBannerUrl(user.discord_id, user.banner) : null;
   const avatarUrl = user.avatar && user.discord_id
@@ -108,6 +110,7 @@ export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountS
                 {displayName}
               </Text>
               <TopAchievementBadge achievement={topAchievement} size={26} />
+              {followControl}
             </HStack>
             <HStack spacing={2} flexWrap="wrap">
               {user.guilde_id ? (

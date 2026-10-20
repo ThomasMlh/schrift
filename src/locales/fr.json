@@ -72,6 +72,9 @@
       "heroTitle": "Guildes Ṣčhrīft",
       "heroDescription": "Rejoignez la communauté Bleach Brave Souls et dominez les classements avec nos guildes",
       "communityTitle": "La Communauté en Chiffres",
+      "followedTitle": "Mes joueurs suivis",
+      "followedSubtitle": "{{cycle}} : leur rang et leur moyenne sur le cycle",
+      "followedNoScore": "Pas encore de score sur ce cycle",
       "monthlyTopTitle": "Joueurs du mois",
       "monthlyTopSubtitle": "{{month}} · meilleure moyenne du {{start}} au {{end}}",
       "monthlyTopSeeAll": "Voir le classement",
@@ -477,6 +480,10 @@
       "noClearNormal": "Non clear normal",
       "noGuildQuest": "N'a pas fait sa QG"
     },
+    "follow": {
+      "follow": "Suivre",
+      "following": "Suivi"
+    },
     "podiumFilters": {
       "modeFullCycle": "Cycle complet",
       "modeByRotation": "Par rotation",
@@ -494,7 +501,8 @@
       "reset": "Réinitialiser",
       "rankingProgression": "Progression",
       "shortcutCurrentCycle": "Cycle en cours",
-      "shortcutMyGuild": "Ma guilde"
+      "shortcutMyGuild": "Ma guilde",
+      "shortcutFollowed": "Mes suivis"
     },
     "podiumInfo": {
       "rotationScore": "Score moyen",
