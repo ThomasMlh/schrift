@@ -13,6 +13,7 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
+import { FiLock } from "react-icons/fi";
 import type { IScore, IUser, ICycle, ICycleRotation } from "../../interfaces";
 import { AttackTypeBadge } from "./AttackTypeBadge";
 import { UserDisplay } from "./UserDisplay";
@@ -59,6 +60,14 @@ const RotationCell = ({ cycle, rotation }: { cycle?: ICycle; rotation?: ICycleRo
     <Text fontSize="sm" color="text.muted">Rotation inconnue</Text>
   );
 
+const LockedActions = () => (
+  <HStack justify="flex-end" pr={2}>
+    <Tooltip label="Cycle verrouillé : seuls les admins peuvent modifier ce score" hasArrow>
+      <Box as="span" color="text.muted" aria-label="Cycle verrouillé"><FiLock /></Box>
+    </Tooltip>
+  </HStack>
+);
+
 const Actions = ({ score, onEdit, onDelete }: { score: IScore; onEdit: (s: IScore) => void; onDelete: (s: IScore) => void }) => (
   <HStack spacing={1} justify="flex-end">
     <Tooltip label="Modifier">
@@ -82,6 +91,10 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
   onDeleteScore
 }) => {
   const canEdit = isAdmin || isGuildManager;
+  const renderActions = (score: IScore, cycle?: ICycle) =>
+    !isAdmin && cycle?.scores_locked
+      ? <LockedActions />
+      : <Actions score={score} onEdit={onEditScore} onDelete={onDeleteScore} />;
 
   const rows: ScoreRow[] = scores.map((score) => {
     const owner = users.find((u) => u._id === score.user_id);
@@ -128,7 +141,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                 </Td>
                 {canEdit && (
                   <Td py={2}>
-                    <Actions score={score} onEdit={onEditScore} onDelete={onDeleteScore} />
+                    {renderActions(score, cycle)}
                   </Td>
                 )}
               </Tr>
@@ -151,7 +164,7 @@ const ScoresTable: React.FC<ScoresTableProps> = ({
                   {!hideCycle && cycle ? `${cycle.name} ${cycle.year} · ` : ""}saisi le {formatDay(score.created_at)}
                 </Text>
               </VStack>
-              {canEdit && <Actions score={score} onEdit={onEditScore} onDelete={onDeleteScore} />}
+              {canEdit && renderActions(score, cycle)}
             </HStack>
           </Box>
         ))}
