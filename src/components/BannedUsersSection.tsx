@@ -23,7 +23,8 @@ const BannedUsersSection: React.FC = () => {
     const { guilds } = useGuilds();
 
     const apiOptions = useMemo(() => ({
-        authenticated: false,
+        // Ban reasons and dates are only returned to admins
+        authenticated: true,
         page: currentPage,
         limit: 20,
         is_banned: 'true',

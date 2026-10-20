@@ -84,9 +84,11 @@ export const useUserAccounts = (options?: {
   };
 };
 
+// Authenticated when logged in: admins then also get the ban details
 export const useUser = (userId: string | undefined) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
   const url = userId ? `${apiUrl}/api/users/${userId}` : null;
-  const { data, error, isLoading, mutate } = useSWR<{ user: IUser }>(url, fetcher, { revalidateOnFocus: false });
+  const { data, error, isLoading, mutate } = useSWR<{ user: IUser }>(url, authenticatedFetcher, { revalidateOnFocus: false });
   return { user: data?.user, isLoading, error, mutate };
 };
 
