@@ -72,12 +72,12 @@
       "heroTitle": "Guildes Ṣčhrīft",
       "heroDescription": "Rejoignez la communauté Bleach Brave Souls et dominez les classements avec nos guildes",
       "communityTitle": "La Communauté en Chiffres",
-      "monthlyTopTitle": "Joueurs du mois",
-      "monthlyTopSubtitle": "{{month}} · meilleure moyenne du {{start}} au {{end}}",
-      "monthlyTopSeeAll": "Voir le classement",
       "followedTitle": "Mes joueurs suivis",
       "followedSubtitle": "{{cycle}} : leur rang et leur moyenne sur le cycle",
       "followedNoScore": "Pas encore de score sur ce cycle",
+      "monthlyTopTitle": "Joueurs du mois",
+      "monthlyTopSubtitle": "{{month}} · meilleure moyenne du {{start}} au {{end}}",
+      "monthlyTopSeeAll": "Voir le classement",
       "communitySubtitle": "Statistiques du cycle actif",
       "communityMembers": "Membres actifs",
       "communityGuilds": "Guildes actives",
@@ -478,6 +478,10 @@
       "noClearNormal": "Non clear normal",
       "noGuildQuest": "N'a pas fait sa QG"
     },
+    "follow": {
+      "follow": "Suivre",
+      "following": "Suivi"
+    },
     "podiumFilters": {
       "modeFullCycle": "Cycle complet",
       "modeByRotation": "Par rotation",
@@ -513,10 +517,6 @@
       "missAverage": "Moyenne : {{avg}} miss/joueur",
       "progressionComparedTo": "Évolution de la moyenne de chaque joueur entre {{previous}} et {{current}}. Seuls les joueurs ayant des scores sur les deux cycles apparaissent.",
       "progressionNoPreviousCycle": "Pas de cycle précédent : la progression ne peut pas être calculée pour ce cycle."
-    },
-    "follow": {
-      "follow": "Suivre",
-      "following": "Suivi"
     },
     "podiumResults": {
       "loading": "Chargement du podium...",
