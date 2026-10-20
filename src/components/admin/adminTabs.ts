@@ -1,7 +1,7 @@
 import type { IconType } from "react-icons";
 import {
   FiActivity, FiBarChart2, FiBell, FiBookOpen, FiCalendar, FiCrosshair,
-  FiGrid, FiImage, FiMessageSquare, FiSearch, FiShield, FiShuffle, FiSlash, FiTrendingDown, FiUserPlus, FiUsers,
+  FiGrid, FiHeart, FiImage, FiMessageSquare, FiSearch, FiShield, FiShuffle, FiSlash, FiTrendingDown, FiUserPlus, FiUsers,
 } from "react-icons/fi";
 import type { AdminPage } from "@/interfaces";
 
@@ -35,6 +35,7 @@ export const ADMIN_TABS: AdminTab[] = [
   { key: "score-control", label: "Contrôle des scores", icon: FiSearch, group: "scores" },
   { key: "preparation", label: "Préparation", icon: FiCrosshair, group: "scores" },
   { key: "alerts", label: "Baisses de régime", icon: FiTrendingDown, group: "scores" },
+  { key: "data-health", label: "Santé des données", icon: FiHeart, group: "scores", adminOnly: true },
   { key: "users", label: "Joueurs", icon: FiUsers, group: "players", adminOnly: true },
   { key: "banned", label: "Bannis", icon: FiSlash, group: "players", adminOnly: true },
   { key: "applications", label: "Candidatures", icon: FiUserPlus, group: "players", adminOnly: true },
@@ -53,6 +54,7 @@ export const ADMIN_SECTION_DESCRIPTIONS: Partial<Record<AdminPage, string>> = {
   draft: "Simuler une nouvelle répartition des joueurs, puis appliquer les mouvements entre guildes.",
   users: "Comptes Discord du site avec leurs comptes BBS, guildes et rôles ; modifier ou bannir un joueur.",
   banned: "Joueurs bannis du site, avec la raison et la possibilité de les débannir.",
+  "data-health": "Tout ce qui fausse les classements ou casse une page : scores en double ou orphelins, rotations sans dates, réglages oubliés.",
   applications: "Candidatures envoyées depuis la page Recrutement, et réglages de cette page.",
   notifications: "Salons Discord et types de notifications envoyés par le bot, pour le site et pour chaque guilde.",
   activity: "Journal de tout ce qui s'est passé sur le site : scores, guildes, cycles, bannissements…",

@@ -53,3 +53,23 @@ export const useScoreLockSettings = () => {
     mutate,
   };
 };
+
+export type DataHealthSeverity = 'error' | 'warning' | 'info';
+
+export interface IDataHealthCheck {
+  code: string;
+  severity: DataHealthSeverity;
+  count: number;
+  samples: Record<string, unknown>[];
+}
+
+// Admin data checks (computed on demand, a few hundred milliseconds)
+export const useDataHealth = () => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const { data, isLoading, isValidating, mutate } = useSWR<{ success: boolean; checks: IDataHealthCheck[]; checked_at: string }>(
+    `${apiUrl}/api/admin/data-health`,
+    authenticatedFetcher,
+    { revalidateOnFocus: false }
+  );
+  return { checks: data?.checks ?? [], checkedAt: data?.checked_at, isLoading, isValidating, refresh: mutate };
+};
