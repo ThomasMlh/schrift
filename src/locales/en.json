@@ -126,6 +126,7 @@
       "followedRotations_one": "{{count}} rotation",
       "followedRotations_other": "{{count}} rotations",
       "followedAverage": "average",
+      "followedCompare": "Compare with me",
       "monthlyTopTitle": "Players of the month",
       "monthlyTopSubtitle": "{{month}} · best average from {{start}} to {{end}}",
       "monthlyTopSeeAll": "See the ranking",

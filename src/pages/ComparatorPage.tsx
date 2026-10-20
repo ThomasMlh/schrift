@@ -83,7 +83,7 @@ const ComparatorPage: React.FC = () => {
   const [userSearch, setUserSearch] = useState("");
   // bbs accounts (not users): a player with several accounts appears once per account, each with its
   // own name/guild, so two accounts of the same player can be compared.
-  const { accounts: users = [] } = useUserAccounts({ authenticated: false, limit: 100, search: userSearch || undefined });
+  const { accounts: users = [] } = useUserAccounts({ authenticated: false, limit: 200, search: userSearch || undefined });
   const { guilds = [] } = useGuilds(false);
   const { cycles = [] } = useCycles();
 
