@@ -75,6 +75,15 @@ export const usePodiumMonths = () => {
   return { months: data?.months ?? [], isLoading };
 };
 
+export const usePodiumMonthlyTop = (month: string | undefined, limit = 3) => {
+  const { data, isLoading } = useSWR<IPodiumResponse>(
+    month ? `${apiUrl}/api/podium/monthly?month=${encodeURIComponent(month)}&limit=${limit}` : null,
+    fetcher,
+    { revalidateOnFocus: false, dedupingInterval: 60000 }
+  );
+  return { players: data?.data ?? [], isLoading };
+};
+
 export const usePodiumFetch = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
