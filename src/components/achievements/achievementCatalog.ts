@@ -35,6 +35,7 @@ export const ICON_PATHS: Record<string, string> = {
   crown: '<path d="M3 8l4.5 4 4.5-7 4.5 7L21 8l-2 10H5L3 8z"/><path d="M5 21h14"/>',
   king: '<path d="M12 2.5v4M10 4.5h4"/><path d="M7 12.5c-1.6-1-2.1-3-1-4.3 1.2-1.4 3.6-.9 6 1.6 2.4-2.5 4.8-3 6-1.6 1.1 1.3.6 3.3-1 4.3"/><path d="M7 12.5h10l-1 6.5H8z"/><path d="M6.5 21.5h11"/>',
   swords: '<path d="M4 4l9 9M4 4h4M4 4v4M20 4l-9 9M20 4h-4M20 4v4M7 17l-3 3M17 17l3 3M9.5 14.5l-3 3M14.5 14.5l3 3"/>',
+  calendarStar: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M12 12.2l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2-1.45-1.4 2-.3z"/>',
   lock: '<path d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="5" y="11" width="14" height="10" rx="2"/>',
 };
 
@@ -64,6 +65,7 @@ export const ACHIEVEMENT_ICONS: Record<string, string> = {
   elite: "layers",
   number_one: "crown",
   week_king: "king",
+  player_of_month: "calendarStar",
   versatile: "swords",
 };
 
