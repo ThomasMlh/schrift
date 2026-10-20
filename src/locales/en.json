@@ -75,6 +75,9 @@
       "monthlyTopTitle": "Players of the month",
       "monthlyTopSubtitle": "{{month}} · best average from {{start}} to {{end}}",
       "monthlyTopSeeAll": "See the ranking",
+      "followedTitle": "Players I follow",
+      "followedSubtitle": "{{cycle}}: their rank and average this cycle",
+      "followedNoScore": "No score this cycle yet",
       "communitySubtitle": "Active cycle statistics",
       "communityMembers": "Active members",
       "communityGuilds": "Active guilds",
@@ -492,7 +495,8 @@
       "reset": "Reset",
       "rankingProgression": "Progression",
       "shortcutCurrentCycle": "Current cycle",
-      "shortcutMyGuild": "My guild"
+      "shortcutMyGuild": "My guild",
+      "shortcutFollowed": "Followed"
     },
     "podiumInfo": {
       "rotationScore": "Average score",
@@ -509,6 +513,10 @@
       "missAverage": "Average: {{avg}} misses/player",
       "progressionComparedTo": "Change in each player's average between {{previous}} and {{current}}. Only players with scores in both cycles are listed.",
       "progressionNoPreviousCycle": "No previous cycle: progression can't be computed for this cycle."
+    },
+    "follow": {
+      "follow": "Follow",
+      "following": "Following"
     },
     "podiumResults": {
       "loading": "Loading podium...",
