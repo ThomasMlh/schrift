@@ -90,7 +90,29 @@
       "preferredGuild": "Guilde souhaitée",
       "noPreference": "Pas de préférence",
       "message": "Message",
-      "submit": "Envoyer ma candidature"
+      "submit": "Envoyer ma candidature",
+      "sentWaitlist": "Candidature envoyée ! Toutes les guildes sont pleines : tu es sur la liste d'attente, et les chefs seront prévenus dès qu'une place se libère.",
+      "trackingHelp": "Garde ce lien pour suivre ta candidature. Il est personnel : ne le partage pas.",
+      "copy": "Copier",
+      "copied": "Copié !",
+      "trackLink": "Suivre ma candidature",
+      "alreadySent": "Tu as déjà envoyé une candidature depuis ce navigateur.",
+      "waitlistNotice": "Toutes les guildes sont pleines pour le moment : ta candidature rejoindra la liste d'attente.",
+      "submitWaitlist": "Rejoindre la liste d'attente"
+    },
+    "recruitmentTracking": {
+      "seoTitle": "Suivi de candidature - Schrift BBS",
+      "heroTitle": "Suivi de ta candidature",
+      "notFound": "Ce lien de suivi ne correspond à aucune candidature. Elle a peut-être été supprimée.",
+      "sent": "Candidature reçue",
+      "review": "Examen par les chefs",
+      "reviewHelp": "Un chef va regarder ta candidature et te contacter sur Discord.",
+      "waitlist": "Liste d'attente",
+      "waitlistPosition": "Toutes les guildes sont pleines. Tu es n°{{position}} dans la file.",
+      "decision": "Décision",
+      "accepted": "Acceptée dans la guilde {{guild}} 🎉",
+      "rejected": "Candidature non retenue",
+      "back": "Retour au recrutement"
     },
     "home": {
       "title": "Bienvenue sur Schrift",

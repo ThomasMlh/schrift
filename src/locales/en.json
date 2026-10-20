@@ -90,7 +90,29 @@
       "preferredGuild": "Preferred guild",
       "noPreference": "No preference",
       "message": "Message",
-      "submit": "Send my application"
+      "submit": "Send my application",
+      "sentWaitlist": "Application sent! Every guild is full: you are on the waiting list, and the leaders will be told as soon as a place frees up.",
+      "trackingHelp": "Keep this link to follow your application. It is personal: do not share it.",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "trackLink": "Follow my application",
+      "alreadySent": "You already sent an application from this browser.",
+      "waitlistNotice": "Every guild is full for now: your application will join the waiting list.",
+      "submitWaitlist": "Join the waiting list"
+    },
+    "recruitmentTracking": {
+      "seoTitle": "Application tracking - Schrift BBS",
+      "heroTitle": "Your application",
+      "notFound": "This tracking link does not match any application. It may have been deleted.",
+      "sent": "Application received",
+      "review": "Review by the leaders",
+      "reviewHelp": "A leader will look at your application and contact you on Discord.",
+      "waitlist": "Waiting list",
+      "waitlistPosition": "Every guild is full. You are no. {{position}} in line.",
+      "decision": "Decision",
+      "accepted": "Accepted into guild {{guild}} 🎉",
+      "rejected": "Application not accepted",
+      "back": "Back to recruitment"
     },
     "home": {
       "title": "Welcome to Schrift",

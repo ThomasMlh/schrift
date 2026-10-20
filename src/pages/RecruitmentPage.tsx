@@ -1,9 +1,10 @@
 import { useState } from "react";
 import {
-  Alert, AlertIcon, Box, Button, Container, FormControl, FormHelperText, FormLabel, Heading, Input,
-  Progress, SimpleGrid, Skeleton, Text, Textarea, VStack, useToast,
+  Alert, AlertDescription, AlertIcon, Box, Button, Container, FormControl, FormHelperText, FormLabel, Heading, HStack, Input,
+  Progress, SimpleGrid, Skeleton, Text, Textarea, VStack, useClipboard, useToast,
 } from "@chakra-ui/react";
-import { FiSend } from "react-icons/fi";
+import { FiCopy, FiEye, FiSend } from "react-icons/fi";
+import { Link as RouterLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { HeroSection } from "@/components/HeroSection";
 import { SEOHead } from "@/components/SEOHead";
@@ -12,6 +13,7 @@ import { useRecruitment } from "@/hooks/useAPI";
 import { useRecruitmentMutations } from "@/hooks/mutations/useRecruitmentMutations";
 import type { IApplicationForm } from "@/hooks/mutations/useRecruitmentMutations";
 import { formatWithCommas } from "@/utils/format";
+import { getStoredTrackingToken, storeTrackingToken, trackingPath } from "@/utils/applicationTracking";
 
 const EMPTY_FORM: IApplicationForm = {
   bbs_name: "", bbs_id: "", discord: "", average_score: "", preferred_guild_id: "", message: "", website: "",
@@ -24,7 +26,10 @@ const RecruitmentPage = () => {
   const { submitApplication } = useRecruitmentMutations();
   const [form, setForm] = useState(EMPTY_FORM);
   const [isSending, setIsSending] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [sent, setSent] = useState<{ waitlisted: boolean; token: string } | null>(null);
+  const [storedToken] = useState(getStoredTrackingToken);
+  const trackingUrl = sent ? `${window.location.origin}${trackingPath(sent.token)}` : "";
+  const { onCopy, hasCopied } = useClipboard(trackingUrl);
 
   const set = (field: keyof IApplicationForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -33,8 +38,9 @@ const RecruitmentPage = () => {
     e.preventDefault();
     setIsSending(true);
     try {
-      await submitApplication(form);
-      setSent(true);
+      const result = await submitApplication(form);
+      storeTrackingToken(result.tracking_token);
+      setSent({ waitlisted: result.status === "waitlist", token: result.tracking_token });
       setForm(EMPTY_FORM);
     } catch (err) {
       toast({ status: "error", title: (err as Error).message, duration: 4000 });
@@ -105,9 +111,38 @@ const RecruitmentPage = () => {
             {!isLoading && recruitment && !recruitment.is_open ? (
               <Alert status="info" borderRadius="lg"><AlertIcon />{t("pages.recruitment.closed")}</Alert>
             ) : sent ? (
-              <Alert status="success" borderRadius="lg"><AlertIcon />{t("pages.recruitment.sent")}</Alert>
+              <VStack align="stretch" spacing={3}>
+                <Alert status="success" borderRadius="lg">
+                  <AlertIcon />
+                  {t(sent.waitlisted ? "pages.recruitment.sentWaitlist" : "pages.recruitment.sent")}
+                </Alert>
+                <Text fontSize="sm" color="text.secondary">{t("pages.recruitment.trackingHelp")}</Text>
+                <HStack>
+                  <Input value={trackingUrl} isReadOnly size="sm" fontFamily="mono" onFocus={(e) => e.target.select()} />
+                  <Button size="sm" leftIcon={<FiCopy />} onClick={onCopy} flexShrink={0}>
+                    {hasCopied ? t("pages.recruitment.copied") : t("pages.recruitment.copy")}
+                  </Button>
+                </HStack>
+                <Button as={RouterLink} to={trackingPath(sent.token)} size="sm" variant="ghost" leftIcon={<FiEye />} alignSelf="flex-start">
+                  {t("pages.recruitment.trackLink")}
+                </Button>
+              </VStack>
             ) : (
               <VStack as="form" onSubmit={submit} spacing={4} align="stretch">
+                {storedToken && (
+                  <Alert status="info" borderRadius="lg">
+                    <AlertIcon />
+                    <AlertDescription>
+                      {t("pages.recruitment.alreadySent")}{" "}
+                      <Button as={RouterLink} to={trackingPath(storedToken)} variant="link" colorScheme="purple" size="sm">
+                        {t("pages.recruitment.trackLink")}
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {recruitment?.is_full && (
+                  <Alert status="warning" borderRadius="lg"><AlertIcon />{t("pages.recruitment.waitlistNotice")}</Alert>
+                )}
                 <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
                   <FormControl isRequired>
                     <FormLabel>{t("pages.recruitment.bbsName")}</FormLabel>
@@ -148,7 +183,7 @@ const RecruitmentPage = () => {
                   <Input tabIndex={-1} autoComplete="off" value={form.website} onChange={set("website")} />
                 </Box>
                 <Button type="submit" colorScheme="purple" leftIcon={<FiSend />} isLoading={isSending} alignSelf="flex-start">
-                  {t("pages.recruitment.submit")}
+                  {t(recruitment?.is_full ? "pages.recruitment.submitWaitlist" : "pages.recruitment.submit")}
                 </Button>
               </VStack>
             )}
