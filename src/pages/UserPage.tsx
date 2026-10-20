@@ -388,7 +388,7 @@ const UserPage = () => {
                 </TabPanel>
 
                 <TabPanel p={0}>
-                  <UserTemporalEvolution temporalEvolution={globalStats?.temporalEvolution ?? []} />
+                  <UserTemporalEvolution temporalEvolution={globalStats?.temporalEvolution ?? []} bbsId={matchedBbsId ?? user.bbs_id ?? undefined} />
                 </TabPanel>
 
                 <TabPanel p={0}>

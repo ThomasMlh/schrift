@@ -823,7 +823,14 @@
         "yearNote": "The year is shown in parentheses.",
         "cyclesDisplayed_one": "📊 {{count}} cycle displayed",
         "cyclesDisplayed_other": "📊 {{count}} cycles displayed",
-        "forYear": "for year {{year}}"
+        "forYear": "for year {{year}}",
+        "viewByCycle": "By cycle",
+        "viewByMonth": "By month",
+        "subtitleMonthly": "Average score per month: a week counts for the month it starts in",
+        "monthsDisplayed_one": "📊 {{count}} month displayed",
+        "monthsDisplayed_other": "📊 {{count}} months displayed",
+        "evolutionNoteMonthly": "💡 Each point is the average of the rotations played in the month, as in the monthly podium.",
+        "inProgress": "in progress"
       },
       "topRotations": {
         "bestRotationTitle": "Best Rotation",
