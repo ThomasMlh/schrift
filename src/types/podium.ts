@@ -59,6 +59,28 @@ export interface IPodiumMonth {
   weeks: number;
   rotations: number;
   in_progress: boolean;
+  finished?: boolean;
+}
+
+export interface IMonthlyWinner {
+  rank: number;
+  bbs_id: string;
+  bbs_name: string | null;
+  discord_id?: string;
+  global_name?: string;
+  avatar?: string;
+  guild_name?: string;
+  averageScore: number;
+  totalScores: number;
+}
+
+// Winners of a finished game month: top 3 players by average and the best guild
+export interface IMonthlyWinners {
+  key: string; // YYYY-MM
+  start_date: string;
+  end_date: string;
+  players: IMonthlyWinner[];
+  guild: { guild_id: string; name: string | null; averageScore: number; totalScores: number } | null;
 }
 
 export interface IPodiumResponse {

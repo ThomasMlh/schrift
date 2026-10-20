@@ -554,6 +554,16 @@
       "scores_one": "{{count}} score",
       "scores_other": "{{count}} scores"
     },
+    "monthlyHallOfFame": {
+      "title": "Monthly hall of fame",
+      "subtitle": "The best players and the guild of the month, month by month",
+      "player": "Player",
+      "guild": "Guild of the month",
+      "view": "View this month",
+      "noPlayer": "Nobody reached the minimum number of scores",
+      "showAll": "Show all {{count}} months",
+      "showLess": "Show less"
+    },
     "podiumResults": {
       "loading": "Loading podium...",
       "selectWeekFirst": "Please select a week",
@@ -1140,6 +1150,10 @@
     "week_king": {
       "name": "King of the week",
       "description": "No. 1 of their guild in a weekly ranking"
+    },
+    "player_of_month": {
+      "name": "Player of the month",
+      "description": "No. 1 of the monthly podium, all guilds"
     },
     "versatile": {
       "name": "All-rounder",

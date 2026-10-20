@@ -12,7 +12,7 @@ import { formatMonthKey, formatWithCommas } from "@/utils/format";
 export const MonthlyTopSection = () => {
   const { t, i18n } = useTranslation();
   const { months, isLoading: monthsLoading } = usePodiumMonths();
-  const lastMonth = months.find((m) => !m.in_progress);
+  const lastMonth = months.find((m) => m.finished ?? !m.in_progress);
   const { players, isLoading } = usePodiumMonthlyTop(lastMonth?.key);
   const { rankings } = useGuildRankings(undefined, lastMonth?.key);
   const guildOfTheMonth = rankings.find((g) => g.totalScores > 0);

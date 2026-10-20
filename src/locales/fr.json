@@ -554,6 +554,16 @@
       "scores_one": "{{count}} score",
       "scores_other": "{{count}} scores"
     },
+    "monthlyHallOfFame": {
+      "title": "Palmarès mensuel",
+      "subtitle": "Les meilleurs joueurs et la guilde du mois, mois par mois",
+      "player": "Joueur",
+      "guild": "Guilde du mois",
+      "view": "Voir ce mois",
+      "noPlayer": "Personne n'a atteint le minimum de scores",
+      "showAll": "Voir les {{count}} mois",
+      "showLess": "Réduire"
+    },
     "podiumResults": {
       "loading": "Chargement du podium...",
       "selectWeekFirst": "Veuillez sélectionner une semaine",
@@ -1140,6 +1150,10 @@
     "week_king": {
       "name": "Roi de la semaine",
       "description": "N°1 de sa guilde au classement d'une semaine"
+    },
+    "player_of_month": {
+      "name": "Joueur du mois",
+      "description": "N°1 du podium mensuel, toutes guildes confondues"
     },
     "versatile": {
       "name": "Touche-à-tout",
