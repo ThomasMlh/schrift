@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { useState, useCallback } from 'react';
-import type { IScoresResponse, IPodiumResponse, IPodiumWeeklyResponse, IPodiumMissesResponse, IPodiumMonth, PodiumRankingType, BulkEntryReference, BulkEntryThresholds } from '../../interfaces';
+import type { IScoresResponse, IPodiumResponse, IPodiumWeeklyResponse, IPodiumMissesResponse, IPodiumMonth, IMonthlyWinners, PodiumRankingType, BulkEntryReference, BulkEntryThresholds } from '../../interfaces';
 import { apiUrl, fetcher, useAuthenticatedFetcher } from './shared';
 
 export const useScores = (options?: {
@@ -71,6 +71,15 @@ export const usePodiumMonths = () => {
     `${apiUrl}/api/podium/months`,
     fetcher,
     { revalidateOnFocus: false, dedupingInterval: 60000 }
+  );
+  return { months: data?.months ?? [], isLoading };
+};
+
+export const useMonthlyWinners = () => {
+  const { data, isLoading } = useSWR<{ success: boolean; months: IMonthlyWinners[] }>(
+    `${apiUrl}/api/podium/monthly/winners`,
+    fetcher,
+    { revalidateOnFocus: false, dedupingInterval: 300000 }
   );
   return { months: data?.months ?? [], isLoading };
 };

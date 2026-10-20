@@ -15,6 +15,7 @@ import { PodiumFilters } from "@/components/podium/PodiumFilters";
 import { PodiumInfo } from "@/components/podium/PodiumInfo";
 import { PodiumResults } from "@/components/podium/PodiumResults";
 import { MonthlyGuildRanking } from "@/components/podium/MonthlyGuildRanking";
+import { MonthlyHallOfFame } from "@/components/podium/MonthlyHallOfFame";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/providers/AuthProvider";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
@@ -345,6 +346,15 @@ const PodiumPage = () => {
               selectedGuildName={selectedGuildName}
               onPageChange={handlePageChange}
             />
+
+            {displayMode === "monthly" && (
+              <MonthlyHallOfFame
+                onSelectMonth={(month) => {
+                  handleMonthChange(month);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              />
+            )}
           </VStack>
         ) : null}
       </Box>
@@ -481,6 +491,15 @@ const PodiumPage = () => {
               selectedGuildName={selectedGuildName}
               onPageChange={handlePageChange}
             />
+
+            {displayMode === "monthly" && (
+              <MonthlyHallOfFame
+                onSelectMonth={(month) => {
+                  handleMonthChange(month);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              />
+            )}
           </VStack>
         </Container>
       </Box>
