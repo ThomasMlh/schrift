@@ -166,3 +166,21 @@ export const useBulkEntryContext = (guildId?: string, cycleId?: string, rotation
     isLoading,
   };
 };
+
+export interface IPlayerMonthAverage {
+  key: string; // YYYY-MM
+  start_date: string;
+  end_date: string;
+  in_progress: boolean;
+  averageScore: number;
+  scoreCount: number;
+}
+
+export const usePlayerMonthlyAverages = (bbsId: string | undefined, enabled = true) => {
+  const { data, isLoading } = useSWR<{ success: boolean; months: IPlayerMonthAverage[] }>(
+    bbsId && enabled ? `${apiUrl}/api/podium/monthly/player/${encodeURIComponent(bbsId)}` : null,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
+  return { months: data?.months ?? [], isLoading };
+};

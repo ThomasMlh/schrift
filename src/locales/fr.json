@@ -823,7 +823,14 @@
         "yearNote": "L'année est affichée entre parenthèses.",
         "cyclesDisplayed_one": "📊 {{count}} cycle affiché",
         "cyclesDisplayed_other": "📊 {{count}} cycles affichés",
-        "forYear": "pour l'année {{year}}"
+        "forYear": "pour l'année {{year}}",
+        "viewByCycle": "Par cycle",
+        "viewByMonth": "Par mois",
+        "subtitleMonthly": "Score moyen par mois : une semaine compte pour le mois où elle commence",
+        "monthsDisplayed_one": "📊 {{count}} mois affiché",
+        "monthsDisplayed_other": "📊 {{count}} mois affichés",
+        "evolutionNoteMonthly": "💡 Chaque point est la moyenne des rotations jouées sur le mois, comme dans le podium mensuel.",
+        "inProgress": "en cours"
       },
       "topRotations": {
         "bestRotationTitle": "Meilleure Rotation",
