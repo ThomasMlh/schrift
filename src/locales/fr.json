@@ -104,6 +104,7 @@
       "followedRotations_one": "{{count}} rotation",
       "followedRotations_other": "{{count}} rotations",
       "followedAverage": "moyenne",
+      "followedCompare": "Comparer avec moi",
       "monthlyTopTitle": "Joueurs du mois",
       "monthlyTopSubtitle": "{{month}} · meilleure moyenne du {{start}} au {{end}}",
       "monthlyTopSeeAll": "Voir le classement",

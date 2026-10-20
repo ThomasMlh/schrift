@@ -1,9 +1,11 @@
-import { Avatar, Badge, Box, HStack, SimpleGrid, Skeleton, Text } from "@chakra-ui/react";
-import { FiStar } from "react-icons/fi";
+import { Avatar, Badge, Box, HStack, Icon, IconButton, SimpleGrid, Skeleton, Text, Tooltip } from "@chakra-ui/react";
+import { FiBarChart2, FiStar } from "react-icons/fi";
+import { Link as RouterLink } from "react-router-dom";
 import useSWR from "swr";
 import { useTranslation } from "react-i18next";
 import { useCycles, useFollowing } from "@/hooks/useAPI";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
+import { useAuth } from "@/providers/AuthProvider";
 import { apiUrl, fetcher } from "@/hooks/api/shared";
 import { HomeSectionHeader } from "./ui/HomeSectionHeader";
 import CustomLink from "./ui/CustomLink";
@@ -14,9 +16,14 @@ import type { IPodiumResponse } from "@/interfaces";
 
 const MEDAL_COLORS = ["#FFD700", "#C0C0C0", "#CD7F32"];
 
+// Comparator pre-filled with the viewer's own account (when they have one) and the followed player
+const duelUrl = (ownBbsId: string | undefined, bbsId: string) =>
+  `/comparateur?type=players&players=${[ownBbsId, bbsId].filter((id, i, ids) => id && ids.indexOf(id) === i).map((id) => encodeURIComponent(id as string)).join(",")}`;
+
 // Followed players' rank and average on the current cycle (logged-in users following someone only)
 export const FollowedPlayersSection = () => {
   const { t } = useTranslation();
+  const { currentUser } = useAuth();
   const { following, followedIds } = useFollowing();
   const { cycles, isLoading: cyclesLoading } = useCycles();
   const { currentCycle } = useCurrentRotation(cycles, cyclesLoading);
@@ -119,6 +126,17 @@ export const FollowedPlayersSection = () => {
                     <Text fontSize="xs" color="text.muted" maxW="110px">{t("pages.home.followedNoScore")}</Text>
                   )}
                 </Box>
+                <Tooltip label={t("pages.home.followedCompare")} hasArrow>
+                  <IconButton
+                    as={RouterLink}
+                    to={duelUrl(currentUser?.bbs_id, account.bbs_id)}
+                    aria-label={t("pages.home.followedCompare")}
+                    icon={<Icon as={FiBarChart2} />}
+                    size="sm"
+                    variant="ghost"
+                    flexShrink={0}
+                  />
+                </Tooltip>
               </HStack>
             );
           })}
