@@ -8,14 +8,20 @@ import { Link } from "react-router-dom";
 import { useApplications, useRecruitmentSettings } from "@/hooks/useAPI";
 import type { ApplicationStatus } from "@/hooks/useAPI";
 import { useRecruitmentMutations } from "@/hooks/mutations/useRecruitmentMutations";
+import { AcceptApplicationModal } from "./AcceptApplicationModal";
+import type { IApplication } from "@/hooks/useAPI";
 import { formatWithCommas } from "@/utils/format";
 
 const STATUS_LABELS: Record<ApplicationStatus, { label: string; color: string }> = {
   new: { label: "Nouvelle", color: "purple" },
+  waitlist: { label: "En attente", color: "orange" },
   accepted: { label: "Acceptée", color: "green" },
   rejected: { label: "Refusée", color: "red" },
 };
-const FILTERS: (ApplicationStatus | "all")[] = ["new", "accepted", "rejected", "all"];
+const FILTERS: (ApplicationStatus | "all")[] = ["new", "waitlist", "accepted", "rejected", "all"];
+const FILTER_LABELS: Record<ApplicationStatus | "all", string> = {
+  new: "Nouvelles", waitlist: "Liste d'attente", accepted: "Acceptées", rejected: "Refusées", all: "Toutes",
+};
 
 const RecruitmentSettingsCard = () => {
   const toast = useToast();
@@ -84,6 +90,7 @@ export const ApplicationsSection = () => {
   const [filter, setFilter] = useState<ApplicationStatus | "all">("new");
   const { applications, isLoading } = useApplications(filter === "all" ? undefined : filter);
   const { setApplicationStatus, deleteApplication } = useRecruitmentMutations();
+  const [accepting, setAccepting] = useState<IApplication | null>(null);
 
   const run = async (action: () => Promise<void>) => {
     try {
@@ -97,7 +104,9 @@ export const ApplicationsSection = () => {
     <VStack spacing={5} align="stretch">
       <RecruitmentSettingsCard />
 
-      <ButtonGroup size="sm" isAttached variant="outline" alignSelf="flex-start">
+      <AcceptApplicationModal application={accepting} onClose={() => setAccepting(null)} />
+
+      <ButtonGroup size="sm" isAttached variant="outline" alignSelf="flex-start" flexWrap="wrap">
         {FILTERS.map((f) => (
           <Button
             key={f}
@@ -105,7 +114,7 @@ export const ApplicationsSection = () => {
             variant={filter === f ? "solid" : "outline"}
             onClick={() => setFilter(f)}
           >
-            {f === "all" ? "Toutes" : `${STATUS_LABELS[f].label}s`}
+            {FILTER_LABELS[f]}
           </Button>
         ))}
       </ButtonGroup>
@@ -128,6 +137,7 @@ export const ApplicationsSection = () => {
                   Discord : {app.discord}
                   {app.average_score ? ` · moyenne ${formatWithCommas(app.average_score)}` : ""}
                   {app.preferred_guild_name ? ` · souhaite ${app.preferred_guild_name}` : ""}
+                  {app.accepted_guild_name ? ` · acceptée dans ${app.accepted_guild_name}` : ""}
                 </Text>
                 <Text fontSize="xs" color="text.muted">{new Date(app.created_at).toLocaleString("fr-FR")}</Text>
                 {app.message && <Text mt={2} fontSize="sm" whiteSpace="pre-line">{app.message}</Text>}
@@ -136,7 +146,7 @@ export const ApplicationsSection = () => {
                 {app.status !== "accepted" && (
                   <Tooltip label="Accepter">
                     <IconButton size="sm" variant="ghost" colorScheme="green" aria-label="Accepter" icon={<FiCheck />}
-                      onClick={() => run(() => setApplicationStatus(app._id, "accepted"))} />
+                      onClick={() => setAccepting(app)} />
                   </Tooltip>
                 )}
                 {app.status !== "rejected" && (
