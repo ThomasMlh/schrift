@@ -27,6 +27,8 @@ export interface ICycle {
   updated_at?: string;
   rotations: ICycleRotation[];
   year: number;
+  // Leaders/officers can no longer change this cycle's scores (admins still can)
+  scores_locked?: boolean;
 }
 
 export interface ICycleFormData {

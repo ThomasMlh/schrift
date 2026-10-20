@@ -37,3 +37,19 @@ export const usePodiumSettings = () => {
     mutate,
   };
 };
+
+export const useScoreLockSettings = () => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+
+  const { data, error, isLoading, mutate } = useSWR<{
+    success: boolean;
+    lock_after_days: number;
+  }>(`${apiUrl}/api/settings/scores`, authenticatedFetcher, { revalidateOnFocus: false });
+
+  return {
+    lockAfterDays: data?.lock_after_days,
+    isLoading,
+    error,
+    mutate,
+  };
+};

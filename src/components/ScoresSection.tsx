@@ -66,6 +66,8 @@ const ScoresSection = () => {
   const handleGuildFilterChange    = (id: string) => { setFilterGuildId(id); setCurrentPage(1); };
   const handleResetFilters         = () => { setFilterCycleId(""); setFilterRotationId(""); setFilterGuildId(""); setScoreSearchQuery(""); setCurrentPage(1); };
 
+  // Leaders/officers can only enter scores on cycles that are not locked yet
+  const writableCycles     = isAdmin ? cycles : cycles.filter((c) => !c.scores_locked);
   const selectedCycle      = cycles.find((c) => c._id === filterCycleId);
   const availableRotations = selectedCycle?.rotations || [];
   const activeFiltersCount = [scoreSearchQuery, filterCycleId, filterRotationId, filterGuildId].filter(Boolean).length;
@@ -231,7 +233,7 @@ const ScoresSection = () => {
           isTransferModalOpen={isTransferModalOpen}
           onTransferModalClose={onTransferModalClose}
           users={users}
-          cycles={cycles}
+          cycles={writableCycles}
           guilds={guilds}
           isLoadingCycles={isLoadingCycles}
           selectedUserId={scoreManagement.selectedUserId}
