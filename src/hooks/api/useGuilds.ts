@@ -129,8 +129,13 @@ export interface IGuildRanking extends IGuildStats {
   rank: number;
 }
 
-export const useGuildRankings = (cycleId?: string) => {
-  const url = `${apiUrl}/api/guildes/rankings${cycleId ? `?cycle_id=${cycleId}` : ''}`;
+// Over a cycle, a game month (YYYY-MM), or all scores when neither is given
+export const useGuildRankings = (cycleId?: string, month?: string) => {
+  const params = new URLSearchParams();
+  if (cycleId) params.set('cycle_id', cycleId);
+  if (month) params.set('month', month);
+  const query = params.toString();
+  const url = `${apiUrl}/api/guildes/rankings${query ? `?${query}` : ''}`;
   const { data, error, isLoading } = useSWR<{ success: boolean; data: IGuildRanking[] }>(url, fetcher, { revalidateOnFocus: false });
   return { rankings: data?.data || [], isLoading, error };
 };
