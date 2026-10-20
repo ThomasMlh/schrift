@@ -8,7 +8,6 @@ import GuildsAdminSection from "../components/GuildsAdminSection";
 import DraftSection from "../components/DraftSection";
 import DraftProposalSection from "../components/DraftProposalSection";
 import CyclesSection from "../components/CyclesSection";
-import { ApplicationsSection } from "../components/admin/ApplicationsSection";
 import ScoresSection from "../components/ScoresSection";
 import UsersTable from "../components/UsersTable";
 import BannedUsersSection from "../components/BannedUsersSection";
@@ -30,6 +29,7 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { AdminSidebar, AdminSectionSelect } from "@/components/admin/AdminSidebar";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { useBotHealth } from "@/components/admin/useBotHealth";
+import { ApplicationsSection } from "../components/admin/ApplicationsSection";
 
 const AdminPage = () => {
   const { isAdmin: isFullAdmin, isGuildManager, managedGuildIds } = useAuth();
