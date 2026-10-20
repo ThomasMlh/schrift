@@ -26,5 +26,16 @@ export const useSettingsMutations = () => {
     return result;
   };
 
-  return { updateGlobalNotificationSettings, updatePodiumMinScores };
+  const updateScoreLockDays = async (lockAfterDays: number) => {
+    const result = await request(`${apiUrl}/api/settings/scores`, {
+      method: 'PUT',
+      body: JSON.stringify({ lock_after_days: lockAfterDays }),
+    }, { fallbackError: 'Erreur lors de la mise à jour du verrouillage des scores' });
+    await mutate(`${apiUrl}/api/settings/scores`);
+    // Each cycle's scores_locked flag depends on this delay
+    await mutate((key) => typeof key === 'string' && key.startsWith(`${apiUrl}/api/cycles`));
+    return result;
+  };
+
+  return { updateGlobalNotificationSettings, updatePodiumMinScores, updateScoreLockDays };
 };

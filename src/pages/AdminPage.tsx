@@ -8,6 +8,7 @@ import GuildsAdminSection from "../components/GuildsAdminSection";
 import DraftSection from "../components/DraftSection";
 import DraftProposalSection from "../components/DraftProposalSection";
 import CyclesSection from "../components/CyclesSection";
+import { ScoreLockSetting } from "../components/admin/ScoreLockSetting";
 import ScoresSection from "../components/ScoresSection";
 import UsersTable from "../components/UsersTable";
 import BannedUsersSection from "../components/BannedUsersSection";
@@ -167,7 +168,12 @@ const AdminPage = () => {
           </VStack>
         );
       case "cycles":
-        return <CyclesSection />;
+        return (
+          <VStack align="stretch" spacing={6}>
+            <ScoreLockSetting />
+            <CyclesSection />
+          </VStack>
+        );
       case "scores":
         return <ScoresSection />;
       case "score-control":
