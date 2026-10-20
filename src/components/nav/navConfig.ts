@@ -8,6 +8,7 @@ import {
   FiShield,
   FiUsers,
   FiBell,
+  FiUserPlus,
 } from "react-icons/fi";
 import { LuSwords, LuBookMarked } from "react-icons/lu";
 
@@ -34,6 +35,7 @@ export const NAV_ITEMS: NavItem[] = [
   { labelKey: "nav.podium", path: "/podium", icon: FiAward, group: "compete", primary: true },
   { labelKey: "nav.comparator", path: "/comparateur", icon: LuSwords, group: "compete" },
   { labelKey: "nav.guides", path: "/guides", icon: LuBookMarked, group: "resources" },
+  { labelKey: "nav.recruitment", path: "/recrutement", icon: FiUserPlus, group: "resources" },
   { labelKey: "nav.annonces", path: "/annonce", icon: FiBell, group: "resources", footerOnly: true },
   { labelKey: "nav.admin", path: "/admin", icon: FiSettings, group: "resources", adminOrGuildManagerOnly: true },
 ];
