@@ -75,6 +75,8 @@
       "monthlyTopTitle": "Joueurs du mois",
       "monthlyTopSubtitle": "{{month}} · meilleure moyenne du {{start}} au {{end}}",
       "monthlyTopSeeAll": "Voir le classement",
+      "guildOfTheMonth": "Guilde du mois",
+      "guildOfTheMonthAverage": "moyenne",
       "communitySubtitle": "Statistiques du cycle actif",
       "communityMembers": "Membres actifs",
       "communityGuilds": "Guildes actives",
@@ -509,6 +511,11 @@
       "missAverage": "Moyenne : {{avg}} miss/joueur",
       "progressionComparedTo": "Évolution de la moyenne de chaque joueur entre {{previous}} et {{current}}. Seuls les joueurs ayant des scores sur les deux cycles apparaissent.",
       "progressionNoPreviousCycle": "Pas de cycle précédent : la progression ne peut pas être calculée pour ce cycle."
+    },
+    "monthlyGuildRanking": {
+      "title": "Classement des guildes du mois",
+      "scores_one": "{{count}} score",
+      "scores_other": "{{count}} scores"
     },
     "podiumResults": {
       "loading": "Chargement du podium...",

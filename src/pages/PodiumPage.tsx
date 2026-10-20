@@ -14,6 +14,7 @@ import { useCycles, useGuilds, usePodiumFetch, usePodiumMonths } from "@/hooks/u
 import { PodiumFilters } from "@/components/podium/PodiumFilters";
 import { PodiumInfo } from "@/components/podium/PodiumInfo";
 import { PodiumResults } from "@/components/podium/PodiumResults";
+import { MonthlyGuildRanking } from "@/components/podium/MonthlyGuildRanking";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/providers/AuthProvider";
 import { cycleSlug, cycleFromSlug } from "@/utils/cycleHelpers";
@@ -435,6 +436,10 @@ const PodiumPage = () => {
                 selectedCycle={selectedCycle}
                 filterBg={filterBg}
               />
+            )}
+
+            {displayMode === "monthly" && selectedMonth && !selectedGuildName && (
+              <MonthlyGuildRanking month={selectedMonth} />
             )}
 
             <PodiumResults
