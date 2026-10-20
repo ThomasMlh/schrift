@@ -2,7 +2,7 @@
 
 export type Page = "guilds" | "characters";
 
-export type AdminPage = "overview" | "guilds" | "draft" | "cycles" | "scores" | "users" | "guides" | "banned" | "images" | "notifications" | "activity" | "messages" | "alerts" | "score-control" | "preparation";
+export type AdminPage = "overview" | "guilds" | "draft" | "cycles" | "scores" | "users" | "guides" | "banned" | "images" | "notifications" | "activity" | "messages" | "alerts" | "score-control" | "preparation" | "applications";
 
 export type Role = "chef" | "sous-chef" | "membre";
 

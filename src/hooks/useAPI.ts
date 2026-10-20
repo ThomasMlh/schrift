@@ -3,6 +3,7 @@
  * Import the domain hook directly when only a subset is needed.
  */
 export * from './api/useCycles';
+export * from './api/useRecruitment';
 export * from './api/useGuilds';
 export * from './api/useUsers';
 export * from './api/useCharacters';

@@ -24,12 +24,13 @@ import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { AdminPage as IAdminPage } from "../interfaces";
 import { useAuth } from "../providers/AuthProvider";
-import { useDeclineAlerts, useGuilds, useScoreAnomalies, useUsers } from "@/hooks/useAPI";
+import { useApplications, useDeclineAlerts, useGuilds, useScoreAnomalies, useUsers } from "@/hooks/useAPI";
 import { ADMIN_SECTION_DESCRIPTIONS, ADMIN_TABS, getAdminTab } from "@/components/admin/adminTabs";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { AdminSidebar, AdminSectionSelect } from "@/components/admin/AdminSidebar";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { useBotHealth } from "@/components/admin/useBotHealth";
+import { ApplicationsSection } from "../components/admin/ApplicationsSection";
 
 const AdminPage = () => {
   const { isAdmin: isFullAdmin, isGuildManager, managedGuildIds } = useAuth();
@@ -75,10 +76,12 @@ const AdminPage = () => {
   const { alerts } = useDeclineAlerts();
   const { anomalies } = useScoreAnomalies();
   const { pagination: bannedPagination } = useUsers({ is_banned: 'true', limit: 1, enabled: isFullAdmin });
+  const { applications: newApplications } = useApplications("new", isFullAdmin);
   const counters: Partial<Record<IAdminPage, number>> = {
     alerts: alerts.length,
     "score-control": anomalies.length,
     banned: bannedPagination?.totalCount ?? 0,
+    applications: newApplications.length,
   };
 
   const handleUpdateCharacters = async () => {
@@ -196,6 +199,8 @@ const AdminPage = () => {
         return <ActivityLogSection />;
       case "messages":
         return <DiscordMessageSection />;
+      case "applications":
+        return <ApplicationsSection />;
       case "guilds":
       default:
         return <GuildsAdminSection />;
