@@ -26,6 +26,7 @@ import type { AdminPage as IAdminPage } from "../interfaces";
 import { useAuth } from "../providers/AuthProvider";
 import { useApplications, useDeclineAlerts, useGuilds, useScoreAnomalies, useUsers } from "@/hooks/useAPI";
 import { ADMIN_SECTION_DESCRIPTIONS, ADMIN_TABS, getAdminTab } from "@/components/admin/adminTabs";
+import { DataHealthSection } from "@/components/admin/DataHealthSection";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { AdminSidebar, AdminSectionSelect } from "@/components/admin/AdminSidebar";
 import { AdminOverview } from "@/components/admin/AdminOverview";
@@ -201,6 +202,8 @@ const AdminPage = () => {
         return <DiscordMessageSection />;
       case "applications":
         return <ApplicationsSection />;
+      case "data-health":
+        return <DataHealthSection onNavigate={handleTabChange} />;
       case "guilds":
       default:
         return <GuildsAdminSection />;
