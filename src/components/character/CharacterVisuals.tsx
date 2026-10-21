@@ -3,6 +3,7 @@ import { DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
 import { useTranslation } from "react-i18next";
 import type { ICharacter } from "@/interfaces";
 import { bucketUrl } from "@/utils/apiRequest";
+import { characterImageUrl, characterQuoteFolder } from "@/utils/characterImages";
 
 interface CharacterVisualsProps {
   character: ICharacter;
@@ -12,7 +13,7 @@ interface CharacterVisualsProps {
 
 // Character visuals (banner, special attack, artwork, quote) with download and zoom
 export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVisualsProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
 
@@ -34,9 +35,9 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
             filename: `banniere-${character.name}.png`,
             key: "banner",
           }] : []),
-          { src: `${bucketUrl}/characters/attack/${character._id}.png`, label: t("pages.characterDetail.labelSpecialAttack"), filename: `attaque-${character.name}.png`, key: "attack" },
-          { src: `${bucketUrl}/characters/artwork/${character._id}.png`, label: t("pages.characterDetail.labelArtwork"), filename: `artwork-${character.name}.png`, key: "artwork" },
-          { src: `${bucketUrl}/characters/phrase/${character._id}.png`, label: t("pages.characterDetail.labelPhrase"), filename: `phrase-${character.name}.png`, key: "phrase" },
+          { src: characterImageUrl(character, "attack"), label: t("pages.characterDetail.labelSpecialAttack"), filename: `attaque-${character.name}.png`, key: "attack" },
+          { src: characterImageUrl(character, "artwork"), label: t("pages.characterDetail.labelArtwork"), filename: `artwork-${character.name}.png`, key: "artwork" },
+          { src: characterImageUrl(character, characterQuoteFolder(character, i18n.language)), label: t("pages.characterDetail.labelPhrase"), filename: `phrase-${character.name}.png`, key: "phrase" },
         ].map(({ src, label, filename, key }) => (
           <Box key={key} borderRadius="xl" overflow="hidden" border="1px solid"
             borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
