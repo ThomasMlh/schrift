@@ -32,6 +32,8 @@ import { AdminSidebar, AdminSectionSelect } from "@/components/admin/AdminSideba
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { useBotHealth } from "@/components/admin/useBotHealth";
 import { ApplicationsSection } from "../components/admin/ApplicationsSection";
+import { CharacterSyncModal } from "@/components/admin/CharacterSyncModal";
+import type { ICharacterSyncResult } from "@/types/character";
 
 const AdminPage = () => {
   const { isAdmin: isFullAdmin, isGuildManager, managedGuildIds } = useAuth();
@@ -65,6 +67,7 @@ const AdminPage = () => {
     }, { replace: true });
   };
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
+  const [syncPreview, setSyncPreview] = useState<ICharacterSyncResult | null>(null);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isSyncingProfiles, setIsSyncingProfiles] = useState(false);
   const [isCreatingIndexes, setIsCreatingIndexes] = useState(false);
@@ -85,11 +88,26 @@ const AdminPage = () => {
     applications: newApplications.length,
   };
 
-  const handleUpdateCharacters = async () => {
+  // Dry run first: the modal shows what will change, the sync only runs on "Appliquer"
+  const handlePreviewCharacters = async () => {
     setIsUpdatingCharacters(true);
     try {
+      setSyncPreview(await updateCharacters({ dryRun: true }));
+    } catch (error: unknown) {
+      toast({ title: (error as Error).message || "Erreur lors de la simulation", status: "error" });
+    } finally {
+      setIsUpdatingCharacters(false);
+    }
+  };
+
+  const handleUpdateCharacters = async () => {
+    setIsUpdatingCharacters(true);
+    const needsImages = (syncPreview?.statistics.inserted ?? 0) + (syncPreview?.statistics.imagesChanged ?? 0) > 0;
+    try {
       const data = await updateCharacters();
-      toast({ title: (data as { message?: string }).message || "Personnages mis à jour", status: "success" });
+      setSyncPreview(null);
+      toast({ title: data.message || "Personnages mis à jour", status: "success", duration: 8000, isClosable: true });
+      if (needsImages) await handleUploadImages();
     } catch (error: unknown) {
       toast({ title: (error as Error).message || "Erreur lors de la mise à jour des personnages", status: "error" });
     } finally {
@@ -264,7 +282,7 @@ const AdminPage = () => {
                   Outils
                 </MenuButton>
                 <MenuList>
-                  <MenuItem icon={<Icon as={FiRefreshCw} />} onClick={handleUpdateCharacters}>
+                  <MenuItem icon={<Icon as={FiRefreshCw} />} onClick={handlePreviewCharacters}>
                     Synchroniser les personnages
                   </MenuItem>
                   <MenuItem icon={<Icon as={FiUsers} />} onClick={handleSyncProfiles}>
@@ -305,6 +323,14 @@ const AdminPage = () => {
           </VStack>
         </Box>
       </Flex>
+
+      <CharacterSyncModal
+        preview={syncPreview}
+        isOpen={syncPreview !== null}
+        onClose={() => setSyncPreview(null)}
+        onApply={() => void handleUpdateCharacters()}
+        isApplying={isUpdatingCharacters}
+      />
     </Box>
   );
 }
