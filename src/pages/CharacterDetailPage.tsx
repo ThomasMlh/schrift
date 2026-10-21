@@ -36,6 +36,7 @@ import { CharacterRotations } from "@/components/character/CharacterRotations";
 import { FiActivity, FiBarChart2, FiCrosshair, FiShield } from "react-icons/fi";
 import { CharacterVisuals } from "@/components/character/CharacterVisuals";
 import { CharacterBuilds } from "@/components/character/CharacterBuilds";
+import { characterImageUrl } from "@/utils/characterImages";
 
 const CharacterDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -226,14 +227,14 @@ const CharacterDetailPage = () => {
               <Box
                 position="absolute"
                 inset="-20px"
-                backgroundImage={`url(${bucketUrl}/characters/artwork/${character._id}.png)`}
+                backgroundImage={`url(${characterImageUrl(character, "artwork")})`}
                 backgroundSize="cover"
                 backgroundPosition="center"
                 filter="blur(18px) brightness(0.6)"
                 aria-hidden
               />
               <Image
-                src={`${bucketUrl}/characters/artwork/${character._id}.png`}
+                src={characterImageUrl(character, "artwork")}
                 alt={`Artwork ${character.name}`}
                 position="absolute"
                 inset={0}
@@ -253,7 +254,7 @@ const CharacterDetailPage = () => {
             >
               <Flex gap={4} align="flex-end" minW={0}>
                 <Image
-                  src={`${bucketUrl}/characters/thumb/${character._id}.png`}
+                  src={characterImageUrl(character, "thumb")}
                   alt={character.name}
                   boxSize={{ base: "88px", md: "112px" }}
                   borderRadius="xl"

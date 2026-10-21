@@ -21,6 +21,35 @@ export interface ICharacter {
   resurrection_release?: string;
   created_at?: string;
   updated_at?: string;
+  source_images?: { quote_en?: string | null };
+  // Bumped each time the bucket images are re-uploaded, used to bypass the browser cache
+  images_version?: number;
+}
+
+export interface ICharacterSyncEntry {
+  search_name: string;
+  name: string;
+}
+
+export interface ICharacterSyncResult {
+  message: string;
+  dryRun?: boolean;
+  statistics: {
+    totalProcessed: number;
+    inserted: number;
+    updated: number;
+    renamed: number;
+    skipped: number;
+    imagesChanged?: number;
+    silhouettes?: number;
+    imagesUploaded?: number;
+  };
+  preview?: {
+    inserted: ICharacterSyncEntry[];
+    renamed: (ICharacterSyncEntry & { previous: string })[];
+    images: (ICharacterSyncEntry & { targets: string[] })[];
+    duplicates: { search_name: string; count: number }[];
+  };
 }
 
 export interface ICharacterStats {

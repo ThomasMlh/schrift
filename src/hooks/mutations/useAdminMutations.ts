@@ -1,14 +1,16 @@
 import { useMemo } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { makeRequest, apiUrl } from '@/utils/apiRequest';
+import type { ICharacterSyncResult } from '@/types/character';
 
 export const useAdminMutations = () => {
   const { token } = useAuth();
   const request = useMemo(() => makeRequest(token), [token]);
 
-  const updateCharacters = async () => {
-    return request(`${apiUrl}/api/characters/update`, {
+  const updateCharacters = async (options: { dryRun?: boolean } = {}) => {
+    return request<ICharacterSyncResult>(`${apiUrl}/api/characters/update`, {
       method: 'POST',
+      body: JSON.stringify({ dryRun: options.dryRun === true }),
     }, { fallbackError: 'Erreur lors de la mise à jour des personnages' });
   };
 
