@@ -167,7 +167,7 @@ const AdminPage = () => {
   const handleUploadImages = async () => {
     setIsUploadingImages(true);
     try {
-      const { totalUploaded } = await uploadImages(100, (total, remaining) => {
+      const { totalUploaded } = await uploadImages(40, (total, remaining) => {
         toast({ title: `Images: ${total} uploadées, ${remaining} restants...`, status: "info", duration: 2000 });
       });
       toast({ title: `Upload terminé: ${totalUploaded} images`, status: "success" });
