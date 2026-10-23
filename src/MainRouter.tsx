@@ -28,6 +28,7 @@ const ComparatorPage = lazy(() => import("./pages/ComparatorPage"));
 const RecruitmentPage = lazy(() => import("./pages/RecruitmentPage"));
 const RecruitmentTrackingPage = lazy(() => import("./pages/RecruitmentTrackingPage"));
 const GuidesPage = lazy(() => import("./pages/GuidesPage"));
+const RafflePage = lazy(() => import("./pages/RafflePage"));
 const AnnoncesPage = lazy(() => import("./pages/AnnoncesPage"));
 const GuildesPage = lazy(() => import("./pages/GuildesPage"));
 const OCRDebugPage = lazy(() => import("./pages/OCRDebugPage"));
@@ -130,6 +131,7 @@ const AppRoutes = () => {
         />
         <Route path="/podium" element={<PodiumPage />} />
         <Route path="/comparateur" element={<ComparatorPage />} />
+        <Route path="/tombola" element={<RafflePage />} />
         <Route path="/recrutement" element={<RecruitmentPage />} />
         <Route path="/recrutement/suivi/:token" element={<RecruitmentTrackingPage />} />
         <Route

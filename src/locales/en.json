@@ -28,7 +28,8 @@
     "roleAdmin": "Admin",
     "roleGuildManager": "Guild leader",
     "roleMember": "Member",
-    "loginHint": "Log in with Discord to access your profile."
+    "loginHint": "Log in with Discord to access your profile.",
+    "raffle": "Raffle"
   },
   "auth": {
     "login": "Log in",
@@ -460,6 +461,135 @@
       "rotationsNone": "No remaining rotation of this cycle matches its killers.",
       "rotationNow": "Now",
       "rotationSameColor": "Same colour"
+    },
+    "raffle": {
+      "seoTitle": "Monthly raffle",
+      "seoDescription": "Entry tickets for the Schrift guilds' monthly raffle.",
+      "heroTitle": "Monthly raffle",
+      "heroDescription": "Every month, one {{prize}} to win per guild. Your scores, consistency and guild life earn you tickets.",
+      "noGuild": "No guild takes part in the raffle yet.",
+      "guild": "Guild {{name}}",
+      "inProgress": "in progress",
+      "me": "Me",
+      "years_one": "{{count}} year",
+      "years_other": "{{count}} years",
+      "period_one": "1st fortnight",
+      "period_other": "2nd fortnight",
+      "below": "below",
+      "above": "above",
+      "noBonus": "No one-off tickets.",
+      "bonusLabel": "Activity",
+      "addBonus": "Add tickets",
+      "removeBonus": "Remove",
+      "firstSeen": "Present since {{date}} according to the site.",
+      "firstSeenUnknown": "Arrival date unknown.",
+      "schriftSince": "Joined Schrift in",
+      "clearSince": "Clear the entered date",
+      "managerHint": "Leader: tick the farm tickets and QG teams of each fortnight, add one-off tickets and fix seniority by clicking the cells.",
+      "col": {
+        "player": "Player",
+        "tickets": "Tickets",
+        "top5Rotations": "Top 5 rotations",
+        "top5Month": "Top 5 month",
+        "homogeneity": "Consistency",
+        "seniority": "Seniority",
+        "collective": "Collective",
+        "farm": "Farm tickets",
+        "qg": "QG teams",
+        "bonus": "One-off",
+        "chance": "Chance"
+      },
+      "hint": {
+        "top5Rotations": "1 ticket per rotation in the guild's top 5, {{max}} max",
+        "homogeneity": "Worst rotation: {{gap}} {{side}} the guild average",
+        "homogeneityMissing": "At least one rotation of the month without a score",
+        "capped": "{{earned}} tickets earned, capped at {{max}}"
+      },
+      "stats": {
+        "total": "Tickets in play",
+        "players_one": "{{count}} player",
+        "players_other": "{{count}} players",
+        "mine": "My tickets",
+        "chance": "{{value}}% chance",
+        "notInGuild": "Not in this guild",
+        "gap": "1st / last gap",
+        "gapGoal": "Collective ticket below {{gap}}",
+        "sRank": "Rank S reached / kept",
+        "sRankHint": "Ticked by a leader when the guild reaches or stays in S this month",
+        "sRankYes": "Yes: +1 ticket for everyone",
+        "sRankNo": "No"
+      },
+      "prizeOfMonth": "Prize: {{prize}}",
+      "readyToDraw": "The month is over: {{total}} tickets in play.",
+      "drawAfter": "Draw available from {{date}}.",
+      "draw": "Draw the winner",
+      "confirmTitle": "Guild {{guild}} draw",
+      "confirmText": "One ticket is drawn at random among the {{total}} in play. Tickets are then frozen and the draw cannot be run again.",
+      "announce": "Announce the winner on the guild's Discord",
+      "drawDone": "{{name}} wins the raffle!",
+      "announcement": {
+        "sent": "The winner was announced on Discord.",
+        "no_channel": "No general channel set for this guild: no announcement.",
+        "failed": "The Discord announcement failed, remember to tell them.",
+        "skipped": "No Discord announcement."
+      },
+      "winner": "Winner of the month",
+      "winnerDetail": "{{prize}} · ticket #{{number}} of {{total}} ({{tickets}} tickets)",
+      "drawnBy": "Drawn by {{name}} on {{date}}",
+      "cancelDraw": "Cancel the draw",
+      "rulesTitle": "How to earn tickets",
+      "rulesSubtitle": "Up to {{max}} tickets per player and per month.",
+      "rules": {
+        "top5": {
+          "title": "Top 5",
+          "items": [
+            "1 ticket per rotation of the month where you are in your guild's top {{rotationTop}} ({{maxRotationTop}} max).",
+            "1 ticket if you are in your guild's top {{monthTop}} on the month's average (at least half of the rotations played)."
+          ]
+        },
+        "homogeneity": {
+          "title": "Consistency",
+          "items": [
+            "We look at your worst rotation of the month: the gap between your score and the guild average on it.",
+            "Less than {{full}} below the average (or above it): 2 tickets. Up to {{half}}: 1 ticket. Beyond: 0.",
+            "A rotation of the month without a score counts as the worst one."
+          ]
+        },
+        "seniority": {
+          "title": "Seniority",
+          "items": [
+            "1 ticket per full year in Schrift, {{maxSeniority}} max.",
+            "Only if you earned at least one Top 5 ticket in the month."
+          ]
+        },
+        "collective": {
+          "title": "Collective",
+          "items": [
+            "1 ticket for every member when the guild reaches or stays in rank S.",
+            "1 ticket for every member if the gap between the guild's first and last (month average) is below {{gap}}."
+          ]
+        },
+        "guildLife": {
+          "title": "Guild life",
+          "items": [
+            "1 ticket per fortnight for sending and requesting farm tickets (randomly checked 3 times a week).",
+            "1 ticket per fortnight for sending the 4 QG teams / pattern / build."
+          ]
+        },
+        "bonus": {
+          "title": "One-off tickets",
+          "items": [
+            "Activities announced along the way give extra tickets."
+          ]
+        }
+      },
+      "settings": {
+        "title": "Raffle settings (admin)",
+        "guilds": "Taking part guilds",
+        "prize": "Prize",
+        "maxTickets": "Max tickets / player",
+        "saved": "Settings saved"
+      }
     }
   },
   "components": {
