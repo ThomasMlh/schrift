@@ -581,7 +581,8 @@
         "prize": "Lot",
         "maxTickets": "Tickets max / joueur",
         "saved": "Réglages enregistrés"
-      }
+      },
+      "loadError": "Impossible de charger la tombola."
     }
   },
   "components": {

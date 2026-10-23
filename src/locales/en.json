@@ -581,7 +581,8 @@
         "prize": "Prize",
         "maxTickets": "Max tickets / player",
         "saved": "Settings saved"
-      }
+      },
+      "loadError": "Could not load the raffle."
     }
   },
   "components": {

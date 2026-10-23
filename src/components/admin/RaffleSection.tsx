@@ -17,7 +17,7 @@ import { formatMonthKey, formatScore } from "@/utils/format";
 export const RaffleSection = () => {
   const { t, i18n } = useTranslation();
   const toast = useToast();
-  const { overview, isLoading: isLoadingOverview } = useRaffleOverview();
+  const { overview, isLoading: isLoadingOverview, error: overviewError } = useRaffleOverview();
   const { setSRank } = useRaffleMutations();
   const [selectedMonth, setSelectedMonth] = useState<string>();
   const [selectedGuildId, setSelectedGuildId] = useState<string>();
@@ -27,7 +27,7 @@ export const RaffleSection = () => {
   // The month in progress by default: tickets fill up while it runs
   const month = selectedMonth ?? (months.find((m) => m.in_progress) ?? months[0])?.key;
   const guildId = selectedGuildId ?? guilds[0]?._id;
-  const { raffle, isLoading } = useGuildRaffle(month, guildId);
+  const { raffle, isLoading, error: raffleError } = useGuildRaffle(month, guildId);
 
   const toggleSRank = async (value: boolean) => {
     if (!raffle) return;
@@ -43,6 +43,9 @@ export const RaffleSection = () => {
       {overview && <RaffleSettings key={overview.guild_ids.join(",")} overview={overview} />}
 
       {isLoadingOverview && <Skeleton h="80px" borderRadius="xl" />}
+      {(overviewError || raffleError) && (
+        <Alert status="error" borderRadius="xl"><AlertIcon />{(overviewError ?? raffleError)?.message || t("pages.raffle.loadError")}</Alert>
+      )}
       {overview && guilds.length === 0 && (
         <Alert status="info" borderRadius="xl"><AlertIcon />{t("pages.raffle.noGuild")}</Alert>
       )}
