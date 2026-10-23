@@ -19,3 +19,4 @@ export * from './api/useTrends';
 export * from './api/useGuildGoals';
 export * from './api/useAlbums';
 export * from './api/useFollowing';
+export * from './api/useRaffle';

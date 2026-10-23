@@ -460,6 +460,129 @@
       "rotationsNone": "Aucune rotation restante de ce cycle ne correspond à ses killers.",
       "rotationNow": "En cours",
       "rotationSameColor": "Même couleur"
+    },
+    "raffle": {
+      "noGuild": "Aucune guilde ne participe encore à la tombola.",
+      "guild": "Guilde {{name}}",
+      "inProgress": "en cours",
+      "years_one": "{{count}} an",
+      "years_other": "{{count}} ans",
+      "period_one": "1re quinzaine",
+      "period_other": "2e quinzaine",
+      "below": "sous",
+      "above": "au-dessus de",
+      "noBonus": "Aucun ticket ponctuel.",
+      "bonusLabel": "Activité",
+      "addBonus": "Ajouter les tickets",
+      "removeBonus": "Retirer",
+      "firstSeen": "Présent depuis {{date}} d'après le site.",
+      "firstSeenUnknown": "Date d'arrivée inconnue.",
+      "schriftSince": "Arrivé dans Schrift en",
+      "clearSince": "Effacer la date saisie",
+      "managerHint": "Coche les tickets farm et les teams QG de chaque quinzaine, ajoute les tickets ponctuels et corrige l'ancienneté en cliquant sur les cellules.",
+      "col": {
+        "player": "Joueur",
+        "tickets": "Tickets",
+        "top5Rotations": "Top 5 rotas",
+        "top5Month": "Top 5 mois",
+        "homogeneity": "Homogénéité",
+        "seniority": "Ancienneté",
+        "collective": "Collectif",
+        "farm": "Tickets farm",
+        "qg": "Teams QG",
+        "bonus": "Ponctuels",
+        "chance": "Chance"
+      },
+      "hint": {
+        "top5Rotations": "1 ticket par rota où le joueur est dans le top 5 de la guilde, {{max}} max",
+        "homogeneity": "Pire rota : {{gap}} {{side}} la moyenne de la guilde",
+        "homogeneityMissing": "Au moins une rota du mois sans score",
+        "capped": "{{earned}} tickets gagnés, plafonnés à {{max}}"
+      },
+      "stats": {
+        "total": "Tickets en jeu",
+        "players_one": "{{count}} joueur",
+        "players_other": "{{count}} joueurs",
+        "gap": "Écart 1er / dernier",
+        "gapGoal": "Ticket collectif sous {{gap}}",
+        "sRank": "Passage / maintien S",
+        "sRankHint": "Passage ou maintien en S ce mois-ci",
+        "sRankYes": "Oui : +1 ticket pour tous",
+        "sRankNo": "Non",
+        "rotations": "Rotas du mois"
+      },
+      "prizeOfMonth": "À gagner : {{prize}}",
+      "readyToDraw": "Le mois est terminé : {{total}} tickets en jeu.",
+      "drawAfter": "Tirage possible à partir du {{date}}.",
+      "draw": "Lancer le tirage",
+      "confirmTitle": "Tirage de la guilde {{guild}}",
+      "confirmText": "Un ticket est tiré au hasard parmi les {{total}} en jeu. Les tickets sont figés ensuite et le tirage ne peut pas être relancé.",
+      "announce": "Annoncer le gagnant sur le Discord de la guilde",
+      "drawDone": "{{name}} remporte la tombola !",
+      "announcement": {
+        "sent": "Le gagnant a été annoncé sur Discord.",
+        "no_channel": "Pas de salon général configuré pour cette guilde : pas d'annonce.",
+        "failed": "L'annonce Discord a échoué, pense à le prévenir.",
+        "skipped": "Pas d'annonce Discord."
+      },
+      "winner": "Gagnant du mois",
+      "winnerDetail": "{{prize}} · ticket n°{{number}} sur {{total}} ({{tickets}} tickets)",
+      "drawnBy": "Tiré par {{name}} le {{date}}",
+      "cancelDraw": "Annuler le tirage",
+      "rulesTitle": "Comment gagner des tickets",
+      "rulesSubtitle": "{{max}} tickets maximum par joueur et par mois.",
+      "rules": {
+        "top5": {
+          "title": "Top 5",
+          "items": [
+            "1 ticket par rota du mois où tu es dans le top {{rotationTop}} de ta guilde ({{maxRotationTop}} maximum).",
+            "1 ticket si tu es dans le top {{monthTop}} de ta guilde sur la moyenne du mois (au moins la moitié des rotas jouées)."
+          ]
+        },
+        "homogeneity": {
+          "title": "Homogénéité",
+          "items": [
+            "On regarde ta pire rota du mois : l'écart entre ton score et la moyenne de la guilde sur cette rota.",
+            "Moins de {{full}} sous la moyenne (ou au-dessus) : 2 tickets. Jusqu'à {{half}} : 1 ticket. Au-delà : 0.",
+            "Une rota du mois sans score compte comme la pire rota."
+          ]
+        },
+        "seniority": {
+          "title": "Ancienneté",
+          "items": [
+            "1 ticket par année complète dans Schrift, {{maxSeniority}} maximum.",
+            "Seulement si tu as gagné au moins un ticket Top 5 dans le mois."
+          ]
+        },
+        "collective": {
+          "title": "Collectif",
+          "items": [
+            "1 ticket pour chaque membre quand la guilde passe ou se maintient en S.",
+            "1 ticket pour chaque membre si l'écart entre le 1er et le dernier de la guilde (moyenne du mois) est sous {{gap}}."
+          ]
+        },
+        "guildLife": {
+          "title": "Vie de guilde",
+          "items": [
+            "1 ticket par quinzaine pour l'envoi et la demande de tickets farm (vérifié au hasard 3 fois par semaine).",
+            "1 ticket par quinzaine pour l'envoi des 4 teams QG / pattern / build."
+          ]
+        },
+        "bonus": {
+          "title": "Tickets ponctuels",
+          "items": [
+            "Des activités annoncées au fur et à mesure rapportent des tickets en plus."
+          ]
+        }
+      },
+      "settings": {
+        "title": "Réglages",
+        "guilds": "Guildes participantes",
+        "prize": "Lot",
+        "maxTickets": "Tickets max / joueur",
+        "saved": "Réglages enregistrés"
+      },
+      "loadError": "Impossible de charger la tombola."
     }
   },
   "components": {
