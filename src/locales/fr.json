@@ -495,7 +495,7 @@
       },
       "hint": {
         "top5Rotations": "1 ticket par rota où le joueur est dans le top 5 de la guilde, {{max}} max",
-        "homogeneity": "Pire rota : {{gap}} {{side}} la moyenne de la guilde",
+        "homogeneity": "Pire rota : {{gap}} {{side}} la médiane de la guilde",
         "homogeneityMissing": "Au moins une rota du mois sans score",
         "capped": "{{earned}} tickets gagnés, plafonnés à {{max}}"
       },
@@ -542,8 +542,8 @@
         "homogeneity": {
           "title": "Homogénéité",
           "items": [
-            "On regarde ta pire rota du mois : l'écart entre ton score et la moyenne de la guilde sur cette rota.",
-            "Moins de {{full}} sous la moyenne (ou au-dessus) : 2 tickets. Jusqu'à {{half}} : 1 ticket. Au-delà : 0.",
+            "On regarde ta pire rota du mois : l'écart entre ton score et la médiane de la guilde sur cette rota (le score du milieu, qu'un 0 ne fait pas chuter).",
+            "Moins de {{full}} sous la médiane (ou au-dessus) : 2 tickets. Jusqu'à {{half}} : 1 ticket. Au-delà : 0.",
             "Une rota du mois sans score compte comme la pire rota."
           ]
         },

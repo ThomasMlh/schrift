@@ -495,7 +495,7 @@
       },
       "hint": {
         "top5Rotations": "1 ticket per rotation in the guild's top 5, {{max}} max",
-        "homogeneity": "Worst rotation: {{gap}} {{side}} the guild average",
+        "homogeneity": "Worst rotation: {{gap}} {{side}} the guild median",
         "homogeneityMissing": "At least one rotation of the month without a score",
         "capped": "{{earned}} tickets earned, capped at {{max}}"
       },
@@ -542,8 +542,8 @@
         "homogeneity": {
           "title": "Consistency",
           "items": [
-            "We look at your worst rotation of the month: the gap between your score and the guild average on it.",
-            "Less than {{full}} below the average (or above it): 2 tickets. Up to {{half}}: 1 ticket. Beyond: 0.",
+            "We look at your worst rotation of the month: the gap between your score and the guild median on it (the middle score, which a 0 does not drag down).",
+            "Less than {{full}} below the median (or above it): 2 tickets. Up to {{half}}: 1 ticket. Beyond: 0.",
             "A rotation of the month without a score counts as the worst one."
           ]
         },
