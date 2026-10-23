@@ -27,6 +27,7 @@ import { useAuth } from "../providers/AuthProvider";
 import { useApplications, useDeclineAlerts, useGuilds, useScoreAnomalies, useUsers } from "@/hooks/useAPI";
 import { ADMIN_SECTION_DESCRIPTIONS, ADMIN_TABS, getAdminTab } from "@/components/admin/adminTabs";
 import { DataHealthSection } from "@/components/admin/DataHealthSection";
+import { RaffleSection } from "@/components/admin/RaffleSection";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { AdminSidebar, AdminSectionSelect } from "@/components/admin/AdminSidebar";
 import { AdminOverview } from "@/components/admin/AdminOverview";
@@ -220,6 +221,8 @@ const AdminPage = () => {
         return <DiscordMessageSection />;
       case "applications":
         return <ApplicationsSection />;
+      case "raffle":
+        return <RaffleSection />;
       case "data-health":
         return <DataHealthSection onNavigate={handleTabChange} />;
       case "guilds":

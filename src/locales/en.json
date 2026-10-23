@@ -28,8 +28,7 @@
     "roleAdmin": "Admin",
     "roleGuildManager": "Guild leader",
     "roleMember": "Member",
-    "loginHint": "Log in with Discord to access your profile.",
-    "raffle": "Raffle"
+    "loginHint": "Log in with Discord to access your profile."
   },
   "auth": {
     "login": "Log in",
@@ -463,14 +462,9 @@
       "rotationSameColor": "Same colour"
     },
     "raffle": {
-      "seoTitle": "Monthly raffle",
-      "seoDescription": "Entry tickets for the Schrift guilds' monthly raffle.",
-      "heroTitle": "Monthly raffle",
-      "heroDescription": "Every month, one {{prize}} to win per guild. Your scores, consistency and guild life earn you tickets.",
       "noGuild": "No guild takes part in the raffle yet.",
       "guild": "Guild {{name}}",
       "inProgress": "in progress",
-      "me": "Me",
       "years_one": "{{count}} year",
       "years_other": "{{count}} years",
       "period_one": "1st fortnight",
@@ -485,7 +479,7 @@
       "firstSeenUnknown": "Arrival date unknown.",
       "schriftSince": "Joined Schrift in",
       "clearSince": "Clear the entered date",
-      "managerHint": "Leader: tick the farm tickets and QG teams of each fortnight, add one-off tickets and fix seniority by clicking the cells.",
+      "managerHint": "Tick the farm tickets and QG teams of each fortnight, add one-off tickets and fix seniority by clicking the cells.",
       "col": {
         "player": "Player",
         "tickets": "Tickets",
@@ -509,15 +503,13 @@
         "total": "Tickets in play",
         "players_one": "{{count}} player",
         "players_other": "{{count}} players",
-        "mine": "My tickets",
-        "chance": "{{value}}% chance",
-        "notInGuild": "Not in this guild",
         "gap": "1st / last gap",
         "gapGoal": "Collective ticket below {{gap}}",
         "sRank": "Rank S reached / kept",
-        "sRankHint": "Ticked by a leader when the guild reaches or stays in S this month",
+        "sRankHint": "Rank S reached or kept this month",
         "sRankYes": "Yes: +1 ticket for everyone",
-        "sRankNo": "No"
+        "sRankNo": "No",
+        "rotations": "Rotations of the month"
       },
       "prizeOfMonth": "Prize: {{prize}}",
       "readyToDraw": "The month is over: {{total}} tickets in play.",
@@ -584,7 +576,7 @@
         }
       },
       "settings": {
-        "title": "Raffle settings (admin)",
+        "title": "Settings",
         "guilds": "Taking part guilds",
         "prize": "Prize",
         "maxTickets": "Max tickets / player",

@@ -28,8 +28,7 @@
     "roleAdmin": "Admin",
     "roleGuildManager": "Chef de guilde",
     "roleMember": "Membre",
-    "loginHint": "Connectez-vous avec Discord pour accéder à votre profil.",
-    "raffle": "Tombola"
+    "loginHint": "Connectez-vous avec Discord pour accéder à votre profil."
   },
   "auth": {
     "login": "Se connecter",
@@ -463,14 +462,9 @@
       "rotationSameColor": "Même couleur"
     },
     "raffle": {
-      "seoTitle": "Tombola mensuelle",
-      "seoDescription": "Tickets de participation à la tombola mensuelle des guildes Schrift.",
-      "heroTitle": "Tombola mensuelle",
-      "heroDescription": "Chaque mois, un {{prize}} à gagner par guilde. Tes scores, ta régularité et ta vie de guilde te rapportent des tickets.",
       "noGuild": "Aucune guilde ne participe encore à la tombola.",
       "guild": "Guilde {{name}}",
       "inProgress": "en cours",
-      "me": "Moi",
       "years_one": "{{count}} an",
       "years_other": "{{count}} ans",
       "period_one": "1re quinzaine",
@@ -485,7 +479,7 @@
       "firstSeenUnknown": "Date d'arrivée inconnue.",
       "schriftSince": "Arrivé dans Schrift en",
       "clearSince": "Effacer la date saisie",
-      "managerHint": "Chef : coche les tickets farm et les teams QG de chaque quinzaine, ajoute les tickets ponctuels et corrige l'ancienneté en cliquant sur les cellules.",
+      "managerHint": "Coche les tickets farm et les teams QG de chaque quinzaine, ajoute les tickets ponctuels et corrige l'ancienneté en cliquant sur les cellules.",
       "col": {
         "player": "Joueur",
         "tickets": "Tickets",
@@ -509,15 +503,13 @@
         "total": "Tickets en jeu",
         "players_one": "{{count}} joueur",
         "players_other": "{{count}} joueurs",
-        "mine": "Mes tickets",
-        "chance": "{{value}} % de chances",
-        "notInGuild": "Pas dans cette guilde",
         "gap": "Écart 1er / dernier",
         "gapGoal": "Ticket collectif sous {{gap}}",
         "sRank": "Passage / maintien S",
-        "sRankHint": "À cocher par un chef quand la guilde passe ou reste en S ce mois-ci",
+        "sRankHint": "Passage ou maintien en S ce mois-ci",
         "sRankYes": "Oui : +1 ticket pour tous",
-        "sRankNo": "Non"
+        "sRankNo": "Non",
+        "rotations": "Rotas du mois"
       },
       "prizeOfMonth": "À gagner : {{prize}}",
       "readyToDraw": "Le mois est terminé : {{total}} tickets en jeu.",
@@ -584,7 +576,7 @@
         }
       },
       "settings": {
-        "title": "Réglages de la tombola (admin)",
+        "title": "Réglages",
         "guilds": "Guildes participantes",
         "prize": "Lot",
         "maxTickets": "Tickets max / joueur",

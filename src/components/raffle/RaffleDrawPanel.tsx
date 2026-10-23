@@ -10,7 +10,7 @@ import { useRaffleMutations } from "@/hooks/mutations/useRaffleMutations";
 import { parseFrenchDate } from "@/utils/raffle";
 
 // Winner of the month, or the button that draws it once the month is over
-export const RaffleDrawPanel = ({ raffle, canManage, isAdmin }: { raffle: IGuildRaffle; canManage: boolean; isAdmin: boolean }) => {
+export const RaffleDrawPanel = ({ raffle }: { raffle: IGuildRaffle }) => {
   const { t, i18n } = useTranslation();
   const toast = useToast();
   const { draw, cancelDraw } = useRaffleMutations();
@@ -67,11 +67,9 @@ export const RaffleDrawPanel = ({ raffle, canManage, isAdmin }: { raffle: IGuild
               </Text>
             </Box>
           </HStack>
-          {isAdmin && (
-            <Button size="sm" variant="ghost" colorScheme="red" isLoading={isBusy} onClick={() => void run(() => cancelDraw(raffle.month.key, raffle.guild._id))}>
-              {t("pages.raffle.cancelDraw")}
-            </Button>
-          )}
+          <Button size="sm" variant="ghost" colorScheme="red" isLoading={isBusy} onClick={() => void run(() => cancelDraw(raffle.month.key, raffle.guild._id))}>
+            {t("pages.raffle.cancelDraw")}
+          </Button>
         </Flex>
       </Box>
     );
@@ -91,7 +89,7 @@ export const RaffleDrawPanel = ({ raffle, canManage, isAdmin }: { raffle: IGuild
             </Text>
           </Box>
         </HStack>
-        {canManage && raffle.month.finished && (
+        {raffle.month.finished && (
           <Button colorScheme="purple" leftIcon={<FiGift />} onClick={confirm.onOpen} isDisabled={raffle.total_tickets === 0}>
             {t("pages.raffle.draw")}
           </Button>

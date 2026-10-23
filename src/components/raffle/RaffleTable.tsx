@@ -12,11 +12,6 @@ import { getUserAvatarUrl } from "@/utils/discord";
 import { buildPlayerUrl } from "@/utils/playerUrl";
 import { formatScore } from "@/utils/format";
 
-interface RaffleTableProps {
-  raffle: IGuildRaffle;
-  canManage: boolean;
-  ownBbsIds: string[];
-}
 
 // A number cell that stays quiet when the player earned nothing
 const Count = ({ value, hint }: { value: number; hint?: string }) => (
@@ -187,9 +182,10 @@ const PeriodBoxes = ({ raffle, player, kind, locked }: { raffle: IGuildRaffle; p
 };
 
 // Every player of the guild with the detail of their tickets; leaders edit the manual ones in place
-export const RaffleTable = ({ raffle, canManage, ownBbsIds }: RaffleTableProps) => {
+export const RaffleTable = ({ raffle }: { raffle: IGuildRaffle }) => {
   const { t } = useTranslation();
-  const locked = !canManage || raffle.draw !== null;
+  // Tickets are frozen once drawn
+  const locked = raffle.draw !== null;
   const { rules } = raffle;
 
   const homogeneityHint = (p: IRafflePlayer) => (p.worst_gap === null
@@ -218,16 +214,14 @@ export const RaffleTable = ({ raffle, canManage, ownBbsIds }: RaffleTableProps) 
           {raffle.players.map((p) => {
             const name = p.bbs_name || p.global_name || p.bbs_id;
             const avatarUrl = p.avatar && p.discord_id ? getUserAvatarUrl({ discord_id: p.discord_id, avatar: p.avatar }) || undefined : undefined;
-            const isMe = ownBbsIds.includes(p.bbs_id);
             const isWinner = raffle.draw?.winner.bbs_id === p.bbs_id;
             const chance = raffle.total_tickets > 0 ? (p.tickets / raffle.total_tickets) * 100 : 0;
             return (
-              <Tr key={p.bbs_id} bg={isWinner ? "rgba(236, 201, 75, 0.15)" : isMe ? "rgba(128, 90, 213, 0.1)" : undefined}>
+              <Tr key={p.bbs_id} bg={isWinner ? "rgba(236, 201, 75, 0.15)" : undefined}>
                 <Td>
                   <HStack spacing={2} minW="160px">
                     <Avatar size="xs" src={avatarUrl} name={name} />
-                    <CustomLink to={buildPlayerUrl(p.bbs_name ?? "", p.bbs_id)} text={name} textSize="sm" sx={{ fontWeight: isMe ? "bold" : "medium" }} />
-                    {isMe && <Badge colorScheme="purple">{t("pages.raffle.me")}</Badge>}
+                    <CustomLink to={buildPlayerUrl(p.bbs_name ?? "", p.bbs_id)} text={name} textSize="sm" sx={{ fontWeight: "medium" }} />
                     {isWinner && <Badge colorScheme="yellow">🏆</Badge>}
                   </HStack>
                 </Td>
@@ -245,12 +239,10 @@ export const RaffleTable = ({ raffle, canManage, ownBbsIds }: RaffleTableProps) 
                   {locked ? <Count value={p.breakdown.seniority} hint={t("pages.raffle.years", { count: p.years })} /> : <SeniorityEditor raffle={raffle} player={p} />}
                 </Td>
                 <Td isNumeric><Count value={p.breakdown.s_rank + p.breakdown.collective_gap} /></Td>
-                <Td>{canManage ? <PeriodBoxes raffle={raffle} player={p} kind="farm" locked={locked} /> : <Count value={p.breakdown.farm} />}</Td>
-                <Td>{canManage ? <PeriodBoxes raffle={raffle} player={p} kind="qg" locked={locked} /> : <Count value={p.breakdown.qg} />}</Td>
+                <Td><PeriodBoxes raffle={raffle} player={p} kind="farm" locked={locked} /></Td>
+                <Td><PeriodBoxes raffle={raffle} player={p} kind="qg" locked={locked} /></Td>
                 <Td isNumeric>
-                  {canManage ? <BonusEditor raffle={raffle} player={p} locked={locked} /> : (
-                    <Count value={p.breakdown.bonus} hint={p.bonuses.map((b) => `${b.label} · ${b.count}`).join("\n") || undefined} />
-                  )}
+                  <BonusEditor raffle={raffle} player={p} locked={locked} />
                 </Td>
                 <Td isNumeric><Text fontSize="xs" color="text.muted">{chance.toFixed(1)} %</Text></Td>
               </Tr>
