@@ -463,10 +463,10 @@
       "formBase": "6★",
       "formResurrected": "Ressuscité",
       "headingGameTraits": "Capacités",
-      "traitsLink": "Link skill",
-      "traitsPassive": "Traits d'âme",
-      "traitsTree": "Arbre des traits",
-      "traitsEx": "Traits EX",
+      "traitsLink": "Soul Trait",
+      "traitsPassive": "Compétences innées",
+      "traitsTree": "Compétences",
+      "traitsEx": "Compétences EX",
       "traitsSpecial": "Attaque spéciale"
     },
     "raffle": {

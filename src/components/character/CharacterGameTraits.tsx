@@ -4,11 +4,12 @@ import type { GameText, IGameTrait, IGameTraits } from "@/interfaces";
 import { gameText } from "@/utils/gameText";
 import { Pill, TraitRow } from "./SectionCard";
 
+// Same sections and order as the in-game character sheet
 const SECTIONS: { key: keyof IGameTraits; label: string }[] = [
+  { key: "ex", label: "pages.characterDetail.traitsEx" },
   { key: "link", label: "pages.characterDetail.traitsLink" },
   { key: "passive", label: "pages.characterDetail.traitsPassive" },
   { key: "tree", label: "pages.characterDetail.traitsTree" },
-  { key: "ex", label: "pages.characterDetail.traitsEx" },
 ];
 
 // Abilities read from the game tables, for the base or the resurrected form

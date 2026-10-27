@@ -81,6 +81,8 @@ export interface IGameTrait {
   value?: number | null;
   values?: number[] | null;
   ref?: string | null;
+  // Soul trait only: its name, the text being its effect
+  name?: GameText | null;
   text: GameText | null;
 }
 
