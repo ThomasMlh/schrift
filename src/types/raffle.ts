@@ -14,12 +14,14 @@ export interface IRaffleOverview {
   months: IRaffleMonth[];
 }
 
+export type RaffleRank = 'S' | 'A1' | 'A2';
+
 export interface IRaffleBreakdown {
   top5_rotations: number;
   top5_month: number;
   homogeneity: number;
   seniority: number;
-  s_rank: number;
+  rank: number;
   collective_gap: number;
   farm: number;
   qg: number;
@@ -69,8 +71,11 @@ export interface IGuildRaffle {
     maxSeniorityTickets: number;
     collectiveGap: number;
     periods: number;
+    ranks: RaffleRank[];
+    maxRankTickets: number;
   };
-  s_rank: boolean;
+  rank: RaffleRank;
+  rank_tickets: number;
   draw: IRaffleDraw | null;
   rotations: number;
   collective_gap: number | null;

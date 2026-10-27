@@ -238,7 +238,7 @@ export const RaffleTable = ({ raffle }: { raffle: IGuildRaffle }) => {
                 <Td isNumeric>
                   {locked ? <Count value={p.breakdown.seniority} hint={t("pages.raffle.years", { count: p.years })} /> : <SeniorityEditor raffle={raffle} player={p} />}
                 </Td>
-                <Td isNumeric><Count value={p.breakdown.s_rank + p.breakdown.collective_gap} /></Td>
+                <Td isNumeric><Count value={p.breakdown.rank + p.breakdown.collective_gap} /></Td>
                 <Td><PeriodBoxes raffle={raffle} player={p} kind="farm" locked={locked} /></Td>
                 <Td><PeriodBoxes raffle={raffle} player={p} kind="qg" locked={locked} /></Td>
                 <Td isNumeric>

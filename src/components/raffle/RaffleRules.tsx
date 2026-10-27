@@ -16,6 +16,7 @@ export const RaffleRules = ({ raffle }: { raffle: IGuildRaffle }) => {
     full: formatWithCommas(rules.homogeneityFull),
     half: formatWithCommas(rules.homogeneityHalf),
     maxSeniority: rules.maxSeniorityTickets,
+    maxRank: rules.maxRankTickets,
     gap: formatWithCommas(rules.collectiveGap),
     max: raffle.max_tickets,
   };
