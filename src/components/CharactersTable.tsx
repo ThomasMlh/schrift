@@ -189,8 +189,8 @@ export const CharactersTable = () => {
         <SimpleGrid columns={{ base: 2, sm: 3, md: 4, lg: 6 }} spacing={3}>
           {Array.from({ length: 12 }).map((_, i) => (
             <Box key={i} borderRadius="xl" overflow="hidden" borderWidth="1px" borderColor="border.subtle">
-              <Skeleton aspectRatio={1} />
-              <Box p={3}><Skeleton h="14px" w="80%" /><Skeleton h="14px" w="40%" mt={2} /></Box>
+              <Skeleton aspectRatio={4 / 3} />
+              <Box px={2} py={2.5}><Skeleton h="14px" w="70%" mx="auto" /><Skeleton h="12px" w="50%" mt={2} mx="auto" /></Box>
             </Box>
           ))}
         </SimpleGrid>

@@ -18,7 +18,9 @@ export interface ICharacter {
   immunities?: string[];
   release_date?: string;
   banner_id?: string;
-  resurrection_release?: string;
+  resurrection_release?: string | null;
+  // "<series>,<version>,<name>"
+  version_name?: string;
   created_at?: string;
   updated_at?: string;
   source_images?: { quote_en?: string | null };
