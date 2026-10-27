@@ -32,6 +32,7 @@ import { GuildLogo } from "@/components/guild/GuildLogo";
 import { GuildWeeklyRanking } from "@/components/guild/GuildWeeklyRanking";
 import { GuildAlbum } from "@/components/guild/GuildAlbum";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
+import { useAuth } from "@/providers/AuthProvider";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import type { IGuild } from "../interfaces";
 import { useTranslation } from "react-i18next";
@@ -51,6 +52,10 @@ const GuildesPage = () => {
     return TAB_KEYS.includes(tab as TabKey) ? (tab as TabKey) : "overview";
   });
   const { t } = useTranslation();
+  const { isLoggedIn } = useAuth();
+  // Guild albums are for logged-in users only
+  const tabKeys: readonly TabKey[] = isLoggedIn ? TAB_KEYS : TAB_KEYS.filter((key) => key !== "album");
+  const currentTab = tabKeys.includes(activeTab) ? activeTab : "overview";
 
 
   // Select the guild from the URL (by name), defaulting to the first one
@@ -283,8 +288,8 @@ const GuildesPage = () => {
                 </Flex>
 
                 <Tabs
-                  index={TAB_KEYS.indexOf(activeTab)}
-                  onChange={(index) => setActiveTab(TAB_KEYS[index])}
+                  index={tabKeys.indexOf(currentTab)}
+                  onChange={(index) => setActiveTab(tabKeys[index])}
                   variant="soft-rounded"
                   colorScheme="purple"
                   size="sm"
@@ -300,9 +305,11 @@ const GuildesPage = () => {
                     <Tab color="text.secondary" fontWeight="semibold" gap={2}>
                       <Icon as={FiActivity} aria-hidden />{t("pages.guilds.tabStats")}
                     </Tab>
-                    <Tab color="text.secondary" fontWeight="semibold" gap={2}>
-                      <Icon as={FiBookOpen} aria-hidden />{t("pages.guilds.tabAlbum")}
-                    </Tab>
+                    {isLoggedIn && (
+                      <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                        <Icon as={FiBookOpen} aria-hidden />{t("pages.guilds.tabAlbum")}
+                      </Tab>
+                    )}
                   </TabList>
 
                   <TabPanels>
@@ -364,9 +371,11 @@ const GuildesPage = () => {
                       </VStack>
                     </TabPanel>
 
-                    <TabPanel px={0} pt={5}>
-                      <GuildAlbum guildId={selectedGuild._id} />
-                    </TabPanel>
+                    {isLoggedIn && (
+                      <TabPanel px={0} pt={5}>
+                        <GuildAlbum guildId={selectedGuild._id} />
+                      </TabPanel>
+                    )}
                   </TabPanels>
                 </Tabs>
               </>

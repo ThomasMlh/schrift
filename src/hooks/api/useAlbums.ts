@@ -1,6 +1,7 @@
 import useSWR from 'swr';
+import { useAuth } from '../../providers/AuthProvider';
 import type { IAlbum, IAlbumCharacter, IGuildAlbumMember } from '../../interfaces';
-import { apiUrl, fetcher } from './shared';
+import { apiUrl, fetcher, useAuthenticatedFetcher } from './shared';
 
 export const albumUrl = (bbsId: string) => `${apiUrl}/api/albums/${encodeURIComponent(bbsId)}`;
 
@@ -15,10 +16,13 @@ export const useAlbum = (bbsId?: string) => {
   return { album: data?.data, isLoading, error, mutate };
 };
 
+// Albums of every account in a guild. Logged-in users only.
 export const useGuildAlbums = (guildId?: string) => {
+  const authenticatedFetcher = useAuthenticatedFetcher();
+  const { token } = useAuth();
   const { data, error, isLoading } = useSWR<{ success: boolean; data: IGuildAlbumMember[] }>(
-    guildId ? `${apiUrl}/api/albums/guild/${encodeURIComponent(guildId)}` : null,
-    fetcher,
+    guildId && token ? `${apiUrl}/api/albums/guild/${encodeURIComponent(guildId)}` : null,
+    authenticatedFetcher,
     { revalidateOnFocus: false }
   );
 
