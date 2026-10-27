@@ -618,7 +618,14 @@
       "rotationShortcut": "Bons sur la rotation : {{killer}}",
       "clearAll": "Tout effacer",
       "resultsCount_one": "{{count}} personnage",
-      "resultsCount_other": "{{count}} personnages"
+      "resultsCount_other": "{{count}} personnages",
+      "traits": "Traits",
+      "traitsSearch": "Chercher un trait...",
+      "traitsNone": "Aucun trait trouvé",
+      "traitsClear": "Décocher tout",
+      "resurrectionAll": "Avec ou sans résurrection",
+      "resurrectionOnly": "Avec résurrection",
+      "resurrectionNone": "Sans résurrection"
     },
     "guildTabsList": {
       "noMemberInGuild": "Aucun membre dans cette guilde",

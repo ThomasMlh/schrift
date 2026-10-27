@@ -34,11 +34,12 @@ import { AdminOverview } from "@/components/admin/AdminOverview";
 import { useBotHealth } from "@/components/admin/useBotHealth";
 import { ApplicationsSection } from "../components/admin/ApplicationsSection";
 import { CharacterSyncModal } from "@/components/admin/CharacterSyncModal";
-import type { ICharacterSyncResult } from "@/types/character";
+import { GameSyncModal } from "@/components/admin/GameSyncModal";
+import type { ICharacterSyncResult, IGameSyncResult } from "@/types/character";
 
 const AdminPage = () => {
   const { isAdmin: isFullAdmin, isGuildManager, managedGuildIds } = useAuth();
-  const { updateCharacters, uploadImages, syncDiscordProfiles, createIndexes } = useAdminMutations();
+  const { updateCharacters, syncGameCharacters, uploadImages, syncDiscordProfiles, createIndexes } = useAdminMutations();
 
   // Tabs allowed for the role: everything for an admin, otherwise the non-restricted tabs
   const visibleTabs = useMemo(
@@ -69,6 +70,7 @@ const AdminPage = () => {
   };
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
   const [syncPreview, setSyncPreview] = useState<ICharacterSyncResult | null>(null);
+  const [gameSyncPreview, setGameSyncPreview] = useState<IGameSyncResult | null>(null);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isSyncingProfiles, setIsSyncingProfiles] = useState(false);
   const [isCreatingIndexes, setIsCreatingIndexes] = useState(false);
@@ -111,6 +113,36 @@ const AdminPage = () => {
       if (needsImages) await handleUploadImages();
     } catch (error: unknown) {
       toast({ title: (error as Error).message || "Erreur lors de la mise à jour des personnages", status: "error" });
+    } finally {
+      setIsUpdatingCharacters(false);
+    }
+  };
+
+  const handlePreviewGameSync = async () => {
+    setIsUpdatingCharacters(true);
+    try {
+      setGameSyncPreview(await syncGameCharacters({ dryRun: true }));
+    } catch (error: unknown) {
+      toast({ title: (error as Error).message || "Erreur lors de la simulation", status: "error" });
+    } finally {
+      setIsUpdatingCharacters(false);
+    }
+  };
+
+  const handleApplyGameSync = async () => {
+    setIsUpdatingCharacters(true);
+    try {
+      const { statistics, merged = [] } = await syncGameCharacters({ dryRun: false });
+      setGameSyncPreview(null);
+      toast({
+        title: `Synchro terminée : ${statistics.updated} mis à jour, ${statistics.created} nouveaux${merged.length ? `, ${merged.length} doublon(s) fusionné(s)` : ""}`,
+        status: "success",
+        duration: 8000,
+        isClosable: true,
+      });
+      if (statistics.newImages > 0) await handleUploadImages();
+    } catch (error: unknown) {
+      toast({ title: (error as Error).message || "Erreur lors de la synchronisation", status: "error" });
     } finally {
       setIsUpdatingCharacters(false);
     }
@@ -285,8 +317,11 @@ const AdminPage = () => {
                   Outils
                 </MenuButton>
                 <MenuList>
+                  <MenuItem icon={<Icon as={FiRefreshCw} />} onClick={handlePreviewGameSync}>
+                    Synchroniser depuis les tables du jeu
+                  </MenuItem>
                   <MenuItem icon={<Icon as={FiRefreshCw} />} onClick={handlePreviewCharacters}>
-                    Synchroniser les personnages
+                    Synchroniser les personnages (ancien fichier)
                   </MenuItem>
                   <MenuItem icon={<Icon as={FiUsers} />} onClick={handleSyncProfiles}>
                     Synchroniser les profils Discord
@@ -327,6 +362,13 @@ const AdminPage = () => {
         </Box>
       </Flex>
 
+      <GameSyncModal
+        preview={gameSyncPreview}
+        isOpen={gameSyncPreview !== null}
+        onClose={() => setGameSyncPreview(null)}
+        onApply={() => void handleApplyGameSync()}
+        isApplying={isUpdatingCharacters}
+      />
       <CharacterSyncModal
         preview={syncPreview}
         isOpen={syncPreview !== null}

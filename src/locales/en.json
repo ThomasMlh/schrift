@@ -618,7 +618,14 @@
       "rotationShortcut": "Good for the rotation: {{killer}}",
       "clearAll": "Clear all",
       "resultsCount_one": "{{count}} character",
-      "resultsCount_other": "{{count}} characters"
+      "resultsCount_other": "{{count}} characters",
+      "traits": "Traits",
+      "traitsSearch": "Search a trait...",
+      "traitsNone": "No trait found",
+      "traitsClear": "Uncheck all",
+      "resurrectionAll": "With or without resurrection",
+      "resurrectionOnly": "With resurrection",
+      "resurrectionNone": "Without resurrection"
     },
     "guildTabsList": {
       "noMemberInGuild": "No members in this guild",
