@@ -1099,6 +1099,10 @@
       "notAnImage": "Ce fichier n'est pas une image",
       "readError": "Impossible de lire cette image",
       "saveError": "Le build est enregistré, mais la capture n'a pas pu être envoyée"
+    },
+    "characterCard": {
+      "rebirth": "Résurrection du {{date}}",
+      "rebirthAlt": "Résurrection"
     }
   },
   "affinities": {

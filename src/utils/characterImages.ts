@@ -10,3 +10,5 @@ export const characterImageUrl = (character: Pick<ICharacter, "_id" | "images_ve
 // English quote when the source has one and the site is in English, French quote otherwise
 export const characterQuoteFolder = (character: Pick<ICharacter, "source_images">, language: string): CharacterImageFolder =>
   (language.startsWith("en") && character.source_images?.quote_en ? "phrase-en" : "phrase");
+
+export const REBIRTH_STAR_URL = `${bucketUrl}/others/rebirth_star.png`;

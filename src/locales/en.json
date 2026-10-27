@@ -1099,6 +1099,10 @@
       "notAnImage": "This file is not an image",
       "readError": "Unable to read this image",
       "saveError": "The build is saved, but the screenshot could not be uploaded"
+    },
+    "characterCard": {
+      "rebirth": "Resurrection on {{date}}",
+      "rebirthAlt": "Resurrection"
     }
   },
   "affinities": {

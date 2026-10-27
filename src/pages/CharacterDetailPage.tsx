@@ -12,6 +12,7 @@ import {
   Flex,
   useToast,
   Image,
+  Tooltip,
 } from "@chakra-ui/react";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
@@ -36,7 +37,7 @@ import { CharacterRotations } from "@/components/character/CharacterRotations";
 import { FiActivity, FiBarChart2, FiCrosshair, FiShield } from "react-icons/fi";
 import { CharacterVisuals } from "@/components/character/CharacterVisuals";
 import { CharacterBuilds } from "@/components/character/CharacterBuilds";
-import { characterImageUrl } from "@/utils/characterImages";
+import { characterImageUrl, REBIRTH_STAR_URL } from "@/utils/characterImages";
 
 const CharacterDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -253,21 +254,32 @@ const CharacterDetailPage = () => {
               justify="space-between"
             >
               <Flex gap={4} align="flex-end" minW={0}>
-                <Image
-                  src={characterImageUrl(character, "thumb")}
-                  alt={character.name}
-                  boxSize={{ base: "88px", md: "112px" }}
-                  borderRadius="xl"
-                  borderWidth="4px"
-                  borderColor="bg.card"
-                  bg="bg.inset"
-                  objectFit="cover"
-                  mt={{ base: -10, md: -14 }}
-                  flexShrink={0}
-                  position="relative"
-                  zIndex={1}
-                  fallback={<Box boxSize={{ base: "88px", md: "112px" }} borderRadius="xl" bg="bg.inset" mt={{ base: -10, md: -14 }} position="relative" zIndex={1} />}
-                />
+                <Box position="relative" zIndex={1} flexShrink={0} mt={{ base: -10, md: -14 }}>
+                  <Image
+                    src={characterImageUrl(character, "thumb")}
+                    alt={character.name}
+                    boxSize={{ base: "88px", md: "112px" }}
+                    borderRadius="xl"
+                    borderWidth="4px"
+                    borderColor="bg.card"
+                    bg="bg.inset"
+                    objectFit="cover"
+                    fallback={<Box boxSize={{ base: "88px", md: "112px" }} borderRadius="xl" bg="bg.inset" />}
+                  />
+                  {character.resurrection_release && (
+                    <Tooltip label={t("components.characterCard.rebirth", { date: character.resurrection_release })} hasArrow>
+                      <Image
+                        src={REBIRTH_STAR_URL}
+                        alt={t("components.characterCard.rebirthAlt")}
+                        position="absolute"
+                        top="-10px"
+                        left="-10px"
+                        w="38%"
+                        filter="drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6))"
+                      />
+                    </Tooltip>
+                  )}
+                </Box>
                 <VStack align="start" spacing={2} minW={0} pt={2}>
                   <Heading as="h1" size={{ base: "md", md: "lg" }} letterSpacing="tight" color="text.strong">
                     {character.name}
@@ -341,7 +353,10 @@ const CharacterDetailPage = () => {
                 )}
                 {character.resurrection_release && (
                   <TraitRow label={t("pages.characterDetail.labelResurrection")}>
-                    <Text fontSize="sm" color="text.body">{character.resurrection_release}</Text>
+                    <HStack spacing={1.5}>
+                      <Image src={REBIRTH_STAR_URL} alt="" aria-hidden boxSize="16px" />
+                      <Text fontSize="sm" color="text.body">{character.resurrection_release}</Text>
+                    </HStack>
                   </TraitRow>
                 )}
               </VStack>
