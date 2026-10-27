@@ -13,7 +13,7 @@ interface CharacterVisualsProps {
   onOpen: (src: string, label: string) => void;
 }
 
-// Character visuals (banner, special attack, artwork, quote) with download and zoom.
+// Character visuals (special attack, artwork, quote, summons) with download and zoom.
 // Not every unit has every image in the game files: a picture that fails to load hides its tile.
 export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVisualsProps) => {
   const { t, i18n } = useTranslation();
@@ -22,8 +22,6 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
   const [failed, setFailed] = useState<string[]>([]);
   const quote = gameText(character.quote, i18n.language);
   const summons = character.banners ?? [];
-  // The banner entered on the site, for characters the game data links to no summon
-  const bannerSrc = summons.length === 0 && character.banner_id ? `${bucketUrl}/banners/${character.banner_id}.png` : null;
 
   return (
     <Box>
@@ -37,12 +35,6 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
       </Text>
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
         {[
-          ...(bannerSrc ? [{
-            src: bannerSrc,
-            label: t("pages.characterDetail.labelBanner"),
-            filename: `banniere-${character.name}.png`,
-            key: "banner",
-          }] : []),
           { src: characterImageUrl(character, "attack"), label: t("pages.characterDetail.labelSpecialAttack"), filename: `attaque-${character.name}.png`, key: "attack" },
           { src: characterImageUrl(character, "artwork"), label: t("pages.characterDetail.labelArtwork"), filename: `artwork-${character.name}.png`, key: "artwork" },
           { src: characterImageUrl(character, characterQuoteFolder(character, i18n.language)), label: t("pages.characterDetail.labelPhrase"), filename: `phrase-${character.name}.png`, key: "phrase" },

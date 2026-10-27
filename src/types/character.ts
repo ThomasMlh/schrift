@@ -17,7 +17,6 @@ export interface ICharacter {
   stats?: ICharacterStats;
   immunities?: string[];
   release_date?: string;
-  banner_id?: string;
   resurrection_release?: string | null;
   // "<series>,<version>,<name>"
   version_name?: string;
@@ -121,6 +120,9 @@ export interface IGameSyncResult {
     duplicates: number;
     unmatched: number;
     ambiguous: number;
+    banners?: number;
+    newBanners?: number;
+    legacyBanners?: number;
   };
   fieldCounts: Record<string, number>;
   preview: {

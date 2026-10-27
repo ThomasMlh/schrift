@@ -64,6 +64,17 @@ export const GameSyncModal = ({ preview, isOpen, onClose, onApply, isApplying }:
                 {stats.firstLinks} personnage(s) seront reliés au jeu pour la première fois. Ils gardent leur identifiant : albums, builds et images restent valides.
               </Alert>
             )}
+            {(stats.newBanners ?? 0) > 0 && (
+              <Text fontSize="sm" color="text.secondary">
+                {stats.newBanners} nouvelle(s) invocation(s) sur {stats.banners}. Leurs visuels seront archivés sur le bucket.
+              </Text>
+            )}
+            {(stats.legacyBanners ?? 0) > 0 && (
+              <Alert status="warning" borderRadius="md" fontSize="sm">
+                <AlertIcon />
+                {stats.legacyBanners} ancienne(s) bannière(s) du site seront supprimées : elles sont remplacées par les invocations du jeu.
+              </Alert>
+            )}
             {stats.duplicates > 0 && (
               <Alert status="warning" borderRadius="md" fontSize="sm">
                 <AlertIcon />
