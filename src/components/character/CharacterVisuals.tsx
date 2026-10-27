@@ -21,10 +21,9 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
   const isDark = colorMode === "dark";
   const [failed, setFailed] = useState<string[]>([]);
   const quote = gameText(character.quote, i18n.language);
-  // Game banner when the game files have it, otherwise the banner entered on the site
-  const bannerSrc = character.source_images?.banner
-    ? characterImageUrl(character, "banner")
-    : character.banner_id ? `${bucketUrl}/banners/${character.banner_id}.png` : null;
+  const summons = character.banners ?? [];
+  // The banner entered on the site, for characters the game data links to no summon
+  const bannerSrc = summons.length === 0 && character.banner_id ? `${bucketUrl}/banners/${character.banner_id}.png` : null;
 
   return (
     <Box>
@@ -82,21 +81,49 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
             {key === "phrase" && quote && (
               <Text px={4} py={3} fontSize="sm" fontStyle="italic" color="text.body">« {quote} »</Text>
             )}
-            {key === "banner" && (character.banners?.length ?? 0) > 0 && (
-              <VStack align="stretch" spacing={1} px={4} py={3}>
-                {character.banners!.map((banner) => (
-                  <Text key={banner.gacha_group_id} fontSize="sm" color="text.body">
-                    {gameText(banner.name, i18n.language)}
-                    {banner.start_date && (
-                      <Text as="span" color="text.muted"> · {banner.start_date}{banner.end_date ? ` → ${banner.end_date}` : ""}</Text>
-                    )}
-                  </Text>
-                ))}
-              </VStack>
-            )}
           </Box>
         ))}
       </SimpleGrid>
+
+      {summons.length > 0 && (
+        <Box mt={4} borderRadius="xl" border="1px solid" borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'} bg={isDark ? 'gray.800' : 'white'}>
+          <Text px={4} pt={3} pb={2} fontSize="xs" fontWeight="semibold" letterSpacing="widest" textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
+            {t("pages.characterDetail.labelSummons")}
+          </Text>
+          <VStack align="stretch" spacing={3} px={4} pb={4}>
+            {summons.map((summon) => (
+              <SummonRow key={summon.gacha_group_id} summon={summon} language={i18n.language} />
+            ))}
+          </VStack>
+        </Box>
+      )}
     </Box>
+  );
+};
+
+type Summon = NonNullable<ICharacter["banners"]>[number];
+
+// One summon featuring the character: its list visual when the game files have it, name and dates
+const SummonRow = ({ summon, language }: { summon: Summon; language: string }) => {
+  const [hasImage, setHasImage] = useState(Boolean(summon.image_path));
+  return (
+    <HStack spacing={3} align="center">
+      {hasImage && (
+        <Image
+          src={`${bucketUrl}/rmfs/${summon.image_path}.png`}
+          alt=""
+          h={{ base: "48px", sm: "64px" }}
+          flexShrink={0}
+          borderRadius="md"
+          onError={() => setHasImage(false)}
+        />
+      )}
+      <Box minW={0}>
+        <Text fontSize="sm" fontWeight="semibold" color="text.strong" noOfLines={2}>{gameText(summon.name, language)}</Text>
+        {summon.start_date && (
+          <Text fontSize="xs" color="text.muted">{summon.start_date}{summon.end_date ? ` → ${summon.end_date}` : ""}</Text>
+        )}
+      </Box>
+    </HStack>
   );
 };

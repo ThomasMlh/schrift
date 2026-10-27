@@ -467,7 +467,8 @@
       "traitsPassive": "Innate skills",
       "traitsTree": "Skills",
       "traitsEx": "EX skills",
-      "traitsSpecial": "Special attack"
+      "traitsSpecial": "Special attack",
+      "labelSummons": "Summons"
     },
     "raffle": {
       "noGuild": "No guild takes part in the raffle yet.",

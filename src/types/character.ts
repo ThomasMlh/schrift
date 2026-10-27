@@ -23,7 +23,7 @@ export interface ICharacter {
   version_name?: string;
   created_at?: string;
   updated_at?: string;
-  source_images?: { quote_en?: string | null; banner?: string | null };
+  source_images?: { quote_en?: string | null };
   // Bumped each time the bucket images are re-uploaded, used to bypass the browser cache
   images_version?: number;
   // Filled by the game tables sync
@@ -38,7 +38,7 @@ export interface ICharacter {
   resurrection?: IGameUnit | null;
   is_growth_event?: boolean;
   quote?: GameText | null;
-  banners?: { gacha_group_id: number; name: GameText | null; start_date: string | null; end_date: string | null }[];
+  banners?: { gacha_group_id: number; name: GameText | null; image_path: string | null; start_date: string | null; end_date: string | null }[];
 }
 
 export interface ICharacterSyncEntry {

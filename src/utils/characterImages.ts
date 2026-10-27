@@ -1,7 +1,7 @@
 import type { ICharacter } from "@/interfaces";
 import { bucketUrl } from "@/utils/apiRequest";
 
-export type CharacterImageFolder = "thumb" | "artwork" | "phrase" | "phrase-en" | "attack" | "banner";
+export type CharacterImageFolder = "thumb" | "artwork" | "phrase" | "phrase-en" | "attack";
 
 // Bucket URL of a character image; the version query reloads it after a re-upload instead of showing the cached one
 export const characterImageUrl = (character: Pick<ICharacter, "_id" | "images_version">, folder: CharacterImageFolder) =>

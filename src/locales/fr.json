@@ -467,7 +467,8 @@
       "traitsPassive": "Compétences innées",
       "traitsTree": "Compétences",
       "traitsEx": "Compétences EX",
-      "traitsSpecial": "Attaque spéciale"
+      "traitsSpecial": "Attaque spéciale",
+      "labelSummons": "Invocations"
     },
     "raffle": {
       "noGuild": "Aucune guilde ne participe encore à la tombola.",
