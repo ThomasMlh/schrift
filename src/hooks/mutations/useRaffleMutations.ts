@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { makeRequest, apiUrl, invalidateKeys } from '@/utils/apiRequest';
-import type { IRaffleDraw, IRaffleOverview } from '@/interfaces';
+import type { IRaffleDraw, IRaffleOverview, RaffleRank } from '@/interfaces';
 
 export const useRaffleMutations = () => {
   const { token } = useAuth();
@@ -14,8 +14,8 @@ export const useRaffleMutations = () => {
     await refresh();
   };
 
-  const setSRank = async (month: string, guildId: string, sRank: boolean) => {
-    await request(`${base}/${month}/guilds/${guildId}/s-rank`, { method: 'PUT', body: JSON.stringify({ s_rank: sRank }) });
+  const setRank = async (month: string, guildId: string, rank: RaffleRank, tickets: number) => {
+    await request(`${base}/${month}/guilds/${guildId}/rank`, { method: 'PUT', body: JSON.stringify({ rank, tickets }) });
     await refresh();
   };
 
@@ -58,5 +58,5 @@ export const useRaffleMutations = () => {
     await refresh();
   };
 
-  return { saveSettings, setSRank, setGuildLife, addBonus, removeBonus, setSchriftSince, draw, cancelDraw };
+  return { saveSettings, setRank, setGuildLife, addBonus, removeBonus, setSchriftSince, draw, cancelDraw };
 };

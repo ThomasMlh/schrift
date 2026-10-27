@@ -505,10 +505,10 @@
         "players_other": "{{count}} joueurs",
         "gap": "Écart 1er / dernier",
         "gapGoal": "Ticket collectif sous {{gap}}",
-        "sRank": "Passage / maintien S",
-        "sRankHint": "Passage ou maintien en S ce mois-ci",
-        "sRankYes": "Oui : +1 ticket pour tous",
-        "sRankNo": "Non",
+        "rank": "Rang de la guilde",
+        "rankTickets": "Tickets de rang gagnés ce mois-ci",
+        "rankHint_one": "Passage / maintien {{rank}} : +{{count}} ticket pour tous",
+        "rankHint_other": "Passage / maintien {{rank}} : +{{count}} tickets pour tous",
         "rotations": "Rotas du mois"
       },
       "prizeOfMonth": "À gagner : {{prize}}",
@@ -557,7 +557,7 @@
         "collective": {
           "title": "Collectif",
           "items": [
-            "1 ticket pour chaque membre quand la guilde passe ou se maintient en S.",
+            "Passage ou maintien au rang visé par la guilde (S, A1 ou A2) : de 0 à {{maxRank}} tickets pour chaque membre, saisis par les admins.",
             "1 ticket pour chaque membre si l'écart entre le 1er et le dernier de la guilde (moyenne du mois) est sous {{gap}}."
           ]
         },

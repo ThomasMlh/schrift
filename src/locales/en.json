@@ -505,10 +505,10 @@
         "players_other": "{{count}} players",
         "gap": "1st / last gap",
         "gapGoal": "Collective ticket below {{gap}}",
-        "sRank": "Rank S reached / kept",
-        "sRankHint": "Rank S reached or kept this month",
-        "sRankYes": "Yes: +1 ticket for everyone",
-        "sRankNo": "No",
+        "rank": "Guild rank",
+        "rankTickets": "Rank tickets earned this month",
+        "rankHint_one": "{{rank}} reached / kept: +{{count}} ticket for everyone",
+        "rankHint_other": "{{rank}} reached / kept: +{{count}} tickets for everyone",
         "rotations": "Rotations of the month"
       },
       "prizeOfMonth": "Prize: {{prize}}",
@@ -557,7 +557,7 @@
         "collective": {
           "title": "Collective",
           "items": [
-            "1 ticket for every member when the guild reaches or stays in rank S.",
+            "Reaching or keeping the rank the guild aims for (S, A1 or A2): 0 to {{maxRank}} tickets for every member, entered by admins.",
             "1 ticket for every member if the gap between the guild's first and last (month average) is below {{gap}}."
           ]
         },

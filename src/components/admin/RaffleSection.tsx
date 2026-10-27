@@ -1,24 +1,22 @@
 import { useState } from "react";
 import {
-  Alert, AlertIcon, Box, Flex, HStack, SimpleGrid, Skeleton, Stat, StatHelpText, StatLabel, StatNumber, Switch, Tab,
-  TabList, Tabs, Text, VStack, useToast,
+  Alert, AlertIcon, Box, Flex, SimpleGrid, Skeleton, Stat, StatHelpText, StatLabel, StatNumber, Tab, TabList, Tabs, Text,
+  VStack,
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { RaffleTable } from "@/components/raffle/RaffleTable";
 import { RaffleDrawPanel } from "@/components/raffle/RaffleDrawPanel";
+import { RaffleRankEditor } from "@/components/raffle/RaffleRankEditor";
 import { RaffleRules } from "@/components/raffle/RaffleRules";
 import { RaffleSettings } from "@/components/raffle/RaffleSettings";
 import { useGuildRaffle, useRaffleOverview } from "@/hooks/useAPI";
-import { useRaffleMutations } from "@/hooks/mutations/useRaffleMutations";
 import { formatMonthKey, formatScore } from "@/utils/format";
 
 // Admin tab: monthly raffle of each taking part guild, manual tickets and the draw
 export const RaffleSection = () => {
   const { t, i18n } = useTranslation();
-  const toast = useToast();
   const { overview, isLoading: isLoadingOverview, error: overviewError } = useRaffleOverview();
-  const { setSRank } = useRaffleMutations();
   const [selectedMonth, setSelectedMonth] = useState<string>();
   const [selectedGuildId, setSelectedGuildId] = useState<string>();
 
@@ -28,15 +26,6 @@ export const RaffleSection = () => {
   const month = selectedMonth ?? (months.find((m) => m.in_progress) ?? months[0])?.key;
   const guildId = selectedGuildId ?? guilds[0]?._id;
   const { raffle, isLoading, error: raffleError } = useGuildRaffle(month, guildId);
-
-  const toggleSRank = async (value: boolean) => {
-    if (!raffle) return;
-    try {
-      await setSRank(raffle.month.key, raffle.guild._id, value);
-    } catch (err) {
-      toast({ status: "error", title: (err as Error).message });
-    }
-  };
 
   return (
     <VStack spacing={6} align="stretch">
@@ -96,19 +85,7 @@ export const RaffleSection = () => {
               <StatNumber fontSize="xl">{raffle.collective_gap === null ? "—" : formatScore(raffle.collective_gap)}</StatNumber>
               <StatHelpText mb={0}>{t("pages.raffle.stats.gapGoal", { gap: formatScore(raffle.rules.collectiveGap) })}</StatHelpText>
             </Stat>
-            <Stat bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="xl" p={4}>
-              <StatLabel>{t("pages.raffle.stats.sRank")}</StatLabel>
-              <HStack mt={2}>
-                <Switch
-                  colorScheme="purple"
-                  isChecked={raffle.s_rank}
-                  isDisabled={raffle.draw !== null}
-                  onChange={(e) => void toggleSRank(e.target.checked)}
-                  aria-label={t("pages.raffle.stats.sRankHint")}
-                />
-                <Text fontSize="sm" color="text.secondary">{raffle.s_rank ? t("pages.raffle.stats.sRankYes") : t("pages.raffle.stats.sRankNo")}</Text>
-              </HStack>
-            </Stat>
+            <RaffleRankEditor key={`${raffle.month.key}:${raffle.guild._id}:${raffle.rank}:${raffle.rank_tickets}`} raffle={raffle} />
           </SimpleGrid>
 
           <RaffleDrawPanel raffle={raffle} />
