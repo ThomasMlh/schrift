@@ -459,7 +459,16 @@
       "headingRotations": "Rotations où ses killers servent (cycle en cours)",
       "rotationsNone": "Aucune rotation restante de ce cycle ne correspond à ses killers.",
       "rotationNow": "En cours",
-      "rotationSameColor": "Même couleur"
+      "rotationSameColor": "Même couleur",
+      "formBase": "6★",
+      "formResurrected": "Ressuscité",
+      "headingGameTraits": "Capacités",
+      "traitsLink": "Soul Trait",
+      "traitsPassive": "Compétences innées",
+      "traitsTree": "Compétences",
+      "traitsEx": "Compétences EX",
+      "traitsSpecial": "Attaque spéciale",
+      "labelSummons": "Invocations"
     },
     "raffle": {
       "noGuild": "Aucune guilde ne participe encore à la tombola.",
@@ -618,7 +627,14 @@
       "rotationShortcut": "Bons sur la rotation : {{killer}}",
       "clearAll": "Tout effacer",
       "resultsCount_one": "{{count}} personnage",
-      "resultsCount_other": "{{count}} personnages"
+      "resultsCount_other": "{{count}} personnages",
+      "traits": "Traits",
+      "traitsSearch": "Chercher un trait...",
+      "traitsNone": "Aucun trait trouvé",
+      "traitsClear": "Décocher tout",
+      "resurrectionAll": "Avec ou sans résurrection",
+      "resurrectionOnly": "Avec résurrection",
+      "resurrectionNone": "Sans résurrection"
     },
     "guildTabsList": {
       "noMemberInGuild": "Aucun membre dans cette guilde",

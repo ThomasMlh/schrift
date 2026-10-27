@@ -459,7 +459,16 @@
       "headingRotations": "Rotations where its killers help (current cycle)",
       "rotationsNone": "No remaining rotation of this cycle matches its killers.",
       "rotationNow": "Now",
-      "rotationSameColor": "Same colour"
+      "rotationSameColor": "Same colour",
+      "formBase": "6★",
+      "formResurrected": "Resurrected",
+      "headingGameTraits": "Abilities",
+      "traitsLink": "Soul Trait",
+      "traitsPassive": "Innate skills",
+      "traitsTree": "Skills",
+      "traitsEx": "EX skills",
+      "traitsSpecial": "Special attack",
+      "labelSummons": "Summons"
     },
     "raffle": {
       "noGuild": "No guild takes part in the raffle yet.",
@@ -618,7 +627,14 @@
       "rotationShortcut": "Good for the rotation: {{killer}}",
       "clearAll": "Clear all",
       "resultsCount_one": "{{count}} character",
-      "resultsCount_other": "{{count}} characters"
+      "resultsCount_other": "{{count}} characters",
+      "traits": "Traits",
+      "traitsSearch": "Search a trait...",
+      "traitsNone": "No trait found",
+      "traitsClear": "Uncheck all",
+      "resurrectionAll": "With or without resurrection",
+      "resurrectionOnly": "With resurrection",
+      "resurrectionNone": "Without resurrection"
     },
     "guildTabsList": {
       "noMemberInGuild": "No members in this guild",

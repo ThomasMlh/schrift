@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import type { ICharactersResponse, ICharacter } from '../../interfaces';
+import type { ICharactersResponse, ICharacter, ITraitFilterCategory } from '../../interfaces';
 import { apiUrl, fetcher } from './shared';
 
 export const useCharacters = (options?: {
@@ -10,8 +10,10 @@ export const useCharacters = (options?: {
   killer?: string;
   attackType?: string;
   searchQuery?: string;
+  traits?: string[];
+  resurrection?: string;
 }) => {
-  const { page = 1, limit = 20, affinity, category, killer, attackType, searchQuery } = options || {};
+  const { page = 1, limit = 20, affinity, category, killer, attackType, searchQuery, traits = [], resurrection } = options || {};
 
   let url = `${apiUrl}/api/characters?page=${page}&limit=${limit}`;
   if (affinity) url += `&affinity=${encodeURIComponent(affinity)}`;
@@ -19,6 +21,8 @@ export const useCharacters = (options?: {
   if (killer) url += `&killer=${encodeURIComponent(killer)}`;
   if (attackType) url += `&attack_type=${encodeURIComponent(attackType)}`;
   if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+  if (traits.length > 0) url += `&traits=${encodeURIComponent(traits.join(','))}`;
+  if (resurrection) url += `&resurrection=${encodeURIComponent(resurrection)}`;
 
   const { data, error, isLoading, mutate } = useSWR<ICharactersResponse>(
     url,
@@ -48,9 +52,11 @@ export const useCharacterMeta = () => {
     killers: string[];
     categories: string[];
     affinities: string[];
+    trait_filters?: ITraitFilterCategory[];
   }>(url, fetcher, { revalidateOnFocus: false, dedupingInterval: 300000 });
 
   return {
+    traitFilters: data?.trait_filters || [],
     killers: data?.killers || [],
     categories: data?.categories || [],
     affinities: data?.affinities || [],

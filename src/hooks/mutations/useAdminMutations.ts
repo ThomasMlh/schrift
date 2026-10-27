@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { makeRequest, apiUrl } from '@/utils/apiRequest';
-import type { ICharacterSyncResult } from '@/types/character';
+import type { ICharacterSyncResult, IGameSyncResult } from '@/types/character';
 
 export const useAdminMutations = () => {
   const { token } = useAuth();
@@ -12,6 +12,14 @@ export const useAdminMutations = () => {
       method: 'POST',
       body: JSON.stringify({ dryRun: options.dryRun === true }),
     }, { fallbackError: 'Erreur lors de la mise à jour des personnages' });
+  };
+
+  // Sync from the game master tables; a simulation unless dryRun is false
+  const syncGameCharacters = async (options: { dryRun: boolean }) => {
+    return request<IGameSyncResult>(`${apiUrl}/api/characters/game-sync`, {
+      method: 'POST',
+      body: JSON.stringify({ dryRun: options.dryRun }),
+    }, { fallbackError: 'Erreur lors de la synchronisation avec les tables du jeu' });
   };
 
   const checkBotHealth = async (): Promise<{
@@ -75,5 +83,5 @@ export const useAdminMutations = () => {
     }, { fallbackError: 'Erreur lors de la création des index' });
   };
 
-  return { updateCharacters, checkBotHealth, uploadImages, syncDiscordProfiles, createIndexes };
+  return { updateCharacters, syncGameCharacters, checkBotHealth, uploadImages, syncDiscordProfiles, createIndexes };
 };
