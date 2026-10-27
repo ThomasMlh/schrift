@@ -13,6 +13,7 @@ import {
   useToast,
   Image,
   Tooltip,
+  ButtonGroup,
 } from "@chakra-ui/react";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
@@ -34,7 +35,8 @@ import { bucketUrl } from "@/utils/apiRequest";
 import { Pill, SectionCard, TraitRow } from "@/components/character/SectionCard";
 import { CharacterStats } from "@/components/character/CharacterStats";
 import { CharacterRotations } from "@/components/character/CharacterRotations";
-import { FiActivity, FiBarChart2, FiCrosshair, FiShield } from "react-icons/fi";
+import { FiActivity, FiBarChart2, FiCrosshair, FiShield, FiStar } from "react-icons/fi";
+import { CharacterGameTraits } from "@/components/character/CharacterGameTraits";
 import { CharacterVisuals } from "@/components/character/CharacterVisuals";
 import { CharacterBuilds } from "@/components/character/CharacterBuilds";
 import { characterImageUrl, REBIRTH_STAR_URL } from "@/utils/characterImages";
@@ -55,6 +57,7 @@ const CharacterDetailPage = () => {
 
   const [lightbox, setLightbox] = useState<{ src: string; label: string } | null>(null);
   const [selectedBuild, setSelectedBuild] = useState<IBuild | null>(null);
+  const [showResurrected, setShowResurrected] = useState(true);
 
   const openLightbox = useCallback((src: string, label: string) => {
     setLightbox({ src, label });
@@ -193,6 +196,11 @@ const CharacterDetailPage = () => {
 
   const { title, description, keywords, structuredData } = generateSEOData();
 
+  const resurrection = character.resurrection ?? null;
+  const resurrected = Boolean(resurrection) && showResurrected;
+  const shownStats = resurrected ? resurrection!.stats : (character.base_stats ?? character.stats ?? null);
+  const shownTraits = resurrected ? resurrection!.traits : (character.traits ?? null);
+
   return (
     <>
       <SEOHead
@@ -314,10 +322,28 @@ const CharacterDetailPage = () => {
             </Flex>
           </Box>
 
+          {/* Base or resurrected form: stats and game traits follow the choice */}
+          {resurrection && (
+            <Flex justify="flex-end">
+              <ButtonGroup size="sm" isAttached variant="outline">
+                <Button onClick={() => setShowResurrected(false)} isActive={!showResurrected}>
+                  {t("pages.characterDetail.formBase")}
+                </Button>
+                <Button
+                  onClick={() => setShowResurrected(true)}
+                  isActive={showResurrected}
+                  leftIcon={<Image src={REBIRTH_STAR_URL} alt="" aria-hidden boxSize="14px" />}
+                >
+                  {t("pages.characterDetail.formResurrected")}
+                </Button>
+              </ButtonGroup>
+            </Flex>
+          )}
+
           <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={5} alignItems="start">
-            {character.stats && (
+            {shownStats && (
               <SectionCard title={t("pages.characterDetail.headingStats")} icon={FiActivity}>
-                <CharacterStats stats={character.stats} />
+                <CharacterStats stats={shownStats} />
               </SectionCard>
             )}
 
@@ -341,7 +367,7 @@ const CharacterDetailPage = () => {
                     ))}
                   </TraitRow>
                 )}
-                {(character.soul_traits?.length ?? 0) > 0 && (
+                {!shownTraits && (character.soul_traits?.length ?? 0) > 0 && (
                   <TraitRow label={t("pages.characterDetail.headingSoulTraits")}>
                     {character.soul_traits!.map((trait) => <Pill key={trait}>{trait}</Pill>)}
                   </TraitRow>
@@ -362,6 +388,12 @@ const CharacterDetailPage = () => {
               </VStack>
             </SectionCard>
           </Grid>
+
+          {shownTraits && (
+            <SectionCard title={t("pages.characterDetail.headingGameTraits")} icon={FiStar}>
+              <CharacterGameTraits traits={shownTraits} special={character.special} profile={character.profile} />
+            </SectionCard>
+          )}
 
           {/* Rotations of the current cycle where its killers are useful */}
           {(character.killers?.length ?? 0) > 0 && (

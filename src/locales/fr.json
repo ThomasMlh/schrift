@@ -459,7 +459,15 @@
       "headingRotations": "Rotations où ses killers servent (cycle en cours)",
       "rotationsNone": "Aucune rotation restante de ce cycle ne correspond à ses killers.",
       "rotationNow": "En cours",
-      "rotationSameColor": "Même couleur"
+      "rotationSameColor": "Même couleur",
+      "formBase": "6★",
+      "formResurrected": "Ressuscité",
+      "headingGameTraits": "Capacités",
+      "traitsLink": "Link skill",
+      "traitsPassive": "Traits d'âme",
+      "traitsTree": "Arbre des traits",
+      "traitsEx": "Traits EX",
+      "traitsSpecial": "Attaque spéciale"
     },
     "raffle": {
       "noGuild": "Aucune guilde ne participe encore à la tombola.",

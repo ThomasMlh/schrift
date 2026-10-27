@@ -459,7 +459,15 @@
       "headingRotations": "Rotations where its killers help (current cycle)",
       "rotationsNone": "No remaining rotation of this cycle matches its killers.",
       "rotationNow": "Now",
-      "rotationSameColor": "Same colour"
+      "rotationSameColor": "Same colour",
+      "formBase": "6★",
+      "formResurrected": "Resurrected",
+      "headingGameTraits": "Abilities",
+      "traitsLink": "Link skill",
+      "traitsPassive": "Soul traits",
+      "traitsTree": "Soul trait tree",
+      "traitsEx": "EX traits",
+      "traitsSpecial": "Special attack"
     },
     "raffle": {
       "noGuild": "No guild takes part in the raffle yet.",
