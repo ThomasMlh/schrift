@@ -402,7 +402,7 @@ const CharacterDetailPage = () => {
             </SectionCard>
           )}
 
-          <CharacterVisuals character={character} onDownload={handleDownload} onOpen={openLightbox} />
+          <CharacterVisuals key={character._id} character={character} onDownload={handleDownload} onOpen={openLightbox} />
           <CharacterBuilds builds={characterBuilds} isLoading={buildsLoading} onSelect={setSelectedBuild} />
         </VStack>
       </Container>
