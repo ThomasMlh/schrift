@@ -35,6 +35,7 @@ export interface ICharacter {
   traits?: IGameTraits;
   filter_types?: string[];
   resurrection?: IGameUnit | null;
+  attacks?: IGameAttacks;
   is_growth_event?: boolean;
   quote?: GameText | null;
   banners?: { gacha_group_id: number; name: GameText | null; image_path: string | null; start_date: string | null; end_date: string | null }[];
@@ -105,11 +106,40 @@ export interface IGameTraits {
   destruction?: IGameTrait[];
 }
 
+export type AttackShape =
+  | { kind: "sector"; radius: number | null; angle: number | null }
+  | { kind: "rect"; width: number | null; length: number | null }
+  | { kind: "circle"; radius: number | null; distance: number | null }
+  | { kind: "projectile"; width: number | null; length: number | null; range: number | null; impact_radius: number | null };
+
+export interface IAttackStep {
+  step: number | null;
+  power: number | null;
+  weapon: number | null;
+  hits: number;
+  knockdown: boolean;
+  color: "R" | "B" | null;
+  shape: AttackShape | null;
+  statuses: { code: string; plus: boolean; name: GameText }[];
+  status_probability: number | null;
+  status_duration: number | null;
+  heal: number | null;
+  buff: { atk: number | null; def: number | null; crt: number | null; sp: number | null; duration: number | null } | null;
+  barrier: boolean;
+  revival: boolean;
+  trap: boolean;
+}
+
+// Attack buttons of a unit, distances in game units and durations in milliseconds
+export type AttackButton = "normal" | "heavy1" | "heavy2" | "heavy3" | "ex" | "extra_action";
+export type IGameAttacks = Partial<Record<AttackButton, { cooldown: number | null; steps: IAttackStep[] }>>;
+
 export interface IGameUnit {
   game_id: number;
   release_date: string | null;
   stats: ICharacterStats | null;
   traits: IGameTraits;
+  attacks?: IGameAttacks;
 }
 
 export interface IGameSyncEntry {

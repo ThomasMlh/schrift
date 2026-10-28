@@ -470,7 +470,8 @@
       "traitsSpecial": "Attaque spéciale",
       "labelSummons": "Invocations",
       "traitsDestruction": "Bonus d'élimination",
-      "afterEliminations": "{{count}} élim. : {{text}}"
+      "afterEliminations": "{{count}} élim. : {{text}}",
+      "headingAttacks": "Attaques"
     },
     "raffle": {
       "noGuild": "Aucune guilde ne participe encore à la tombola.",
@@ -1147,6 +1148,32 @@
       "partialHint": "Le personnage doit avoir au moins un élément sélectionné.",
       "doneCount_one": "Valider ({{count}})",
       "doneCount_other": "Valider ({{count}})"
+    },
+    "characterAttacks": {
+      "buttons": {
+        "normal": "Attaque normale",
+        "heavy1": "Attaque puissante 1",
+        "heavy2": "Attaque puissante 2",
+        "heavy3": "Attaque puissante 3",
+        "ex": "Attaque spéciale",
+        "extra_action": "EX Move"
+      },
+      "cooldown": "Recharge {{value}}",
+      "power": "Puissance",
+      "hits": "Coups",
+      "area": "Zone",
+      "sector": "Arc {{angle}}° · {{radius}}",
+      "around": "Cercle {{radius}}",
+      "rect": "Rect. {{width}}×{{length}}",
+      "ahead": "Cercle {{radius}} à {{distance}}",
+      "projectile": "Projectile {{range}}",
+      "status": "{{names}} : {{probability}} % · {{duration}}",
+      "knockdown": "Renverse",
+      "heal": "Soins {{value}} %",
+      "buff": "Renforcement",
+      "barrier": "Barrière",
+      "revival": "Revit",
+      "trap": "Piège"
     }
   },
   "affinities": {

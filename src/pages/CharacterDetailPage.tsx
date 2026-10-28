@@ -35,8 +35,9 @@ import { bucketUrl } from "@/utils/apiRequest";
 import { Pill, SectionCard, TraitRow } from "@/components/character/SectionCard";
 import { CharacterStats } from "@/components/character/CharacterStats";
 import { CharacterRotations } from "@/components/character/CharacterRotations";
-import { FiActivity, FiBarChart2, FiCrosshair, FiShield, FiStar } from "react-icons/fi";
+import { FiActivity, FiBarChart2, FiCrosshair, FiShield, FiStar, FiZap } from "react-icons/fi";
 import { CharacterGameTraits } from "@/components/character/CharacterGameTraits";
+import { CharacterAttacks } from "@/components/character/CharacterAttacks";
 import { CharacterVisuals } from "@/components/character/CharacterVisuals";
 import { CharacterBuilds } from "@/components/character/CharacterBuilds";
 import { characterImageUrl, REBIRTH_STAR_URL } from "@/utils/characterImages";
@@ -200,6 +201,7 @@ const CharacterDetailPage = () => {
   const resurrected = Boolean(resurrection) && showResurrected;
   const shownStats = resurrected ? resurrection!.stats : (character.base_stats ?? character.stats ?? null);
   const shownTraits = resurrected ? resurrection!.traits : (character.traits ?? null);
+  const shownAttacks = resurrected ? resurrection!.attacks : character.attacks;
 
   return (
     <>
@@ -392,6 +394,12 @@ const CharacterDetailPage = () => {
           {shownTraits && (
             <SectionCard title={t("pages.characterDetail.headingGameTraits")} icon={FiStar}>
               <CharacterGameTraits traits={shownTraits} special={character.special} profile={character.profile} />
+            </SectionCard>
+          )}
+
+          {shownAttacks && Object.keys(shownAttacks).length > 0 && (
+            <SectionCard title={t("pages.characterDetail.headingAttacks")} icon={FiZap}>
+              <CharacterAttacks attacks={shownAttacks} />
             </SectionCard>
           )}
 
