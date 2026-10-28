@@ -21,7 +21,8 @@ import { useAccessories, useAccessoriesSubeffects } from "../../hooks/useAPI";
 import { useTranslation } from "react-i18next";
 import { bucketUrl } from "../../utils/apiRequest";
 import { gameText } from "../../utils/gameText";
-import type { IAccessory, IAccessorySubeffect } from "../../interfaces";
+import { subeffectLabel } from "../../utils/accessoryText";
+import type { IAccessory } from "../../interfaces";
 
 interface AccessorySearchSelectProps {
   value?: { id_accessory: string; id_subeffect?: string };
@@ -47,7 +48,7 @@ export const AccessorySearchSelect = ({
 
   const { i18n } = useTranslation();
   const { accessories, isLoading } = useAccessories(accessorySearch);
-  const label = (item: IAccessory | IAccessorySubeffect) => gameText(item.names, i18n.language) || item.name;
+  const label = (item: IAccessory) => gameText(item.names, i18n.language) || item.name;
   const effectText = (accessory: IAccessory) => gameText(accessory.effect?.text, i18n.language);
   const { subeffects, isLoading: isLoadingSubeffects } = useAccessoriesSubeffects(subeffectSearch);
 
@@ -230,7 +231,7 @@ export const AccessorySearchSelect = ({
                 _hover={{ borderColor: "gray.300" }}
               >
                 <Badge colorScheme="teal" fontSize="xs" px={2} py={1}>
-                  {label(selectedSubeffect)}
+                  {subeffectLabel(selectedSubeffect, selectedAccessory, i18n.language)}
                 </Badge>
               </HStack>
             ) : (
@@ -272,7 +273,7 @@ export const AccessorySearchSelect = ({
                         borderColor={borderColor}
                         _last={{ borderBottom: "none" }}
                       >
-                        <Text fontSize="sm">{label(subeffect)}</Text>
+                        <Text fontSize="sm">{subeffectLabel(subeffect, selectedAccessory, i18n.language)}</Text>
                       </HStack>
                     ))}
                   </VStack>

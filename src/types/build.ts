@@ -3,14 +3,16 @@ import type { GameText, ISkill } from "./character";
 import type { IPagination } from "./common";
 import type { IUser } from "./user";
 
-// Accessory of the game, at its strongest version (5★+ when it exists) and max level
+// Accessory of the game, at its strongest version (5★+ when it exists) and max level, worn by a
+// character of its affinity: values include that bonus (same_affinity_rate), null without affinity
 export interface IAccessory {
   _id: string;
   name: string;
   names?: GameText | null;
   code?: string;
   rarity?: string;
-  effect?: { type: string; values: number[]; text: GameText | null } | null;
+  effect?: { type: string; values: number[]; base_values?: number[]; text: GameText | null } | null;
+  same_affinity_rate?: number | null;
 }
 
 export interface IAccessorySubeffect {
@@ -18,6 +20,9 @@ export interface IAccessorySubeffect {
   name: string;
   names?: GameText | null;
   value?: number;
+  // Without the affinity bonus, on an accessory that has no affinity
+  base_value?: number;
+  base_names?: GameText | null;
 }
 
 export interface IBuildAccessory {
