@@ -164,6 +164,8 @@ export interface IGameSyncResult {
     updated: number;
     created: number;
     newImages: number;
+    // Summon visuals to copy from the game files
+    bannerImages?: number;
     duplicates: number;
     unmatched: number;
     ambiguous: number;
