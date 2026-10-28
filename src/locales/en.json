@@ -470,7 +470,8 @@
       "traitsSpecial": "Special attack",
       "labelSummons": "Summons",
       "traitsDestruction": "Elimination bonus",
-      "afterEliminations": "{{count}} KOs: {{text}}"
+      "afterEliminations": "{{count}} KOs: {{text}}",
+      "headingAttacks": "Attacks"
     },
     "raffle": {
       "noGuild": "No guild takes part in the raffle yet.",
@@ -1147,6 +1148,32 @@
       "partialHint": "The character must have at least one selected entry.",
       "doneCount_one": "Done ({{count}})",
       "doneCount_other": "Done ({{count}})"
+    },
+    "characterAttacks": {
+      "buttons": {
+        "normal": "Normal attack",
+        "heavy1": "Strong attack 1",
+        "heavy2": "Strong attack 2",
+        "heavy3": "Strong attack 3",
+        "ex": "Special attack",
+        "extra_action": "EX Move"
+      },
+      "cooldown": "Cooldown {{value}}",
+      "power": "Power",
+      "hits": "Hits",
+      "area": "Area",
+      "sector": "Arc {{angle}}° · {{radius}}",
+      "around": "Circle {{radius}}",
+      "rect": "Rect. {{width}}×{{length}}",
+      "ahead": "Circle {{radius}} at {{distance}}",
+      "projectile": "Projectile {{range}}",
+      "status": "{{names}}: {{probability}}% · {{duration}}",
+      "knockdown": "Knockdown",
+      "heal": "Heal {{value}}%",
+      "buff": "Buff",
+      "barrier": "Barrier",
+      "revival": "Revive",
+      "trap": "Trap"
     }
   },
   "affinities": {
