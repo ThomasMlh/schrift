@@ -120,6 +120,9 @@ export interface IAttackStep {
   weapon: number | null;
   hits: number;
   knockdown: boolean;
+  // Advanced strong attack (spiked button) and double strike
+  advanced?: boolean;
+  twice?: boolean;
   color: "R" | "B" | null;
   shape: AttackShape | null;
   statuses: { code: string; plus: boolean; name: GameText; probability: number | null; duration: number | null }[];

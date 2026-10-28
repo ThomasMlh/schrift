@@ -50,11 +50,12 @@ const isHeavy = (button: AttackButton) => button.startsWith("heavy");
 export const attackBase = (button: AttackButton, steps: IAttackStep[]) => {
   if (button === "extra_action") return steps.some((s) => s.color === "B") ? "ex_action_base01" : "ex_action_base02";
   if (button === "ex") return "bt_skill";
-  const heavy = isHeavy(button);
-  if (steps.some((s) => s.heal)) return heavy ? "bt_heal_heavy" : "bt_heal";
-  if (steps.some((s) => s.buff)) return "bt_buff_heavy";
+  // Advanced strong attacks have a spiked border ("_heavy_plus")
+  const heavy = isHeavy(button) ? (steps.some((s) => s.advanced) ? "_heavy_plus" : "_heavy") : "";
+  if (steps.some((s) => s.heal)) return `bt_heal${heavy}`;
+  if (steps.some((s) => s.buff)) return `bt_buff${heavy || "_heavy"}`;
   const blue = steps.some((s) => s.color === "B");
-  return `${blue ? "bt_projectile" : "bt_fighting"}${heavy ? "_heavy" : ""}`;
+  return `${blue ? "bt_projectile" : "bt_fighting"}${heavy}`;
 };
 
 // Weapon icon of the button, or the closest one the game has for that weapon. Buffs show the
@@ -62,6 +63,8 @@ export const attackBase = (button: AttackButton, steps: IAttackStep[]) => {
 export const attackWeaponIcon = (button: AttackButton, steps: IAttackStep[]) => {
   if (button === "extra_action") return "ex_action01";
   if (button === "ex") return "11_skill1";
+  // Double strike has its own icon
+  if (steps.some((s) => s.twice)) return "11_heavy3";
   const buff = steps.find((s) => s.buff)?.buff;
   const weapon = buff ? (buff.target === 2 ? 7 : 6) : steps.some((s) => s.heal) ? 5 : steps.find((s) => s.weapon)?.weapon;
   if (!weapon) return null;
@@ -69,8 +72,13 @@ export const attackWeaponIcon = (button: AttackButton, steps: IAttackStep[]) => 
   return candidates.find((name) => WEAPON_ICONS.has(name)) ?? [...WEAPON_ICONS].find((name) => name.startsWith(`${weapon}_`)) ?? null;
 };
 
-// Badges of the statuses the attack inflicts (the game shows each of them)
-export const attackStatusIcons = (steps: IAttackStep[]) => [...new Set(steps
-  .flatMap((s) => s.statuses)
-  .filter((status) => STATUS_CODES.has(status.code))
-  .map((status) => `ailment_${status.code}${status.plus ? "_plus" : ""}`))];
+// Statuses the attack inflicts, one badge each in the game: icon on a dark disc, an orange "+" for the "+" ones
+export const attackStatusBadges = (steps: IAttackStep[]) => {
+  const seen = new Map<string, { icon: string; plus: boolean }>();
+  for (const status of steps.flatMap((s) => s.statuses)) {
+    if (!STATUS_CODES.has(status.code)) continue;
+    const key = `${status.code}${status.plus ? "+" : ""}`;
+    if (!seen.has(key)) seen.set(key, { icon: `ailment_${status.code}`, plus: status.plus });
+  }
+  return [...seen.values()];
+};
