@@ -468,7 +468,9 @@
       "traitsTree": "Skills",
       "traitsEx": "EX skills",
       "traitsSpecial": "Special attack",
-      "labelSummons": "Summons"
+      "labelSummons": "Summons",
+      "traitsDestruction": "Elimination bonus",
+      "afterEliminations": "{{count}} KOs: {{text}}"
     },
     "raffle": {
       "noGuild": "No guild takes part in the raffle yet.",
@@ -627,14 +629,7 @@
       "rotationShortcut": "Good for the rotation: {{killer}}",
       "clearAll": "Clear all",
       "resultsCount_one": "{{count}} character",
-      "resultsCount_other": "{{count}} characters",
-      "traits": "Traits",
-      "traitsSearch": "Search a trait...",
-      "traitsNone": "No trait found",
-      "traitsClear": "Uncheck all",
-      "resurrectionAll": "With or without resurrection",
-      "resurrectionOnly": "With resurrection",
-      "resurrectionNone": "Without resurrection"
+      "resultsCount_other": "{{count}} characters"
     },
     "guildTabsList": {
       "noMemberInGuild": "No members in this guild",
@@ -1119,6 +1114,39 @@
     "characterCard": {
       "rebirth": "Resurrection on {{date}}",
       "rebirthAlt": "Resurrection"
+    },
+    "characterFilters": {
+      "all": "All",
+      "affinity": "Affinity",
+      "killer": "Killer",
+      "killerOf": "Killer: {{faction}}",
+      "attackColor": "Normal attack color",
+      "redAttacks": "Red attacks",
+      "blueAttacks": "Blue attacks",
+      "category": "Category",
+      "soulTrait": "Soul Trait",
+      "exSkills": "EX skills",
+      "skills": "Skills (innate included)",
+      "special": "Special effects",
+      "destruction": "Elimination bonus",
+      "noFilter": "No filter (all)",
+      "selected_one": "{{count}} filter",
+      "selected_other": "{{count}} filters",
+      "choose": "Choose",
+      "edit": "Edit",
+      "search": "Search...",
+      "nothingFound": "Nothing found",
+      "done": "Done",
+      "toggle": "Filters",
+      "hide": "Hide filters",
+      "reset": "Reset",
+      "matching": "Result matching",
+      "perfect": "Perfect",
+      "partial": "Partial",
+      "perfectHint": "The character must have everything selected.",
+      "partialHint": "The character must have at least one selected entry.",
+      "doneCount_one": "Done ({{count}})",
+      "doneCount_other": "Done ({{count}})"
     }
   },
   "affinities": {
