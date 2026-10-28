@@ -13,7 +13,7 @@ const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
 const seconds = (ms: number | null) => (ms ? `${Math.round(ms / 100) / 10}\u00a0s` : "—");
 
 // Attack cards of a unit: area drawing, cooldown, statuses and, for a combo, one column per hit
-export const CharacterAttacks = ({ attacks, portrait }: { attacks: IGameAttacks; portrait?: string }) => {
+export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
   const { t, i18n } = useTranslation();
   const buttons = BUTTONS.filter((button) => attacks[button]);
   // Same scale for every attack of the character
@@ -62,7 +62,7 @@ export const CharacterAttacks = ({ attacks, portrait }: { attacks: IGameAttacks;
           <Box key={button} bg="bg.subtle" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={3}>
             <HStack justify="space-between" mb={2}>
               <HStack spacing={2}>
-                <AttackButtonIcon button={button} steps={steps} portrait={portrait} size="44px" />
+                <AttackButtonIcon button={button} steps={steps} size="44px" />
                 <Box>
                   <Text fontWeight="bold" fontSize="sm" color="text.strong">{t(`components.characterAttacks.buttons.${button}`)}</Text>
                   {color && <AttackTypeBadge attackType={color} size="10px" />}
