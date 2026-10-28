@@ -399,7 +399,7 @@ const CharacterDetailPage = () => {
 
           {shownAttacks && Object.keys(shownAttacks).length > 0 && (
             <SectionCard title={t("pages.characterDetail.headingAttacks")} icon={FiZap}>
-              <CharacterAttacks attacks={shownAttacks} />
+              <CharacterAttacks attacks={shownAttacks} portrait={characterImageUrl(character, "thumb")} />
             </SectionCard>
           )}
 

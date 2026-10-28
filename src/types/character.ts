@@ -115,6 +115,7 @@ export type AttackShape =
 export interface IAttackStep {
   step: number | null;
   power: number | null;
+  weapon: number | null;
   hits: number;
   knockdown: boolean;
   color: "R" | "B" | null;

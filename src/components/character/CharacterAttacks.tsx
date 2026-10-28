@@ -5,6 +5,7 @@ import { gameText } from "@/utils/gameText";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { shapeReach } from "@/utils/attackShape";
 import { AttackArea } from "./AttackArea";
+import { AttackButtonIcon } from "./AttackButtonIcon";
 
 const BUTTONS: AttackButton[] = ["normal", "heavy1", "heavy2", "heavy3", "ex", "extra_action"];
 const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
@@ -12,7 +13,7 @@ const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
 const seconds = (ms: number | null) => (ms ? `${Math.round(ms / 100) / 10}\u00a0s` : "—");
 
 // Attack cards of a unit: area drawing, cooldown, statuses and, for a combo, one column per hit
-export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
+export const CharacterAttacks = ({ attacks, portrait }: { attacks: IGameAttacks; portrait?: string }) => {
   const { t, i18n } = useTranslation();
   const buttons = BUTTONS.filter((button) => attacks[button]);
   // Same scale for every attack of the character
@@ -61,8 +62,11 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
           <Box key={button} bg="bg.subtle" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={3}>
             <HStack justify="space-between" mb={2}>
               <HStack spacing={2}>
-                {color && <AttackTypeBadge attackType={color} size="12px" />}
-                <Text fontWeight="bold" fontSize="sm" color="text.strong">{t(`components.characterAttacks.buttons.${button}`)}</Text>
+                <AttackButtonIcon button={button} steps={steps} portrait={portrait} size="44px" />
+                <Box>
+                  <Text fontWeight="bold" fontSize="sm" color="text.strong">{t(`components.characterAttacks.buttons.${button}`)}</Text>
+                  {color && <AttackTypeBadge attackType={color} size="10px" />}
+                </Box>
               </HStack>
               <Badge variant="subtle" colorScheme="purple" textTransform="none">
                 {t("components.characterAttacks.cooldown", { value: seconds(cooldown) })}
