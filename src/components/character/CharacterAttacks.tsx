@@ -58,7 +58,7 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
   return (
     <SimpleGrid columns={{ base: 1, sm: 2, xl: 3 }} spacing={4}>
       {buttons.map((button) => {
-        const { cooldown, steps } = attacks[button]!;
+        const { cooldown, hits, steps } = attacks[button]!;
         const color = steps.find((s) => s.color)?.color ?? null;
         const shapes = steps.map((s) => s.shape).filter((s): s is AttackShape => Boolean(s));
         const uniqueShapes = shapes.filter((shape, i) => shapes.findIndex((other) => JSON.stringify(other) === JSON.stringify(shape)) === i);
@@ -109,7 +109,9 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
                 </Tr>
                 <Tr>
                   <Td px={1} fontSize="xs" color="text.muted">{t("components.characterAttacks.hits")}</Td>
-                  {steps.map((step, i) => <Td key={i} px={1} textAlign="center">{step.hits}</Td>)}
+                  {hits
+                    ? <Td px={1} textAlign="center" colSpan={steps.length}>{hits}</Td>
+                    : steps.map((step, i) => <Td key={i} px={1} textAlign="center">{step.hits ?? "—"}</Td>)}
                 </Tr>
                 <Tr>
                   <Td px={1} fontSize="xs" color="text.muted" borderBottom="none">{t("components.characterAttacks.area")}</Td>

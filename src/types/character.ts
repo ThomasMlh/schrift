@@ -118,7 +118,8 @@ export interface IAttackStep {
   variant: number;
   power: number | null;
   weapon: number | null;
-  hits: number;
+  // Unknown when the animations of the model were not extracted
+  hits: number | null;
   knockdown: boolean;
   // Advanced strong attack (spiked button) and double strike
   advanced?: boolean;
@@ -138,7 +139,8 @@ export interface IAttackStep {
 
 // Attack buttons of a unit, distances in game units and durations in milliseconds
 export type AttackButton = "normal" | "heavy1" | "heavy2" | "heavy3" | "ex" | "extra_action";
-export type IGameAttacks = Partial<Record<AttackButton, { cooldown: number | null; steps: IAttackStep[] }>>;
+// hits: total of a strong attack whose steps share one animation, when it cannot be shared out
+export type IGameAttacks = Partial<Record<AttackButton, { cooldown: number | null; hits?: number | null; steps: IAttackStep[] }>>;
 
 export interface IGameUnit {
   game_id: number;
@@ -181,6 +183,8 @@ export interface IGameSyncResult {
     newSkills?: number;
     // Bonus skills entered on the site, replaced by the game bonus abilities
     legacySkills?: number;
+    // Models whose animations gave the hits of melee attacks (attack_hits.csv)
+    attackHitModels?: number;
   };
   fieldCounts: Record<string, number>;
   preview: {
