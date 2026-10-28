@@ -1184,7 +1184,14 @@
       "buff": "Buff",
       "barrier": "Barrier",
       "revival": "Revive",
-      "trap": "Trap"
+            "projectileSized": "Proj. {{width}}×{{length}} · {{range}}",
+      "trap": "Vortex",
+      "trapLine": "Vortex: {{hits}} hits over {{duration}}, {{kind}}",
+      "trapStatic": "static",
+      "trapHoming": "follows the enemy",
+      "rangeBonus": "Area +{{value}}% (included)",
+      "hitBonus_one": "+{{count}} hit (soul tree)",
+      "hitBonus_other": "+{{count}} hits (soul tree)"
     },
     "accessorySearchSelect": {
       "accessory": "Accessory",

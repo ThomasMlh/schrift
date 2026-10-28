@@ -10,7 +10,7 @@ import { AttackButtonIcon } from "./AttackButtonIcon";
 const BUTTONS: AttackButton[] = ["normal", "heavy1", "heavy2", "heavy3", "ex", "extra_action"];
 const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
 
-const seconds = (ms: number | null) => (ms ? `${Math.round(ms / 100) / 10}\u00a0s` : "—");
+const seconds = (ms: number | null, decimals = 1) => (ms ? `${Math.round(ms / 10 ** (3 - decimals)) / 10 ** decimals}\u00a0s` : "—");
 
 // Attack cards of a unit: area drawing, cooldown, statuses and, for a combo, one column per hit
 export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
@@ -27,7 +27,9 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
         : t("components.characterAttacks.around", { radius: shape.radius });
       case "rect": return t("components.characterAttacks.rect", { width: shape.width, length: shape.length });
       case "circle": return t("components.characterAttacks.ahead", { radius: shape.radius, distance: shape.distance });
-      case "projectile": return t("components.characterAttacks.projectile", { range: shape.range ?? shape.length });
+      case "projectile": return shape.width && shape.length
+        ? t("components.characterAttacks.projectileSized", { width: shape.width, length: shape.length, range: shape.range ?? "—" })
+        : t("components.characterAttacks.projectile", { range: shape.range ?? shape.length });
     }
   };
 
@@ -51,14 +53,14 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
     if (steps.some((s) => s.buff)) list.push(t("components.characterAttacks.buff"));
     if (steps.some((s) => s.barrier)) list.push(t("components.characterAttacks.barrier"));
     if (steps.some((s) => s.revival)) list.push(t("components.characterAttacks.revival"));
-    if (steps.some((s) => s.trap)) list.push(t("components.characterAttacks.trap"));
     return list;
   };
 
   return (
     <SimpleGrid columns={{ base: 1, sm: 2, xl: 3 }} spacing={4}>
       {buttons.map((button) => {
-        const { cooldown, hits, steps } = attacks[button]!;
+        const { cooldown, hits, steps, range_bonus: rangeBonus, hit_bonus: hitBonus } = attacks[button]!;
+        const traps = steps.map((s) => s.trap).filter((trap): trap is NonNullable<IAttackStep["trap"]> => Boolean(trap));
         const color = steps.find((s) => s.color)?.color ?? null;
         const shapes = steps.map((s) => s.shape).filter((s): s is AttackShape => Boolean(s));
         const uniqueShapes = shapes.filter((shape, i) => shapes.findIndex((other) => JSON.stringify(other) === JSON.stringify(shape)) === i);
@@ -81,6 +83,27 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
             <AttackArea shapes={uniqueShapes} reach={reach} color={color} />
 
             {status && <Text fontSize="xs" color="text.secondary" mt={2}>{status}</Text>}
+            {traps.map((trap, i) => (
+              <Text key={i} fontSize="xs" color="text.secondary" mt={1}>
+                {trap.hits
+                  ? t("components.characterAttacks.trapLine", {
+                    hits: trap.hits,
+                    duration: seconds(trap.duration, 2),
+                    kind: t(`components.characterAttacks.${trap.homing ? "trapHoming" : "trapStatic"}`),
+                  })
+                  : t("components.characterAttacks.trap")}
+              </Text>
+            ))}
+            {(rangeBonus || hitBonus) && (
+              <Wrap spacing={1} mt={2}>
+                {rangeBonus && (
+                  <WrapItem><Badge colorScheme="teal" variant="subtle" textTransform="none">{t("components.characterAttacks.rangeBonus", { value: rangeBonus })}</Badge></WrapItem>
+                )}
+                {hitBonus && (
+                  <WrapItem><Badge colorScheme="teal" variant="subtle" textTransform="none">{t("components.characterAttacks.hitBonus", { count: hitBonus })}</Badge></WrapItem>
+                )}
+              </Wrap>
+            )}
             {effects(steps).length > 0 && (
               <Wrap spacing={1} mt={2}>
                 {effects(steps).map((effect) => (
