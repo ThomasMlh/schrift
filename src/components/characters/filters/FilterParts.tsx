@@ -88,7 +88,11 @@ export const MultiChoiceRow = ({ values, options, onChange }: {
   onChange: (values: string[]) => void;
 }) => {
   const { t } = useTranslation();
-  const toggle = (value: string) => onChange(values.includes(value) ? values.filter((v) => v !== value) : [...values, value]);
+  const toggle = (value: string) => {
+    const next = values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
+    // Every option checked is the same as no filter: back to "All"
+    onChange(next.length === options.length ? [] : next);
+  };
   return (
     <Wrap spacing={2}>
       <WrapItem>
