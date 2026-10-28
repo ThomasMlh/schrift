@@ -10,7 +10,7 @@ import { gameText } from "@/utils/gameText";
 interface CharacterVisualsProps {
   character: ICharacter;
   onDownload: (src: string, filename: string) => void;
-  onOpen: (src: string, label: string) => void;
+  onOpen: (src: string, label: string, caption?: string) => void;
 }
 
 // Character visuals (special attack, artwork, quote, summons) with download and zoom.
@@ -58,7 +58,7 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
                 <Tooltip label={t("pages.characterDetail.tooltipExpand")}>
                   <IconButton aria-label={t("pages.characterDetail.tooltipExpand")} icon={<ExternalLinkIcon />} size="xs"
                     variant="ghost" borderRadius="full"
-                    onClick={() => onOpen(src, label)} />
+                    onClick={() => onOpen(src, label, key === "phrase" ? quote : undefined)} />
                 </Tooltip>
               </HStack>
             </Flex>
@@ -67,7 +67,7 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
               alt={label}
               w="100%" h="auto"
               cursor="zoom-in"
-              onClick={() => onOpen(src, label)}
+              onClick={() => onOpen(src, label, key === "phrase" ? quote : undefined)}
               onError={() => setFailed((keys) => [...keys, key])}
             />
             {key === "phrase" && quote && (
