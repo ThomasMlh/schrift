@@ -1,17 +1,19 @@
 import type { ICharacter } from "@/interfaces";
+import { gameText } from "@/utils/gameText";
 
-const SERIES_SHORT_NAMES: Record<string, string> = {
-  "Thousand-Year Blood War": "TYBW",
-};
+// Short series names, as the game shortens them in its event list ("TYBW")
+const SERIES_SHORT_NAMES: [RegExp, string][] = [
+  [/guerre sanglante de mille ans/i, "TYBW"],
+  [/thousand-year blood war/i, "TYBW"],
+];
 
-// "Thousand-Year Blood War,Refine,Ichigo Kurosaki" -> "TYBW : Refine"
-export const characterVersionLabel = (character: Pick<ICharacter, "name" | "version_name" | "game_version">) => {
-  // Characters added by the game sync have no hand-entered version: the game one, without its "version " prefix
-  if (!character.version_name) return (character.game_version?.fr ?? "").replace(/^version\s+/i, "");
-  const parts = (character.version_name ?? "").split(",").map((part) => part.trim()).filter(Boolean);
-  // "<series>,<version>,<name>": the name part can be an older spelling of the character name
-  if (parts.length >= 3 || (parts.length > 1 && parts[parts.length - 1] === character.name)) parts.pop();
-  const [series, ...rest] = parts;
-  if (!series) return "";
-  return [SERIES_SHORT_NAMES[series] ?? series, ...rest].join(" : ");
+// Game version of the character: "version guerre sanglante de mille ans/Refine 3" -> "TYBW : Refine 3"
+export const characterVersionLabel = (character: Pick<ICharacter, "game_version">, language = "fr") => {
+  const raw = gameText(character.game_version, language).replace(/^version\s+/i, "").trim();
+  if (!raw) return "";
+  const label = raw
+    .split("/")
+    .map((part) => SERIES_SHORT_NAMES.reduce((text, [pattern, short]) => text.replace(pattern, short), part.trim()))
+    .join(" : ");
+  return label.charAt(0).toUpperCase() + label.slice(1);
 };
