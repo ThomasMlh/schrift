@@ -54,7 +54,11 @@ export const GameSyncModal = ({ preview, isOpen, onClose, onApply, isApplying }:
               <Stat><StatLabel>Reliés au jeu</StatLabel><StatNumber>{stats.linked}</StatNumber></Stat>
               <Stat><StatLabel>Mis à jour</StatLabel><StatNumber>{stats.updated}</StatNumber></Stat>
               <Stat><StatLabel>Nouveaux</StatLabel><StatNumber>{stats.created}</StatNumber></Stat>
-              <Stat><StatLabel>Images à envoyer</StatLabel><StatNumber>{stats.newImages}</StatNumber></Stat>
+              <Stat>
+                <StatLabel>Images à envoyer</StatLabel>
+                <StatNumber>{stats.newImages + (stats.bannerImages ?? 0)}</StatNumber>
+                {(stats.bannerImages ?? 0) > 0 && <Text fontSize="xs" color="text.muted">dont {stats.bannerImages} visuel(s) de loterie</Text>}
+              </Stat>
               <Stat><StatLabel>Doublons à fusionner</StatLabel><StatNumber>{stats.duplicates}</StatNumber></Stat>
               <Stat><StatLabel>Non reliés</StatLabel><StatNumber>{stats.unmatched + stats.ambiguous}</StatNumber></Stat>
             </SimpleGrid>
