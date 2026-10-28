@@ -18,7 +18,10 @@ import { SearchIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
 import { FloatingMenu } from "./FloatingMenu";
 import { useAccessories, useAccessoriesSubeffects } from "../../hooks/useAPI";
+import { useTranslation } from "react-i18next";
 import { bucketUrl } from "../../utils/apiRequest";
+import { gameText } from "../../utils/gameText";
+import type { IAccessory, IAccessorySubeffect } from "../../interfaces";
 
 interface AccessorySearchSelectProps {
   value?: { id_accessory: string; id_subeffect?: string };
@@ -42,7 +45,10 @@ export const AccessorySearchSelect = ({
   const accessoryFloatingRef = useRef<HTMLDivElement>(null);
   const subeffectFloatingRef = useRef<HTMLDivElement>(null);
 
+  const { i18n } = useTranslation();
   const { accessories, isLoading } = useAccessories(accessorySearch);
+  const label = (item: IAccessory | IAccessorySubeffect) => gameText(item.names, i18n.language) || item.name;
+  const effectText = (accessory: IAccessory) => gameText(accessory.effect?.text, i18n.language);
   const { subeffects, isLoading: isLoadingSubeffects } = useAccessoriesSubeffects(subeffectSearch);
 
   const bgColor = "bg.elevated";
@@ -138,8 +144,11 @@ export const AccessorySearchSelect = ({
                 />
               )}
               <Badge colorScheme="cyan" fontSize="xs" px={2} py={1}>
-                {selectedAccessory.name}
+                {label(selectedAccessory)}
               </Badge>
+              {effectText(selectedAccessory) && (
+                <Text fontSize="xs" color="text.secondary" noOfLines={1}>{effectText(selectedAccessory)}</Text>
+              )}
             </HStack>
           ) : (
             <InputGroup size="sm">
@@ -190,7 +199,10 @@ export const AccessorySearchSelect = ({
                           fallback={<Box w="22px" />}
                         />
                       )}
-                      <Text fontSize="sm">{accessory.name}</Text>
+                      <Box minW={0}>
+                        <Text fontSize="sm">{label(accessory)}</Text>
+                        {effectText(accessory) && <Text fontSize="xs" color="text.secondary">{effectText(accessory)}</Text>}
+                      </Box>
                     </HStack>
                   ))}
                 </VStack>
@@ -218,7 +230,7 @@ export const AccessorySearchSelect = ({
                 _hover={{ borderColor: "gray.300" }}
               >
                 <Badge colorScheme="teal" fontSize="xs" px={2} py={1}>
-                  {selectedSubeffect.name}
+                  {label(selectedSubeffect)}
                 </Badge>
               </HStack>
             ) : (
@@ -260,7 +272,7 @@ export const AccessorySearchSelect = ({
                         borderColor={borderColor}
                         _last={{ borderBottom: "none" }}
                       >
-                        <Text fontSize="sm">{subeffect.name}</Text>
+                        <Text fontSize="sm">{label(subeffect)}</Text>
                       </HStack>
                     ))}
                   </VStack>

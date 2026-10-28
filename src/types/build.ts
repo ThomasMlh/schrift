@@ -1,17 +1,23 @@
 // Builds, accessories and guides
-import type { ISkill } from "./character";
+import type { GameText, ISkill } from "./character";
 import type { IPagination } from "./common";
 import type { IUser } from "./user";
 
+// Accessory of the game, at its strongest version (5★+ when it exists) and max level
 export interface IAccessory {
   _id: string;
   name: string;
+  names?: GameText | null;
   code?: string;
+  rarity?: string;
+  effect?: { type: string; values: number[]; text: GameText | null } | null;
 }
 
 export interface IAccessorySubeffect {
   _id: string;
   name: string;
+  names?: GameText | null;
+  value?: number;
 }
 
 export interface IBuildAccessory {

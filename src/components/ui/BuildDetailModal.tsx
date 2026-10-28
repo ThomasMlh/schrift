@@ -35,6 +35,7 @@ import type { IBuild } from "../../interfaces";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 import { bucketUrl } from "@/utils/apiRequest";
+import { gameText } from "@/utils/gameText";
 import { BuildGuildPlayers } from "@/components/guides/BuildGuildPlayers";
 
 interface BuildDetailModalProps {
@@ -80,7 +81,7 @@ export const BuildDetailModal = ({
   const linkCardBg = "bg.muted";
   const mutedText = "text.muted";
   const { currentUser } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
@@ -351,11 +352,16 @@ export const BuildDetailModal = ({
                                       </Box>
                                       <VStack align="start" spacing={0} flex={1} minW={0}>
                                         <Text fontSize="md" fontWeight="medium" noOfLines={1}>
-                                          {acc.accessory?.name ?? "—"}
+                                          {acc.accessory ? gameText(acc.accessory.names, i18n.language) || acc.accessory.name : "—"}
                                         </Text>
+                                        {acc.accessory?.effect?.text && (
+                                          <Text fontSize="sm" color={mutedText}>
+                                            {gameText(acc.accessory.effect.text, i18n.language)}
+                                          </Text>
+                                        )}
                                         {acc.subeffect && (
                                           <Text fontSize="sm" color={mutedText} noOfLines={1}>
-                                            ↳ {acc.subeffect.name}
+                                            ↳ {gameText(acc.subeffect.names, i18n.language) || acc.subeffect.name}
                                           </Text>
                                         )}
                                       </VStack>
