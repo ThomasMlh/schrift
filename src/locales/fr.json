@@ -541,6 +541,7 @@
       "winner": "Gagnant du mois",
       "winnerDetail": "{{prize}} · ticket n°{{number}} sur {{total}} ({{tickets}} tickets)",
       "drawnBy": "Tiré par {{name}} le {{date}}",
+      "drawnAt": "Tiré le {{date}}",
       "cancelDraw": "Annuler le tirage",
       "rulesTitle": "Comment gagner des tickets",
       "rulesSubtitle": "{{max}} tickets maximum par joueur et par mois.",

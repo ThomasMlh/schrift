@@ -541,6 +541,7 @@
       "winner": "Winner of the month",
       "winnerDetail": "{{prize}} · ticket #{{number}} of {{total}} ({{tickets}} tickets)",
       "drawnBy": "Drawn by {{name}} on {{date}}",
+      "drawnAt": "Drawn on {{date}}",
       "cancelDraw": "Cancel the draw",
       "rulesTitle": "How to earn tickets",
       "rulesSubtitle": "Up to {{max}} tickets per player and per month.",

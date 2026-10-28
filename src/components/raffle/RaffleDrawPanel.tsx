@@ -60,8 +60,8 @@ export const RaffleDrawPanel = ({ raffle }: { raffle: IGuildRaffle }) => {
                 })}
               </Text>
               <Text fontSize="xs" color="text.muted">
-                {t("pages.raffle.drawnBy", {
-                  name: raffle.draw.drawn_by.name ?? "?",
+                {t(raffle.draw.drawn_by.name ? "pages.raffle.drawnBy" : "pages.raffle.drawnAt", {
+                  name: raffle.draw.drawn_by.name,
                   date: new Date(raffle.draw.drawn_at).toLocaleString(i18n.language, { dateStyle: "short", timeStyle: "short" }),
                 })}
               </Text>
