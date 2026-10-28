@@ -8,9 +8,9 @@ import { AffinityIcon } from "../ui/AffinityIcon";
 
 // Character list card, like the in-game list: round thumbnail over its blurred copy, affinity, name and version
 export const CharacterCard = ({ character }: { character: ICharacter }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const thumb = characterImageUrl(character, "thumb");
-  const version = characterVersionLabel(character);
+  const version = characterVersionLabel(character, i18n.language);
 
   return (
     <Box
