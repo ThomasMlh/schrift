@@ -84,6 +84,16 @@ export const RaffleSection = () => {
               <StatLabel>{t("pages.raffle.stats.gap")}</StatLabel>
               <StatNumber fontSize="xl">{raffle.collective_gap === null ? "—" : formatScore(raffle.collective_gap)}</StatNumber>
               <StatHelpText mb={0}>{t("pages.raffle.stats.gapGoal", { gap: formatScore(raffle.rules.collectiveGap) })}</StatHelpText>
+              {raffle.collective_extremes && (
+                <Text fontSize="xs" color="text.muted">
+                  {t("pages.raffle.stats.gapBetween", {
+                    best: raffle.collective_extremes.best.bbs_name ?? raffle.collective_extremes.best.bbs_id,
+                    bestAverage: formatScore(raffle.collective_extremes.best.average),
+                    worst: raffle.collective_extremes.worst.bbs_name ?? raffle.collective_extremes.worst.bbs_id,
+                    worstAverage: formatScore(raffle.collective_extremes.worst.average),
+                  })}
+                </Text>
+              )}
             </Stat>
             <RaffleRankEditor key={`${raffle.month.key}:${raffle.guild._id}:${raffle.rank}:${raffle.rank_tickets}`} raffle={raffle} />
           </SimpleGrid>

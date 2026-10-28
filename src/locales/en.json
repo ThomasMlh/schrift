@@ -521,7 +521,8 @@
         "rankTickets": "Rank tickets earned this month",
         "rankHint_one": "{{rank}} reached / kept: +{{count}} ticket for everyone",
         "rankHint_other": "{{rank}} reached / kept: +{{count}} tickets for everyone",
-        "rotations": "Rotations of the month"
+        "rotations": "Rotations of the month",
+        "gapBetween": "{{best}} ({{bestAverage}}) → {{worst}} ({{worstAverage}})"
       },
       "prizeOfMonth": "Prize: {{prize}}",
       "readyToDraw": "The month is over: {{total}} tickets in play.",
@@ -594,7 +595,16 @@
         "maxTickets": "Max tickets / player",
         "saved": "Settings saved"
       },
-      "loadError": "Could not load the raffle."
+      "loadError": "Could not load the raffle.",
+      "collective": {
+        "rank_one": "Rank {{rank}}: +{{count}} ticket",
+        "rank_other": "Rank {{rank}}: +{{count}} tickets",
+        "gap_one": "1st / last gap {{gap}} (goal under {{goal}}): +{{count}} ticket",
+        "gap_other": "1st / last gap {{gap}} (goal under {{goal}}): +{{count}} tickets",
+        "gapUnknown": "1st / last gap not computed: fewer than 2 ranked players",
+        "average": "Player's monthly average: {{average}}",
+        "notRanked": "No average: fewer than half of the rotations played"
+      }
     }
   },
   "components": {

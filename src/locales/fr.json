@@ -521,7 +521,8 @@
         "rankTickets": "Tickets de rang gagnés ce mois-ci",
         "rankHint_one": "Passage / maintien {{rank}} : +{{count}} ticket pour tous",
         "rankHint_other": "Passage / maintien {{rank}} : +{{count}} tickets pour tous",
-        "rotations": "Rotas du mois"
+        "rotations": "Rotas du mois",
+        "gapBetween": "{{best}} ({{bestAverage}}) → {{worst}} ({{worstAverage}})"
       },
       "prizeOfMonth": "À gagner : {{prize}}",
       "readyToDraw": "Le mois est terminé : {{total}} tickets en jeu.",
@@ -594,7 +595,16 @@
         "maxTickets": "Tickets max / joueur",
         "saved": "Réglages enregistrés"
       },
-      "loadError": "Impossible de charger la tombola."
+      "loadError": "Impossible de charger la tombola.",
+      "collective": {
+        "rank_one": "Rang {{rank}} : +{{count}} ticket",
+        "rank_other": "Rang {{rank}} : +{{count}} tickets",
+        "gap_one": "Écart 1er / dernier {{gap}} (objectif sous {{goal}}) : +{{count}} ticket",
+        "gap_other": "Écart 1er / dernier {{gap}} (objectif sous {{goal}}) : +{{count}} tickets",
+        "gapUnknown": "Écart 1er / dernier non calculé : moins de 2 joueurs classés",
+        "average": "Moyenne du mois du joueur : {{average}}",
+        "notRanked": "Pas de moyenne : moins de la moitié des rotas jouées"
+      }
     }
   },
   "components": {
