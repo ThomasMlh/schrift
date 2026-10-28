@@ -172,6 +172,11 @@ export interface IGameSyncResult {
     banners?: number;
     newBanners?: number;
     legacyBanners?: number;
+    accessories?: number;
+    newAccessories?: number;
+    // Accessories and sub-effects entered on the site, replaced by the game ones
+    legacyAccessories?: number;
+    accessoryImages?: number;
   };
   fieldCounts: Record<string, number>;
   preview: {

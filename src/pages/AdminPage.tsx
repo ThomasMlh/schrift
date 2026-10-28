@@ -140,7 +140,7 @@ const AdminPage = () => {
         duration: 8000,
         isClosable: true,
       });
-      if (statistics.newImages + (statistics.bannerImages ?? 0) > 0) await handleUploadImages();
+      if (statistics.newImages + (statistics.bannerImages ?? 0) + (statistics.accessoryImages ?? 0) > 0) await handleUploadImages();
     } catch (error: unknown) {
       toast({ title: (error as Error).message || "Erreur lors de la synchronisation", status: "error" });
     } finally {

@@ -56,8 +56,9 @@ export const GameSyncModal = ({ preview, isOpen, onClose, onApply, isApplying }:
               <Stat><StatLabel>Nouveaux</StatLabel><StatNumber>{stats.created}</StatNumber></Stat>
               <Stat>
                 <StatLabel>Images à envoyer</StatLabel>
-                <StatNumber>{stats.newImages + (stats.bannerImages ?? 0)}</StatNumber>
+                <StatNumber>{stats.newImages + (stats.bannerImages ?? 0) + (stats.accessoryImages ?? 0)}</StatNumber>
                 {(stats.bannerImages ?? 0) > 0 && <Text fontSize="xs" color="text.muted">dont {stats.bannerImages} visuel(s) de loterie</Text>}
+                {(stats.accessoryImages ?? 0) > 0 && <Text fontSize="xs" color="text.muted">dont {stats.accessoryImages} accessoire(s)</Text>}
               </Stat>
               <Stat><StatLabel>Doublons à fusionner</StatLabel><StatNumber>{stats.duplicates}</StatNumber></Stat>
               <Stat><StatLabel>Non reliés</StatLabel><StatNumber>{stats.unmatched + stats.ambiguous}</StatNumber></Stat>
@@ -72,6 +73,17 @@ export const GameSyncModal = ({ preview, isOpen, onClose, onApply, isApplying }:
               <Text fontSize="sm" color="text.secondary">
                 {stats.newBanners} nouvelle(s) invocation(s) sur {stats.banners}. Leurs visuels seront archivés sur le bucket.
               </Text>
+            )}
+            {(stats.newAccessories ?? 0) > 0 && (
+              <Text fontSize="sm" color="text.secondary">
+                {stats.newAccessories} nouvel(s) accessoire(s) sur {stats.accessories}, dans leur version la plus forte (5★+ quand elle existe).
+              </Text>
+            )}
+            {(stats.legacyAccessories ?? 0) > 0 && (
+              <Alert status="warning" borderRadius="md" fontSize="sm">
+                <AlertIcon />
+                {stats.legacyAccessories} ancien(s) accessoire(s) et sous-effet(s) du site seront supprimés : ils sont remplacés par ceux du jeu.
+              </Alert>
             )}
             {(stats.legacyBanners ?? 0) > 0 && (
               <Alert status="warning" borderRadius="md" fontSize="sm">
