@@ -20,9 +20,6 @@ export interface IAccessorySubeffect {
   name: string;
   names?: GameText | null;
   value?: number;
-  // Without the affinity bonus, on an accessory that has no affinity
-  base_value?: number;
-  base_names?: GameText | null;
 }
 
 export interface IBuildAccessory {

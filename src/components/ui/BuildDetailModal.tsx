@@ -36,7 +36,6 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 import { bucketUrl } from "@/utils/apiRequest";
 import { gameText } from "@/utils/gameText";
-import { subeffectLabel } from "@/utils/accessoryText";
 import { BuildGuildPlayers } from "@/components/guides/BuildGuildPlayers";
 
 interface BuildDetailModalProps {
@@ -362,7 +361,7 @@ export const BuildDetailModal = ({
                                         )}
                                         {acc.subeffect && (
                                           <Text fontSize="sm" color={mutedText} noOfLines={1}>
-                                            ↳ {subeffectLabel(acc.subeffect, acc.accessory, i18n.language)}
+                                            ↳ {gameText(acc.subeffect.names, i18n.language) || acc.subeffect.name}
                                           </Text>
                                         )}
                                       </VStack>
