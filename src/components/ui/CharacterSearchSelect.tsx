@@ -16,6 +16,7 @@ import { useState, useEffect, useRef } from "react";
 import { FloatingMenu } from "./FloatingMenu";
 import { AffinityIcon } from "./AffinityIcon";
 import { useCharacters, useCharacter } from "../../hooks/useAPI";
+import { useTranslation } from "react-i18next";
 import { bucketUrl } from "../../utils/apiRequest";
 
 interface Character {
@@ -38,7 +39,7 @@ interface CharacterSearchSelectProps {
 export const CharacterSearchSelect = ({
   value,
   onChange,
-  placeholder = "Rechercher un personnage...",
+  placeholder,
   size = "md",
   isDisabled = false,
   excludeIds = [],
@@ -53,6 +54,7 @@ export const CharacterSearchSelect = ({
   const borderColor = "border.default";
   const hoverBg = useColorModeValue("gray.50", "gray.600");
 
+  const { t } = useTranslation();
   const { characters, isLoading } = useCharacters({
     limit: 50,
     searchQuery: searchTerm || undefined,
@@ -147,7 +149,7 @@ export const CharacterSearchSelect = ({
             {isLoading ? <Spinner size="sm" /> : <SearchIcon color="gray.400" />}
           </InputLeftElement>
           <Input
-            placeholder={placeholder}
+            placeholder={placeholder ?? t("components.buildForm.searchCharacter")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={handleInputFocus}
@@ -165,7 +167,7 @@ export const CharacterSearchSelect = ({
             </Flex>
           ) : filteredCharacters.length === 0 ? (
             <Text p={4} textAlign="center" color="gray.500" fontSize="sm">
-              Aucun personnage trouvé
+              {t("components.buildForm.noCharacter")}
             </Text>
           ) : (
             <VStack spacing={0} align="stretch">

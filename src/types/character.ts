@@ -172,6 +172,15 @@ export interface IGameSyncResult {
     banners?: number;
     newBanners?: number;
     legacyBanners?: number;
+    accessories?: number;
+    newAccessories?: number;
+    // Accessories and sub-effects entered on the site, replaced by the game ones
+    legacyAccessories?: number;
+    accessoryImages?: number;
+    skills?: number;
+    newSkills?: number;
+    // Bonus skills entered on the site, replaced by the game bonus abilities
+    legacySkills?: number;
   };
   fieldCounts: Record<string, number>;
   preview: {
@@ -197,9 +206,13 @@ export interface ICharactersResponse {
   pagination: IPagination;
 }
 
+// Bonus skill of a build: a bonus ability of the game, at the value the game shows
 export interface ISkill {
   _id: string;
   name: string;
+  names?: GameText | null;
+  value?: number | null;
+  format?: "percent" | "plus" | null;
   description?: string;
   icon?: string;
 }

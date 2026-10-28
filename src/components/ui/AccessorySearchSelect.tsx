@@ -18,7 +18,10 @@ import { SearchIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
 import { FloatingMenu } from "./FloatingMenu";
 import { useAccessories, useAccessoriesSubeffects } from "../../hooks/useAPI";
+import { useTranslation } from "react-i18next";
 import { bucketUrl } from "../../utils/apiRequest";
+import { gameText } from "../../utils/gameText";
+import type { IAccessory, IAccessorySubeffect } from "../../interfaces";
 
 interface AccessorySearchSelectProps {
   value?: { id_accessory: string; id_subeffect?: string };
@@ -30,7 +33,7 @@ interface AccessorySearchSelectProps {
 export const AccessorySearchSelect = ({
   value,
   onChange,
-  placeholder = "Rechercher un accessoire...",
+  placeholder,
   excludeIds = [],
 }: AccessorySearchSelectProps) => {
   const [accessorySearch, setAccessorySearch] = useState("");
@@ -42,7 +45,10 @@ export const AccessorySearchSelect = ({
   const accessoryFloatingRef = useRef<HTMLDivElement>(null);
   const subeffectFloatingRef = useRef<HTMLDivElement>(null);
 
+  const { t, i18n } = useTranslation();
   const { accessories, isLoading } = useAccessories(accessorySearch);
+  const label = (item: IAccessory | IAccessorySubeffect) => gameText(item.names, i18n.language) || item.name;
+  const effectText = (accessory: IAccessory) => gameText(accessory.effect?.text, i18n.language);
   const { subeffects, isLoading: isLoadingSubeffects } = useAccessoriesSubeffects(subeffectSearch);
 
   const bgColor = "bg.elevated";
@@ -113,7 +119,7 @@ export const AccessorySearchSelect = ({
   return (
     <VStack spacing={2} align="stretch" w="100%">
       <FormControl>
-        <FormLabel fontSize="sm">Accessoire</FormLabel>
+        <FormLabel fontSize="sm">{t("components.accessorySearchSelect.accessory")}</FormLabel>
         <Box position="relative" ref={accessoryMenuRef} w="100%">
           {selectedAccessory && !isAccessoryOpen ? (
             <HStack
@@ -138,8 +144,11 @@ export const AccessorySearchSelect = ({
                 />
               )}
               <Badge colorScheme="cyan" fontSize="xs" px={2} py={1}>
-                {selectedAccessory.name}
+                {label(selectedAccessory)}
               </Badge>
+              {effectText(selectedAccessory) && (
+                <Text fontSize="xs" color="text.secondary" noOfLines={1}>{effectText(selectedAccessory)}</Text>
+              )}
             </HStack>
           ) : (
             <InputGroup size="sm">
@@ -147,7 +156,7 @@ export const AccessorySearchSelect = ({
                 {isLoading ? <Spinner size="sm" /> : <SearchIcon color="gray.400" />}
               </InputLeftElement>
               <Input
-                placeholder={placeholder}
+                placeholder={placeholder ?? t("components.accessorySearchSelect.searchAccessory")}
                 value={accessorySearch}
                 onChange={(e) => setAccessorySearch(e.target.value)}
                 onFocus={() => setIsAccessoryOpen(true)}
@@ -164,7 +173,7 @@ export const AccessorySearchSelect = ({
                 </Flex>
               ) : availableAccessories.length === 0 ? (
                 <Text p={4} textAlign="center" color="gray.500" fontSize="sm">
-                  Aucun accessoire trouvé
+                  {t("components.accessorySearchSelect.noAccessory")}
                 </Text>
               ) : (
                 <VStack spacing={0} align="stretch">
@@ -190,7 +199,10 @@ export const AccessorySearchSelect = ({
                           fallback={<Box w="22px" />}
                         />
                       )}
-                      <Text fontSize="sm">{accessory.name}</Text>
+                      <Box minW={0}>
+                        <Text fontSize="sm">{label(accessory)}</Text>
+                        {effectText(accessory) && <Text fontSize="xs" color="text.secondary">{effectText(accessory)}</Text>}
+                      </Box>
                     </HStack>
                   ))}
                 </VStack>
@@ -203,7 +215,7 @@ export const AccessorySearchSelect = ({
       {/* Sub-effect (optional) */}
       {value?.id_accessory && (
         <FormControl>
-          <FormLabel fontSize="sm">Sous-effet (optionnel)</FormLabel>
+          <FormLabel fontSize="sm">{t("components.accessorySearchSelect.subeffect")}</FormLabel>
           <Box position="relative" ref={subeffectMenuRef} w="100%">
             {selectedSubeffect && !isSubeffectOpen ? (
               <HStack
@@ -218,7 +230,7 @@ export const AccessorySearchSelect = ({
                 _hover={{ borderColor: "gray.300" }}
               >
                 <Badge colorScheme="teal" fontSize="xs" px={2} py={1}>
-                  {selectedSubeffect.name}
+                  {label(selectedSubeffect)}
                 </Badge>
               </HStack>
             ) : (
@@ -227,7 +239,7 @@ export const AccessorySearchSelect = ({
                   {isLoadingSubeffects ? <Spinner size="sm" /> : <SearchIcon color="gray.400" />}
                 </InputLeftElement>
                 <Input
-                  placeholder="Rechercher un sous-effet..."
+                  placeholder={t("components.accessorySearchSelect.searchSubeffect")}
                   value={subeffectSearch}
                   onChange={(e) => setSubeffectSearch(e.target.value)}
                   onFocus={() => setIsSubeffectOpen(true)}
@@ -244,7 +256,7 @@ export const AccessorySearchSelect = ({
                   </Flex>
                 ) : subeffects.length === 0 ? (
                   <Text p={4} textAlign="center" color="gray.500" fontSize="sm">
-                    Aucun sous-effet trouvé
+                    {t("components.accessorySearchSelect.noSubeffect")}
                   </Text>
                 ) : (
                   <VStack spacing={0} align="stretch">
@@ -260,7 +272,7 @@ export const AccessorySearchSelect = ({
                         borderColor={borderColor}
                         _last={{ borderBottom: "none" }}
                       >
-                        <Text fontSize="sm">{subeffect.name}</Text>
+                        <Text fontSize="sm">{label(subeffect)}</Text>
                       </HStack>
                     ))}
                   </VStack>

@@ -15,6 +15,8 @@ import { SearchIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
 import { FloatingMenu } from "./FloatingMenu";
 import { useSkills } from "../../hooks/useAPI";
+import { useTranslation } from "react-i18next";
+import { skillLabel } from "../../utils/skillText";
 
 interface SkillSearchSelectProps {
   value: string[];
@@ -28,7 +30,7 @@ interface SkillSearchSelectProps {
 export const SkillSearchSelect = ({
   value,
   onChange,
-  placeholder = "Rechercher une compétence...",
+  placeholder,
   size = "md",
   isDisabled = false,
   maxSkills = 2,
@@ -42,6 +44,7 @@ export const SkillSearchSelect = ({
   const borderColor = "border.default";
   const hoverBg = useColorModeValue("gray.50", "gray.600");
 
+  const { t, i18n } = useTranslation();
   const { skills, isLoading } = useSkills(searchTerm);
 
   const availableSkills = skills.filter((skill) => !value.includes(skill._id));
@@ -103,7 +106,7 @@ export const SkillSearchSelect = ({
               onClick={() => !isDisabled && handleRemove(skill._id)}
               _hover={!isDisabled ? { opacity: 0.7 } : {}}
             >
-              {skill.name} ✕
+              {skillLabel(skill, i18n.language)} ✕
             </Badge>
           ))}
         </HStack>
@@ -116,7 +119,7 @@ export const SkillSearchSelect = ({
               {isLoading ? <Spinner size="sm" /> : <SearchIcon color="gray.400" />}
             </InputLeftElement>
             <Input
-              placeholder={placeholder}
+              placeholder={placeholder ?? t("components.buildForm.searchSkill")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={handleInputFocus}
@@ -133,7 +136,7 @@ export const SkillSearchSelect = ({
                 </Flex>
               ) : availableSkills.length === 0 ? (
                 <Text p={4} textAlign="center" color="gray.500" fontSize="sm">
-                  Aucune compétence trouvée
+                  {t("components.buildForm.noSkill")}
                 </Text>
               ) : (
                 <VStack spacing={0} align="stretch">
@@ -150,7 +153,7 @@ export const SkillSearchSelect = ({
                       _last={{ borderBottom: "none" }}
                     >
                       <Text fontSize={size === "sm" ? "sm" : "md"} flex={1}>
-                        {skill.name}
+                        {skillLabel(skill, i18n.language)}
                       </Text>
                       {skill.description && (
                         <Text fontSize="xs" color="gray.500" isTruncated maxW="200px">
@@ -168,7 +171,7 @@ export const SkillSearchSelect = ({
 
       {!canAddMore && (
         <Text fontSize="xs" color="gray.500" mt={1}>
-          Maximum de {maxSkills} compétences atteint
+          {t("components.buildForm.maxSkills", { count: maxSkills })}
         </Text>
       )}
     </Box>

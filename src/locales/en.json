@@ -1174,6 +1174,31 @@
       "barrier": "Barrier",
       "revival": "Revive",
       "trap": "Trap"
+    },
+    "accessorySearchSelect": {
+      "accessory": "Accessory",
+      "searchAccessory": "Search an accessory...",
+      "noAccessory": "No accessory found",
+      "subeffect": "Sub-effect (optional)",
+      "searchSubeffect": "Search a sub-effect...",
+      "noSubeffect": "No sub-effect found"
+    },
+    "buildForm": {
+      "position": "Position {{position}}",
+      "mainCharacter": "Main character",
+      "searchCharacter": "Search a character...",
+      "links": "Links ({{count}}/3)",
+      "searchLink": "Search a link...",
+      "removeLink": "Remove the link",
+      "addLink": "Add a link",
+      "skills": "Bonus skills (optional, max 2)",
+      "searchSkill": "Search a skill...",
+      "noSkill": "No skill found",
+      "maxSkills": "Maximum of {{count}} skills reached",
+      "accessories": "Accessories ({{count}}/3)",
+      "removeAccessory": "Remove the accessory",
+      "addAccessory": "Add an accessory",
+      "noCharacter": "No character found"
     }
   },
   "affinities": {
