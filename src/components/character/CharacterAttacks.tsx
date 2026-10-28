@@ -31,11 +31,16 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
     }
   };
 
+  // Each status with its own chance (combined statuses have one each), from the hit most likely to inflict them
   const statusLine = (steps: IAttackStep[]) => {
     const step = steps.filter((s) => s.statuses.length > 0).sort((a, b) => (b.status_probability ?? 0) - (a.status_probability ?? 0))[0];
     if (!step) return null;
-    const names = step.statuses.map((status) => `${gameText(status.name, i18n.language)}${status.plus ? " +" : ""}`).join(" & ");
-    return t("components.characterAttacks.status", { names, probability: step.status_probability ?? 0, duration: seconds(step.status_duration) });
+    return step.statuses
+      .map((status) => {
+        const name = `${gameText(status.name, i18n.language)}${status.plus ? " +" : ""}`;
+        return status.probability ? t("components.characterAttacks.status", { name, probability: status.probability, duration: seconds(status.duration) }) : name;
+      })
+      .join(" · ");
   };
 
   const effects = (steps: IAttackStep[]) => {
@@ -89,7 +94,11 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
                 <Thead>
                   <Tr>
                     <Th px={1} />
-                    {steps.map((_, i) => <Th key={i} px={1} textAlign="center">{ROMAN[i] ?? i + 1}</Th>)}
+                    {steps.map((step, i) => (
+                      <Th key={i} px={1} textAlign="center" textTransform="none">
+                        {ROMAN[(step.step ?? i + 1) - 1] ?? step.step}{step.variant > 0 ? "\u2032" : ""}
+                      </Th>
+                    ))}
                   </Tr>
                 </Thead>
               )}

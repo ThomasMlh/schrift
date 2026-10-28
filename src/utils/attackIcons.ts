@@ -48,7 +48,7 @@ const isHeavy = (button: AttackButton) => button.startsWith("heavy");
 // Button background: purple for the special attack, green for heals, orange for buffs, otherwise the
 // attack color (red or blue)
 export const attackBase = (button: AttackButton, steps: IAttackStep[]) => {
-  if (button === "extra_action") return "ex_action_base01";
+  if (button === "extra_action") return steps.some((s) => s.color === "B") ? "ex_action_base01" : "ex_action_base02";
   if (button === "ex") return "bt_skill";
   const heavy = isHeavy(button);
   if (steps.some((s) => s.heal)) return heavy ? "bt_heal_heavy" : "bt_heal";
@@ -57,18 +57,20 @@ export const attackBase = (button: AttackButton, steps: IAttackStep[]) => {
   return `${blue ? "bt_projectile" : "bt_fighting"}${heavy ? "_heavy" : ""}`;
 };
 
-// Weapon icon of the button, or the closest one the game has for that weapon
+// Weapon icon of the button, or the closest one the game has for that weapon. Buffs show the
+// character (6) or the party (7), heals show drops (5), like the game.
 export const attackWeaponIcon = (button: AttackButton, steps: IAttackStep[]) => {
   if (button === "extra_action") return "ex_action01";
   if (button === "ex") return "11_skill1";
-  const weapon = steps.find((s) => s.weapon)?.weapon;
+  const buff = steps.find((s) => s.buff)?.buff;
+  const weapon = buff ? (buff.target === 2 ? 7 : 6) : steps.some((s) => s.heal) ? 5 : steps.find((s) => s.weapon)?.weapon;
   if (!weapon) return null;
   const candidates = [`${weapon}_${button}`, `${weapon}_heavy3`, `${weapon}_normal`, `${weapon}_heavy1`];
   return candidates.find((name) => WEAPON_ICONS.has(name)) ?? [...WEAPON_ICONS].find((name) => name.startsWith(`${weapon}_`)) ?? null;
 };
 
-// Badge of the first status the attack inflicts
-export const attackStatusIcon = (steps: IAttackStep[]) => {
-  const status = steps.flatMap((s) => s.statuses)[0];
-  return status && STATUS_CODES.has(status.code) ? `ailment_${status.code}${status.plus ? "_plus" : ""}` : null;
-};
+// Badges of the statuses the attack inflicts (the game shows each of them)
+export const attackStatusIcons = (steps: IAttackStep[]) => [...new Set(steps
+  .flatMap((s) => s.statuses)
+  .filter((status) => STATUS_CODES.has(status.code))
+  .map((status) => `ailment_${status.code}${status.plus ? "_plus" : ""}`))];

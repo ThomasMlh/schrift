@@ -114,17 +114,20 @@ export type AttackShape =
 
 export interface IAttackStep {
   step: number | null;
+  // Second part of the same hit
+  variant: number;
   power: number | null;
   weapon: number | null;
   hits: number;
   knockdown: boolean;
   color: "R" | "B" | null;
   shape: AttackShape | null;
-  statuses: { code: string; plus: boolean; name: GameText }[];
+  statuses: { code: string; plus: boolean; name: GameText; probability: number | null; duration: number | null }[];
   status_probability: number | null;
   status_duration: number | null;
   heal: number | null;
-  buff: { atk: number | null; def: number | null; crt: number | null; sp: number | null; duration: number | null } | null;
+  // target 1 = the character, 2 = the whole party
+  buff: { target: number | null; atk: number | null; def: number | null; crt: number | null; sp: number | null; duration: number | null } | null;
   barrier: boolean;
   revival: boolean;
   trap: boolean;

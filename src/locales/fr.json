@@ -1167,7 +1167,7 @@
       "rect": "Rect. {{width}}×{{length}}",
       "ahead": "Cercle {{radius}} à {{distance}}",
       "projectile": "Projectile {{range}}",
-      "status": "{{names}} : {{probability}} % · {{duration}}",
+      "status": "{{name}} {{probability}} % ({{duration}})",
       "knockdown": "Renverse",
       "heal": "Soins {{value}} %",
       "buff": "Renforcement",
