@@ -10,6 +10,7 @@ const SECTIONS: { key: keyof IGameTraits; label: string }[] = [
   { key: "link", label: "pages.characterDetail.traitsLink" },
   { key: "passive", label: "pages.characterDetail.traitsPassive" },
   { key: "tree", label: "pages.characterDetail.traitsTree" },
+  { key: "destruction", label: "pages.characterDetail.traitsDestruction" },
 ];
 
 // Abilities read from the game tables, for the base or the resurrected form
@@ -19,13 +20,17 @@ export const CharacterGameTraits = ({ traits, special, profile }: {
   profile?: GameText | null;
 }) => {
   const { t, i18n } = useTranslation();
-  const label = (trait: IGameTrait) => gameText(trait.text, i18n.language) || trait.type;
+  const label = (trait: IGameTrait) => {
+    const text = gameText(trait.text, i18n.language) || trait.type;
+    // Elimination bonuses unlock after a number of defeated enemies
+    return trait.count ? t("pages.characterDetail.afterEliminations", { count: trait.count, text }) : text;
+  };
 
   return (
     <VStack align="stretch" spacing={4}>
-      {SECTIONS.filter(({ key }) => traits[key]?.length > 0).map(({ key, label: title }) => (
+      {SECTIONS.filter(({ key }) => (traits[key]?.length ?? 0) > 0).map(({ key, label: title }) => (
         <TraitRow key={key} label={t(title)}>
-          {traits[key].map((trait, index) => <Pill key={`${trait.type}-${index}`}>{label(trait)}</Pill>)}
+          {(traits[key] ?? []).map((trait, index) => <Pill key={`${trait.type}-${index}`}>{label(trait)}</Pill>)}
         </TraitRow>
       ))}
       {special && (

@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import type { ICharactersResponse, ICharacter, ITraitFilterCategory } from '../../interfaces';
+import type { ICharactersResponse, ICharacter, IFilterGroups, ITraitFilterCategory } from '../../interfaces';
 import { apiUrl, fetcher } from './shared';
 
 export const useCharacters = (options?: {
@@ -12,8 +12,10 @@ export const useCharacters = (options?: {
   searchQuery?: string;
   traits?: string[];
   resurrection?: string;
+  // Groups of the game filter, by query parameter (soul_traits, ex_skills, skills, special, destruction)
+  groups?: Record<string, string[]>;
 }) => {
-  const { page = 1, limit = 20, affinity, category, killer, attackType, searchQuery, traits = [], resurrection } = options || {};
+  const { page = 1, limit = 20, affinity, category, killer, attackType, searchQuery, traits = [], resurrection, groups = {} } = options || {};
 
   let url = `${apiUrl}/api/characters?page=${page}&limit=${limit}`;
   if (affinity) url += `&affinity=${encodeURIComponent(affinity)}`;
@@ -23,6 +25,9 @@ export const useCharacters = (options?: {
   if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
   if (traits.length > 0) url += `&traits=${encodeURIComponent(traits.join(','))}`;
   if (resurrection) url += `&resurrection=${encodeURIComponent(resurrection)}`;
+  for (const [param, types] of Object.entries(groups)) {
+    if (types.length > 0) url += `&${param}=${encodeURIComponent(types.join(','))}`;
+  }
 
   const { data, error, isLoading, mutate } = useSWR<ICharactersResponse>(
     url,
@@ -53,10 +58,12 @@ export const useCharacterMeta = () => {
     categories: string[];
     affinities: string[];
     trait_filters?: ITraitFilterCategory[];
+    filter_groups?: IFilterGroups;
   }>(url, fetcher, { revalidateOnFocus: false, dedupingInterval: 300000 });
 
   return {
     traitFilters: data?.trait_filters || [],
+    filterGroups: data?.filter_groups ?? null,
     killers: data?.killers || [],
     categories: data?.categories || [],
     affinities: data?.affinities || [],

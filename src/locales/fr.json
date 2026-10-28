@@ -468,7 +468,9 @@
       "traitsTree": "Compétences",
       "traitsEx": "Compétences EX",
       "traitsSpecial": "Attaque spéciale",
-      "labelSummons": "Invocations"
+      "labelSummons": "Invocations",
+      "traitsDestruction": "Bonus d'élimination",
+      "afterEliminations": "{{count}} élim. : {{text}}"
     },
     "raffle": {
       "noGuild": "Aucune guilde ne participe encore à la tombola.",
@@ -627,14 +629,7 @@
       "rotationShortcut": "Bons sur la rotation : {{killer}}",
       "clearAll": "Tout effacer",
       "resultsCount_one": "{{count}} personnage",
-      "resultsCount_other": "{{count}} personnages",
-      "traits": "Traits",
-      "traitsSearch": "Chercher un trait...",
-      "traitsNone": "Aucun trait trouvé",
-      "traitsClear": "Décocher tout",
-      "resurrectionAll": "Avec ou sans résurrection",
-      "resurrectionOnly": "Avec résurrection",
-      "resurrectionNone": "Sans résurrection"
+      "resultsCount_other": "{{count}} personnages"
     },
     "guildTabsList": {
       "noMemberInGuild": "Aucun membre dans cette guilde",
@@ -1119,6 +1114,35 @@
     "characterCard": {
       "rebirth": "Résurrection du {{date}}",
       "rebirthAlt": "Résurrection"
+    },
+    "characterFilters": {
+      "all": "Tout",
+      "affinity": "Affinité",
+      "killer": "Tueur",
+      "killerOf": "Tueur : {{faction}}",
+      "attackColor": "Couleur des attaques normales",
+      "redAttacks": "Attaques rouges",
+      "blueAttacks": "Attaques bleues",
+      "category": "Catégorie",
+      "resurrection": "Résurrection",
+      "withResurrection": "Avec résurrection",
+      "withoutResurrection": "Sans résurrection",
+      "soulTrait": "Soul Trait",
+      "exSkills": "Compétences EX",
+      "skills": "Compétences (innées incluses)",
+      "special": "Effets particuliers",
+      "destruction": "Bonus d'élimination",
+      "noFilter": "Pas de filtre (tous)",
+      "selected_one": "{{count}} filtre",
+      "selected_other": "{{count}} filtres",
+      "choose": "Choisir",
+      "edit": "Modifier",
+      "search": "Rechercher...",
+      "nothingFound": "Aucun résultat",
+      "clearGroup": "Tout décocher",
+      "done": "Valider",
+      "toggle": "Filtres",
+      "hide": "Masquer les filtres"
     }
   },
   "affinities": {

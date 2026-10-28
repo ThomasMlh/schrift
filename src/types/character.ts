@@ -76,14 +76,24 @@ export interface ITraitFilterCategory {
   types: { type: string; label: GameText }[];
 }
 
+export interface IFilterGroups {
+  link: ITraitFilterCategory[];
+  ex: ITraitFilterCategory[];
+  skill: ITraitFilterCategory[];
+  special: { type: string; label: GameText }[];
+  destruction: { type: string; label: GameText }[];
+}
+
 export interface IGameTrait {
-  kind: "passive" | "tree" | "ex" | "link";
+  kind: "passive" | "tree" | "ex" | "link" | "destruction";
   type: string;
   value?: number | null;
   values?: number[] | null;
   ref?: string | null;
   // Soul trait only: its name, the text being its effect
   name?: GameText | null;
+  // Elimination bonus only: enemies to defeat
+  count?: number | null;
   text: GameText | null;
 }
 
@@ -92,6 +102,7 @@ export interface IGameTraits {
   passive: IGameTrait[];
   tree: IGameTrait[];
   ex: IGameTrait[];
+  destruction?: IGameTrait[];
 }
 
 export interface IGameUnit {

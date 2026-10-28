@@ -2,7 +2,7 @@ import {
   Box, Button, VStack, Text, Input, InputGroup, InputLeftElement, Flex, SimpleGrid, Skeleton,
   Icon, Image, Tag, TagLabel, TagCloseButton, Wrap, WrapItem,
 } from "@chakra-ui/react";
-import { FiCrosshair, FiSearch } from "react-icons/fi";
+import { FiCrosshair, FiFilter, FiSearch } from "react-icons/fi";
 import { CharacterCard } from "./character/CharacterCard";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
 import { useState, useEffect } from "react";
@@ -12,15 +12,11 @@ import { AffinityIcon } from "./ui/AffinityIcon";
 import { KillerIcon } from "./ui/KillerIcon";
 import { CategoryIcon } from "./ui/CategoryIcon";
 import { AttackTypeBadge } from "./ui/AttackTypeBadge";
-import { AffinityFilter } from "./ui/AffinityFilter";
-import { CategoryFilter } from "./ui/CategoryFilter";
-import { KillerFilter } from "./ui/KillerFilter";
-import { AttackTypeFilter } from "./ui/AttackTypeFilter";
-import { TraitFilter } from "./ui/TraitFilter";
+import { CharacterFiltersPanel, type CharacterFilterValues } from "./characters/filters/CharacterFiltersPanel";
+import { EMPTY_GROUPS, FILTER_GROUP_KEYS, type FilterGroupSelection } from "./characters/filters/filterGroups";
 import { REBIRTH_STAR_URL } from "@/utils/characterImages";
 import { gameText } from "@/utils/gameText";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
-import { CharactersKillers, CharactersCategories, CharactersAffinities } from "../utils/chractersData";
 import { CustomSelect } from "./ui/CustomSelect";
 import { useTranslation } from "react-i18next";
 
@@ -34,16 +30,20 @@ export const CharactersTable = () => {
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || "");
   const [selectedKiller, setSelectedKiller] = useState(searchParams.get('killer') || "");
   const [selectedAttackType, setSelectedAttackType] = useState(searchParams.get('attack_type') || "");
-  const [selectedTraits, setSelectedTraits] = useState<string[]>(() => (searchParams.get('traits') || "").split(',').filter(Boolean));
   const [resurrection, setResurrection] = useState(searchParams.get('resurrection') || "");
-  const { traitFilters } = useCharacterMeta();
-  const traitLabels = new Map(traitFilters.flatMap((c) => c.types.map((type) => [type.type, gameText(type.label, i18n.language)])));
+  const [groups, setGroups] = useState<FilterGroupSelection>(() => Object.fromEntries(
+    FILTER_GROUP_KEYS.map((key) => [key, (searchParams.get(key) || "").split(',').filter(Boolean)])
+  ) as FilterGroupSelection);
+  const [showFilters, setShowFilters] = useState(false);
+  const { filterGroups } = useCharacterMeta();
+  // Names of the game abilities, effects and bonuses, for the active filter tags
+  const groupLabels = new Map([
+    ...[...(filterGroups?.link ?? []), ...(filterGroups?.ex ?? []), ...(filterGroups?.skill ?? [])].flatMap((c) => c.types),
+    ...(filterGroups?.special ?? []),
+    ...(filterGroups?.destruction ?? []),
+  ].map((entry) => [entry.type, gameText(entry.label, i18n.language)]));
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'));
   const [itemsPerPage, setItemsPerPage] = useState(parseInt(searchParams.get('limit') || '24'));
-
-  const affinities = CharactersAffinities;
-  const categories = CharactersCategories;
-  const killers = CharactersKillers;
 
 
   useEffect(() => {
@@ -51,8 +51,9 @@ export const CharactersTable = () => {
     return () => clearTimeout(id);
   }, [searchTerm]);
 
-  const traitsKey = selectedTraits.join(',');
-  useEffect(() => { setCurrentPage(1); }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, traitsKey, resurrection, itemsPerPage]);
+  const groupsKey = FILTER_GROUP_KEYS.map((key) => groups[key].join(',')).join('|');
+  const activeGroupCount = FILTER_GROUP_KEYS.reduce((sum, key) => sum + groups[key].length, 0);
+  useEffect(() => { setCurrentPage(1); }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, groupsKey, resurrection, itemsPerPage]);
 
   const { cycles, isLoading: cyclesLoading } = useCycles({ limit: 5 });
   const { currentRotation } = useCurrentRotation(cycles, cyclesLoading);
@@ -65,7 +66,7 @@ export const CharactersTable = () => {
     category: selectedCategory,
     killer: selectedKiller,
     attackType: selectedAttackType,
-    traits: selectedTraits,
+    groups,
     resurrection,
   });
 
@@ -77,12 +78,13 @@ export const CharactersTable = () => {
     if (selectedCategory) params.set('category', selectedCategory);
     if (selectedKiller) params.set('killer', selectedKiller);
     if (selectedAttackType) params.set('attack_type', selectedAttackType);
-    if (traitsKey) params.set('traits', traitsKey);
+    for (const key of FILTER_GROUP_KEYS) if (groups[key].length > 0) params.set(key, groups[key].join(','));
     if (resurrection) params.set('resurrection', resurrection);
     if (itemsPerPage !== 24) params.set('limit', itemsPerPage.toString());
     if (currentPage !== 1) params.set('page', currentPage.toString());
     setSearchParams(params, { replace: true });
-  }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, traitsKey, resurrection, itemsPerPage, currentPage, setSearchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, groupsKey, resurrection, itemsPerPage, currentPage, setSearchParams]);
 
   const handlePageChange = (page: number) => {
     if (pagination && page >= 1 && page <= pagination.totalPages) setCurrentPage(page);
@@ -94,13 +96,31 @@ export const CharactersTable = () => {
     setSelectedCategory("");
     setSelectedKiller("");
     setSelectedAttackType("");
-    setSelectedTraits([]);
+    setGroups(EMPTY_GROUPS);
     setResurrection("");
     setCurrentPage(1);
     setSearchParams({});
   };
 
-  const hasFilters = Boolean(searchTerm || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType || traitsKey || resurrection);
+  const hasFilters = Boolean(searchTerm || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType || activeGroupCount || resurrection);
+  const panelFilterCount = [selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, resurrection].filter(Boolean).length + activeGroupCount;
+
+  const filterValues: CharacterFilterValues = {
+    affinity: selectedAffinity,
+    killer: selectedKiller,
+    attackType: selectedAttackType,
+    category: selectedCategory,
+    resurrection,
+    groups,
+  };
+  const changeFilters = (next: Partial<CharacterFilterValues>) => {
+    if (next.affinity !== undefined) setSelectedAffinity(next.affinity);
+    if (next.killer !== undefined) setSelectedKiller(next.killer);
+    if (next.attackType !== undefined) setSelectedAttackType(next.attackType);
+    if (next.category !== undefined) setSelectedCategory(next.category);
+    if (next.resurrection !== undefined) setResurrection(next.resurrection);
+    if (next.groups) setGroups(next.groups);
+  };
   const rotationAttack = currentRotation?.attack === "R" || currentRotation?.attack === "B" ? currentRotation.attack : "";
   const isRotationFilterActive = Boolean(currentRotation)
     && selectedKiller === currentRotation?.killer
@@ -143,6 +163,18 @@ export const CharactersTable = () => {
               borderRadius="lg"
             />
           </InputGroup>
+          <Button
+            onClick={() => setShowFilters((open) => !open)}
+            variant={showFilters ? "solid" : "outline"}
+            colorScheme="orange"
+            borderRadius="lg"
+            flexShrink={0}
+            leftIcon={<Icon as={FiFilter} />}
+            aria-expanded={showFilters}
+          >
+            {showFilters ? t("components.characterFilters.hide") : t("components.characterFilters.toggle")}
+            {panelFilterCount > 0 && ` (${panelFilterCount})`}
+          </Button>
           {currentRotation && (
             <Button
               onClick={applyRotationFilter}
@@ -158,23 +190,11 @@ export const CharactersTable = () => {
           )}
         </Flex>
 
-        <SimpleGrid columns={{ base: 2, md: 3, xl: 6 }} spacing={3} mt={3}>
-          <AffinityFilter selectedAffinity={selectedAffinity} affinities={affinities} onAffinityChange={setSelectedAffinity} />
-          <CategoryFilter selectedCategory={selectedCategory} categories={categories} onCategoryChange={setSelectedCategory} />
-          <KillerFilter selectedKiller={selectedKiller} killers={killers} onKillerChange={setSelectedKiller} />
-          <AttackTypeFilter selectedAttackType={selectedAttackType} onAttackTypeChange={setSelectedAttackType} />
-          <TraitFilter categories={traitFilters} selected={selectedTraits} onChange={setSelectedTraits} />
-          <CustomSelect
-            value={resurrection}
-            onChange={setResurrection}
-            options={[
-              { value: "", label: t("components.charactersTable.resurrectionAll") },
-              { value: "1", label: t("components.charactersTable.resurrectionOnly") },
-              { value: "0", label: t("components.charactersTable.resurrectionNone") },
-            ]}
-            allowDeselect={false}
-          />
-        </SimpleGrid>
+        {showFilters && (
+          <Box mt={4}>
+            <CharacterFiltersPanel values={filterValues} onChange={changeFilters} filterGroups={filterGroups} />
+          </Box>
+        )}
 
         {hasFilters && (
           <Flex mt={3} gap={2} align="center" wrap="wrap">
@@ -183,11 +203,16 @@ export const CharactersTable = () => {
               {selectedAffinity && filterTag("affinity", <AffinityIcon affinity={selectedAffinity} size="14px" />, selectedAffinity, () => setSelectedAffinity(""))}
               {selectedCategory && filterTag("category", <CategoryIcon category={selectedCategory} size="14px" />, t(`factions.${selectedCategory}`, selectedCategory), () => setSelectedCategory(""))}
               {selectedKiller && filterTag("killer", <KillerIcon killer={selectedKiller} size="14px" />, `${t("components.charactersTable.filterKiller")} ${t(`factions.${selectedKiller}`, selectedKiller)}`, () => setSelectedKiller(""))}
-              {selectedTraits.map((trait) => filterTag(`trait-${trait}`, null, traitLabels.get(trait) ?? trait, () => setSelectedTraits(selectedTraits.filter((s) => s !== trait))))}
+              {FILTER_GROUP_KEYS.flatMap((key) => groups[key].map((type) => filterTag(
+                `${key}-${type}`,
+                null,
+                groupLabels.get(type) ?? type,
+                () => setGroups({ ...groups, [key]: groups[key].filter((s) => s !== type) }),
+              )))}
               {resurrection && filterTag(
                 "resurrection",
                 resurrection === "1" ? <Image src={REBIRTH_STAR_URL} alt="" boxSize="14px" /> : null,
-                resurrection === "1" ? t("components.charactersTable.resurrectionOnly") : t("components.charactersTable.resurrectionNone"),
+                resurrection === "1" ? t("components.characterFilters.withResurrection") : t("components.characterFilters.withoutResurrection"),
                 () => setResurrection(""),
               )}
               {selectedAttackType && filterTag("attack", <AttackTypeBadge attackType={selectedAttackType} size="10px" />, selectedAttackType === "R" ? t("components.charactersTable.attackRed") : t("components.charactersTable.attackBlue"), () => setSelectedAttackType(""))}
