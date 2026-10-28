@@ -1174,6 +1174,31 @@
       "barrier": "Barrière",
       "revival": "Revit",
       "trap": "Piège"
+    },
+    "accessorySearchSelect": {
+      "accessory": "Accessoire",
+      "searchAccessory": "Rechercher un accessoire...",
+      "noAccessory": "Aucun accessoire trouvé",
+      "subeffect": "Sous-effet (optionnel)",
+      "searchSubeffect": "Rechercher un sous-effet...",
+      "noSubeffect": "Aucun sous-effet trouvé"
+    },
+    "buildForm": {
+      "position": "Position {{position}}",
+      "mainCharacter": "Personnage principal",
+      "searchCharacter": "Rechercher un personnage...",
+      "links": "Links ({{count}}/3)",
+      "searchLink": "Rechercher un link...",
+      "removeLink": "Supprimer le link",
+      "addLink": "Ajouter un link",
+      "skills": "Compétences bonus (optionnel, max 2)",
+      "searchSkill": "Rechercher une compétence...",
+      "noSkill": "Aucune compétence trouvée",
+      "maxSkills": "Maximum de {{count}} compétences atteint",
+      "accessories": "Accessoires ({{count}}/3)",
+      "removeAccessory": "Supprimer l'accessoire",
+      "addAccessory": "Ajouter un accessoire",
+      "noCharacter": "Aucun personnage trouvé"
     }
   },
   "affinities": {

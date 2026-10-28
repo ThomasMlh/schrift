@@ -33,7 +33,7 @@ interface AccessorySearchSelectProps {
 export const AccessorySearchSelect = ({
   value,
   onChange,
-  placeholder = "Rechercher un accessoire...",
+  placeholder,
   excludeIds = [],
 }: AccessorySearchSelectProps) => {
   const [accessorySearch, setAccessorySearch] = useState("");
@@ -45,7 +45,7 @@ export const AccessorySearchSelect = ({
   const accessoryFloatingRef = useRef<HTMLDivElement>(null);
   const subeffectFloatingRef = useRef<HTMLDivElement>(null);
 
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { accessories, isLoading } = useAccessories(accessorySearch);
   const label = (item: IAccessory | IAccessorySubeffect) => gameText(item.names, i18n.language) || item.name;
   const effectText = (accessory: IAccessory) => gameText(accessory.effect?.text, i18n.language);
@@ -119,7 +119,7 @@ export const AccessorySearchSelect = ({
   return (
     <VStack spacing={2} align="stretch" w="100%">
       <FormControl>
-        <FormLabel fontSize="sm">Accessoire</FormLabel>
+        <FormLabel fontSize="sm">{t("components.accessorySearchSelect.accessory")}</FormLabel>
         <Box position="relative" ref={accessoryMenuRef} w="100%">
           {selectedAccessory && !isAccessoryOpen ? (
             <HStack
@@ -156,7 +156,7 @@ export const AccessorySearchSelect = ({
                 {isLoading ? <Spinner size="sm" /> : <SearchIcon color="gray.400" />}
               </InputLeftElement>
               <Input
-                placeholder={placeholder}
+                placeholder={placeholder ?? t("components.accessorySearchSelect.searchAccessory")}
                 value={accessorySearch}
                 onChange={(e) => setAccessorySearch(e.target.value)}
                 onFocus={() => setIsAccessoryOpen(true)}
@@ -173,7 +173,7 @@ export const AccessorySearchSelect = ({
                 </Flex>
               ) : availableAccessories.length === 0 ? (
                 <Text p={4} textAlign="center" color="gray.500" fontSize="sm">
-                  Aucun accessoire trouvé
+                  {t("components.accessorySearchSelect.noAccessory")}
                 </Text>
               ) : (
                 <VStack spacing={0} align="stretch">
@@ -215,7 +215,7 @@ export const AccessorySearchSelect = ({
       {/* Sub-effect (optional) */}
       {value?.id_accessory && (
         <FormControl>
-          <FormLabel fontSize="sm">Sous-effet (optionnel)</FormLabel>
+          <FormLabel fontSize="sm">{t("components.accessorySearchSelect.subeffect")}</FormLabel>
           <Box position="relative" ref={subeffectMenuRef} w="100%">
             {selectedSubeffect && !isSubeffectOpen ? (
               <HStack
@@ -239,7 +239,7 @@ export const AccessorySearchSelect = ({
                   {isLoadingSubeffects ? <Spinner size="sm" /> : <SearchIcon color="gray.400" />}
                 </InputLeftElement>
                 <Input
-                  placeholder="Rechercher un sous-effet..."
+                  placeholder={t("components.accessorySearchSelect.searchSubeffect")}
                   value={subeffectSearch}
                   onChange={(e) => setSubeffectSearch(e.target.value)}
                   onFocus={() => setIsSubeffectOpen(true)}
@@ -256,7 +256,7 @@ export const AccessorySearchSelect = ({
                   </Flex>
                 ) : subeffects.length === 0 ? (
                   <Text p={4} textAlign="center" color="gray.500" fontSize="sm">
-                    Aucun sous-effet trouvé
+                    {t("components.accessorySearchSelect.noSubeffect")}
                   </Text>
                 ) : (
                   <VStack spacing={0} align="stretch">
