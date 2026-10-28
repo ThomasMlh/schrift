@@ -96,6 +96,13 @@ export const GameSyncModal = ({ preview, isOpen, onClose, onApply, isApplying }:
                 {stats.legacySkills} ancienne(s) compétence(s) bonus du site seront supprimées : elles sont remplacées par celles du jeu.
               </Alert>
             )}
+            {stats.attackHitModels !== undefined && (
+              <Text fontSize="sm" color="text.secondary">
+                {stats.attackHitModels > 0
+                  ? `Coups des attaques au corps à corps lus dans les animations de ${stats.attackHitModels} modèle(s).`
+                  : "Pas de fichier attack_hits.csv : le nombre de coups des attaques au corps à corps restera inconnu."}
+              </Text>
+            )}
             {(stats.legacyBanners ?? 0) > 0 && (
               <Alert status="warning" borderRadius="md" fontSize="sm">
                 <AlertIcon />
