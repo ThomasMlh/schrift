@@ -32,6 +32,8 @@ export interface IRafflePlayer {
   bbs_id: string;
   bbs_name: string | null;
   rotations_played: number;
+  // Average of the month, null below half of the rotations
+  month_average: number | null;
   worst_gap: number | null;
   years: number;
   breakdown: IRaffleBreakdown;
@@ -45,6 +47,12 @@ export interface IRafflePlayer {
   global_name: string | null;
   first_seen: string | null;
   schrift_since: string | null;
+}
+
+export interface IRaffleExtreme {
+  bbs_id: string;
+  bbs_name: string | null;
+  average: number;
 }
 
 export interface IRaffleDraw {
@@ -79,6 +87,8 @@ export interface IGuildRaffle {
   draw: IRaffleDraw | null;
   rotations: number;
   collective_gap: number | null;
+  // Best and worst monthly averages, the collective gap is measured between them
+  collective_extremes: { best: IRaffleExtreme; worst: IRaffleExtreme } | null;
   total_tickets: number;
   players: IRafflePlayer[];
 }

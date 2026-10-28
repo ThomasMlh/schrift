@@ -22,6 +22,36 @@ const Count = ({ value, hint }: { value: number; hint?: string }) => (
   </Tooltip>
 );
 
+// Detail of the collective tickets: the guild rank tickets and the 1st / last gap ticket, the same for every member
+const CollectiveCell = ({ raffle, player }: { raffle: IGuildRaffle; player: IRafflePlayer }) => {
+  const { t } = useTranslation();
+  const { rank, collective_gap: collectiveGap } = player.breakdown;
+  const goal = formatScore(raffle.rules.collectiveGap);
+  const detail = (
+    <VStack align="start" spacing={1} fontSize="xs">
+      <Text>{t("pages.raffle.collective.rank", { rank: raffle.rank, count: rank })}</Text>
+      <Text>
+        {raffle.collective_gap === null
+          ? t("pages.raffle.collective.gapUnknown")
+          : t("pages.raffle.collective.gap", { gap: formatScore(raffle.collective_gap), goal, count: collectiveGap })}
+      </Text>
+      <Text color="gray.300">
+        {player.month_average === null
+          ? t("pages.raffle.collective.notRanked")
+          : t("pages.raffle.collective.average", { average: formatScore(player.month_average) })}
+      </Text>
+    </VStack>
+  );
+  return (
+    <Tooltip label={detail} hasArrow placement="left">
+      <Text as="span" cursor="help" fontWeight={rank + collectiveGap > 0 ? "semibold" : "normal"} color={rank + collectiveGap > 0 ? "text.strong" : "text.muted"}>
+        {rank + collectiveGap}
+        <Text as="span" fontSize="2xs" color="text.muted" ml={1}>({rank} + {collectiveGap})</Text>
+      </Text>
+    </Tooltip>
+  );
+};
+
 const BonusEditor = ({ raffle, player, locked }: { raffle: IGuildRaffle; player: IRafflePlayer; locked: boolean }) => {
   const { t } = useTranslation();
   const toast = useToast();
@@ -238,7 +268,7 @@ export const RaffleTable = ({ raffle }: { raffle: IGuildRaffle }) => {
                 <Td isNumeric>
                   {locked ? <Count value={p.breakdown.seniority} hint={t("pages.raffle.years", { count: p.years })} /> : <SeniorityEditor raffle={raffle} player={p} />}
                 </Td>
-                <Td isNumeric><Count value={p.breakdown.rank + p.breakdown.collective_gap} /></Td>
+                <Td isNumeric><CollectiveCell raffle={raffle} player={p} /></Td>
                 <Td><PeriodBoxes raffle={raffle} player={p} kind="farm" locked={locked} /></Td>
                 <Td><PeriodBoxes raffle={raffle} player={p} kind="qg" locked={locked} /></Td>
                 <Td isNumeric>
