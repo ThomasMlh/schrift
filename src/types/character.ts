@@ -202,9 +202,13 @@ export interface ICharactersResponse {
   pagination: IPagination;
 }
 
+// Bonus skill of a build: a bonus ability of the game, at the value the game shows
 export interface ISkill {
   _id: string;
   name: string;
+  names?: GameText | null;
+  value?: number | null;
+  format?: "percent" | "plus" | null;
   description?: string;
   icon?: string;
 }

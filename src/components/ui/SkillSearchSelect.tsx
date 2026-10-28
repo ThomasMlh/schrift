@@ -16,6 +16,7 @@ import { useState, useEffect, useRef } from "react";
 import { FloatingMenu } from "./FloatingMenu";
 import { useSkills } from "../../hooks/useAPI";
 import { useTranslation } from "react-i18next";
+import { skillLabel } from "../../utils/skillText";
 
 interface SkillSearchSelectProps {
   value: string[];
@@ -43,7 +44,7 @@ export const SkillSearchSelect = ({
   const borderColor = "border.default";
   const hoverBg = useColorModeValue("gray.50", "gray.600");
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { skills, isLoading } = useSkills(searchTerm);
 
   const availableSkills = skills.filter((skill) => !value.includes(skill._id));
@@ -105,7 +106,7 @@ export const SkillSearchSelect = ({
               onClick={() => !isDisabled && handleRemove(skill._id)}
               _hover={!isDisabled ? { opacity: 0.7 } : {}}
             >
-              {skill.name} ✕
+              {skillLabel(skill, i18n.language)} ✕
             </Badge>
           ))}
         </HStack>
@@ -152,7 +153,7 @@ export const SkillSearchSelect = ({
                       _last={{ borderBottom: "none" }}
                     >
                       <Text fontSize={size === "sm" ? "sm" : "md"} flex={1}>
-                        {skill.name}
+                        {skillLabel(skill, i18n.language)}
                       </Text>
                       {skill.description && (
                         <Text fontSize="xs" color="gray.500" isTruncated maxW="200px">

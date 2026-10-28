@@ -36,6 +36,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 import { bucketUrl } from "@/utils/apiRequest";
 import { gameText } from "@/utils/gameText";
+import { skillLabel } from "@/utils/skillText";
 import { BuildGuildPlayers } from "@/components/guides/BuildGuildPlayers";
 
 interface BuildDetailModalProps {
@@ -310,7 +311,7 @@ export const BuildDetailModal = ({
                                 <HStack spacing={1.5} flexWrap="wrap">
                                   {member.skills.map((skill, skillIndex) => {
                                     const skillName =
-                                      typeof skill === "string" ? skill : skill.name;
+                                      typeof skill === "string" ? skill : skillLabel(skill, i18n.language);
                                     return (
                                       <Badge
                                         key={skillIndex}
