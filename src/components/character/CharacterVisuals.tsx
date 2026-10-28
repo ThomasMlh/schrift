@@ -95,19 +95,26 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
 
 type Summon = NonNullable<ICharacter["banners"]>[number];
 
-// One summon featuring the character: its list visual (copied to the bucket by the sync), name and dates
+// One summon featuring the character: its list visual (copied to the bucket by the sync) in the site
+// language when the game has it, otherwise the French one, then name and dates
 const SummonRow = ({ summon, language }: { summon: Summon; language: string }) => {
-  const [hasImage, setHasImage] = useState(true);
+  const lang = language.slice(0, 2);
+  const sources = [
+    ...(lang !== "fr" ? [`${bucketUrl}/banners/gacha_${summon.gacha_group_id}.${lang}.png`] : []),
+    `${bucketUrl}/banners/gacha_${summon.gacha_group_id}.png`,
+  ];
+  const [attempt, setAttempt] = useState(0);
+  const hasImage = attempt < sources.length;
   return (
     <HStack spacing={3} align="center">
       {hasImage && (
         <Image
-          src={`${bucketUrl}/banners/gacha_${summon.gacha_group_id}.png`}
+          src={sources[attempt]}
           alt=""
           h={{ base: "48px", sm: "64px" }}
           flexShrink={0}
           borderRadius="md"
-          onError={() => setHasImage(false)}
+          onError={() => setAttempt((a) => a + 1)}
         />
       )}
       <Box minW={0}>
