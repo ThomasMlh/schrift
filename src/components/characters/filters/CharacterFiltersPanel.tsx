@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Image, VStack } from "@chakra-ui/react";
+import { VStack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import type { IFilterGroups } from "@/interfaces";
 import { AffinityIcon } from "@/components/ui/AffinityIcon";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { KillerIcon } from "@/components/ui/KillerIcon";
-import { REBIRTH_STAR_URL } from "@/utils/characterImages";
 import { ChoiceRow, FilterSection, GroupRow, MultiChoiceRow } from "./FilterParts";
 import { GroupPickerModal, type PickerCategory } from "./GroupPickerModal";
 import type { FilterGroupKey, FilterGroupSelection } from "./filterGroups";
@@ -21,7 +20,6 @@ export interface CharacterFilterValues {
   killers: string[];
   attackType: string;
   categories: string[];
-  resurrection: string;
   groups: FilterGroupSelection;
   // Groups matched on one of their entries ("partial") instead of all of them ("perfect")
   partialGroups: FilterGroupKey[];
@@ -93,17 +91,6 @@ export const CharacterFiltersPanel = ({ values, onChange, filterGroups }: {
             label: t(`factions.${faction}`, faction),
             icon: <CategoryIcon category={faction} size="20px" />,
           }))}
-        />
-      </FilterSection>
-
-      <FilterSection title={t("components.characterFilters.resurrection")}>
-        <ChoiceRow
-          value={values.resurrection}
-          onChange={(resurrection) => onChange({ resurrection })}
-          options={[
-            { value: "1", label: t("components.characterFilters.withResurrection"), icon: <Image src={REBIRTH_STAR_URL} alt="" boxSize="16px" /> },
-            { value: "0", label: t("components.characterFilters.withoutResurrection") },
-          ]}
         />
       </FilterSection>
 
