@@ -13,7 +13,7 @@ import { KillerIcon } from "./ui/KillerIcon";
 import { CategoryIcon } from "./ui/CategoryIcon";
 import { AttackTypeBadge } from "./ui/AttackTypeBadge";
 import { CharacterFiltersPanel, type CharacterFilterValues } from "./characters/filters/CharacterFiltersPanel";
-import { EMPTY_GROUPS, FILTER_GROUP_KEYS, type FilterGroupSelection } from "./characters/filters/filterGroups";
+import { EMPTY_GROUPS, FILTER_GROUP_KEYS, listParam, type FilterGroupKey, type FilterGroupSelection } from "./characters/filters/filterGroups";
 import { REBIRTH_STAR_URL } from "@/utils/characterImages";
 import { gameText } from "@/utils/gameText";
 import { Pagination as PaginationComponent } from "./ui/Pagination";
@@ -26,14 +26,17 @@ export const CharactersTable = () => {
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
   const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
-  const [selectedAffinity, setSelectedAffinity] = useState(searchParams.get('affinity') || "");
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || "");
-  const [selectedKiller, setSelectedKiller] = useState(searchParams.get('killer') || "");
+  const [selectedAffinities, setSelectedAffinities] = useState(() => listParam(searchParams.get('affinity')));
+  const [selectedCategories, setSelectedCategories] = useState(() => listParam(searchParams.get('category')));
+  const [selectedKillers, setSelectedKillers] = useState(() => listParam(searchParams.get('killer')));
   const [selectedAttackType, setSelectedAttackType] = useState(searchParams.get('attack_type') || "");
   const [resurrection, setResurrection] = useState(searchParams.get('resurrection') || "");
   const [groups, setGroups] = useState<FilterGroupSelection>(() => Object.fromEntries(
     FILTER_GROUP_KEYS.map((key) => [key, (searchParams.get(key) || "").split(',').filter(Boolean)])
   ) as FilterGroupSelection);
+  const [partialGroups, setPartialGroups] = useState<FilterGroupKey[]>(
+    () => FILTER_GROUP_KEYS.filter((key) => searchParams.get(`${key}_match`) === "any")
+  );
   const [showFilters, setShowFilters] = useState(false);
   const { filterGroups } = useCharacterMeta();
   // Names of the game abilities, effects and bonuses, for the active filter tags
@@ -51,9 +54,12 @@ export const CharactersTable = () => {
     return () => clearTimeout(id);
   }, [searchTerm]);
 
-  const groupsKey = FILTER_GROUP_KEYS.map((key) => groups[key].join(',')).join('|');
+  const groupsKey = `${FILTER_GROUP_KEYS.map((key) => groups[key].join(',')).join('|')}/${partialGroups.join(',')}`;
+  const affinityKey = selectedAffinities.join(',');
+  const categoryKey = selectedCategories.join(',');
+  const killerKey = selectedKillers.join(',');
   const activeGroupCount = FILTER_GROUP_KEYS.reduce((sum, key) => sum + groups[key].length, 0);
-  useEffect(() => { setCurrentPage(1); }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, groupsKey, resurrection, itemsPerPage]);
+  useEffect(() => { setCurrentPage(1); }, [debouncedSearch, affinityKey, categoryKey, killerKey, selectedAttackType, groupsKey, resurrection, itemsPerPage]);
 
   const { cycles, isLoading: cyclesLoading } = useCycles({ limit: 5 });
   const { currentRotation } = useCurrentRotation(cycles, cyclesLoading);
@@ -62,11 +68,12 @@ export const CharactersTable = () => {
     page: currentPage,
     limit: itemsPerPage,
     searchQuery: debouncedSearch,
-    affinity: selectedAffinity,
-    category: selectedCategory,
-    killer: selectedKiller,
+    affinity: affinityKey,
+    category: categoryKey,
+    killer: killerKey,
     attackType: selectedAttackType,
     groups,
+    partialGroups,
     resurrection,
   });
 
@@ -74,17 +81,21 @@ export const CharactersTable = () => {
   useEffect(() => {
     const params = new URLSearchParams();
     if (debouncedSearch.trim()) params.set('search', debouncedSearch.trim());
-    if (selectedAffinity) params.set('affinity', selectedAffinity);
-    if (selectedCategory) params.set('category', selectedCategory);
-    if (selectedKiller) params.set('killer', selectedKiller);
+    if (affinityKey) params.set('affinity', affinityKey);
+    if (categoryKey) params.set('category', categoryKey);
+    if (killerKey) params.set('killer', killerKey);
     if (selectedAttackType) params.set('attack_type', selectedAttackType);
-    for (const key of FILTER_GROUP_KEYS) if (groups[key].length > 0) params.set(key, groups[key].join(','));
+    for (const key of FILTER_GROUP_KEYS) {
+      if (groups[key].length === 0) continue;
+      params.set(key, groups[key].join(','));
+      if (partialGroups.includes(key)) params.set(`${key}_match`, 'any');
+    }
     if (resurrection) params.set('resurrection', resurrection);
     if (itemsPerPage !== 24) params.set('limit', itemsPerPage.toString());
     if (currentPage !== 1) params.set('page', currentPage.toString());
     setSearchParams(params, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, groupsKey, resurrection, itemsPerPage, currentPage, setSearchParams]);
+  }, [debouncedSearch, affinityKey, categoryKey, killerKey, selectedAttackType, groupsKey, resurrection, itemsPerPage, currentPage, setSearchParams]);
 
   const handlePageChange = (page: number) => {
     if (pagination && page >= 1 && page <= pagination.totalPages) setCurrentPage(page);
@@ -92,9 +103,10 @@ export const CharactersTable = () => {
 
   const resetFilters = () => {
     setSearchTerm("");
-    setSelectedAffinity("");
-    setSelectedCategory("");
-    setSelectedKiller("");
+    setSelectedAffinities([]);
+    setSelectedCategories([]);
+    setSelectedKillers([]);
+    setPartialGroups([]);
     setSelectedAttackType("");
     setGroups(EMPTY_GROUPS);
     setResurrection("");
@@ -102,38 +114,41 @@ export const CharactersTable = () => {
     setSearchParams({});
   };
 
-  const hasFilters = Boolean(searchTerm || selectedAffinity || selectedCategory || selectedKiller || selectedAttackType || activeGroupCount || resurrection);
-  const panelFilterCount = [selectedAffinity, selectedCategory, selectedKiller, selectedAttackType, resurrection].filter(Boolean).length + activeGroupCount;
+  const hasFilters = Boolean(searchTerm || affinityKey || categoryKey || killerKey || selectedAttackType || activeGroupCount || resurrection);
+  const panelFilterCount = selectedAffinities.length + selectedCategories.length + selectedKillers.length
+    + [selectedAttackType, resurrection].filter(Boolean).length + activeGroupCount;
 
   const filterValues: CharacterFilterValues = {
-    affinity: selectedAffinity,
-    killer: selectedKiller,
+    affinities: selectedAffinities,
+    killers: selectedKillers,
     attackType: selectedAttackType,
-    category: selectedCategory,
+    categories: selectedCategories,
     resurrection,
     groups,
+    partialGroups,
   };
   const changeFilters = (next: Partial<CharacterFilterValues>) => {
-    if (next.affinity !== undefined) setSelectedAffinity(next.affinity);
-    if (next.killer !== undefined) setSelectedKiller(next.killer);
+    if (next.affinities) setSelectedAffinities(next.affinities);
+    if (next.killers) setSelectedKillers(next.killers);
     if (next.attackType !== undefined) setSelectedAttackType(next.attackType);
-    if (next.category !== undefined) setSelectedCategory(next.category);
+    if (next.categories) setSelectedCategories(next.categories);
+    if (next.partialGroups) setPartialGroups(next.partialGroups);
     if (next.resurrection !== undefined) setResurrection(next.resurrection);
     if (next.groups) setGroups(next.groups);
   };
   const rotationAttack = currentRotation?.attack === "R" || currentRotation?.attack === "B" ? currentRotation.attack : "";
   const isRotationFilterActive = Boolean(currentRotation)
-    && selectedKiller === currentRotation?.killer
+    && killerKey === currentRotation?.killer
     && selectedAttackType === rotationAttack;
 
   // Toggles the killer and attack filters of the current rotation
   const applyRotationFilter = () => {
     if (!currentRotation) return;
     if (isRotationFilterActive) {
-      setSelectedKiller("");
+      setSelectedKillers([]);
       setSelectedAttackType("");
     } else {
-      setSelectedKiller(currentRotation.killer);
+      setSelectedKillers([currentRotation.killer]);
       setSelectedAttackType(rotationAttack);
     }
   };
@@ -200,9 +215,9 @@ export const CharactersTable = () => {
           <Flex mt={3} gap={2} align="center" wrap="wrap">
             <Wrap spacing={2} flex={1}>
               {searchTerm && filterTag("search", <Icon as={FiSearch} />, searchTerm, () => setSearchTerm(""))}
-              {selectedAffinity && filterTag("affinity", <AffinityIcon affinity={selectedAffinity} size="14px" />, selectedAffinity, () => setSelectedAffinity(""))}
-              {selectedCategory && filterTag("category", <CategoryIcon category={selectedCategory} size="14px" />, t(`factions.${selectedCategory}`, selectedCategory), () => setSelectedCategory(""))}
-              {selectedKiller && filterTag("killer", <KillerIcon killer={selectedKiller} size="14px" />, `${t("components.charactersTable.filterKiller")} ${t(`factions.${selectedKiller}`, selectedKiller)}`, () => setSelectedKiller(""))}
+              {selectedAffinities.map((affinity) => filterTag(`affinity-${affinity}`, <AffinityIcon affinity={affinity} size="14px" />, t(`affinities.${affinity}`, affinity), () => setSelectedAffinities(selectedAffinities.filter((a) => a !== affinity))))}
+              {selectedCategories.map((category) => filterTag(`category-${category}`, <CategoryIcon category={category} size="14px" />, t(`factions.${category}`, category), () => setSelectedCategories(selectedCategories.filter((c) => c !== category))))}
+              {selectedKillers.map((killer) => filterTag(`killer-${killer}`, <KillerIcon killer={killer} size="14px" />, `${t("components.charactersTable.filterKiller")} ${t(`factions.${killer}`, killer)}`, () => setSelectedKillers(selectedKillers.filter((k) => k !== killer))))}
               {FILTER_GROUP_KEYS.flatMap((key) => groups[key].map((type) => filterTag(
                 `${key}-${type}`,
                 null,

@@ -14,8 +14,12 @@ export const useCharacters = (options?: {
   resurrection?: string;
   // Groups of the game filter, by query parameter (soul_traits, ex_skills, skills, special, destruction)
   groups?: Record<string, string[]>;
+  // Groups matched on one of their entries instead of all of them
+  partialGroups?: string[];
 }) => {
-  const { page = 1, limit = 20, affinity, category, killer, attackType, searchQuery, traits = [], resurrection, groups = {} } = options || {};
+  const {
+    page = 1, limit = 20, affinity, category, killer, attackType, searchQuery, traits = [], resurrection, groups = {}, partialGroups = [],
+  } = options || {};
 
   let url = `${apiUrl}/api/characters?page=${page}&limit=${limit}`;
   if (affinity) url += `&affinity=${encodeURIComponent(affinity)}`;
@@ -26,7 +30,7 @@ export const useCharacters = (options?: {
   if (traits.length > 0) url += `&traits=${encodeURIComponent(traits.join(','))}`;
   if (resurrection) url += `&resurrection=${encodeURIComponent(resurrection)}`;
   for (const [param, types] of Object.entries(groups)) {
-    if (types.length > 0) url += `&${param}=${encodeURIComponent(types.join(','))}`;
+    if (types.length > 0) url += `&${param}=${encodeURIComponent(types.join(','))}${partialGroups.includes(param) ? `&${param}_match=any` : ''}`;
   }
 
   const { data, error, isLoading, mutate } = useSWR<ICharactersResponse>(

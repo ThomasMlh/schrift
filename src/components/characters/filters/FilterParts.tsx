@@ -30,15 +30,21 @@ export const FilterSection = ({ title, children, defaultOpen = true }: { title: 
 };
 
 // One choice of a section; the active one is highlighted in orange like in the game
-export const FilterChip = ({ isActive, onClick, icon, children }: {
+export const FilterChip = ({ isActive, onClick, icon, children, fullWidth }: {
   isActive: boolean;
   onClick: () => void;
   icon?: ReactNode;
   children: ReactNode;
+  fullWidth?: boolean;
 }) => (
   <Button
     size="sm"
-    h="36px"
+    h={fullWidth ? "auto" : "36px"}
+    minH="36px"
+    py={fullWidth ? 2 : undefined}
+    w={fullWidth ? "100%" : undefined}
+    whiteSpace={fullWidth ? "normal" : undefined}
+    textAlign="center"
     borderRadius="lg"
     variant={isActive ? "solid" : "outline"}
     colorScheme={isActive ? "orange" : "gray"}
@@ -67,6 +73,30 @@ export const ChoiceRow = <T extends string>({ value, options, onChange }: {
       {options.map((option) => (
         <WrapItem key={option.value}>
           <FilterChip isActive={value === option.value} onClick={() => onChange(value === option.value ? "" : option.value)} icon={option.icon}>
+            {option.label}
+          </FilterChip>
+        </WrapItem>
+      ))}
+    </Wrap>
+  );
+};
+
+// "All" plus one chip per option, several choices at once ("All" clears them)
+export const MultiChoiceRow = ({ values, options, onChange }: {
+  values: string[];
+  options: { value: string; label: string; icon?: ReactNode }[];
+  onChange: (values: string[]) => void;
+}) => {
+  const { t } = useTranslation();
+  const toggle = (value: string) => onChange(values.includes(value) ? values.filter((v) => v !== value) : [...values, value]);
+  return (
+    <Wrap spacing={2}>
+      <WrapItem>
+        <FilterChip isActive={values.length === 0} onClick={() => onChange([])}>{t("components.characterFilters.all")}</FilterChip>
+      </WrapItem>
+      {options.map((option) => (
+        <WrapItem key={option.value}>
+          <FilterChip isActive={values.includes(option.value)} onClick={() => toggle(option.value)} icon={option.icon}>
             {option.label}
           </FilterChip>
         </WrapItem>

@@ -7,7 +7,7 @@ import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { KillerIcon } from "@/components/ui/KillerIcon";
 import { REBIRTH_STAR_URL } from "@/utils/characterImages";
-import { ChoiceRow, FilterSection, GroupRow } from "./FilterParts";
+import { ChoiceRow, FilterSection, GroupRow, MultiChoiceRow } from "./FilterParts";
 import { GroupPickerModal, type PickerCategory } from "./GroupPickerModal";
 import type { FilterGroupKey, FilterGroupSelection } from "./filterGroups";
 
@@ -17,12 +17,14 @@ const FACTIONS = ["Shinigami", "Capitaine", "Division 0", "Hollow", "Arrancar", 
 
 
 export interface CharacterFilterValues {
-  affinity: string;
-  killer: string;
+  affinities: string[];
+  killers: string[];
   attackType: string;
-  category: string;
+  categories: string[];
   resurrection: string;
   groups: FilterGroupSelection;
+  // Groups matched on one of their entries ("partial") instead of all of them ("perfect")
+  partialGroups: FilterGroupKey[];
 }
 
 // The game's character filter: choice sections, then groups of abilities picked in a dialog
@@ -48,9 +50,9 @@ export const CharacterFiltersPanel = ({ values, onChange, filterGroups }: {
   return (
     <VStack align="stretch" spacing={3}>
       <FilterSection title={t("components.characterFilters.affinity")}>
-        <ChoiceRow
-          value={values.affinity}
-          onChange={(affinity) => onChange({ affinity })}
+        <MultiChoiceRow
+          values={values.affinities}
+          onChange={(affinities) => onChange({ affinities })}
           options={AFFINITIES.map((affinity) => ({
             value: affinity,
             label: t(`affinities.${affinity}`, affinity),
@@ -60,9 +62,9 @@ export const CharacterFiltersPanel = ({ values, onChange, filterGroups }: {
       </FilterSection>
 
       <FilterSection title={t("components.characterFilters.killer")}>
-        <ChoiceRow
-          value={values.killer}
-          onChange={(killer) => onChange({ killer })}
+        <MultiChoiceRow
+          values={values.killers}
+          onChange={(killers) => onChange({ killers })}
           options={FACTIONS.map((faction) => ({
             value: faction,
             label: t("components.characterFilters.killerOf", { faction: t(`factions.${faction}`, faction) }),
@@ -83,9 +85,9 @@ export const CharacterFiltersPanel = ({ values, onChange, filterGroups }: {
       </FilterSection>
 
       <FilterSection title={t("components.characterFilters.category")}>
-        <ChoiceRow
-          value={values.category}
-          onChange={(category) => onChange({ category })}
+        <MultiChoiceRow
+          values={values.categories}
+          onChange={(categories) => onChange({ categories })}
           options={FACTIONS.map((faction) => ({
             value: faction,
             label: t(`factions.${faction}`, faction),
@@ -123,8 +125,12 @@ export const CharacterFiltersPanel = ({ values, onChange, filterGroups }: {
           title={opened.title}
           categories={opened.categories}
           selected={values.groups[opened.key]}
+          isPartial={values.partialGroups.includes(opened.key)}
           onClose={() => setOpenGroup(null)}
           onChange={(types) => onChange({ groups: { ...values.groups, [opened.key]: types } })}
+          onPartialChange={(partial) => onChange({
+            partialGroups: partial ? [...values.partialGroups, opened.key] : values.partialGroups.filter((key) => key !== opened.key),
+          })}
         />
       )}
     </VStack>

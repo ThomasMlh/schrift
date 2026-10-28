@@ -1139,10 +1139,17 @@
       "edit": "Modifier",
       "search": "Rechercher...",
       "nothingFound": "Aucun résultat",
-      "clearGroup": "Tout décocher",
       "done": "Valider",
       "toggle": "Filtres",
-      "hide": "Masquer les filtres"
+      "hide": "Masquer les filtres",
+      "reset": "Réinitialiser",
+      "matching": "Correspondance des résultats",
+      "perfect": "Parfaite",
+      "partial": "Partielle",
+      "perfectHint": "Le personnage doit avoir tout ce qui est sélectionné.",
+      "partialHint": "Le personnage doit avoir au moins un élément sélectionné.",
+      "doneCount_one": "Valider ({{count}})",
+      "doneCount_other": "Valider ({{count}})"
     }
   },
   "affinities": {

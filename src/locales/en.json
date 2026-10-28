@@ -1139,10 +1139,17 @@
       "edit": "Edit",
       "search": "Search...",
       "nothingFound": "Nothing found",
-      "clearGroup": "Uncheck all",
       "done": "Done",
       "toggle": "Filters",
-      "hide": "Hide filters"
+      "hide": "Hide filters",
+      "reset": "Reset",
+      "matching": "Result matching",
+      "perfect": "Perfect",
+      "partial": "Partial",
+      "perfectHint": "The character must have everything selected.",
+      "partialHint": "The character must have at least one selected entry.",
+      "doneCount_one": "Done ({{count}})",
+      "doneCount_other": "Done ({{count}})"
     }
   },
   "affinities": {
