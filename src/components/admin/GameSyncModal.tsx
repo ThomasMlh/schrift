@@ -85,6 +85,17 @@ export const GameSyncModal = ({ preview, isOpen, onClose, onApply, isApplying }:
                 {stats.legacyAccessories} ancien(s) accessoire(s) et sous-effet(s) du site seront supprimés : ils sont remplacés par ceux du jeu.
               </Alert>
             )}
+            {(stats.newSkills ?? 0) > 0 && (
+              <Text fontSize="sm" color="text.secondary">
+                {stats.newSkills} nouvelle(s) compétence(s) bonus sur {stats.skills}.
+              </Text>
+            )}
+            {(stats.legacySkills ?? 0) > 0 && (
+              <Alert status="warning" borderRadius="md" fontSize="sm">
+                <AlertIcon />
+                {stats.legacySkills} ancienne(s) compétence(s) bonus du site seront supprimées : elles sont remplacées par celles du jeu.
+              </Alert>
+            )}
             {(stats.legacyBanners ?? 0) > 0 && (
               <Alert status="warning" borderRadius="md" fontSize="sm">
                 <AlertIcon />

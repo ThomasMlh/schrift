@@ -177,6 +177,10 @@ export interface IGameSyncResult {
     // Accessories and sub-effects entered on the site, replaced by the game ones
     legacyAccessories?: number;
     accessoryImages?: number;
+    skills?: number;
+    newSkills?: number;
+    // Bonus skills entered on the site, replaced by the game bonus abilities
+    legacySkills?: number;
   };
   fieldCounts: Record<string, number>;
   preview: {
