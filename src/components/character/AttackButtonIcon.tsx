@@ -11,11 +11,22 @@ export const AttackButtonIcon = ({ button, steps, size = "56px" }: {
   const badges = attackStatusBadges(steps).slice(0, 2);
   const weapon = attackWeaponIcon(button, steps);
   const subBadge = attackSubBadge(steps);
+  // The normal attack background (bt_fighting) has a wider margin than the others: its icon is smaller,
+  // in the same proportion as in the game (about 2/3 of the button instead of 9/10)
+  const weaponSize = button === "normal" ? 58 : 76;
   return (
     <Box position="relative" boxSize={size} flexShrink={0}>
       <Image src={attackIconUrl(attackBase(button, steps))} alt="" position="absolute" inset={0} boxSize="100%" />
       {weapon && (
-        <Image src={attackIconUrl(weapon)} alt="" position="absolute" top="12%" left="12%" boxSize="76%" objectFit="contain" />
+        <Image
+          src={attackIconUrl(weapon)}
+          alt=""
+          position="absolute"
+          top={`${(100 - weaponSize) / 2}%`}
+          left={`${(100 - weaponSize) / 2}%`}
+          boxSize={`${weaponSize}%`}
+          objectFit="contain"
+        />
       )}
       {/* Bottom right badge on a dark disc, like the game */}
       {subBadge && (
