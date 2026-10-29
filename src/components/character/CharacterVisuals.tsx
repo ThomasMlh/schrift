@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import { Box, Flex, HStack, IconButton, Image, SimpleGrid, Text, Tooltip, VStack, useColorMode } from "@chakra-ui/react";
 import { DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
 import { useTranslation } from "react-i18next";
@@ -95,8 +96,8 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
 
 type Summon = NonNullable<ICharacter["banners"]>[number];
 
-// One summon featuring the character: its list visual (copied to the bucket by the sync) in the site
-// language when the game has it, otherwise the French one, then name and dates
+// One summon featuring the character, linking to its page: its banner in the site language when the
+// game has it, otherwise the French one, then name and dates
 const SummonRow = ({ summon, language }: { summon: Summon; language: string }) => {
   const lang = language.slice(0, 2);
   const sources = [
@@ -106,7 +107,14 @@ const SummonRow = ({ summon, language }: { summon: Summon; language: string }) =
   const [attempt, setAttempt] = useState(0);
   const hasImage = attempt < sources.length;
   return (
-    <HStack spacing={3} align="center">
+    <HStack
+      as={RouterLink}
+      to={`/invocation/${summon.gacha_group_id}`}
+      spacing={3}
+      align="center"
+      borderRadius="md"
+      _hover={{ bg: "bg.inset" }}
+    >
       {hasImage && (
         <Image
           src={sources[attempt]}
