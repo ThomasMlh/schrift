@@ -2,7 +2,7 @@ import {
   Box, Flex, Heading, HStack, VStack, Text, Button, Menu, MenuButton, MenuList, MenuItem, Icon, Tooltip, useToast,
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
-import { FiCpu, FiDatabase, FiImage, FiRefreshCw, FiTool, FiUsers } from "react-icons/fi";
+import { FiCpu, FiDatabase, FiImage, FiRefreshCw, FiTool, FiUsers, FiFileText } from "react-icons/fi";
 import { useAdminMutations } from "@/hooks/mutations/useAdminMutations";
 import GuildsAdminSection from "../components/GuildsAdminSection";
 import DraftSection from "../components/DraftSection";
@@ -33,13 +33,13 @@ import { AdminSidebar, AdminSectionSelect } from "@/components/admin/AdminSideba
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { useBotHealth } from "@/components/admin/useBotHealth";
 import { ApplicationsSection } from "../components/admin/ApplicationsSection";
-import { CharacterSyncModal } from "@/components/admin/CharacterSyncModal";
+import { BotDatabaseModal } from "@/components/admin/BotDatabaseModal";
 import { GameSyncModal } from "@/components/admin/GameSyncModal";
-import type { ICharacterSyncResult, IGameSyncResult } from "@/types/character";
+import type { IBotDatabaseResult, IGameSyncResult } from "@/types/character";
 
 const AdminPage = () => {
   const { isAdmin: isFullAdmin, isGuildManager, managedGuildIds } = useAuth();
-  const { updateCharacters, syncGameCharacters, uploadImages, syncDiscordProfiles, createIndexes } = useAdminMutations();
+  const { enrichBotDatabase, syncGameCharacters, uploadImages, syncDiscordProfiles, createIndexes } = useAdminMutations();
 
   // Tabs allowed for the role: everything for an admin, otherwise the non-restricted tabs
   const visibleTabs = useMemo(
@@ -69,7 +69,8 @@ const AdminPage = () => {
     }, { replace: true });
   };
   const [isUpdatingCharacters, setIsUpdatingCharacters] = useState(false);
-  const [syncPreview, setSyncPreview] = useState<ICharacterSyncResult | null>(null);
+  const [botDatabasePreview, setBotDatabasePreview] = useState<IBotDatabaseResult | null>(null);
+  const [isEnrichingBotDatabase, setIsEnrichingBotDatabase] = useState(false);
   const [gameSyncPreview, setGameSyncPreview] = useState<IGameSyncResult | null>(null);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isSyncingProfiles, setIsSyncingProfiles] = useState(false);
@@ -91,30 +92,28 @@ const AdminPage = () => {
     applications: newApplications.length,
   };
 
-  // Dry run first: the modal shows what will change, the sync only runs on "Appliquer"
-  const handlePreviewCharacters = async () => {
-    setIsUpdatingCharacters(true);
+  // Dry run first: the modal shows which rows of the bot file change, it is written only on "Appliquer"
+  const handlePreviewBotDatabase = async () => {
+    setIsEnrichingBotDatabase(true);
     try {
-      setSyncPreview(await updateCharacters({ dryRun: true }));
+      setBotDatabasePreview(await enrichBotDatabase({ dryRun: true }));
     } catch (error: unknown) {
       toast({ title: (error as Error).message || "Erreur lors de la simulation", status: "error" });
     } finally {
-      setIsUpdatingCharacters(false);
+      setIsEnrichingBotDatabase(false);
     }
   };
 
-  const handleUpdateCharacters = async () => {
-    setIsUpdatingCharacters(true);
-    const needsImages = (syncPreview?.statistics.inserted ?? 0) + (syncPreview?.statistics.imagesChanged ?? 0) > 0;
+  const handleApplyBotDatabase = async () => {
+    setIsEnrichingBotDatabase(true);
     try {
-      const data = await updateCharacters();
-      setSyncPreview(null);
-      toast({ title: data.message || "Personnages mis à jour", status: "success", duration: 8000, isClosable: true });
-      if (needsImages) await handleUploadImages();
+      const { statistics } = await enrichBotDatabase({ dryRun: false });
+      setBotDatabasePreview(null);
+      toast({ title: `database.json complété : ${statistics.updated} ligne(s) mise(s) à jour`, status: "success", duration: 8000, isClosable: true });
     } catch (error: unknown) {
-      toast({ title: (error as Error).message || "Erreur lors de la mise à jour des personnages", status: "error" });
+      toast({ title: (error as Error).message || "Erreur lors de la mise à jour de database.json", status: "error" });
     } finally {
-      setIsUpdatingCharacters(false);
+      setIsEnrichingBotDatabase(false);
     }
   };
 
@@ -311,7 +310,7 @@ const AdminPage = () => {
                   borderRadius="full"
                   leftIcon={<Icon as={FiTool} />}
                   rightIcon={<ChevronDownIcon />}
-                  isLoading={isUpdatingCharacters || isUploadingImages || isSyncingProfiles || isCreatingIndexes}
+                  isLoading={isUpdatingCharacters || isEnrichingBotDatabase || isUploadingImages || isSyncingProfiles || isCreatingIndexes}
                   loadingText="En cours…"
                 >
                   Outils
@@ -320,8 +319,8 @@ const AdminPage = () => {
                   <MenuItem icon={<Icon as={FiRefreshCw} />} onClick={handlePreviewGameSync}>
                     Synchroniser depuis les tables du jeu
                   </MenuItem>
-                  <MenuItem icon={<Icon as={FiRefreshCw} />} onClick={handlePreviewCharacters}>
-                    Synchroniser les personnages (ancien fichier)
+                  <MenuItem icon={<Icon as={FiFileText} />} onClick={() => void handlePreviewBotDatabase()}>
+                    Compléter database.json du bot
                   </MenuItem>
                   <MenuItem icon={<Icon as={FiUsers} />} onClick={handleSyncProfiles}>
                     Synchroniser les profils Discord
@@ -369,12 +368,12 @@ const AdminPage = () => {
         onApply={() => void handleApplyGameSync()}
         isApplying={isUpdatingCharacters}
       />
-      <CharacterSyncModal
-        preview={syncPreview}
-        isOpen={syncPreview !== null}
-        onClose={() => setSyncPreview(null)}
-        onApply={() => void handleUpdateCharacters()}
-        isApplying={isUpdatingCharacters}
+      <BotDatabaseModal
+        preview={botDatabasePreview}
+        isOpen={botDatabasePreview !== null}
+        onClose={() => setBotDatabasePreview(null)}
+        onApply={() => void handleApplyBotDatabase()}
+        isApplying={isEnrichingBotDatabase}
       />
     </Box>
   );
