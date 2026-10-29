@@ -17,7 +17,13 @@ export const AttackButtonIcon = ({ button, steps, size = "56px" }: {
       {weapon && (
         <Image src={attackIconUrl(weapon)} alt="" position="absolute" top="12%" left="12%" boxSize="76%" objectFit="contain" />
       )}
-      {subBadge && <Image src={attackIconUrl(subBadge)} alt="" position="absolute" bottom="-6%" right="-6%" boxSize="42%" />}
+      {/* Bottom right badge on a dark disc, like the game */}
+      {subBadge && (
+        <Box position="absolute" bottom="-6%" right="-6%" boxSize="42%">
+          <Image src={attackIconUrl("ailment_base_2")} alt="" position="absolute" inset={0} boxSize="100%" />
+          <Image src={attackIconUrl(subBadge)} alt="" position="absolute" top="4%" left="4%" boxSize="92%" />
+        </Box>
+      )}
       {/* Status badges on the top left, like the game */}
       {badges.map((badge, index) => (
         <Box key={`${badge.icon}${badge.plus}`} position="absolute" top="-8%" left={`${-8 + index * 30}%`} boxSize="40%">
