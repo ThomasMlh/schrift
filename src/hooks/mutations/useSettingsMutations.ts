@@ -37,5 +37,14 @@ export const useSettingsMutations = () => {
     return result;
   };
 
-  return { updateGlobalNotificationSettings, updatePodiumMinScores, updateScoreLockDays };
+  const updateAlbumLeadersCanEdit = async (leadersCanEdit: boolean) => {
+    const result = await request(`${apiUrl}/api/settings/albums`, {
+      method: 'PUT',
+      body: JSON.stringify({ leaders_can_edit: leadersCanEdit }),
+    }, { fallbackError: "Erreur lors de la mise à jour de l'option des albums" });
+    await mutate(`${apiUrl}/api/settings/albums`);
+    return result;
+  };
+
+  return { updateGlobalNotificationSettings, updatePodiumMinScores, updateScoreLockDays, updateAlbumLeadersCanEdit };
 };
