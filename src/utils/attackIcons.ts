@@ -93,6 +93,8 @@ export const attackWeaponIcon = (button: AttackButton, steps: IAttackStep[]) => 
   if (button === "ex") return steps.some((s) => s.revival) ? "10_special1" : "11_skill1";
   // Double strike has its own icon
   if (steps.some((s) => s.twice)) return "11_heavy3";
+  // A buff that also heals has its own icon (party with a "+"), the heal drop goes in a badge
+  if (steps.some((s) => s.buff) && steps.some((s) => s.heal)) return "6_heavy4";
   const buff = steps.find((s) => s.buff)?.buff;
   const weapon = buff ? (buff.target === 2 ? 7 : 6) : steps.some((s) => s.heal) ? 5 : steps.find((s) => s.weapon)?.weapon;
   if (!weapon) return null;
