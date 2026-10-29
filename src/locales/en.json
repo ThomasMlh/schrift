@@ -1184,14 +1184,15 @@
       "buff": "Buff",
       "barrier": "Barrier",
       "revival": "Revive",
-            "projectileSized": "Proj. {{width}}×{{length}} · {{range}}",
+      "projectileSized": "Proj. {{width}}×{{length}} · {{range}}",
       "trap": "Vortex",
       "trapLine": "Vortex: {{hits}} hits over {{duration}}, {{kind}}",
       "trapStatic": "static",
       "trapHoming": "follows the enemy",
       "rangeBonus": "Area +{{value}}% (included)",
       "hitBonus_one": "+{{count}} hit (soul tree)",
-      "hitBonus_other": "+{{count}} hits (soul tree)"
+      "hitBonus_other": "+{{count}} hits (soul tree)",
+      "waveLegend": "White dots: a guild quest wave (12 enemies in a circle), orange dot: elite. Same scale as the areas."
     },
     "accessorySearchSelect": {
       "accessory": "Accessory",

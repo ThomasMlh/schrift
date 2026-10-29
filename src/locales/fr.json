@@ -1184,14 +1184,15 @@
       "buff": "Renforcement",
       "barrier": "Barrière",
       "revival": "Revit",
-            "projectileSized": "Proj. {{width}}×{{length}} · {{range}}",
+      "projectileSized": "Proj. {{width}}×{{length}} · {{range}}",
       "trap": "Vortex",
       "trapLine": "Vortex : {{hits}} coups en {{duration}}, {{kind}}",
       "trapStatic": "fixe",
       "trapHoming": "suit l'ennemi",
       "rangeBonus": "Zone +{{value}} % (incluse)",
       "hitBonus_one": "+{{count}} coup (arbre d'âme)",
-      "hitBonus_other": "+{{count}} coups (arbre d'âme)"
+      "hitBonus_other": "+{{count}} coups (arbre d'âme)",
+      "waveLegend": "Points blancs : vague de quête de guilde (12 ennemis en cercle), point orange : élite. Même échelle que les zones."
     },
     "accessorySearchSelect": {
       "accessory": "Accessoire",

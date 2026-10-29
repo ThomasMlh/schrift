@@ -57,94 +57,97 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
   };
 
   return (
-    <SimpleGrid columns={{ base: 1, sm: 2, xl: 3 }} spacing={4}>
-      {buttons.map((button) => {
-        const { cooldown, hits, steps, range_bonus: rangeBonus, hit_bonus: hitBonus } = attacks[button]!;
-        const traps = steps.map((s) => s.trap).filter((trap): trap is NonNullable<IAttackStep["trap"]> => Boolean(trap));
-        const color = steps.find((s) => s.color)?.color ?? null;
-        const shapes = steps.map((s) => s.shape).filter((s): s is AttackShape => Boolean(s));
-        const uniqueShapes = shapes.filter((shape, i) => shapes.findIndex((other) => JSON.stringify(other) === JSON.stringify(shape)) === i);
-        const status = statusLine(steps);
-        return (
-          <Box key={button} bg="bg.subtle" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={3}>
-            <HStack justify="space-between" mb={2}>
-              <HStack spacing={2}>
-                <AttackButtonIcon button={button} steps={steps} size="44px" />
-                <Box>
-                  <Text fontWeight="bold" fontSize="sm" color="text.strong">{t(`components.characterAttacks.buttons.${button}`)}</Text>
-                  {color && <AttackTypeBadge attackType={color} size="10px" />}
-                </Box>
+    <Box>
+      <Text fontSize="xs" color="text.muted" mb={2}>{t("components.characterAttacks.waveLegend")}</Text>
+      <SimpleGrid columns={{ base: 1, sm: 2, xl: 3 }} spacing={4}>
+        {buttons.map((button) => {
+          const { cooldown, hits, steps, range_bonus: rangeBonus, hit_bonus: hitBonus } = attacks[button]!;
+          const traps = steps.map((s) => s.trap).filter((trap): trap is NonNullable<IAttackStep["trap"]> => Boolean(trap));
+          const color = steps.find((s) => s.color)?.color ?? null;
+          const shapes = steps.map((s) => s.shape).filter((s): s is AttackShape => Boolean(s));
+          const uniqueShapes = shapes.filter((shape, i) => shapes.findIndex((other) => JSON.stringify(other) === JSON.stringify(shape)) === i);
+          const status = statusLine(steps);
+          return (
+            <Box key={button} bg="bg.subtle" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={3}>
+              <HStack justify="space-between" mb={2}>
+                <HStack spacing={2}>
+                  <AttackButtonIcon button={button} steps={steps} size="44px" />
+                  <Box>
+                    <Text fontWeight="bold" fontSize="sm" color="text.strong">{t(`components.characterAttacks.buttons.${button}`)}</Text>
+                    {color && <AttackTypeBadge attackType={color} size="10px" />}
+                  </Box>
+                </HStack>
+                <Badge variant="subtle" colorScheme="purple" textTransform="none">
+                  {t("components.characterAttacks.cooldown", { value: seconds(cooldown) })}
+                </Badge>
               </HStack>
-              <Badge variant="subtle" colorScheme="purple" textTransform="none">
-                {t("components.characterAttacks.cooldown", { value: seconds(cooldown) })}
-              </Badge>
-            </HStack>
 
-            <AttackArea shapes={uniqueShapes} reach={reach} color={color} />
+              <AttackArea shapes={uniqueShapes} reach={reach} color={color} />
 
-            {status && <Text fontSize="xs" color="text.secondary" mt={2}>{status}</Text>}
-            {traps.map((trap, i) => (
-              <Text key={i} fontSize="xs" color="text.secondary" mt={1}>
-                {trap.hits
-                  ? t("components.characterAttacks.trapLine", {
-                    hits: trap.hits,
-                    duration: seconds(trap.duration, 2),
-                    kind: t(`components.characterAttacks.${trap.homing ? "trapHoming" : "trapStatic"}`),
-                  })
-                  : t("components.characterAttacks.trap")}
-              </Text>
-            ))}
-            {(rangeBonus || hitBonus) && (
-              <Wrap spacing={1} mt={2}>
-                {rangeBonus && (
-                  <WrapItem><Badge colorScheme="teal" variant="subtle" textTransform="none">{t("components.characterAttacks.rangeBonus", { value: rangeBonus })}</Badge></WrapItem>
-                )}
-                {hitBonus && (
-                  <WrapItem><Badge colorScheme="teal" variant="subtle" textTransform="none">{t("components.characterAttacks.hitBonus", { count: hitBonus })}</Badge></WrapItem>
-                )}
-              </Wrap>
-            )}
-            {effects(steps).length > 0 && (
-              <Wrap spacing={1} mt={2}>
-                {effects(steps).map((effect) => (
-                  <WrapItem key={effect}><Badge colorScheme="orange" variant="subtle" textTransform="none">{effect}</Badge></WrapItem>
-                ))}
-              </Wrap>
-            )}
-
-            <Table size="sm" variant="simple" mt={2}>
-              {steps.length > 1 && (
-                <Thead>
-                  <Tr>
-                    <Th px={1} />
-                    {steps.map((step, i) => (
-                      <Th key={i} px={1} textAlign="center" textTransform="none">
-                        {ROMAN[(step.step ?? i + 1) - 1] ?? step.step}{step.variant > 0 ? "\u2032" : ""}
-                      </Th>
-                    ))}
-                  </Tr>
-                </Thead>
+              {status && <Text fontSize="xs" color="text.secondary" mt={2}>{status}</Text>}
+              {traps.map((trap, i) => (
+                <Text key={i} fontSize="xs" color="text.secondary" mt={1}>
+                  {trap.hits
+                    ? t("components.characterAttacks.trapLine", {
+                      hits: trap.hits,
+                      duration: seconds(trap.duration, 2),
+                      kind: t(`components.characterAttacks.${trap.homing ? "trapHoming" : "trapStatic"}`),
+                    })
+                    : t("components.characterAttacks.trap")}
+                </Text>
+              ))}
+              {(rangeBonus || hitBonus) && (
+                <Wrap spacing={1} mt={2}>
+                  {rangeBonus && (
+                    <WrapItem><Badge colorScheme="teal" variant="subtle" textTransform="none">{t("components.characterAttacks.rangeBonus", { value: rangeBonus })}</Badge></WrapItem>
+                  )}
+                  {hitBonus && (
+                    <WrapItem><Badge colorScheme="teal" variant="subtle" textTransform="none">{t("components.characterAttacks.hitBonus", { count: hitBonus })}</Badge></WrapItem>
+                  )}
+                </Wrap>
               )}
-              <Tbody>
-                <Tr>
-                  <Td px={1} fontSize="xs" color="text.muted">{t("components.characterAttacks.power")}</Td>
-                  {steps.map((step, i) => <Td key={i} px={1} textAlign="center" fontWeight="semibold">{step.power ?? "—"}</Td>)}
-                </Tr>
-                <Tr>
-                  <Td px={1} fontSize="xs" color="text.muted">{t("components.characterAttacks.hits")}</Td>
-                  {hits
-                    ? <Td px={1} textAlign="center" colSpan={steps.length}>{hits}</Td>
-                    : steps.map((step, i) => <Td key={i} px={1} textAlign="center">{step.hits ?? "—"}</Td>)}
-                </Tr>
-                <Tr>
-                  <Td px={1} fontSize="xs" color="text.muted" borderBottom="none">{t("components.characterAttacks.area")}</Td>
-                  {steps.map((step, i) => <Td key={i} px={1} textAlign="center" fontSize="2xs" borderBottom="none">{shapeLabel(step.shape)}</Td>)}
-                </Tr>
-              </Tbody>
-            </Table>
-          </Box>
-        );
-      })}
-    </SimpleGrid>
+              {effects(steps).length > 0 && (
+                <Wrap spacing={1} mt={2}>
+                  {effects(steps).map((effect) => (
+                    <WrapItem key={effect}><Badge colorScheme="orange" variant="subtle" textTransform="none">{effect}</Badge></WrapItem>
+                  ))}
+                </Wrap>
+              )}
+
+              <Table size="sm" variant="simple" mt={2}>
+                {steps.length > 1 && (
+                  <Thead>
+                    <Tr>
+                      <Th px={1} />
+                      {steps.map((step, i) => (
+                        <Th key={i} px={1} textAlign="center" textTransform="none">
+                          {ROMAN[(step.step ?? i + 1) - 1] ?? step.step}{step.variant > 0 ? "\u2032" : ""}
+                        </Th>
+                      ))}
+                    </Tr>
+                  </Thead>
+                )}
+                <Tbody>
+                  <Tr>
+                    <Td px={1} fontSize="xs" color="text.muted">{t("components.characterAttacks.power")}</Td>
+                    {steps.map((step, i) => <Td key={i} px={1} textAlign="center" fontWeight="semibold">{step.power ?? "—"}</Td>)}
+                  </Tr>
+                  <Tr>
+                    <Td px={1} fontSize="xs" color="text.muted">{t("components.characterAttacks.hits")}</Td>
+                    {hits
+                      ? <Td px={1} textAlign="center" colSpan={steps.length}>{hits}</Td>
+                      : steps.map((step, i) => <Td key={i} px={1} textAlign="center">{step.hits ?? "—"}</Td>)}
+                  </Tr>
+                  <Tr>
+                    <Td px={1} fontSize="xs" color="text.muted" borderBottom="none">{t("components.characterAttacks.area")}</Td>
+                    {steps.map((step, i) => <Td key={i} px={1} textAlign="center" fontSize="2xs" borderBottom="none">{shapeLabel(step.shape)}</Td>)}
+                  </Tr>
+                </Tbody>
+              </Table>
+            </Box>
+          );
+        })}
+      </SimpleGrid>
+    </Box>
   );
 };

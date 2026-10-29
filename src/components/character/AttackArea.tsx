@@ -3,6 +3,31 @@ import type { AttackShape } from "@/interfaces";
 
 const GRID_STEP = 250;
 
+// Reference wave of a guild quest (m_guild_quest_block_enemy_spawnpoint, wave 1 of block 41314343):
+// 12 enemies on a circle of radius 650 and an elite 300 beyond its center. The character stands on the
+// near edge of the circle, facing it, as when it reaches the wave.
+const WAVE = { count: 12, radius: 650, center: -550, elite: -850 };
+const ENEMY_RADIUS = 45;
+
+const WaveMarks = () => (
+  <g>
+    {Array.from({ length: WAVE.count }, (_, i) => {
+      const angle = (2 * Math.PI * i) / WAVE.count;
+      return (
+        <circle
+          key={i}
+          cx={WAVE.radius * Math.sin(angle)}
+          cy={WAVE.center - WAVE.radius * Math.cos(angle)}
+          r={ENEMY_RADIUS}
+          fill="white"
+          fillOpacity={0.85}
+        />
+      );
+    })}
+    <circle cx={0} cy={WAVE.elite} r={ENEMY_RADIUS * 1.3} fill="#ed8936" />
+  </g>
+);
+
 // Sector facing up (towards negative y), or a full circle
 const sectorPath = (radius: number, angle: number) => {
   if (angle >= 360) return null;
@@ -45,11 +70,13 @@ const ShapeMark = ({ shape, fill, stroke }: { shape: AttackShape; fill: string; 
 
 // Widest frame drawn: a bigger area (a screen-wide special) fills it instead of shrinking the others
 const MAX_HALF = 1500;
+// Smallest frame: the reference wave always fits
+const MIN_HALF = 1300;
 
 // Area hit by an attack seen from above, the character at the center facing up. Every attack of a
 // character uses the same scale (reach), so their sizes compare.
 export const AttackArea = ({ shapes, reach, color }: { shapes: AttackShape[]; reach: number; color: "R" | "B" | null }) => {
-  const half = Math.min(Math.max(reach * 1.1, 600), MAX_HALF);
+  const half = Math.min(Math.max(reach * 1.1, MIN_HALF), MAX_HALF);
   const lines = [];
   for (let v = GRID_STEP; v < half; v += GRID_STEP) lines.push(v, -v);
   const tone = color === "B" ? "66, 153, 225" : "229, 62, 62";
@@ -63,6 +90,7 @@ export const AttackArea = ({ shapes, reach, color }: { shapes: AttackShape[]; re
             <line x1={-half} y1={v} x2={half} y2={v} />
           </g>
         ))}
+        <WaveMarks />
         {shapes.map((shape, index) => (
           <ShapeMark key={index} shape={shape} fill={`rgba(${tone}, ${shapes.length > 1 ? 0.22 : 0.35})`} stroke={`rgba(${tone}, 0.9)`} />
         ))}
