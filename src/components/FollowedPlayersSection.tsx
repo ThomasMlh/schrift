@@ -115,7 +115,7 @@ export const FollowedPlayersSection = () => {
                 <Box textAlign="right" flexShrink={0}>
                   {row?.averageScore ? (
                     <>
-                      <Text fontWeight="bold" fontSize="lg" color="blue.300" lineHeight="short">
+                      <Text fontWeight="bold" fontSize="lg" color="text.strong" lineHeight="short">
                         {formatScore(row.averageScore)}
                       </Text>
                       <Text fontSize="2xs" color="text.muted" textTransform="uppercase" letterSpacing="wide">
