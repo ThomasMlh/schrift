@@ -402,7 +402,7 @@ const UserPage = () => {
                 </TabPanel>
 
                 <TabPanel p={0}>
-                  <UserAlbum bbsId={user.bbs_id ?? undefined} canEdit={canEditAlbum} />
+                  <UserAlbum key={user.bbs_id} bbsId={user.bbs_id ?? undefined} canEdit={canEditAlbum} />
                 </TabPanel>
               </TabPanels>
             </Tabs>
@@ -428,7 +428,7 @@ const UserPage = () => {
               </Card>
             </Center>
             {/* Without scores there are no tabs: the album stays available below the notice */}
-            <UserAlbum bbsId={user.bbs_id ?? undefined} canEdit={canEditAlbum} />
+            <UserAlbum key={user.bbs_id} bbsId={user.bbs_id ?? undefined} canEdit={canEditAlbum} />
           </VStack>
         )}
       </Container>

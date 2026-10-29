@@ -11,7 +11,7 @@ import ActivityDetailModal from "./ActivityDetailModal";
 import { BoldMarkdownText } from "./ui/BoldMarkdownText";
 import { useActivity, useGuilds } from "@/hooks/useAPI";
 import { useAuth } from "@/providers/AuthProvider";
-import { NOTIFICATION_TYPES, NOTIFICATION_TYPE_LABELS, formatActivityEntry } from "@/utils/notificationTypes";
+import { ACTIVITY_TYPES, ACTIVITY_TYPE_LABELS, formatActivityEntry } from "@/utils/notificationTypes";
 
 const ActivityLogSection: React.FC = () => {
     const { isAdmin } = useAuth();
@@ -46,8 +46,8 @@ const ActivityLogSection: React.FC = () => {
                     value={typeFilter}
                     onChange={(e) => { setTypeFilter(e.target.value); setCurrentPage(1); }}
                 >
-                    {NOTIFICATION_TYPES.map((type) => (
-                        <option key={type} value={type}>{NOTIFICATION_TYPE_LABELS[type]}</option>
+                    {ACTIVITY_TYPES.map((type) => (
+                        <option key={type} value={type}>{ACTIVITY_TYPE_LABELS[type]}</option>
                     ))}
                 </Select>
                 {isAdmin && (
@@ -100,7 +100,7 @@ const ActivityLogSection: React.FC = () => {
                                     </Td>
                                     <Td>
                                         <Badge fontSize="xs">
-                                            {NOTIFICATION_TYPE_LABELS[entry.type as keyof typeof NOTIFICATION_TYPE_LABELS] || entry.type}
+                                            {ACTIVITY_TYPE_LABELS[entry.type as keyof typeof ACTIVITY_TYPE_LABELS] || entry.type}
                                         </Badge>
                                     </Td>
                                     <Td>
