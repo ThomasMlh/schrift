@@ -471,7 +471,10 @@
       "labelSummons": "Summons",
       "traitsDestruction": "Elimination bonus",
       "afterEliminations": "{{count}} KOs: {{text}}",
-      "headingAttacks": "Attacks"
+      "headingAttacks": "Attacks",
+      "copyJson": "Copy for the JSON",
+      "jsonCopied": "Fields copied: paste them into database.json",
+      "jsonCopyFailed": "Could not copy to the clipboard"
     },
     "raffle": {
       "noGuild": "No guild takes part in the raffle yet.",

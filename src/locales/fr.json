@@ -471,7 +471,10 @@
       "labelSummons": "Invocations",
       "traitsDestruction": "Bonus d'élimination",
       "afterEliminations": "{{count}} élim. : {{text}}",
-      "headingAttacks": "Attaques"
+      "headingAttacks": "Attaques",
+      "copyJson": "Copier pour le JSON",
+      "jsonCopied": "Champs copiés : colle-les dans database.json",
+      "jsonCopyFailed": "Impossible de copier dans le presse-papiers"
     },
     "raffle": {
       "noGuild": "Aucune guilde ne participe encore à la tombola.",

@@ -40,6 +40,8 @@ import { CharacterGameTraits } from "@/components/character/CharacterGameTraits"
 import { CharacterAttacks } from "@/components/character/CharacterAttacks";
 import { CharacterVisuals } from "@/components/character/CharacterVisuals";
 import { CharacterBuilds } from "@/components/character/CharacterBuilds";
+import { CharacterJsonCopyButton } from "@/components/character/CharacterJsonCopyButton";
+import { useAuth } from "@/providers/AuthProvider";
 import { characterImageUrl, REBIRTH_STAR_URL } from "@/utils/characterImages";
 
 const CharacterDetailPage = () => {
@@ -47,6 +49,7 @@ const CharacterDetailPage = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { t } = useTranslation();
+  const { isAdmin } = useAuth();
 
   const { character, isLoading, error: fetchError } = useCharacter(id);
   const { builds: characterBuilds, isLoading: buildsLoading } = useBuilds({
@@ -311,16 +314,19 @@ const CharacterDetailPage = () => {
                   </Flex>
                 </VStack>
               </Flex>
-              <Button
-                as={RouterLink}
-                to={`/comparateur?type=characters&characters=${character._id}`}
-                size="sm"
-                variant="outline"
-                leftIcon={<Icon as={FiBarChart2} />}
-                flexShrink={0}
-              >
-                {t("pages.characterDetail.compare")}
-              </Button>
+              <HStack spacing={2} flexShrink={0}>
+                {isAdmin && <CharacterJsonCopyButton character={character} />}
+                <Button
+                  as={RouterLink}
+                  to={`/comparateur?type=characters&characters=${character._id}`}
+                  size="sm"
+                  variant="outline"
+                  leftIcon={<Icon as={FiBarChart2} />}
+                  flexShrink={0}
+                >
+                  {t("pages.characterDetail.compare")}
+                </Button>
+              </HStack>
             </Flex>
           </Box>
 
