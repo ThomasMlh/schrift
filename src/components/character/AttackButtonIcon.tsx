@@ -1,6 +1,6 @@
 import { Box, Image } from "@chakra-ui/react";
 import type { AttackButton, IAttackStep } from "@/interfaces";
-import { attackBase, attackIconUrl, attackStatusBadges, attackSubBadge, attackWeaponIcon } from "@/utils/attackIcons";
+import { attackBase, attackIconUrl, attackStatusBadges, attackSubBadge, attackWeaponBox, attackWeaponIcon } from "@/utils/attackIcons";
 
 // In-game attack button rebuilt from its pieces: background, weapon icon and status badge
 export const AttackButtonIcon = ({ button, steps, size = "56px" }: {
@@ -11,20 +11,19 @@ export const AttackButtonIcon = ({ button, steps, size = "56px" }: {
   const badges = attackStatusBadges(steps).slice(0, 2);
   const weapon = attackWeaponIcon(button, steps);
   const subBadge = attackSubBadge(steps);
-  // The normal attack background (bt_fighting) has a wider margin than the others: its icon is smaller,
-  // in the same proportion as in the game (about 2/3 of the button instead of 9/10)
-  const weaponSize = button === "normal" ? 58 : 76;
+  const box = weapon ? attackWeaponBox(weapon) : null;
   return (
     <Box position="relative" boxSize={size} flexShrink={0}>
       <Image src={attackIconUrl(attackBase(button, steps))} alt="" position="absolute" inset={0} boxSize="100%" />
-      {weapon && (
+      {weapon && box && (
         <Image
           src={attackIconUrl(weapon)}
           alt=""
           position="absolute"
-          top={`${(100 - weaponSize) / 2}%`}
-          left={`${(100 - weaponSize) / 2}%`}
-          boxSize={`${weaponSize}%`}
+          top={`${box.top}%`}
+          left={`${box.left}%`}
+          w={`${box.width}%`}
+          h={`${box.height}%`}
           objectFit="contain"
         />
       )}

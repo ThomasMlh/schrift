@@ -41,6 +41,33 @@ const WEAPON_ICONS = new Set([
   "8_heavy3",
   "9_heavy3",
 ]);
+// Normal attack icons are trimmed in the atlas: the game puts them back in a 112x124 frame (offset of the
+// trimmed image, its size), centered on the 168x168 button. Without it the icon sits too low.
+const NORMAL_FRAME = { width: 112, height: 124, button: 168 };
+const NORMAL_ICONS: Record<string, { left: number; top: number; width: number; height: number }> = {
+  "1_normal": { left: 11, top: 0, width: 90, height: 97 },
+  "2_normal": { left: 11, top: 0, width: 90, height: 100 },
+  "3_normal": { left: 10, top: 0, width: 92, height: 110 },
+  "4_normal": { left: 11, top: 0, width: 90, height: 107 },
+  "5_normal": { left: 11, top: 0, width: 90, height: 102 },
+};
+
+// Position of a weapon icon on its button, in percent of the button
+export const attackWeaponBox = (icon: string) => {
+  const normal = NORMAL_ICONS[icon];
+  if (!normal) return { top: 12, left: 12, width: 76, height: 76 };
+  const { width: frameWidth, height: frameHeight, button } = NORMAL_FRAME;
+  const frameLeft = (button - frameWidth) / 2;
+  const frameTop = (button - frameHeight) / 2;
+  const percent = (value: number) => (value / button) * 100;
+  return {
+    left: percent(frameLeft + normal.left),
+    top: percent(frameTop + normal.top),
+    width: percent(normal.width),
+    height: percent(normal.height),
+  };
+};
+
 const STATUS_CODES = new Set(["brn", "cnf", "ero", "frz", "inj", "par", "psn", "spd", "tko", "wek"]);
 
 const isHeavy = (button: AttackButton) => button.startsWith("heavy");
