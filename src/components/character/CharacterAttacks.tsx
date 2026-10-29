@@ -1,6 +1,6 @@
 import { Badge, Box, HStack, SimpleGrid, Table, Tbody, Td, Text, Th, Thead, Tr, Wrap, WrapItem } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
-import type { AttackButton, AttackShape, IAttackStep, IGameAttacks } from "@/interfaces";
+import type { AttackButton, AttackShape, IAttackStep, IGameAttacks, IStatusBonus } from "@/interfaces";
 import { gameText } from "@/utils/gameText";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { AttackArea } from "./AttackArea";
@@ -30,17 +30,17 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
     }
   };
 
-  // Each status with its own chance (combined statuses have one each), from the hit most likely to inflict them
-  const statusLine = (steps: IAttackStep[]) => {
-    const step = steps.filter((s) => s.statuses.length > 0).sort((a, b) => (b.status_probability ?? 0) - (a.status_probability ?? 0))[0];
-    if (!step) return null;
-    return step.statuses
-      .map((status) => {
-        const name = `${gameText(status.name, i18n.language)}${status.plus ? " +" : ""}`;
-        return status.probability ? t("components.characterAttacks.status", { name, probability: status.probability, duration: seconds(status.duration) }) : name;
-      })
-      .join(" · ");
-  };
+  // Statuses of the hit most likely to inflict them; their chance and duration are in the tiles
+  const statusStep = (steps: IAttackStep[]) => steps
+    .filter((s) => s.statuses.length > 0)
+    .sort((a, b) => (b.status_probability ?? 0) - (a.status_probability ?? 0))[0] ?? null;
+
+  const statusLine = (step: IAttackStep | null) => step?.statuses
+    .map((status) => `${gameText(status.name, i18n.language)}${status.plus ? " +" : ""}`)
+    .join(" · ") ?? null;
+
+  const conditionLabel = ({ belong, affinity }: IStatusBonus["conditional"][number]) => [belong?.join(", "), affinity].filter(Boolean).join(" · ")
+    || t("components.characterAttacks.anyEnemy");
 
   const effects = (steps: IAttackStep[]) => {
     const list: string[] = [];
@@ -58,12 +58,16 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
       <Text fontSize="xs" color="text.muted" mb={2}>{t("components.characterAttacks.waveLegend")}</Text>
       <SimpleGrid columns={{ base: 1, sm: 2, xl: 3 }} spacing={4}>
         {buttons.map((button) => {
-          const { cooldown, hits, steps, range_bonus: rangeBonus, hit_bonus: hitBonus } = attacks[button]!;
+          const { cooldown, hits, steps, range_bonus: rangeBonus, hit_bonus: hitBonus, status_bonus: statusBonus } = attacks[button]!;
           const traps = steps.map((s) => s.trap).filter((trap): trap is NonNullable<IAttackStep["trap"]> => Boolean(trap));
           const color = steps.find((s) => s.color)?.color ?? null;
           const shapes = steps.map((s) => s.shape).filter((s): s is AttackShape => Boolean(s));
           const uniqueShapes = shapes.filter((shape, i) => shapes.findIndex((other) => JSON.stringify(other) === JSON.stringify(shape)) === i);
-          const status = statusLine(steps);
+          const mainStatus = statusStep(steps);
+          const status = statusLine(mainStatus);
+          // Chance and duration of the main status with the unit's own abilities
+          const chance = mainStatus?.status_probability ? mainStatus.status_probability + (statusBonus?.probability ?? 0) : null;
+          const duration = mainStatus?.status_duration ? mainStatus.status_duration + (statusBonus?.duration ?? 0) : null;
           return (
             <Box key={button} bg="bg.subtle" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={3}>
               <HStack justify="space-between" mb={2}>
@@ -74,13 +78,27 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
                     {color && <AttackTypeBadge attackType={color} size="10px" />}
                   </Box>
                 </HStack>
-                <Badge variant="subtle" colorScheme="purple" textTransform="none">
-                  {t("components.characterAttacks.cooldown", { value: seconds(cooldown) })}
-                </Badge>
               </HStack>
 
               <AttackArea shapes={uniqueShapes} color={color} />
 
+              <SimpleGrid columns={3} spacing={2} mt={2}>
+                {[
+                  { label: t("components.characterAttacks.cooldownLabel"), value: seconds(cooldown), extra: [] as string[] },
+                  {
+                    label: t("components.characterAttacks.chance"),
+                    value: chance ? `${chance}\u00a0%` : "—",
+                    extra: chance ? (statusBonus?.conditional ?? []).map((c) => t("components.characterAttacks.chanceAgainst", { value: chance + c.value, against: conditionLabel(c) })) : [],
+                  },
+                  { label: t("components.characterAttacks.statusDuration"), value: seconds(duration), extra: [] as string[] },
+                ].map(({ label, value, extra }) => (
+                  <Box key={label} bg="blackAlpha.200" borderRadius="md" px={2} py={1}>
+                    <Text fontSize="2xs" color="text.muted" textTransform="uppercase" noOfLines={1}>{label}</Text>
+                    <Text fontSize="sm" fontWeight="semibold" color="text.strong">{value}</Text>
+                    {extra.map((line) => <Text key={line} fontSize="2xs" color="text.secondary">{line}</Text>)}
+                  </Box>
+                ))}
+              </SimpleGrid>
               {status && <Text fontSize="xs" color="text.secondary" mt={2}>{status}</Text>}
               {traps.map((trap, i) => (
                 <Box key={i} mt={2} px={3} py={2} borderRadius="md" borderWidth="1px" borderColor="blue.400" bg="blackAlpha.200">
@@ -135,7 +153,17 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
                 <Tbody>
                   <Tr>
                     <Td px={1} fontSize="xs" color="text.muted">{t("components.characterAttacks.power")}</Td>
-                    {steps.map((step, i) => <Td key={i} px={1} textAlign="center" fontWeight="semibold">{step.power ?? "—"}</Td>)}
+                    {steps.map((step, i) => (
+                      <Td key={i} px={1} textAlign="center" fontWeight="semibold">
+                        {step.power ?? "—"}
+                        {/* The table gives the total of a vortex (magnification_sum): spread over its blasts */}
+                        {step.power && (step.trap?.hits ?? 0) > 1 && (
+                          <Text fontSize="2xs" fontWeight="normal" color="text.muted">
+                            {t("components.characterAttacks.perHit", { value: Math.round((step.power / step.trap!.hits!) * 10) / 10 })}
+                          </Text>
+                        )}
+                      </Td>
+                    ))}
                   </Tr>
                   <Tr>
                     <Td px={1} fontSize="xs" color="text.muted">{t("components.characterAttacks.hits")}</Td>

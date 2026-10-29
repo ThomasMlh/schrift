@@ -1169,7 +1169,6 @@
         "ex": "Special attack",
         "extra_action": "EX Move"
       },
-      "cooldown": "Cooldown {{value}}",
       "power": "Power",
       "hits": "Hits",
       "area": "Area",
@@ -1178,7 +1177,6 @@
       "rect": "Rect. {{width}}×{{length}}",
       "ahead": "Circle {{radius}} at {{distance}}",
       "projectile": "Projectile {{range}}",
-      "status": "{{name}} {{probability}}% ({{duration}})",
       "knockdown": "Knockdown",
       "heal": "Heal {{value}}%",
       "buff": "Buff",
@@ -1194,7 +1192,13 @@
       "waveLegend": "White dots: a guild quest wave (12 enemies in a circle and 1 in the middle), orange dot: boss. Same scale as the areas. Drag the blue dot of a drawing to move the character in it.",
       "recenter": "Recenter",
       "trapDuration": "Duration",
-      "trapKind": "Type"
+      "trapKind": "Type",
+      "cooldownLabel": "Cooldown",
+      "chance": "Status chance",
+      "statusDuration": "Status duration",
+      "chanceAgainst": "{{value}}% against {{against}}",
+      "anyEnemy": "all",
+      "perHit": "{{value}} / hit"
     },
     "accessorySearchSelect": {
       "accessory": "Accessory",

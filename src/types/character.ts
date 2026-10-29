@@ -138,6 +138,13 @@ export interface IAttackStep {
   trap: { hits: number | null; interval: number | null; duration: number | null; homing: boolean; delay: number | null } | null;
 }
 
+export interface IStatusBonus {
+  duration: number;
+  probability: number;
+  // belong: enemy categories (null = every one), affinity: enemy affinity (null = any)
+  conditional: { value: number; belong: string[] | null; affinity: string | null }[];
+}
+
 // Attack buttons of a unit, distances in game units and durations in milliseconds
 export type AttackButton = "normal" | "heavy1" | "heavy2" | "heavy3" | "ex" | "extra_action";
 // hits: total of a strong attack whose steps share one animation, when it cannot be shared out.
@@ -148,6 +155,8 @@ export type IGameAttacks = Partial<Record<AttackButton, {
   hits?: number | null;
   range_bonus?: number | null;
   hit_bonus?: number | null;
+  // Status abilities of the unit: extra duration (ms) and chance (percent), and chances against some enemies only
+  status_bonus?: IStatusBonus | null;
   steps: IAttackStep[];
 }>>;
 

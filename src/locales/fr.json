@@ -1169,7 +1169,6 @@
         "ex": "Attaque spéciale",
         "extra_action": "EX Move"
       },
-      "cooldown": "Recharge {{value}}",
       "power": "Puissance",
       "hits": "Coups",
       "area": "Zone",
@@ -1178,7 +1177,6 @@
       "rect": "Rect. {{width}}×{{length}}",
       "ahead": "Cercle {{radius}} à {{distance}}",
       "projectile": "Projectile {{range}}",
-      "status": "{{name}} {{probability}} % ({{duration}})",
       "knockdown": "Renverse",
       "heal": "Soins {{value}} %",
       "buff": "Renforcement",
@@ -1194,7 +1192,13 @@
       "waveLegend": "Points blancs : vague de quête de guilde (12 ennemis en cercle et 1 au centre), point orange : boss. Même échelle que les zones. Déplace le point bleu d'un dessin pour y placer le perso.",
       "recenter": "Recentrer",
       "trapDuration": "Durée",
-      "trapKind": "Type"
+      "trapKind": "Type",
+      "cooldownLabel": "Recharge",
+      "chance": "Taux d'altération",
+      "statusDuration": "Durée d'altération",
+      "chanceAgainst": "{{value}} % contre {{against}}",
+      "anyEnemy": "tous",
+      "perHit": "{{value}} / coup"
     },
     "accessorySearchSelect": {
       "accessory": "Accessoire",
