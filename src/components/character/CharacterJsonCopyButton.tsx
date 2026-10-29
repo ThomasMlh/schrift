@@ -45,6 +45,8 @@ const jsonLines = async (character: ICharacter) => {
     ...quotes,
     ["Base ID", character._id],
     ["Game ID", character.game_id ?? null],
+    // Old summons are filed under group 0 in the game tables, not a summon id
+    ...(firstSummon?.gacha_group_id ? [["Game Banner ID", firstSummon.gacha_group_id] as [string, number]] : []),
   ];
   // Same indentation as database.json, a comma after every field but the last one of the object
   return fields.map(([field, value], index) => `        ${JSON.stringify(field)}: ${JSON.stringify(value)}${index < fields.length - 1 ? "," : ""}`).join("\n");
