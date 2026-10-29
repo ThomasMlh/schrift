@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import type { AttackButton, AttackShape, IAttackStep, IGameAttacks } from "@/interfaces";
 import { gameText } from "@/utils/gameText";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
-import { shapeReach } from "@/utils/attackShape";
 import { AttackArea } from "./AttackArea";
 import { AttackButtonIcon } from "./AttackButtonIcon";
 
@@ -16,8 +15,6 @@ const seconds = (ms: number | null, decimals = 1) => (ms ? `${Math.round(ms / 10
 export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
   const { t, i18n } = useTranslation();
   const buttons = BUTTONS.filter((button) => attacks[button]);
-  // Same scale for every attack of the character
-  const reach = Math.max(...buttons.flatMap((button) => attacks[button]!.steps.map((step) => shapeReach(step.shape))), 0);
 
   const shapeLabel = (shape: AttackShape | null) => {
     if (!shape) return "—";
@@ -82,19 +79,27 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
                 </Badge>
               </HStack>
 
-              <AttackArea shapes={uniqueShapes} reach={reach} color={color} />
+              <AttackArea shapes={uniqueShapes} color={color} />
 
               {status && <Text fontSize="xs" color="text.secondary" mt={2}>{status}</Text>}
               {traps.map((trap, i) => (
-                <Text key={i} fontSize="xs" color="text.secondary" mt={1}>
-                  {trap.hits
-                    ? t("components.characterAttacks.trapLine", {
-                      hits: trap.hits,
-                      duration: seconds(trap.duration, 2),
-                      kind: t(`components.characterAttacks.${trap.homing ? "trapHoming" : "trapStatic"}`),
-                    })
-                    : t("components.characterAttacks.trap")}
-                </Text>
+                <Box key={i} mt={2} px={3} py={2} borderRadius="md" borderWidth="1px" borderColor="blue.400" bg="blackAlpha.200">
+                  <Text fontSize="2xs" fontWeight="bold" color="blue.300" textTransform="uppercase" letterSpacing="wider" mb={1}>
+                    ◉ {t("components.characterAttacks.trap")}
+                  </Text>
+                  <SimpleGrid columns={3} spacing={2}>
+                    {[
+                      [t("components.characterAttacks.hits"), trap.hits ?? "—"],
+                      [t("components.characterAttacks.trapDuration"), seconds(trap.duration, 2)],
+                      [t("components.characterAttacks.trapKind"), t(`components.characterAttacks.${trap.homing ? "trapHoming" : "trapStatic"}`)],
+                    ].map(([label, value]) => (
+                      <Box key={String(label)}>
+                        <Text fontSize="2xs" color="text.muted" textTransform="uppercase">{label}</Text>
+                        <Text fontSize="sm" fontWeight="semibold" color="text.strong">{value}</Text>
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+                </Box>
               ))}
               {(rangeBonus || hitBonus) && (
                 <Wrap spacing={1} mt={2}>

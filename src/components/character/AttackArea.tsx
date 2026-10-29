@@ -2,33 +2,29 @@ import { useRef, useState } from "react";
 import { Box, Button } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import type { AttackShape } from "@/interfaces";
-import { AREA_ORIGIN, type AreaPosition } from "@/utils/attackShape";
+import type { AreaPosition } from "@/utils/attackShape";
 
 const GRID_STEP = 250;
 
+// Fixed frame centered on the reference wave, in game units: every drawing of every character has the
+// same scale, so areas compare between characters; a bigger area overflows the frame
+const HALF = 1200;
+const DOT_RADIUS = 60;
+
 // Reference wave of a guild quest (m_guild_quest_block_enemy_spawnpoint, wave 1 of block 41314343):
 // 12 enemies on a circle of radius 650, one at its center, and the boss halfway between the center and
-// the far side. The character stands on the near edge of the circle, facing it, as when it reaches the wave.
-const WAVE = { count: 12, radius: 650, center: -550, boss: -875 };
-const ENEMY_RADIUS = 45;
+// the far side. The character starts on the near edge of the circle, facing it, as when it reaches the wave.
+const WAVE = { count: 12, radius: 650, boss: -325 };
+const START: AreaPosition = { x: 0, y: 550 };
 
 const WaveMarks = () => (
   <g>
     {Array.from({ length: WAVE.count }, (_, i) => {
       const angle = (2 * Math.PI * i) / WAVE.count;
-      return (
-        <circle
-          key={i}
-          cx={WAVE.radius * Math.sin(angle)}
-          cy={WAVE.center - WAVE.radius * Math.cos(angle)}
-          r={ENEMY_RADIUS}
-          fill="white"
-          fillOpacity={0.85}
-        />
-      );
+      return <circle key={i} cx={WAVE.radius * Math.sin(angle)} cy={-WAVE.radius * Math.cos(angle)} r={DOT_RADIUS} fill="white" fillOpacity={0.85} />;
     })}
-    <circle cx={0} cy={WAVE.center} r={ENEMY_RADIUS} fill="white" fillOpacity={0.85} />
-    <circle cx={0} cy={WAVE.boss} r={ENEMY_RADIUS * 1.3} fill="#ed8936" />
+    <circle cx={0} cy={0} r={DOT_RADIUS} fill="white" fillOpacity={0.85} />
+    <circle cx={0} cy={WAVE.boss} r={DOT_RADIUS} fill="#ed8936" />
   </g>
 );
 
@@ -72,23 +68,16 @@ const ShapeMark = ({ shape, fill, stroke }: { shape: AttackShape; fill: string; 
   }
 };
 
-// Widest frame drawn: a bigger area (a screen-wide special) fills it instead of shrinking the others
-const MAX_HALF = 1500;
-// Smallest frame: the reference wave always fits
-const MIN_HALF = 1300;
-
-// Area hit by an attack seen from above, the character facing up, at the center unless moved. Every
-// attack of a character uses the same scale (reach), so their sizes compare. Dragging the character
-// moves the areas of this drawing only against the reference wave.
-export const AttackArea = ({ shapes, reach, color }: { shapes: AttackShape[]; reach: number; color: "R" | "B" | null }) => {
+// Area hit by an attack seen from above, the character facing up. Dragging the character moves the
+// areas of this drawing only against the reference wave.
+export const AttackArea = ({ shapes, color }: { shapes: AttackShape[]; color: "R" | "B" | null }) => {
   const { t } = useTranslation();
   const svgRef = useRef<SVGSVGElement>(null);
-  const [position, setPosition] = useState<AreaPosition>(AREA_ORIGIN);
-  const moved = position.x !== 0 || position.y !== 0;
+  const [position, setPosition] = useState<AreaPosition>(START);
   const [isDragging, setIsDragging] = useState(false);
-  const half = Math.min(Math.max(reach * 1.1, MIN_HALF), MAX_HALF);
+  const moved = position.x !== START.x || position.y !== START.y;
   const lines = [];
-  for (let v = GRID_STEP; v < half; v += GRID_STEP) lines.push(v, -v);
+  for (let v = GRID_STEP; v < HALF; v += GRID_STEP) lines.push(v, -v);
   const tone = color === "B" ? "66, 153, 225" : "229, 62, 62";
 
   // Pointer position in game units, kept inside the frame
@@ -96,7 +85,7 @@ export const AttackArea = ({ shapes, reach, color }: { shapes: AttackShape[]; re
     const matrix = svgRef.current?.getScreenCTM();
     if (!matrix) return null;
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
-    const limit = half * 0.95;
+    const limit = HALF - DOT_RADIUS;
     const clamp = (value: number) => Math.round(Math.max(-limit, Math.min(limit, value)));
     return { x: clamp(point.x), y: clamp(point.y) };
   };
@@ -123,7 +112,7 @@ export const AttackArea = ({ shapes, reach, color }: { shapes: AttackShape[]; re
     <Box position="relative" bg="gray.900" borderRadius="lg" overflow="hidden" borderWidth="1px" borderColor="whiteAlpha.200">
       <svg
         ref={svgRef}
-        viewBox={`${-half} ${-half} ${half * 2} ${half * 2}`}
+        viewBox={`${-HALF} ${-HALF} ${HALF * 2} ${HALF * 2}`}
         width="100%"
         style={{ display: "block", aspectRatio: "1" }}
         role="img"
@@ -133,8 +122,8 @@ export const AttackArea = ({ shapes, reach, color }: { shapes: AttackShape[]; re
       >
         {[0, ...lines].map((v) => (
           <g key={v} stroke="rgba(255,255,255,0.08)" strokeWidth={6}>
-            <line x1={v} y1={-half} x2={v} y2={half} />
-            <line x1={-half} y1={v} x2={half} y2={v} />
+            <line x1={v} y1={-HALF} x2={v} y2={HALF} />
+            <line x1={-HALF} y1={v} x2={HALF} y2={v} />
           </g>
         ))}
         <WaveMarks />
@@ -143,18 +132,15 @@ export const AttackArea = ({ shapes, reach, color }: { shapes: AttackShape[]; re
             <ShapeMark key={index} shape={shape} fill={`rgba(${tone}, ${shapes.length > 1 ? 0.22 : 0.35})`} stroke={`rgba(${tone}, 0.9)`} />
           ))}
           {/* Only the character starts a drag, so swiping over the area still scrolls the page on phones */}
-          <g
-            onPointerDown={startDrag}
-            style={{ cursor: isDragging ? "grabbing" : "grab", touchAction: "none" }}
-          >
-            <circle cx={0} cy={0} r={half * 0.1} fill="transparent" />
-            <circle cx={0} cy={0} r={half * 0.045} fill="#63b3ed" stroke="white" strokeWidth={10} />
-            <path d={`M 0 ${-half * 0.12} l ${-half * 0.035} ${half * 0.05} h ${half * 0.07} Z`} fill="white" />
+          <g onPointerDown={startDrag} style={{ cursor: isDragging ? "grabbing" : "grab", touchAction: "none" }}>
+            <circle cx={0} cy={0} r={DOT_RADIUS * 2.5} fill="transparent" />
+            <circle cx={0} cy={0} r={DOT_RADIUS} fill="#63b3ed" stroke="white" strokeWidth={12} />
+            <path d={`M 0 ${-DOT_RADIUS * 3} l ${-DOT_RADIUS * 0.8} ${DOT_RADIUS * 1.1} h ${DOT_RADIUS * 1.6} Z`} fill="white" />
           </g>
         </g>
       </svg>
       {moved && (
-        <Button size="xs" position="absolute" top={2} right={2} variant="solid" opacity={0.85} onClick={() => setPosition(AREA_ORIGIN)}>
+        <Button size="xs" position="absolute" top={2} right={2} variant="solid" opacity={0.85} onClick={() => setPosition(START)}>
           {t("components.characterAttacks.recenter")}
         </Button>
       )}

@@ -1186,14 +1186,15 @@
       "revival": "Revit",
       "projectileSized": "Proj. {{width}}×{{length}} · {{range}}",
       "trap": "Vortex",
-      "trapLine": "Vortex : {{hits}} coups en {{duration}}, {{kind}}",
       "trapStatic": "fixe",
       "trapHoming": "suit l'ennemi",
       "rangeBonus": "Zone +{{value}} % (incluse)",
       "hitBonus_one": "+{{count}} coup (arbre d'âme)",
       "hitBonus_other": "+{{count}} coups (arbre d'âme)",
       "waveLegend": "Points blancs : vague de quête de guilde (12 ennemis en cercle et 1 au centre), point orange : boss. Même échelle que les zones. Déplace le point bleu d'un dessin pour y placer le perso.",
-      "recenter": "Recentrer"
+      "recenter": "Recentrer",
+      "trapDuration": "Durée",
+      "trapKind": "Type"
     },
     "accessorySearchSelect": {
       "accessory": "Accessoire",
