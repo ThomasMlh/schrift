@@ -118,7 +118,8 @@ export interface IAttackStep {
   variant: number;
   power: number | null;
   weapon: number | null;
-  hits: number;
+  // Unknown when the animations of the model were not extracted
+  hits: number | null;
   knockdown: boolean;
   // Advanced strong attack (spiked button) and double strike
   advanced?: boolean;
@@ -133,12 +134,31 @@ export interface IAttackStep {
   buff: { target: number | null; atk: number | null; def: number | null; crt: number | null; sp: number | null; duration: number | null } | null;
   barrier: boolean;
   revival: boolean;
-  trap: boolean;
+  // Area left on the ground that hits several times (vortex...): blasts, ms between them, total ms
+  trap: { hits: number | null; interval: number | null; duration: number | null; homing: boolean; delay: number | null } | null;
+}
+
+export interface IStatusBonus {
+  duration: number;
+  probability: number;
+  // belong: enemy categories (null = every one), affinity: enemy affinity (null = any)
+  conditional: { value: number; belong: string[] | null; affinity: string | null }[];
 }
 
 // Attack buttons of a unit, distances in game units and durations in milliseconds
 export type AttackButton = "normal" | "heavy1" | "heavy2" | "heavy3" | "ex" | "extra_action";
-export type IGameAttacks = Partial<Record<AttackButton, { cooldown: number | null; steps: IAttackStep[] }>>;
+// hits: total of a strong attack whose steps share one animation, when it cannot be shared out.
+// range_bonus: percent the unit's abilities widen the areas (already applied to the shapes);
+// hit_bonus: extra hits given by its soul tree
+export type IGameAttacks = Partial<Record<AttackButton, {
+  cooldown: number | null;
+  hits?: number | null;
+  range_bonus?: number | null;
+  hit_bonus?: number | null;
+  // Status abilities of the unit: extra duration (ms) and chance (percent), and chances against some enemies only
+  status_bonus?: IStatusBonus | null;
+  steps: IAttackStep[];
+}>>;
 
 export interface IGameUnit {
   game_id: number;
@@ -181,6 +201,8 @@ export interface IGameSyncResult {
     newSkills?: number;
     // Bonus skills entered on the site, replaced by the game bonus abilities
     legacySkills?: number;
+    // Models whose animations gave the hits of melee attacks (attack_hits.csv)
+    attackHitModels?: number;
   };
   fieldCounts: Record<string, number>;
   preview: {
