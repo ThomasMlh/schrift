@@ -4,9 +4,9 @@ import type { AttackShape } from "@/interfaces";
 const GRID_STEP = 250;
 
 // Reference wave of a guild quest (m_guild_quest_block_enemy_spawnpoint, wave 1 of block 41314343):
-// 12 enemies on a circle of radius 650 and an elite 300 beyond its center. The character stands on the
-// near edge of the circle, facing it, as when it reaches the wave.
-const WAVE = { count: 12, radius: 650, center: -550, elite: -850 };
+// 12 enemies on a circle of radius 650, one at its center, and the boss halfway between the center and
+// the far side. The character stands on the near edge of the circle, facing it, as when it reaches the wave.
+const WAVE = { count: 12, radius: 650, center: -550, boss: -875 };
 const ENEMY_RADIUS = 45;
 
 const WaveMarks = () => (
@@ -24,7 +24,8 @@ const WaveMarks = () => (
         />
       );
     })}
-    <circle cx={0} cy={WAVE.elite} r={ENEMY_RADIUS * 1.3} fill="#ed8936" />
+    <circle cx={0} cy={WAVE.center} r={ENEMY_RADIUS} fill="white" fillOpacity={0.85} />
+    <circle cx={0} cy={WAVE.boss} r={ENEMY_RADIUS * 1.3} fill="#ed8936" />
   </g>
 );
 

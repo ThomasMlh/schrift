@@ -1192,7 +1192,7 @@
       "rangeBonus": "Area +{{value}}% (included)",
       "hitBonus_one": "+{{count}} hit (soul tree)",
       "hitBonus_other": "+{{count}} hits (soul tree)",
-      "waveLegend": "White dots: a guild quest wave (12 enemies in a circle), orange dot: elite. Same scale as the areas."
+      "waveLegend": "White dots: a guild quest wave (12 enemies in a circle and 1 in the middle), orange dot: boss. Same scale as the areas."
     },
     "accessorySearchSelect": {
       "accessory": "Accessory",
