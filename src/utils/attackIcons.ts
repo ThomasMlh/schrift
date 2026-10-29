@@ -62,7 +62,8 @@ export const attackBase = (button: AttackButton, steps: IAttackStep[]) => {
 // character (6) or the party (7), heals show drops (5), like the game.
 export const attackWeaponIcon = (button: AttackButton, steps: IAttackStep[]) => {
   if (button === "extra_action") return "ex_action01";
-  if (button === "ex") return "11_skill1";
+  // A special that revives the party has the revive icon, the others the default one
+  if (button === "ex") return steps.some((s) => s.revival) ? "10_special1" : "11_skill1";
   // Double strike has its own icon
   if (steps.some((s) => s.twice)) return "11_heavy3";
   const buff = steps.find((s) => s.buff)?.buff;
