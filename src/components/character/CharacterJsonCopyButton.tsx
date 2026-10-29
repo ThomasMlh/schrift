@@ -13,23 +13,40 @@ const imageExists = (url: string) => new Promise<boolean>((resolve) => {
   image.src = url;
 });
 
-// Fields of the character in database.json, pointing to the bucket, formatted to paste into the file
+// First URL whose picture loads, null when none does
+const firstExisting = async (urls: string[]) => {
+  for (const url of urls) if (await imageExists(url)) return url;
+  return null;
+};
+
+// Fields of the character in database.json, pointing to the bucket, formatted to paste into the file.
+// The game quote picture is the same in every language: English falls back to it without a subtitled one.
 const jsonLines = async (character: ICharacter) => {
   const characterUrl = (folder: string) => `${bucketUrl}/characters/${folder}/${character._id}.png`;
   const firstSummon = character.banners?.[0];
-  const candidates: [string, string | null][] = [
-    ["Link", characterUrl("thumb")],
-    ["URL Portail", firstSummon ? `${bucketUrl}/banners/gacha_${firstSummon.gacha_group_id}.png` : null],
-    ["URL Artwork", characterUrl("artwork")],
-    ["URL Phrase FR", characterUrl("phrase")],
-    ["URL Phrase EN", characterUrl("phrase-en")],
-    ["URL ATK", characterUrl("attack")],
+  const candidates: [string, string[]][] = [
+    ["Link", [characterUrl("thumb")]],
+    ["URL Portail", firstSummon ? [`${bucketUrl}/banners/gacha_${firstSummon.gacha_group_id}.png`] : []],
+    ["URL Artwork", [characterUrl("artwork")]],
+    ["URL Phrase FR", [characterUrl("phrase")]],
+    ["URL Phrase EN", [characterUrl("phrase-en"), characterUrl("phrase")]],
+    ["URL ATK", [characterUrl("attack")]],
   ];
-  const found = await Promise.all(candidates.map(async ([field, url]) => (url && await imageExists(url) ? [field, url] : null)));
+  const found = await Promise.all(candidates.map(async ([field, urls]) => {
+    const url = await firstExisting(urls);
+    return url ? [field, url] : null;
+  }));
+  const quotes = (["fr", "en"] as const).flatMap((language): [string, string][] => {
+    const text = character.quote?.[language];
+    return text ? [[`Phrase ${language.toUpperCase()}`, text]] : [];
+  });
   const fields: [string, string | number | null][] = [
     ...found.filter((entry): entry is [string, string] => entry !== null),
+    ...quotes,
     ["Base ID", character._id],
     ["Game ID", character.game_id ?? null],
+    // Old summons are filed under group 0 in the game tables, not a summon id
+    ...(firstSummon?.gacha_group_id ? [["Game Banner ID", firstSummon.gacha_group_id] as [string, number]] : []),
   ];
   // Same indentation as database.json, a comma after every field but the last one of the object
   return fields.map(([field, value], index) => `        ${JSON.stringify(field)}: ${JSON.stringify(value)}${index < fields.length - 1 ? "," : ""}`).join("\n");
