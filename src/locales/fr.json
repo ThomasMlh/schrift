@@ -1192,7 +1192,8 @@
       "rangeBonus": "Zone +{{value}} % (incluse)",
       "hitBonus_one": "+{{count}} coup (arbre d'âme)",
       "hitBonus_other": "+{{count}} coups (arbre d'âme)",
-      "waveLegend": "Points blancs : vague de quête de guilde (12 ennemis en cercle et 1 au centre), point orange : boss. Même échelle que les zones."
+      "waveLegend": "Points blancs : vague de quête de guilde (12 ennemis en cercle et 1 au centre), point orange : boss. Même échelle que les zones. Déplace le point bleu pour placer le perso.",
+      "recenter": "Recentrer"
     },
     "accessorySearchSelect": {
       "accessory": "Accessoire",

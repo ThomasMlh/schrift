@@ -1,5 +1,7 @@
+import { useRef, useState } from "react";
 import { Box } from "@chakra-ui/react";
 import type { AttackShape } from "@/interfaces";
+import { AREA_ORIGIN, type AreaPosition } from "@/utils/attackShape";
 
 const GRID_STEP = 250;
 
@@ -74,17 +76,64 @@ const MAX_HALF = 1500;
 // Smallest frame: the reference wave always fits
 const MIN_HALF = 1300;
 
-// Area hit by an attack seen from above, the character at the center facing up. Every attack of a
-// character uses the same scale (reach), so their sizes compare.
-export const AttackArea = ({ shapes, reach, color }: { shapes: AttackShape[]; reach: number; color: "R" | "B" | null }) => {
+// Area hit by an attack seen from above, the character facing up, at the center unless moved. Every
+// attack of a character uses the same scale (reach), so their sizes compare. Dragging the character
+// moves its areas against the reference wave.
+export const AttackArea = ({ shapes, reach, color, position = AREA_ORIGIN, onMove }: {
+  shapes: AttackShape[];
+  reach: number;
+  color: "R" | "B" | null;
+  position?: AreaPosition;
+  onMove?: (position: AreaPosition) => void;
+}) => {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const half = Math.min(Math.max(reach * 1.1, MIN_HALF), MAX_HALF);
   const lines = [];
   for (let v = GRID_STEP; v < half; v += GRID_STEP) lines.push(v, -v);
   const tone = color === "B" ? "66, 153, 225" : "229, 62, 62";
 
+  // Pointer position in game units, kept inside the frame
+  const pointerPosition = (event: React.PointerEvent) => {
+    const matrix = svgRef.current?.getScreenCTM();
+    if (!matrix) return null;
+    const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+    const limit = half * 0.95;
+    const clamp = (value: number) => Math.round(Math.max(-limit, Math.min(limit, value)));
+    return { x: clamp(point.x), y: clamp(point.y) };
+  };
+
+  const startDrag = (event: React.PointerEvent<SVGGElement>) => {
+    if (!onMove) return;
+    event.preventDefault();
+    svgRef.current?.setPointerCapture(event.pointerId);
+    setIsDragging(true);
+  };
+
+  const drag = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (!isDragging || !onMove) return;
+    const next = pointerPosition(event);
+    if (next) onMove(next);
+  };
+
+  const stopDrag = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (!isDragging) return;
+    svgRef.current?.releasePointerCapture(event.pointerId);
+    setIsDragging(false);
+  };
+
   return (
     <Box bg="gray.900" borderRadius="lg" overflow="hidden" borderWidth="1px" borderColor="whiteAlpha.200">
-      <svg viewBox={`${-half} ${-half} ${half * 2} ${half * 2}`} width="100%" style={{ display: "block", aspectRatio: "1" }} role="img">
+      <svg
+        ref={svgRef}
+        viewBox={`${-half} ${-half} ${half * 2} ${half * 2}`}
+        width="100%"
+        style={{ display: "block", aspectRatio: "1" }}
+        role="img"
+        onPointerMove={drag}
+        onPointerUp={stopDrag}
+        onPointerCancel={stopDrag}
+      >
         {[0, ...lines].map((v) => (
           <g key={v} stroke="rgba(255,255,255,0.08)" strokeWidth={6}>
             <line x1={v} y1={-half} x2={v} y2={half} />
@@ -92,11 +141,20 @@ export const AttackArea = ({ shapes, reach, color }: { shapes: AttackShape[]; re
           </g>
         ))}
         <WaveMarks />
-        {shapes.map((shape, index) => (
-          <ShapeMark key={index} shape={shape} fill={`rgba(${tone}, ${shapes.length > 1 ? 0.22 : 0.35})`} stroke={`rgba(${tone}, 0.9)`} />
-        ))}
-        <circle cx={0} cy={0} r={half * 0.045} fill="#63b3ed" stroke="white" strokeWidth={10} />
-        <path d={`M 0 ${-half * 0.12} l ${-half * 0.035} ${half * 0.05} h ${half * 0.07} Z`} fill="white" />
+        <g transform={`translate(${position.x} ${position.y})`}>
+          {shapes.map((shape, index) => (
+            <ShapeMark key={index} shape={shape} fill={`rgba(${tone}, ${shapes.length > 1 ? 0.22 : 0.35})`} stroke={`rgba(${tone}, 0.9)`} />
+          ))}
+          {/* Only the character starts a drag, so swiping over the area still scrolls the page on phones */}
+          <g
+            onPointerDown={startDrag}
+            style={{ cursor: onMove ? (isDragging ? "grabbing" : "grab") : undefined, touchAction: onMove ? "none" : undefined }}
+          >
+            <circle cx={0} cy={0} r={half * 0.1} fill="transparent" />
+            <circle cx={0} cy={0} r={half * 0.045} fill="#63b3ed" stroke="white" strokeWidth={10} />
+            <path d={`M 0 ${-half * 0.12} l ${-half * 0.035} ${half * 0.05} h ${half * 0.07} Z`} fill="white" />
+          </g>
+        </g>
       </svg>
     </Box>
   );

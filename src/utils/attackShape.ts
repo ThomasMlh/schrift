@@ -10,3 +10,11 @@ export const shapeReach = (shape: AttackShape | null) => {
     case "projectile": return (shape.range ?? shape.length ?? 0) + (shape.impact_radius ?? 0);
   }
 };
+
+// Position of the character in an attack drawing, in game units from the center
+export interface AreaPosition {
+  x: number;
+  y: number;
+}
+
+export const AREA_ORIGIN: AreaPosition = { x: 0, y: 0 };
