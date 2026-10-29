@@ -1,12 +1,10 @@
-import { Box, Button, ButtonGroup, Flex, Input, InputGroup, InputLeftElement, SimpleGrid } from "@chakra-ui/react";
-import { FiSearch } from "react-icons/fi";
+import { useState } from "react";
+import { Box, Button, ButtonGroup, Flex, Icon, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
+import { FiFilter, FiSearch } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
-import { AffinityFilter } from "@/components/ui/AffinityFilter";
-import { CategoryFilter } from "@/components/ui/CategoryFilter";
-import { KillerFilter } from "@/components/ui/KillerFilter";
-import { AttackTypeFilter } from "@/components/ui/AttackTypeFilter";
-import { CharactersAffinities, CharactersCategories, CharactersKillers } from "@/utils/chractersData";
-import { EMPTY_ALBUM_FILTERS, hasAlbumFilters, type AlbumFilterValues, type OwnershipFilter } from "@/utils/albumFilters";
+import { useCharacterMeta } from "@/hooks/useAPI";
+import { CharacterFiltersPanel } from "@/components/characters/filters/CharacterFiltersPanel";
+import { countPanelFilters, EMPTY_ALBUM_FILTERS, hasAlbumFilters, type AlbumFilterValues, type OwnershipFilter } from "@/utils/albumFilters";
 
 interface AlbumFiltersProps {
   value: AlbumFilterValues;
@@ -14,10 +12,12 @@ interface AlbumFiltersProps {
   ownershipLabels: Record<OwnershipFilter, string>;
 }
 
+// Search and ownership, then the same filter panel as the Characters page
 export const AlbumFilters = ({ value, onChange, ownershipLabels }: AlbumFiltersProps) => {
   const { t } = useTranslation();
-  const set = <K extends keyof AlbumFilterValues>(key: K) => (next: AlbumFilterValues[K]) =>
-    onChange({ ...value, [key]: next });
+  const [showFilters, setShowFilters] = useState(false);
+  const { filterGroups } = useCharacterMeta();
+  const panelCount = countPanelFilters(value);
 
   return (
     <Box>
@@ -26,7 +26,7 @@ export const AlbumFilters = ({ value, onChange, ownershipLabels }: AlbumFiltersP
           <InputLeftElement pointerEvents="none"><FiSearch /></InputLeftElement>
           <Input
             value={value.search}
-            onChange={(e) => set("search")(e.target.value)}
+            onChange={(e) => onChange({ ...value, search: e.target.value })}
             placeholder={t("pages.user.albumSearchPlaceholder")}
           />
         </InputGroup>
@@ -36,22 +36,36 @@ export const AlbumFilters = ({ value, onChange, ownershipLabels }: AlbumFiltersP
               key={key}
               colorScheme={value.ownership === key ? "purple" : "gray"}
               variant={value.ownership === key ? "solid" : "outline"}
-              onClick={() => set("ownership")(key)}
+              onClick={() => onChange({ ...value, ownership: key })}
             >
               {ownershipLabels[key]}
             </Button>
           ))}
         </ButtonGroup>
+        <Button
+          onClick={() => setShowFilters((open) => !open)}
+          variant={showFilters ? "solid" : "outline"}
+          colorScheme="orange"
+          flexShrink={0}
+          leftIcon={<Icon as={FiFilter} />}
+          aria-expanded={showFilters}
+        >
+          {showFilters ? t("components.characterFilters.hide") : t("components.characterFilters.toggle")}
+          {panelCount > 0 && ` (${panelCount})`}
+        </Button>
         {hasAlbumFilters(value) && (
           <Button variant="ghost" onClick={() => onChange(EMPTY_ALBUM_FILTERS)}>{t("common.reset")}</Button>
         )}
       </Flex>
-      <SimpleGrid columns={{ base: 2, md: 4 }} spacing={3} mt={3}>
-        <AffinityFilter selectedAffinity={value.affinity} affinities={CharactersAffinities} onAffinityChange={set("affinity")} />
-        <CategoryFilter selectedCategory={value.category} categories={CharactersCategories} onCategoryChange={set("category")} />
-        <KillerFilter selectedKiller={value.killer} killers={CharactersKillers} onKillerChange={set("killer")} />
-        <AttackTypeFilter selectedAttackType={value.attackType} onAttackTypeChange={set("attackType")} />
-      </SimpleGrid>
+      {showFilters && (
+        <Box mt={4}>
+          <CharacterFiltersPanel
+            values={value}
+            onChange={(next) => onChange({ ...value, ...next })}
+            filterGroups={filterGroups}
+          />
+        </Box>
+      )}
     </Box>
   );
 };
