@@ -2,7 +2,8 @@ import {
   Box, Button, ButtonGroup, Flex, Grid, HStack, Popover, PopoverArrow, PopoverBody, PopoverContent,
   PopoverTrigger, Progress, Skeleton, Text, VStack, useToast,
 } from "@chakra-ui/react";
-import { memo, useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { FiEdit2 } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAlbum, useCharacterCatalog } from "@/hooks/useAPI";
@@ -15,7 +16,7 @@ import type { IAlbumCharacter } from "@/interfaces";
 interface UserAlbumProps {
   // bbs account shown on the page (an alt when the URL targets it)
   bbsId?: string;
-  // Account owner or admin
+  // Account owner, admin, or a leader of its guild when admins allow it
   canEdit: boolean;
 }
 
@@ -95,13 +96,31 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
   const toast = useToast();
   const { characters, isLoading: catalogLoading } = useCharacterCatalog();
   const { album, isLoading: albumLoading, mutate } = useAlbum(bbsId);
-  const { setCharacterSpe } = useAlbumMutations();
+  const { saveAlbum } = useAlbumMutations();
   const [filters, setFilters] = useState(EMPTY_ALBUM_FILTERS);
   const [activeId, setActiveId] = useState<string | null>(null);
+  // The album is locked until "Edit" is clicked; changes stay local until they are saved in one request
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState<Record<string, number>>({});
+  const [isSaving, setIsSaving] = useState(false);
   // Deferred so typing in the search stays responsive
   const deferredFilters = useDeferredValue(filters);
 
-  const owned = useMemo(() => album?.characters ?? {}, [album]);
+  const saved = useMemo(() => album?.characters ?? {}, [album]);
+  const owned = useMemo(() => {
+    const next = { ...saved, ...draft };
+    for (const [id, spe] of Object.entries(draft)) if (spe === 0) delete next[id];
+    return next;
+  }, [saved, draft]);
+  const pendingCount = Object.keys(draft).length;
+
+  // Unsaved changes are lost when the page is left: ask first
+  useEffect(() => {
+    if (pendingCount === 0) return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [pendingCount]);
 
   const { ownedCount, maxedCount } = useMemo(() => {
     const speOf = characters.map((c) => owned[c._id] ?? 0);
@@ -116,32 +135,42 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
     [characters, owned, deferredFilters],
   );
 
-  // Latest values read by handleChange without changing its identity (otherwise memo is useless)
-  const latest = useRef({ setCharacterSpe, toast, t });
-  latest.current = { setCharacterSpe, toast, t };
-
   const closeTile = useCallback(() => setActiveId(null), []);
 
-  // Optimistic update: the tile changes immediately. The server response is not re-applied (avoids
-  // a second render); data is only resynced on error.
-  const handleChange = useCallback(async (characterId: string, spe: number) => {
-    if (!bbsId) return;
-    mutate((current) => {
-      if (!current) return current;
-      const next = { ...current.data.characters };
-      if (spe === 0) delete next[characterId];
+  // A change back to the saved value is not a change anymore
+  const handleChange = useCallback((characterId: string, spe: number) => {
+    setDraft((current) => {
+      const next = { ...current };
+      if ((saved[characterId] ?? 0) === spe) delete next[characterId];
       else next[characterId] = spe;
-      return { ...current, data: { ...current.data, characters: next } };
-    }, { revalidate: false });
+      return next;
+    });
+  }, [saved]);
 
-    try {
-      await latest.current.setCharacterSpe(bbsId, characterId, spe);
-    } catch (err) {
-      mutate();
-      const { toast: showToast, t: translate } = latest.current;
-      showToast({ status: "error", title: translate("pages.user.albumSaveError"), description: (err as Error).message, duration: 4000 });
+  const stopEditing = () => {
+    setDraft({});
+    setActiveId(null);
+    setIsEditing(false);
+  };
+
+  const handleSave = async () => {
+    if (!bbsId) return;
+    if (pendingCount === 0) {
+      stopEditing();
+      return;
     }
-  }, [bbsId, mutate]);
+    setIsSaving(true);
+    try {
+      const { data } = await saveAlbum(bbsId, draft);
+      await mutate((current) => (current ? { ...current, data } : current), { revalidate: false });
+      stopEditing();
+      toast({ status: "success", title: t("pages.user.albumSaved", { count: pendingCount }), duration: 3000 });
+    } catch (err) {
+      toast({ status: "error", title: t("pages.user.albumSaveError"), description: (err as Error).message, duration: 4000 });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (catalogLoading || albumLoading) return <Skeleton h="320px" borderRadius="xl" />;
 
@@ -155,7 +184,7 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
           <Box>
             <Text fontSize="md" fontWeight="bold" color="text.strong">{t("pages.user.albumTitle")}</Text>
             <Text fontSize="sm" color="text.muted">
-              {canEdit ? t("pages.user.albumSubtitleEdit") : t("pages.user.albumSubtitle")}
+              {isEditing ? t("pages.user.albumSubtitleEdit") : canEdit ? t("pages.user.albumSubtitleLocked") : t("pages.user.albumSubtitle")}
             </Text>
           </Box>
           <HStack spacing={4}>
@@ -165,6 +194,11 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
             <Text fontSize="sm" color="text.muted">
               {t("pages.user.albumMaxed", { count: maxedCount })}
             </Text>
+            {canEdit && !isEditing && (
+              <Button size="sm" colorScheme="purple" leftIcon={<FiEdit2 />} onClick={() => setIsEditing(true)}>
+                {t("pages.user.albumEdit")}
+              </Button>
+            )}
           </HStack>
         </Flex>
         <Progress value={percent} size="sm" colorScheme="purple" borderRadius="full" />
@@ -189,7 +223,7 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
               key={character._id}
               character={character}
               spe={owned[character._id] ?? 0}
-              canEdit={canEdit}
+              canEdit={canEdit && isEditing}
               isActive={activeId === character._id}
               onOpen={setActiveId}
               onClose={closeTile}
@@ -197,6 +231,35 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
             />
           ))}
         </Grid>
+      )}
+
+      {isEditing && (
+        <Flex
+          position="sticky"
+          bottom={4}
+          zIndex="sticky"
+          align="center"
+          justify="space-between"
+          wrap="wrap"
+          gap={3}
+          bg="bg.card"
+          borderRadius="xl"
+          borderWidth="1px"
+          borderColor="purple.400"
+          boxShadow="lg"
+          px={5}
+          py={3}
+        >
+          <Text fontSize="sm" color="text.muted">
+            {pendingCount > 0 ? t("pages.user.albumPending", { count: pendingCount }) : t("pages.user.albumNoChanges")}
+          </Text>
+          <HStack spacing={2}>
+            <Button size="sm" variant="ghost" onClick={stopEditing} isDisabled={isSaving}>{t("common.cancel")}</Button>
+            <Button size="sm" colorScheme="purple" onClick={handleSave} isLoading={isSaving}>
+              {t("pages.user.albumSave")}
+            </Button>
+          </HStack>
+        </Flex>
       )}
     </VStack>
   );

@@ -3,7 +3,7 @@ import {
     Text, VStack, HStack, Badge, Divider, Table, Thead, Tbody, Tr, Th, Td, Box, Code
 } from "@chakra-ui/react";
 import type { IActivityLogEntry } from "../interfaces";
-import { NOTIFICATION_TYPE_LABELS } from "@/utils/notificationTypes";
+import { ACTIVITY_TYPE_LABELS } from "@/utils/notificationTypes";
 
 interface ActivityDetailModalProps {
     entry: IActivityLogEntry | null;
@@ -227,6 +227,45 @@ const DetailBody: React.FC<{ type: string; data: Record<string, unknown> }> = ({
                 </VStack>
             );
 
+        case "album_update": {
+            type AlbumChange = { name: string; version?: string; spe?: number; from?: number; to?: number };
+            const list = (key: string) => (Array.isArray(data[key]) ? data[key] as AlbumChange[] : []);
+            const rows = [
+                ...list("added").map((c) => ({ ...c, change: `Ajouté (spé ${c.spe})` })),
+                ...list("changed").map((c) => ({ ...c, change: `Spé ${c.from} → ${c.to}` })),
+                ...list("removed").map((c) => ({ ...c, change: `Retiré (était spé ${c.spe})` })),
+            ];
+            return (
+                <VStack align="stretch" spacing={3}>
+                    <Box>
+                        <Field label="Modifié par" value={s("edited_by")} />
+                        <Field label="Compte" value={s("bbs_name")} />
+                        <Field label="Guilde" value={s("guild_name")} />
+                    </Box>
+                    {rows.length > 0 && (
+                        <Box maxH="320px" overflowY="auto" borderWidth="1px" borderRadius="md">
+                            <Table size="sm">
+                                <Thead position="sticky" top={0} bg="chakra-body-bg">
+                                    <Tr><Th>Personnage</Th><Th>Changement</Th></Tr>
+                                </Thead>
+                                <Tbody>
+                                    {rows.map((row, i) => (
+                                        <Tr key={i}>
+                                            <Td>
+                                                <Text>{row.name}</Text>
+                                                {row.version && <Text fontSize="xs" color="gray.500">{row.version}</Text>}
+                                            </Td>
+                                            <Td>{row.change}</Td>
+                                        </Tr>
+                                    ))}
+                                </Tbody>
+                            </Table>
+                        </Box>
+                    )}
+                </VStack>
+            );
+        }
+
         default:
             return (
                 <Code display="block" whiteSpace="pre-wrap" p={3} borderRadius="md" fontSize="xs">
@@ -244,7 +283,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({ entry, guildN
                 <ModalHeader>
                     <HStack spacing={2}>
                         <Badge fontSize="xs">
-                            {entry ? NOTIFICATION_TYPE_LABELS[entry.type as keyof typeof NOTIFICATION_TYPE_LABELS] || entry.type : ""}
+                            {entry ? ACTIVITY_TYPE_LABELS[entry.type as keyof typeof ACTIVITY_TYPE_LABELS] || entry.type : ""}
                         </Badge>
                         {guildName && <Text fontSize="sm" color="gray.500">{guildName}</Text>}
                     </HStack>

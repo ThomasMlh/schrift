@@ -29,6 +29,17 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   achievement_unlock: "Succès or et platine débloqués (salon membres)",
 };
 
+// Events only shown in the activity log, never sent to Discord (mirror of ACTIVITY_ONLY_TYPES in the API)
+const ACTIVITY_ONLY_TYPES = ["album_update"] as const;
+type ActivityOnlyType = typeof ACTIVITY_ONLY_TYPES[number];
+
+export const ACTIVITY_TYPES: (NotificationType | ActivityOnlyType)[] = [...NOTIFICATION_TYPES, ...ACTIVITY_ONLY_TYPES];
+
+export const ACTIVITY_TYPE_LABELS: Record<NotificationType | ActivityOnlyType, string> = {
+  ...NOTIFICATION_TYPE_LABELS,
+  album_update: "Modification d'album",
+};
+
 const fmt = (data: Record<string, unknown>, key: string, fallback = "?"): string =>
   typeof data[key] === "string" || typeof data[key] === "number" ? String(data[key]) : fallback;
 
@@ -79,6 +90,18 @@ export const formatActivityEntry = (type: string, data: Record<string, unknown>)
     case "achievement_unlock": {
       const count = Array.isArray(data.unlocks) ? data.unlocks.length : 0;
       return `${count} succès débloqué(s)${data.guild_name ? ` dans **${fmt(data, "guild_name")}**` : ""}`;
+    }
+    case "album_update": {
+      const count = (key: string) => (Array.isArray(data[key]) ? data[key].length : 0);
+      const parts = [
+        count("added") && `+${count("added")}`,
+        count("removed") && `-${count("removed")}`,
+        count("changed") && `${count("changed")} spé`,
+      ].filter(Boolean).join(", ");
+      const editor = fmt(data, "edited_by");
+      const account = fmt(data, "bbs_name");
+      const who = editor === account ? `**${account}** a modifié son album` : `${editor} a modifié l'album de **${account}**`;
+      return parts ? `${who} (${parts})` : who;
     }
     case "cycle_recap":
       return `Bilan de fin de **${fmt(data, "cycle_name")}** publié${data.guild_name ? ` pour **${fmt(data, "guild_name")}**` : ""}`;
