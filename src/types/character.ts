@@ -56,6 +56,65 @@ export interface IBotDatabaseResult {
 // Game texts: one entry per language present in the game data (fr at least)
 export type GameText = Partial<Record<string, string>>;
 
+// Game summon and what its tables tell (rates and the full list of units are not in them)
+export interface ISummonMode {
+  kind: "single" | "multiple";
+  type: string | null;
+  payment: string | null;
+  price: number | null;
+  draws: number;
+  ticket_id: number | null;
+}
+
+export interface ISummonStep {
+  number: number;
+  price: number | null;
+  draws: number;
+  rarity_5: GameText | null;
+  appeal: GameText | null;
+  is_loop: boolean;
+  badge: string | null;
+}
+
+export interface ISummonDetails {
+  news_id: number | null;
+  category: string | null;
+  start_at: string | null;
+  end_at: string | null;
+  modes: ISummonMode[];
+  steps: ISummonStep[];
+  attention: GameText | null;
+  featured: { game_id: number; badge: string | null }[];
+  medal_shop: {
+    name: GameText | null;
+    start_date: string | null;
+    end_date: string | null;
+    products: { name: GameText | null; price: number | null; limit: number | null; type: string | null; content_id: number | null; amount: number | null }[];
+  } | null;
+}
+
+export interface ISummonCharacter {
+  _id: string;
+  name: string;
+  version?: string;
+  version_name?: string;
+  game_version?: GameText | null;
+  game_id: number;
+  affinity?: string;
+}
+
+export interface ISummon {
+  _id: string;
+  gacha_group_id: number;
+  name: string | null;
+  names?: GameText | null;
+  start_date: string | null;
+  end_date: string | null;
+  character_game_ids?: number[];
+  details?: ISummonDetails | null;
+  characters: ISummonCharacter[];
+}
+
 export interface ITraitFilterCategory {
   id: number;
   label: GameText;

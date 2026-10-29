@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import type { ICharactersResponse, ICharacter, IFilterGroups, ITraitFilterCategory } from '../../interfaces';
+import type { ICharactersResponse, ICharacter, IFilterGroups, ITraitFilterCategory, ISummon } from '../../interfaces';
 import { apiUrl, fetcher } from './shared';
 
 export const useCharacters = (options?: {
@@ -52,6 +52,12 @@ export const useCharacter = (characterId?: string) => {
   );
 
   return { character: data?.data, isLoading, error, mutate };
+};
+
+export const useSummon = (gachaGroupId?: string) => {
+  const url = gachaGroupId ? `${apiUrl}/api/banners/game/${encodeURIComponent(gachaGroupId)}` : null;
+  const { data, error, isLoading } = useSWR<{ success: boolean; data: ISummon }>(url, fetcher, { revalidateOnFocus: false });
+  return { summon: data?.data, isLoading, error };
 };
 
 export const useCharacterMeta = () => {

@@ -16,6 +16,7 @@ import { AuthProvider, useAuth } from "./providers/AuthProvider";
 const HomePage = lazy(() => import("./pages/HomePage"));
 const CharactersPage = lazy(() => import("./pages/CharactersPage"));
 const CharacterDetailPage = lazy(() => import("./pages/CharacterDetailPage"));
+const SummonPage = lazy(() => import("./pages/SummonPage"));
 const CyclesPage = lazy(() => import("./pages/CyclesPage"));
 const CycleDetailPage = lazy(() => import("./pages/CycleDetailPage"));
 const RotationDetailPage = lazy(() => import("./pages/RotationDetailPage"));
@@ -96,6 +97,7 @@ const AppRoutes = () => {
         <Route path="/guildes" element={<GuildesPage />} />
         <Route path="/personnages" element={<CharactersPage />} />
         <Route path="/personnage/:id" element={<CharacterDetailPage />} />
+        <Route path="/invocation/:id" element={<SummonPage />} />
         <Route path="/cycles" element={<CyclesPage />} />
         <Route path="/cycle/:id" element={<CycleDetailPage />} />
         <Route
