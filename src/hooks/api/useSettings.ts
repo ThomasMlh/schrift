@@ -1,5 +1,6 @@
 import useSWR from 'swr';
 import type { NotificationType } from '../../interfaces';
+import { useAuth } from '@/providers/AuthProvider';
 import { apiUrl, useAuthenticatedFetcher } from './shared';
 
 // Stable reference so referential equality holds while `data` is loading (an inline `|| []` would
@@ -52,6 +53,20 @@ export const useScoreLockSettings = () => {
     error,
     mutate,
   };
+};
+
+// Whether guild leaders and officers may fill their players' albums (admin option, off by default)
+export const useAlbumSettings = () => {
+  const { token } = useAuth();
+  const authenticatedFetcher = useAuthenticatedFetcher();
+
+  const { data, isLoading, mutate } = useSWR<{ success: boolean; leaders_can_edit: boolean }>(
+    token ? `${apiUrl}/api/settings/albums` : null,
+    authenticatedFetcher,
+    { revalidateOnFocus: false }
+  );
+
+  return { leadersCanEdit: data?.leaders_can_edit ?? false, isLoaded: data !== undefined, isLoading, mutate };
 };
 
 export type DataHealthSeverity = 'error' | 'warning' | 'info';

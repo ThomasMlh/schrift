@@ -9,6 +9,7 @@ import DraftSection from "../components/DraftSection";
 import DraftProposalSection from "../components/DraftProposalSection";
 import CyclesSection from "../components/CyclesSection";
 import { ScoreLockSetting } from "../components/admin/ScoreLockSetting";
+import { AlbumLeadersSetting } from "../components/admin/AlbumLeadersSetting";
 import ScoresSection from "../components/ScoresSection";
 import UsersTable from "../components/UsersTable";
 import BannedUsersSection from "../components/BannedUsersSection";
@@ -237,7 +238,12 @@ const AdminPage = () => {
       case "alerts":
         return <DeclineAlertsSection />;
       case "users":
-        return <UsersTable isAdminMode={true} />;
+        return (
+          <VStack align="stretch" spacing={6}>
+            <AlbumLeadersSetting />
+            <UsersTable isAdminMode={true} />
+          </VStack>
+        );
       case "banned":
         return <BannedUsersSection />;
       case "guides":

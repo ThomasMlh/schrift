@@ -21,7 +21,7 @@ import {
 import { PageLoader } from "@/components/ui/PageLoader";
 import { SEOHead } from "@/components/SEOHead";
 import { CycleSelect } from "@/components/ui/CycleSelect";
-import { useCycles, useUser, useUserByBBSName, useUserStats, useGuild, useUserAchievements } from "@/hooks/useAPI";
+import { useCycles, useUser, useUserByBBSName, useUserStats, useGuild, useUserAchievements, useAlbumSettings } from "@/hooks/useAPI";
 import { StatCard } from "@/components/ui/StatCard";
 import { UserStatsOverview } from "@/components/user/UserStatsOverview";
 import { UserPerformances } from "@/components/user/UserPerformances";
@@ -56,7 +56,8 @@ const UserPage = () => {
   const { user: resolvedUser, matchedBbsId, isLoading: resolvingUser } = useUserByBBSName(bbs_name, accountIdParam);
   const userId = resolvedUser?._id;
   const [selectedCycle, setSelectedCycle] = useState<string>("");
-  const { isAdmin, currentUser } = useAuth();
+  const { isAdmin, currentUser, managedGuildIds } = useAuth();
+  const { leadersCanEdit: leadersCanEditAlbums } = useAlbumSettings();
   const { t } = useTranslation();
 
   // Tabs: URL key -> index. Legacy keys (tendance, top-rotations, records) map to the tab that now
@@ -170,8 +171,11 @@ const UserPage = () => {
 
 
   const cardBg = "bg.card";
-  // The account owner (logged in through Discord) or an admin can fill the album
-  const canEditAlbum = isAdmin || (!!currentUser?._id && currentUser._id === userId);
+  // The account owner (logged in through Discord), an admin, or a leader of the account's guild when
+  // admins allow it can fill the album
+  const canEditAlbum = isAdmin
+    || (!!currentUser?._id && currentUser._id === userId)
+    || (leadersCanEditAlbums && !!user?.guilde_id && managedGuildIds.includes(String(user.guilde_id)));
 
 
   if (loading) {
