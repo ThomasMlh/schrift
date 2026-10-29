@@ -1,17 +1,18 @@
 import { useMemo } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { makeRequest, apiUrl } from '@/utils/apiRequest';
-import type { ICharacterSyncResult, IGameSyncResult } from '@/types/character';
+import type { IBotDatabaseResult, IGameSyncResult } from '@/types/character';
 
 export const useAdminMutations = () => {
   const { token } = useAuth();
   const request = useMemo(() => makeRequest(token), [token]);
 
-  const updateCharacters = async (options: { dryRun?: boolean } = {}) => {
-    return request<ICharacterSyncResult>(`${apiUrl}/api/characters/update`, {
+  // Fills the bot database.json with the site ids and bucket URLs; a simulation unless dryRun is false
+  const enrichBotDatabase = async (options: { dryRun: boolean }) => {
+    return request<IBotDatabaseResult>(`${apiUrl}/api/characters/bot-database/enrich`, {
       method: 'POST',
-      body: JSON.stringify({ dryRun: options.dryRun === true }),
-    }, { fallbackError: 'Erreur lors de la mise à jour des personnages' });
+      body: JSON.stringify({ dryRun: options.dryRun }),
+    }, { fallbackError: 'Erreur lors de la mise à jour de database.json' });
   };
 
   // Sync from the game master tables; a simulation unless dryRun is false
@@ -83,5 +84,5 @@ export const useAdminMutations = () => {
     }, { fallbackError: 'Erreur lors de la création des index' });
   };
 
-  return { updateCharacters, syncGameCharacters, checkBotHealth, uploadImages, syncDiscordProfiles, createIndexes };
+  return { enrichBotDatabase, syncGameCharacters, checkBotHealth, uploadImages, syncDiscordProfiles, createIndexes };
 };
