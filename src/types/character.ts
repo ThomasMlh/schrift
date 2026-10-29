@@ -247,4 +247,6 @@ export interface IAlbumCharacter {
   attack_type?: string;
   killers?: string[];
   categories?: string[];
+  // Game ability types by filter group (link, ex, skill, special, destruction)
+  filters?: Record<string, string[]>;
 }
