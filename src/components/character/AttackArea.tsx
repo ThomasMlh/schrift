@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { Box } from "@chakra-ui/react";
+import { Box, Button } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import type { AttackShape } from "@/interfaces";
 import { AREA_ORIGIN, type AreaPosition } from "@/utils/attackShape";
 
@@ -78,15 +79,12 @@ const MIN_HALF = 1300;
 
 // Area hit by an attack seen from above, the character facing up, at the center unless moved. Every
 // attack of a character uses the same scale (reach), so their sizes compare. Dragging the character
-// moves its areas against the reference wave.
-export const AttackArea = ({ shapes, reach, color, position = AREA_ORIGIN, onMove }: {
-  shapes: AttackShape[];
-  reach: number;
-  color: "R" | "B" | null;
-  position?: AreaPosition;
-  onMove?: (position: AreaPosition) => void;
-}) => {
+// moves the areas of this drawing only against the reference wave.
+export const AttackArea = ({ shapes, reach, color }: { shapes: AttackShape[]; reach: number; color: "R" | "B" | null }) => {
+  const { t } = useTranslation();
   const svgRef = useRef<SVGSVGElement>(null);
+  const [position, setPosition] = useState<AreaPosition>(AREA_ORIGIN);
+  const moved = position.x !== 0 || position.y !== 0;
   const [isDragging, setIsDragging] = useState(false);
   const half = Math.min(Math.max(reach * 1.1, MIN_HALF), MAX_HALF);
   const lines = [];
@@ -104,16 +102,15 @@ export const AttackArea = ({ shapes, reach, color, position = AREA_ORIGIN, onMov
   };
 
   const startDrag = (event: React.PointerEvent<SVGGElement>) => {
-    if (!onMove) return;
     event.preventDefault();
     svgRef.current?.setPointerCapture(event.pointerId);
     setIsDragging(true);
   };
 
   const drag = (event: React.PointerEvent<SVGSVGElement>) => {
-    if (!isDragging || !onMove) return;
+    if (!isDragging) return;
     const next = pointerPosition(event);
-    if (next) onMove(next);
+    if (next) setPosition(next);
   };
 
   const stopDrag = (event: React.PointerEvent<SVGSVGElement>) => {
@@ -123,7 +120,7 @@ export const AttackArea = ({ shapes, reach, color, position = AREA_ORIGIN, onMov
   };
 
   return (
-    <Box bg="gray.900" borderRadius="lg" overflow="hidden" borderWidth="1px" borderColor="whiteAlpha.200">
+    <Box position="relative" bg="gray.900" borderRadius="lg" overflow="hidden" borderWidth="1px" borderColor="whiteAlpha.200">
       <svg
         ref={svgRef}
         viewBox={`${-half} ${-half} ${half * 2} ${half * 2}`}
@@ -148,7 +145,7 @@ export const AttackArea = ({ shapes, reach, color, position = AREA_ORIGIN, onMov
           {/* Only the character starts a drag, so swiping over the area still scrolls the page on phones */}
           <g
             onPointerDown={startDrag}
-            style={{ cursor: onMove ? (isDragging ? "grabbing" : "grab") : undefined, touchAction: onMove ? "none" : undefined }}
+            style={{ cursor: isDragging ? "grabbing" : "grab", touchAction: "none" }}
           >
             <circle cx={0} cy={0} r={half * 0.1} fill="transparent" />
             <circle cx={0} cy={0} r={half * 0.045} fill="#63b3ed" stroke="white" strokeWidth={10} />
@@ -156,6 +153,11 @@ export const AttackArea = ({ shapes, reach, color, position = AREA_ORIGIN, onMov
           </g>
         </g>
       </svg>
+      {moved && (
+        <Button size="xs" position="absolute" top={2} right={2} variant="solid" opacity={0.85} onClick={() => setPosition(AREA_ORIGIN)}>
+          {t("components.characterAttacks.recenter")}
+        </Button>
+      )}
     </Box>
   );
 };

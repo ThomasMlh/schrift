@@ -1192,7 +1192,7 @@
       "rangeBonus": "Area +{{value}}% (included)",
       "hitBonus_one": "+{{count}} hit (soul tree)",
       "hitBonus_other": "+{{count}} hits (soul tree)",
-      "waveLegend": "White dots: a guild quest wave (12 enemies in a circle and 1 in the middle), orange dot: boss. Same scale as the areas. Drag the blue dot to move the character.",
+      "waveLegend": "White dots: a guild quest wave (12 enemies in a circle and 1 in the middle), orange dot: boss. Same scale as the areas. Drag the blue dot of a drawing to move the character in it.",
       "recenter": "Recenter"
     },
     "accessorySearchSelect": {

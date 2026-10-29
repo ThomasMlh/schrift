@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { Badge, Box, Button, Flex, HStack, SimpleGrid, Table, Tbody, Td, Text, Th, Thead, Tr, Wrap, WrapItem } from "@chakra-ui/react";
+import { Badge, Box, HStack, SimpleGrid, Table, Tbody, Td, Text, Th, Thead, Tr, Wrap, WrapItem } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import type { AttackButton, AttackShape, IAttackStep, IGameAttacks } from "@/interfaces";
 import { gameText } from "@/utils/gameText";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
-import { AREA_ORIGIN, shapeReach, type AreaPosition } from "@/utils/attackShape";
+import { shapeReach } from "@/utils/attackShape";
 import { AttackArea } from "./AttackArea";
 import { AttackButtonIcon } from "./AttackButtonIcon";
 
@@ -17,9 +16,6 @@ const seconds = (ms: number | null, decimals = 1) => (ms ? `${Math.round(ms / 10
 export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
   const { t, i18n } = useTranslation();
   const buttons = BUTTONS.filter((button) => attacks[button]);
-  // Position of the character, shared by every card so the attacks compare from the same spot
-  const [position, setPosition] = useState<AreaPosition>(AREA_ORIGIN);
-  const moved = position.x !== 0 || position.y !== 0;
   // Same scale for every attack of the character
   const reach = Math.max(...buttons.flatMap((button) => attacks[button]!.steps.map((step) => shapeReach(step.shape))), 0);
 
@@ -62,14 +58,7 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
 
   return (
     <Box>
-      <Flex justify="space-between" align="center" gap={2} mb={2} minH="24px">
-        <Text fontSize="xs" color="text.muted">{t("components.characterAttacks.waveLegend")}</Text>
-        {moved && (
-          <Button size="xs" variant="ghost" flexShrink={0} onClick={() => setPosition(AREA_ORIGIN)}>
-            {t("components.characterAttacks.recenter")}
-          </Button>
-        )}
-      </Flex>
+      <Text fontSize="xs" color="text.muted" mb={2}>{t("components.characterAttacks.waveLegend")}</Text>
       <SimpleGrid columns={{ base: 1, sm: 2, xl: 3 }} spacing={4}>
         {buttons.map((button) => {
           const { cooldown, hits, steps, range_bonus: rangeBonus, hit_bonus: hitBonus } = attacks[button]!;
@@ -93,7 +82,7 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
                 </Badge>
               </HStack>
 
-              <AttackArea shapes={uniqueShapes} reach={reach} color={color} position={position} onMove={setPosition} />
+              <AttackArea shapes={uniqueShapes} reach={reach} color={color} />
 
               {status && <Text fontSize="xs" color="text.secondary" mt={2}>{status}</Text>}
               {traps.map((trap, i) => (
