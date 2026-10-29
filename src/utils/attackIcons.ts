@@ -41,19 +41,46 @@ const WEAPON_ICONS = new Set([
   "8_heavy3",
   "9_heavy3",
 ]);
+// Normal attack icons are trimmed in the atlas: the game puts them back in a 112x124 frame (offset of the
+// trimmed image, its size), centered on the 168x168 button. Without it the icon sits too low.
+const NORMAL_FRAME = { width: 112, height: 124, button: 168 };
+const NORMAL_ICONS: Record<string, { left: number; top: number; width: number; height: number }> = {
+  "1_normal": { left: 11, top: 0, width: 90, height: 97 },
+  "2_normal": { left: 11, top: 0, width: 90, height: 100 },
+  "3_normal": { left: 10, top: 0, width: 92, height: 110 },
+  "4_normal": { left: 11, top: 0, width: 90, height: 107 },
+  "5_normal": { left: 11, top: 0, width: 90, height: 102 },
+};
+
+// Position of a weapon icon on its button, in percent of the button
+export const attackWeaponBox = (icon: string) => {
+  const normal = NORMAL_ICONS[icon];
+  if (!normal) return { top: 12, left: 12, width: 76, height: 76 };
+  const { width: frameWidth, height: frameHeight, button } = NORMAL_FRAME;
+  const frameLeft = (button - frameWidth) / 2;
+  const frameTop = (button - frameHeight) / 2;
+  const percent = (value: number) => (value / button) * 100;
+  return {
+    left: percent(frameLeft + normal.left),
+    top: percent(frameTop + normal.top),
+    width: percent(normal.width),
+    height: percent(normal.height),
+  };
+};
+
 const STATUS_CODES = new Set(["brn", "cnf", "ero", "frz", "inj", "par", "psn", "spd", "tko", "wek"]);
 
 const isHeavy = (button: AttackButton) => button.startsWith("heavy");
 
-// Button background: purple for the special attack, green for heals, orange for buffs, otherwise the
-// attack color (red or blue)
+// Button background: purple for the special attack, orange for buffs, green for heals, otherwise the
+// attack color (red or blue). A buff that also heals keeps the buff look, the heal becomes a badge.
 export const attackBase = (button: AttackButton, steps: IAttackStep[]) => {
   if (button === "extra_action") return steps.some((s) => s.color === "B") ? "ex_action_base01" : "ex_action_base02";
   if (button === "ex") return "bt_skill";
   // Advanced strong attacks have a spiked border ("_heavy_plus")
   const heavy = isHeavy(button) ? (steps.some((s) => s.advanced) ? "_heavy_plus" : "_heavy") : "";
-  if (steps.some((s) => s.heal)) return `bt_heal${heavy}`;
   if (steps.some((s) => s.buff)) return `bt_buff${heavy || "_heavy"}`;
+  if (steps.some((s) => s.heal)) return `bt_heal${heavy}`;
   const blue = steps.some((s) => s.color === "B");
   return `${blue ? "bt_projectile" : "bt_fighting"}${heavy}`;
 };
@@ -62,7 +89,8 @@ export const attackBase = (button: AttackButton, steps: IAttackStep[]) => {
 // character (6) or the party (7), heals show drops (5), like the game.
 export const attackWeaponIcon = (button: AttackButton, steps: IAttackStep[]) => {
   if (button === "extra_action") return "ex_action01";
-  if (button === "ex") return "11_skill1";
+  // A special that revives the party has the revive icon, the others the default one
+  if (button === "ex") return steps.some((s) => s.revival) ? "10_special1" : "11_skill1";
   // Double strike has its own icon
   if (steps.some((s) => s.twice)) return "11_heavy3";
   const buff = steps.find((s) => s.buff)?.buff;
@@ -71,6 +99,9 @@ export const attackWeaponIcon = (button: AttackButton, steps: IAttackStep[]) => 
   const candidates = [`${weapon}_${button}`, `${weapon}_heavy3`, `${weapon}_normal`, `${weapon}_heavy1`];
   return candidates.find((name) => WEAPON_ICONS.has(name)) ?? [...WEAPON_ICONS].find((name) => name.startsWith(`${weapon}_`)) ?? null;
 };
+
+// Small badge on the bottom right of the button, like the game: the drops of a buff that also heals
+export const attackSubBadge = (steps: IAttackStep[]) => (steps.some((s) => s.buff) && steps.some((s) => s.heal) ? "sub_5" : null);
 
 // Statuses the attack inflicts, one badge each in the game: icon on a dark disc, an orange "+" for the "+" ones
 export const attackStatusBadges = (steps: IAttackStep[]) => {

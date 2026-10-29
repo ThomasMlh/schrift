@@ -1,6 +1,6 @@
 import { Box, Image } from "@chakra-ui/react";
 import type { AttackButton, IAttackStep } from "@/interfaces";
-import { attackBase, attackIconUrl, attackStatusBadges, attackWeaponIcon } from "@/utils/attackIcons";
+import { attackBase, attackIconUrl, attackStatusBadges, attackSubBadge, attackWeaponBox, attackWeaponIcon } from "@/utils/attackIcons";
 
 // In-game attack button rebuilt from its pieces: background, weapon icon and status badge
 export const AttackButtonIcon = ({ button, steps, size = "56px" }: {
@@ -10,11 +10,29 @@ export const AttackButtonIcon = ({ button, steps, size = "56px" }: {
 }) => {
   const badges = attackStatusBadges(steps).slice(0, 2);
   const weapon = attackWeaponIcon(button, steps);
+  const subBadge = attackSubBadge(steps);
+  const box = weapon ? attackWeaponBox(weapon) : null;
   return (
     <Box position="relative" boxSize={size} flexShrink={0}>
       <Image src={attackIconUrl(attackBase(button, steps))} alt="" position="absolute" inset={0} boxSize="100%" />
-      {weapon && (
-        <Image src={attackIconUrl(weapon)} alt="" position="absolute" top="12%" left="12%" boxSize="76%" objectFit="contain" />
+      {weapon && box && (
+        <Image
+          src={attackIconUrl(weapon)}
+          alt=""
+          position="absolute"
+          top={`${box.top}%`}
+          left={`${box.left}%`}
+          w={`${box.width}%`}
+          h={`${box.height}%`}
+          objectFit="contain"
+        />
+      )}
+      {/* Bottom right badge on a dark disc, like the game */}
+      {subBadge && (
+        <Box position="absolute" bottom="-6%" right="-6%" boxSize="42%">
+          <Image src={attackIconUrl("ailment_base_2")} alt="" position="absolute" inset={0} boxSize="100%" />
+          <Image src={attackIconUrl(subBadge)} alt="" position="absolute" top="4%" left="4%" boxSize="92%" />
+        </Box>
       )}
       {/* Status badges on the top left, like the game */}
       {badges.map((badge, index) => (
