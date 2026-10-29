@@ -8,6 +8,9 @@ import { useCurrentRotation } from "@/hooks/useCurrentRotation";
 import { cycleSlug, getRotationRealDates } from "@/utils/cycleHelpers";
 import { AttackTypeBadge } from "../ui/AttackTypeBadge";
 
+// "Quincy +" (stronger killer) serves on the "Quincy" rotations like "Quincy"
+const baseKiller = (killer: string) => killer.replace(/\s*\+$/, "");
+
 const formatDay = (date: Date) =>
   date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "2-digit" });
 
@@ -17,12 +20,13 @@ export const CharacterRotations = ({ character }: { character: ICharacter }) => 
   const { cycles, isLoading } = useCycles({ limit: 5 });
   const { currentCycle, currentRotation } = useCurrentRotation(cycles, isLoading);
   const killers = character.killers ?? [];
+  const baseKillers = new Set(killers.map(baseKiller));
 
   const rotations = currentCycle?.rotations ?? [];
   const startIndex = currentRotation ? rotations.indexOf(currentRotation) : rotations.length;
   const matching = rotations
     .slice(Math.max(0, startIndex))
-    .filter((r) => killers.includes(r.killer));
+    .filter((r) => baseKillers.has(baseKiller(r.killer)));
 
   if (!currentCycle || killers.length === 0) return null;
 
