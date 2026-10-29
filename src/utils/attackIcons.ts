@@ -45,15 +45,15 @@ const STATUS_CODES = new Set(["brn", "cnf", "ero", "frz", "inj", "par", "psn", "
 
 const isHeavy = (button: AttackButton) => button.startsWith("heavy");
 
-// Button background: purple for the special attack, green for heals, orange for buffs, otherwise the
-// attack color (red or blue)
+// Button background: purple for the special attack, orange for buffs, green for heals, otherwise the
+// attack color (red or blue). A buff that also heals keeps the buff look, the heal becomes a badge.
 export const attackBase = (button: AttackButton, steps: IAttackStep[]) => {
   if (button === "extra_action") return steps.some((s) => s.color === "B") ? "ex_action_base01" : "ex_action_base02";
   if (button === "ex") return "bt_skill";
   // Advanced strong attacks have a spiked border ("_heavy_plus")
   const heavy = isHeavy(button) ? (steps.some((s) => s.advanced) ? "_heavy_plus" : "_heavy") : "";
-  if (steps.some((s) => s.heal)) return `bt_heal${heavy}`;
   if (steps.some((s) => s.buff)) return `bt_buff${heavy || "_heavy"}`;
+  if (steps.some((s) => s.heal)) return `bt_heal${heavy}`;
   const blue = steps.some((s) => s.color === "B");
   return `${blue ? "bt_projectile" : "bt_fighting"}${heavy}`;
 };
@@ -71,6 +71,9 @@ export const attackWeaponIcon = (button: AttackButton, steps: IAttackStep[]) => 
   const candidates = [`${weapon}_${button}`, `${weapon}_heavy3`, `${weapon}_normal`, `${weapon}_heavy1`];
   return candidates.find((name) => WEAPON_ICONS.has(name)) ?? [...WEAPON_ICONS].find((name) => name.startsWith(`${weapon}_`)) ?? null;
 };
+
+// Small badge on the bottom right of the button, like the game: the drops of a buff that also heals
+export const attackSubBadge = (steps: IAttackStep[]) => (steps.some((s) => s.buff) && steps.some((s) => s.heal) ? "sub_5" : null);
 
 // Statuses the attack inflicts, one badge each in the game: icon on a dark disc, an orange "+" for the "+" ones
 export const attackStatusBadges = (steps: IAttackStep[]) => {
