@@ -10,6 +10,7 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import { bucketUrl } from "@/utils/apiRequest";
 import { getAffinityIcon } from "@/utils/characterIcons";
 import { gameText } from "@/utils/gameText";
+import { characterVersionLabel } from "@/utils/characterVersion";
 import type { ISummon, ISummonCharacter } from "@/interfaces";
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -41,7 +42,7 @@ const GameBadge = ({ src }: { src: string | null }) => {
 };
 
 const FeaturedCharacter = ({ character, badge, language }: { character: ISummonCharacter; badge: string | null; language: string }) => {
-  const version = gameText(character.game_version, language) || character.version_name || character.version;
+  const version = characterVersionLabel(character, language);
   const affinityIcon = character.affinity ? getAffinityIcon(character.affinity) : null;
   return (
     <VStack
