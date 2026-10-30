@@ -22,16 +22,24 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
   </Box>
 );
 
-// Official banner in the site language, the French one otherwise; hidden when neither exists
-const SummonBanner = ({ groupId, language }: { groupId: number; language: string }) => {
+// Official banner in the site language, the French one otherwise; hidden when neither exists. The visual
+// of a ticket is the small item icon of the game
+const SummonVisual = ({ groupId, language, isTicket }: { groupId: number; language: string; isTicket: boolean }) => {
   const lang = language.slice(0, 2);
   const sources = [
-    ...(lang !== "fr" ? [`${bucketUrl}/banners/gacha_${groupId}.${lang}.png`] : []),
+    ...(lang !== "fr" && !isTicket ? [`${bucketUrl}/banners/gacha_${groupId}.${lang}.png`] : []),
     `${bucketUrl}/banners/gacha_${groupId}.png`,
   ];
   const [attempt, setAttempt] = useState(0);
   if (attempt >= sources.length) return null;
-  return <Image src={sources[attempt]} alt="" w="100%" borderRadius="xl" onError={() => setAttempt((a) => a + 1)} />;
+  return (
+    <Image
+      src={sources[attempt]}
+      alt=""
+      {...(isTicket ? { boxSize: "128px", borderRadius: "lg" } : { w: "100%", borderRadius: "xl" })}
+      onError={() => setAttempt((a) => a + 1)}
+    />
+  );
 };
 
 // Game badge picture (rate, bonus...); only some are in the game files
@@ -115,7 +123,8 @@ const SummonPage = () => {
   const details = summon.details;
   const name = gameText(summon.names, language) || summon.name || t("pages.summon.title");
   const start = details?.start_at ?? summon.start_date;
-  const end = details?.end_at ?? summon.end_date;
+  // The catalog gives no end date to what never expires, while the details keep the far date of the tables
+  const end = summon.list_category && !summon.end_date ? null : details?.end_at ?? summon.end_date;
   const characters = orderedCharacters(summon);
   const isStepUp = (details?.steps.length ?? 0) > 0;
   const modes = (details?.modes ?? []).filter((mode) => !(isStepUp && mode.kind === "multiple"));
@@ -128,7 +137,7 @@ const SummonPage = () => {
           {t("pages.summon.back")}
         </Button>
 
-        <SummonBanner groupId={summon.gacha_group_id} language={language} />
+        <SummonVisual groupId={summon.gacha_group_id} language={language} isTicket={Boolean(summon.list_category?.endsWith("_ticket"))} />
 
         <Box>
           <Text as="h1" fontSize="2xl" fontWeight="bold" color="text.strong">{name}</Text>

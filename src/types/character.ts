@@ -103,13 +103,20 @@ export interface ISummonCharacter {
   affinity?: string;
 }
 
-export interface ISummon {
+export type SummonListCategory = "character_gacha" | "character_ticket" | "accessory_gacha" | "accessory_ticket";
+
+export interface ISummonListItem {
   _id: string;
   gacha_group_id: number;
   name: string | null;
   names?: GameText | null;
   start_date: string | null;
   end_date: string | null;
+  list_category?: SummonListCategory;
+  summon_type?: string;
+}
+
+export interface ISummon extends ISummonListItem {
   character_game_ids?: number[];
   details?: ISummonDetails | null;
   characters: ISummonCharacter[];

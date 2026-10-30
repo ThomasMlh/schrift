@@ -2,6 +2,7 @@ import type { IconType } from "react-icons";
 import {
   FiAward,
   FiBookOpen,
+  FiGift,
   FiHome,
   FiRefreshCw,
   FiSettings,
@@ -32,6 +33,7 @@ export const NAV_ITEMS: NavItem[] = [
   { labelKey: "nav.characters", path: "/personnages", icon: FiBookOpen, group: "explore", primary: true },
   { labelKey: "nav.cycles", path: "/cycles", icon: FiRefreshCw, group: "explore", primary: true },
   { labelKey: "nav.players", path: "/joueurs", icon: FiUsers, group: "explore", primary: true },
+  { labelKey: "nav.summons", path: "/invocations", icon: FiGift, group: "explore" },
   { labelKey: "nav.podium", path: "/podium", icon: FiAward, group: "compete", primary: true },
   { labelKey: "nav.comparator", path: "/comparateur", icon: LuSwords, group: "compete" },
   { labelKey: "nav.guides", path: "/guides", icon: LuBookMarked, group: "resources" },
