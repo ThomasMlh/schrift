@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
-import { Box, Flex, HStack, IconButton, Image, SimpleGrid, Text, Tooltip, VStack, useColorMode } from "@chakra-ui/react";
+import { Box, Flex, HStack, IconButton, Image, SimpleGrid, Text, Tooltip, useColorMode } from "@chakra-ui/react";
 import { DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
 import { useTranslation } from "react-i18next";
 import type { ICharacter } from "@/interfaces";
-import { bucketUrl } from "@/utils/apiRequest";
 import { characterImageUrl, characterQuoteFolder } from "@/utils/characterImages";
 import { gameText } from "@/utils/gameText";
+import { CharacterSummons } from "./CharacterSummons";
 
 interface CharacterVisualsProps {
   character: ICharacter;
@@ -78,59 +77,7 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
         ))}
       </SimpleGrid>
 
-      {summons.length > 0 && (
-        <Box mt={4} borderRadius="xl" border="1px solid" borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'} bg={isDark ? 'gray.800' : 'white'}>
-          <Text px={4} pt={3} pb={2} fontSize="xs" fontWeight="semibold" letterSpacing="widest" textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
-            {t("pages.characterDetail.labelSummons")}
-          </Text>
-          <VStack align="stretch" spacing={3} px={4} pb={4}>
-            {summons.map((summon) => (
-              <SummonRow key={summon.gacha_group_id} summon={summon} language={i18n.language} />
-            ))}
-          </VStack>
-        </Box>
-      )}
+      {summons.length > 0 && <CharacterSummons banners={summons} />}
     </Box>
-  );
-};
-
-type Summon = NonNullable<ICharacter["banners"]>[number];
-
-// One summon featuring the character, linking to its page: its banner in the site language when the
-// game has it, otherwise the French one, then name and dates
-const SummonRow = ({ summon, language }: { summon: Summon; language: string }) => {
-  const lang = language.slice(0, 2);
-  const sources = [
-    ...(lang !== "fr" ? [`${bucketUrl}/banners/gacha_${summon.gacha_group_id}.${lang}.png`] : []),
-    `${bucketUrl}/banners/gacha_${summon.gacha_group_id}.png`,
-  ];
-  const [attempt, setAttempt] = useState(0);
-  const hasImage = attempt < sources.length;
-  return (
-    <HStack
-      as={RouterLink}
-      to={`/invocation/${summon.gacha_group_id}`}
-      spacing={3}
-      align="center"
-      borderRadius="md"
-      _hover={{ bg: "bg.inset" }}
-    >
-      {hasImage && (
-        <Image
-          src={sources[attempt]}
-          alt=""
-          h={{ base: "48px", sm: "64px" }}
-          flexShrink={0}
-          borderRadius="md"
-          onError={() => setAttempt((a) => a + 1)}
-        />
-      )}
-      <Box minW={0}>
-        <Text fontSize="sm" fontWeight="semibold" color="text.strong" noOfLines={2}>{gameText(summon.name, language)}</Text>
-        {summon.start_date && (
-          <Text fontSize="xs" color="text.muted">{summon.start_date}{summon.end_date ? ` → ${summon.end_date}` : ""}</Text>
-        )}
-      </Box>
-    </HStack>
   );
 };
