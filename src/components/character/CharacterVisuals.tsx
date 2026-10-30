@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { Box, Flex, HStack, IconButton, Image, SimpleGrid, Text, Tooltip, VStack, useColorMode } from "@chakra-ui/react";
+import { Badge, Box, Button, Flex, HStack, IconButton, Image, SimpleGrid, Text, Tooltip, useColorMode } from "@chakra-ui/react";
 import { DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
 import { useTranslation } from "react-i18next";
 import type { ICharacter } from "@/interfaces";
@@ -14,6 +14,9 @@ interface CharacterVisualsProps {
   onOpen: (src: string, label: string, caption?: string) => void;
 }
 
+const VISIBLE_SUMMONS = 6;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 // Character visuals (special attack, artwork, quote, summons) with download and zoom.
 // Not every unit has every image in the game files: a picture that fails to load hides its tile.
 export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVisualsProps) => {
@@ -22,7 +25,9 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
   const isDark = colorMode === "dark";
   const [failed, setFailed] = useState<string[]>([]);
   const quote = gameText(character.quote, i18n.language);
-  const summons = character.banners ?? [];
+  const [showAllSummons, setShowAllSummons] = useState(false);
+  const summons = [...(character.banners ?? [])].sort((a, b) => summonDate(b.start_date) - summonDate(a.start_date));
+  const visibleSummons = showAllSummons ? summons : summons.slice(0, VISIBLE_SUMMONS);
 
   return (
     <Box>
@@ -80,14 +85,21 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
 
       {summons.length > 0 && (
         <Box mt={4} borderRadius="xl" border="1px solid" borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'} bg={isDark ? 'gray.800' : 'white'}>
-          <Text px={4} pt={3} pb={2} fontSize="xs" fontWeight="semibold" letterSpacing="widest" textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
-            {t("pages.characterDetail.labelSummons")}
-          </Text>
-          <VStack align="stretch" spacing={3} px={4} pb={4}>
-            {summons.map((summon) => (
-              <SummonRow key={summon.gacha_group_id} summon={summon} language={i18n.language} />
+          <Flex px={4} pt={3} pb={3} justify="space-between" align="center">
+            <Text fontSize="xs" fontWeight="semibold" letterSpacing="widest" textTransform="uppercase" color={isDark ? 'gray.400' : 'gray.500'}>
+              {t("pages.characterDetail.labelSummons")} ({summons.length})
+            </Text>
+            {summons.length > VISIBLE_SUMMONS && (
+              <Button size="xs" variant="ghost" borderRadius="full" onClick={() => setShowAllSummons((shown) => !shown)}>
+                {showAllSummons ? t("pages.characterDetail.summonsShowLess") : t("pages.characterDetail.summonsShowAll")}
+              </Button>
+            )}
+          </Flex>
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3} px={4} pb={4}>
+            {visibleSummons.map((summon) => (
+              <SummonCard key={summon.gacha_group_id} summon={summon} language={i18n.language} />
             ))}
-          </VStack>
+          </SimpleGrid>
         </Box>
       )}
     </Box>
@@ -96,41 +108,64 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
 
 type Summon = NonNullable<ICharacter["banners"]>[number];
 
+// Summon dates are stored as DD/MM/YYYY
+const summonDate = (date: string | null) => {
+  const [day, month, year] = (date ?? "").split("/").map(Number);
+  return year ? new Date(year, month - 1, day).getTime() : 0;
+};
+
+const isOngoing = (summon: Summon) => {
+  const now = Date.now();
+  const end = summonDate(summon.end_date);
+  return summonDate(summon.start_date) <= now && end > 0 && now < end + DAY_MS;
+};
+
 // One summon featuring the character, linking to its page: its banner in the site language when the
 // game has it, otherwise the French one, then name and dates
-const SummonRow = ({ summon, language }: { summon: Summon; language: string }) => {
+const SummonCard = ({ summon, language }: { summon: Summon; language: string }) => {
+  const { t } = useTranslation();
   const lang = language.slice(0, 2);
   const sources = [
     ...(lang !== "fr" ? [`${bucketUrl}/banners/gacha_${summon.gacha_group_id}.${lang}.png`] : []),
     `${bucketUrl}/banners/gacha_${summon.gacha_group_id}.png`,
   ];
   const [attempt, setAttempt] = useState(0);
-  const hasImage = attempt < sources.length;
   return (
-    <HStack
+    <Box
       as={RouterLink}
       to={`/invocation/${summon.gacha_group_id}`}
-      spacing={3}
-      align="center"
-      borderRadius="md"
-      _hover={{ bg: "bg.inset" }}
+      display="block"
+      borderRadius="lg"
+      borderWidth="1px"
+      borderColor="border.subtle"
+      overflow="hidden"
+      transition="border-color 0.15s"
+      _hover={{ borderColor: "purple.400" }}
     >
-      {hasImage && (
-        <Image
-          src={sources[attempt]}
-          alt=""
-          h={{ base: "48px", sm: "64px" }}
-          flexShrink={0}
-          borderRadius="md"
-          onError={() => setAttempt((a) => a + 1)}
-        />
-      )}
-      <Box minW={0}>
+      <Box position="relative" sx={{ aspectRatio: "3 / 1" }} bg="bg.inset">
+        {attempt < sources.length && (
+          <Image
+            src={sources[attempt]}
+            alt=""
+            w="100%"
+            h="100%"
+            objectFit="cover"
+            loading="lazy"
+            onError={() => setAttempt((a) => a + 1)}
+          />
+        )}
+        {isOngoing(summon) && (
+          <Badge position="absolute" top={2} right={2} colorScheme="green" variant="solid">
+            {t("pages.characterDetail.summonOngoing")}
+          </Badge>
+        )}
+      </Box>
+      <Box px={3} py={2}>
         <Text fontSize="sm" fontWeight="semibold" color="text.strong" noOfLines={2}>{gameText(summon.name, language)}</Text>
         {summon.start_date && (
           <Text fontSize="xs" color="text.muted">{summon.start_date}{summon.end_date ? ` → ${summon.end_date}` : ""}</Text>
         )}
       </Box>
-    </HStack>
+    </Box>
   );
 };
