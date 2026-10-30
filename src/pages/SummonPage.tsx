@@ -43,10 +43,24 @@ const SummonVisual = ({ groupId, language, isTicket }: { groupId: number; langua
 };
 
 // Game badge picture (rate, bonus...); only some are in the game files
-const GameBadge = ({ src }: { src: string | null }) => {
+const GameBadge = ({ src, size }: { src: string | null; size: string }) => {
   const [failed, setFailed] = useState(false);
   if (!src || failed) return null;
-  return <Image src={src} alt="" h="28px" objectFit="contain" onError={() => setFailed(true)} />;
+  return <Image src={src} alt="" h={size} objectFit="contain" onError={() => setFailed(true)} />;
+};
+
+// Price of a draw: spirit orbs show as the game's orb, other currencies keep their name
+const SummonPrice = ({ price, payment }: { price: number | null; payment: string | null }) => {
+  const { t } = useTranslation();
+  const label = t(`pages.summon.payment_${payment ?? "unknown"}`, { defaultValue: payment ?? "" });
+  if (payment === "gacha_ticket") return <>{label}</>;
+  if (payment !== "gold") return <>{price ?? "?"} {label}</>;
+  return (
+    <HStack as="span" display="inline-flex" spacing={1}>
+      <span>{price ?? "?"}</span>
+      <Image src="/orb.png" alt={label} title={label} boxSize="18px" />
+    </HStack>
+  );
 };
 
 const FeaturedCharacter = ({ character, badge, language }: { character: ISummonCharacter; badge: string | null; language: string }) => {
@@ -73,7 +87,7 @@ const FeaturedCharacter = ({ character, badge, language }: { character: ISummonC
         <Text fontSize="sm" fontWeight="semibold" color="text.strong" noOfLines={2}>{character.name}</Text>
         {version && <Text fontSize="xs" color="text.muted" noOfLines={2}>{version}</Text>}
       </Box>
-      <GameBadge src={badge} />
+      <GameBadge src={badge} size="72px" />
     </VStack>
   );
 };
@@ -128,7 +142,6 @@ const SummonPage = () => {
   const characters = orderedCharacters(summon);
   const isStepUp = (details?.steps.length ?? 0) > 0;
   const modes = (details?.modes ?? []).filter((mode) => !(isStepUp && mode.kind === "multiple"));
-  const paymentLabel = (payment: string | null) => t(`pages.summon.payment_${payment ?? "unknown"}`, { defaultValue: payment ?? "" });
 
   return (
     <Container maxW="container.lg" py={8}>
@@ -169,8 +182,8 @@ const SummonPage = () => {
               {modes.map((mode) => (
                 <HStack key={mode.kind} justify="space-between">
                   <Text fontSize="sm" color="text.strong">{t("pages.summon.mode", { count: mode.draws })}</Text>
-                  <Text fontSize="sm" color="text.muted">
-                    {mode.payment === "gacha_ticket" ? paymentLabel(mode.payment) : `${mode.price ?? "?"} ${paymentLabel(mode.payment)}`}
+                  <Text as="div" fontSize="sm" color="text.muted">
+                    <SummonPrice price={mode.price} payment={mode.payment} />
                   </Text>
                 </HStack>
               ))}
@@ -198,13 +211,13 @@ const SummonPage = () => {
                         {step.number}
                         {step.is_loop && <Badge ml={2} colorScheme="purple">{t("pages.summon.loop")}</Badge>}
                       </Td>
-                      <Td isNumeric whiteSpace="nowrap">{step.price ?? "?"} {paymentLabel(details.modes.find((m) => m.kind === "multiple")?.payment ?? "gold")}</Td>
+                      <Td isNumeric whiteSpace="nowrap"><SummonPrice price={step.price} payment={details.modes.find((m) => m.kind === "multiple")?.payment ?? "gold"} /></Td>
                       <Td isNumeric>{step.draws}</Td>
                       <Td minW="160px">{gameText(step.rarity_5, language)}</Td>
                       <Td minW="160px">
                         <VStack align="start" spacing={1}>
                           {step.appeal && <Text fontSize="sm">{gameText(step.appeal, language)}</Text>}
-                          <GameBadge src={step.badge} />
+                          <GameBadge src={step.badge} size="96px" />
                         </VStack>
                       </Td>
                     </Tr>
