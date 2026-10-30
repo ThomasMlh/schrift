@@ -77,7 +77,7 @@ const SummonEntry = ({ summon, language }: { summon: Summon; language: string })
   return (
     <Box as={RouterLink} to={`/invocation/${summon.gacha_group_id}`} display="block" role="group" borderRadius="md" _focusVisible={{ boxShadow: "outline" }}>
       <SummonBanner summon={summon} language={language} />
-      <Text mt={2} fontSize="sm" fontWeight="semibold" color="text.strong" noOfLines={2} _groupHover={{ color: "purple.400" }}>
+      <Text mt={2} fontSize="md" fontWeight="semibold" lineHeight="short" color="text.strong" noOfLines={2} _groupHover={{ color: "purple.400" }}>
         {gameText(summon.name, language)}
       </Text>
       {summon.start_date && <Text fontSize="xs" color="text.muted">{dateRange(summon)}</Text>}
@@ -118,12 +118,12 @@ export const CharacterSummons = ({ banners }: { banners: Summon[] }) => {
         </Box>
         <Box minW={0}>
           {availability && (
-            <Text fontSize="xl" fontWeight="bold" lineHeight="short" color={isOngoing(latest) ? "green.400" : "text.strong"}>
+            <Text fontSize="sm" fontWeight="semibold" color={isOngoing(latest) ? "green.400" : "text.muted"}>
               {availability}
             </Text>
           )}
-          <Text mt={1} fontSize="sm" color="text.body" noOfLines={2}>{gameText(latest.name, language)}</Text>
-          {latest.start_date && <Text fontSize="xs" color="text.muted">{dateRange(latest)}</Text>}
+          <Text mt={1} fontSize="xl" fontWeight="bold" lineHeight="short" color="text.strong" noOfLines={3}>{gameText(latest.name, language)}</Text>
+          {latest.start_date && <Text mt={1} fontSize="sm" color="text.muted">{dateRange(latest)}</Text>}
           {firstYear && (
             <Text mt={2} fontSize="xs" color="text.muted">
               {t("pages.characterDetail.summonsTotal", { count: banners.length, year: firstYear })}
