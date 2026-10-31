@@ -1,5 +1,6 @@
 import { Box, Image } from "@chakra-ui/react";
 import type { ICharacter } from "@/interfaces";
+import { bucketUrl } from "@/utils/apiRequest";
 import { CHARACTER_FRAME_BACKGROUND_URL, CHARACTER_FRAME_URL, characterImageUrl } from "@/utils/characterImages";
 
 const AFFINITY_ICONS: Record<string, string> = {
@@ -21,7 +22,7 @@ export const CharacterAvatar = ({ character }: { character: ICharacter }) => {
       <Image src={characterImageUrl(character, "thumb")} alt={character.name} {...LAYER} />
       <Image src={CHARACTER_FRAME_URL} alt="" aria-hidden {...LAYER} />
       {affinity && (
-        <Image src={`/character-frame/${affinity}.png`} alt="" aria-hidden position="absolute" left="1.56%" top="64.84%" w="26.56%" />
+        <Image src={`${bucketUrl}/affinity/${affinity}_large.png`} alt="" aria-hidden position="absolute" left={0} top="65.7%" w="31.25%" />
       )}
     </Box>
   );
