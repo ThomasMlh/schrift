@@ -22,7 +22,7 @@ export const CharacterAvatar = ({ character }: { character: ICharacter }) => {
       <Image src={characterImageUrl(character, "thumb")} alt={character.name} {...LAYER} />
       <Image src={CHARACTER_FRAME_URL} alt="" aria-hidden {...LAYER} />
       {affinity && (
-        <Image src={`${bucketUrl}/affinity/${affinity}_large.png`} alt="" aria-hidden position="absolute" left={0} top="65.7%" w="31.25%" />
+        <Image src={`${bucketUrl}/affinity/${affinity}_medium.png`} alt="" aria-hidden position="absolute" left="2.34%" top="67.58%" w="26.56%" />
       )}
     </Box>
   );
