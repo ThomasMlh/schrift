@@ -494,7 +494,14 @@
       "medals": "Medals",
       "limit": "Limit",
       "unlimited": "Unlimited",
-      "ratesNote": "Taken from the game files. Detailed rates and the full list of characters that can be drawn are not in them."
+      "accessories": "Featured accessories",
+      "section_new": "New characters",
+      "section_selection": "Selection characters ({{count}})",
+      "section_available": "Available characters ({{count}})",
+      "showAll": "Show all ({{count}})",
+      "rates": "Rates",
+      "ratesSource": "Rates shown by the game during the summon, in French.",
+      "ratesNote": "Rates and the full list are not available for this summon."
     },
     "characterDetail": {
       "backToCharacters": "Back to characters",
