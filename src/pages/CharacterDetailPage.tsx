@@ -59,12 +59,12 @@ const CharacterDetailPage = () => {
   });
 
 
-  const [lightbox, setLightbox] = useState<{ src: string; label: string; caption?: string } | null>(null);
+  const [lightbox, setLightbox] = useState<{ src: string; label: string } | null>(null);
   const [selectedBuild, setSelectedBuild] = useState<IBuild | null>(null);
   const [showResurrected, setShowResurrected] = useState(true);
 
-  const openLightbox = useCallback((src: string, label: string, caption?: string) => {
-    setLightbox({ src, label, caption });
+  const openLightbox = useCallback((src: string, label: string) => {
+    setLightbox({ src, label });
   }, []);
 
   const closeLightbox = useCallback(() => setLightbox(null), []);
@@ -424,7 +424,6 @@ const CharacterDetailPage = () => {
       <ImageLightbox
         src={lightbox?.src ?? null}
         label={lightbox?.label ?? ""}
-        caption={lightbox?.caption}
         characterName={character?.name ?? ""}
         onClose={closeLightbox}
         onDownload={handleDownload}

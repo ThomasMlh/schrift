@@ -20,7 +20,6 @@ const firstExisting = async (urls: string[]) => {
 };
 
 // Fields of the character in database.json, pointing to the bucket, formatted to paste into the file.
-// The game quote picture is the same in every language: English falls back to it without a subtitled one.
 const jsonLines = async (character: ICharacter) => {
   const characterUrl = (folder: string) => `${bucketUrl}/characters/${folder}/${character._id}.png`;
   const firstSummon = character.banners?.[0];
@@ -28,8 +27,8 @@ const jsonLines = async (character: ICharacter) => {
     ["Link", [characterUrl("thumb")]],
     ["URL Portail", firstSummon ? [`${bucketUrl}/banners/gacha_${firstSummon.gacha_group_id}.png`] : []],
     ["URL Artwork", [characterUrl("artwork")]],
-    ["URL Phrase FR", [characterUrl("phrase")]],
-    ["URL Phrase EN", [characterUrl("phrase-en"), characterUrl("phrase")]],
+    ["URL Phrase FR", [characterUrl("phrase/fr")]],
+    ["URL Phrase EN", [characterUrl("phrase/en")]],
     ["URL ATK", [characterUrl("attack")]],
   ];
   const found = await Promise.all(candidates.map(async ([field, urls]) => {
