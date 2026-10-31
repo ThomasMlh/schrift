@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import type { ICharactersResponse, ICharacter, IFilterGroups, ITraitFilterCategory, ISummon } from '../../interfaces';
+import type { ICharactersResponse, ICharacter, IFilterGroups, ITraitFilterCategory, ISummon, ISummonListItem, SummonListCategory } from '../../interfaces';
 import { apiUrl, fetcher } from './shared';
 
 export const useCharacters = (options?: {
@@ -58,6 +58,44 @@ export const useSummon = (gachaGroupId?: string) => {
   const url = gachaGroupId ? `${apiUrl}/api/banners/game/${encodeURIComponent(gachaGroupId)}` : null;
   const { data, error, isLoading } = useSWR<{ success: boolean; data: ISummon }>(url, fetcher, { revalidateOnFocus: false });
   return { summon: data?.data, isLoading, error };
+};
+
+interface SummonCatalogQuery {
+  category: SummonListCategory;
+  search: string;
+  type: string;
+  year: string;
+  ongoing: boolean;
+  page: number;
+  limit: number;
+}
+
+interface SummonCatalogResponse {
+  success: boolean;
+  data: ISummonListItem[];
+  total: number;
+  counts: Partial<Record<SummonListCategory, number>>;
+  years: number[];
+}
+
+export const useSummonCatalog = ({ category, search, type, year, ongoing, page, limit }: SummonCatalogQuery) => {
+  const params = new URLSearchParams({ category, page: String(page), limit: String(limit) });
+  if (search) params.set("search", search);
+  if (type) params.set("type", type);
+  if (year) params.set("year", year);
+  if (ongoing) params.set("ongoing", "true");
+  const { data, error, isLoading } = useSWR<SummonCatalogResponse>(`${apiUrl}/api/banners/game?${params}`, fetcher, {
+    revalidateOnFocus: false,
+    keepPreviousData: true,
+  });
+  return {
+    summons: data?.data ?? [],
+    total: data?.total ?? 0,
+    counts: data?.counts ?? {},
+    years: data?.years ?? [],
+    isLoading,
+    error,
+  };
 };
 
 export const useCharacterMeta = () => {
