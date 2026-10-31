@@ -38,11 +38,12 @@ import { CharacterRotations } from "@/components/character/CharacterRotations";
 import { FiActivity, FiBarChart2, FiCrosshair, FiShield, FiStar, FiZap } from "react-icons/fi";
 import { CharacterGameTraits } from "@/components/character/CharacterGameTraits";
 import { CharacterAttacks } from "@/components/character/CharacterAttacks";
+import { CharacterAvatar } from "@/components/character/CharacterAvatar";
 import { CharacterVisuals } from "@/components/character/CharacterVisuals";
 import { CharacterBuilds } from "@/components/character/CharacterBuilds";
 import { CharacterJsonCopyButton } from "@/components/character/CharacterJsonCopyButton";
 import { useAuth } from "@/providers/AuthProvider";
-import { CHARACTER_FRAME_URL, characterImageUrl, REBIRTH_STAR_URL } from "@/utils/characterImages";
+import { characterImageUrl, REBIRTH_STAR_URL } from "@/utils/characterImages";
 
 const CharacterDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -270,14 +271,7 @@ const CharacterDetailPage = () => {
             >
               <Flex gap={4} align="flex-end" minW={0}>
                 <Box position="relative" zIndex={1} flexShrink={0} mt={{ base: -10, md: -14 }}>
-                  <Box
-                    boxSize={{ base: "96px", md: "128px" }}
-                    backgroundImage={`url(${CHARACTER_FRAME_URL})`}
-                    backgroundSize="cover"
-                    filter="drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45))"
-                  >
-                    <Image src={characterImageUrl(character, "thumb")} alt={character.name} boxSize="100%" fallback={<Box />} />
-                  </Box>
+                  <CharacterAvatar character={character} />
                   {character.resurrection_release && (
                     <Tooltip label={t("components.characterCard.rebirth", { date: character.resurrection_release })} hasArrow>
                       <Image
