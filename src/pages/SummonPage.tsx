@@ -80,7 +80,7 @@ const FeaturedCharacter = ({ character, badge, language }: { character: ISummonC
       <Box position="relative">
         <Image src={`${bucketUrl}/characters/thumb/${character._id}.png`} alt={character.name} boxSize="72px" borderRadius="lg" loading="lazy" />
         {affinityIcon && (
-          <Image src={affinityIcon} alt={character.affinity} position="absolute" top="2px" left="2px" boxSize="18px" borderRadius="full" bg="blackAlpha.600" p="1px" />
+          <Image src={affinityIcon} alt={character.affinity} position="absolute" top="2px" left="2px" boxSize="18px" objectFit="contain" />
         )}
       </Box>
       <Box textAlign="center">

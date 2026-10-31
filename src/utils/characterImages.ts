@@ -12,3 +12,7 @@ export const characterQuoteFolder = (language: string): CharacterImageFolder =>
   (language.startsWith("en") ? "phrase/en" : "phrase/fr");
 
 export const REBIRTH_STAR_URL = `${bucketUrl}/others/rebirth_star.png`;
+
+// Parts of the in-game thumbnail: background behind the cut-out unit, then the frame with its stars
+export const CHARACTER_FRAME_BACKGROUND_URL = `${bucketUrl}/rmfs/fr/Thumbnail/ch_frame_bg5.png`;
+export const CHARACTER_FRAME_URL = `${bucketUrl}/game-ui/thumbnail/frame.png`;

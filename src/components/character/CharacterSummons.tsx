@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { Badge, Box, Button, Grid, SimpleGrid, Text } from "@chakra-ui/react";
+import { Badge, Box, Button, Flex, Grid, HStack, SimpleGrid, Text } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import type { ICharacter } from "@/interfaces";
 import { SummonBanner } from "@/components/summons/SummonBanner";
@@ -9,7 +9,7 @@ import { isSummonOngoing, relativeTime, summonDateRange, summonTime } from "@/ut
 
 type Summon = NonNullable<ICharacter["summon_history"]>[number];
 
-const VISIBLE_HISTORY = 6;
+const VISIBLE_HISTORY = 8;
 
 const summonYear = (summon: Summon) => summon.start_date?.split("/")[2] ?? null;
 
@@ -28,16 +28,38 @@ const groupByYear = (summons: Summon[]) => {
 const SummonEntry = ({ summon, language }: { summon: Summon; language: string }) => {
   const { t } = useTranslation();
   return (
-    <Box as={RouterLink} to={`/invocation/${summon.gacha_group_id}`} display="block" role="group" borderRadius="md" _focusVisible={{ boxShadow: "outline" }}>
-      <SummonBanner groupId={summon.gacha_group_id} language={language} />
-      <Text mt={2} fontSize="md" fontWeight="semibold" lineHeight="short" color="text.strong" noOfLines={2} _groupHover={{ color: "purple.400" }}>
-        {gameText(summon.name, language)}
-      </Text>
-      {summon.start_date && <Text fontSize="xs" color="text.muted">{summonDateRange(summon)}</Text>}
-      {isSummonOngoing(summon) && <Badge mt={1} colorScheme="green">{t("pages.characterDetail.summonOngoing")}</Badge>}
-    </Box>
+    <Flex
+      as={RouterLink}
+      to={`/invocation/${summon.gacha_group_id}`}
+      gap={3}
+      align="center"
+      minW={0}
+      p={1.5}
+      borderRadius="md"
+      role="group"
+      _hover={{ bg: "bg.inset" }}
+      _focusVisible={{ boxShadow: "outline" }}
+    >
+      <Box w="132px" flexShrink={0}>
+        <SummonBanner groupId={summon.gacha_group_id} language={language} />
+      </Box>
+      <Box minW={0}>
+        <Text fontSize="sm" fontWeight="semibold" lineHeight="short" color="text.strong" noOfLines={2} _groupHover={{ color: "purple.400" }}>
+          {gameText(summon.name, language)}
+        </Text>
+        {summon.start_date && <Text fontSize="xs" color="text.muted">{summonDateRange(summon)}</Text>}
+        {isSummonOngoing(summon) && <Badge mt={1} colorScheme="green">{t("pages.characterDetail.summonOngoing")}</Badge>}
+      </Box>
+    </Flex>
   );
 };
+
+const SummaryFigure = ({ value, label }: { value: string | number; label: string }) => (
+  <Box>
+    <Text fontSize="2xl" fontWeight="bold" lineHeight="1" color="text.strong">{value}</Text>
+    <Text mt={1} fontSize="xs" color="text.muted">{label}</Text>
+  </Box>
+);
 
 // Where the unit's availability stands, from its latest summon
 const availabilityLabel = (latest: Summon, language: string, t: (key: string, options?: Record<string, string>) => string) => {
@@ -77,29 +99,26 @@ export const CharacterSummons = ({ banners }: { banners: Summon[] }) => {
           )}
           <Text mt={1} fontSize="xl" fontWeight="bold" lineHeight="short" color="text.strong" noOfLines={3}>{gameText(latest.name, language)}</Text>
           {latest.start_date && <Text mt={1} fontSize="sm" color="text.muted">{summonDateRange(latest)}</Text>}
-          {firstYear && (
-            <Text mt={2} fontSize="xs" color="text.muted">
-              {t("pages.characterDetail.summonsTotal", { count: banners.length, year: firstYear })}
-            </Text>
-          )}
+          <HStack mt={4} spacing={8}>
+            <SummaryFigure value={banners.length} label={t("pages.characterDetail.summonsCount", { count: banners.length })} />
+            {firstYear && <SummaryFigure value={firstYear} label={t("pages.characterDetail.summonsFirstYear")} />}
+          </HStack>
         </Box>
       </Grid>
 
       {history.length > 0 && (
         <Box mt={6}>
           {groupByYear(visible).map(({ year, summons }) => (
-            <Grid key={year ?? "undated"} templateColumns={{ base: "1fr", md: "56px 1fr" }} columnGap={3}>
-              <Text fontSize="lg" fontWeight="bold" color="text.muted" lineHeight="1.2" mb={{ base: 2, md: 0 }}>
+            <Box key={year ?? "undated"} mb={4}>
+              <Text mb={1} fontSize="sm" fontWeight="bold" color="text.muted">
                 {year ?? t("pages.characterDetail.summonsUndated")}
               </Text>
-              <Box borderLeftWidth={{ base: 0, md: "2px" }} borderColor="border.subtle" pl={{ base: 0, md: 4 }} pb={6}>
-                <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={3}>
-                  {summons.map((summon) => (
-                    <SummonEntry key={summon.gacha_group_id} summon={summon} language={language} />
-                  ))}
-                </SimpleGrid>
-              </Box>
-            </Grid>
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacingX={3} spacingY={1}>
+                {summons.map((summon) => (
+                  <SummonEntry key={summon.gacha_group_id} summon={summon} language={language} />
+                ))}
+              </SimpleGrid>
+            </Box>
           ))}
           {hiddenCount > 0 && (
             <Button size="sm" variant="ghost" onClick={() => setShowAll((shown) => !shown)}>

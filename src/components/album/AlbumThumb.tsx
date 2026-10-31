@@ -62,9 +62,7 @@ export const AlbumThumb = ({ character, spe, children }: AlbumThumbProps) => (
         left="3px"
         w="18px"
         h="18px"
-        p="1px"
-        borderRadius="full"
-        bg="blackAlpha.600"
+        objectFit="contain"
         loading="lazy"
         decoding="async"
         opacity={spe > 0 ? 1 : 0.6}

@@ -78,7 +78,7 @@ export const CharacterCard = ({ character }: { character: ICharacter }) => {
           {character.affinity && (
             <Tooltip label={t(`affinities.${character.affinity}`, character.affinity)} hasArrow>
               <Box position="absolute" bottom="0" right="-4%" w="32%" filter="drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6))">
-                <AffinityIcon affinity={character.affinity} size="100%" showLabel={false} />
+                <AffinityIcon affinity={character.affinity} size="100%" showLabel={false} variant="medium" />
               </Box>
             </Tooltip>
           )}
