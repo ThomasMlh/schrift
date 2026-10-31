@@ -412,6 +412,7 @@
       "albumSubtitleLocked": "The characters owned by this account and their spec. Click “Edit album” to update it.",
       "albumEdit": "Edit album",
       "albumSave": "Save",
+      "albumSaveReminder": "Don't forget to save the album when you're done.",
       "albumPending_one": "{{count}} pending change",
       "albumPending_other": "{{count}} pending changes",
       "albumNoChanges": "Click a character to change its spec, then save.",
