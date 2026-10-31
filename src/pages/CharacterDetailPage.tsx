@@ -42,7 +42,7 @@ import { CharacterVisuals } from "@/components/character/CharacterVisuals";
 import { CharacterBuilds } from "@/components/character/CharacterBuilds";
 import { CharacterJsonCopyButton } from "@/components/character/CharacterJsonCopyButton";
 import { useAuth } from "@/providers/AuthProvider";
-import { characterImageUrl, REBIRTH_STAR_URL } from "@/utils/characterImages";
+import { CHARACTER_FRAME_URL, characterImageUrl, REBIRTH_STAR_URL } from "@/utils/characterImages";
 
 const CharacterDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -233,10 +233,12 @@ const CharacterDetailPage = () => {
           <Box bg="bg.card" borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" overflow="hidden" boxShadow="md">
             {/* Full artwork (contain) over a blurred copy of itself, so nothing is cropped */}
             <Box
-              h={{ base: "180px", sm: "240px", md: "320px" }}
+              sx={{ aspectRatio: "16 / 9" }}
               bgGradient="linear(to-r, purple.600, blue.500)"
               position="relative"
               overflow="hidden"
+              cursor="zoom-in"
+              onClick={() => openLightbox(characterImageUrl(character, "artwork"), t("pages.characterDetail.labelArtwork"))}
             >
               <Box
                 position="absolute"
@@ -268,17 +270,14 @@ const CharacterDetailPage = () => {
             >
               <Flex gap={4} align="flex-end" minW={0}>
                 <Box position="relative" zIndex={1} flexShrink={0} mt={{ base: -10, md: -14 }}>
-                  <Image
-                    src={characterImageUrl(character, "thumb")}
-                    alt={character.name}
-                    boxSize={{ base: "88px", md: "112px" }}
-                    borderRadius="xl"
-                    borderWidth="4px"
-                    borderColor="bg.card"
-                    bg="bg.inset"
-                    objectFit="cover"
-                    fallback={<Box boxSize={{ base: "88px", md: "112px" }} borderRadius="xl" bg="bg.inset" />}
-                  />
+                  <Box
+                    boxSize={{ base: "96px", md: "128px" }}
+                    backgroundImage={`url(${CHARACTER_FRAME_URL})`}
+                    backgroundSize="cover"
+                    filter="drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45))"
+                  >
+                    <Image src={characterImageUrl(character, "thumb")} alt={character.name} boxSize="100%" fallback={<Box />} />
+                  </Box>
                   {character.resurrection_release && (
                     <Tooltip label={t("components.characterCard.rebirth", { date: character.resurrection_release })} hasArrow>
                       <Image
