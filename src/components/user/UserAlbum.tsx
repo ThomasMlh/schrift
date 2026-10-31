@@ -147,6 +147,11 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
     });
   }, [saved]);
 
+  const startEditing = () => {
+    setIsEditing(true);
+    toast({ status: "info", title: t("pages.user.albumSaveReminder"), duration: 4000, isClosable: true });
+  };
+
   const stopEditing = () => {
     setDraft({});
     setActiveId(null);
@@ -195,7 +200,7 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
               {t("pages.user.albumMaxed", { count: maxedCount })}
             </Text>
             {canEdit && !isEditing && (
-              <Button size="sm" colorScheme="purple" leftIcon={<FiEdit2 />} onClick={() => setIsEditing(true)}>
+              <Button size="sm" colorScheme="purple" leftIcon={<FiEdit2 />} onClick={startEditing}>
                 {t("pages.user.albumEdit")}
               </Button>
             )}
@@ -203,6 +208,35 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
         </Flex>
         <Progress value={percent} size="sm" colorScheme="purple" borderRadius="full" />
       </Box>
+
+      {isEditing && (
+        <Flex
+          position="sticky"
+          top="80px"
+          zIndex="sticky"
+          align="center"
+          justify="space-between"
+          wrap="wrap"
+          gap={3}
+          bg="bg.card"
+          borderRadius="xl"
+          borderWidth="1px"
+          borderColor="purple.400"
+          boxShadow="lg"
+          px={5}
+          py={3}
+        >
+          <Text fontSize="sm" color="text.muted">
+            {pendingCount > 0 ? t("pages.user.albumPending", { count: pendingCount }) : t("pages.user.albumNoChanges")}
+          </Text>
+          <HStack spacing={2}>
+            <Button size="sm" variant="ghost" onClick={stopEditing} isDisabled={isSaving}>{t("common.cancel")}</Button>
+            <Button size="sm" colorScheme="purple" onClick={handleSave} isLoading={isSaving}>
+              {t("pages.user.albumSave")}
+            </Button>
+          </HStack>
+        </Flex>
+      )}
 
       <AlbumFilters
         value={filters}
@@ -233,34 +267,6 @@ export const UserAlbum = ({ bbsId, canEdit }: UserAlbumProps) => {
         </Grid>
       )}
 
-      {isEditing && (
-        <Flex
-          position="sticky"
-          bottom={4}
-          zIndex="sticky"
-          align="center"
-          justify="space-between"
-          wrap="wrap"
-          gap={3}
-          bg="bg.card"
-          borderRadius="xl"
-          borderWidth="1px"
-          borderColor="purple.400"
-          boxShadow="lg"
-          px={5}
-          py={3}
-        >
-          <Text fontSize="sm" color="text.muted">
-            {pendingCount > 0 ? t("pages.user.albumPending", { count: pendingCount }) : t("pages.user.albumNoChanges")}
-          </Text>
-          <HStack spacing={2}>
-            <Button size="sm" variant="ghost" onClick={stopEditing} isDisabled={isSaving}>{t("common.cancel")}</Button>
-            <Button size="sm" colorScheme="purple" onClick={handleSave} isLoading={isSaving}>
-              {t("pages.user.albumSave")}
-            </Button>
-          </HStack>
-        </Flex>
-      )}
     </VStack>
   );
 };

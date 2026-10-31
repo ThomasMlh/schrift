@@ -412,6 +412,7 @@
       "albumSubtitleLocked": "Les personnages possédés par ce compte et leur spé. Clique sur « Modifier l'album » pour le mettre à jour.",
       "albumEdit": "Modifier l'album",
       "albumSave": "Enregistrer",
+      "albumSaveReminder": "N'oublie pas d'enregistrer l'album une fois tes modifications terminées.",
       "albumPending_one": "{{count}} modification en attente",
       "albumPending_other": "{{count}} modifications en attente",
       "albumNoChanges": "Clique sur un personnage pour changer sa spé, puis enregistre.",
