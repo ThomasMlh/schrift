@@ -6,16 +6,18 @@ interface AffinityIconProps {
   affinity: string;
   size?: string;
   showLabel?: boolean;
+  variant?: "small" | "medium" | "large";
 }
 
 export const AffinityIcon = ({ 
   affinity, 
   size = "24px", 
-  showLabel = false 
+  showLabel = false,
+  variant = "small",
 }: AffinityIconProps) => {
   const { t } = useTranslation();
   const label = t(`affinities.${affinity}`, affinity);
-  const imageUrl = getAffinityIcon(affinity);
+  const imageUrl = getAffinityIcon(affinity, variant);
 
   if (!imageUrl) {
     return showLabel ? (
