@@ -7,7 +7,7 @@ import { SummonBanner } from "@/components/summons/SummonBanner";
 import { gameText } from "@/utils/gameText";
 import { isSummonOngoing, relativeTime, summonDateRange, summonTime } from "@/utils/summons";
 
-type Summon = NonNullable<ICharacter["banners"]>[number];
+type Summon = NonNullable<ICharacter["summon_history"]>[number];
 
 const VISIBLE_HISTORY = 6;
 
