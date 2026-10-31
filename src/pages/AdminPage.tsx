@@ -110,7 +110,7 @@ const AdminPage = () => {
     try {
       const { statistics } = await enrichBotDatabase({ dryRun: false });
       setBotDatabasePreview(null);
-      toast({ title: `database.json complété : ${statistics.updated} ligne(s) mise(s) à jour`, status: "success", duration: 8000, isClosable: true });
+      toast({ title: `database.json complété : ${statistics.updated} ligne(s) mise(s) à jour, ${statistics.rarities} rareté(s) reprise(s)`, status: "success", duration: 8000, isClosable: true });
     } catch (error: unknown) {
       toast({ title: (error as Error).message || "Erreur lors de la mise à jour de database.json", status: "error" });
     } finally {

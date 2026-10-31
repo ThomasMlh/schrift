@@ -45,7 +45,7 @@ export interface ICharacter {
 // Filling of the bot character file (database.json) with the site ids and bucket URLs
 export interface IBotDatabaseResult {
   dryRun: boolean;
-  statistics: { rows: number; matched: number; matchedByIdentity: number; updated: number; unresolved: number; missing: number };
+  statistics: { rows: number; matched: number; matchedByIdentity: number; updated: number; unresolved: number; missing: number; rarities: number };
   fieldCounts: Record<string, number>;
   preview: {
     updated: { label: string; method: "id" | "search_name" | "identity"; fields: string[] }[];
