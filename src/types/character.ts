@@ -38,6 +38,8 @@ export interface ICharacter {
   is_growth_event?: boolean;
   quote?: GameText | null;
   banners?: { gacha_group_id: number; name: GameText | null; image_path: string | null; start_date: string | null; end_date: string | null }[];
+  // Every character summon of the unit, selections included
+  summon_history?: { gacha_group_id: number; name: GameText | null; start_date: string | null; end_date: string | null }[];
 }
 
 // Filling of the bot character file (database.json) with the site ids and bucket URLs

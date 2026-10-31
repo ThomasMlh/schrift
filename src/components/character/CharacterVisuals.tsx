@@ -19,7 +19,7 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
   const [failed, setFailed] = useState<string[]>([]);
-  const summons = character.banners ?? [];
+  const summons = character.summon_history ?? character.banners ?? [];
 
   return (
     <Box>
