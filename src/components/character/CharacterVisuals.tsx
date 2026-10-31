@@ -4,13 +4,12 @@ import { DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
 import { useTranslation } from "react-i18next";
 import type { ICharacter } from "@/interfaces";
 import { characterImageUrl, characterQuoteFolder } from "@/utils/characterImages";
-import { gameText } from "@/utils/gameText";
 import { CharacterSummons } from "./CharacterSummons";
 
 interface CharacterVisualsProps {
   character: ICharacter;
   onDownload: (src: string, filename: string) => void;
-  onOpen: (src: string, label: string, caption?: string) => void;
+  onOpen: (src: string, label: string) => void;
 }
 
 // Character visuals (special attack, artwork, quote, summons) with download and zoom.
@@ -20,7 +19,6 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
   const [failed, setFailed] = useState<string[]>([]);
-  const quote = gameText(character.quote, i18n.language);
   const summons = character.banners ?? [];
 
   return (
@@ -37,7 +35,7 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
         {[
           { src: characterImageUrl(character, "attack"), label: t("pages.characterDetail.labelSpecialAttack"), filename: `attaque-${character.name}.png`, key: "attack" },
           { src: characterImageUrl(character, "artwork"), label: t("pages.characterDetail.labelArtwork"), filename: `artwork-${character.name}.png`, key: "artwork" },
-          { src: characterImageUrl(character, characterQuoteFolder(character, i18n.language)), label: t("pages.characterDetail.labelPhrase"), filename: `phrase-${character.name}.png`, key: "phrase" },
+          { src: characterImageUrl(character, characterQuoteFolder(i18n.language)), label: t("pages.characterDetail.labelPhrase"), filename: `phrase-${character.name}.png`, key: "phrase" },
         ].filter(({ key }) => !failed.includes(key)).map(({ src, label, filename, key }) => (
           <Box key={key} borderRadius="xl" overflow="hidden" border="1px solid"
             borderColor={isDark ? 'whiteAlpha.100' : 'gray.200'}
@@ -58,7 +56,7 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
                 <Tooltip label={t("pages.characterDetail.tooltipExpand")}>
                   <IconButton aria-label={t("pages.characterDetail.tooltipExpand")} icon={<ExternalLinkIcon />} size="xs"
                     variant="ghost" borderRadius="full"
-                    onClick={() => onOpen(src, label, key === "phrase" ? quote : undefined)} />
+                    onClick={() => onOpen(src, label)} />
                 </Tooltip>
               </HStack>
             </Flex>
@@ -67,12 +65,9 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
               alt={label}
               w="100%" h="auto"
               cursor="zoom-in"
-              onClick={() => onOpen(src, label, key === "phrase" ? quote : undefined)}
+              onClick={() => onOpen(src, label)}
               onError={() => setFailed((keys) => [...keys, key])}
             />
-            {key === "phrase" && quote && (
-              <Text px={4} py={3} fontSize="sm" fontStyle="italic" color="text.body">« {quote} »</Text>
-            )}
           </Box>
         ))}
       </SimpleGrid>

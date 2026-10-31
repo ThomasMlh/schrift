@@ -18,13 +18,11 @@ interface ImageLightboxProps {
   src: string | null;
   label: string;
   characterName: string;
-  // Text shown under the image, e.g. the translation of a quote
-  caption?: string;
   onClose: () => void;
   onDownload: (src: string, filename: string) => void;
 }
 
-export const ImageLightbox = ({ src, label, characterName, caption, onClose, onDownload }: ImageLightboxProps) => {
+export const ImageLightbox = ({ src, label, characterName, onClose, onDownload }: ImageLightboxProps) => {
   const { t } = useTranslation();
 
   return (
@@ -84,13 +82,8 @@ export const ImageLightbox = ({ src, label, characterName, caption, onClose, onD
                 w="auto"
                 maxW="100%"
                 objectFit="contain"
-                borderBottomRadius={caption ? undefined : "xl"}
+                borderBottomRadius="xl"
               />
-            )}
-            {src && caption && (
-              <Text w="100%" px={6} py={4} bg="blackAlpha.800" borderBottomRadius="xl" color="white" fontSize="lg" fontStyle="italic" textAlign="center">
-                « {caption} »
-              </Text>
             )}
           </VStack>
         </ModalBody>

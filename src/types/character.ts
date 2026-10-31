@@ -22,7 +22,6 @@ export interface ICharacter {
   version_name?: string;
   created_at?: string;
   updated_at?: string;
-  source_images?: { quote_en?: string | null };
   // Bumped each time the bucket images are re-uploaded, used to bypass the browser cache
   images_version?: number;
   // Filled by the game tables sync
