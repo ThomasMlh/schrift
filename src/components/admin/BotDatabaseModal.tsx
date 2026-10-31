@@ -35,6 +35,7 @@ export const BotDatabaseModal = ({ preview, isOpen, onClose, onApply, isApplying
 }) => {
   if (!preview) return null;
   const { statistics: stats, preview: details, fieldCounts } = preview;
+  const upToDate = stats.updated === 0 && stats.rarities === 0;
   const fields = Object.entries(fieldCounts).filter(([, count]) => count > 0).sort((a, b) => b[1] - a[1]);
 
   return (
@@ -57,6 +58,7 @@ export const BotDatabaseModal = ({ preview, isOpen, onClose, onApply, isApplying
                 {stats.matchedByIdentity > 0 && <StatHelpText mb={0}>dont {stats.matchedByIdentity} nouvelle(s)</StatHelpText>}
               </Stat>
               <Stat><StatLabel>À compléter</StatLabel><StatNumber>{stats.updated}</StatNumber></Stat>
+              <Stat><StatLabel>Raretés à reprendre</StatLabel><StatNumber>{stats.rarities}</StatNumber></Stat>
             </SimpleGrid>
 
             {fields.length > 0 && (
@@ -66,7 +68,7 @@ export const BotDatabaseModal = ({ preview, isOpen, onClose, onApply, isApplying
                 ))}
               </Wrap>
             )}
-            {stats.updated === 0 && (
+            {upToDate && (
               <Alert status="success" borderRadius="md" fontSize="sm"><AlertIcon />Le fichier est déjà à jour.</Alert>
             )}
             {stats.unresolved > 0 && (
@@ -93,7 +95,7 @@ export const BotDatabaseModal = ({ preview, isOpen, onClose, onApply, isApplying
         </ModalBody>
         <ModalFooter gap={2}>
           <Button variant="ghost" onClick={onClose}>Fermer</Button>
-          <Button colorScheme="purple" onClick={onApply} isLoading={isApplying} isDisabled={stats.updated === 0}>
+          <Button colorScheme="purple" onClick={onApply} isLoading={isApplying} isDisabled={upToDate}>
             Appliquer
           </Button>
         </ModalFooter>
