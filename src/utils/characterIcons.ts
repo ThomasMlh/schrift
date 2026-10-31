@@ -50,8 +50,10 @@ const categorySlugMap: Record<string, string> = {
  * Icon URL of an affinity
  */
 export const getAffinityIcon = (affinity: string): string | null => {
-  const slug = affinitySlugMap[affinity] || "goton";
-  return `${bucketUrl}/affinity/${slug}.png`;
+  const slug = affinitySlugMap[affinity];
+  // The game has no icon for the Goton placeholder
+  if (!slug || slug === "goton") return `${bucketUrl}/affinity/goton.png`;
+  return `${bucketUrl}/affinity/${slug}_small.png`;
 };
 
 /**

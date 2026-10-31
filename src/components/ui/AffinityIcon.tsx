@@ -33,6 +33,7 @@ export const AffinityIcon = ({
           alt={label}
           width={size}
           height={size}
+          objectFit="contain"
           fallback={<Text fontSize="sm">{label}</Text>}
         />
         <Text fontSize="sm">
@@ -48,6 +49,7 @@ export const AffinityIcon = ({
       alt={label}
       width={size}
       height={size}
+      objectFit="contain"
       fallback={<Text fontSize="sm">{label}</Text>}
     />
   );
