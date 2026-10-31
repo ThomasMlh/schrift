@@ -11,7 +11,7 @@ import { bucketUrl } from "@/utils/apiRequest";
 import { getAffinityIcon } from "@/utils/characterIcons";
 import { gameText } from "@/utils/gameText";
 import { characterVersionLabel } from "@/utils/characterVersion";
-import type { ISummon, ISummonCharacter } from "@/interfaces";
+import type { ISummon, ISummonAccessory, ISummonCharacter, ISummonRates, ISummonRateUnit } from "@/interfaces";
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <Box bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={5}>
@@ -78,7 +78,7 @@ const FeaturedCharacter = ({ character, badge, language }: { character: ISummonC
       _hover={{ borderColor: "purple.400" }}
     >
       <Box position="relative">
-        <Image src={`${bucketUrl}/characters/thumb/${character._id}.png`} alt={character.name} boxSize="72px" borderRadius="lg" />
+        <Image src={`${bucketUrl}/characters/thumb/${character._id}.png`} alt={character.name} boxSize="72px" borderRadius="lg" loading="lazy" />
         {affinityIcon && (
           <Image src={affinityIcon} alt={character.affinity} position="absolute" top="2px" left="2px" boxSize="18px" borderRadius="full" bg="blackAlpha.600" p="1px" />
         )}
@@ -92,9 +92,109 @@ const FeaturedCharacter = ({ character, badge, language }: { character: ISummonC
   );
 };
 
-// Units the summon features, in the game's layout order; any other unit it lists comes after
+// Unit of the rate page without a sheet on the site
+const UnlinkedUnit = ({ unit }: { unit: ISummonRateUnit }) => (
+  <VStack spacing={1} p={3} borderRadius="lg" borderWidth="1px" borderColor="border.subtle" justify="center">
+    <Text fontSize="sm" fontWeight="semibold" color="text.strong" textAlign="center" noOfLines={2}>{unit.name}</Text>
+    <Text fontSize="xs" color="text.muted" textAlign="center" noOfLines={2}>
+      {[`${unit.rarity}★`, unit.version].filter(Boolean).join(" ")}
+    </Text>
+  </VStack>
+);
+
+const VISIBLE_UNITS = 30;
+
+const RateUnits = ({ units, summon, language }: { units: ISummonRateUnit[]; summon: ISummon; language: string }) => {
+  const { t } = useTranslation();
+  const [showAll, setShowAll] = useState(false);
+  const byGameId = new Map(summon.characters.map((c) => [c.game_id, c]));
+  const badges = new Map((summon.details?.featured ?? []).map((f) => [f.game_id, f.badge]));
+  return (
+    <>
+      <SimpleGrid columns={{ base: 2, sm: 3, md: 5 }} spacing={3}>
+        {(showAll ? units : units.slice(0, VISIBLE_UNITS)).map((unit, index) => {
+          const character = unit.game_id ? byGameId.get(unit.game_id) : undefined;
+          return character
+            ? <FeaturedCharacter key={character._id} character={character} badge={badges.get(character.game_id) ?? null} language={language} />
+            : <UnlinkedUnit key={index} unit={unit} />;
+        })}
+      </SimpleGrid>
+      {!showAll && units.length > VISIBLE_UNITS && (
+        <Button size="sm" variant="ghost" mt={3} onClick={() => setShowAll(true)}>
+          {t("pages.summon.showAll", { count: units.length })}
+        </Button>
+      )}
+    </>
+  );
+};
+
+const FeaturedAccessories = ({ accessories, language }: { accessories: ISummonAccessory[]; language: string }) => (
+  <SimpleGrid columns={{ base: 2, sm: 3, md: 5 }} spacing={3}>
+    {accessories.map((accessory) => (
+      <VStack key={accessory._id} spacing={2} p={3} borderRadius="lg" borderWidth="1px" borderColor="border.subtle">
+        {accessory.code && <Image src={`${bucketUrl}/accessories/${accessory.code}/thumb.png`} alt="" boxSize="72px" objectFit="contain" loading="lazy" />}
+        <Text fontSize="sm" fontWeight="semibold" color="text.strong" textAlign="center" noOfLines={2}>
+          {gameText(accessory.names, language) || accessory.name}
+        </Text>
+      </VStack>
+    ))}
+  </SimpleGrid>
+);
+
+type RateRow = ISummonRates["tables"][number]["rows"][number];
+
+// Steps with the same rates share a row: "Palier 1" to "Palier 4" reads "Palier 1 – 4"
+const mergeSteps = (rows: RateRow[]) => {
+  const merged: { row: RateRow; first: string; last: string }[] = [];
+  for (const row of rows) {
+    const label = row.cells[0]?.[0] ?? "";
+    const previous = merged[merged.length - 1];
+    const sameRates = previous && !row.header && !previous.row.header && label.startsWith("Palier")
+      && JSON.stringify(row.cells.slice(1)) === JSON.stringify(previous.row.cells.slice(1));
+    if (sameRates) previous.last = label;
+    else merged.push({ row, first: label, last: label });
+  }
+  return merged.map(({ row, first, last }) => (
+    first === last ? row : { ...row, cells: [[`${first} – ${last.replace("Palier ", "")}`], ...row.cells.slice(1)] }
+  ));
+};
+
+const RateTables = ({ tables }: { tables: ISummonRates["tables"] }) => (
+  <VStack align="stretch" spacing={5}>
+    {tables.map((table, index) => {
+      const columns = Math.max(...table.rows.map((row) => row.cells.length));
+      return (
+        <Box key={index}>
+          {table.title && <Text fontSize="sm" fontWeight="semibold" color="text.strong" mb={2}>{table.title}</Text>}
+          <Box overflowX="auto">
+            <Table size="sm">
+              <Tbody>
+                {mergeSteps(table.rows).map((row, rowIndex) => (
+                  <Tr key={rowIndex}>
+                    {row.cells.map((lines, cellIndex) => {
+                      const Cell = row.header ? Th : Td;
+                      return (
+                        <Cell key={cellIndex} colSpan={row.cells.length === 1 ? columns : undefined} verticalAlign="top" minW="110px">
+                          {lines.map((line, lineIndex) => <Text key={lineIndex} fontSize="xs" textTransform="none">{line}</Text>)}
+                        </Cell>
+                      );
+                    })}
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
+        </Box>
+      );
+    })}
+  </VStack>
+);
+
+// Units the summon features, in the game's layout order; any other unit it lists comes after. Those of
+// the rate page have their own sections.
 const orderedCharacters = (summon: ISummon) => {
   const byGameId = new Map(summon.characters.map((c) => [c.game_id, c]));
+  const inRates = new Set((summon.rates?.sections ?? []).flatMap((section) => section.units.map((unit) => unit.game_id)));
   const featured = summon.details?.featured ?? [];
   const rows = featured
     .map((f) => ({ character: byGameId.get(f.game_id), badge: f.badge }))
@@ -103,7 +203,7 @@ const orderedCharacters = (summon: ISummon) => {
   for (const character of summon.characters) {
     if (!listed.has(character.game_id)) rows.push({ character, badge: null });
   }
-  return rows;
+  return rows.filter(({ character }) => !inRates.has(character.game_id));
 };
 
 const SummonPage = () => {
@@ -165,6 +265,18 @@ const SummonPage = () => {
             <Badge variant="outline">{t("pages.summon.groupId", { id: summon.gacha_group_id })}</Badge>
           </Flex>
         </Box>
+
+        {(summon.rates?.sections ?? []).map((section) => (
+          <Section key={section.kind} title={t(`pages.summon.section_${section.kind}`, { count: section.units.length })}>
+            <RateUnits units={section.units} summon={summon} language={language} />
+          </Section>
+        ))}
+
+        {(summon.accessories?.length ?? 0) > 0 && (
+          <Section title={t("pages.summon.accessories")}>
+            <FeaturedAccessories accessories={summon.accessories ?? []} language={language} />
+          </Section>
+        )}
 
         {characters.length > 0 && (
           <Section title={t("pages.summon.featured")}>
@@ -267,7 +379,14 @@ const SummonPage = () => {
           </Section>
         )}
 
-        <Text fontSize="xs" color="text.muted">{t("pages.summon.ratesNote")}</Text>
+        {(summon.rates?.tables.length ?? 0) > 0 ? (
+          <Section title={t("pages.summon.rates")}>
+            <RateTables tables={summon.rates?.tables ?? []} />
+            <Text fontSize="xs" color="text.muted" mt={4}>{t("pages.summon.ratesSource")}</Text>
+          </Section>
+        ) : (
+          <Text fontSize="xs" color="text.muted">{t("pages.summon.ratesNote")}</Text>
+        )}
       </VStack>
     </Container>
   );

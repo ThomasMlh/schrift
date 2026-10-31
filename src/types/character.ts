@@ -56,7 +56,7 @@ export interface IBotDatabaseResult {
 // Game texts: one entry per language present in the game data (fr at least)
 export type GameText = Partial<Record<string, string>>;
 
-// Game summon and what its tables tell (rates and the full list of units are not in them)
+// Game summon and what its tables tell
 export interface ISummonMode {
   kind: "single" | "multiple";
   type: string | null;
@@ -103,6 +103,30 @@ export interface ISummonCharacter {
   affinity?: string;
 }
 
+export interface ISummonRateUnit {
+  name: string;
+  rarity: number;
+  affinity: string | null;
+  version: string | null;
+  game_id: number | null;
+}
+
+// Rates and units of the game's rate page, in French
+export interface ISummonRates {
+  sections: { kind: "new" | "selection" | "available"; units: ISummonRateUnit[] }[];
+  available_count: number;
+  tables: { title: string | null; rows: { header: boolean; cells: string[][] }[] }[];
+}
+
+export interface ISummonAccessory {
+  _id: string;
+  name: string;
+  names?: GameText | null;
+  code?: string;
+  rarity?: string;
+  game_identity_id: number;
+}
+
 export type SummonListCategory = "character_gacha" | "character_ticket" | "accessory_gacha" | "accessory_ticket";
 
 export interface ISummonListItem {
@@ -119,7 +143,9 @@ export interface ISummonListItem {
 export interface ISummon extends ISummonListItem {
   character_game_ids?: number[];
   details?: ISummonDetails | null;
+  rates?: ISummonRates | null;
   characters: ISummonCharacter[];
+  accessories?: ISummonAccessory[];
 }
 
 export interface ITraitFilterCategory {

@@ -494,7 +494,14 @@
       "medals": "Médailles",
       "limit": "Limite",
       "unlimited": "Illimité",
-      "ratesNote": "Infos tirées des fichiers du jeu. Les taux détaillés et la liste complète des personnages qu'on peut obtenir n'y figurent pas."
+      "accessories": "Accessoires mis en avant",
+      "section_new": "Nouveaux personnages",
+      "section_selection": "Personnages de la sélection ({{count}})",
+      "section_available": "Personnages disponibles ({{count}})",
+      "showAll": "Tout afficher ({{count}})",
+      "rates": "Taux d'obtention",
+      "ratesSource": "Taux affichés par le jeu au moment de l'invocation.",
+      "ratesNote": "Les taux et la liste complète ne sont pas disponibles pour cette invocation."
     },
     "characterDetail": {
       "backToCharacters": "Retour aux personnages",
