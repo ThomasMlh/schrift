@@ -1,9 +1,9 @@
 import {
   Box, VStack, HStack, Text, Button, ButtonGroup, Grid, GridItem, Flex, Image, Input,
-  Avatar, Badge, Divider, Alert, AlertIcon, useColorModeValue, useToast,
+  Avatar, Badge, Divider, Alert, AlertIcon, Spinner, useColorModeValue, useToast,
   NumberInput, NumberInputField, IconButton, Tooltip,
 } from "@chakra-ui/react";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { RepeatIcon, TimeIcon, DeleteIcon, ViewIcon } from "@chakra-ui/icons";
 import { useCycles, useGuilds, usePodiumSettings } from "@/hooks/useAPI";
 import { useAuth } from "@/providers/AuthProvider";
@@ -70,6 +70,29 @@ interface HistoryEntryFull extends HistoryEntry {
 }
 
 const DEFAULT_GUILD_ORDER = ["A", "C", "B", "E", "D"];
+// Column of the players without a guild in the current view
+const UNGUILDED = "—";
+
+const proposalQuery = (
+  cycle: { name: string; year: number },
+  rankingType: RankingType,
+  guildOrder: string[],
+  lockedGuilds: Set<string>,
+  excluded: Map<string, string>,
+  pinned: Map<string, string>,
+) => {
+  const params = new URLSearchParams({
+    cycle_name: cycle.name,
+    year: String(cycle.year),
+    ranking_type: rankingType,
+    guild_names: guildOrder.join(","),
+  });
+  const locked = guildOrder.filter((g) => lockedGuilds.has(g));
+  if (locked.length > 0) params.set("locked_guild_names", locked.join(","));
+  if (excluded.size > 0) params.set("excluded_bbs_ids", [...excluded.keys()].join(","));
+  if (pinned.size > 0) params.set("pinned_bbs_ids", [...pinned.keys()].join(","));
+  return params.toString();
+};
 
 const formatAverage = (value: number | null | undefined) =>
   value == null ? "—" : value.toLocaleString("fr-FR");
@@ -104,9 +127,10 @@ const GuildAverageRow = ({ guild, mutedText }: { guild: DraftProposalGuild; mute
   );
 };
 
-// Read-only admin tool: simulates a split of the guilds on a given cycle by ranking all their
-// current members by score and filling guilds by chunks of 20 in the chosen order. Nothing is
-// changed; the proposal is applied manually from the Draft tab.
+// Read-only admin tool: shows the current guilds on a cycle, and simulates a split by ranking all
+// their members by score and filling guilds by chunks of 20 in the chosen order. Every change is
+// recomputed at once; only "Générer" keeps a proposal in the history. Nothing is changed in the
+// guilds: the proposal is applied manually from the Draft tab.
 const DraftProposalSection = () => {
   const { token, isAdmin } = useAuth();
   const toast = useToast();
@@ -140,10 +164,14 @@ const DraftProposalSection = () => {
   const [guildOrder, setGuildOrder] = useState<string[]>(DEFAULT_GUILD_ORDER);
   // Full split (chunks of 20) or targeted replacement of a few players of one guild
   const [mode, setMode] = useState<"full" | "replacement">("full");
+  const [view, setView] = useState<"current" | "proposal">("current");
   // Locked guilds keep their current members and are skipped by the split
   const [lockedGuilds, setLockedGuilds] = useState<Set<string>>(new Set());
   const [result, setResult] = useState<DraftProposalResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  // Query of the history entry on screen: the live view leaves it until a parameter changes
+  const shownHistoryQuery = useRef<string | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -201,11 +229,15 @@ const DraftProposalSection = () => {
       setRankingType(entry.ranking_type);
       setGuildOrder(entry.guild_order);
       setLockedGuilds(new Set(entry.locked_guild_names ?? []));
+      shownHistoryQuery.current = selectedCycle
+        ? proposalQuery(selectedCycle, entry.ranking_type, entry.guild_order, new Set(entry.locked_guild_names ?? []), excluded, pinned)
+        : null;
       setResult({
         guilds: entry.guilds,
         leftover: entry.leftover,
         meta: { totalCandidates: entry.total_candidates },
       });
+      setView("proposal");
     } catch (err) {
       toast({ title: err instanceof Error ? err.message : "Erreur inconnue", status: "error" });
     } finally {
@@ -263,28 +295,44 @@ const DraftProposalSection = () => {
   };
   const activeLockedGuilds = guildOrder.filter((g) => lockedGuilds.has(g));
 
+  const query = useMemo(
+    () => (selectedCycle ? proposalQuery(selectedCycle, rankingType, guildOrder, lockedGuilds, excluded, pinned) : null),
+    [selectedCycle, rankingType, guildOrder, lockedGuilds, excluded, pinned],
+  );
+
+  // Live view: the cycle shows the guilds at once, and each choice is applied without generating
+  useEffect(() => {
+    if (mode !== "full" || !query || shownHistoryQuery.current === query) return;
+    shownHistoryQuery.current = null;
+    const controller = new AbortController();
+    setIsRefreshing(true);
+    fetch(`${apiUrl}/api/podium/draft-proposal?${query}&preview=1`, { headers: authHeaders, signal: controller.signal })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || "Erreur lors du chargement des guildes");
+        setResult(data);
+      })
+      .catch((err) => {
+        if (controller.signal.aborted) return;
+        toast({ title: "Erreur", description: err instanceof Error ? err.message : "Erreur inconnue", status: "error", duration: 4000 });
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsRefreshing(false);
+      });
+    return () => controller.abort();
+  }, [mode, query, authHeaders, toast]);
+
   const handleGenerate = async () => {
-    if (!selectedCycle) return;
+    if (!query) return;
     setIsLoading(true);
-    setResult(null);
     try {
-      const params = new URLSearchParams({
-        cycle_name: selectedCycle.name,
-        year: String(selectedCycle.year),
-        ranking_type: rankingType,
-        guild_names: guildOrder.join(","),
-      });
-      if (activeLockedGuilds.length > 0) params.set("locked_guild_names", activeLockedGuilds.join(","));
-      if (excluded.size > 0) params.set("excluded_bbs_ids", [...excluded.keys()].join(","));
-      if (pinned.size > 0) params.set("pinned_bbs_ids", [...pinned.keys()].join(","));
-      const response = await fetch(`${apiUrl}/api/podium/draft-proposal?${params}`, {
-        headers: authHeaders,
-      });
+      const response = await fetch(`${apiUrl}/api/podium/draft-proposal?${query}`, { headers: authHeaders });
       const data = await response.json();
       if (!response.ok || !data.success) {
         throw new Error(data.message || "Erreur lors de la génération de la proposition");
       }
       setResult(data);
+      setView("proposal");
       fetchHistory();
     } catch (err) {
       toast({
@@ -298,15 +346,29 @@ const DraftProposalSection = () => {
     }
   };
 
+  const scoreOf = useCallback((p: DraftProposalPlayer) => (rankingType === "average" ? p.averageScore : p.totalScore), [rankingType]);
+
+  const shownGuilds = useMemo(() => {
+    if (!result || view === "proposal") return result?.guilds ?? [];
+    const players = [...result.guilds.flatMap((g) => g.players), ...result.leftover];
+    const inGuild = (name: string | null) => players.filter((p) => p.currentGuildName === name).sort((a, b) => scoreOf(b) - scoreOf(a));
+    const unguilded = inGuild(null);
+    return [
+      ...result.guilds.map((g) => ({ ...g, players: inGuild(g.guild_name) })),
+      ...(unguilded.length > 0 ? [{ guild_name: UNGUILDED, players: unguilded }] : []),
+    ];
+  }, [result, view, scoreOf]);
+
   return (
     <Box borderWidth="1px" borderColor={borderColor} borderRadius="xl" p={5} bg={cardBg}>
       <VStack align="stretch" spacing={4}>
         <Box>
           <Text fontWeight="bold" fontSize="lg">Proposition de draft automatique</Text>
           <Text fontSize="sm" color={mutedText}>
-            Simulation en lecture seule : classe les membres actuels des guildes sélectionnées par score sur un
-            cycle, et propose une répartition par paquets de 20 (les meilleurs dans la 1ère guilde, etc.). Rien
-            n'est appliqué — à toi de faire les mouvements dans l'onglet Draft si tu valides la proposition.
+            Choisis un cycle pour voir les guildes actuelles, puis 📌 pour garder un joueur dans sa guilde actuelle
+            ou ✕ pour le retirer : chaque choix s'applique tout de suite. La proposition répartit les joueurs par
+            paquets de 20 (les meilleurs dans la 1ère guilde, etc.). Rien n'est appliqué aux guildes, et « Générer »
+            garde la proposition dans l'historique.
           </Text>
         </Box>
 
@@ -444,7 +506,7 @@ const DraftProposalSection = () => {
           <Box>
             <HStack justify="space-between" mb={1}>
               <Text fontSize="xs" color={mutedText}>
-                Simulation "et si" — ces choix s'appliquent à la prochaine génération
+                Choix appliqués à la proposition
               </Text>
               <Button
                 size="xs"
@@ -544,7 +606,16 @@ const DraftProposalSection = () => {
               </Alert>
             )}
 
-            <HStack spacing={3}>
+            <HStack spacing={3} flexWrap="wrap">
+              <ButtonGroup size="sm" isAttached variant="outline">
+                <Button colorScheme={view === "current" ? "purple" : undefined} variant={view === "current" ? "solid" : "outline"} onClick={() => setView("current")}>
+                  Guildes actuelles
+                </Button>
+                <Button colorScheme={view === "proposal" ? "purple" : undefined} variant={view === "proposal" ? "solid" : "outline"} onClick={() => setView("proposal")}>
+                  Proposition
+                </Button>
+              </ButtonGroup>
+              {isRefreshing && <Spinner size="sm" />}
               <Input
                 placeholder="Rechercher un joueur…"
                 value={searchQuery}
@@ -554,7 +625,7 @@ const DraftProposalSection = () => {
               />
               {normalizedSearch && (
                 <Text fontSize="xs" color={mutedText}>
-                  {result.guilds.reduce((sum, g) => sum + g.players.filter(isMatch).length, 0)} résultat(s)
+                  {shownGuilds.reduce((sum, g) => sum + g.players.filter(isMatch).length, 0)} résultat(s)
                 </Text>
               )}
             </HStack>
@@ -562,17 +633,17 @@ const DraftProposalSection = () => {
             <Box borderWidth="1px" borderColor={borderColor} borderRadius="lg" overflowX="auto">
               <Grid
                 templateColumns={{
-                  base: `repeat(${result.guilds.length}, minmax(350px, 1fr))`,
-                  md: `repeat(${result.guilds.length}, minmax(450px, 1fr))`,
+                  base: `repeat(${shownGuilds.length}, minmax(350px, 1fr))`,
+                  md: `repeat(${shownGuilds.length}, minmax(450px, 1fr))`,
                 }}
-                minW={{ base: `${result.guilds.length * 350}px`, md: `${result.guilds.length * 450}px` }}
+                minW={{ base: `${shownGuilds.length * 350}px`, md: `${shownGuilds.length * 450}px` }}
               >
-                {result.guilds.map((g, colIndex) => {
+                {shownGuilds.map((g, colIndex) => {
                   const color = guildColorMap[g.guild_name] || "gray";
                   return (
                     <GridItem
                       key={g.guild_name}
-                      borderRightWidth={colIndex < result.guilds.length - 1 ? "1px" : 0}
+                      borderRightWidth={colIndex < shownGuilds.length - 1 ? "1px" : 0}
                       borderColor={borderColor}
                     >
                       <HStack spacing={2} px={3} py={2.5} borderBottomWidth="2px" borderColor={borderColor} bg={headerBg}>
@@ -593,17 +664,17 @@ const DraftProposalSection = () => {
                         )}
                         <Box minW={0}>
                           <HStack spacing={1.5}>
-                            <Text fontWeight="bold" fontSize="sm" isTruncated>Guilde {g.guild_name}</Text>
+                            <Text fontWeight="bold" fontSize="sm" isTruncated>{g.guild_name === UNGUILDED ? "Sans guilde" : `Guilde ${g.guild_name}`}</Text>
                             {g.locked && <Badge colorScheme="orange" fontSize="0.6rem">🔒 Inchangée</Badge>}
                           </HStack>
                           <Text fontSize="xs" fontFamily="mono" color={mutedText}>
                             {g.locked
                               ? `${g.member_count ?? g.players.length} membre(s) actuel(s)${(g.member_count ?? 0) > g.players.length ? ` · ${(g.member_count ?? 0) - g.players.length} sans score ce cycle` : ""}`
-                              : `${g.players.length}/20 joueurs`}
+                              : view === "current" ? `${g.players.length} joueur(s) classé(s)` : `${g.players.length}/20 joueurs`}
                           </Text>
                         </Box>
                       </HStack>
-                      <GuildAverageRow guild={g} mutedText={mutedText} />
+                      {view === "proposal" && <GuildAverageRow guild={g} mutedText={mutedText} />}
 
                       <VStack align="stretch" spacing={0}>
                         {g.players.map((p, i) => (
@@ -629,7 +700,7 @@ const DraftProposalSection = () => {
                             <HStack flex={1} minW={0} spacing={1.5}>
                               <Text isTruncated>{p.bbs_name || p.global_name}</Text>
                               {p.isPinned && (
-                                <Text fontSize="0.7rem" flexShrink={0} title="Épinglé dans sa guilde actuelle">📌</Text>
+                                <Text fontSize="0.7rem" flexShrink={0} title="Gardé dans sa guilde actuelle">📌</Text>
                               )}
                               {p.currentGuildName && p.currentGuildName !== g.guild_name && (
                                 <Badge
@@ -645,22 +716,30 @@ const DraftProposalSection = () => {
                             </Text>
                             {!g.locked && (
                             <HStack spacing={0.5} flexShrink={0}>
-                              <IconButton
-                                aria-label="Épingler dans la guilde actuelle"
-                                icon={<Text fontSize="0.7rem">📌</Text>}
-                                size="xs"
-                                variant={pinned.has(p.bbs_id) ? "solid" : "ghost"}
-                                colorScheme={pinned.has(p.bbs_id) ? "blue" : undefined}
-                                onClick={() => togglePinned(p)}
-                              />
-                              <IconButton
-                                aria-label="Exclure de la simulation"
-                                icon={<Text fontSize="0.7rem">✕</Text>}
-                                size="xs"
-                                variant={excluded.has(p.bbs_id) ? "solid" : "ghost"}
-                                colorScheme={excluded.has(p.bbs_id) ? "red" : undefined}
-                                onClick={() => toggleExcluded(p)}
-                              />
+                              {p.currentGuildName && (
+                                <Tooltip label={`Garder en guilde ${p.currentGuildName}`} hasArrow>
+                                  <IconButton
+                                    aria-label={`Garder en guilde ${p.currentGuildName}`}
+                                    aria-pressed={pinned.has(p.bbs_id)}
+                                    icon={<Text fontSize="0.7rem">📌</Text>}
+                                    size="xs"
+                                    variant={pinned.has(p.bbs_id) ? "solid" : "ghost"}
+                                    colorScheme={pinned.has(p.bbs_id) ? "blue" : undefined}
+                                    onClick={() => togglePinned(p)}
+                                  />
+                                </Tooltip>
+                              )}
+                              <Tooltip label="Retirer de la proposition" hasArrow>
+                                <IconButton
+                                  aria-label="Retirer de la proposition"
+                                  aria-pressed={excluded.has(p.bbs_id)}
+                                  icon={<Text fontSize="0.7rem">✕</Text>}
+                                  size="xs"
+                                  variant={excluded.has(p.bbs_id) ? "solid" : "ghost"}
+                                  colorScheme={excluded.has(p.bbs_id) ? "red" : undefined}
+                                  onClick={() => toggleExcluded(p)}
+                                />
+                              </Tooltip>
                             </HStack>
                             )}
                           </HStack>
@@ -675,7 +754,7 @@ const DraftProposalSection = () => {
               </Grid>
             </Box>
 
-            {result.leftover.length > 0 && (
+            {view === "proposal" && result.leftover.length > 0 && (
               <Box borderWidth="1px" borderColor={borderColor} borderRadius="md" p={3}>
                 <Text fontWeight="bold" mb={2}>
                   Hors répartition ({result.leftover.length})
