@@ -1,5 +1,6 @@
 // Cycles, rotations and end-of-cycle recap
 import type { IPagination } from "./common";
+import type { IGuildGoal } from "./guild";
 
 export interface IRotationTemplate {
   _id: string;
@@ -61,9 +62,11 @@ export interface ICycleRecap {
   previous_cycle_name: string | null;
   participants: number;
   top3: { rank: number; pseudo: string; average: number }[];
+  top3_max: { rank: number; pseudo: string; total: number }[];
+  top3_progression: { rank: number; pseudo: string; previous_average: number; average: number; percent: number }[];
   records_count: number;
   records: { pseudo: string; killer: string; attack: string; previous_score: number; new_score: number }[];
-  best_progression: { pseudo: string; previous_average: number; average: number; percent: number } | null;
   guild_average: number | null;
   previous_guild_average: number | null;
+  goals: Pick<IGuildGoal, "type" | "unit" | "target" | "value" | "achieved">[];
 }
