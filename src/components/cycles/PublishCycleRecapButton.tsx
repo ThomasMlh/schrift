@@ -22,36 +22,88 @@ const MEDALS: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
 const formatNumber = (n: number) => n.toLocaleString("fr-FR");
 const formatPercent = (n: number) => `${n > 0 ? "+" : ""}${n.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
 
-// Text preview of the recap, as close as possible to the embed sent by the bot (format_cycle_recap).
+const GOAL_LABELS: Record<string, string> = {
+  average: "Moyenne de la guilde",
+  clear_rate: "Taux de clear",
+  records: "Records battus",
+  participation: "Participation",
+};
+const ATTACK_EMOJIS: Record<string, string> = { R: "🔴", B: "🔵" };
+
+const formatGoalValue = (value: number | null, unit: string) => {
+  if (value == null) return "—";
+  return unit === "percent" ? `${value.toLocaleString("fr-FR")} %` : formatNumber(value);
+};
+
+interface RecapPodiumProps<T> {
+  title: string;
+  players: T[];
+  renderValue: (player: T) => React.ReactNode;
+}
+
+const RecapPodium = <T extends { rank: number; pseudo: string }>({ title, players, renderValue }: RecapPodiumProps<T>) => players.length > 0 && (
+  <Box>
+    <Text fontWeight="semibold">{title}</Text>
+    {players.map((player) => (
+      <Text key={`${player.rank}-${player.pseudo}`}>{MEDALS[player.rank] ?? "•"} <b>{player.pseudo}</b> — {renderValue(player)}</Text>
+    ))}
+  </Box>
+);
+
+// Text preview of the recap, showing the same sections as the embed sent by the bot (format_cycle_recap).
 const RecapPreview = ({ recap }: { recap: ICycleRecap }) => {
   const evolution = recap.guild_average != null && recap.previous_guild_average
     ? ((recap.guild_average - recap.previous_guild_average) / recap.previous_guild_average) * 100
     : null;
+  const hiddenRecords = recap.records_count - recap.records.length;
+  const achievedGoals = recap.goals.filter((goal) => goal.achieved).length;
 
   return (
     <VStack align="stretch" spacing={2} fontSize="sm">
       <Text fontWeight="bold">📊 Fin du {recap.cycle_name} {recap.cycle_year} · {recap.participants} joueur(s)</Text>
-      {recap.top3.length > 0 ? (
-        <Box>
-          {recap.top3.map((p) => (
-            <Text key={p.rank}>{MEDALS[p.rank]} <b>{p.pseudo}</b> — {formatNumber(p.average)}</Text>
-          ))}
-        </Box>
-      ) : (
+      {recap.top3.length === 0 && (
         <Text color="gray.500">Aucun score enregistré pour cette guilde sur ce cycle.</Text>
       )}
+      <RecapPodium title="Podium (moyenne)" players={recap.top3} renderValue={(player) => formatNumber(player.average)} />
+      <RecapPodium title="Podium (max)" players={recap.top3_max} renderValue={(player) => formatNumber(player.total)} />
+      <RecapPodium
+        title="🚀 Podium (progression)"
+        players={recap.top3_progression}
+        renderValue={(player) => (
+          <>{formatNumber(player.previous_average)} → <b>{formatNumber(player.average)}</b> <i>({formatPercent(player.percent)})</i></>
+        )}
+      />
       {recap.guild_average != null && (
-        <Text>
-          Moyenne de la guilde : <b>{formatNumber(recap.guild_average)}</b>
-          {evolution != null && ` (${evolution > 0 ? "📈" : evolution < 0 ? "📉" : "➖"} ${formatPercent(evolution)} vs ${recap.previous_cycle_name ?? "cycle précédent"})`}
-        </Text>
+        <Box>
+          <Text fontWeight="semibold">Moyenne de la guilde</Text>
+          <Text>
+            <b>{formatNumber(recap.guild_average)}</b>
+            {evolution != null && recap.previous_guild_average != null
+              && ` ${evolution > 0 ? "📈" : evolution < 0 ? "📉" : "➖"} ${formatPercent(evolution)} vs ${recap.previous_cycle_name ?? "cycle précédent"} (${formatNumber(recap.previous_guild_average)})`}
+          </Text>
+        </Box>
       )}
-      {recap.best_progression && (
-        <Text>
-          🚀 Plus forte progression : <b>{recap.best_progression.pseudo}</b> ({formatPercent(recap.best_progression.percent)})
-        </Text>
+      {recap.records_count > 0 && (
+        <Box>
+          <Text fontWeight="semibold">🏅 Records personnels battus ({recap.records_count})</Text>
+          {recap.records.map((record) => (
+            <Text key={`${record.pseudo}-${record.killer}-${record.attack}`}>
+              <b>{record.pseudo}</b> — {record.killer} {ATTACK_EMOJIS[record.attack]} : {formatNumber(record.previous_score)} → <b>{formatNumber(record.new_score)}</b>
+            </Text>
+          ))}
+          {hiddenRecords > 0 && <Text as="i">… et {hiddenRecords} autre{hiddenRecords > 1 ? "s" : ""}</Text>}
+        </Box>
       )}
-      <Text>🏅 Records personnels battus : <b>{recap.records_count}</b></Text>
+      {recap.goals.length > 0 && (
+        <Box>
+          <Text fontWeight="semibold">🎯 Objectifs ({achievedGoals}/{recap.goals.length} atteints)</Text>
+          {recap.goals.map((goal) => (
+            <Text key={goal.type}>
+              {goal.achieved ? "✅" : "❌"} <b>{GOAL_LABELS[goal.type] ?? goal.type}</b> : {formatGoalValue(goal.value, goal.unit)} / {formatGoalValue(goal.target, goal.unit)}
+            </Text>
+          ))}
+        </Box>
+      )}
     </VStack>
   );
 };
