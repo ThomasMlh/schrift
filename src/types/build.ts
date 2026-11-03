@@ -31,6 +31,8 @@ export interface IBuildAccessory {
 
 export interface IBuildLink {
   id_character: string;
+  // Spe set in the author's album, absent when the album does not list the character
+  spe?: number;
   character?: {
     _id: string;
     name: string;
@@ -38,13 +40,19 @@ export interface IBuildLink {
     rarity?: string;
     element?: string;
     affinity?: string;
-    soul_traits?: string[];
+    version?: string;
+    // Soul traits from the game tables, at their resurrected values when the form exists
+    link_traits?: { name?: GameText | null; text: GameText | null }[];
+    // EX traits of the base form, one value per EX level
+    ex_traits?: { text: GameText | null; values?: number[] }[];
   };
 }
 
 export interface IBuildTeamMember {
   id_character: string;
   position: number; // 1, 2 or 3
+  // Spe set in the author's album, absent when the album does not list the character
+  spe?: number;
   links?: IBuildLink[];
   skills?: string[] | ISkill[]; // Ids or populated objects
   accessories?: IBuildAccessory[];
@@ -55,6 +63,9 @@ export interface IBuildTeamMember {
     rarity?: string;
     element?: string;
     affinity?: string;
+    version?: string;
+    // EX traits of the base form, one value per EX level
+    ex_traits?: { text: GameText | null; values?: number[] }[];
   };
 }
 

@@ -920,9 +920,9 @@
       "statusPending": "Pending validation",
       "teamComposition": "Team composition",
       "characterFallback": "Character {{id}}",
-      "skills": "Skills:",
-      "accessories": "Accessories:",
-      "links": "Links:",
+      "skills": "Skills",
+      "accessories": "Accessories",
+      "links": "Links",
       "dateModified": "Updated on",
       "buttonEdit": "Edit",
       "buttonClose": "Close",
@@ -930,7 +930,11 @@
       "timeNormalWave": "Normal wave",
       "timeExtraWave": "Extra wave",
       "screenshot": "Screenshot",
-      "screenshotOpen": "Enlarge"
+      "screenshotOpen": "Enlarge",
+      "characterEx": "Character EX",
+      "noGear": "No bonus skill or accessory set.",
+      "layoutBanner": "Team banner",
+      "layoutRows": "Team rows"
     },
     "buildCreationModal": {
       "titleCreate": "Create a Build",
