@@ -107,7 +107,8 @@ const LinkTile = ({ link }: { link: IBuildLink }) => {
   );
 };
 
-const MemberArtwork = ({ member, borderRadius }: { member: IBuildTeamMember; borderRadius?: string }) => {
+// fill: on wide screens the artwork takes the whole height of its row instead of a 16:9 box
+const MemberArtwork = ({ member, borderRadius, fill = false }: { member: IBuildTeamMember; borderRadius?: string; fill?: boolean }) => {
   const { t } = useTranslation();
   const character = member.character;
   const name = character?.name || t("components.buildDetailModal.characterFallback", { id: member.id_character });
@@ -122,6 +123,8 @@ const MemberArtwork = ({ member, borderRadius }: { member: IBuildTeamMember; bor
       overflow="hidden"
       borderRadius={borderRadius}
       bg="bg.inset"
+      h={fill ? { lg: "100%" } : undefined}
+      minH={fill ? { lg: "260px" } : undefined}
       sx={{ aspectRatio: "16 / 9" }}
       role="group"
     >
@@ -148,8 +151,8 @@ const MemberArtwork = ({ member, borderRadius }: { member: IBuildTeamMember; bor
   );
 };
 
-// Bonus skills and accessories of a member
-const MemberGear = ({ member }: { member: IBuildTeamMember }) => {
+// Bonus skills and accessories of a member; sideBySide puts them in two columns on wide screens
+const MemberGear = ({ member, sideBySide = false }: { member: IBuildTeamMember; sideBySide?: boolean }) => {
   const { t, i18n } = useTranslation();
   const skills = member.skills ?? [];
   const accessories = member.accessories ?? [];
@@ -159,7 +162,7 @@ const MemberGear = ({ member }: { member: IBuildTeamMember }) => {
   }
 
   return (
-    <VStack align="stretch" spacing={4}>
+    <SimpleGrid columns={{ base: 1, md: sideBySide && skills.length > 0 && accessories.length > 0 ? 2 : 1 }} spacing={4}>
       {skills.length > 0 && (
         <Box>
           <SectionTitle>{t("components.buildDetailModal.skills")}</SectionTitle>
@@ -210,7 +213,7 @@ const MemberGear = ({ member }: { member: IBuildTeamMember }) => {
           </VStack>
         </Box>
       )}
-    </VStack>
+    </SimpleGrid>
   );
 };
 
@@ -253,7 +256,7 @@ export const BuildTeamBanner = ({ team }: { team: IBuildTeamMember[] }) => {
   );
 };
 
-// Team rows: one line per member with artwork, its links side by side, then its gear
+// Team rows: one line per member with a large artwork, then its links side by side, its EX and its gear
 export const BuildTeamRows = ({ team }: { team: IBuildTeamMember[] }) => {
   const { t } = useTranslation();
   return (
@@ -261,15 +264,13 @@ export const BuildTeamRows = ({ team }: { team: IBuildTeamMember[] }) => {
       {team.map((member, index) => (
         <Grid
           key={member.position}
-          templateColumns={{ base: "minmax(0, 1fr)", lg: "260px minmax(0, 1.5fr) minmax(0, 1fr)" }}
+          templateColumns={{ base: "minmax(0, 1fr)", lg: "minmax(0, 5fr) minmax(0, 6fr)" }}
           gap={5}
           p={4}
           borderTopWidth={index > 0 ? "1px" : 0}
           borderColor="border.subtle"
         >
-          <Box alignSelf="start">
-            <MemberArtwork member={member} borderRadius="lg" />
-          </Box>
+          <MemberArtwork member={member} borderRadius="lg" fill />
           <VStack align="stretch" spacing={4} minW={0}>
             {(member.links ?? []).length > 0 && (
               <Box>
@@ -285,10 +286,8 @@ export const BuildTeamRows = ({ team }: { team: IBuildTeamMember[] }) => {
                 <ExList traits={member.character?.ex_traits} />
               </Box>
             )}
+            <MemberGear member={member} sideBySide />
           </VStack>
-          <Box minW={0}>
-            <MemberGear member={member} />
-          </Box>
         </Grid>
       ))}
     </VStack>
