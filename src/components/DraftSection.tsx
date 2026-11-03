@@ -235,7 +235,7 @@ const DraftSection = ({ onDraftComplete }: DraftSectionProps) => {
   const currentTab = columns.find((c) => c.key === activeTab) ?? columns[0];
 
   return (
-    <Box w="100%" maxW="1400px" mx="auto">
+    <Box w="100%">
       <VStack align="stretch" spacing={4}>
         <Text fontSize="xl" fontWeight="bold">Draft de Guildes</Text>
 
