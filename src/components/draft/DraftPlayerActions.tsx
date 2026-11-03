@@ -19,7 +19,7 @@ import {
 import type { ReactElement } from "react";
 import type { IGuild, Role } from "@/interfaces";
 import type { DraftAccount } from "@/utils/draftBoard";
-import { GuildTag, RoleIcon } from "./DraftPlayerChip";
+import { GuildTag } from "./DraftPlayerChip";
 
 export interface DraftActionsProps {
   account: DraftAccount;
@@ -34,10 +34,10 @@ export interface DraftActionsProps {
   onReset: () => void;
 }
 
-const ROLES: { value: Role; label: string }[] = [
-  { value: "membre", label: "Membre" },
-  { value: "sous-chef", label: "Sous-chef" },
-  { value: "chef", label: "Chef" },
+const ROLES: { value: Role; label: string; icon: string }[] = [
+  { value: "membre", label: "Membre", icon: "👤" },
+  { value: "sous-chef", label: "Sous-chef", icon: "🥈" },
+  { value: "chef", label: "Chef", icon: "👑" },
 ];
 
 const Label = ({ children }: { children: string }) => (
@@ -64,9 +64,21 @@ export const DraftActionsContent = ({
           {targets.map((target) => {
             const count = target.id ? counts[target.id] ?? 0 : null;
             return (
-              <Button key={target.id ?? "none"} size="sm" variant="outline" colorScheme={guildColor(target.id)} onClick={act(() => onMove(target.id))} px={2}>
-                {target.name}
-                {count != null && <Text as="span" ml={1} fontSize="2xs" color={count >= 20 ? "red.300" : "text.muted"}>{count}</Text>}
+              <Button
+                key={target.id ?? "none"}
+                variant="outline"
+                colorScheme={guildColor(target.id)}
+                onClick={act(() => onMove(target.id))}
+                h="auto"
+                py={1.5}
+                px={1}
+                flexDirection="column"
+                gap={0.5}
+              >
+                <Text fontWeight="bold" fontSize="sm" lineHeight="short">{target.name}</Text>
+                <Text fontSize="2xs" fontWeight="normal" lineHeight="short" color={count != null && count >= 20 ? "red.300" : "text.muted"}>
+                  {count != null ? `${count}/20` : "—"}
+                </Text>
               </Button>
             );
           })}
@@ -76,17 +88,21 @@ export const DraftActionsContent = ({
         <VStack align="stretch" spacing={1.5}>
           <Label>Rôle</Label>
           <SimpleGrid columns={3} spacing={1.5}>
-            {ROLES.map(({ value, label }) => (
+            {ROLES.map(({ value, label, icon }) => (
               <Button
                 key={value}
-                size="sm"
                 variant={finalRole === value ? "solid" : "outline"}
                 colorScheme={finalRole === value ? "purple" : "gray"}
                 onClick={act(() => onRole(value))}
-                leftIcon={<RoleIcon role={value} />}
-                px={2}
+                h="auto"
+                py={1.5}
+                px={1}
+                flexDirection="column"
+                gap={0.5}
+                aria-pressed={finalRole === value}
               >
-                {label}
+                <Text as="span" fontSize="md" lineHeight="short" aria-hidden>{icon}</Text>
+                <Text as="span" fontSize="xs" lineHeight="short">{label}</Text>
               </Button>
             ))}
           </SimpleGrid>

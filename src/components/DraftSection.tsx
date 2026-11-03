@@ -200,6 +200,8 @@ const DraftSection = ({ onDraftComplete }: DraftSectionProps) => {
         borderRadius="xl"
         p={3}
         minW={0}
+        display="flex"
+        flexDirection="column"
       >
         <Flex justify="space-between" align="baseline" mb={1}>
           <Text fontWeight="extrabold" fontSize="lg" color={`${color}.300`} noOfLines={1}>{col.name}</Text>
@@ -216,7 +218,12 @@ const DraftSection = ({ onDraftComplete }: DraftSectionProps) => {
         {isPool && (
           <Input size="sm" mb={2} placeholder="Filtrer…" aria-label="Filtrer les joueurs sans guilde" value={poolFilter} onChange={(e) => setPoolFilter(e.target.value)} />
         )}
-        <VStack align="stretch" spacing={1} maxH={isPool && !isMobile ? "680px" : undefined} overflowY={isPool && !isMobile ? "auto" : undefined}>
+        {/* On desktop the guildless list takes no height of its own: it scrolls within the guild columns' height */}
+        <VStack
+          align="stretch"
+          spacing={1}
+          {...(isPool && !isMobile ? { flex: "1 1 0", minH: "240px", overflowY: "auto", pr: 1 } : {})}
+        >
           {incoming.map((a) => renderChip(a, "in"))}
           {outgoing.map((a) => renderChip(a, "out"))}
           {shownStaying.map((a) => renderChip(a, "stay"))}
@@ -284,7 +291,7 @@ const DraftSection = ({ onDraftComplete }: DraftSectionProps) => {
             {renderColumn(currentTab)}
           </>
         ) : (
-          <Grid templateColumns={`repeat(${columns.length}, minmax(0, 1fr))`} gap={3} alignItems="start">
+          <Grid templateColumns={`repeat(${columns.length}, minmax(0, 1fr))`} gap={3} alignItems="stretch">
             {columns.map(renderColumn)}
           </Grid>
         )}
