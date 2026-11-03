@@ -16,17 +16,19 @@ import {
   Flex,
   SimpleGrid,
   Icon,
+  IconButton,
+  Tooltip,
 } from "@chakra-ui/react";
 import { EditIcon, CheckCircleIcon, TimeIcon } from "@chakra-ui/icons";
 import { useState, type ReactNode } from "react";
-import { FiMaximize2 } from "react-icons/fi";
+import { FiColumns, FiList, FiMaximize2 } from "react-icons/fi";
 import { AttackTypeBadge } from "./AttackTypeBadge";
 import { AlterationImage } from "./AlterationImage";
 import { ScoreBadge } from "./ScoreBadge";
 import { ImageLightbox } from "./ImageLightbox";
 import { formatChrono } from "@/utils/chrono";
 import { UserDisplay } from "./UserDisplay";
-import { BuildMemberCard } from "./BuildMemberCard";
+import { BuildTeamBanner, BuildTeamRows, type BuildTeamLayout } from "./BuildTeam";
 import type { IBuild } from "../../interfaces";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
@@ -42,11 +44,21 @@ interface BuildDetailModalProps {
 
 // Result tile (score, times)
 const ResultTile = ({ label, children }: { label: string; children: ReactNode }) => (
-  <Box bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="border.subtle" px={3} py={2.5}>
-    <Text fontSize="xs" color="text.muted" textTransform="uppercase" letterSpacing="wide" fontWeight="semibold">{label}</Text>
-    <Box fontSize="lg" fontWeight="extrabold" color="text.strong" mt={0.5}>{children}</Box>
+  <Box bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="border.subtle" px={3} py={1.5} minW="110px">
+    <Text fontSize="2xs" color="text.muted" textTransform="uppercase" letterSpacing="wide" fontWeight="semibold">{label}</Text>
+    <Box fontSize="md" fontWeight="extrabold" color="text.strong" sx={{ fontVariantNumeric: "tabular-nums" }}>{children}</Box>
   </Box>
 );
+
+const LAYOUT_KEY = "buildDetailModal.layout";
+
+const readLayout = (): BuildTeamLayout => {
+  try {
+    return localStorage.getItem(LAYOUT_KEY) === "rows" ? "rows" : "banner";
+  } catch {
+    return "banner";
+  }
+};
 
 const downloadImage = async (src: string, filename: string) => {
   try {
@@ -88,6 +100,15 @@ export const BuildDetailModal = ({
     (build.user_id === currentUser._id || currentUser.is_admin);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [layout, setLayout] = useState<BuildTeamLayout>(readLayout);
+  const changeLayout = (next: BuildTeamLayout) => {
+    setLayout(next);
+    try {
+      localStorage.setItem(LAYOUT_KEY, next);
+    } catch {
+      // Storage unavailable: the choice only applies to this session
+    }
+  };
   const screenshotUrl = build?.screenshot ? `${bucketUrl}/builds/${build.screenshot}` : null;
   const hasResult = build != null && (build.score != null || build.time_normal_wave != null || build.time_extra_wave != null);
 
@@ -129,33 +150,9 @@ export const BuildDetailModal = ({
                 <Text>{formatDate(build?.created_at)}</Text>
               </HStack>
             </Box>
-            {build && canEdit && (
-              <Badge
-                colorScheme={build.isValid ? "green" : "yellow"}
-                variant="subtle"
-                px={2.5}
-                py={1}
-                borderRadius="full"
-                display="flex"
-                alignItems="center"
-                gap={1}
-                flexShrink={0}
-              >
-                <Icon as={build.isValid ? CheckCircleIcon : TimeIcon} boxSize={3} />
-                {build.isValid
-                  ? t("components.buildDetailModal.statusValid")
-                  : t("components.buildDetailModal.statusPending")}
-              </Badge>
-            )}
-          </Flex>
-        </ModalHeader>
-        <ModalCloseButton top={4} right={4} />
-
-        <ModalBody p={5}>
-          {build && (
-            <VStack align="stretch" spacing={5}>
-              {hasResult && (
-                <SimpleGrid columns={{ base: 2, md: 3 }} spacing={3}>
+            <HStack spacing={2} flexWrap="wrap" align="center" flexShrink={0}>
+              {hasResult && build && (
+                <>
                   {build.score != null && (
                     <ResultTile label={t("components.buildDetailModal.score")}>
                       <ScoreBadge score={build.score} fontSize="md" commas />
@@ -171,16 +168,59 @@ export const BuildDetailModal = ({
                       {formatChrono(build.time_extra_wave)}
                     </ResultTile>
                   )}
-                </SimpleGrid>
+                </>
               )}
+              {build && canEdit && (
+                <Badge
+                  colorScheme={build.isValid ? "green" : "yellow"}
+                  variant="subtle"
+                  px={2.5}
+                  py={1}
+                  borderRadius="full"
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                  flexShrink={0}
+                >
+                  <Icon as={build.isValid ? CheckCircleIcon : TimeIcon} boxSize={3} />
+                  {build.isValid
+                    ? t("components.buildDetailModal.statusValid")
+                    : t("components.buildDetailModal.statusPending")}
+                </Badge>
+              )}
+            </HStack>
+          </Flex>
+        </ModalHeader>
+        <ModalCloseButton top={4} right={4} />
 
+        <ModalBody p={5}>
+          {build && (
+            <VStack align="stretch" spacing={5}>
               <Box>
-                <Text fontWeight="bold" color="text.strong" mb={3}>
-                  {t("components.buildDetailModal.teamComposition")}
-                </Text>
-                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-                  {build.team?.map((member) => <BuildMemberCard key={member.position} member={member} />)}
-                </SimpleGrid>
+                <Flex justify="space-between" align="center" gap={3} mb={3}>
+                  <Text fontWeight="bold" color="text.strong">
+                    {t("components.buildDetailModal.teamComposition")}
+                  </Text>
+                  <HStack spacing={0.5} flexShrink={0}>
+                    {([["banner", "layoutBanner", FiColumns], ["rows", "layoutRows", FiList]] as const).map(([mode, labelKey, ModeIcon]) => {
+                      const label = t(`components.buildDetailModal.${labelKey}`);
+                      return (
+                        <Tooltip key={mode} label={label} placement="top" hasArrow openDelay={400}>
+                          <IconButton
+                            aria-label={label}
+                            aria-pressed={layout === mode}
+                            icon={<Icon as={ModeIcon} />}
+                            size="sm"
+                            variant={layout === mode ? "solid" : "ghost"}
+                            colorScheme={layout === mode ? "purple" : "gray"}
+                            onClick={() => changeLayout(mode)}
+                          />
+                        </Tooltip>
+                      );
+                    })}
+                  </HStack>
+                </Flex>
+                {layout === "rows" ? <BuildTeamRows team={build.team ?? []} /> : <BuildTeamBanner team={build.team ?? []} />}
               </Box>
 
               <BuildGuildPlayers build={build} />
