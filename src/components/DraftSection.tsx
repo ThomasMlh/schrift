@@ -1,226 +1,155 @@
 import {
-  Box,
-  Button,
-  VStack,
-  HStack,
-  Text,
-  useToast,
-  Badge,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCloseButton,
-  useDisclosure,
-  useColorModeValue,
   Alert,
   AlertIcon,
+  Badge,
+  Box,
+  Button,
   Flex,
-  Tag,
-  TagLabel,
-  Progress,
-  Tooltip,
   Grid,
-  GridItem,
-  Avatar,
-  Divider,
+  HStack,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Progress,
+  Text,
+  VStack,
+  useBreakpointValue,
+  useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
-import { AddIcon, ArrowForwardIcon, CheckIcon } from "@chakra-ui/icons";
-import { DraftMoveRow } from "./draft/DraftMoveRow";
-import { useState, useMemo, useCallback } from "react";
+import { CheckIcon } from "@chakra-ui/icons";
+import { useMemo, useState } from "react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import type { IGuild, IUser } from "../interfaces";
-import {
-  useGuilds,
-  useAllGuildsMembers,
-  useGuildlessUsers
-} from "@/hooks/useAPI";
+import type { Role } from "../interfaces";
+import { useGuilds, useAllGuildsMembers, useGuildlessUsers } from "@/hooks/useAPI";
 import { useAPIMutations } from "@/hooks/useAPIMutations";
-import { CustomSelect } from "./ui/CustomSelect";
 import { PageLoader } from "./ui/PageLoader";
-import { getGuildColor, type GuildColor } from "./draft/guildColors";
+import { getGuildColor } from "./draft/guildColors";
+import { DraftPlayerChip, GuildTag, RoleIcon } from "./draft/DraftPlayerChip";
+import { DraftActionsPopover, DraftActionsSheet, type DraftActionsProps } from "./draft/DraftPlayerActions";
+import { DraftSearchBar } from "./draft/DraftSearchBar";
+import {
+  columnEntries,
+  finalState,
+  isRoleChange,
+  isTransfer,
+  setChange,
+  toDraftAccount,
+  type DraftAccount,
+  type DraftChanges,
+} from "@/utils/draftBoard";
 
-type DraftMember = IUser & { guildId: string };
-
-interface DraftMove {
-  id: string;
-  user: IUser;
-  bbsId: string;
-  fromGuild: IGuild | null;
-  toGuild: IGuild | null;
-}
+const MAX_MEMBERS = 20;
+const NONE = "__none__";
 
 interface DraftSectionProps {
   onDraftComplete: () => void;
 }
 
-const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
+const matches = (account: DraftAccount, term: string) =>
+  [account.name, account.user.global_name, account.user.username].some((name) => name?.toLowerCase().includes(term));
+
+// Guild draft board: one column per guild plus the guildless accounts (tabs on mobile), a search bar
+// to move someone in two clicks, and the pending transfers and role changes validated in one go.
+const DraftSection = ({ onDraftComplete }: DraftSectionProps) => {
   const { guilds } = useGuilds(true);
-  const { membersByGuild, isLoading: membersLoading } =
-    useAllGuildsMembers(guilds, true);
+  const { membersByGuild, isLoading: membersLoading } = useAllGuildsMembers(guilds, true);
   const { executeDraft } = useAPIMutations();
   const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const confirm = useDisclosure();
+  const isMobile = useBreakpointValue({ base: true, lg: false }) ?? false;
 
-  const [draftMoves, setDraftMoves] = useState<DraftMove[]>([]);
-  const [selectedBbsId, setSelectedBbsId] = useState<string>("");
-  const [selectedMember, setSelectedMember] = useState<DraftMember | null>(null);
-  const [playerSearch, setPlayerSearch] = useState("");
-  const debouncedSearch = useDebouncedValue(playerSearch, 300);
-  const [selectedTargetGuild, setSelectedTargetGuild] = useState<string>("");
+  const [changes, setChanges] = useState<DraftChanges>({});
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search, 300);
+  const [poolFilter, setPoolFilter] = useState("");
+  const [activeTab, setActiveTab] = useState<string>("");
+  const [sheetAccount, setSheetAccount] = useState<DraftAccount | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
 
-  // Unified pool (the source guild is inferred from the selected player), always loaded
-  const { users: guildlessUsers, isLoading: guildlessLoading } = useGuildlessUsers(true, debouncedSearch);
-  const { totalCount: guildlessCount } = useGuildlessUsers(true, "", 1);
+  const { users: guildless, totalCount: guildlessCount } = useGuildlessUsers(true);
+  const { users: guildlessFound, isLoading: searching } = useGuildlessUsers(!!debouncedSearch.trim(), debouncedSearch);
 
-  const cardBg = "bg.card";
-  const sidebarBg     = useColorModeValue("gray.50", "gray.850");
-  const borderColor   = useColorModeValue("gray.200", "gray.700");
-  const mutedText     = useColorModeValue("gray.500", "gray.400");
-  const progressBg = "border.default";
-  const rowHoverBg    = useColorModeValue("gray.50", "gray.700");
-  const modalBg = "bg.card";
-  const emptyBg = "bg.muted";
-  const guildCardBg = "bg.elevated";
-
-  // Drafts work on bbs accounts, not users: an account without bbs_id (guild/role assigned before
-  // the game account was linked) cannot be sent to the API, so it is left out of the pool.
-  // Guild members are filtered locally; guildless accounts are already filtered by the API.
-  const allMembers = useMemo(() => {
-    const term = debouncedSearch.trim().toLowerCase();
-    const matches = (member: IUser) =>
-      !term || [member.bbs_name, member.global_name, member.username].some((name) => name?.toLowerCase().includes(term));
-    const members: DraftMember[] = [];
-    for (const [guildId, guildMembers] of Object.entries(membersByGuild)) {
-      for (const member of guildMembers) {
-        if (member.bbs_id && matches(member)) members.push({ ...member, guildId });
-      }
-    }
-    for (const user of guildlessUsers) {
-      if (user.bbs_id) members.push({ ...user, guildId: "" });
-    }
-    return members;
-  }, [membersByGuild, guildlessUsers, debouncedSearch]);
-
-  // Players offered in the select (all members and guildless accounts), minus those already
-  // in the current draft.
-  const availableUsers = useMemo(() => {
-    const draftedBbsIds = new Set(draftMoves.map((m) => m.bbsId));
-    return allMembers.filter((member) => !draftedBbsIds.has(member.bbs_id!));
-  }, [allMembers, draftMoves]);
-
-  const projectedCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
+  // Drafts work on bbs accounts: an account without bbs_id cannot be sent to the API
+  const membersOf = useMemo(() => {
+    const byGuild: Record<string, DraftAccount[]> = {};
     for (const guild of guilds) {
-      counts[guild._id] = membersByGuild[guild._id]?.length || 0;
+      byGuild[guild._id] = (membersByGuild[guild._id] ?? []).filter((u) => u.bbs_id).map((u) => toDraftAccount(u, guild._id));
     }
-    for (const move of draftMoves) {
-      if (move.fromGuild) counts[move.fromGuild._id] = (counts[move.fromGuild._id] || 0) - 1;
-      if (move.toGuild)   counts[move.toGuild._id]   = (counts[move.toGuild._id]   || 0) + 1;
-    }
-    return counts;
-  }, [guilds, membersByGuild, draftMoves]);
+    byGuild[NONE] = guildless.filter((u) => u.bbs_id).map((u) => toDraftAccount(u, null));
+    return byGuild;
+  }, [guilds, membersByGuild, guildless]);
 
-  const hasOverflow = useMemo(
-    () => guilds.some((g) => (projectedCounts[g._id] || 0) > 20),
-    [guilds, projectedCounts]
+  const guildColor = useMemo(() => {
+    const map = new Map(guilds.map((g, i) => [g._id, getGuildColor(i)]));
+    return (guildId: string | null) => (guildId ? map.get(guildId) ?? "gray" : "gray");
+  }, [guilds]);
+  const guildInfo = (guildId: string | null) =>
+    guildId ? { name: guilds.find((g) => g._id === guildId)?.name ?? "?", color: guildColor(guildId) } : null;
+
+  const columns = useMemo(() => [...guilds.map((g) => ({ id: g._id as string | null, key: g._id, name: g.name })), { id: null, key: NONE, name: "Sans guilde" }], [guilds]);
+  const entries = useMemo(
+    () => Object.fromEntries(columns.map((col) => [col.key, columnEntries(col.id, membersOf[col.key] ?? [], changes)])),
+    [columns, membersOf, changes],
+  );
+  const counts = useMemo(
+    () => Object.fromEntries(guilds.map((g) => [g._id, entries[g._id].staying.length + entries[g._id].incoming.length])),
+    [guilds, entries],
   );
 
-  const guildMap = useMemo(() => {
-    const map: Record<string, IGuild> = {};
-    guilds.forEach((g) => (map[g._id] = g));
-    return map;
-  }, [guilds]);
+  const changeList = Object.values(changes);
+  const transfers = changeList.filter(isTransfer);
+  const roleChanges = changeList.filter(isRoleChange);
+  const overflow = guilds.filter((g) => counts[g._id] > MAX_MEMBERS);
 
-  const guildColorMap = useMemo(() => {
-    const map: Record<string, GuildColor> = {};
-    guilds.forEach((g, i) => (map[g._id] = getGuildColor(i)));
-    return map;
-  }, [guilds]);
+  const searchResults = useMemo(() => {
+    const term = debouncedSearch.trim().toLowerCase();
+    if (!term) return [];
+    const inGuilds = guilds.flatMap((g) => membersOf[g._id]).filter((a) => matches(a, term));
+    return [...inGuilds, ...guildlessFound.filter((u) => u.bbs_id).map((u) => toDraftAccount(u, null))];
+  }, [debouncedSearch, guilds, membersOf, guildlessFound]);
 
-  // Kept as an object: a later search can filter the selected account out of the options
-  const selectedUserData = selectedMember;
-  const selectPlayer = (bbsId: string) => {
-    setSelectedBbsId(bbsId);
-    setSelectedMember(availableUsers.find((u) => u.bbs_id === bbsId) ?? null);
-  };
-  const playerOptions = selectedMember && !availableUsers.some((u) => u.bbs_id === selectedMember.bbs_id)
-    ? [selectedMember, ...availableUsers]
-    : availableUsers;
+  const move = (account: DraftAccount, toGuildId: string | null) => setChanges((prev) => setChange(prev, account, { toGuildId }));
+  const changeRole = (account: DraftAccount, role: Role) => setChanges((prev) => setChange(prev, account, { role }));
+  const reset = (account: DraftAccount) => setChanges((prev) => {
+    const next = { ...prev };
+    delete next[account.bbsId];
+    return next;
+  });
 
-  const addMove = useCallback(() => {
-    if (!selectedBbsId || !selectedTargetGuild) return;
-    const user = selectedMember;
-    if (!user) return;
-
-    const isRemoval = selectedTargetGuild === "__none__";
-    const fromGuild = user.guildId ? guildMap[user.guildId] || null : null;
-    const toGuild    = isRemoval ? null : guildMap[selectedTargetGuild] || null;
-
-    if (!isRemoval && !toGuild) return;
-    if (!isRemoval && fromGuild && fromGuild._id === toGuild!._id) {
-      toast({ title: "Même guilde", description: "Le joueur est déjà dans cette guilde", status: "warning", duration: 2000 });
-      return;
-    }
-    if (isRemoval && !fromGuild) {
-      toast({ title: "Action inutile", description: "Ce joueur n'a déjà pas de guilde", status: "warning", duration: 2000 });
-      return;
-    }
-
-    setDraftMoves((prev) => [...prev, { id: `${user.bbs_id}-${Date.now()}`, user, bbsId: user.bbs_id!, fromGuild, toGuild }]);
-    setSelectedBbsId("");
-    setSelectedMember(null);
-    setSelectedTargetGuild("");
-  }, [selectedBbsId, selectedTargetGuild, selectedMember, guildMap, toast]);
-
-  const removeMove  = (moveId: string) => setDraftMoves((prev) => prev.filter((m) => m.id !== moveId));
-
-  const updateMoveTarget = useCallback((moveId: string, newToGuildId: string | null) => {
-    setDraftMoves((prev) => {
-      const move = prev.find((m) => m.id === moveId);
-      if (!move) return prev;
-      if (newToGuildId && move.fromGuild && move.fromGuild._id === newToGuildId) {
-        toast({ title: "Même guilde", description: "Le joueur est déjà dans cette guilde", status: "warning", duration: 2000 });
-        return prev;
-      }
-      if (!newToGuildId && !move.fromGuild) {
-        toast({ title: "Action inutile", description: "Ce joueur n'a déjà pas de guilde", status: "warning", duration: 2000 });
-        return prev;
-      }
-      const newToGuild = newToGuildId ? guildMap[newToGuildId] || null : null;
-      return prev.map((m) => (m.id === moveId ? { ...m, toGuild: newToGuild } : m));
-    });
-  }, [guildMap, toast]);
-
-  const getTargetOptionsForMove = useCallback((move: DraftMove) => [
-    ...(move.fromGuild ? [{ value: "__none__", label: "✕ Retirer de la guilde" }] : []),
-    ...guilds
-      .filter((g) => g._id !== move.fromGuild?._id)
-      .map((g) => {
-        const count = projectedCounts[g._id] || 0;
-        return {
-          value: g._id,
-          label: `${g.name} (${count}/20)${count >= 20 ? " — pleine" : ""}`
-        };
-      })
-  ], [guilds, projectedCounts]);
-
-  const clearDraft  = () => {
-    setDraftMoves([]);
-    setSelectedBbsId("");
-    setSelectedTargetGuild("");
+  const actionsFor = (account: DraftAccount): DraftActionsProps => {
+    const final = finalState(account, changes);
+    return {
+      account,
+      finalGuildId: final.guildId,
+      finalRole: final.role,
+      isChanged: !!changes[account.bbsId],
+      guilds,
+      guildColor,
+      counts,
+      onMove: (to) => move(account, to),
+      onRole: (role) => changeRole(account, role),
+      onReset: () => reset(account),
+    };
   };
 
-  const handleExecuteDraft = async () => {
+  const handleExecute = async () => {
     setIsExecuting(true);
     try {
-      await executeDraft(draftMoves.map((m) => ({ userId: m.user._id, bbsId: m.bbsId, toGuildId: m.toGuild?._id || null })));
-      toast({ title: "Draft exécuté", description: `${draftMoves.length} joueur(s) déplacé(s)`, status: "success", duration: 3000 });
-      clearDraft();
-      onClose();
+      await executeDraft(changeList.map((c) => ({
+        userId: c.account.user._id,
+        bbsId: c.account.bbsId,
+        toGuildId: c.toGuildId,
+        ...(c.role ? { role: c.role } : {}),
+      })));
+      toast({ title: "Draft exécuté", description: `${transfers.length} transfert(s), ${roleChanges.length} rôle(s)`, status: "success", duration: 3000 });
+      setChanges({});
+      confirm.onClose();
       onDraftComplete();
     } catch (error) {
       toast({ title: "Erreur", description: error instanceof Error ? error.message : "Erreur lors de l'exécution", status: "error", duration: 5000 });
@@ -229,409 +158,210 @@ const DraftSection: React.FC<DraftSectionProps> = ({ onDraftComplete }) => {
     }
   };
 
-  const getAvatarUrl = (user: IUser) =>
-    user.avatar && user.discord_id
-      ? `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.webp?size=64`
-      : undefined;
+  if (membersLoading) return <PageLoader color="purple.400" height="200px" />;
 
-  // Player select option: avatar, guild and role
-  const renderPlayerOption = (user: DraftMember) => {
-    const guild = user.guildId ? guildMap[user.guildId] : null;
-    const color = user.guildId ? guildColorMap[user.guildId] : "gray";
+  const renderChip = (account: DraftAccount, state: "stay" | "in" | "out") => {
+    const final = finalState(account, changes);
+    const change = changes[account.bbsId];
+    const chip = (
+      <DraftPlayerChip
+        account={account}
+        finalRole={final.role}
+        state={state}
+        otherGuild={state === "in" ? guildInfo(account.guildId) : state === "out" ? guildInfo(final.guildId) : undefined}
+        roleChanged={!!change && isRoleChange(change)}
+        onClick={isMobile ? () => setSheetAccount(account) : undefined}
+      />
+    );
     return (
-      <HStack spacing={2} overflow="hidden">
-        <Avatar
-          size="2xs"
-          src={getAvatarUrl(user)}
-          name={user.bbs_name || user.global_name}
-          flexShrink={0}
-        />
-        <Text fontWeight="medium" isTruncated>
-          {user.bbs_name || user.global_name || user.username}
-        </Text>
-        <Badge colorScheme={color} fontSize="2xs" borderRadius="full" flexShrink={0}>
-          {guild ? guild.name : "Sans guilde"}
-        </Badge>
-        {(user.role === "chef" || user.role === "sous-chef") && (
-          <Badge
-            colorScheme={user.role === "chef" ? "red" : "orange"}
-            fontSize="2xs"
-            borderRadius="full"
-            flexShrink={0}
-          >
-            {user.role === "chef" ? "👑" : "🥈"}
-          </Badge>
-        )}
-      </HStack>
+      <Box key={account.bbsId}>
+        {isMobile ? chip : <DraftActionsPopover {...actionsFor(account)} trigger={chip} />}
+      </Box>
     );
   };
 
-  if (membersLoading) {
-    return <PageLoader color="orange.500" height="200px" />;
-  }
+  const renderColumn = (col: (typeof columns)[number]) => {
+    const { incoming, outgoing, staying } = entries[col.key];
+    const isPool = col.id === null;
+    const count = isPool ? guildlessCount - outgoing.length + incoming.length : counts[col.key];
+    const filter = poolFilter.trim().toLowerCase();
+    const shownStaying = isPool && filter ? staying.filter((a) => matches(a, filter)) : staying;
+    const color = guildColor(col.id);
+    const isOver = !isPool && count > MAX_MEMBERS;
+
+    return (
+      <Box
+        key={col.key}
+        bg="bg.card"
+        borderWidth="1px"
+        borderColor="border.subtle"
+        borderTopWidth="3px"
+        borderTopColor={`${color}.400`}
+        borderRadius="xl"
+        p={3}
+        minW={0}
+      >
+        <Flex justify="space-between" align="baseline" mb={1}>
+          <Text fontWeight="extrabold" fontSize="lg" color={`${color}.300`} noOfLines={1}>{col.name}</Text>
+          <Text fontWeight="extrabold" fontSize="lg" color={isOver ? "red.400" : count === MAX_MEMBERS ? "green.300" : "text.strong"}>
+            {count}
+            {!isPool && <Text as="span" fontSize="xs" color="text.muted">/{MAX_MEMBERS}</Text>}
+          </Text>
+        </Flex>
+        {!isPool && <Progress value={Math.min((count / MAX_MEMBERS) * 100, 100)} size="xs" borderRadius="full" colorScheme={isOver ? "red" : color} mb={1.5} />}
+        <HStack spacing={2} fontSize="xs" fontWeight="bold" mb={2} minH="18px">
+          {incoming.length > 0 && <Text color="green.300">+{incoming.length}</Text>}
+          {outgoing.length > 0 && <Text color="red.300">−{outgoing.length}</Text>}
+        </HStack>
+        {isPool && (
+          <Input size="sm" mb={2} placeholder="Filtrer…" aria-label="Filtrer les joueurs sans guilde" value={poolFilter} onChange={(e) => setPoolFilter(e.target.value)} />
+        )}
+        <VStack align="stretch" spacing={1} maxH={isPool && !isMobile ? "680px" : undefined} overflowY={isPool && !isMobile ? "auto" : undefined}>
+          {incoming.map((a) => renderChip(a, "in"))}
+          {outgoing.map((a) => renderChip(a, "out"))}
+          {shownStaying.map((a) => renderChip(a, "stay"))}
+        </VStack>
+      </Box>
+    );
+  };
+
+  const currentTab = columns.find((c) => c.key === activeTab) ?? columns[0];
 
   return (
-    <Box w="100%" maxW="1100px" mx="auto">
-      <Grid
-        templateColumns={{ base: "1fr", lg: "280px 1fr" }}
-        gap={5}
-        alignItems="start"
-      >
-        <GridItem>
-          <Box
-            bg={sidebarBg}
-            borderRadius="xl"
-            borderWidth="1px"
-            borderColor={borderColor}
-            overflow="hidden"
-            position={{ lg: "sticky" }}
-            top={{ lg: "20px" }}
-          >
-            <Box px={4} py={3} borderBottomWidth="1px" borderColor={borderColor}>
-              <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText}>
-                Effectifs
-                {draftMoves.length > 0 && (
-                  <Text as="span" color="orange.400" ml={2}>après draft</Text>
-                )}
-              </Text>
-            </Box>
+    <Box w="100%" maxW="1400px" mx="auto">
+      <VStack align="stretch" spacing={4}>
+        <Text fontSize="xl" fontWeight="bold">Draft de Guildes</Text>
 
-            <VStack spacing={0} align="stretch" p={3}>
-              {guilds.map((guild) => {
-                const color     = guildColorMap[guild._id];
-                const current   = membersByGuild[guild._id]?.length || 0;
-                const projected = projectedCounts[guild._id] || 0;
-                const diff      = projected - current;
-                const pct       = Math.min((projected / 20) * 100, 100);
-                const isOver    = projected > 20;
-                const barColor  = isOver ? "red" : projected >= 18 ? "orange" : color;
+        <DraftSearchBar
+          value={search}
+          onChange={setSearch}
+          results={searchResults}
+          isLoading={searching}
+          guilds={guilds}
+          guildColor={guildColor}
+          finalGuildId={(account) => finalState(account, changes).guildId}
+          onMove={move}
+        />
 
+        {overflow.length > 0 && (
+          <Alert status="error" borderRadius="lg" py={2} fontSize="sm">
+            <AlertIcon />
+            {overflow.map((g) => g.name).join(", ")} dépasse{overflow.length > 1 ? "nt" : ""} {MAX_MEMBERS} membres : corrigez avant de valider.
+          </Alert>
+        )}
+
+        {isMobile ? (
+          <>
+            <HStack spacing={2} overflowX="auto" pb={1} position="sticky" top={0} zIndex="sticky" bg="bg.page" py={2}>
+              {columns.map((col) => {
+                const { incoming, outgoing } = entries[col.key];
+                const isActive = col.key === currentTab.key;
+                const color = guildColor(col.id);
                 return (
-                  <Box
-                    key={guild._id}
-                    bg={guildCardBg}
-                    borderRadius="xl"
-                    p={3}
-                    mb={2}
-                    borderWidth="1px"
-                    borderColor={borderColor}
-                    borderLeftWidth="3px"
-                    borderLeftColor={`${color}.400`}
+                  <Button
+                    key={col.key}
+                    onClick={() => setActiveTab(col.key)}
+                    variant="outline"
+                    flexShrink={0}
+                    h="auto"
+                    py={1.5}
+                    px={3}
+                    flexDirection="column"
+                    alignItems="flex-start"
+                    borderColor={isActive ? `${color}.400` : "border.subtle"}
+                    bg={isActive ? "bg.subtle" : "bg.card"}
+                    aria-pressed={isActive}
                   >
-                    <Flex justify="space-between" align="center" mb={2}>
-                      <Text fontSize="sm" fontWeight="semibold" noOfLines={1}>{guild.name}</Text>
-                      <HStack spacing={1}>
-                        <Text
-                          fontSize="sm"
-                          fontWeight="bold"
-                          color={isOver ? "red.400" : `${color}.400`}
-                        >
-                          {projected}
-                        </Text>
-                        <Text fontSize="xs" color={mutedText}>/20</Text>
-                        {diff !== 0 && (
-                          <Badge
-                            colorScheme={diff > 0 ? (isOver ? "red" : "orange") : "green"}
-                            fontSize="2xs"
-                            borderRadius="full"
-                            px={1.5}
-                          >
-                            {diff > 0 ? `+${diff}` : diff}
-                          </Badge>
-                        )}
-                      </HStack>
-                    </Flex>
-                    <Progress
-                      value={pct}
-                      size="xs"
-                      borderRadius="full"
-                      colorScheme={barColor}
-                      bg={progressBg}
-                    />
-                  </Box>
+                    <Text fontWeight="extrabold" color={`${color}.300`}>{col.id ? col.name : "Sans"}</Text>
+                    <Text fontSize="xs" fontWeight="normal">
+                      {col.id ? `${counts[col.key]}/${MAX_MEMBERS}` : guildlessCount}
+                      {(incoming.length > 0 || outgoing.length > 0) && ` · +${incoming.length} −${outgoing.length}`}
+                    </Text>
+                  </Button>
                 );
               })}
+            </HStack>
+            {renderColumn(currentTab)}
+          </>
+        ) : (
+          <Grid templateColumns={`repeat(${columns.length}, minmax(0, 1fr))`} gap={3} alignItems="start">
+            {columns.map(renderColumn)}
+          </Grid>
+        )}
 
-              <Box
-                bg={guildCardBg}
-                borderRadius="xl"
-                p={3}
-                borderWidth="1px"
-                borderColor={borderColor}
-                borderLeftWidth="3px"
-                borderLeftColor="gray.400"
-              >
-                <Flex justify="space-between" align="center">
-                  <Text fontSize="sm" fontWeight="semibold" color={mutedText}>Sans guilde</Text>
-                  <Text fontSize="sm" fontWeight="bold" color={mutedText}>
-                    {guildlessCount}
-                  </Text>
-                </Flex>
-              </Box>
-            </VStack>
-          </Box>
-        </GridItem>
+        {changeList.length > 0 && (
+          <Flex
+            position="sticky"
+            bottom={3}
+            zIndex="sticky"
+            align="center"
+            gap={3}
+            px={4}
+            py={2.5}
+            borderRadius="xl"
+            borderWidth="1px"
+            borderColor="border.default"
+            bg="bg.elevated"
+            boxShadow="lg"
+          >
+            <Text fontSize="sm" mr="auto">
+              <Text as="b">{transfers.length}</Text> transfert{transfers.length > 1 ? "s" : ""} · <Text as="b">{roleChanges.length}</Text> rôle{roleChanges.length > 1 ? "s" : ""}
+            </Text>
+            <Button size="sm" variant="ghost" onClick={() => setChanges({})}>Tout annuler</Button>
+            <Button size="sm" colorScheme="purple" leftIcon={<CheckIcon boxSize={3} />} onClick={confirm.onOpen} isDisabled={overflow.length > 0}>
+              Valider le draft
+            </Button>
+          </Flex>
+        )}
+      </VStack>
 
-        <GridItem>
-          <VStack spacing={4} align="stretch">
+      {sheetAccount && (
+        <DraftActionsSheet {...actionsFor(sheetAccount)} isOpen onClose={() => setSheetAccount(null)} />
+      )}
 
-            <Flex align="center" justify="space-between">
-              <HStack spacing={3}>
-                <Text fontSize="xl" fontWeight="bold">Draft de Guildes</Text>
-                {draftMoves.length > 0 && (
-                  <Badge colorScheme="orange" borderRadius="full" px={2.5} fontSize="xs">
-                    {draftMoves.length}
-                  </Badge>
-                )}
-              </HStack>
-              {draftMoves.length > 0 && (
-                <Button size="xs" variant="ghost" colorScheme="red" onClick={clearDraft}>
-                  Tout effacer
-                </Button>
-              )}
-            </Flex>
-
-            <Box
-              bg={cardBg}
-              borderRadius="xl"
-              borderWidth="1px"
-              borderColor={borderColor}
-              p={5}
-            >
-              <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={4}>
-                Nouveau transfert
-              </Text>
-
-              <Grid
-                templateColumns={{ base: "1fr", md: "1fr auto 1fr auto" }}
-                gap={3}
-                alignItems="end"
-              >
-                <Box>
-                  <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>
-                    Joueur
-                  </Text>
-                  <CustomSelect
-                    placeholder="Rechercher un joueur"
-                    value={selectedBbsId}
-                    onChange={selectPlayer}
-                    size="sm"
-                    allowDeselect={false}
-                    enableSearch
-                    onSearchChange={setPlayerSearch}
-                    accentColor="orange.400"
-                    isLoading={guildlessLoading}
-                    renderSelected={(option) => option.content}
-                    options={playerOptions.map((u) => ({
-                      value: u.bbs_id!,
-                      label: u.bbs_name || u.global_name || u.username,
-                      content: renderPlayerOption(u)
-                    }))}
-                  />
-                </Box>
-
-                <Box display={{ base: "none", md: "flex" }} alignItems="center" pb={1}>
-                  <ArrowForwardIcon color={selectedBbsId ? "orange.400" : "gray.300"} boxSize={4} />
-                </Box>
-
-                <Box>
-                  <Text fontSize="xs" fontWeight="medium" mb={1.5} color={mutedText}>Vers</Text>
-                  <CustomSelect
-                    placeholder="Guilde cible"
-                    value={selectedTargetGuild}
-                    onChange={setSelectedTargetGuild}
-                    size="sm"
-                    allowDeselect={false}
-                    accentColor="orange.400"
-                    isDisabled={!selectedBbsId}
-                    options={[
-                      ...(selectedUserData?.guildId
-                        ? [{ value: "__none__", label: "✕ Retirer de la guilde" }]
-                        : []),
-                      ...guilds
-                        .filter((g) => g._id !== selectedUserData?.guildId)
-                        .map((g) => {
-                          const count = projectedCounts[g._id] || 0;
-                          return {
-                            value: g._id,
-                            label: `${g.name} (${count}/20)${count >= 20 ? " — pleine" : ""}`
-                          };
-                        })
-                    ]}
-                  />
-                </Box>
-
-                <Tooltip label={!selectedBbsId || !selectedTargetGuild ? "Remplissez tous les champs" : "Ajouter ce transfert"} hasArrow>
-                  <Button
-                    leftIcon={<AddIcon boxSize={3} />}
-                    colorScheme="orange"
-                    size="sm"
-                    borderRadius="lg"
-                    onClick={addMove}
-                    isDisabled={!selectedBbsId || !selectedTargetGuild}
-                    px={4}
-                    alignSelf="flex-end"
-                    mb={{ base: 0, md: 0 }}
-                  >
-                    Ajouter
-                  </Button>
-                </Tooltip>
-              </Grid>
-            </Box>
-
-            {draftMoves.length > 0 ? (
-              <Box
-                bg={cardBg}
-                borderRadius="xl"
-                borderWidth="1px"
-                borderColor={borderColor}
-                overflow="hidden"
-              >
-                <Box px={5} pt={4} pb={3}>
-                  <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText}>
-                    Transferts planifiés
-                  </Text>
-                </Box>
-
-                <Divider borderColor={borderColor} />
-
-                <VStack spacing={0} align="stretch">
-                  {draftMoves.map((move, index) => (
-                    <DraftMoveRow
-                      key={move.id}
-                      move={move}
-                      fromColor={move.fromGuild ? guildColorMap[move.fromGuild._id] : "gray"}
-                      toColor={move.toGuild ? guildColorMap[move.toGuild._id] : "gray"}
-                      borderColor={borderColor}
-                      isLast={index === draftMoves.length - 1}
-                      getAvatarUrl={getAvatarUrl}
-                      onRemove={removeMove}
-                      onChangeTarget={updateMoveTarget}
-                      targetOptions={getTargetOptionsForMove(move)}
-                      hoverBg={rowHoverBg}
-                      mutedText={mutedText}
-                    />
-                  ))}
-                </VStack>
-
-                {hasOverflow && (
-                  <Box px={5} pb={3} pt={2}>
-                    <Alert status="error" borderRadius="lg" py={2} fontSize="sm">
-                      <AlertIcon />
-                      Des guildes dépassent 20 membres — corrigez avant de valider.
-                    </Alert>
-                  </Box>
-                )}
-
-                <Flex justify="flex-end" gap={3} px={5} pb={5} pt={2}>
-                  <Button variant="ghost" size="sm" borderRadius="lg" onClick={clearDraft}>
-                    Annuler
-                  </Button>
-                  <Button
-                    colorScheme="orange"
-                    size="sm"
-                    borderRadius="lg"
-                    leftIcon={<CheckIcon boxSize={3} />}
-                    onClick={onOpen}
-                    isDisabled={hasOverflow}
-                  >
-                    Valider ({draftMoves.length})
-                  </Button>
-                </Flex>
-              </Box>
-            ) : (
-              <Box
-                bg={emptyBg}
-                borderRadius="xl"
-                borderWidth="1px"
-                borderColor={borderColor}
-                borderStyle="dashed"
-                p={10}
-                textAlign="center"
-              >
-                <Text fontSize="2xl" mb={2}>🏟️</Text>
-                <Text color={mutedText} fontSize="sm">
-                  Aucun transfert planifié
-                </Text>
-                <Text color={mutedText} fontSize="xs" mt={1}>
-                  Utilisez le formulaire ci-dessus pour commencer.
-                </Text>
-              </Box>
-            )}
-          </VStack>
-        </GridItem>
-      </Grid>
-
-      <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
+      <Modal isOpen={confirm.isOpen} onClose={confirm.onClose} size="xl" isCentered scrollBehavior="inside">
         <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
-        <ModalContent borderRadius="xl" bg={modalBg} mx={4}>
-          <Box h="3px" bgGradient="linear(to-r, orange.400, pink.400)" borderTopRadius="xl" />
+        <ModalContent borderRadius="xl" bg="bg.card" mx={4}>
           <ModalHeader pb={2}>Confirmer le draft</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Alert status="warning" mb={5} borderRadius="lg" fontSize="sm">
+            <Alert status="warning" mb={4} borderRadius="lg" fontSize="sm">
               <AlertIcon />
-              Les joueurs seront retirés de leur guilde puis réassignés. Opération irréversible.
+              Les transferts et les rôles seront appliqués immédiatement.
             </Alert>
-
-            <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={3}>
-              {draftMoves.length} transfert{draftMoves.length > 1 ? "s" : ""}
-            </Text>
-
-            <VStack spacing={0} align="stretch" borderWidth="1px" borderColor={borderColor} borderRadius="lg" overflow="hidden">
-              {draftMoves.map((move, index) => (
-                <DraftMoveRow
-                  key={move.id}
-                  move={move}
-                  fromColor={move.fromGuild ? guildColorMap[move.fromGuild._id] : "gray"}
-                  toColor={move.toGuild ? guildColorMap[move.toGuild._id] : "gray"}
-                  borderColor={borderColor}
-                  isLast={index === draftMoves.length - 1}
-                  getAvatarUrl={getAvatarUrl}
-                  compact
-                />
-              ))}
+            <VStack align="stretch" spacing={4}>
+              {[...guilds.map((g) => g._id as string | null), null].map((guildId) => {
+                const arriving = changeList.filter((c) => c.toGuildId === guildId && (isTransfer(c) || isRoleChange(c)));
+                if (arriving.length === 0) return null;
+                const guild = guildInfo(guildId);
+                return (
+                  <Box key={guildId ?? NONE}>
+                    <HStack mb={1.5}>
+                      <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color="text.muted">Vers</Text>
+                      <GuildTag guild={guild} />
+                      {guildId && <Badge variant="subtle">{counts[guildId]}/{MAX_MEMBERS}</Badge>}
+                    </HStack>
+                    <VStack align="stretch" spacing={1}>
+                      {arriving.map((c) => (
+                        <HStack key={c.account.bbsId} fontSize="sm" spacing={2}>
+                          <Text fontWeight="semibold" noOfLines={1}>{c.account.name}</Text>
+                          {isTransfer(c) ? (
+                            <HStack spacing={1}><Text color="text.muted">depuis</Text><GuildTag guild={guildInfo(c.account.guildId)} /></HStack>
+                          ) : (
+                            <Text color="text.muted">{c.account.role ?? "membre"} →</Text>
+                          )}
+                          {c.role && c.role !== "membre" && <HStack spacing={1}><RoleIcon role={c.role} /><Text>{c.role}</Text></HStack>}
+                        </HStack>
+                      ))}
+                    </VStack>
+                  </Box>
+                );
+              })}
             </VStack>
-
-            {guilds.some((g) => (membersByGuild[g._id]?.length || 0) !== (projectedCounts[g._id] || 0)) && (
-              <Box mt={4}>
-                <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedText} mb={2}>
-                  Impact
-                </Text>
-                <Flex gap={2} flexWrap="wrap">
-                  {guilds
-                    .filter((g) => (membersByGuild[g._id]?.length || 0) !== (projectedCounts[g._id] || 0))
-                    .map((guild) => {
-                      const current   = membersByGuild[guild._id]?.length || 0;
-                      const projected = projectedCounts[guild._id] || 0;
-                      const diff      = projected - current;
-                      const color     = guildColorMap[guild._id];
-                      return (
-                        <Tag key={guild._id} size="sm" borderRadius="full" colorScheme={color} variant="outline">
-                          <TagLabel>
-                            {guild.name} {current}→{projected}{" "}
-                            <Text as="span" fontWeight="bold" color={diff > 0 ? "orange.400" : "green.400"}>
-                              ({diff > 0 ? `+${diff}` : diff})
-                            </Text>
-                          </TagLabel>
-                        </Tag>
-                      );
-                    })}
-                </Flex>
-              </Box>
-            )}
           </ModalBody>
-
           <ModalFooter pt={2}>
-            <Button variant="ghost" mr={3} onClick={onClose} borderRadius="lg">Annuler</Button>
-            <Button
-              colorScheme="orange"
-              onClick={handleExecuteDraft}
-              isLoading={isExecuting}
-              loadingText="Exécution…"
-              borderRadius="lg"
-              leftIcon={<CheckIcon />}
-            >
+            <Button variant="ghost" mr={3} onClick={confirm.onClose}>Annuler</Button>
+            <Button colorScheme="purple" onClick={handleExecute} isLoading={isExecuting} loadingText="Exécution…" leftIcon={<CheckIcon />}>
               Confirmer et exécuter
             </Button>
           </ModalFooter>
