@@ -31,6 +31,8 @@ export interface IBuildAccessory {
 
 export interface IBuildLink {
   id_character: string;
+  // Spe set in the author's album, absent when the album does not list the character
+  spe?: number;
   character?: {
     _id: string;
     name: string;
@@ -49,6 +51,8 @@ export interface IBuildLink {
 export interface IBuildTeamMember {
   id_character: string;
   position: number; // 1, 2 or 3
+  // Spe set in the author's album, absent when the album does not list the character
+  spe?: number;
   links?: IBuildLink[];
   skills?: string[] | ISkill[]; // Ids or populated objects
   accessories?: IBuildAccessory[];
