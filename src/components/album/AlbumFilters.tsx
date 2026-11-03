@@ -9,7 +9,8 @@ import { countPanelFilters, EMPTY_ALBUM_FILTERS, hasAlbumFilters, type AlbumFilt
 interface AlbumFiltersProps {
   value: AlbumFilterValues;
   onChange: (value: AlbumFilterValues) => void;
-  ownershipLabels: Record<OwnershipFilter, string>;
+  // Left out without an album: the ownership buttons are hidden
+  ownershipLabels?: Record<OwnershipFilter, string>;
 }
 
 // Search and ownership, then the same filter panel as the Characters page
@@ -30,18 +31,20 @@ export const AlbumFilters = ({ value, onChange, ownershipLabels }: AlbumFiltersP
             placeholder={t("pages.user.albumSearchPlaceholder")}
           />
         </InputGroup>
-        <ButtonGroup size="md" isAttached variant="outline">
-          {(["all", "owned", "missing"] as const).map((key) => (
-            <Button
-              key={key}
-              colorScheme={value.ownership === key ? "purple" : "gray"}
-              variant={value.ownership === key ? "solid" : "outline"}
-              onClick={() => onChange({ ...value, ownership: key })}
-            >
-              {ownershipLabels[key]}
-            </Button>
-          ))}
-        </ButtonGroup>
+        {ownershipLabels && (
+          <ButtonGroup size="md" isAttached variant="outline">
+            {(["all", "owned", "missing"] as const).map((key) => (
+              <Button
+                key={key}
+                colorScheme={value.ownership === key ? "purple" : "gray"}
+                variant={value.ownership === key ? "solid" : "outline"}
+                onClick={() => onChange({ ...value, ownership: key })}
+              >
+                {ownershipLabels[key]}
+              </Button>
+            ))}
+          </ButtonGroup>
+        )}
         <Button
           onClick={() => setShowFilters((open) => !open)}
           variant={showFilters ? "solid" : "outline"}
