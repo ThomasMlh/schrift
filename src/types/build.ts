@@ -38,7 +38,9 @@ export interface IBuildLink {
     rarity?: string;
     element?: string;
     affinity?: string;
-    soul_traits?: string[];
+    version?: string;
+    // Soul traits from the game tables, at their resurrected values when the form exists
+    link_traits?: { name?: GameText | null; text: GameText | null }[];
   };
 }
 
@@ -55,6 +57,7 @@ export interface IBuildTeamMember {
     rarity?: string;
     element?: string;
     affinity?: string;
+    version?: string;
   };
 }
 

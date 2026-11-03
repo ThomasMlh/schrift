@@ -13,12 +13,8 @@ import {
   HStack,
   Badge,
   Image,
-  Divider,
   Flex,
   SimpleGrid,
-  Grid,
-  GridItem,
-  Tooltip,
   Icon,
 } from "@chakra-ui/react";
 import { EditIcon, CheckCircleIcon, TimeIcon } from "@chakra-ui/icons";
@@ -30,13 +26,11 @@ import { ScoreBadge } from "./ScoreBadge";
 import { ImageLightbox } from "./ImageLightbox";
 import { formatChrono } from "@/utils/chrono";
 import { UserDisplay } from "./UserDisplay";
-import { AffinityIcon } from "./AffinityIcon";
+import { BuildMemberCard } from "./BuildMemberCard";
 import type { IBuild } from "../../interfaces";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 import { bucketUrl } from "@/utils/apiRequest";
-import { gameText } from "@/utils/gameText";
-import { skillLabel } from "@/utils/skillText";
 import { BuildGuildPlayers } from "@/components/guides/BuildGuildPlayers";
 
 interface BuildDetailModalProps {
@@ -45,8 +39,6 @@ interface BuildDetailModalProps {
   build: IBuild | null;
   onEdit?: (build: IBuild) => void;
 }
-
-const POSITION_COLORS = ["purple", "blue", "teal"] as const;
 
 // Result tile (score, times)
 const ResultTile = ({ label, children }: { label: string; children: ReactNode }) => (
@@ -76,13 +68,8 @@ export const BuildDetailModal = ({
   build,
   onEdit,
 }: BuildDetailModalProps) => {
-  const cardBg = "bg.card";
-  const cardBorder = "border.subtle";
-  const sectionBg = "bg.muted";
-  const linkCardBg = "bg.muted";
-  const mutedText = "text.muted";
   const { currentUser } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
@@ -187,256 +174,61 @@ export const BuildDetailModal = ({
                 </SimpleGrid>
               )}
 
-              {screenshotUrl && (
-                <Box
-                  as="button"
-                  onClick={() => setLightboxOpen(true)}
-                  borderRadius="xl"
-                  overflow="hidden"
-                  borderWidth="1px"
-                  borderColor="border.subtle"
-                  bg="bg.inset"
-                  position="relative"
-                  role="group"
-                  aria-label={t("components.buildDetailModal.screenshotOpen")}
-                >
-                  <Image src={screenshotUrl} alt={t("components.buildDetailModal.screenshot")} w="100%" maxH="420px" objectFit="contain" />
-                  <HStack
-                    position="absolute"
-                    bottom={2}
-                    right={2}
-                    spacing={1}
-                    px={2}
-                    py={1}
-                    borderRadius="md"
-                    bg="blackAlpha.700"
-                    color="white"
-                    fontSize="xs"
-                    opacity={0.85}
-                    _groupHover={{ opacity: 1 }}
-                  >
-                    <Icon as={FiMaximize2} />
-                    <Text>{t("components.buildDetailModal.screenshotOpen")}</Text>
-                  </HStack>
-                </Box>
-              )}
-
               <Box>
                 <Text fontWeight="bold" color="text.strong" mb={3}>
                   {t("components.buildDetailModal.teamComposition")}
                 </Text>
-                <Grid
-                  templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }}
-                  gap={4}
-                >
-                  {build.team?.map((member, index) => {
-                    const positionColor = POSITION_COLORS[(member.position - 1) % POSITION_COLORS.length];
-                    return (
-                      <GridItem key={index}>
-                        <Box
-                          bg={cardBg}
-                          borderWidth="1px"
-                          borderColor={cardBorder}
-                          borderRadius="xl"
-                          overflow="hidden"
-                          h="100%"
-                          boxShadow="sm"
-                          _hover={{ boxShadow: "md", borderColor: `${positionColor}.300` }}
-                          transition="all 0.2s"
-                        >
-                          <Box position="relative">
-                            <Image
-                              src={`${bucketUrl}/characters/full/${member.character?._id}.png`}
-                              alt={member.character?.name || ""}
-                              w="100%"
-                              h="200px"
-                              objectFit="cover"
-                              objectPosition="middle"
-                              fallbackSrc={`${bucketUrl}/characters/thumb/${member.character?._id}.png`}
-                              bg={sectionBg}
-                            />
-                            <Box
-                              position="absolute"
-                              bottom={0}
-                              left={0}
-                              right={0}
-                              h="70px"
-                              bgGradient="linear(to-t, blackAlpha.800, transparent)"
-                            />
-                            <Badge
-                              position="absolute"
-                              top={2}
-                              left={2}
-                              colorScheme={positionColor}
-                              borderRadius="full"
-                              px={2}
-                              py={0.5}
-                              fontSize="xs"
-                              fontWeight="bold"
-                            >
-                              #{member.position}
-                            </Badge>
-                            <HStack
-                              position="absolute"
-                              bottom={2}
-                              left={3}
-                              right={3}
-                              spacing={2}
-                            >
-                              <Text
-                                color="white"
-                                fontWeight="bold"
-                                fontSize="sm"
-                                noOfLines={1}
-                                flex={1}
-                                textShadow="0 1px 3px rgba(0,0,0,0.8)"
-                              >
-                                {member.character?.name ||
-                                  t("components.buildDetailModal.characterFallback", {
-                                    id: member.id_character,
-                                  })}
-                              </Text>
-                              {member.character?.affinity && (
-                                <AffinityIcon affinity={member.character.affinity} size="18px" />
-                              )}
-                            </HStack>
-                          </Box>
-
-                          <VStack align="stretch" spacing={0} divider={<Divider />}>
-                            {member.skills && member.skills.length > 0 && (
-                              <Box p={3}>
-                                <Text fontSize="xs" fontWeight="semibold" color={mutedText} textTransform="uppercase" letterSpacing="wide" mb={2}>
-                                  {t("components.buildDetailModal.skills")}
-                                </Text>
-                                <HStack spacing={1.5} flexWrap="wrap">
-                                  {member.skills.map((skill, skillIndex) => {
-                                    const skillName =
-                                      typeof skill === "string" ? skill : skillLabel(skill, i18n.language);
-                                    return (
-                                      <Badge
-                                        key={skillIndex}
-                                        colorScheme="purple"
-                                        fontSize="xs"
-                                        px={2}
-                                        py={0.5}
-                                        borderRadius="md"
-                                      >
-                                        {skillName}
-                                      </Badge>
-                                    );
-                                  })}
-                                </HStack>
-                              </Box>
-                            )}
-
-                            {member.accessories && member.accessories.length > 0 && (
-                              <Box p={3}>
-                                <Text fontSize="xs" fontWeight="semibold" color={mutedText} textTransform="uppercase" letterSpacing="wide" mb={2}>
-                                  {t("components.buildDetailModal.accessories")}
-                                </Text>
-                                <VStack align="stretch" spacing={1.5}>
-                                  {member.accessories.map((acc, accIndex) => (
-                                    <HStack key={accIndex} spacing={2} align="center">
-                                      <Box flexShrink={0}>
-                                        {acc.accessory?.code ? (
-                                          <Image
-                                            src={`${bucketUrl}/accessories/${acc.accessory.code}/thumb.png`}
-                                            alt={acc.accessory?.name}
-                                            boxSize="28px"
-                                            borderRadius="md"
-                                            objectFit="contain"
-                                            fallback={<Box boxSize="28px" borderRadius="md" bg={sectionBg} />}
-                                          />
-                                        ) : (
-                                          <Box boxSize="28px" borderRadius="md" bg={sectionBg} />
-                                        )}
-                                      </Box>
-                                      <VStack align="start" spacing={0} flex={1} minW={0}>
-                                        <Text fontSize="md" fontWeight="medium" noOfLines={1}>
-                                          {acc.accessory ? gameText(acc.accessory.names, i18n.language) || acc.accessory.name : "—"}
-                                        </Text>
-                                        {acc.accessory?.effect?.text && (
-                                          <Text fontSize="sm" color={mutedText}>
-                                            {gameText(acc.accessory.effect.text, i18n.language)}
-                                          </Text>
-                                        )}
-                                        {acc.subeffect && (
-                                          <Text fontSize="sm" color={mutedText} noOfLines={1}>
-                                            ↳ {gameText(acc.subeffect.names, i18n.language) || acc.subeffect.name}
-                                          </Text>
-                                        )}
-                                      </VStack>
-                                    </HStack>
-                                  ))}
-                                </VStack>
-                              </Box>
-                            )}
-
-                            {member.links && member.links.length > 0 && (
-                              <Box p={3}>
-                                <Text fontSize="xs" fontWeight="semibold" color={mutedText} textTransform="uppercase" letterSpacing="wide" mb={2}>
-                                  {t("components.buildDetailModal.links")}
-                                </Text>
-                                <VStack align="stretch" spacing={1.5}>
-                                  {member.links.map((link, linkIndex) => (
-                                    <HStack
-                                      key={linkIndex}
-                                      p={2}
-                                      bg={linkCardBg}
-                                      borderRadius="md"
-                                      spacing={2}
-                                    >
-                                      <Image
-                                        src={`${bucketUrl}/characters/thumb/${link.character?._id}.png`}
-                                        alt={link.character?.name || ""}
-                                        boxSize="28px"
-                                        borderRadius="full"
-                                        objectFit="cover"
-                                        bg="gray.200"
-                                        fallback={<Box boxSize="28px" borderRadius="full" bg="gray.200" />}
-                                      />
-                                      <VStack align="start" spacing={0} flex={1} minW={0}>
-                                        <HStack spacing={1}>
-                                          <Text fontSize="md" fontWeight="semibold" noOfLines={1}>
-                                            {link.character?.name ||
-                                              t("components.buildDetailModal.characterFallback", {
-                                                id: link.id_character,
-                                              })}
-                                          </Text>
-                                          {link.character?.affinity && (
-                                            <AffinityIcon affinity={link.character.affinity} size="12px" />
-                                          )}
-                                        </HStack>
-                                        {link.character?.soul_traits?.slice(0, 1).map((trait, traitIdx) => (
-                                          <Tooltip key={traitIdx} label={trait} hasArrow placement="top">
-                                            <Text fontSize="sm" color={mutedText} noOfLines={1}>
-                                              {trait}
-                                            </Text>
-                                          </Tooltip>
-                                        ))}
-                                      </VStack>
-                                    </HStack>
-                                  ))}
-                                </VStack>
-                              </Box>
-                            )}
-                          </VStack>
-                        </Box>
-                      </GridItem>
-                    );
-                  })}
-                </Grid>
+                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+                  {build.team?.map((member) => <BuildMemberCard key={member.position} member={member} />)}
+                </SimpleGrid>
               </Box>
 
               <BuildGuildPlayers build={build} />
 
-              {build.description && (
-                <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="border.subtle">
-                  <Text fontSize="xs" color="text.muted" mb={1} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide">
-                    {t("components.buildDetailModal.description")}
-                  </Text>
-                  <Text whiteSpace="pre-wrap" color="text.body">{build.description}</Text>
-                </Box>
+              {(screenshotUrl || build.description) && (
+                <SimpleGrid columns={{ base: 1, md: screenshotUrl && build.description ? 2 : 1 }} spacing={4} alignItems="start">
+                  {screenshotUrl && (
+                    <Box
+                      as="button"
+                      onClick={() => setLightboxOpen(true)}
+                      borderRadius="xl"
+                      overflow="hidden"
+                      borderWidth="1px"
+                      borderColor="border.subtle"
+                      bg="bg.inset"
+                      position="relative"
+                      role="group"
+                      aria-label={t("components.buildDetailModal.screenshotOpen")}
+                    >
+                      <Image src={screenshotUrl} alt={t("components.buildDetailModal.screenshot")} w="100%" maxH="320px" objectFit="contain" />
+                      <HStack
+                        position="absolute"
+                        bottom={2}
+                        right={2}
+                        spacing={1}
+                        px={2}
+                        py={1}
+                        borderRadius="md"
+                        bg="blackAlpha.700"
+                        color="white"
+                        fontSize="xs"
+                        opacity={0.85}
+                        _groupHover={{ opacity: 1 }}
+                      >
+                        <Icon as={FiMaximize2} />
+                        <Text>{t("components.buildDetailModal.screenshotOpen")}</Text>
+                      </HStack>
+                    </Box>
+                  )}
+                  {build.description && (
+                    <Box p={4} bg="bg.subtle" borderRadius="lg" borderWidth="1px" borderColor="border.subtle">
+                      <Text fontSize="xs" color="text.muted" mb={1} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide">
+                        {t("components.buildDetailModal.description")}
+                      </Text>
+                      <Text whiteSpace="pre-wrap" color="text.body">{build.description}</Text>
+                    </Box>
+                  )}
+                </SimpleGrid>
               )}
 
               {build.updated_at && build.updated_at !== build.created_at && (
