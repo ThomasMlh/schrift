@@ -942,8 +942,6 @@
       "buttonEdit": "Modifier le Build",
       "loadingCreate": "Création...",
       "loadingEdit": "Modification...",
-      "toastCharUsedTitle": "Personnage déjà utilisé",
-      "toastCharUsedDesc": "Ce personnage est déjà utilisé dans une autre position ou comme link.",
       "toastAuthTitle": "Erreur d'authentification",
       "toastAuthDescCreate": "Vous devez être connecté pour créer un build",
       "toastAuthDescEdit": "Vous devez être connecté pour modifier un build",
@@ -1284,30 +1282,26 @@
       "anyEnemy": "tous",
       "perHit": "{{value}} / coup"
     },
-    "accessorySearchSelect": {
-      "accessory": "Accessoire",
-      "searchAccessory": "Rechercher un accessoire...",
-      "noAccessory": "Aucun accessoire trouvé",
-      "subeffect": "Sous-effet (optionnel)",
-      "searchSubeffect": "Rechercher un sous-effet...",
-      "noSubeffect": "Aucun sous-effet trouvé"
-    },
     "buildForm": {
-      "position": "Position {{position}}",
       "mainCharacter": "Personnage principal",
-      "searchCharacter": "Rechercher un personnage...",
+      "pickCharacter": "Choisir un personnage",
+      "removeCharacter": "Retirer le personnage",
+      "characterUsed": "Déjà utilisé",
+      "noCharacter": "Aucun personnage trouvé",
       "links": "Links ({{count}}/3)",
-      "searchLink": "Rechercher un link...",
+      "pickLink": "Choisir un link",
       "removeLink": "Supprimer le link",
-      "addLink": "Ajouter un link",
       "skills": "Compétences bonus (optionnel, max 2)",
+      "addSkill": "Ajouter une compétence",
+      "removeSkill": "Retirer la compétence",
       "searchSkill": "Rechercher une compétence...",
       "noSkill": "Aucune compétence trouvée",
-      "maxSkills": "Maximum de {{count}} compétences atteint",
       "accessories": "Accessoires ({{count}}/3)",
-      "removeAccessory": "Supprimer l'accessoire",
       "addAccessory": "Ajouter un accessoire",
-      "noCharacter": "Aucun personnage trouvé"
+      "removeAccessory": "Supprimer l'accessoire",
+      "searchAccessory": "Rechercher par nom ou effet...",
+      "noAccessory": "Aucun accessoire trouvé",
+      "subeffect": "Sous-effet (optionnel)"
     }
   },
   "affinities": {
