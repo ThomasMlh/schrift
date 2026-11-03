@@ -107,7 +107,8 @@ const LinkTile = ({ link }: { link: IBuildLink }) => {
   );
 };
 
-// fill: on wide screens the artwork takes the whole height of its row instead of a 16:9 box
+// fill: on wide screens the artwork stretches to the height of its row instead of keeping a 16:9 box.
+// The image is absolutely positioned so its own size never drives the box or the row.
 const MemberArtwork = ({ member, borderRadius, fill = false }: { member: IBuildTeamMember; borderRadius?: string; fill?: boolean }) => {
   const { t } = useTranslation();
   const character = member.character;
@@ -121,14 +122,16 @@ const MemberArtwork = ({ member, borderRadius, fill = false }: { member: IBuildT
       display="block"
       position="relative"
       overflow="hidden"
+      minW={0}
       borderRadius={borderRadius}
       bg="bg.inset"
-      h={fill ? { lg: "100%" } : undefined}
       minH={fill ? { lg: "260px" } : undefined}
-      sx={{ aspectRatio: "16 / 9" }}
+      sx={{ aspectRatio: fill ? { base: "16 / 9", lg: "auto" } : "16 / 9" }}
       role="group"
     >
       <Image
+        position="absolute"
+        inset={0}
         src={`${bucketUrl}/characters/artwork/${member.id_character}.png`}
         fallbackSrc={`${bucketUrl}/characters/thumb/${member.id_character}.png`}
         alt={name}
