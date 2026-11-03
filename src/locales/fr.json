@@ -911,7 +911,14 @@
       "anonymous": "Anonyme",
       "ariaEditBuild": "Modifier le build",
       "currentRotation": "Rotation en cours",
-      "view": "Voir"
+      "view": "Voir",
+      "noResult": "Pas de résultat",
+      "waveNormal": "Normale",
+      "waveExtra": "Extra",
+      "sortRecent": "Les plus récents d'abord",
+      "sortScore": "Meilleur score d'abord",
+      "layoutCards": "Cartes",
+      "layoutRows": "Lignes"
     },
     "buildDetailModal": {
       "title": "Détails du Build",
