@@ -1,5 +1,6 @@
 import {
   Box, Flex, Heading, HStack, VStack, Text, Button, Menu, MenuButton, MenuList, MenuItem, Icon, Tooltip, useToast,
+  Tabs, TabList, Tab, TabPanels, TabPanel,
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { FiCpu, FiDatabase, FiImage, FiRefreshCw, FiTool, FiUsers, FiFileText } from "react-icons/fi";
@@ -217,10 +218,21 @@ const AdminPage = () => {
         return <AdminOverview guilds={managedGuilds} isAdmin={isFullAdmin} bot={bot} onNavigate={handleTabChange} />;
       case "draft":
         return (
-          <VStack align="stretch" spacing={6}>
-            <DraftProposalSection />
-            <DraftSection onDraftComplete={() => {}} />
-          </VStack>
+          // Panels stay mounted once opened, so a draft in progress survives a look at the simulation
+          <Tabs variant="soft-rounded" colorScheme="purple" isLazy lazyBehavior="keepMounted">
+            <TabList>
+              <Tab>Draft</Tab>
+              <Tab>Simulation</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel px={0}>
+                <DraftSection onDraftComplete={() => {}} />
+              </TabPanel>
+              <TabPanel px={0}>
+                <DraftProposalSection />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
         );
       case "cycles":
         return (
