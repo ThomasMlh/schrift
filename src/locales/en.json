@@ -930,7 +930,11 @@
       "timeNormalWave": "Normal wave",
       "timeExtraWave": "Extra wave",
       "screenshot": "Screenshot",
-      "screenshotOpen": "Enlarge"
+      "screenshotOpen": "Enlarge",
+      "characterEx": "Character EX",
+      "noGear": "No bonus skill or accessory set.",
+      "layoutBanner": "Team banner",
+      "layoutRows": "Team rows"
     },
     "buildCreationModal": {
       "titleCreate": "Create a Build",

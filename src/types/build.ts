@@ -41,6 +41,8 @@ export interface IBuildLink {
     version?: string;
     // Soul traits from the game tables, at their resurrected values when the form exists
     link_traits?: { name?: GameText | null; text: GameText | null }[];
+    // EX traits of the base form, one value per EX level
+    ex_traits?: { text: GameText | null; values?: number[] }[];
   };
 }
 
@@ -58,6 +60,8 @@ export interface IBuildTeamMember {
     element?: string;
     affinity?: string;
     version?: string;
+    // EX traits of the base form, one value per EX level
+    ex_traits?: { text: GameText | null; values?: number[] }[];
   };
 }
 
