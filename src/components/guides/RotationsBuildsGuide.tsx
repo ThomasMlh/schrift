@@ -13,6 +13,8 @@ import {
   Icon,
   Tooltip,
   Link,
+  IconButton,
+  SimpleGrid,
 } from "@chakra-ui/react";
 import { useState, useEffect, useMemo } from "react";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
@@ -20,7 +22,7 @@ import { useTranslation } from "react-i18next";
 import { AddIcon } from "@chakra-ui/icons";
 import { useBuilds, useCycles, useRotations } from "../../hooks/useAPI";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
-import { FiCheckCircle, FiSearch } from "react-icons/fi";
+import { FiCheckCircle, FiGrid, FiList, FiSearch } from "react-icons/fi";
 import { useMyAlbum } from "@/hooks/useMyAlbum";
 import { albumTabUrl } from "@/utils/buildOwnership";
 import BuildCreationModal from "../ui/BuildCreationModal";
@@ -33,6 +35,19 @@ import { AlterationImage } from "../ui/AlterationImage";
 import type { IBuild } from "../../interfaces";
 import { PageLoader } from "../ui/PageLoader";
 import { BuildRow } from "./BuildRow";
+import { BuildCard } from "./BuildCard";
+
+type BuildListLayout = "cards" | "rows";
+
+const LAYOUT_KEY = "rotationsBuildsGuide.layout";
+
+const readLayout = (): BuildListLayout => {
+  try {
+    return localStorage.getItem(LAYOUT_KEY) === "rows" ? "rows" : "cards";
+  } catch {
+    return "cards";
+  }
+};
 
 const RotationsBuildsGuide = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -57,6 +72,16 @@ const RotationsBuildsGuide = () => {
   const [playableOnly, setPlayableOnly] = useState(false);
   const isPlayableFilterOn = playableOnly && hasAlbum && !!account;
 
+  const [layout, setLayout] = useState<BuildListLayout>(readLayout);
+  const changeLayout = (next: BuildListLayout) => {
+    setLayout(next);
+    try {
+      localStorage.setItem(LAYOUT_KEY, next);
+    } catch {
+      // Storage unavailable: the choice only applies to this session
+    }
+  };
+
   const { rotations, isLoading: isLoadingRotations } = useRotations();
   const { cycles, isLoading: isLoadingCycles } = useCycles({ limit: 5 });
   const { currentRotation } = useCurrentRotation(cycles, isLoadingCycles);
@@ -78,12 +103,15 @@ const RotationsBuildsGuide = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const sortByScore = !!selectedRotation || isPlayableFilterOn;
   const { builds, pagination, isLoading, mutate } = useBuilds({
     page: currentPage,
     limit: 10,
     rotation_id: selectedRotation || undefined,
     isValid: true,
     playable_by: isPlayableFilterOn ? account?.bbs_id : undefined,
+    // Most recent first without a filter, best score first as soon as one applies
+    sort: sortByScore ? "score" : "recent",
     authenticated: false,
   });
 
@@ -306,10 +334,34 @@ const RotationsBuildsGuide = () => {
         </Box>
       ) : (
         <>
-          <Box bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" overflow="hidden">
-            <VStack spacing={0} align="stretch" divider={<Divider borderColor="border.subtle" />}>
+          <Flex justify="space-between" align="center" gap={3}>
+            <Text fontSize="xs" color={mutedText}>
+              {t(sortByScore ? "components.rotationsBuildsGuide.sortScore" : "components.rotationsBuildsGuide.sortRecent")}
+            </Text>
+            <HStack spacing={0.5} flexShrink={0}>
+              {([["cards", "layoutCards", FiGrid], ["rows", "layoutRows", FiList]] as const).map(([mode, labelKey, ModeIcon]) => {
+                const label = t(`components.rotationsBuildsGuide.${labelKey}`);
+                return (
+                  <Tooltip key={mode} label={label} placement="top" hasArrow openDelay={400}>
+                    <IconButton
+                      aria-label={label}
+                      aria-pressed={layout === mode}
+                      icon={<Icon as={ModeIcon} />}
+                      size="sm"
+                      variant={layout === mode ? "solid" : "ghost"}
+                      colorScheme={layout === mode ? "purple" : "gray"}
+                      onClick={() => changeLayout(mode)}
+                    />
+                  </Tooltip>
+                );
+              })}
+            </HStack>
+          </Flex>
+
+          {layout === "cards" ? (
+            <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={4}>
               {builds.map((build) => (
-                <BuildRow
+                <BuildCard
                   key={build._id}
                   build={build}
                   rotation={rotations.find((r) => r._id === build.rotation_id)}
@@ -319,8 +371,24 @@ const RotationsBuildsGuide = () => {
                   owned={hasAlbum ? owned : undefined}
                 />
               ))}
-            </VStack>
-          </Box>
+            </SimpleGrid>
+          ) : (
+            <Box bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" overflow="hidden">
+              <VStack spacing={0} align="stretch" divider={<Divider borderColor="border.subtle" />}>
+                {builds.map((build) => (
+                  <BuildRow
+                    key={build._id}
+                    build={build}
+                    rotation={rotations.find((r) => r._id === build.rotation_id)}
+                    canEdit={Boolean(canEditBuild(build))}
+                    onOpen={handleOpenBuild}
+                    onEdit={handleEditBuild}
+                    owned={hasAlbum ? owned : undefined}
+                  />
+                ))}
+              </VStack>
+            </Box>
+          )}
 
           {pagination && pagination.totalPages > 1 && (
             <Pagination
