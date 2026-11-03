@@ -942,8 +942,6 @@
       "buttonEdit": "Edit Build",
       "loadingCreate": "Creating...",
       "loadingEdit": "Editing...",
-      "toastCharUsedTitle": "Character already used",
-      "toastCharUsedDesc": "This character is already used in another position or as a link.",
       "toastAuthTitle": "Authentication error",
       "toastAuthDescCreate": "You must be logged in to create a build",
       "toastAuthDescEdit": "You must be logged in to edit a build",
@@ -1284,30 +1282,26 @@
       "anyEnemy": "all",
       "perHit": "{{value}} / hit"
     },
-    "accessorySearchSelect": {
-      "accessory": "Accessory",
-      "searchAccessory": "Search an accessory...",
-      "noAccessory": "No accessory found",
-      "subeffect": "Sub-effect (optional)",
-      "searchSubeffect": "Search a sub-effect...",
-      "noSubeffect": "No sub-effect found"
-    },
     "buildForm": {
-      "position": "Position {{position}}",
       "mainCharacter": "Main character",
-      "searchCharacter": "Search a character...",
+      "pickCharacter": "Choose a character",
+      "removeCharacter": "Remove the character",
+      "characterUsed": "Already used",
+      "noCharacter": "No character found",
       "links": "Links ({{count}}/3)",
-      "searchLink": "Search a link...",
+      "pickLink": "Choose a link",
       "removeLink": "Remove the link",
-      "addLink": "Add a link",
       "skills": "Bonus skills (optional, max 2)",
+      "addSkill": "Add a skill",
+      "removeSkill": "Remove the skill",
       "searchSkill": "Search a skill...",
       "noSkill": "No skill found",
-      "maxSkills": "Maximum of {{count}} skills reached",
       "accessories": "Accessories ({{count}}/3)",
-      "removeAccessory": "Remove the accessory",
       "addAccessory": "Add an accessory",
-      "noCharacter": "No character found"
+      "removeAccessory": "Remove the accessory",
+      "searchAccessory": "Search by name or effect...",
+      "noAccessory": "No accessory found",
+      "subeffect": "Sub-effect (optional)"
     }
   },
   "affinities": {

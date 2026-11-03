@@ -37,7 +37,7 @@ const MAX_BUILD_SCORE = 625_000_000;
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAPIMutations } from "../../hooks/useAPIMutations";
 import { DescriptionTextarea } from "./DescriptionTextarea";
-import { TeamMemberCard } from "./TeamMemberCard";
+import { TeamMemberCard, type TeamMember, type TeamMemberAccessory } from "./TeamMemberCard";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "react-i18next";
 import type { IBuild, IBuildTeamMember, IBuildLink, ISkill } from "@/interfaces";
@@ -48,14 +48,6 @@ interface BuildCreationModalProps {
   rotationId: string;
   onSuccess: () => void;
   buildToEdit?: IBuild;
-}
-
-interface TeamMember {
-  id_character: string;
-  position: number;
-  links: Array<{ id_character: string }>;
-  skills?: string[];
-  accessories?: Array<{ id_accessory: string; id_subeffect?: string }>;
 }
 
 const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdit }: BuildCreationModalProps) => {
@@ -138,66 +130,15 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, buildId]); // Depend on the id only, not on the whole buildToEdit object
 
-  const usedCharacterIds = useMemo(() => {
-    const usedIds = new Set<string>();
-    team.forEach((member) => {
-      if (member.id_character) {
-        usedIds.add(member.id_character);
-      }
-      member.links.forEach((link) => {
-        if (link.id_character) {
-          usedIds.add(link.id_character);
-        }
-      });
-    });
-    return usedIds;
-  }, [team]);
+  const usedCharacterIds = useMemo(() => team.flatMap((member) => [
+    member.id_character,
+    ...member.links.map((link) => link.id_character),
+  ]).filter(Boolean), [team]);
 
   const handleCharacterChange = useCallback((position: number, characterId: string) => {
-    setTeam((prev) => {
-      const usedIds = new Set<string>();
-      prev.forEach((member) => {
-        if (member.id_character) {
-          usedIds.add(member.id_character);
-        }
-        member.links.forEach((link) => {
-          if (link.id_character) {
-            usedIds.add(link.id_character);
-          }
-        });
-      });
-      
-      const currentMember = prev.find((m) => m.position === position);
-      
-      // Ignore the member's own character so it can be selected again
-      if (currentMember?.id_character) {
-        usedIds.delete(currentMember.id_character);
-      }
-      
-      if (characterId && usedIds.has(characterId)) {
-        toast({
-          title: t("components.buildCreationModal.toastCharUsedTitle"),
-          description: t("components.buildCreationModal.toastCharUsedDesc"),
-          status: "warning",
-          duration: 3000,
-        });
-        return prev;
-      }
-
-      return prev.map((member) =>
-        member.position === position ? { ...member, id_character: characterId } : member
-      );
-    });
-  }, [toast, t]);
-
-  const handleAddLink = useCallback((position: number) => {
-    setTeam((prev) =>
-      prev.map((member) =>
-        member.position === position && member.links.length < 3
-          ? { ...member, links: [...member.links, { id_character: "" }] }
-          : member
-      )
-    );
+    setTeam((prev) => prev.map((member) =>
+      member.position === position ? { ...member, id_character: characterId } : member
+    ));
   }, []);
 
   const handleRemoveLink = useCallback((position: number, linkIndex: number) => {
@@ -211,69 +152,18 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
   }, []);
 
   const handleLinkChange = useCallback((position: number, linkIndex: number, characterId: string) => {
-    setTeam((prev) => {
-      const usedIds = new Set<string>();
-      prev.forEach((member) => {
-        if (member.id_character) {
-          usedIds.add(member.id_character);
-        }
-        member.links.forEach((link) => {
-          if (link.id_character) {
-            usedIds.add(link.id_character);
-          }
-        });
-      });
-      
-      const currentMember = prev.find((m) => m.position === position);
-      
-      // Ignore the link's own character so it can be selected again
-      if (currentMember?.links[linkIndex]?.id_character) {
-        usedIds.delete(currentMember.links[linkIndex].id_character);
-      }
-      
-      if (characterId && usedIds.has(characterId)) {
-        toast({
-          title: t("components.buildCreationModal.toastCharUsedTitle"),
-          description: t("components.buildCreationModal.toastCharUsedDesc"),
-          status: "warning",
-          duration: 3000,
-        });
-        return prev;
-      }
-
-      return prev.map((member) =>
-        member.position === position
-          ? {
-              ...member,
-              links: member.links.map((link, i) =>
-                i === linkIndex ? { id_character: characterId } : link
-              ),
-            }
-          : member
-      );
-    });
-  }, [toast, t]);
+    setTeam((prev) => prev.map((member) => {
+      if (member.position !== position) return member;
+      const links = [...member.links];
+      links[linkIndex] = { id_character: characterId };
+      return { ...member, links };
+    }));
+  }, []);
 
   const handleSkillsChange = useCallback((position: number, skillIds: string[]) => {
     setTeam((prev) =>
       prev.map((member) =>
         member.position === position ? { ...member, skills: skillIds } : member
-      )
-    );
-  }, []);
-
-  const handleAddAccessory = useCallback((position: number) => {
-    setTeam((prev) =>
-      prev.map((member) =>
-        member.position === position && (member.accessories?.length || 0) < 3
-          ? {
-              ...member,
-              accessories: [
-                ...(member.accessories || []),
-                { id_accessory: "", id_subeffect: undefined },
-              ],
-            }
-          : member
       )
     );
   }, []);
@@ -294,7 +184,7 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
   const handleAccessoryChange = useCallback((
     position: number,
     accessoryIndex: number,
-    accessory: { id_accessory: string; id_subeffect?: string }
+    accessory: TeamMemberAccessory
   ) => {
     setTeam((prev) =>
       prev.map((member) => {
@@ -307,22 +197,6 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
       })
     );
   }, []);
-
-  const getUsedAccessoryIds = useCallback((position: number) => {
-    const member = team.find((m) => m.position === position);
-    if (!member?.accessories) return [];
-    return member.accessories
-      .map((acc) => acc.id_accessory)
-      .filter((id) => id !== "");
-  }, [team]);
-
-  // Memoized per-member exclusions, to keep memo() effective
-  const excludedIdsPerMember = useMemo(() => {
-    const allUsedIds = Array.from(usedCharacterIds);
-    return team.map((member) => 
-      allUsedIds.filter(id => id !== member.id_character)
-    );
-  }, [usedCharacterIds, team]);
 
   // Entered result: score as digits (spaces allowed), times in seconds
   const scoreDigits = scoreInput;
@@ -516,27 +390,34 @@ const BuildCreationModal = ({ isOpen, onClose, rotationId, onSuccess, buildToEdi
                   <Tabs variant="line" colorScheme="purple" size="sm">
                     <TabList>
                       {team.map((member) => (
-                        <Tab key={member.position} fontWeight="semibold">
+                        <Tab key={member.position} fontWeight="semibold" gap={2}>
+                          {member.id_character && (
+                            <Box
+                              as="img"
+                              src={`${bucketUrl}/characters/thumb/${member.id_character}.png`}
+                              alt=""
+                              w="24px"
+                              h="24px"
+                              borderRadius="full"
+                              objectFit="cover"
+                            />
+                          )}
                           {t("components.buildCreationModal.position", { pos: member.position })}
-                          {member.id_character && <Box ml={2} w="6px" h="6px" borderRadius="full" bg="green.400" />}
                         </Tab>
                       ))}
                     </TabList>
                     <TabPanels>
-                      {team.map((member, index) => (
+                      {team.map((member) => (
                         <TabPanel key={member.position} px={0}>
                           <TeamMemberCard
                             member={member}
-                            excludedCharacterIds={excludedIdsPerMember[index] || []}
+                            usedCharacterIds={usedCharacterIds}
                             onCharacterChange={handleCharacterChange}
-                            onAddLink={handleAddLink}
                             onRemoveLink={handleRemoveLink}
                             onLinkChange={handleLinkChange}
                             onSkillsChange={handleSkillsChange}
-                            onAddAccessory={handleAddAccessory}
                             onRemoveAccessory={handleRemoveAccessory}
                             onAccessoryChange={handleAccessoryChange}
-                            getUsedAccessoryIds={getUsedAccessoryIds}
                           />
                         </TabPanel>
                       ))}
