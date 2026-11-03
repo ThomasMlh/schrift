@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { AlbumFilters } from "@/components/album/AlbumFilters";
 import { useCharacterCatalog } from "@/hooks/useAPI";
 import { useMyAlbum } from "@/hooks/useMyAlbum";
-import { EMPTY_ALBUM_FILTERS, MAX_SPE, filterAlbumCharacters } from "@/utils/albumFilters";
+import { EMPTY_ALBUM_FILTERS, MAX_SPE, SPE_LEVELS, filterAlbumCharacters } from "@/utils/albumFilters";
 import { bucketUrl } from "@/utils/apiRequest";
 import { getAffinityIcon } from "@/utils/characterIcons";
 import type { IAlbumCharacter } from "@/interfaces";
@@ -39,6 +39,11 @@ const PickerTile = memo(({ character, spe, muted, isUsed, usedLabel, onPick }: P
       <span className="picker-thumb" data-spe={spe === MAX_SPE ? "max" : spe > 0 ? "owned" : undefined} data-muted={muted || isUsed || undefined}>
         <img src={`${bucketUrl}/characters/thumb/${character._id}.png`} alt={character.name} loading="lazy" decoding="async" />
         {affinityIcon && <img className="picker-affinity" src={affinityIcon} alt="" loading="lazy" decoding="async" />}
+        {spe > 0 && (
+          <span className="picker-spe">
+            {SPE_LEVELS.map((level) => <i key={level} data-on={level <= spe || undefined} />)}
+          </span>
+        )}
         {isUsed && <span className="picker-used">{usedLabel}</span>}
       </span>
       <span className="picker-name">{label}</span>
@@ -72,6 +77,19 @@ const TILE_STYLES = {
   ".picker-thumb > img:first-of-type": { width: "100%", height: "100%", objectFit: "cover" },
   ".picker-thumb[data-muted] > img:first-of-type": { opacity: 0.35 },
   ".picker-affinity": { position: "absolute", top: "3px", left: "3px", width: "18px", height: "18px", objectFit: "contain" },
+  ".picker-spe": {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    display: "flex",
+    justifyContent: "center",
+    gap: "3px",
+    py: 1,
+    bgGradient: "linear(to-t, blackAlpha.800, transparent)",
+  },
+  ".picker-spe > i": { width: "7px", height: "7px", borderRadius: "full", bg: "whiteAlpha.400" },
+  ".picker-spe > i[data-on]": { bg: "yellow.300" },
   ".picker-used": {
     position: "absolute",
     inset: 0,
