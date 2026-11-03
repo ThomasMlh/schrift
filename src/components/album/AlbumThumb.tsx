@@ -23,13 +23,11 @@ export const SpePips = ({ spe, size = 7 }: { spe: number; size?: number }) => (
 interface AlbumThumbProps {
   character: IAlbumCharacter;
   spe: number;
-  // Greyed out: not owned by default
-  muted?: boolean;
   children?: ReactNode;
 }
 
 // Native <img> rather than Chakra's Image with fallback, which preloads every thumbnail in JS
-export const AlbumThumb = ({ character, spe, muted = spe === 0, children }: AlbumThumbProps) => (
+export const AlbumThumb = ({ character, spe, children }: AlbumThumbProps) => (
   <Box
     position="relative"
     aspectRatio={1}
@@ -50,8 +48,8 @@ export const AlbumThumb = ({ character, spe, muted = spe === 0, children }: Albu
       objectFit="cover"
       loading="lazy"
       decoding="async"
-      filter={muted ? "grayscale(1)" : undefined}
-      opacity={muted ? 0.35 : 1}
+      filter={spe > 0 ? undefined : "grayscale(1)"}
+      opacity={spe > 0 ? 1 : 0.35}
     />
     {/* Some versions of a character share the same artwork */}
     {character.affinity && (
@@ -67,7 +65,7 @@ export const AlbumThumb = ({ character, spe, muted = spe === 0, children }: Albu
         objectFit="contain"
         loading="lazy"
         decoding="async"
-        opacity={muted ? 0.6 : 1}
+        opacity={spe > 0 ? 1 : 0.6}
       />
     )}
     {spe > 0 && (
