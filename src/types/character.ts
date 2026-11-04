@@ -102,6 +102,8 @@ export interface ISummonCharacter {
   game_version?: GameText | null;
   game_id: number;
   affinity?: string;
+  images_version?: number;
+  resurrection_release?: string | null;
 }
 
 export interface ISummonRateUnit {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Badge, Box, Button, Container, Flex, HStack, Image, SimpleGrid, Table, Tbody, Td, Text, Th, Thead, Tr, VStack,
 } from "@chakra-ui/react";
@@ -8,9 +8,8 @@ import { useTranslation } from "react-i18next";
 import { useSummon } from "@/hooks/useAPI";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { bucketUrl } from "@/utils/apiRequest";
-import { getAffinityIcon } from "@/utils/characterIcons";
 import { gameText } from "@/utils/gameText";
-import { characterVersionLabel } from "@/utils/characterVersion";
+import { CharacterCard } from "@/components/character/CharacterCard";
 import type { ISummon, ISummonAccessory, ISummonCharacter, ISummonRates, ISummonRateUnit } from "@/interfaces";
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -42,13 +41,6 @@ const SummonVisual = ({ groupId, language, isTicket }: { groupId: number; langua
   );
 };
 
-// Game badge picture (rate, bonus...); only some are in the game files
-const GameBadge = ({ src, size }: { src: string | null; size: string }) => {
-  const [failed, setFailed] = useState(false);
-  if (!src || failed) return null;
-  return <Image src={src} alt="" h={size} objectFit="contain" onError={() => setFailed(true)} />;
-};
-
 // Price of a draw: spirit orbs show as the game's orb, other currencies keep their name
 const SummonPrice = ({ price, payment }: { price: number | null; payment: string | null }) => {
   const { t } = useTranslation();
@@ -63,38 +55,18 @@ const SummonPrice = ({ price, payment }: { price: number | null; payment: string
   );
 };
 
-const FeaturedCharacter = ({ character, badge, language }: { character: ISummonCharacter; badge: string | null; language: string }) => {
-  const version = characterVersionLabel(character, language);
-  const affinityIcon = character.affinity ? getAffinityIcon(character.affinity) : null;
-  return (
-    <VStack
-      as={RouterLink}
-      to={`/personnage/${character._id}`}
-      spacing={2}
-      p={3}
-      borderRadius="lg"
-      borderWidth="1px"
-      borderColor="border.subtle"
-      _hover={{ borderColor: "purple.400" }}
-    >
-      <Box position="relative">
-        <Image src={`${bucketUrl}/characters/thumb/${character._id}.png`} alt={character.name} boxSize="72px" borderRadius="lg" loading="lazy" />
-        {affinityIcon && (
-          <Image src={affinityIcon} alt={character.affinity} position="absolute" top="2px" left="2px" boxSize="18px" objectFit="contain" />
-        )}
-      </Box>
-      <Box textAlign="center">
-        <Text fontSize="sm" fontWeight="semibold" color="text.strong" noOfLines={2}>{character.name}</Text>
-        {version && <Text fontSize="xs" color="text.muted" noOfLines={2}>{version}</Text>}
-      </Box>
-      <GameBadge src={badge} size="72px" />
-    </VStack>
-  );
+// Game badge picture of a step (rate, bonus...); only some are in the game files
+const GameBadge = ({ src, size }: { src: string | null; size: string }) => {
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) return null;
+  return <Image src={src} alt="" h={size} objectFit="contain" onError={() => setFailed(true)} />;
 };
+
+const CHARACTER_COLUMNS = { base: 2, sm: 3, md: 4, lg: 5 };
 
 // Unit of the rate page without a sheet on the site
 const UnlinkedUnit = ({ unit }: { unit: ISummonRateUnit }) => (
-  <VStack spacing={1} p={3} borderRadius="lg" borderWidth="1px" borderColor="border.subtle" justify="center">
+  <VStack spacing={1} p={3} bg="bg.card" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" justify="center">
     <Text fontSize="sm" fontWeight="semibold" color="text.strong" textAlign="center" noOfLines={2}>{unit.name}</Text>
     <Text fontSize="xs" color="text.muted" textAlign="center" noOfLines={2}>
       {[`${unit.rarity}★`, unit.version].filter(Boolean).join(" ")}
@@ -104,18 +76,17 @@ const UnlinkedUnit = ({ unit }: { unit: ISummonRateUnit }) => (
 
 const VISIBLE_UNITS = 30;
 
-const RateUnits = ({ units, summon, language }: { units: ISummonRateUnit[]; summon: ISummon; language: string }) => {
+const RateUnits = ({ units, summon }: { units: ISummonRateUnit[]; summon: ISummon }) => {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
   const byGameId = new Map(summon.characters.map((c) => [c.game_id, c]));
-  const badges = new Map((summon.details?.featured ?? []).map((f) => [f.game_id, f.badge]));
   return (
     <>
-      <SimpleGrid columns={{ base: 2, sm: 3, md: 5 }} spacing={3}>
+      <SimpleGrid columns={CHARACTER_COLUMNS} spacing={3}>
         {(showAll ? units : units.slice(0, VISIBLE_UNITS)).map((unit, index) => {
           const character = unit.game_id ? byGameId.get(unit.game_id) : undefined;
           return character
-            ? <FeaturedCharacter key={character._id} character={character} badge={badges.get(character.game_id) ?? null} language={language} />
+            ? <CharacterCard key={character._id} character={character} />
             : <UnlinkedUnit key={index} unit={unit} />;
         })}
       </SimpleGrid>
@@ -197,13 +168,13 @@ const orderedCharacters = (summon: ISummon) => {
   const inRates = new Set((summon.rates?.sections ?? []).flatMap((section) => section.units.map((unit) => unit.game_id)));
   const featured = summon.details?.featured ?? [];
   const rows = featured
-    .map((f) => ({ character: byGameId.get(f.game_id), badge: f.badge }))
-    .filter((row): row is { character: ISummonCharacter; badge: string | null } => Boolean(row.character));
+    .map((f) => byGameId.get(f.game_id))
+    .filter((character): character is ISummonCharacter => Boolean(character));
   const listed = new Set(featured.map((f) => f.game_id));
   for (const character of summon.characters) {
-    if (!listed.has(character.game_id)) rows.push({ character, badge: null });
+    if (!listed.has(character.game_id)) rows.push(character);
   }
-  return rows.filter(({ character }) => !inRates.has(character.game_id));
+  return rows.filter((character) => !inRates.has(character.game_id));
 };
 
 const SummonPage = () => {
@@ -268,7 +239,7 @@ const SummonPage = () => {
 
         {(summon.rates?.sections ?? []).map((section) => (
           <Section key={section.kind} title={t(`pages.summon.section_${section.kind}`, { count: section.units.length })}>
-            <RateUnits units={section.units} summon={summon} language={language} />
+            <RateUnits units={section.units} summon={summon} />
           </Section>
         ))}
 
@@ -280,9 +251,9 @@ const SummonPage = () => {
 
         {characters.length > 0 && (
           <Section title={t("pages.summon.featured")}>
-            <SimpleGrid columns={{ base: 2, sm: 3, md: 5 }} spacing={3}>
-              {characters.map(({ character, badge }) => (
-                <FeaturedCharacter key={character._id} character={character} badge={badge} language={language} />
+            <SimpleGrid columns={CHARACTER_COLUMNS} spacing={3}>
+              {characters.map((character) => (
+                <CharacterCard key={character._id} character={character} />
               ))}
             </SimpleGrid>
           </Section>
