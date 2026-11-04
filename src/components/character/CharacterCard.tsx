@@ -6,8 +6,10 @@ import { characterImageUrl, REBIRTH_STAR_URL } from "@/utils/characterImages";
 import { characterVersionLabel } from "@/utils/characterVersion";
 import { AffinityIcon } from "../ui/AffinityIcon";
 
+type CardCharacter = Pick<ICharacter, "_id" | "name" | "affinity" | "images_version" | "resurrection_release" | "game_version">;
+
 // Character list card, like the in-game list: round thumbnail over its blurred copy, affinity, name and version
-export const CharacterCard = ({ character }: { character: ICharacter }) => {
+export const CharacterCard = ({ character }: { character: CardCharacter }) => {
   const { t, i18n } = useTranslation();
   const thumb = characterImageUrl(character, "thumb");
   const version = characterVersionLabel(character, i18n.language);
