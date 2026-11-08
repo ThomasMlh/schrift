@@ -42,7 +42,7 @@ const rotationDates = (rotation: ICycleRotation) =>
   getRotationRealDates(rotation.start_date, rotation.end_date);
 
 export const CurrentInfoSection = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const now = useNow();
   const [error, setError] = useState<string | null>(null);
 
@@ -236,7 +236,7 @@ export const CurrentInfoSection = () => {
                               : t("components.currentInfoSection.startsIn")}
                           </Text>
                           <Text fontSize="xl" fontWeight="extrabold" color="text.strong" sx={{ fontVariantNumeric: "tabular-nums" }}>
-                            {formatCountdown(countdownTarget.getTime() - now.getTime())}
+                            {formatCountdown(countdownTarget.getTime() - now.getTime(), i18n.language)}
                           </Text>
                         </Box>
                         <VStack align={{ base: "start", sm: "end" }} spacing={0} fontSize="sm" color="text.muted">

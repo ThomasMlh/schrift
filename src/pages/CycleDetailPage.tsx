@@ -48,16 +48,6 @@ const RotationTags = ({ rotation }: { rotation: ICycleRotation }) => {
   );
 };
 
-const PeriodBadge = ({ period }: { period: ICycleRotation["period"] }) => {
-  const { t } = useTranslation();
-  const isWeekend = period?.includes("Vendredi");
-  return (
-    <Badge colorScheme={isWeekend ? "pink" : "blue"} borderRadius="full" px={2} fontSize="2xs">
-      {t(`periodsShort.${period}`, isWeekend ? "Ven-Dim" : "Mar-Jeu")}
-    </Badge>
-  );
-};
-
 const CurrentBadge = () => {
   const { t } = useTranslation();
   return (
@@ -93,7 +83,6 @@ const RotationSpotlight = ({
           {t("pages.cycleDetail.rotationNumber", { position: rotation.position })}
           {!isCurrent && ` · ${formatRealDate(item.start, i18n.language)}`}
         </Text>
-        <PeriodBadge period={rotation.period} />
       </HStack>
       <Text fontSize={isMain ? "2xl" : "xl"} fontWeight="extrabold" color="text.strong" mt={2}>
         {t(`factions.${rotation.killer}`, rotation.killer)}
@@ -104,7 +93,7 @@ const RotationSpotlight = ({
           <Text fontSize="sm" color="text.muted">
             {isCurrent ? t("pages.cycleDetail.endsIn") : t("pages.cycleDetail.startsIn")}{" "}
             <Text as="span" fontWeight="extrabold" color="text.strong" fontSize="lg">
-              {formatCountdown((isCurrent ? item.end : item.start).getTime() - now.getTime())}
+              {formatCountdown((isCurrent ? item.end : item.start).getTime() - now.getTime(), i18n.language)}
             </Text>
           </Text>
         )}
@@ -233,7 +222,7 @@ const CycleDetailPage = () => {
   const progressLabel = current
     ? t("pages.cycleDetail.progressRotation", { current: current.rotation.position, total })
     : doneCount === 0 && first
-      ? t("pages.cycleDetail.progressUpcoming", { time: formatCountdown(first.start.getTime() - now.getTime()) })
+      ? t("pages.cycleDetail.progressUpcoming", { time: formatCountdown(first.start.getTime() - now.getTime(), i18n.language) })
       : doneCount === total
         ? t("pages.cycleDetail.progressDone")
         : t("pages.cycleDetail.progressRotation", { current: doneCount, total });
