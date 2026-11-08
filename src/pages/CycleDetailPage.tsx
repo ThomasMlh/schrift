@@ -1,40 +1,168 @@
-import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import {
-  Container,
-  VStack,
-  HStack,
-  Text,
-  Button,
-  Alert,
-  AlertIcon,
-  Box,
-  Badge,
-  useColorModeValue,
-  Flex,
-  Icon,
-  Divider,
-  Skeleton,
-  SimpleGrid,
+  Alert, AlertIcon, Badge, Box, Button, Container, Flex, HStack, SimpleGrid, Skeleton, Text, VStack,
 } from "@chakra-ui/react";
-import { ArrowBackIcon } from "@chakra-ui/icons";
-import { FiCalendar, FiLayers, FiGrid } from "react-icons/fi";
-
-import { AlterationImage } from "../components/ui/AlterationImage";
-import { AttackTypeBadge } from "../components/ui/AttackTypeBadge";
-import CustomLink from "@/components/ui/CustomLink";
-import { HeroSection } from "@/components/HeroSection";
-import { useCycle, useCycles } from "@/hooks/useAPI";
-import { SEOHead } from "@/components/SEOHead";
+import { ArrowBackIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { useTranslation } from "react-i18next";
+
+import { AlterationImage } from "@/components/ui/AlterationImage";
+import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import RotationCalendar from "@/components/cycles/RotationCalendar";
-import { cycleFromSlug } from "@/utils/cycleHelpers";
+import { SEOHead } from "@/components/SEOHead";
+import { useCycle, useCycles } from "@/hooks/useAPI";
+import { useNow } from "@/hooks/useNow";
+import { cycleFromSlug, getRotationRealDates } from "@/utils/cycleHelpers";
+import { formatCountdown } from "@/utils/countdown";
+import type { ICycleRotation } from "@/interfaces";
+
+type RotationState = "past" | "current" | "upcoming";
+
+interface TimedRotation {
+  rotation: ICycleRotation;
+  start: Date;
+  end: Date;
+  state: RotationState;
+}
+
+const PARIS = "Europe/Paris";
+
+// "lun. 02/11 16 h", in Paris time like the game reset
+const formatRealDate = (date: Date, language: string) => {
+  const locale = language.startsWith("en") ? "en-GB" : "fr-FR";
+  const day = date.toLocaleDateString(locale, { timeZone: PARIS, weekday: "short", day: "2-digit", month: "2-digit" });
+  const hour = date.toLocaleTimeString(locale, { timeZone: PARIS, hour: "2-digit", minute: "2-digit" }).replace(/:00$/, "");
+  return locale === "fr-FR" ? `${day} ${hour.replace(/^0/, "")} h` : `${day} ${hour}:00`;
+};
+
+const RotationTags = ({ rotation }: { rotation: ICycleRotation }) => {
+  const { t } = useTranslation();
+  return (
+    <>
+      <HStack spacing={1.5}>
+        <AttackTypeBadge attackType={rotation.attack} size="16px" />
+        <Text fontSize="sm">{t(`attackTypes.${rotation.attack}`, rotation.attack)}</Text>
+      </HStack>
+      <AlterationImage alteration={rotation.alteration} size="20px" showLabel />
+    </>
+  );
+};
+
+const CurrentBadge = () => {
+  const { t } = useTranslation();
+  return (
+    <Badge colorScheme="green" variant="solid" borderRadius="full" px={2} fontSize="2xs" letterSpacing="wider">
+      {t("pages.cycleDetail.current")}
+    </Badge>
+  );
+};
+
+const SPOTLIGHT_STYLES = {
+  current: { borderColor: "green.400", bgGradient: "linear(135deg, rgba(34, 160, 107, 0.14), transparent 60%)" },
+  upcoming: { borderColor: "purple.400", bgGradient: "linear(135deg, rgba(124, 92, 255, 0.14), transparent 60%)" },
+  following: { borderColor: "border.subtle", bgGradient: undefined },
+};
+
+// Card of the running rotation (or the next one between two rotations), then of the one after it
+const RotationSpotlight = ({
+  item, cycleSlug, kind, now,
+}: { item: TimedRotation; cycleSlug: string; kind: keyof typeof SPOTLIGHT_STYLES; now: Date }) => {
+  const { t, i18n } = useTranslation();
+  const isCurrent = kind === "current";
+  const isMain = kind !== "following";
+  const { rotation } = item;
+  return (
+    <Box bg="bg.card" borderWidth="1px" borderRadius="2xl" p={5} {...SPOTLIGHT_STYLES[kind]}>
+      <HStack spacing={2} fontSize="xs" fontWeight="bold" textTransform="uppercase" letterSpacing="wider" color="text.muted" flexWrap="wrap">
+        {isCurrent ? <CurrentBadge /> : (
+          <Text as="span" color={isMain ? "purple.300" : undefined}>
+            {t(isMain ? "pages.cycleDetail.upcoming" : "pages.cycleDetail.next")}
+          </Text>
+        )}
+        <Text as="span">
+          {t("pages.cycleDetail.rotationNumber", { position: rotation.position })}
+          {!isCurrent && ` · ${formatRealDate(item.start, i18n.language)}`}
+        </Text>
+      </HStack>
+      <Text fontSize={isMain ? "2xl" : "xl"} fontWeight="extrabold" color="text.strong" mt={2}>
+        {t(`factions.${rotation.killer}`, rotation.killer)}
+      </Text>
+      <Flex gap={4} wrap="wrap" align="center" mt={3} mb={4}>
+        <RotationTags rotation={rotation} />
+        {isMain && (
+          <Text fontSize="sm" color="text.muted">
+            {isCurrent ? t("pages.cycleDetail.endsIn") : t("pages.cycleDetail.startsIn")}{" "}
+            <Text as="span" fontWeight="extrabold" color="text.strong" fontSize="lg">
+              {formatCountdown((isCurrent ? item.end : item.start).getTime() - now.getTime(), i18n.language)}
+            </Text>
+          </Text>
+        )}
+      </Flex>
+      <HStack spacing={2} flexWrap="wrap">
+        {isCurrent && (
+          <Button as={RouterLink} to={`/cycle/${cycleSlug}/rotation/${rotation.position}`} size="sm" colorScheme="purple">
+            {t("pages.cycleDetail.ranking")}
+          </Button>
+        )}
+        {rotation.rotation_id && (
+          <Button as={RouterLink} to={`/guides/rotations-builds?rotation=${rotation.rotation_id}`} size="sm" variant="outline">
+            {t("pages.cycleDetail.builds")}
+          </Button>
+        )}
+      </HStack>
+    </Box>
+  );
+};
+
+const TABLE_COLUMNS = "48px 250px 1fr 110px 150px 20px";
+
+const RotationRow = ({ item, cycleSlug }: { item: TimedRotation; cycleSlug: string }) => {
+  const { t, i18n } = useTranslation();
+  const { rotation, state } = item;
+  const isCurrent = state === "current";
+  return (
+    <Box
+      as={RouterLink}
+      to={`/cycle/${cycleSlug}/rotation/${rotation.position}`}
+      display="grid"
+      gridTemplateColumns={{ base: "32px 1fr", md: TABLE_COLUMNS }}
+      gridTemplateAreas={{ base: `"pos killer" "pos dates" "pos tags"`, md: "none" }}
+      alignItems="center"
+      columnGap={3}
+      rowGap={1.5}
+      px={4}
+      py={3}
+      borderTopWidth="1px"
+      borderColor="border.subtle"
+      opacity={state === "past" ? 0.5 : 1}
+      bg={isCurrent ? "rgba(34, 160, 107, 0.1)" : undefined}
+      boxShadow={isCurrent ? "inset 3px 0 0 var(--chakra-colors-green-400)" : undefined}
+      _hover={{ bg: isCurrent ? "rgba(34, 160, 107, 0.16)" : "bg.subtle", opacity: 1 }}
+      transition="background 0.15s, opacity 0.15s"
+    >
+      <Text gridArea={{ base: "pos", md: "auto" }} alignSelf={{ base: "start", md: "center" }} fontWeight="extrabold" color="purple.400">
+        {rotation.position}
+      </Text>
+      <Text gridArea={{ base: "dates", md: "auto" }} order={{ base: 2, md: 0 }} fontSize="sm" color="text.muted" sx={{ fontVariantNumeric: "tabular-nums" }}>
+        {formatRealDate(item.start, i18n.language)} → {formatRealDate(item.end, i18n.language)}
+      </Text>
+      <HStack gridArea={{ base: "killer", md: "auto" }} order={{ base: 1, md: 0 }} spacing={2} minW={0}>
+        <Text fontWeight="bold" color="text.strong" noOfLines={1}>{t(`factions.${rotation.killer}`, rotation.killer)}</Text>
+        {isCurrent && <CurrentBadge />}
+      </HStack>
+      <Flex gridArea={{ base: "tags", md: "auto" }} order={{ base: 3, md: 0 }} display={{ base: "flex", md: "contents" }} gap={4} align="center">
+        <RotationTags rotation={rotation} />
+      </Flex>
+      <ChevronRightIcon display={{ base: "none", md: "block" }} color="text.muted" />
+    </Box>
+  );
+};
 
 const CycleDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const now = useNow();
 
   // Resolve the slug into its _id (falls back to the raw id for compatibility)
   const { cycles } = useCycles({ limit: 100 });
@@ -43,64 +171,38 @@ const CycleDetailPage = () => {
     return cycleFromSlug(cycles, id!)?._id ?? id;
   }, [cycles, id]);
 
-  const { cycle, isLoading, error: fetchError } = useCycle(resolvedId);
-  const [error, setError] = useState<string | null>(null);
-  const [showCalendar, setShowCalendar] = useState(false);
+  const { cycle, isLoading, error } = useCycle(resolvedId);
 
-  const cycleInitialMonth = useMemo(() => {
-    const raw = cycle?.rotations?.[0]?.start_date;
-    if (!raw) return undefined;
-    const parts = raw.split("/");
-    if (parts.length !== 3) return undefined;
-    const [, m, y] = parts.map(Number);
-    return new Date(y, m - 1, 1);
-  }, [cycle]);
-
-  const cardBg = "bg.glass";
-  const borderColor = "border.faint";
-  const subTextColor = "text.muted";
-  const labelColor = "text.strong";
-  const statBg = "bg.glass";
-  const rowBg = "bg.subtle";
-  const rowHoverBg = useColorModeValue("blue.50", "whiteAlpha.100");
-
-  useEffect(() => {
-    if (fetchError) {
-      setError(t("pages.cycleDetail.errorLoading"));
-    }
-    if (!id) {
-      setError(t("pages.cycleDetail.errorMissingId"));
-    }
-  }, [fetchError, id, t]);
+  const timed = useMemo<TimedRotation[]>(() => (cycle?.rotations ?? [])
+    .filter((rotation) => rotation.start_date && rotation.end_date)
+    .map((rotation) => {
+      const { realStartDate: start, realEndDate: end } = getRotationRealDates(rotation.start_date, rotation.end_date);
+      const state: RotationState = now > end ? "past" : now >= start ? "current" : "upcoming";
+      return { rotation, start, end, state };
+    }), [cycle, now]);
 
   if (isLoading) {
     return (
       <Container maxW="container.xl" py={8}>
-        <VStack spacing={6} align="stretch">
+        <VStack spacing={4} align="stretch">
           <Skeleton height="16px" width="240px" borderRadius="md" />
-          <Skeleton height="90px" borderRadius="xl" />
-          {Array.from({ length: 8 }).map((_, i) => (
-            <SimpleGrid key={i} columns={1}>
-              <Skeleton height="68px" borderRadius="xl" />
-            </SimpleGrid>
-          ))}
+          <Skeleton height="90px" borderRadius="2xl" />
+          <Skeleton height="160px" borderRadius="2xl" />
+          <Skeleton height="400px" borderRadius="2xl" />
         </VStack>
       </Container>
     );
   }
 
-  if (error || !cycle) {
+  if (error || !id || !cycle) {
     return (
       <Container maxW="container.xl" py={8}>
         <VStack spacing={4}>
           <Alert status="error">
             <AlertIcon />
-            {error || t("pages.cycleDetail.errorNotFound")}
+            {!id ? t("pages.cycleDetail.errorMissingId") : error ? t("pages.cycleDetail.errorLoading") : t("pages.cycleDetail.errorNotFound")}
           </Alert>
-          <Button
-            leftIcon={<ArrowBackIcon />}
-            onClick={() => navigate("/cycles")}
-          >
+          <Button leftIcon={<ArrowBackIcon />} onClick={() => navigate("/cycles")}>
             {t("pages.cycleDetail.backToCycles")}
           </Button>
         </VStack>
@@ -108,231 +210,111 @@ const CycleDetailPage = () => {
     );
   }
 
+  const total = timed.length;
+  const current = timed.find((item) => item.state === "current") ?? null;
+  // Between two rotations, the next one takes the main card
+  const spotlight = current ?? timed.find((item) => item.state === "upcoming") ?? null;
+  const following = spotlight ? timed[timed.indexOf(spotlight) + 1] ?? null : null;
+  const doneCount = timed.filter((item) => item.state !== "upcoming").length;
+  const first = timed[0];
+  const last = timed[total - 1];
+
+  const progressLabel = current
+    ? t("pages.cycleDetail.progressRotation", { current: current.rotation.position, total })
+    : doneCount === 0 && first
+      ? t("pages.cycleDetail.progressUpcoming", { time: formatCountdown(first.start.getTime() - now.getTime(), i18n.language) })
+      : doneCount === total
+        ? t("pages.cycleDetail.progressDone")
+        : t("pages.cycleDetail.progressRotation", { current: doneCount, total });
+
   return (
     <>
       <SEOHead
-        title={cycle ? `${cycle.name} - ${cycle.year} - Schrift BBS` : `Cycle ${id} - Schrift BBS`}
-        description={cycle ? `Détails du cycle ${cycle.name} (${cycle.year}) de la Guilde War Schrift` : `Détails du cycle ${id} de la Guilde War Schrift`}
+        title={`${cycle.name} - ${cycle.year} - Schrift BBS`}
+        description={`Détails du cycle ${cycle.name} (${cycle.year}) de la Guilde War Schrift`}
         noIndex={true}
       />
 
-      <Box w="100%">
-        <HeroSection
-          title={`${cycle.name} — ${cycle.year}`}
-          description={`${t("pages.cycleDetail.subtitle")} · ${cycle.rotations?.length || 0} rotations`}
-          size="md"
-        />
+      <Container maxW="container.xl" py={5}>
+        <VStack spacing={4} align="stretch">
+          <Breadcrumbs items={[
+            { label: t("nav.home"), to: "/" },
+            { label: t("nav.cycles"), to: "/cycles" },
+            { label: cycle.name },
+          ]} />
 
-        <Container maxW="container.xl" py={8}>
-          <VStack spacing={8} align="stretch">
-
-            <Box>
-              <Breadcrumbs items={[
-                { label: t("nav.home"), to: "/" },
-                { label: t("nav.cycles"), to: "/cycles" },
-                { label: cycle.name },
-              ]} />
-              <Button
-                leftIcon={<ArrowBackIcon />}
-                variant="ghost"
-                onClick={() => navigate("/cycles")}
-                size="sm"
-                _hover={{ transform: "translateX(-4px)" }}
-                transition="all 0.2s"
-              >
-                {t("pages.cycleDetail.backToCycles")}
-              </Button>
+          <Flex
+            bg="bg.card"
+            borderWidth="1px"
+            borderColor="border.subtle"
+            borderRadius="2xl"
+            px={{ base: 4, md: 6 }}
+            py={4}
+            gap={5}
+            align="center"
+            wrap="wrap"
+          >
+            <Box flex="1" minW="220px">
+              <Text as="h1" fontSize="xl" fontWeight="extrabold" color="text.strong">
+                {cycle.name} — {cycle.year}
+              </Text>
+              {first && last && (
+                <Text fontSize="sm" color="text.muted">
+                  {t("pages.cycleDetail.summary", {
+                    start: formatRealDate(first.start, i18n.language),
+                    end: formatRealDate(last.end, i18n.language),
+                    count: total,
+                  })}
+                </Text>
+              )}
             </Box>
-
-            {cycle.rotations && cycle.rotations.length > 0 && (
-              <Box
-                bg={statBg}
-                borderRadius="xl"
-                borderWidth={1}
-                borderColor={borderColor}
-                boxShadow="md"
-                overflow="hidden"
-              >
-                <Flex
-                  justify="center"
-                  align="center"
-                  px={6}
-                  py={5}
-                  gap={12}
-                  wrap="wrap"
-                >
-                  <HStack spacing={3}>
-                    <Box bg="green.500" borderRadius="lg" p={2} display="flex" alignItems="center" justifyContent="center">
-                      <Icon as={FiCalendar} color="white" boxSize={4} />
-                    </Box>
-                    <VStack align="start" spacing={0}>
-                      <Text fontSize="lg" fontWeight="extrabold" color="green.500">
-                        {cycle.rotations[0].start_date || "—"}
-                      </Text>
-                      <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wide">
-                        {t("pages.cycleDetail.labelStartDate")}
-                      </Text>
-                    </VStack>
-                  </HStack>
-
-                  <Divider orientation="vertical" h="40px" />
-
-                  <HStack spacing={3}>
-                    <Box bg="red.500" borderRadius="lg" p={2} display="flex" alignItems="center" justifyContent="center">
-                      <Icon as={FiCalendar} color="white" boxSize={4} />
-                    </Box>
-                    <VStack align="start" spacing={0}>
-                      <Text fontSize="lg" fontWeight="extrabold" color="red.500">
-                        {cycle.rotations[cycle.rotations.length - 1].end_date || "—"}
-                      </Text>
-                      <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wide">
-                        {t("pages.cycleDetail.labelEndDate")}
-                      </Text>
-                    </VStack>
-                  </HStack>
-
-                  <Divider orientation="vertical" h="40px" />
-
-                  <HStack spacing={3}>
-                    <Box bgGradient="linear(to-br, purple.500, blue.500)" borderRadius="lg" p={2} display="flex" alignItems="center" justifyContent="center">
-                      <Icon as={FiLayers} color="white" boxSize={4} />
-                    </Box>
-                    <VStack align="start" spacing={0}>
-                      <Text fontSize="lg" fontWeight="extrabold" bgGradient="linear(to-r, purple.500, blue.400)" bgClip="text">
-                        {cycle.rotations.length}
-                      </Text>
-                      <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wide">
-                        {t("pages.cycleDetail.labelRotations")}
-                      </Text>
-                    </VStack>
-                  </HStack>
+            {total > 0 && (
+              <Box flex="1" minW="220px">
+                <Flex justify="space-between" fontSize="xs" color="text.muted" mb={1.5}>
+                  <Text>{t("pages.cycleDetail.progress")}</Text>
+                  <Text fontWeight="bold" color="text.strong">{progressLabel}</Text>
                 </Flex>
+                <Box h="8px" borderRadius="full" bg="bg.subtle" overflow="hidden">
+                  <Box h="100%" w={`${(doneCount / total) * 100}%`} borderRadius="full" bgGradient="linear(to-r, purple.500, blue.500)" />
+                </Box>
               </Box>
             )}
+          </Flex>
 
-            <Box>
-              <Button
-                leftIcon={<Icon as={FiGrid} />}
-                size="sm"
-                variant={showCalendar ? "solid" : "outline"}
-                colorScheme="blue"
-                borderRadius="lg"
-                onClick={() => setShowCalendar((v) => !v)}
-                mb={showCalendar ? 4 : 0}
+          {spotlight && (
+            <SimpleGrid columns={1} spacing={4} templateColumns={{ md: following ? "1.3fr 1fr" : undefined }}>
+              <RotationSpotlight item={spotlight} cycleSlug={id} kind={current ? "current" : "upcoming"} now={now} />
+              {following && <RotationSpotlight item={following} cycleSlug={id} kind="following" now={now} />}
+            </SimpleGrid>
+          )}
+
+          {total > 0 && (
+            <Box bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="2xl" overflow="hidden">
+              <Box
+                display={{ base: "none", md: "grid" }}
+                gridTemplateColumns={TABLE_COLUMNS}
+                columnGap={3}
+                px={4}
+                py={2.5}
+                bg="bg.subtle"
+                fontSize="2xs"
+                fontWeight="bold"
+                textTransform="uppercase"
+                letterSpacing="wider"
+                color="text.muted"
               >
-                {showCalendar ? t("pages.cycleDetail.hideCalendar") : t("pages.cycleDetail.showCalendar")}
-              </Button>
-              {showCalendar && <RotationCalendar initialMonth={cycleInitialMonth} />}
+                <Text>#</Text>
+                <Text>{t("pages.cycleDetail.fieldDates")}</Text>
+                <Text>{t("pages.cycleDetail.fieldKiller")}</Text>
+                <Text>{t("pages.cycleDetail.fieldAttack")}</Text>
+                <Text>{t("pages.cycleDetail.fieldAlteration")}</Text>
+                <span />
+              </Box>
+              {timed.map((item) => <RotationRow key={item.rotation.position} item={item} cycleSlug={id} />)}
             </Box>
-
-            {cycle.rotations && cycle.rotations.length > 0 && (
-              <VStack spacing={2} align="stretch">
-                <Text fontSize="xs" fontWeight="semibold" color={subTextColor} textTransform="uppercase" letterSpacing="wider" mb={1}>
-                  {t("pages.cycleDetail.rotationsHeading")}
-                </Text>
-
-                {cycle.rotations.map((rotation, index) => (
-                  <Box
-                    key={index}
-                    bg={cardBg}
-                    backdropFilter="blur(12px)"
-                    borderRadius="xl"
-                    borderWidth={1}
-                    borderColor={borderColor}
-                    overflow="hidden"
-                    position="relative"
-                    transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
-                    _hover={{
-                      transform: "translateX(4px)",
-                      borderColor: "purple.400",
-                      _dark: { borderColor: "purple.600" },
-                      bg: rowHoverBg,
-                    }}
-                  >
-                    <Box
-                      position="absolute"
-                      left={0}
-                      top={0}
-                      bottom={0}
-                      w="3px"
-                      bgGradient="linear(to-b, purple.400, blue.500)"
-                    />
-
-                    <Box pl={5} pr={4} py={3}>
-                      {/* Line 1: position, link and period badge */}
-                      <Flex justify="space-between" align="center" mb={2}>
-                        <HStack spacing={2}>
-                          <Text fontSize="xs" fontWeight="bold" color="purple.500" minW="24px" textAlign="right">
-                            #{rotation.position}
-                          </Text>
-                          <CustomLink
-                            to={`/cycle/${id}/rotation/${rotation.position}`}
-                            text={`Rotation #${rotation.position}`}
-                          />
-                        </HStack>
-                        <Badge
-                          fontSize="xs"
-                          px={2.5}
-                          py={1}
-                          borderRadius="full"
-                          colorScheme={rotation.period?.includes("Vendredi") ? "pink" : "blue"}
-                          fontWeight="bold"
-                          flexShrink={0}
-                        >
-                          {t(`periodsShort.${rotation.period}`, rotation.period?.includes("Vendredi") ? "V–D" : "M–J")}
-                        </Badge>
-                      </Flex>
-
-                      {/* Line 2: details */}
-                      <Flex gap={2} flexWrap="wrap">
-                        <Box flex={1} minW="110px" bg={rowBg} px={3} py={1.5} borderRadius="lg">
-                          <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide">
-                            {t("pages.cycleDetail.fieldKiller")}
-                          </Text>
-                          <Text fontSize="sm" fontWeight="bold" color={labelColor} noOfLines={1}>
-                            {t(`factions.${rotation.killer}`, rotation.killer)}
-                          </Text>
-                        </Box>
-
-                        <Box flexShrink={0} bg={rowBg} px={3} py={1.5} borderRadius="lg">
-                          <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" mb={1}>
-                            {t("pages.cycleDetail.fieldAttack")}
-                          </Text>
-                          <HStack spacing={1.5}>
-                            <AttackTypeBadge attackType={rotation.attack} size="15px" />
-                            <Text fontSize="xs" color={subTextColor} w="46px">
-                              {t(`attackTypes.${rotation.attack}`, rotation.attack)}
-                            </Text>
-                          </HStack>
-                        </Box>
-
-                        <Box flexShrink={0} bg={rowBg} px={3} py={1.5} borderRadius="lg">
-                          <Text fontSize="2xs" color={subTextColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" mb={1}>
-                            {t("pages.cycleDetail.fieldAlteration")}
-                          </Text>
-                          <AlterationImage alteration={rotation.alteration} size="20px" showLabel={true} />
-                        </Box>
-
-                        <Box flexShrink={0} bg={rowBg} px={3} py={1.5} borderRadius="lg">
-                          <HStack spacing={1.5} mb={0.5}>
-                            <Icon as={FiCalendar} boxSize={3} color="green.500" />
-                            <Text fontSize="xs" color={subTextColor}>{rotation.start_date || "—"}</Text>
-                          </HStack>
-                          <HStack spacing={1.5}>
-                            <Icon as={FiCalendar} boxSize={3} color="red.500" />
-                            <Text fontSize="xs" color={subTextColor}>{rotation.end_date || "—"}</Text>
-                          </HStack>
-                        </Box>
-                      </Flex>
-                    </Box>
-                  </Box>
-                ))}
-              </VStack>
-            )}
-
-          </VStack>
-        </Container>
-      </Box>
+          )}
+        </VStack>
+      </Container>
     </>
   );
 };

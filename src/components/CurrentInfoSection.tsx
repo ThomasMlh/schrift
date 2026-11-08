@@ -23,6 +23,8 @@ import { AlterationImage } from "./ui/AlterationImage";
 import { useCycles } from "@/hooks/useAPI";
 import { getRotationRealDates } from "@/utils/cycleHelpers";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
+import { useNow } from "@/hooks/useNow";
+import { formatCountdown } from "@/utils/countdown";
 import { FeaturedRotationBuilds } from "./FeaturedRotationBuilds";
 import type { ICycleRotation } from "@/interfaces";
 
@@ -36,33 +38,11 @@ const formatDateTime = (date: Date) =>
 const formatShortDate = (date: Date) =>
   date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "2-digit" });
 
-/** "2 j 04 h 12 min" (or "04 h 12 min" under 24 h) */
-const formatCountdown = (ms: number) => {
-  const totalMinutes = Math.max(0, Math.floor(ms / 60_000));
-  const days = Math.floor(totalMinutes / 1440);
-  const hours = Math.floor((totalMinutes % 1440) / 60);
-  const minutes = totalMinutes % 60;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return days > 0
-    ? `${days} j ${pad(hours)} h ${pad(minutes)} min`
-    : `${pad(hours)} h ${pad(minutes)} min`;
-};
-
-/** Current time, refreshed every minute for the countdown */
-const useNow = () => {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(id);
-  }, []);
-  return now;
-};
-
 const rotationDates = (rotation: ICycleRotation) =>
   getRotationRealDates(rotation.start_date, rotation.end_date);
 
 export const CurrentInfoSection = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const now = useNow();
   const [error, setError] = useState<string | null>(null);
 
@@ -256,7 +236,7 @@ export const CurrentInfoSection = () => {
                               : t("components.currentInfoSection.startsIn")}
                           </Text>
                           <Text fontSize="xl" fontWeight="extrabold" color="text.strong" sx={{ fontVariantNumeric: "tabular-nums" }}>
-                            {formatCountdown(countdownTarget.getTime() - now.getTime())}
+                            {formatCountdown(countdownTarget.getTime() - now.getTime(), i18n.language)}
                           </Text>
                         </Box>
                         <VStack align={{ base: "start", sm: "end" }} spacing={0} fontSize="sm" color="text.muted">
