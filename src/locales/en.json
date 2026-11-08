@@ -188,6 +188,7 @@
       "progressDone": "Finished",
       "current": "Ongoing",
       "next": "Next",
+      "upcoming": "Next rotation",
       "rotationNumber": "Rotation #{{position}}",
       "endsIn": "Ends in",
       "startsIn": "Starts in",

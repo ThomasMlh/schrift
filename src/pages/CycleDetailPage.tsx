@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import {
-  Alert, AlertIcon, Badge, Box, Button, Container, Flex, HStack, Progress, SimpleGrid, Skeleton, Text, VStack,
+  Alert, AlertIcon, Badge, Box, Button, Container, Flex, HStack, SimpleGrid, Skeleton, Text, VStack,
 } from "@chakra-ui/react";
 import { ArrowBackIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { useTranslation } from "react-i18next";
@@ -48,6 +48,16 @@ const RotationTags = ({ rotation }: { rotation: ICycleRotation }) => {
   );
 };
 
+const PeriodBadge = ({ period }: { period: ICycleRotation["period"] }) => {
+  const { t } = useTranslation();
+  const isWeekend = period?.includes("Vendredi");
+  return (
+    <Badge colorScheme={isWeekend ? "pink" : "blue"} borderRadius="full" px={2} fontSize="2xs">
+      {t(`periodsShort.${period}`, isWeekend ? "Ven-Dim" : "Mar-Jeu")}
+    </Badge>
+  );
+};
+
 const CurrentBadge = () => {
   const { t } = useTranslation();
   return (
@@ -57,41 +67,48 @@ const CurrentBadge = () => {
   );
 };
 
-// Large card of the running (or next) rotation, with its countdown and links
+const SPOTLIGHT_STYLES = {
+  current: { borderColor: "green.400", bgGradient: "linear(135deg, rgba(34, 160, 107, 0.14), transparent 60%)" },
+  upcoming: { borderColor: "purple.400", bgGradient: "linear(135deg, rgba(124, 92, 255, 0.14), transparent 60%)" },
+  following: { borderColor: "border.subtle", bgGradient: undefined },
+};
+
+// Card of the running rotation (or the next one between two rotations), then of the one after it
 const RotationSpotlight = ({
   item, cycleSlug, kind, now,
-}: { item: TimedRotation; cycleSlug: string; kind: "current" | "next"; now: Date }) => {
+}: { item: TimedRotation; cycleSlug: string; kind: keyof typeof SPOTLIGHT_STYLES; now: Date }) => {
   const { t, i18n } = useTranslation();
   const isCurrent = kind === "current";
+  const isMain = kind !== "following";
   const { rotation } = item;
   return (
-    <Box
-      bg="bg.card"
-      borderWidth="1px"
-      borderColor={isCurrent ? "green.400" : "border.subtle"}
-      borderRadius="2xl"
-      p={5}
-      bgGradient={isCurrent ? "linear(135deg, rgba(34, 160, 107, 0.14), transparent 60%)" : undefined}
-    >
-      <HStack spacing={2} fontSize="xs" fontWeight="bold" textTransform="uppercase" letterSpacing="wider" color="text.muted">
-        {isCurrent ? <CurrentBadge /> : <Text as="span">{t("pages.cycleDetail.next")}</Text>}
-        <Text as="span">{t("pages.cycleDetail.rotationNumber", { position: rotation.position })}</Text>
+    <Box bg="bg.card" borderWidth="1px" borderRadius="2xl" p={5} {...SPOTLIGHT_STYLES[kind]}>
+      <HStack spacing={2} fontSize="xs" fontWeight="bold" textTransform="uppercase" letterSpacing="wider" color="text.muted" flexWrap="wrap">
+        {isCurrent ? <CurrentBadge /> : (
+          <Text as="span" color={isMain ? "purple.300" : undefined}>
+            {t(isMain ? "pages.cycleDetail.upcoming" : "pages.cycleDetail.next")}
+          </Text>
+        )}
+        <Text as="span">
+          {t("pages.cycleDetail.rotationNumber", { position: rotation.position })}
+          {!isCurrent && ` · ${formatRealDate(item.start, i18n.language)}`}
+        </Text>
+        <PeriodBadge period={rotation.period} />
       </HStack>
-      <Text fontSize={isCurrent ? "2xl" : "xl"} fontWeight="extrabold" color="text.strong" mt={2}>
+      <Text fontSize={isMain ? "2xl" : "xl"} fontWeight="extrabold" color="text.strong" mt={2}>
         {t(`factions.${rotation.killer}`, rotation.killer)}
       </Text>
       <Flex gap={4} wrap="wrap" align="center" mt={3} mb={4}>
         <RotationTags rotation={rotation} />
-        <Text fontSize="sm" color="text.muted">
-          {isCurrent ? t("pages.cycleDetail.endsIn") : t("pages.cycleDetail.startsIn")}{" "}
-          <Text as="span" fontWeight="bold" color="text.strong">
-            {formatCountdown((isCurrent ? item.end : item.start).getTime() - now.getTime())}
+        {isMain && (
+          <Text fontSize="sm" color="text.muted">
+            {isCurrent ? t("pages.cycleDetail.endsIn") : t("pages.cycleDetail.startsIn")}{" "}
+            <Text as="span" fontWeight="extrabold" color="text.strong" fontSize="lg">
+              {formatCountdown((isCurrent ? item.end : item.start).getTime() - now.getTime())}
+            </Text>
           </Text>
-        </Text>
+        )}
       </Flex>
-      {!isCurrent && (
-        <Text fontSize="xs" color="text.muted" mt={-2} mb={4}>{formatRealDate(item.start, i18n.language)}</Text>
-      )}
       <HStack spacing={2} flexWrap="wrap">
         {isCurrent && (
           <Button as={RouterLink} to={`/cycle/${cycleSlug}/rotation/${rotation.position}`} size="sm" colorScheme="purple">
@@ -206,8 +223,9 @@ const CycleDetailPage = () => {
 
   const total = timed.length;
   const current = timed.find((item) => item.state === "current") ?? null;
-  const upcoming = timed.find((item) => item.state === "upcoming") ?? null;
-  const next = current ? timed[timed.indexOf(current) + 1] ?? null : upcoming;
+  // Between two rotations, the next one takes the main card
+  const spotlight = current ?? timed.find((item) => item.state === "upcoming") ?? null;
+  const following = spotlight ? timed[timed.indexOf(spotlight) + 1] ?? null : null;
   const doneCount = timed.filter((item) => item.state !== "upcoming").length;
   const first = timed[0];
   const last = timed[total - 1];
@@ -228,8 +246,8 @@ const CycleDetailPage = () => {
         noIndex={true}
       />
 
-      <Container maxW="container.xl" py={6}>
-        <VStack spacing={5} align="stretch">
+      <Container maxW="container.xl" py={5}>
+        <VStack spacing={4} align="stretch">
           <Breadcrumbs items={[
             { label: t("nav.home"), to: "/" },
             { label: t("nav.cycles"), to: "/cycles" },
@@ -242,13 +260,13 @@ const CycleDetailPage = () => {
             borderColor="border.subtle"
             borderRadius="2xl"
             px={{ base: 4, md: 6 }}
-            py={5}
+            py={4}
             gap={5}
             align="center"
             wrap="wrap"
           >
             <Box flex="1" minW="220px">
-              <Text as="h1" fontSize="2xl" fontWeight="extrabold" color="text.strong">
+              <Text as="h1" fontSize="xl" fontWeight="extrabold" color="text.strong">
                 {cycle.name} — {cycle.year}
               </Text>
               {first && last && (
@@ -267,15 +285,17 @@ const CycleDetailPage = () => {
                   <Text>{t("pages.cycleDetail.progress")}</Text>
                   <Text fontWeight="bold" color="text.strong">{progressLabel}</Text>
                 </Flex>
-                <Progress value={(doneCount / total) * 100} size="sm" borderRadius="full" colorScheme="purple" />
+                <Box h="8px" borderRadius="full" bg="bg.subtle" overflow="hidden">
+                  <Box h="100%" w={`${(doneCount / total) * 100}%`} borderRadius="full" bgGradient="linear(to-r, purple.500, blue.500)" />
+                </Box>
               </Box>
             )}
           </Flex>
 
-          {(current || next) && (
-            <SimpleGrid columns={{ base: 1, md: current && next ? 2 : 1 }} spacing={4} templateColumns={{ md: current && next ? "1.3fr 1fr" : undefined }}>
-              {current && <RotationSpotlight item={current} cycleSlug={id} kind="current" now={now} />}
-              {next && <RotationSpotlight item={next} cycleSlug={id} kind="next" now={now} />}
+          {spotlight && (
+            <SimpleGrid columns={1} spacing={4} templateColumns={{ md: following ? "1.3fr 1fr" : undefined }}>
+              <RotationSpotlight item={spotlight} cycleSlug={id} kind={current ? "current" : "upcoming"} now={now} />
+              {following && <RotationSpotlight item={following} cycleSlug={id} kind="following" now={now} />}
             </SimpleGrid>
           )}
 
