@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link as RouterLink, useParams, useSearchParams } from "react-router-dom";
 import {
-  Alert, AlertIcon, Avatar, Box, Button, Container, Flex, Grid, HStack, SimpleGrid, Skeleton, Text, VStack,
+  Alert, AlertIcon, Avatar, Badge, Box, Button, Container, Flex, Grid, HStack, SimpleGrid, Skeleton, Text, VStack,
 } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { useTranslation } from "react-i18next";
@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { AlterationImage } from "@/components/ui/AlterationImage";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import { CustomSelect } from "@/components/ui/CustomSelect";
+import { CycleSelect } from "@/components/ui/CycleSelect";
 import { BuildDetailModal } from "@/components/ui/BuildDetailModal";
 import { SEOHead } from "@/components/SEOHead";
 import { RotationEvolutionChart } from "@/components/rotation/RotationEvolutionChart";
@@ -50,6 +50,15 @@ const Stat = ({ label, value, detail, highlight }: { label: string; value: strin
     {detail && <Text fontSize="xs" color="text.muted" noOfLines={1}>{detail}</Text>}
   </Box>
 );
+
+// Position of the rotation in a cycle, or its state when it is running or still to come
+const PassageBadge = ({ passage }: { passage?: RotationPassage }) => {
+  const { t } = useTranslation();
+  if (!passage) return null;
+  if (passage.state === "current") return <Badge colorScheme="green" fontSize="2xs">{t("pages.rotation.current")}</Badge>;
+  if (passage.state === "upcoming") return <Badge colorScheme="gray" fontSize="2xs">{t("pages.rotation.upcoming")}</Badge>;
+  return <Badge colorScheme="purple" variant="subtle" fontSize="2xs">#{passage.rotation.position}</Badge>;
+};
 
 // Rotation next to the shown one in its cycle, with its attack color
 const NeighbourButton = ({ rotation, passage, side }: { rotation: ICycleRotation; passage: RotationPassage; side: "previous" | "next" }) => {
@@ -262,16 +271,12 @@ const RotationPage = () => {
                 borderColor="border.subtle"
               >
                 <Flex align="center" gap={3} wrap="wrap" flex="1" minW={0}>
-                  <CustomSelect
-                    value={showAll ? ALL_CYCLES : passage?.slug ?? ""}
-                    onChange={selectCycle}
-                    options={[
-                      { value: ALL_CYCLES, label: t("pages.rotation.allCycles") },
-                      ...passages.map((p) => ({
-                        value: p.slug,
-                        label: `${p.cycle.name} · ${p.cycle.year} — ${p.state === "upcoming" ? t("pages.rotation.upcoming") : t("pages.rotation.rotationNumber", { position: p.rotation.position })}`,
-                      })),
-                    ]}
+                  <CycleSelect
+                    cycles={passages.map((p) => p.cycle)}
+                    value={showAll ? ALL_CYCLES : passage?.cycle._id ?? ""}
+                    onChange={(value) => selectCycle(value === ALL_CYCLES ? ALL_CYCLES : passages.find((p) => p.cycle._id === value)?.slug ?? "")}
+                    leadingOptions={[{ value: ALL_CYCLES, label: t("pages.rotation.allCycles") }]}
+                    renderBadge={(cycle) => <PassageBadge passage={passages.find((p) => p.cycle._id === cycle._id)} />}
                     allowDeselect={false}
                     size="sm"
                     w={{ base: "100%", sm: "280px" }}

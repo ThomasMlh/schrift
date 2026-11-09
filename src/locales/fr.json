@@ -214,8 +214,7 @@
       "noUpcoming": "Aucun cycle prévu",
       "cycle": "Cycle",
       "allCycles": "Tous les cycles (records)",
-      "upcoming": "à venir",
-      "rotationNumber": "rotation #{{position}}",
+      "upcoming": "À venir",
       "recordsSubtitle": "meilleur score de chaque joueur sur cette rotation",
       "participants_one": "{{count}} participant",
       "participants_other": "{{count}} participants",
@@ -244,7 +243,8 @@
       "chartNotEnough": "Il faut au moins deux passages joués pour tracer l'évolution.",
       "builds": "Builds conseillés",
       "seeAll": "Tout voir ›",
-      "noBuild": "Aucun build validé pour cette rotation."
+      "noBuild": "Aucun build validé pour cette rotation.",
+      "current": "En cours"
     },
     "players": {
       "title": "Joueurs",

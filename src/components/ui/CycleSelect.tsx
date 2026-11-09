@@ -24,6 +24,10 @@ interface CycleSelectProps {
     size?: 'sm' | 'md' | 'lg';
     variant?: SelectVariant;
     w?: string | object;
+    // Options listed before the cycles (e.g. "all cycles")
+    leadingOptions?: SelectOption[];
+    // Badge shown next to each cycle, in place of the active badge
+    renderBadge?: (cycle: ICycle) => ReactNode;
 }
 
 export const CycleSelect = ({
@@ -37,7 +41,9 @@ export const CycleSelect = ({
     showActiveBadge = false,
     size = 'md',
     variant = 'default',
-    w
+    w,
+    leadingOptions = [],
+    renderBadge,
 }: CycleSelectProps) => {
     const cyclesByYear = cycles.reduce((acc, cycle) => {
         const year = cycle.year || 'Année inconnue';
@@ -75,7 +81,8 @@ export const CycleSelect = ({
                                 {cycle.name}
                             </Text>
                             <HStack spacing={1} flexShrink={0}>
-                                {showActiveBadge && (
+                                {renderBadge?.(cycle)}
+                                {!renderBadge && showActiveBadge && (
                                     <>
                                         {isCycleActive(cycle) ? (
                                             <Badge colorScheme="green" fontSize="xs">
@@ -110,7 +117,8 @@ export const CycleSelect = ({
                         {selectedCycle.year}
                     </Badge>
                 )}
-                {showActiveBadge && selectedCycle && isCycleActive(selectedCycle) && (
+                {selectedCycle && renderBadge?.(selectedCycle)}
+                {!renderBadge && showActiveBadge && selectedCycle && isCycleActive(selectedCycle) && (
                     <Badge colorScheme="green" fontSize="xs" flexShrink={0}>
                         Actif
                     </Badge>
@@ -121,7 +129,7 @@ export const CycleSelect = ({
 
     return (
         <CustomSelect
-            options={options}
+            options={[...leadingOptions, ...options]}
             value={value}
             onChange={onChange}
             placeholder={placeholder}
