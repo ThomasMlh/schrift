@@ -20,6 +20,7 @@ import { UserDisplay } from "./UserDisplay";
 import CustomLink from "./CustomLink";
 import { AlterationImage } from "./AlterationImage";
 import { ScoreBadge } from "./ScoreBadge";
+import { rotationUrl } from "@/utils/rotationPassages";
 
 interface ScoresTableProps {
   scores: IScore[];
@@ -49,7 +50,7 @@ const RotationCell = ({ cycle, rotation }: { cycle?: ICycle; rotation?: ICycleRo
       <HStack spacing={2} w="fit-content">
         <AttackTypeBadge attackType={rotation.attack} size="10px" />
         <CustomLink
-          to={`/cycle/${cycle?._id}/rotation/${rotation.position}`}
+          to={rotationUrl(rotation, cycle)}
           text={`#${rotation.position} ${rotation.killer}`}
           textSize="sm"
         />

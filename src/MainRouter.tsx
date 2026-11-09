@@ -20,7 +20,8 @@ const SummonPage = lazy(() => import("./pages/SummonPage"));
 const SummonsPage = lazy(() => import("./pages/SummonsPage"));
 const CyclesPage = lazy(() => import("./pages/CyclesPage"));
 const CycleDetailPage = lazy(() => import("./pages/CycleDetailPage"));
-const RotationDetailPage = lazy(() => import("./pages/RotationDetailPage"));
+const RotationPage = lazy(() => import("./pages/RotationPage"));
+const RotationRedirectPage = lazy(() => import("./pages/RotationRedirectPage"));
 const DiscordCallback = lazy(() => import("./pages/DiscordCallback"));
 const UserPage = lazy(() => import("./pages/UserPage"));
 const UsersPage = lazy(() => import("./pages/UsersPage"));
@@ -102,10 +103,8 @@ const AppRoutes = () => {
         <Route path="/invocation/:id" element={<SummonPage />} />
         <Route path="/cycles" element={<CyclesPage />} />
         <Route path="/cycle/:id" element={<CycleDetailPage />} />
-        <Route
-          path="/cycle/:cycleId/rotation/:position"
-          element={<RotationDetailPage />}
-        />
+        <Route path="/rotation/:killer/:attack" element={<RotationPage />} />
+        <Route path="/cycle/:cycleId/rotation/:position" element={<RotationRedirectPage />} />
         <Route
           path="/admin"
           element={

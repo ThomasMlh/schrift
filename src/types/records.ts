@@ -1,4 +1,5 @@
 // Killer records and achievements
+import type { IScoreWithUser } from "./score";
 
 // Holder of a record on a killer (GET /api/rotations/:id/history)
 export interface IKillerRecordHolder {
@@ -17,6 +18,7 @@ export interface IRotationHistoryCycle {
   cycle_name: string;
   cycle_year: number;
   average: number | null;
+  best: number | null;
   count: number;
   guild_average: number | null;
   guild_count: number | null;
@@ -89,4 +91,24 @@ export interface ITopAchievement {
   name: string;
   tier: AchievementTier;
   rarity: number;
+}
+
+// Score of the rotation ranking of one cycle, with the player's score on its last earlier passage
+export interface IRotationRankedScore extends IScoreWithUser {
+  guild_id?: string;
+  previous: { score: number; cycle_id: string; cycle_name: string | null; cycle_year: number | null } | null;
+}
+
+// Best score of a player on a rotation over every cycle
+export interface IRotationRecord {
+  rank: number;
+  bbs_id: string;
+  bbs_name: string | null;
+  score: number;
+  guild_id: string | null;
+  guild_name: string | null;
+  cycle_id: string;
+  cycle_name: string | null;
+  cycle_year: number | null;
+  passages: number;
 }
