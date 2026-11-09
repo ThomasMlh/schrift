@@ -270,7 +270,7 @@ const RotationPage = () => {
                 borderBottomWidth="1px"
                 borderColor="border.subtle"
               >
-                <Flex align="center" gap={3} wrap="wrap" flex="1" minW={0}>
+                <Flex align="center" gap={3} wrap="wrap" flex={{ base: "1 1 100%", md: "1 1 0" }} minW={0}>
                   <CycleSelect
                     cycles={passages.map((p) => p.cycle)}
                     value={showAll ? ALL_CYCLES : passage?.cycle._id ?? ""}
@@ -296,10 +296,10 @@ const RotationPage = () => {
                   </Text>
                 </Flex>
                 {passage && !showAll && (
-                  <HStack spacing={2} flexShrink={0}>
+                  <Grid templateColumns={{ base: "1fr 1fr", md: "auto auto" }} gap={2} flexShrink={0} w={{ base: "100%", md: "auto" }}>
                     {passage.previous && <NeighbourButton rotation={passage.previous} passage={passage} side="previous" />}
                     {passage.next && <NeighbourButton rotation={passage.next} passage={passage} side="next" />}
-                  </HStack>
+                  </Grid>
                 )}
               </Flex>
 
