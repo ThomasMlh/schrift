@@ -1,6 +1,5 @@
 import useSWR from 'swr';
-import { useState, useCallback } from 'react';
-import type { ICycle, IRotationTemplate, IScoreDetailApiResponse, IPagination } from '../../interfaces';
+import type { ICycle, IRotationTemplate, IPagination } from '../../interfaces';
 import { apiUrl, fetcher, normalizeList, useAuthenticatedFetcher } from './shared';
 
 export const useCycles = (options?: { limit?: number; page?: number; authenticated?: boolean }) => {
@@ -48,41 +47,3 @@ export const useRotations = () => {
   return { rotations, isLoading, error, mutate };
 };
 
-export const useRotationScores = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchRotationScores = useCallback(async (
-    cycleId: string,
-    position: string,
-    options: { page?: number; limit?: number; guildName?: string } = {}
-  ): Promise<IScoreDetailApiResponse | null> => {
-    if (!cycleId || !position) return null;
-
-    const { page = 1, limit = 20, guildName } = options;
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
-      if (guildName) params.append('guild', guildName);
-
-      const response = await fetch(
-        `${apiUrl}/api/cycles/${cycleId}/rotations/${position}/scores?${params.toString()}`
-      );
-
-      if (!response.ok) {
-        throw new Error(response.status === 404 ? 'Rotation introuvable' : 'Erreur lors du chargement des scores');
-      }
-
-      return await response.json() as IScoreDetailApiResponse;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur de connexion');
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  return { fetchRotationScores, isLoading, error };
-};

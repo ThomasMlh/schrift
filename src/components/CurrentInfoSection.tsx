@@ -27,6 +27,7 @@ import { useNow } from "@/hooks/useNow";
 import { formatCountdown } from "@/utils/countdown";
 import { FeaturedRotationBuilds } from "./FeaturedRotationBuilds";
 import type { ICycleRotation } from "@/interfaces";
+import { rotationUrl } from "@/utils/rotationPassages";
 
 const UPCOMING_COUNT = 3;
 
@@ -195,7 +196,7 @@ export const CurrentInfoSection = () => {
                     <Flex gap={4} align="center" wrap="wrap">
                       <Link
                         as={RouterLink}
-                        to={`/cycle/${cycle._id}/rotation/${featuredPosition}`}
+                        to={rotationUrl(featured.rotation_id, cycle)}
                         fontSize={{ base: "3xl", md: "4xl" }}
                         fontWeight="extrabold"
                         lineHeight={1}
@@ -277,7 +278,7 @@ export const CurrentInfoSection = () => {
                         <Link
                           key={rotation._id ?? position}
                           as={RouterLink}
-                          to={`/cycle/${cycle._id}/rotation/${position}`}
+                          to={rotationUrl(rotation.rotation_id, cycle)}
                           display="flex"
                           alignItems="center"
                           gap={3}

@@ -1,6 +1,5 @@
 // Scores, declines and score control
 import type { IPagination } from "./common";
-import type { ICycle, IRotationTemplate } from "./cycle";
 import type { IUser } from "./user";
 
 export interface IScore {
@@ -40,19 +39,6 @@ export interface IScoreFormData {
 export interface IScoresResponse {
   data: IScore[];
   pagination: IPagination;
-}
-
-export interface IScoreDetailApiResponse {
-  success: boolean;
-  data: IScoreWithUser[];
-  cycle: ICycle | null;
-  rotation: IRotationTemplate | null;
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    itemsPerPage: number;
-  };
 }
 
 // Declines (leader/admin area): latest scores compared with the player's usual level on the same killers

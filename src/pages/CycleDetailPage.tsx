@@ -14,7 +14,11 @@ import { useCycle, useCycles } from "@/hooks/useAPI";
 import { useNow } from "@/hooks/useNow";
 import { cycleFromSlug, getRotationRealDates } from "@/utils/cycleHelpers";
 import { formatCountdown } from "@/utils/countdown";
-import type { ICycleRotation } from "@/interfaces";
+import { formatRealDate } from "@/utils/rotationDates";
+import { rotationUrl } from "@/utils/rotationPassages";
+import type { ICycle, ICycleRotation } from "@/interfaces";
+
+type CycleRef = Pick<ICycle, "name" | "year">;
 
 type RotationState = "past" | "current" | "upcoming";
 
@@ -24,16 +28,6 @@ interface TimedRotation {
   end: Date;
   state: RotationState;
 }
-
-const PARIS = "Europe/Paris";
-
-// "lun. 02/11 16 h", in Paris time like the game reset
-const formatRealDate = (date: Date, language: string) => {
-  const locale = language.startsWith("en") ? "en-GB" : "fr-FR";
-  const day = date.toLocaleDateString(locale, { timeZone: PARIS, weekday: "short", day: "2-digit", month: "2-digit" });
-  const hour = date.toLocaleTimeString(locale, { timeZone: PARIS, hour: "2-digit", minute: "2-digit" }).replace(/:00$/, "");
-  return locale === "fr-FR" ? `${day} ${hour.replace(/^0/, "")} h` : `${day} ${hour}:00`;
-};
 
 const RotationTags = ({ rotation }: { rotation: ICycleRotation }) => {
   const { t } = useTranslation();
@@ -65,8 +59,8 @@ const SPOTLIGHT_STYLES = {
 
 // Card of the running rotation (or the next one between two rotations), then of the one after it
 const RotationSpotlight = ({
-  item, cycleSlug, kind, now,
-}: { item: TimedRotation; cycleSlug: string; kind: keyof typeof SPOTLIGHT_STYLES; now: Date }) => {
+  item, cycle, kind, now,
+}: { item: TimedRotation; cycle: CycleRef; kind: keyof typeof SPOTLIGHT_STYLES; now: Date }) => {
   const { t, i18n } = useTranslation();
   const isCurrent = kind === "current";
   const isMain = kind !== "following";
@@ -100,7 +94,7 @@ const RotationSpotlight = ({
       </Flex>
       <HStack spacing={2} flexWrap="wrap">
         {isCurrent && (
-          <Button as={RouterLink} to={`/cycle/${cycleSlug}/rotation/${rotation.position}`} size="sm" colorScheme="purple">
+          <Button as={RouterLink} to={rotationUrl(rotation.rotation_id, cycle)} size="sm" colorScheme="purple">
             {t("pages.cycleDetail.ranking")}
           </Button>
         )}
@@ -116,14 +110,14 @@ const RotationSpotlight = ({
 
 const TABLE_COLUMNS = "48px 250px 1fr 110px 150px 20px";
 
-const RotationRow = ({ item, cycleSlug }: { item: TimedRotation; cycleSlug: string }) => {
+const RotationRow = ({ item, cycle }: { item: TimedRotation; cycle: CycleRef }) => {
   const { t, i18n } = useTranslation();
   const { rotation, state } = item;
   const isCurrent = state === "current";
   return (
     <Box
       as={RouterLink}
-      to={`/cycle/${cycleSlug}/rotation/${rotation.position}`}
+      to={rotationUrl(rotation.rotation_id, cycle)}
       display="grid"
       gridTemplateColumns={{ base: "32px 1fr", md: TABLE_COLUMNS }}
       gridTemplateAreas={{ base: `"pos killer" "pos dates" "pos tags"`, md: "none" }}
@@ -283,8 +277,8 @@ const CycleDetailPage = () => {
 
           {spotlight && (
             <SimpleGrid columns={1} spacing={4} templateColumns={{ md: following ? "1.3fr 1fr" : undefined }}>
-              <RotationSpotlight item={spotlight} cycleSlug={id} kind={current ? "current" : "upcoming"} now={now} />
-              {following && <RotationSpotlight item={following} cycleSlug={id} kind="following" now={now} />}
+              <RotationSpotlight item={spotlight} cycle={cycle} kind={current ? "current" : "upcoming"} now={now} />
+              {following && <RotationSpotlight item={following} cycle={cycle} kind="following" now={now} />}
             </SimpleGrid>
           )}
 
@@ -310,7 +304,7 @@ const CycleDetailPage = () => {
                 <Text>{t("pages.cycleDetail.fieldAlteration")}</Text>
                 <span />
               </Box>
-              {timed.map((item) => <RotationRow key={item.rotation.position} item={item} cycleSlug={id} />)}
+              {timed.map((item) => <RotationRow key={item.rotation.position} item={item} cycle={cycle} />)}
             </Box>
           )}
         </VStack>

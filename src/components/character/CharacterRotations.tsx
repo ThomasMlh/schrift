@@ -5,8 +5,9 @@ import { useTranslation } from "react-i18next";
 import type { ICharacter } from "@/interfaces";
 import { useCycles } from "@/hooks/useAPI";
 import { useCurrentRotation } from "@/hooks/useCurrentRotation";
-import { cycleSlug, getRotationRealDates } from "@/utils/cycleHelpers";
+import { getRotationRealDates } from "@/utils/cycleHelpers";
 import { AttackTypeBadge } from "../ui/AttackTypeBadge";
+import { rotationUrl } from "@/utils/rotationPassages";
 
 // "Quincy +" (stronger killer) serves on the "Quincy" rotations like "Quincy"
 const baseKiller = (killer: string) => killer.replace(/\s*\+$/, "");
@@ -47,7 +48,7 @@ export const CharacterRotations = ({ character }: { character: ICharacter }) => 
               <Flex
                 key={rotation.rotation_id ?? position}
                 as={Link}
-                to={`/cycle/${cycleSlug(currentCycle.name, currentCycle.year)}/rotation/${position}`}
+                to={rotationUrl(rotation.rotation_id, currentCycle)}
                 align="center"
                 gap={3}
                 px={3}
