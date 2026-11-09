@@ -25,7 +25,6 @@ import {
 import type { IBuild, ICycleRotation } from "@/interfaces";
 
 const PAGE_SIZE = 20;
-const ATTACK_COLORS: Record<string, string> = { R: "red.400", B: "blue.400" };
 
 const Card = ({ children, ...props }: React.ComponentProps<typeof Box>) => (
   <Box bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="2xl" {...props}>{children}</Box>
@@ -61,10 +60,10 @@ const NeighbourButton = ({ rotation, passage, side }: { rotation: ICycleRotation
       variant="outline"
       fontSize="xs"
     >
-      <HStack spacing={1.5}>
+      <HStack spacing={1.5} align="center" lineHeight={1}>
         {side === "previous" && <Text as="span">‹</Text>}
         <Text as="span">#{rotation.position} {t(`factions.${rotation.killer}`, rotation.killer)}</Text>
-        <Box w="9px" h="9px" borderRadius="full" bg={ATTACK_COLORS[rotation.attack] ?? "gray.400"} />
+        <Flex align="center"><AttackTypeBadge attackType={rotation.attack} size="10px" /></Flex>
         {side === "next" && <Text as="span">›</Text>}
       </HStack>
     </Button>
@@ -246,49 +245,55 @@ const RotationPage = () => {
             </SimpleGrid>
           </Card>
 
-          <HStack spacing={3} flexWrap="wrap">
-            <SectionTitle>{t("pages.rotation.cycle")}</SectionTitle>
-            <Select
-              value={showAll ? ALL_CYCLES : passage?.slug ?? ""}
-              onChange={(e) => selectCycle(e.target.value)}
-              maxW="340px"
-              bg="bg.card"
-              borderColor="border.subtle"
-              fontWeight="semibold"
-              aria-label={t("pages.rotation.cycle")}
-            >
-              <option value={ALL_CYCLES}>{t("pages.rotation.allCycles")}</option>
-              {passages.map((p) => (
-                <option key={p.slug} value={p.slug}>
-                  {`${p.cycle.name} · ${p.cycle.year} — ${p.state === "upcoming" ? t("pages.rotation.upcoming") : t("pages.rotation.rotationNumber", { position: p.rotation.position })}`}
-                </option>
-              ))}
-            </Select>
-          </HStack>
 
           <Grid templateColumns={{ base: "1fr", lg: "minmax(0, 1fr) 360px" }} gap={4} alignItems="start">
             <Card overflow="hidden">
-              <Flex justify="space-between" align="center" gap={3} wrap="wrap" px={4} py={3} borderBottomWidth="1px" borderColor="border.subtle">
-                <Text fontSize="sm" color="text.muted">
-                  {showAll ? (
-                    <><Text as="span" fontWeight="bold" color="text.strong">{t("pages.rotation.recordsTitle")}</Text> · {t("pages.rotation.recordsSubtitle")}</>
-                  ) : passage ? (
-                    <>
-                      <Text as="span" fontWeight="bold" color="text.strong">
-                        {`${passage.cycle.name} · ${passage.cycle.year} · ${t("pages.rotation.rotationNumber", { position: passage.rotation.position })}`}
-                      </Text>
-                      {` · ${formatRealDate(passage.start, language)} → ${formatRealDate(passage.end, language)}`}
-                      {(() => {
-                        const stats = history?.per_cycle.find((c) => c.cycle_id === passage.cycle._id);
-                        return stats && stats.count > 0
-                          ? ` · ${t("pages.rotation.participants", { count: stats.count })} · ${t("pages.rotation.average", { value: `${((stats.average ?? 0) / 1_000_000).toFixed(1)} M` })}`
-                          : "";
-                      })()}
-                    </>
-                  ) : t("pages.rotation.noPassage")}
-                </Text>
+              <Flex
+                justify="space-between"
+                align="center"
+                gap={3}
+                wrap={{ base: "wrap", md: "nowrap" }}
+                px={4}
+                py={3}
+                borderBottomWidth="1px"
+                borderColor="border.subtle"
+              >
+                <Flex align="center" gap={3} wrap="wrap" flex="1" minW={0}>
+                  <Select
+                    value={showAll ? ALL_CYCLES : passage?.slug ?? ""}
+                    onChange={(e) => selectCycle(e.target.value)}
+                    size="sm"
+                    w="auto"
+                    maxW="100%"
+                    borderRadius="lg"
+                    bg="bg.subtle"
+                    borderColor="border.subtle"
+                    fontWeight="bold"
+                    aria-label={t("pages.rotation.cycle")}
+                  >
+                    <option value={ALL_CYCLES}>{t("pages.rotation.allCycles")}</option>
+                    {passages.map((p) => (
+                      <option key={p.slug} value={p.slug}>
+                        {`${p.cycle.name} · ${p.cycle.year} — ${p.state === "upcoming" ? t("pages.rotation.upcoming") : t("pages.rotation.rotationNumber", { position: p.rotation.position })}`}
+                      </option>
+                    ))}
+                  </Select>
+                  <Text fontSize="sm" color="text.muted" minW={0}>
+                    {showAll ? t("pages.rotation.recordsSubtitle") : passage ? (
+                      <>
+                        {`${formatRealDate(passage.start, language)} → ${formatRealDate(passage.end, language)}`}
+                        {(() => {
+                          const stats = history?.per_cycle.find((c) => c.cycle_id === passage.cycle._id);
+                          return stats && stats.count > 0
+                            ? ` · ${t("pages.rotation.participants", { count: stats.count })} · ${t("pages.rotation.average", { value: `${((stats.average ?? 0) / 1_000_000).toFixed(1)} M` })}`
+                            : "";
+                        })()}
+                      </>
+                    ) : t("pages.rotation.noPassage")}
+                  </Text>
+                </Flex>
                 {passage && !showAll && (
-                  <HStack spacing={2}>
+                  <HStack spacing={2} flexShrink={0}>
                     {passage.previous && <NeighbourButton rotation={passage.previous} passage={passage} side="previous" />}
                     {passage.next && <NeighbourButton rotation={passage.next} passage={passage} side="next" />}
                   </HStack>
