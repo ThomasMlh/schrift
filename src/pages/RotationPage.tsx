@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link as RouterLink, useParams, useSearchParams } from "react-router-dom";
 import {
-  Alert, AlertIcon, Avatar, Box, Button, Container, Flex, Grid, HStack, Select, SimpleGrid, Skeleton, Text, VStack,
+  Alert, AlertIcon, Avatar, Box, Button, Container, Flex, Grid, HStack, SimpleGrid, Skeleton, Text, VStack,
 } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { useTranslation } from "react-i18next";
@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { AlterationImage } from "@/components/ui/AlterationImage";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { BuildDetailModal } from "@/components/ui/BuildDetailModal";
 import { SEOHead } from "@/components/SEOHead";
 import { RotationEvolutionChart } from "@/components/rotation/RotationEvolutionChart";
@@ -261,25 +262,20 @@ const RotationPage = () => {
                 borderColor="border.subtle"
               >
                 <Flex align="center" gap={3} wrap="wrap" flex="1" minW={0}>
-                  <Select
+                  <CustomSelect
                     value={showAll ? ALL_CYCLES : passage?.slug ?? ""}
-                    onChange={(e) => selectCycle(e.target.value)}
+                    onChange={selectCycle}
+                    options={[
+                      { value: ALL_CYCLES, label: t("pages.rotation.allCycles") },
+                      ...passages.map((p) => ({
+                        value: p.slug,
+                        label: `${p.cycle.name} · ${p.cycle.year} — ${p.state === "upcoming" ? t("pages.rotation.upcoming") : t("pages.rotation.rotationNumber", { position: p.rotation.position })}`,
+                      })),
+                    ]}
+                    allowDeselect={false}
                     size="sm"
-                    w="auto"
-                    maxW="100%"
-                    borderRadius="lg"
-                    bg="bg.subtle"
-                    borderColor="border.subtle"
-                    fontWeight="bold"
-                    aria-label={t("pages.rotation.cycle")}
-                  >
-                    <option value={ALL_CYCLES}>{t("pages.rotation.allCycles")}</option>
-                    {passages.map((p) => (
-                      <option key={p.slug} value={p.slug}>
-                        {`${p.cycle.name} · ${p.cycle.year} — ${p.state === "upcoming" ? t("pages.rotation.upcoming") : t("pages.rotation.rotationNumber", { position: p.rotation.position })}`}
-                      </option>
-                    ))}
-                  </Select>
+                    w={{ base: "100%", sm: "280px" }}
+                  />
                   <Text fontSize="sm" color="text.muted" minW={0}>
                     {showAll ? t("pages.rotation.recordsSubtitle") : passage ? (
                       <>
