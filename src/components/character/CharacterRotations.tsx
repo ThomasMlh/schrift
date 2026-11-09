@@ -48,7 +48,7 @@ export const CharacterRotations = ({ character }: { character: ICharacter }) => 
               <Flex
                 key={rotation.rotation_id ?? position}
                 as={Link}
-                to={rotationUrl(rotation.rotation_id, currentCycle)}
+                to={rotationUrl(rotation, currentCycle)}
                 align="center"
                 gap={3}
                 px={3}

@@ -50,7 +50,7 @@ const RotationCell = ({ cycle, rotation }: { cycle?: ICycle; rotation?: ICycleRo
       <HStack spacing={2} w="fit-content">
         <AttackTypeBadge attackType={rotation.attack} size="10px" />
         <CustomLink
-          to={cycle ? rotationUrl(rotation.rotation_id, cycle) : rotationUrl(rotation.rotation_id)}
+          to={rotationUrl(rotation, cycle)}
           text={`#${rotation.position} ${rotation.killer}`}
           textSize="sm"
         />

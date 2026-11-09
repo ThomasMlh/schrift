@@ -14,7 +14,7 @@ const RotationRedirectPage = () => {
   const cycle = cycleFromSlug(cycles, cycleId) ?? cycles.find((c) => c._id === cycleId);
   const rotation = cycle?.rotations.find((r) => String(r.position) === position);
   if (!cycle || !rotation) return <Navigate to="/cycles" replace />;
-  return <Navigate to={rotationUrl(rotation.rotation_id, cycle)} replace />;
+  return <Navigate to={rotationUrl(rotation, cycle)} replace />;
 };
 
 export default RotationRedirectPage;

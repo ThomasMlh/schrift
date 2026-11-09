@@ -19,7 +19,9 @@ import { useNow } from "@/hooks/useNow";
 import { bucketUrl } from "@/utils/apiRequest";
 import { formatCountdown } from "@/utils/countdown";
 import { formatRealDate } from "@/utils/rotationDates";
-import { ALL_CYCLES, defaultPassage, rotationPassages, rotationUrl, type RotationPassage } from "@/utils/rotationPassages";
+import {
+  ALL_CYCLES, defaultPassage, matchesRotationSlug, rotationPassages, rotationUrl, type RotationPassage,
+} from "@/utils/rotationPassages";
 import type { IBuild, ICycleRotation } from "@/interfaces";
 
 const PAGE_SIZE = 20;
@@ -54,7 +56,7 @@ const NeighbourButton = ({ rotation, passage, side }: { rotation: ICycleRotation
   return (
     <Button
       as={RouterLink}
-      to={rotationUrl(rotation.rotation_id, passage.cycle)}
+      to={rotationUrl(rotation, passage.cycle)}
       size="sm"
       variant="outline"
       fontSize="xs"
@@ -128,7 +130,7 @@ const BuildsPanel = ({ rotationId }: { rotationId: string }) => {
 };
 
 const RotationPage = () => {
-  const { id = "" } = useParams<{ id: string }>();
+  const { killer: killerParam = "", attack: attackParam = "" } = useParams<{ killer: string; attack: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const { t, i18n } = useTranslation();
   const now = useNow();
@@ -137,8 +139,9 @@ const RotationPage = () => {
   const { rotations, isLoading: rotationsLoading } = useRotations();
   const { cycles, isLoading: cyclesLoading } = useCycles({ limit: 100 });
   const { guilds } = useGuilds(false, true);
-  const { history } = useRotationHistory(id);
-  const rotation = rotations.find((r) => r._id === id) ?? null;
+  const rotation = rotations.find((r) => matchesRotationSlug(r, killerParam, attackParam)) ?? null;
+  const id = rotation?._id ?? "";
+  const { history } = useRotationHistory(id || undefined);
 
   const passages = useMemo(() => rotationPassages(cycles, id, now), [cycles, id, now]);
   const cycleParam = searchParams.get("cycle");

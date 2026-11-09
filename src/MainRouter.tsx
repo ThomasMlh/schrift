@@ -103,7 +103,7 @@ const AppRoutes = () => {
         <Route path="/invocation/:id" element={<SummonPage />} />
         <Route path="/cycles" element={<CyclesPage />} />
         <Route path="/cycle/:id" element={<CycleDetailPage />} />
-        <Route path="/rotation/:id" element={<RotationPage />} />
+        <Route path="/rotation/:killer/:attack" element={<RotationPage />} />
         <Route path="/cycle/:cycleId/rotation/:position" element={<RotationRedirectPage />} />
         <Route
           path="/admin"

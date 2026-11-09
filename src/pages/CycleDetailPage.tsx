@@ -94,7 +94,7 @@ const RotationSpotlight = ({
       </Flex>
       <HStack spacing={2} flexWrap="wrap">
         {isCurrent && (
-          <Button as={RouterLink} to={rotationUrl(rotation.rotation_id, cycle)} size="sm" colorScheme="purple">
+          <Button as={RouterLink} to={rotationUrl(rotation, cycle)} size="sm" colorScheme="purple">
             {t("pages.cycleDetail.ranking")}
           </Button>
         )}
@@ -117,7 +117,7 @@ const RotationRow = ({ item, cycle }: { item: TimedRotation; cycle: CycleRef }) 
   return (
     <Box
       as={RouterLink}
-      to={rotationUrl(rotation.rotation_id, cycle)}
+      to={rotationUrl(rotation, cycle)}
       display="grid"
       gridTemplateColumns={{ base: "32px 1fr", md: TABLE_COLUMNS }}
       gridTemplateAreas={{ base: `"pos killer" "pos dates" "pos tags"`, md: "none" }}

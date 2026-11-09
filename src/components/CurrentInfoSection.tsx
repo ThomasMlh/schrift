@@ -196,7 +196,7 @@ export const CurrentInfoSection = () => {
                     <Flex gap={4} align="center" wrap="wrap">
                       <Link
                         as={RouterLink}
-                        to={rotationUrl(featured.rotation_id, cycle)}
+                        to={rotationUrl(featured, cycle)}
                         fontSize={{ base: "3xl", md: "4xl" }}
                         fontWeight="extrabold"
                         lineHeight={1}
@@ -278,7 +278,7 @@ export const CurrentInfoSection = () => {
                         <Link
                           key={rotation._id ?? position}
                           as={RouterLink}
-                          to={rotationUrl(rotation.rotation_id, cycle)}
+                          to={rotationUrl(rotation, cycle)}
                           display="flex"
                           alignItems="center"
                           gap={3}

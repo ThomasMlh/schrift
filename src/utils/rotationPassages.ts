@@ -17,10 +17,26 @@ export interface RotationPassage {
 
 export const ALL_CYCLES = "all";
 
-export const rotationUrl = (rotationId: string, cycle?: Pick<ICycle, "name" | "year"> | typeof ALL_CYCLES) => {
+type RotationKey = Pick<ICycleRotation, "killer" | "attack">;
+
+// Blue attacks are ranged, red ones melee
+const ATTACK_SLUGS: Record<string, string> = { B: "range", R: "melee" };
+
+// "Stern Ritter" -> "stern-ritter", "Division 0" -> "division-0"
+export const killerSlug = (killer: string) => killer
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+export const attackSlug = (attack: string) => ATTACK_SLUGS[attack] ?? attack.toLowerCase();
+
+// A killer and an attack type make one rotation: /rotation/arrancar/range
+export const rotationUrl = (rotation: RotationKey, cycle?: Pick<ICycle, "name" | "year"> | typeof ALL_CYCLES) => {
   const query = cycle === ALL_CYCLES ? ALL_CYCLES : cycle ? cycleSlug(cycle.name, cycle.year) : null;
-  return `/rotation/${rotationId}${query ? `?cycle=${query}` : ""}`;
+  return `/rotation/${killerSlug(rotation.killer)}/${attackSlug(rotation.attack)}${query ? `?cycle=${query}` : ""}`;
 };
+
+export const matchesRotationSlug = (rotation: RotationKey, killer: string, attack: string) =>
+  killerSlug(rotation.killer) === killer && attackSlug(rotation.attack) === attack;
 
 // Passages of a rotation, most recent first
 export const rotationPassages = (cycles: ICycle[], rotationId: string, now: Date): RotationPassage[] => cycles
