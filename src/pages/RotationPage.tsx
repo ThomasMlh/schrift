@@ -3,6 +3,7 @@ import { Link as RouterLink, useParams, useSearchParams } from "react-router-dom
 import {
   Alert, AlertIcon, Avatar, Box, Button, Container, Flex, Grid, HStack, Select, SimpleGrid, Skeleton, Text, VStack,
 } from "@chakra-ui/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { useTranslation } from "react-i18next";
 
 import { AlterationImage } from "@/components/ui/AlterationImage";
@@ -59,12 +60,13 @@ const NeighbourButton = ({ rotation, passage, side }: { rotation: ICycleRotation
       size="sm"
       variant="outline"
       fontSize="xs"
+      iconSpacing={1}
+      leftIcon={side === "previous" ? <ChevronLeftIcon boxSize={4} /> : undefined}
+      rightIcon={side === "next" ? <ChevronRightIcon boxSize={4} /> : undefined}
     >
-      <HStack spacing={1.5} align="center" lineHeight={1}>
-        {side === "previous" && <Text as="span">‹</Text>}
+      <HStack spacing={1.5} align="center">
         <Text as="span">#{rotation.position} {t(`factions.${rotation.killer}`, rotation.killer)}</Text>
-        <Flex align="center"><AttackTypeBadge attackType={rotation.attack} size="10px" /></Flex>
-        {side === "next" && <Text as="span">›</Text>}
+        <AttackTypeBadge attackType={rotation.attack} size="10px" />
       </HStack>
     </Button>
   );
