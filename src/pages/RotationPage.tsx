@@ -12,6 +12,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import { BuildDetailModal } from "@/components/ui/BuildDetailModal";
 import { SEOHead } from "@/components/SEOHead";
+import { ScoreFormulaButton } from "@/components/score/ScoreFormulaModal";
 import { RotationEvolutionChart } from "@/components/rotation/RotationEvolutionChart";
 import { GuildFilter, RotationRankingTable, RotationRecordsTable, TablePager } from "@/components/rotation/RotationTables";
 import {
@@ -217,7 +218,10 @@ const RotationPage = () => {
 
           <Card as={Grid} templateColumns={{ base: "1fr", lg: "1.1fr 2fr" }} gap={5} alignItems="center" px={{ base: 4, md: 5 }} py={4}>
             <Box>
-              <Text as="h1" fontSize="2xl" fontWeight="extrabold" color="text.strong">{killer}</Text>
+              <Flex justify="space-between" align="center" gap={3}>
+                <Text as="h1" fontSize="2xl" fontWeight="extrabold" color="text.strong">{killer}</Text>
+                <ScoreFormulaButton size="xs" />
+              </Flex>
               <HStack spacing={4} mt={2} flexWrap="wrap">
                 <HStack spacing={1.5}>
                   <AttackTypeBadge attackType={rotation.attack} size="16px" />
