@@ -32,7 +32,7 @@ const useLocale = () => {
   const locale = i18n.language.startsWith("en") ? "en-GB" : "fr-FR";
   return {
     points: (value: number) => Math.round(value).toLocaleString(locale),
-    decimal: (value: number) => value.toLocaleString(locale, { maximumFractionDigits: 2 }),
+    decimal: (value: number) => value.toLocaleString(locale, { maximumFractionDigits: 3 }),
   };
 };
 
@@ -127,34 +127,68 @@ const FormulaTab = () => {
   );
 };
 
+const parseDecimal = (text: string) => Number(text.replace(",", "."));
+
+// The text is kept apart from the value so decimals typed by hand (45,25 or 49.498) are never reformatted
 const RunField = ({ id, label, unit, value, max, onChange }: {
   id: string; label: string; unit: string; value: number; max: number; onChange: (value: number) => void;
-}) => (
-  <Box>
-    <Flex justify="space-between" mb={1}>
-      <Text as="label" htmlFor={id} fontSize="sm" fontWeight="semibold">{label}</Text>
-      <Text fontSize="xs" color="text.muted">{unit}</Text>
-    </Flex>
-    <Grid templateColumns="1fr 88px" gap={3} alignItems="center">
-      <Slider aria-label={label} min={0} max={max} step={0.1} value={value} onChange={onChange} colorScheme="purple" focusThumbOnChange={false}>
-        <SliderTrack><SliderFilledTrack /></SliderTrack>
-        <SliderThumb />
-      </Slider>
-      <NumberInput
-        id={id}
-        size="sm"
-        min={0}
-        max={max}
-        step={0.1}
-        precision={1}
-        value={value}
-        onChange={(_, number) => onChange(Number.isFinite(number) ? Math.min(max, Math.max(0, number)) : 0)}
-      >
-        <NumberInputField sx={{ fontVariantNumeric: "tabular-nums" }} />
-      </NumberInput>
-    </Grid>
-  </Box>
-);
+}) => {
+  const [text, setText] = useState(String(value));
+  const [synced, setSynced] = useState(value);
+  if (value !== synced) {
+    setSynced(value);
+    if (parseDecimal(text) !== value) setText(String(value));
+  }
+  const commit = (next: number) => {
+    const clamped = Math.min(max, Math.max(0, next));
+    setSynced(clamped);
+    onChange(clamped);
+  };
+
+  return (
+    <Box>
+      <Flex justify="space-between" mb={1}>
+        <Text as="label" htmlFor={id} fontSize="sm" fontWeight="semibold">{label}</Text>
+        <Text fontSize="xs" color="text.muted">{unit}</Text>
+      </Flex>
+      <Grid templateColumns="1fr 96px" gap={3} alignItems="center">
+        <Slider
+          aria-label={label}
+          min={0}
+          max={max}
+          step={0.1}
+          value={value}
+          onChange={(next) => { setText(String(next)); commit(next); }}
+          colorScheme="purple"
+          focusThumbOnChange={false}
+        >
+          <SliderTrack><SliderFilledTrack /></SliderTrack>
+          <SliderThumb />
+        </Slider>
+        <NumberInput
+          id={id}
+          size="sm"
+          min={0}
+          max={max}
+          step={0.1}
+          value={text}
+          inputMode="decimal"
+          clampValueOnBlur={false}
+          isValidCharacter={(char) => /^[0-9.,]$/.test(char)}
+          pattern="[0-9]*[.,]?[0-9]*"
+          onChange={(next) => {
+            setText(next);
+            const number = parseDecimal(next);
+            if (next !== "" && Number.isFinite(number)) commit(number);
+          }}
+          onBlur={() => setText(String(value))}
+        >
+          <NumberInputField sx={{ fontVariantNumeric: "tabular-nums" }} />
+        </NumberInput>
+      </Grid>
+    </Box>
+  );
+};
 
 const CalculatorTab = ({ run, onChange }: { run: QuestRun; onChange: (run: QuestRun) => void }) => {
   const { t } = useTranslation();
