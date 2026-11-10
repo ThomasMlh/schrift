@@ -27,6 +27,7 @@ import { useMyAlbum } from "@/hooks/useMyAlbum";
 import { albumTabUrl } from "@/utils/buildOwnership";
 import BuildCreationModal from "../ui/BuildCreationModal";
 import { BuildDetailModal } from "../ui/BuildDetailModal";
+import { ScoreFormulaButton } from "../score/ScoreFormulaModal";
 import { Pagination } from "../ui/Pagination";
 import { useAuth } from "../../providers/AuthProvider";
 import { CustomSelect } from "../ui/CustomSelect";
@@ -233,6 +234,7 @@ const RotationsBuildsGuide = () => {
               {t("components.rotationsBuildsGuide.currentRotation")}
             </Button>
           )}
+          <ScoreFormulaButton />
           {isAuthenticated && (
             <Tooltip
               label={!selectedRotation ? t("components.rotationsBuildsGuide.selectRotationHint") : ""}
