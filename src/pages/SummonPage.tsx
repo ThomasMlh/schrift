@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Badge, Box, Button, Container, Flex, HStack, Image, SimpleGrid, Table, Tbody, Td, Text, Th, Thead, Tr, VStack,
+  Badge, Box, Button, ButtonGroup, Container, Flex, HStack, Image, SimpleGrid, Table, Tbody, Td, Text, Th, Thead, Tr, VStack,
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,7 @@ import { bucketUrl } from "@/utils/apiRequest";
 import { gameText } from "@/utils/gameText";
 import { CharacterCard } from "@/components/character/CharacterCard";
 import { useMyAlbum } from "@/hooks/useMyAlbum";
+import type { OwnershipFilter } from "@/utils/albumFilters";
 import type { ISummon, ISummonAccessory, ISummonCharacter, ISummonRates, ISummonRateUnit } from "@/interfaces";
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -76,25 +77,41 @@ const UnlinkedUnit = ({ unit }: { unit: ISummonRateUnit }) => (
 );
 
 const VISIBLE_UNITS = 30;
+const OWNERSHIP_FILTERS: OwnershipFilter[] = ["all", "owned", "missing"];
 
-const RateUnits = ({ units, summon }: { units: ISummonRateUnit[]; summon: ISummon }) => {
+type Owned = Record<string, number>;
+
+// A unit without a sheet on the site cannot be in an album, so it counts as missing
+const isOwned = (owned: Owned, character?: Pick<ISummonCharacter, "_id">) => !!character && (owned[character._id] ?? 0) > 0;
+
+const matchesOwnership = (filter: OwnershipFilter, owned: Owned, character?: Pick<ISummonCharacter, "_id">) =>
+  filter === "all" || (filter === "owned") === isOwned(owned, character);
+
+const EmptyFilter = () => {
+  const { t } = useTranslation();
+  return <Text fontSize="sm" color="text.muted" textAlign="center" py={4}>{t("pages.summon.ownershipEmpty")}</Text>;
+};
+
+const RateUnits = ({ units, summon, owned, ownership }: {
+  units: ISummonRateUnit[]; summon: ISummon; owned: Owned; ownership: OwnershipFilter;
+}) => {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
-  const { owned } = useMyAlbum();
   const byGameId = new Map(summon.characters.map((c) => [c.game_id, c]));
+  const rows = units
+    .map((unit) => ({ unit, character: unit.game_id ? byGameId.get(unit.game_id) : undefined }))
+    .filter(({ character }) => matchesOwnership(ownership, owned, character));
+  if (rows.length === 0) return <EmptyFilter />;
   return (
     <>
       <SimpleGrid columns={CHARACTER_COLUMNS} spacing={3}>
-        {(showAll ? units : units.slice(0, VISIBLE_UNITS)).map((unit, index) => {
-          const character = unit.game_id ? byGameId.get(unit.game_id) : undefined;
-          return character
-            ? <CharacterCard key={character._id} character={character} spe={owned[character._id]} />
-            : <UnlinkedUnit key={index} unit={unit} />;
-        })}
+        {(showAll ? rows : rows.slice(0, VISIBLE_UNITS)).map(({ unit, character }, index) => character
+          ? <CharacterCard key={character._id} character={character} spe={owned[character._id]} />
+          : <UnlinkedUnit key={`${unit.name}-${index}`} unit={unit} />)}
       </SimpleGrid>
-      {!showAll && units.length > VISIBLE_UNITS && (
+      {!showAll && rows.length > VISIBLE_UNITS && (
         <Button size="sm" variant="ghost" mt={3} onClick={() => setShowAll(true)}>
-          {t("pages.summon.showAll", { count: units.length })}
+          {t("pages.summon.showAll", { count: rows.length })}
         </Button>
       )}
     </>
@@ -184,7 +201,8 @@ const SummonPage = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { summon, isLoading, error } = useSummon(id);
-  const { owned } = useMyAlbum();
+  const { owned, hasAlbum } = useMyAlbum();
+  const [ownership, setOwnership] = useState<OwnershipFilter>("all");
   const language = i18n.language;
 
   if (isLoading) {
@@ -214,6 +232,24 @@ const SummonPage = () => {
   // The catalog gives no end date to what never expires, while the details keep the far date of the tables
   const end = summon.list_category && !summon.end_date ? null : details?.end_at ?? summon.end_date;
   const characters = orderedCharacters(summon);
+  // Every unit shown on the page, once, for the counts of the ownership filter
+  const byGameId = new Map(summon.characters.map((c) => [c.game_id, c]));
+  const pageUnits = new Map<string, ISummonCharacter | undefined>();
+  for (const section of summon.rates?.sections ?? []) {
+    section.units.forEach((unit, index) => {
+      pageUnits.set(unit.game_id ? String(unit.game_id) : `${section.kind}-${index}`, unit.game_id ? byGameId.get(unit.game_id) : undefined);
+    });
+  }
+  for (const character of characters) pageUnits.set(String(character.game_id), character);
+  const ownedCount = [...pageUnits.values()].filter((character) => isOwned(owned, character)).length;
+  const ownershipCounts: Record<OwnershipFilter, number> = {
+    all: pageUnits.size,
+    owned: ownedCount,
+    missing: pageUnits.size - ownedCount,
+  };
+  // Without an album the filter is hidden and everything shows
+  const activeOwnership = hasAlbum ? ownership : "all";
+  const visibleCharacters = characters.filter((character) => matchesOwnership(activeOwnership, owned, character));
   const isStepUp = (details?.steps.length ?? 0) > 0;
   const modes = (details?.modes ?? []).filter((mode) => !(isStepUp && mode.kind === "multiple"));
 
@@ -240,9 +276,28 @@ const SummonPage = () => {
           </Flex>
         </Box>
 
+        {hasAlbum && pageUnits.size > 0 && (
+          <Flex align="center" gap={3} wrap="wrap">
+            <Text fontSize="sm" fontWeight="semibold" color="text.muted">{t("pages.summon.ownershipLabel")}</Text>
+            <ButtonGroup size="sm" isAttached variant="outline">
+              {OWNERSHIP_FILTERS.map((key) => (
+                <Button
+                  key={key}
+                  colorScheme={ownership === key ? "purple" : "gray"}
+                  variant={ownership === key ? "solid" : "outline"}
+                  onClick={() => setOwnership(key)}
+                  aria-pressed={ownership === key}
+                >
+                  {t(`pages.user.albumFilter_${key}`)} ({ownershipCounts[key]})
+                </Button>
+              ))}
+            </ButtonGroup>
+          </Flex>
+        )}
+
         {(summon.rates?.sections ?? []).map((section) => (
           <Section key={section.kind} title={t(`pages.summon.section_${section.kind}`, { count: section.units.length })}>
-            <RateUnits units={section.units} summon={summon} />
+            <RateUnits units={section.units} summon={summon} owned={owned} ownership={activeOwnership} />
           </Section>
         ))}
 
@@ -254,11 +309,13 @@ const SummonPage = () => {
 
         {characters.length > 0 && (
           <Section title={t("pages.summon.featured")}>
-            <SimpleGrid columns={CHARACTER_COLUMNS} spacing={3}>
-              {characters.map((character) => (
-                <CharacterCard key={character._id} character={character} spe={owned[character._id]} />
-              ))}
-            </SimpleGrid>
+            {visibleCharacters.length === 0 ? <EmptyFilter /> : (
+              <SimpleGrid columns={CHARACTER_COLUMNS} spacing={3}>
+                {visibleCharacters.map((character) => (
+                  <CharacterCard key={character._id} character={character} spe={owned[character._id]} />
+                ))}
+              </SimpleGrid>
+            )}
           </Section>
         )}
 
