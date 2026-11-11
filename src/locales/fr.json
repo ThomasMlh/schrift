@@ -514,7 +514,9 @@
       "showAll": "Tout afficher ({{count}})",
       "rates": "Taux d'obtention",
       "ratesSource": "Taux affichés par le jeu au moment de l'invocation.",
-      "ratesNote": "Les taux et la liste complète ne sont pas disponibles pour cette invocation."
+      "ratesNote": "Les taux et la liste complète ne sont pas disponibles pour cette invocation.",
+      "ownershipLabel": "Mon album :",
+      "ownershipEmpty": "Aucun personnage ne correspond à ce filtre."
     },
     "characterDetail": {
       "backToCharacters": "Retour aux personnages",
