@@ -10,6 +10,7 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import { bucketUrl } from "@/utils/apiRequest";
 import { gameText } from "@/utils/gameText";
 import { CharacterCard } from "@/components/character/CharacterCard";
+import { useMyAlbum } from "@/hooks/useMyAlbum";
 import type { ISummon, ISummonAccessory, ISummonCharacter, ISummonRates, ISummonRateUnit } from "@/interfaces";
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -79,6 +80,7 @@ const VISIBLE_UNITS = 30;
 const RateUnits = ({ units, summon }: { units: ISummonRateUnit[]; summon: ISummon }) => {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
+  const { owned } = useMyAlbum();
   const byGameId = new Map(summon.characters.map((c) => [c.game_id, c]));
   return (
     <>
@@ -86,7 +88,7 @@ const RateUnits = ({ units, summon }: { units: ISummonRateUnit[]; summon: ISummo
         {(showAll ? units : units.slice(0, VISIBLE_UNITS)).map((unit, index) => {
           const character = unit.game_id ? byGameId.get(unit.game_id) : undefined;
           return character
-            ? <CharacterCard key={character._id} character={character} />
+            ? <CharacterCard key={character._id} character={character} spe={owned[character._id]} />
             : <UnlinkedUnit key={index} unit={unit} />;
         })}
       </SimpleGrid>
@@ -182,6 +184,7 @@ const SummonPage = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { summon, isLoading, error } = useSummon(id);
+  const { owned } = useMyAlbum();
   const language = i18n.language;
 
   if (isLoading) {
@@ -253,7 +256,7 @@ const SummonPage = () => {
           <Section title={t("pages.summon.featured")}>
             <SimpleGrid columns={CHARACTER_COLUMNS} spacing={3}>
               {characters.map((character) => (
-                <CharacterCard key={character._id} character={character} />
+                <CharacterCard key={character._id} character={character} spe={owned[character._id]} />
               ))}
             </SimpleGrid>
           </Section>

@@ -1230,7 +1230,8 @@
     },
     "characterCard": {
       "rebirth": "Resurrection on {{date}}",
-      "rebirthAlt": "Resurrection"
+      "rebirthAlt": "Resurrection",
+      "owned": "Owned · Spec {{spe}}"
     },
     "characterFilters": {
       "all": "All",

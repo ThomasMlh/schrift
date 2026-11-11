@@ -1,4 +1,4 @@
-import { Box, Image, Text, Tooltip } from "@chakra-ui/react";
+import { Badge, Box, Image, Text, Tooltip } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { ICharacter } from "@/interfaces";
@@ -8,8 +8,9 @@ import { AffinityIcon } from "../ui/AffinityIcon";
 
 type CardCharacter = Pick<ICharacter, "_id" | "name" | "affinity" | "images_version" | "resurrection_release" | "game_version">;
 
-// Character list card, like the in-game list: round thumbnail over its blurred copy, affinity, name and version
-export const CharacterCard = ({ character }: { character: CardCharacter }) => {
+// Character list card, like the in-game list: round thumbnail over its blurred copy, affinity, name and version.
+// spe, the level in the viewer's album, marks the character as owned
+export const CharacterCard = ({ character, spe }: { character: CardCharacter; spe?: number }) => {
   const { t, i18n } = useTranslation();
   const thumb = characterImageUrl(character, "thumb");
   const version = characterVersionLabel(character, i18n.language);
@@ -29,6 +30,23 @@ export const CharacterCard = ({ character }: { character: CardCharacter }) => {
       _hover={{ borderColor: "purple.400", transform: "translateY(-2px)" }}
     >
       <Box position="relative" aspectRatio={4 / 3} overflow="hidden" bg="bg.inset">
+        {!!spe && (
+          <Badge
+            position="absolute"
+            top={1.5}
+            right={1.5}
+            zIndex={1}
+            colorScheme="green"
+            variant="solid"
+            borderRadius="full"
+            px={2}
+            fontSize="2xs"
+            textTransform="none"
+            boxShadow="0 2px 6px rgba(0, 0, 0, 0.4)"
+          >
+            {t("components.characterCard.owned", { spe })}
+          </Badge>
+        )}
         <Image
           src={thumb}
           alt=""
