@@ -1359,7 +1359,7 @@
       "fieldNormal": "Temps restant, vagues normales",
       "fieldEx": "Temps restant en EX",
       "fieldLeader": "PV du leader",
-      "fieldSub": "PV du sub {{index}}",
+      "fieldSubs": "PV moyens des 2 subs",
       "unitSeconds": "secondes",
       "unitSecondsShort": "s",
       "unitPercent": "pourcentage",

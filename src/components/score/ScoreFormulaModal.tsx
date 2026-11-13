@@ -20,8 +20,8 @@ const COLORS = {
   dark: { curve: "#8B6CFF", point: "#C98418", subs: "#5B8FF0", zone: "#F08A4B" },
 };
 
-// The guild leader's example: 55 s before the EX, 45 s left in EX, leader full, one sub down
-const EXAMPLE: QuestRun = { normalSeconds: 55, exSeconds: 45, leader: 100, sub1: 100, sub2: 0 };
+// The guild leader's example: 55 s before the EX, 45 s left in EX, leader full, subs at 50 % on average
+const EXAMPLE: QuestRun = { normalSeconds: 55, exSeconds: 45, leader: 100, subs: 50 };
 
 // Thresholds below which the guild advises restarting
 const EX_RESTART_BELOW = 30;
@@ -193,7 +193,7 @@ const RunField = ({ id, label, unit, value, max, onChange }: {
 const CalculatorTab = ({ run, onChange }: { run: QuestRun; onChange: (run: QuestRun) => void }) => {
   const { t } = useTranslation();
   const { points, decimal } = useLocale();
-  const { parts, subs, exBonus, total } = scoreBreakdown(run);
+  const { parts, exBonus, total } = scoreBreakdown(run);
   const set = (key: keyof QuestRun) => (value: number) => onChange({ ...run, [key]: value });
   const seconds = t("components.scoreFormula.unitSeconds");
   const percent = t("components.scoreFormula.unitPercent");
@@ -203,7 +203,7 @@ const CalculatorTab = ({ run, onChange }: { run: QuestRun; onChange: (run: Quest
     { label: t("components.scoreFormula.rowNormalTime", { value: decimal(run.normalSeconds) }), value: parts.normalTime },
     { label: t("components.scoreFormula.rowExTime", { value: decimal(run.exSeconds) }), value: parts.exTime, max: TIME_BONUS_MAX },
     { label: t("components.scoreFormula.rowLeader", { value: decimal(run.leader) }), value: parts.leader, max: LEADER_BONUS_MAX },
-    { label: t("components.scoreFormula.rowSubs", { value: decimal(subs) }), value: parts.subs, max: SUBS_BONUS_MAX },
+    { label: t("components.scoreFormula.rowSubs", { value: decimal(run.subs) }), value: parts.subs, max: SUBS_BONUS_MAX },
   ];
 
   return (
@@ -212,8 +212,7 @@ const CalculatorTab = ({ run, onChange }: { run: QuestRun; onChange: (run: Quest
         <RunField id="score-normal" label={t("components.scoreFormula.fieldNormal")} unit={seconds} value={run.normalSeconds} max={90} onChange={set("normalSeconds")} />
         <RunField id="score-ex" label={t("components.scoreFormula.fieldEx")} unit={seconds} value={run.exSeconds} max={EX_TIME_LIMIT} onChange={set("exSeconds")} />
         <RunField id="score-leader" label={t("components.scoreFormula.fieldLeader")} unit={percent} value={run.leader} max={100} onChange={set("leader")} />
-        <RunField id="score-sub1" label={t("components.scoreFormula.fieldSub", { index: 1 })} unit={percent} value={run.sub1} max={100} onChange={set("sub1")} />
-        <RunField id="score-sub2" label={t("components.scoreFormula.fieldSub", { index: 2 })} unit={percent} value={run.sub2} max={100} onChange={set("sub2")} />
+        <RunField id="score-subs" label={t("components.scoreFormula.fieldSubs")} unit={percent} value={run.subs} max={100} onChange={set("subs")} />
         <Button size="xs" variant="ghost" alignSelf="flex-start" onClick={() => onChange(EXAMPLE)}>
           {t("components.scoreFormula.resetExample")}
         </Button>
@@ -341,7 +340,7 @@ const CurvesTab = ({ run }: { run: QuestRun }) => {
         max={100}
         unit=" %"
         fn={(v) => staminaBonus(SUBS_BONUS_MAX, v)}
-        value={(run.sub1 + run.sub2) / 2}
+        value={run.subs}
         restartBelow={STAMINA_RESTART_BELOW}
       />
     </VStack>

@@ -1359,7 +1359,7 @@
       "fieldNormal": "Time left, normal waves",
       "fieldEx": "Time left in EX",
       "fieldLeader": "Leader stamina",
-      "fieldSub": "Sub {{index}} stamina",
+      "fieldSubs": "Average stamina of the 2 subs",
       "unitSeconds": "seconds",
       "unitSecondsShort": "s",
       "unitPercent": "percent",
