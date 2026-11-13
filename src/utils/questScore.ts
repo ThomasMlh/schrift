@@ -21,22 +21,20 @@ export interface QuestRun {
   normalSeconds: number;
   exSeconds: number;
   leader: number;
-  sub1: number;
-  sub2: number;
+  // Average stamina of the 2 subs, as the result screen gives it
+  subs: number;
 }
 
 export const scoreBreakdown = (run: QuestRun) => {
-  const subs = (run.sub1 + run.sub2) / 2;
   const parts = {
     clear: CLEAR_SCORE,
     normalTime: Math.round(Math.max(0, run.normalSeconds) * POINTS_PER_SECOND),
     exTime: timeBonus(run.exSeconds),
     leader: staminaBonus(LEADER_BONUS_MAX, run.leader),
-    subs: staminaBonus(SUBS_BONUS_MAX, subs),
+    subs: staminaBonus(SUBS_BONUS_MAX, run.subs),
   };
   return {
     parts,
-    subs,
     exBonus: parts.exTime + parts.leader + parts.subs,
     total: Object.values(parts).reduce((sum, value) => sum + value, 0),
   };
