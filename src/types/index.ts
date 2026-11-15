@@ -11,3 +11,4 @@ export type * from "./comparison";
 export type * from "./build";
 export type * from "./records";
 export type * from "./raffle";
+export type * from "./events";

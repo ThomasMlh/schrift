@@ -1,6 +1,6 @@
 import type { IconType } from "react-icons";
 import {
-  FiActivity, FiBarChart2, FiBell, FiBookOpen, FiCalendar, FiCrosshair, FiGift,
+  FiActivity, FiAward, FiBarChart2, FiBell, FiBookOpen, FiCalendar, FiCrosshair, FiGift,
   FiGrid, FiHeart, FiImage, FiMessageSquare, FiSearch, FiShield, FiShuffle, FiSlash, FiTrendingDown, FiUserPlus, FiUsers,
 } from "react-icons/fi";
 import type { AdminPage } from "@/interfaces";
@@ -40,6 +40,7 @@ export const ADMIN_TABS: AdminTab[] = [
   { key: "banned", label: "Bannis", icon: FiSlash, group: "players", adminOnly: true },
   { key: "applications", label: "Candidatures", icon: FiUserPlus, group: "players", adminOnly: true },
   { key: "raffle", label: "Tombola", icon: FiGift, group: "players", adminOnly: true },
+  { key: "events", label: "Événements", icon: FiAward, group: "content", adminOnly: true },
   { key: "guides", label: "Guides", icon: FiBookOpen, group: "content", adminOnly: true },
   { key: "images", label: "Images", icon: FiImage, group: "content", adminOnly: true },
   { key: "notifications", label: "Notifications", icon: FiBell, group: "communication" },
@@ -56,6 +57,7 @@ export const ADMIN_SECTION_DESCRIPTIONS: Partial<Record<AdminPage, string>> = {
   users: "Comptes Discord du site avec leurs comptes BBS, guildes et rôles ; modifier ou bannir un joueur.",
   banned: "Joueurs bannis du site, avec la raison et la possibilité de les débannir.",
   "data-health": "Tout ce qui fausse les classements ou casse une page : scores en double ou orphelins, rotations sans dates, réglages oubliés.",
+  events: "Événements comme l'anniversaire : dates, quiz, médiathèque, participants et corrections avant la révélation des résultats.",
   raffle: "Tickets de la tombola mensuelle de chaque guilde, tickets à saisir à la main, et tirage du lot en fin de mois.",
   applications: "Candidatures envoyées depuis la page Recrutement, et réglages de cette page.",
   notifications: "Salons Discord et types de notifications envoyés par le bot, pour le site et pour chaque guilde.",

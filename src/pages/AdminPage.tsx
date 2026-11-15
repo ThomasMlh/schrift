@@ -30,6 +30,7 @@ import { useApplications, useDeclineAlerts, useGuilds, useScoreAnomalies, useUse
 import { ADMIN_SECTION_DESCRIPTIONS, ADMIN_TABS, getAdminTab } from "@/components/admin/adminTabs";
 import { DataHealthSection } from "@/components/admin/DataHealthSection";
 import { RaffleSection } from "@/components/admin/RaffleSection";
+import { EventsSection } from "@/components/admin/events/EventsSection";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { AdminSidebar, AdminSectionSelect } from "@/components/admin/AdminSidebar";
 import { AdminOverview } from "@/components/admin/AdminOverview";
@@ -272,6 +273,8 @@ const AdminPage = () => {
         return <ApplicationsSection />;
       case "raffle":
         return <RaffleSection />;
+      case "events":
+        return <EventsSection />;
       case "data-health":
         return <DataHealthSection onNavigate={handleTabChange} />;
       case "guilds":
