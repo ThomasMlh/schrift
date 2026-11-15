@@ -8,7 +8,9 @@ import { SEOHead } from "@/components/SEOHead";
 import { QuestionInput } from "@/components/quiz/QuestionInput";
 import { initialAnswer } from "@/utils/quiz";
 import { QuestionMedia } from "@/components/quiz/QuestionMedia";
-import { useCurrentEvent, useQuizPlay } from "@/hooks/useAPI";
+import { TestCorrection } from "@/components/quiz/TestCorrection";
+import { useAdminQuiz, useCurrentEvent, useQuizPlay } from "@/hooks/useAPI";
+import { SUPPORT_SECONDS } from "@/utils/quizEditor";
 import { useAuth } from "@/providers/AuthProvider";
 import { startDiscordLogin } from "@/utils/discordAuth";
 import type { IAttemptState, QuizAnswer } from "@/interfaces";
@@ -36,13 +38,21 @@ const useCountdown = (state: IAttemptState | null) => {
   return left;
 };
 
-const QuizPlayPage = () => {
+// `test`: an admin rehearses the saved quiz, draft or not and whatever the dates; it is never ranked
+const QuizPlayPage = ({ test = false }: { test?: boolean }) => {
   const { quizId } = useParams<{ quizId: string }>();
   const { t, i18n } = useTranslation();
-  const { isLoggedIn, isAuthLoading } = useAuth();
-  const play = useQuizPlay(quizId);
+  const { isLoggedIn, isAuthLoading, isAdmin } = useAuth();
+  const play = useQuizPlay(quizId, test);
   const { data: event } = useCurrentEvent();
-  const quiz = event?.quizzes.find((q) => q._id === quizId);
+  const { data: draft } = useAdminQuiz(test && isAdmin ? quizId : undefined);
+  const quiz = test
+    ? draft && {
+      title: draft.title,
+      question_count: draft.questions.length,
+      duration_seconds: draft.questions.reduce((sum, q) => sum + SUPPORT_SECONDS[q.support], 0),
+    }
+    : event?.quizzes.find((q) => q._id === quizId);
   const [state, setState] = useState<IAttemptState | null>(null);
   const [notStarted, setNotStarted] = useState(false);
   const [answer, setAnswer] = useState<QuizAnswer>(null);
@@ -60,9 +70,9 @@ const QuizPlayPage = () => {
 
   // Resume an attempt already started, otherwise show the start screen
   useEffect(() => {
-    if (!isLoggedIn || !quizId) return;
+    if (!isLoggedIn || !quizId || (test && !isAdmin)) return;
     play.state().then(apply).catch(() => setNotStarted(true));
-  }, [isLoggedIn, quizId, play, apply]);
+  }, [isLoggedIn, isAdmin, test, quizId, play, apply]);
 
   const send = useCallback(async () => {
     if (!state?.question || sending) return;
@@ -91,6 +101,8 @@ const QuizPlayPage = () => {
 
   const start = async () => {
     setError(null);
+    // A rehearsal can start again with the same questions
+    autoSent.current = null;
     try {
       apply(await play.start());
     } catch (err) {
@@ -112,19 +124,35 @@ const QuizPlayPage = () => {
         </Card>
       );
     }
+    if (test && !isAdmin) return <Alert status="error" borderRadius="lg"><AlertIcon />Réservé aux admins.</Alert>;
     if (notStarted) {
       return (
         <Card>
           <VStack spacing={4} align="stretch">
             <Text fontSize="xl" fontWeight="extrabold">{quiz?.title ?? t("pages.quiz.title")}</Text>
             {quiz && <Text color="text.muted">{t("pages.quiz.intro", { count: quiz.question_count, minutes: Math.ceil(quiz.duration_seconds / 60) })}</Text>}
-            <Alert status="warning" borderRadius="lg"><AlertIcon />{t("pages.quiz.noPause")}</Alert>
-            <Button colorScheme="purple" size="lg" onClick={start}>{t("pages.quiz.start")}</Button>
+            {test ? (
+              <Alert status="info" borderRadius="lg"><AlertIcon />Les questions enregistrées sont jouées comme un joueur les verrait, chrono compris. Ta réponse et la bonne s'affichent à la fin.</Alert>
+            ) : <Alert status="warning" borderRadius="lg"><AlertIcon />{t("pages.quiz.noPause")}</Alert>}
+            <Button colorScheme="purple" size="lg" onClick={start}>{test ? "Lancer le test" : t("pages.quiz.start")}</Button>
           </VStack>
         </Card>
       );
     }
     if (!state) return <Spinner />;
+    if (state.status === "finished" && test) {
+      return (
+        <Card>
+          <VStack align="stretch" spacing={4}>
+            <Flex justify="space-between" align="center" gap={3} wrap="wrap">
+              <Text fontSize="2xl" fontWeight="extrabold">Correction du test</Text>
+              <Button colorScheme="purple" onClick={start}>Recommencer</Button>
+            </Flex>
+            <TestCorrection load={play.result} />
+          </VStack>
+        </Card>
+      );
+    }
     if (state.status === "finished") {
       return (
         <Card>
@@ -175,7 +203,7 @@ const QuizPlayPage = () => {
 
   return (
     <>
-      <SEOHead title={`${quiz?.title ?? t("pages.quiz.title")} - Schrift BBS`} description={t("pages.anniversary.seoDescription")} noIndex />
+      <SEOHead title={`${test ? "Test · " : ""}${quiz?.title ?? t("pages.quiz.title")} - Schrift BBS`} description={t("pages.anniversary.seoDescription")} noIndex />
       <Container maxW="container.md" py={{ base: 5, md: 8 }}>
         <VStack align="stretch" spacing={4}>
           {state?.status === "in_progress" && (
@@ -184,6 +212,11 @@ const QuizPlayPage = () => {
                 <Box key={i} flex={1} h="6px" borderRadius="full" bg={i < (state.index ?? 0) ? "accent" : i === state.index ? "orange.400" : "border.subtle"} />
               ))}
             </HStack>
+          )}
+          {test && (
+            <Alert status="warning" variant="left-accent" borderRadius="lg">
+              <AlertIcon />Mode test : rien n'est compté dans les classements ni dans les participants. Le test peut être relancé autant de fois que tu veux.
+            </Alert>
           )}
           {error && !state && <Alert status="error" borderRadius="lg"><AlertIcon />{error}</Alert>}
           {body()}

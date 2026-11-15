@@ -44,11 +44,13 @@ export const QuestionForm = ({ question, media, onChange }: QuestionFormProps) =
         return (
           <FormControl>
             <FormLabel>Propositions <Text as="span" color="text.muted" fontWeight="normal">(coche {multi ? "les bonnes réponses" : "la bonne réponse"})</Text></FormLabel>
+            <RadioGroup value={question.correct_id ?? ""} onChange={(id) => set({ correct_id: id })}>
             <VStack align="stretch" spacing={2}>
               {options.map((option, index) => (
                 <Grid key={option.id} templateColumns="28px 1fr 32px" gap={2} alignItems="center">
                   {multi ? (
                     <Checkbox
+                      id={`correct-${option.id}`}
                       colorScheme="green"
                       isChecked={question.correct_ids?.includes(option.id)}
                       onChange={(e) => set({
@@ -59,7 +61,7 @@ export const QuestionForm = ({ question, media, onChange }: QuestionFormProps) =
                       aria-label="Bonne réponse"
                     />
                   ) : (
-                    <Radio colorScheme="green" isChecked={question.correct_id === option.id} onChange={() => set({ correct_id: option.id })} aria-label="Bonne réponse" />
+                    <Radio value={option.id} colorScheme="green" aria-label="Bonne réponse" />
                   )}
                   <Input
                     value={option.text}
@@ -77,6 +79,7 @@ export const QuestionForm = ({ question, media, onChange }: QuestionFormProps) =
                 </Grid>
               ))}
             </VStack>
+            </RadioGroup>
             {options.length < MAX_OPTIONS[question.answer_type] && (
               <Button size="sm" variant="ghost" leftIcon={<AddIcon boxSize={2.5} />} mt={2} onClick={() => set({ options: [...options, { id: newItemId(), text: "" }] })}>
                 Ajouter une proposition

@@ -27,19 +27,21 @@ export const useQuizResults = (quizId?: string, enabled = true) => {
   return { results: data ?? null, isLoading, error: error as Error | undefined };
 };
 
-// Player actions; each returns the new state of the attempt
-export const useQuizPlay = (quizId?: string) => {
+// Player actions; each returns the new state of the attempt. `test`: an admin rehearsal, never ranked
+export const useQuizPlay = (quizId?: string, test = false) => {
   const { token } = useAuth();
   const request = useMemo(() => makeRequest(token), [token]);
   return useMemo(() => {
-    const url = `${EVENTS}/quizzes/${quizId}/attempt`;
+    const url = test ? `${ADMIN}/quizzes/${quizId}/test` : `${EVENTS}/quizzes/${quizId}/attempt`;
     return {
       start: () => request<IAttemptState>(url, { method: 'POST' }),
       state: () => request<IAttemptState>(url),
       answer: (questionId: string, answer: QuizAnswer) =>
         request<IAttemptState>(`${url}/answer`, { method: 'POST', body: JSON.stringify({ question_id: questionId, answer }) }),
+      // Correction of a rehearsal
+      result: async () => (await request<{ data: IQuizAttemptDetail }>(`${url}/result`)).data,
     };
-  }, [quizId, request]);
+  }, [quizId, test, request]);
 };
 
 // ---------- Admin ----------
@@ -51,6 +53,7 @@ const useAdminList = <T>(url: string | null) => {
 };
 
 export const useAdminEvents = () => useAdminList<ISiteEvent[]>(ADMIN);
+export const useAdminQuiz = (quizId?: string) => useAdminList<IQuiz>(quizId ? `${ADMIN}/quizzes/${quizId}` : null);
 export const useAdminEventQuizzes = (eventId?: string) => useAdminList<IQuiz[]>(eventId ? `${ADMIN}/${eventId}/quizzes` : null);
 export const useEventMedia = (eventId?: string) => useAdminList<IQuizMedia[]>(eventId ? `${ADMIN}/${eventId}/media` : null);
 export const useQuizAttempts = (quizId?: string) => useAdminList<IQuizAttemptRow[]>(quizId ? `${ADMIN}/quizzes/${quizId}/attempts` : null);

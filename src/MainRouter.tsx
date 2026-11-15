@@ -155,6 +155,7 @@ const AppRoutes = () => {
         <Route path="/annonce" element={<AnnoncesPage />} />
         <Route path="/anniversaire" element={<AnniversaryPage />} />
         <Route path="/anniversaire/quiz/:quizId" element={<QuizPlayPage />} />
+        <Route path="/anniversaire/quiz/:quizId/test" element={<QuizPlayPage test />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>

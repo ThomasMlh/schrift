@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import {
   Alert, AlertIcon, Badge, Box, Button, Flex, FormControl, FormHelperText, FormLabel, Grid, HStack, IconButton, Input, Modal,
   ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, NumberInput, NumberInputField, Select, Spinner,
-  Switch, Tab, TabList, TabPanel, TabPanels, Tabs, Text, Textarea, VStack, useToast,
+  Switch, Tab, TabList, TabPanel, TabPanels, Tabs, Text, Textarea, Tooltip, VStack, useToast,
 } from "@chakra-ui/react";
 import { AddIcon, ChevronDownIcon, ChevronUpIcon, CopyIcon, DeleteIcon } from "@chakra-ui/icons";
 import { Link as RouterLink } from "react-router-dom";
+import { FiPlay } from "react-icons/fi";
 import { useAdminEventQuizzes, useAdminEvents, useEventAdminActions, useEventMedia } from "@/hooks/useAPI";
 import { ANSWER_LABELS, SUPPORT_LABELS, blankQuestion, newItemId } from "@/utils/quizEditor";
 import type { IQuiz, IQuizQuestion, ISiteEvent } from "@/interfaces";
@@ -156,6 +157,16 @@ const QuestionsEditor = ({ quiz }: { quiz: IQuiz }) => {
         <Text fontSize="sm" color="text.muted">{questions.length} questions · {total.toLocaleString("fr-FR")} points</Text>
         <HStack>
           {dirty && <Badge colorScheme="orange">Modifications non enregistrées</Badge>}
+          <Tooltip label={dirty ? "Enregistre d'abord : le test joue les questions enregistrées" : "Jouer le quiz comme un joueur, sans être classé (même en brouillon)"} hasArrow>
+            <Button
+              variant="outline"
+              leftIcon={<FiPlay />}
+              isDisabled={dirty || !questions.length}
+              onClick={() => window.open(`/anniversaire/quiz/${quiz._id}/test`, "_blank", "noopener")}
+            >
+              Tester le quiz
+            </Button>
+          </Tooltip>
           <Button colorScheme="purple" onClick={save} isLoading={saving} isDisabled={!dirty}>Enregistrer les questions</Button>
         </HStack>
       </Flex>
