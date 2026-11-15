@@ -6,7 +6,8 @@ import {
 import { useAttemptDetail, useEventAdminActions, useQuizAttempts } from "@/hooks/useAPI";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import { ANSWER_LABELS } from "@/utils/quizEditor";
-import type { IQuizAttemptDetail, IQuizQuestion, QuizAnswer } from "@/interfaces";
+import { readableAnswer } from "@/utils/quiz";
+import type { IQuizAttemptDetail } from "@/interfaces";
 
 type Filter = "all" | "guild" | "free" | "pending";
 const FILTERS: [Filter, string][] = [["all", "Tous"], ["guild", "En guilde"], ["free", "Hors guilde"], ["pending", "À vérifier"]];
@@ -14,22 +15,6 @@ const FILTERS: [Filter, string][] = [["all", "Tous"], ["guild", "En guilde"], ["
 const format = (value: number) => value.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
 const formatDate = (value: string) => new Date(value).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 const formatDuration = (ms: number | null) => (ms === null ? "—" : `${Math.floor(ms / 60000)} min ${String(Math.round((ms % 60000) / 1000)).padStart(2, "0")}`);
-
-// The player's answer in words, from the stored ids
-const readable = (question: IQuizQuestion | null, answer: QuizAnswer): string => {
-  if (answer === null || answer === undefined) return "—";
-  if (!question) return JSON.stringify(answer);
-  const optionText = (id: string) => question.options?.find((o) => o.id === id)?.text ?? id;
-  switch (question.answer_type) {
-    case "multiple": return (answer as string[]).map(optionText).join(" · ") || "—";
-    case "single": return optionText(answer as string);
-    case "true_false": return answer ? "Vrai" : "Faux";
-    case "match": return (question.pairs ?? []).map((p) => `${p.left} → ${question.pairs?.find((x) => x.id === (answer as Record<string, string>)[p.id])?.right ?? "—"}`).join(" · ");
-    case "order": return (answer as string[]).map((id) => question.items?.find((i) => i.id === id)?.text ?? id).join(" > ");
-    case "blanks": return (answer as string[]).map((a, i) => `[${i + 1}] ${a || "—"}`).join(" · ");
-    default: return String(answer);
-  }
-};
 
 const AttemptModal = ({ attemptId, onClose }: { attemptId: string; onClose: () => void }) => {
   const { data, isLoading } = useAttemptDetail(attemptId);
@@ -76,7 +61,7 @@ const AttemptModal = ({ attemptId, onClose }: { attemptId: string; onClose: () =
                     <Text fontWeight="bold" fontSize="sm" whiteSpace="nowrap">{format(detail.points)} / {format(detail.max)}</Text>
                   </Flex>
                   <Text fontSize="xs" color="text.muted">{detail.question ? ANSWER_LABELS[detail.question.answer_type] : ""} · {detail.missed ? "temps écoulé" : `${Math.round(detail.remaining_ms / 1000)} s restantes`}</Text>
-                  <Text fontSize="sm" mt={1}>Réponse : {readable(detail.question, detail.answer)}</Text>
+                  <Text fontSize="sm" mt={1}>Réponse : {readableAnswer(detail.question, detail.answer)}</Text>
                   {detail.pending.map((key) => (
                     <HStack key={key} mt={2} spacing={2}>
                       <Badge colorScheme="orange">À vérifier{key !== "text" ? ` · trou [${Number(key) + 1}]` : ""}</Badge>
