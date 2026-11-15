@@ -63,8 +63,10 @@ const AdminPage = () => {
   });
 
   // Changes the tab and stores it in the URL so it survives a refresh.
+  // A new section starts at the top, as a new page would
   const handleTabChange = (page: IAdminPage) => {
     setCurrentPage(page);
+    window.scrollTo({ top: 0 });
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
       next.set('tab', page);
