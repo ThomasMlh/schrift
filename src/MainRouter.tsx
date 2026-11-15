@@ -34,6 +34,8 @@ const GuidesPage = lazy(() => import("./pages/GuidesPage"));
 const AnnoncesPage = lazy(() => import("./pages/AnnoncesPage"));
 const GuildesPage = lazy(() => import("./pages/GuildesPage"));
 const OCRDebugPage = lazy(() => import("./pages/OCRDebugPage"));
+const AnniversaryPage = lazy(() => import("./pages/AnniversaryPage"));
+const QuizPlayPage = lazy(() => import("./pages/QuizPlayPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const PageFallback = () => (
@@ -151,6 +153,8 @@ const AppRoutes = () => {
         <Route path="/guides" element={<GuidesPage />} />
         <Route path="/guides/:section" element={<GuidesPage />} />
         <Route path="/annonce" element={<AnnoncesPage />} />
+        <Route path="/anniversaire" element={<AnniversaryPage />} />
+        <Route path="/anniversaire/quiz/:quizId" element={<QuizPlayPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>

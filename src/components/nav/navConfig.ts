@@ -11,7 +11,7 @@ import {
   FiBell,
   FiUserPlus,
 } from "react-icons/fi";
-import { LuSwords, LuBookMarked } from "react-icons/lu";
+import { LuSwords, LuBookMarked, LuPartyPopper } from "react-icons/lu";
 
 export type NavGroup = "explore" | "compete" | "resources";
 
@@ -25,6 +25,8 @@ export interface NavItem {
   adminOrGuildManagerOnly?: boolean;
   // Link only shown in the footer
   footerOnly?: boolean;
+  // Only shown while an anniversary event is coming, running or just over (see useNavItems)
+  eventOnly?: boolean;
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -35,6 +37,7 @@ export const NAV_ITEMS: NavItem[] = [
   { labelKey: "nav.players", path: "/joueurs", icon: FiUsers, group: "explore", primary: true },
   { labelKey: "nav.summons", path: "/invocations", icon: FiGift, group: "explore" },
   { labelKey: "nav.podium", path: "/podium", icon: FiAward, group: "compete", primary: true },
+  { labelKey: "nav.anniversary", path: "/anniversaire", icon: LuPartyPopper, group: "compete", primary: true, eventOnly: true },
   { labelKey: "nav.comparator", path: "/comparateur", icon: LuSwords, group: "compete" },
   { labelKey: "nav.guides", path: "/guides", icon: LuBookMarked, group: "resources" },
   { labelKey: "nav.recruitment", path: "/recrutement", icon: FiUserPlus, group: "resources" },

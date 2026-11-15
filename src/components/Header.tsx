@@ -19,7 +19,8 @@ import { BrandLogo } from "./nav/BrandLogo";
 import { MobileNavDrawer } from "./nav/MobileNavDrawer";
 import { UserMenu } from "./nav/UserMenu";
 import { ColorModeToggle, LanguageMenu } from "./nav/preferences";
-import { NAV_ITEMS, isActivePath, type NavItem } from "./nav/navConfig";
+import { isActivePath, type NavItem } from "./nav/navConfig";
+import { useNavItems } from "./nav/useNavItems";
 
 // Top bar link: the active tab is underlined in purple along the bar's bottom edge
 const NavLink = ({ item, active }: { item: NavItem; active: boolean }) => {
@@ -61,7 +62,8 @@ export const Header = () => {
   const { t } = useTranslation();
   const { pathname } = useLocation();
 
-  const items = NAV_ITEMS.filter(
+  const navItems = useNavItems();
+  const items = navItems.filter(
     (item) => !item.footerOnly && (!item.adminOrGuildManagerOnly || isAdmin || isGuildManager)
   );
   const primary = items.filter((item) => item.primary);

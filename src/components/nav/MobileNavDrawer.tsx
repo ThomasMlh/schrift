@@ -24,6 +24,7 @@ import { BrandLogo } from "./BrandLogo";
 import { LoginButton } from "./UserMenu";
 import { useLanguage } from "./useLanguage";
 import { NAV_GROUP_LABELS, NAV_ITEMS, isActivePath, type NavGroup } from "./navConfig";
+import { useNavItems } from "./useNavItems";
 import { useNavAccount } from "./useNavAccount";
 
 interface MobileNavDrawerProps {
@@ -46,7 +47,8 @@ export const MobileNavDrawer = ({ isOpen, onClose }: MobileNavDrawerProps) => {
   const { isLoggedIn, isAdmin, canSeeAdmin, avatar, displayName, roleLabel, profileUrl, handleLogout } = useNavAccount();
 
   const groups: NavGroup[] = ["explore", "compete", "resources"];
-  const visible = NAV_ITEMS.filter((item) => !item.footerOnly && !item.adminOrGuildManagerOnly);
+  const navItems = useNavItems();
+  const visible = navItems.filter((item) => !item.footerOnly && !item.adminOrGuildManagerOnly);
   const adminItem = NAV_ITEMS.find((item) => item.adminOrGuildManagerOnly);
 
   const renderLink = (item: (typeof NAV_ITEMS)[number]) => {
