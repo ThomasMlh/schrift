@@ -9,6 +9,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { useAdminEventQuizzes, useAdminEvents, useEventAdminActions, useEventMedia } from "@/hooks/useAPI";
 import { ANSWER_LABELS, SUPPORT_LABELS, blankQuestion, newItemId } from "@/utils/quizEditor";
 import type { IQuiz, IQuizQuestion, ISiteEvent } from "@/interfaces";
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import { QuestionForm } from "./QuestionForm";
 import { MediaLibrary } from "./MediaLibrary";
 import { QuizParticipants } from "./QuizParticipants";
@@ -104,6 +105,7 @@ const QuestionsEditor = ({ quiz }: { quiz: IQuiz }) => {
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [removing, setRemoving] = useState<number | null>(null);
 
   const update = (next: IQuizQuestion[]) => {
     setQuestions(next);
@@ -125,10 +127,11 @@ const QuestionsEditor = ({ quiz }: { quiz: IQuiz }) => {
     update([...questions.slice(0, index + 1), copy, ...questions.slice(index + 1)]);
     setSelected(index + 1);
   };
+  // Removed from the draft only: nothing is lost until the questions are saved
   const remove = (index: number) => {
-    if (!window.confirm("Supprimer cette question ?")) return;
     update(questions.filter((_, i) => i !== index));
     setSelected(Math.max(0, index - 1));
+    setRemoving(null);
   };
   const save = async () => {
     setSaving(true);
@@ -196,7 +199,7 @@ const QuestionsEditor = ({ quiz }: { quiz: IQuiz }) => {
                   <IconButton size="sm" aria-label="Monter" icon={<ChevronUpIcon />} onClick={() => move(selected, selected - 1)} isDisabled={selected === 0} />
                   <IconButton size="sm" aria-label="Descendre" icon={<ChevronDownIcon />} onClick={() => move(selected, selected + 1)} isDisabled={selected === questions.length - 1} />
                   <IconButton size="sm" aria-label="Dupliquer" icon={<CopyIcon />} onClick={() => duplicate(selected)} />
-                  <IconButton size="sm" aria-label="Supprimer" icon={<DeleteIcon />} colorScheme="red" variant="ghost" onClick={() => remove(selected)} />
+                  <IconButton size="sm" aria-label="Supprimer" icon={<DeleteIcon />} colorScheme="red" variant="ghost" onClick={() => setRemoving(selected)} />
                 </HStack>
               </Flex>
               <QuestionForm
@@ -211,6 +214,15 @@ const QuestionsEditor = ({ quiz }: { quiz: IQuiz }) => {
           )}
         </Panel>
       </Grid>
+      <DeleteConfirmationModal
+        isOpen={removing !== null}
+        onClose={() => setRemoving(null)}
+        onConfirm={() => removing !== null && remove(removing)}
+        isDeleting={false}
+        title="Supprimer la question"
+        description="Elle sera retirée du quiz à l'enregistrement des questions."
+        itemDetails={removing !== null ? `${removing + 1}. ${questions[removing]?.prompt || "Nouvelle question"}` : undefined}
+      />
     </VStack>
   );
 };
@@ -218,6 +230,8 @@ const QuestionsEditor = ({ quiz }: { quiz: IQuiz }) => {
 const QuizSettings = ({ quiz }: { quiz: IQuiz }) => {
   const actions = useEventAdminActions();
   const toast = useToast();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({ title: quiz.title, description: quiz.description, bonus: Math.round(quiz.bonus_ratio * 100), shuffle: quiz.shuffle });
   const save = async (changes: Partial<IQuiz>) => {
     try {
@@ -228,11 +242,14 @@ const QuizSettings = ({ quiz }: { quiz: IQuiz }) => {
     }
   };
   const remove = async () => {
-    if (!window.confirm("Supprimer ce quiz ?")) return;
+    setDeleting(true);
     try {
       await actions.deleteQuiz(quiz._id);
     } catch (err) {
       toast({ status: "error", title: (err as Error).message });
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(false);
     }
   };
   return (
@@ -272,11 +289,20 @@ const QuizSettings = ({ quiz }: { quiz: IQuiz }) => {
         </FormControl>
       </Grid>
       <HStack justify="space-between">
-        <Button variant="ghost" colorScheme="red" onClick={remove}>Supprimer le quiz</Button>
+        <Button variant="ghost" colorScheme="red" onClick={() => setConfirmDelete(true)}>Supprimer le quiz</Button>
         <Button colorScheme="purple" onClick={() => save({ title: form.title, description: form.description, bonus_ratio: form.bonus / 100, shuffle: form.shuffle })}>
           Enregistrer
         </Button>
       </HStack>
+      <DeleteConfirmationModal
+        isOpen={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={remove}
+        isDeleting={deleting}
+        title="Supprimer le quiz"
+        description="Le quiz et ses questions seront supprimés. Impossible si des joueurs ont déjà participé."
+        itemDetails={`${quiz.title} · ${quiz.questions.length} questions`}
+      />
     </VStack>
   );
 };
@@ -288,6 +314,8 @@ export const EventsSection = () => {
   const toast = useToast();
   const [eventId, setEventId] = useState<string>("");
   const [editing, setEditing] = useState<Partial<ISiteEvent> | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const event = events.find((e) => e._id === eventId);
   const { data: quizzes = [] } = useAdminEventQuizzes(event?._id);
   const [quizId, setQuizId] = useState<string>("");
@@ -307,12 +335,16 @@ export const EventsSection = () => {
     }
   };
   const deleteEvent = async () => {
-    if (!event || !window.confirm(`Supprimer « ${event.name} » ?`)) return;
+    if (!event) return;
+    setDeleting(true);
     try {
       await actions.deleteEvent(event._id);
       setEventId("");
     } catch (err) {
       toast({ status: "error", title: (err as Error).message });
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(false);
     }
   };
 
@@ -328,7 +360,7 @@ export const EventsSection = () => {
             </Select>
           </FormControl>
           {event && <Button variant="outline" onClick={() => setEditing(event)}>Modifier</Button>}
-          {event && <Button variant="ghost" colorScheme="red" onClick={deleteEvent}>Supprimer</Button>}
+          {event && <Button variant="ghost" colorScheme="red" onClick={() => setConfirmDelete(true)}>Supprimer</Button>}
           <Button colorScheme="purple" leftIcon={<AddIcon boxSize={2.5} />} onClick={() => setEditing({})}>Nouvel événement</Button>
           {event?.kind === "anniversary" && <Button as={RouterLink} to="/anniversaire" variant="link" colorScheme="purple">Voir la page</Button>}
         </Flex>
@@ -377,6 +409,15 @@ export const EventsSection = () => {
         </Box>
       ))}
 
+      <DeleteConfirmationModal
+        isOpen={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={deleteEvent}
+        isDeleting={deleting}
+        title="Supprimer l'événement"
+        description="L'événement et ses quiz seront supprimés. Impossible si des joueurs ont participé ou si la médiathèque n'est pas vide."
+        itemDetails={event?.name}
+      />
       {editing && <EventModal event={editing} onClose={() => setEditing(null)} onSaved={(saved) => setEventId(saved._id)} />}
     </VStack>
   );

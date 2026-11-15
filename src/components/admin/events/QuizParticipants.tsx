@@ -4,6 +4,7 @@ import {
   ModalHeader, ModalOverlay, Spinner, Table, Tbody, Td, Text, Th, Thead, Tr, VStack, useToast,
 } from "@chakra-ui/react";
 import { useAttemptDetail, useEventAdminActions, useQuizAttempts } from "@/hooks/useAPI";
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import { ANSWER_LABELS } from "@/utils/quizEditor";
 import type { IQuizAttemptDetail, IQuizQuestion, QuizAnswer } from "@/interfaces";
 
@@ -34,6 +35,8 @@ const AttemptModal = ({ attemptId, onClose }: { attemptId: string; onClose: () =
   const { data, isLoading } = useAttemptDetail(attemptId);
   const actions = useEventAdminActions();
   const toast = useToast();
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const review = async (detail: IQuizAttemptDetail["answers"][number], key: string, accept: boolean) => {
     try {
       await actions.review(attemptId, detail.question_id, key, accept);
@@ -42,9 +45,16 @@ const AttemptModal = ({ attemptId, onClose }: { attemptId: string; onClose: () =
     }
   };
   const reset = async () => {
-    if (!window.confirm("Effacer cette participation ? Le joueur pourra refaire le quiz depuis le début.")) return;
-    await actions.deleteAttempt(attemptId);
-    onClose();
+    setResetting(true);
+    try {
+      await actions.deleteAttempt(attemptId);
+      onClose();
+    } catch (err) {
+      toast({ status: "error", title: (err as Error).message });
+    } finally {
+      setResetting(false);
+      setConfirmReset(false);
+    }
   };
 
   return (
@@ -77,11 +87,20 @@ const AttemptModal = ({ attemptId, onClose }: { attemptId: string; onClose: () =
                   {detail.accepted.length > 0 && <Badge mt={2} colorScheme="green">Accepté à la main</Badge>}
                 </Box>
               ))}
-              <Button alignSelf="flex-start" size="sm" colorScheme="red" variant="ghost" mt={2} onClick={reset}>Effacer la participation</Button>
+              <Button alignSelf="flex-start" size="sm" colorScheme="red" variant="ghost" mt={2} onClick={() => setConfirmReset(true)}>Effacer la participation</Button>
             </VStack>
           )}
         </ModalBody>
       </ModalContent>
+      <DeleteConfirmationModal
+        isOpen={confirmReset}
+        onClose={() => setConfirmReset(false)}
+        onConfirm={reset}
+        isDeleting={resetting}
+        title="Effacer la participation"
+        description="Le joueur pourra refaire le quiz depuis le début."
+        itemDetails={data?.name}
+      />
     </Modal>
   );
 };
