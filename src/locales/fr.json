@@ -29,7 +29,8 @@
     "roleAdmin": "Admin",
     "roleGuildManager": "Chef de guilde",
     "roleMember": "Membre",
-    "loginHint": "Connectez-vous avec Discord pour accéder à votre profil."
+    "loginHint": "Connectez-vous avec Discord pour accéder à votre profil.",
+    "anniversary": "Anniversaire"
   },
   "auth": {
     "login": "Se connecter",

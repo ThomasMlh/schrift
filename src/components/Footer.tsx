@@ -5,7 +5,8 @@ import { useAuth } from "../providers/AuthProvider";
 import { BrandLogo } from "./nav/BrandLogo";
 import { ColorModeToggle } from "./nav/preferences";
 import { useLanguage } from "./nav/useLanguage";
-import { NAV_GROUP_LABELS, NAV_ITEMS, type NavGroup } from "./nav/navConfig";
+import { NAV_GROUP_LABELS, type NavGroup } from "./nav/navConfig";
+import { useNavItems } from "./nav/useNavItems";
 
 const GROUPS: NavGroup[] = ["explore", "compete", "resources"];
 
@@ -15,7 +16,7 @@ export const Footer = () => {
   const { current, setLanguage, languages } = useLanguage();
 
   // Home is already the logo; admin stays in the account menu
-  const links = NAV_ITEMS.filter((item) => item.path !== "/" && !item.adminOrGuildManagerOnly);
+  const links = useNavItems().filter((item) => item.path !== "/" && !item.adminOrGuildManagerOnly);
   const canSeeAdmin = isAdmin || isGuildManager;
 
   return (

@@ -29,7 +29,8 @@
     "roleAdmin": "Admin",
     "roleGuildManager": "Guild leader",
     "roleMember": "Member",
-    "loginHint": "Log in with Discord to access your profile."
+    "loginHint": "Log in with Discord to access your profile.",
+    "anniversary": "Anniversary"
   },
   "auth": {
     "login": "Log in",
