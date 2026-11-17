@@ -833,7 +833,8 @@
       "player": "Joueur",
       "found": "Trouvés",
       "pts": "Pts",
-      "notReady": "Pas encore préparée : reviens un peu plus tard"
+      "notReady": "Pas encore préparée : reviens un peu plus tard",
+      "guild": "Guilde"
     }
   },
   "components": {

@@ -71,6 +71,7 @@ export interface IAdventDay {
 
 export interface IAdventRankRow {
   user_id: string;
+  user?: IRankPlayer;
   name: string;
   guild_name: string | null;
   in_guild: boolean;
@@ -197,9 +198,20 @@ export interface IAttemptState {
   ignored?: boolean;
 }
 
+// Site account of a ranking row, to show the player's avatar
+export interface IRankPlayer {
+  _id: string | null;
+  discord_id: string | null;
+  avatar: string | null;
+  global_name: string | null;
+  bbs_name: string;
+  bbs_id: string | null;
+}
+
 export interface IQuizRankRow {
   attempt_id: string;
   user_id: string;
+  user?: IRankPlayer;
   name: string;
   guild_name: string | null;
   in_guild: boolean;

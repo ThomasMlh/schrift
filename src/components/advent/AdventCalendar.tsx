@@ -10,6 +10,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { bucketUrl } from "@/utils/apiRequest";
 import { characterImageUrl } from "@/utils/characterImages";
 import { startDiscordLogin } from "@/utils/discordAuth";
+import { PlayerCell } from "@/components/quiz/PlayerCell";
 import type { IAdventDay, IAdventRankRow } from "@/interfaces";
 
 type Ranking = "all" | "guild" | "free";
@@ -213,17 +214,23 @@ const Rankings = ({ rankings, myUserId }: { rankings: Record<Ranking, IAdventRan
       </ButtonGroup>
       {rows.length === 0 ? <Text fontSize="sm" color="text.muted">{t("pages.advent.noPlayer")}</Text> : (
         <Table size="sm">
-          <Thead><Tr><Th w="40px">#</Th><Th>{t("pages.advent.player")}</Th><Th isNumeric>{t("pages.advent.found")}</Th><Th isNumeric>{t("pages.advent.pts")}</Th></Tr></Thead>
+          <Thead>
+            <Tr>
+              <Th w="32px" px={2}>#</Th>
+              <Th px={2}>{t("pages.advent.player")}</Th>
+              <Th px={2}>{t("pages.advent.guild")}</Th>
+              <Th px={2} isNumeric>{t("pages.advent.found")}</Th>
+              <Th px={2} isNumeric>{t("pages.advent.pts")}</Th>
+            </Tr>
+          </Thead>
           <Tbody>
             {shown.map((row) => (
               <Tr key={row.user_id} bg={row.user_id === myUserId ? "purple.50" : undefined} _dark={{ bg: row.user_id === myUserId ? "whiteAlpha.100" : undefined }}>
-                <Td fontWeight="bold">{row.rank}</Td>
-                <Td>
-                  <Text fontWeight="semibold">{row.name}</Text>
-                  {row.guild_name && <Text fontSize="xs" color="text.muted">{row.guild_name}</Text>}
-                </Td>
-                <Td isNumeric>{row.found}</Td>
-                <Td isNumeric fontWeight="bold">{row.points.toLocaleString()}</Td>
+                <Td px={2} fontWeight="bold">{row.rank}</Td>
+                <Td px={2}><PlayerCell player={row.user} name={row.name} /></Td>
+                <Td px={2}>{row.guild_name ? <Badge borderRadius="full" textTransform="none">{row.guild_name}</Badge> : <Text color="text.muted">—</Text>}</Td>
+                <Td px={2} isNumeric>{row.found}</Td>
+                <Td px={2} isNumeric fontWeight="bold">{row.points.toLocaleString()}</Td>
               </Tr>
             ))}
           </Tbody>

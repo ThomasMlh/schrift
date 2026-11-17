@@ -833,7 +833,8 @@
       "player": "Player",
       "found": "Found",
       "pts": "Pts",
-      "notReady": "Not ready yet: come back a little later"
+      "notReady": "Not ready yet: come back a little later",
+      "guild": "Guild"
     }
   },
   "components": {

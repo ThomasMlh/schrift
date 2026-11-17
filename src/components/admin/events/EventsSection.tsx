@@ -410,7 +410,7 @@ export const EventsSection = () => {
           {event && <Button variant="outline" onClick={() => setEditing(event)}>Modifier</Button>}
           {event && <Button variant="ghost" colorScheme="red" onClick={() => setConfirmDelete(true)}>Supprimer</Button>}
           <Button colorScheme="purple" leftIcon={<AddIcon boxSize={2.5} />} onClick={() => setEditing({})}>Nouvel événement</Button>
-          {event?.kind === "anniversary" && <Button as={RouterLink} to="/anniversaire" variant="link" colorScheme="purple">Voir la page</Button>}
+          {event?.kind === "anniversary" && <Button as={RouterLink} to="/anniversaire" variant="ghost" colorScheme="purple">Voir la page</Button>}
         </Flex>
         {event && (
           <Text fontSize="sm" color="text.muted" mt={3}>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Alert, AlertIcon, Badge, Box, Button, ButtonGroup, Flex, Grid, SimpleGrid, Skeleton, Table, Tbody, Td, Text, Th, Thead, Tr, VStack,
 } from "@chakra-ui/react";
+import { PlayerCell } from "./PlayerCell";
 import { useTranslation } from "react-i18next";
 import { useQuizResults } from "@/hooks/useAPI";
 import type { IQuizRankRow } from "@/interfaces";
@@ -34,7 +35,7 @@ const Podium = ({ rows }: { rows: IQuizRankRow[] }) => {
           _dark={{ bg: row.rank === 1 ? "whiteAlpha.100" : "bg.subtle" }}
         >
           <Text fontSize="2xl" fontWeight="extrabold" color={row.rank === 1 ? "orange.400" : undefined}>#{row.rank}</Text>
-          <Text fontWeight="bold" noOfLines={1}>{row.name}</Text>
+          <PlayerCell player={row.user} name={row.name} direction="column" avatarSize="md" />
           <Text fontSize="xs" color="text.muted" noOfLines={1}>{row.guild_name ?? t("pages.anniversary.noGuild")}</Text>
           <Text fontWeight="extrabold" sx={{ fontVariantNumeric: "tabular-nums" }}>{format(row.total)}</Text>
         </VStack>
@@ -87,7 +88,7 @@ export const QuizResults = ({ quizId, myUserId }: { quizId: string; myUserId?: s
                 {rows.map((row) => (
                   <Tr key={row.attempt_id} bg={row.user_id === myUserId ? "purple.50" : undefined} _dark={{ bg: row.user_id === myUserId ? "whiteAlpha.100" : undefined }}>
                     <Td isNumeric fontWeight="bold">{row.rank}</Td>
-                    <Td fontWeight="semibold">{row.name}</Td>
+                    <Td><PlayerCell player={row.user} name={row.name} /></Td>
                     <Td>{row.guild_name ? <Badge borderRadius="full" textTransform="none">{row.guild_name}</Badge> : <Text color="text.muted">—</Text>}</Td>
                     <Td isNumeric>{format(row.points)}</Td>
                     <Td isNumeric color="text.muted">+{format(row.bonus)}</Td>
