@@ -17,26 +17,36 @@ interface UserRivalsProps {
 type Rival = NonNullable<IUserStats["rivals"]>[number];
 const millions = (value: number) => `${(Math.abs(value) / 1000000).toFixed(2)}M`;
 
-const RankChip = ({ rank, highlight }: { rank: number; highlight: boolean }) => (
-  <Flex
-    position="relative"
-    zIndex={1}
-    boxSize="44px"
-    flexShrink={0}
-    borderRadius="full"
-    align="center"
-    justify="center"
-    bg={highlight ? "purple.400" : "bg.subtle"}
-    color={highlight ? "white" : "text.strong"}
-    borderWidth="3px"
-    borderColor="bg.card"
-    fontWeight="extrabold"
-    fontSize="sm"
-    sx={{ fontVariantNumeric: "tabular-nums" }}
-  >
-    {rank <= 3 && !highlight ? <MedalBadge rank={rank as 1 | 2 | 3} size={22} /> : `#${rank}`}
-  </Flex>
-);
+// Solid fill of a rank chip, so the rail never shows through; the podium gets its metal
+const CHIP_FILLS: Record<number, [string, string, string]> = {
+  1: ["#5c4a12", "#fef3c7", "rgba(242, 201, 76, 0.7)"],
+  2: ["#3d4452", "#edf2f7", "rgba(203, 213, 224, 0.7)"],
+  3: ["#5a3418", "#feebc8", "rgba(221, 107, 32, 0.7)"],
+};
+
+const RankChip = ({ rank, highlight }: { rank: number; highlight: boolean }) => {
+  const [dark, light, ring] = CHIP_FILLS[rank] ?? ["#2d3748", "#edf2f7", "rgba(160, 174, 192, 0.35)"];
+  return (
+    <Flex
+      position="relative"
+      zIndex={1}
+      boxSize="44px"
+      flexShrink={0}
+      borderRadius="full"
+      align="center"
+      justify="center"
+      bg={highlight ? "purple.400" : dark}
+      _light={{ bg: highlight ? "purple.500" : light }}
+      color={highlight ? "white" : "text.strong"}
+      boxShadow={`0 0 0 3px var(--chakra-colors-bg-card), 0 0 0 4px ${highlight ? "rgba(183, 148, 244, 0.8)" : ring}`}
+      fontWeight="extrabold"
+      fontSize="sm"
+      sx={{ fontVariantNumeric: "tabular-nums" }}
+    >
+      {rank <= 3 && !highlight ? <MedalBadge rank={rank as 1 | 2 | 3} size={22} /> : `#${rank}`}
+    </Flex>
+  );
+};
 
 // Players just above and below in the global ranking, as a ladder around the profile's player
 export const UserRivals = ({ rivals, currentUser, currentUserRank, currentUserAverage, loggedInUserId }: UserRivalsProps) => {
