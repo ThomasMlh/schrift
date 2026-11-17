@@ -22,7 +22,7 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import { SEOHead } from "@/components/SEOHead";
 import { CycleSelect } from "@/components/ui/CycleSelect";
 import { useCycles, useUser, useUserByBBSName, useUserStats, useGuild, useUserAchievements, useAlbumSettings } from "@/hooks/useAPI";
-import { StatCard } from "@/components/ui/StatCard";
+import { UserStatsStrip } from "@/components/user/UserStatsStrip";
 import { UserStatsOverview } from "@/components/user/UserStatsOverview";
 import { UserPerformances } from "@/components/user/UserPerformances";
 import { UserTopRotations } from "@/components/user/UserTopRotations";
@@ -33,7 +33,7 @@ import { UserGuildContribution } from "@/components/user/UserGuildContribution";
 import { UserPositionPerformance } from "@/components/user/UserPositionPerformance";
 import { BanDetailsCard } from "@/components/user/BanDetailsCard";
 import { UserTypeAnalysis } from "@/components/user/UserTypeAnalysis";
-import { FiBarChart2, FiTrendingUp, FiAward, FiActivity, FiClock, FiHexagon, FiTarget, FiGrid } from "react-icons/fi";
+import { FiBarChart2, FiActivity, FiClock, FiHexagon, FiGrid } from "react-icons/fi";
 import { UserKillerRecords } from "@/components/user/UserKillerRecords";
 import { UserAchievements } from "@/components/achievements/UserAchievements";
 import { UserAlbum } from "@/components/user/UserAlbum";
@@ -178,6 +178,9 @@ const UserPage = () => {
     || (leadersCanEditAlbums && !!user?.guilde_id && managedGuildIds.includes(String(user.guilde_id)));
 
 
+  const hasContribution = Boolean(globalStats?.guildContribution && globalStats.guildContribution.byCycle.length > 0);
+  const hasPositions = Boolean(globalStats?.performanceByQuartile && globalStats.performanceByQuartile.length >= 2);
+
   if (loading) {
     return <PageLoader label={t("pages.user.loadingProfile")} />;
   }
@@ -224,7 +227,18 @@ const UserPage = () => {
         <UserProfileHeader
           user={user}
           topAchievement={topAchievement}
-          followControl={<FollowButton bbsId={matchedBbsId ?? user.bbs_id ?? undefined} />}
+          followControl={<FollowButton bbsId={matchedBbsId ?? user.bbs_id ?? undefined} size="md" />}
+          stats={(statsLoading || (stats && stats.totalScores > 0)) ? (
+            <UserStatsStrip
+              isLoading={statsLoading}
+              items={stats ? [
+                { label: t("pages.user.statTotalScoresLabel"), value: stats.totalScores.toLocaleString("fr-FR"), help: t("pages.user.statTotalScoresHelp") },
+                { label: t("pages.user.statAverageScoreLabel"), value: `${(Math.round(stats.averageScore) / 1000000).toFixed(1)}M`, help: t("pages.user.statAverageScoreHelp") },
+                { label: t("pages.user.statTotalPointsLabel"), value: `${(stats.totalPoints / 1000000000).toFixed(1)}B`, help: t("pages.user.statTotalPointsHelp") },
+                { label: t("pages.user.statBestScoreLabel"), value: stats.bestScore.score.toLocaleString("fr-FR"), help: t("pages.user.statBestScoreHelp"), accent: true },
+              ] : []}
+            />
+          ) : undefined}
           accountSwitcher={
             userData?.bbs_accounts && userData.bbs_accounts.length > 1 ? (
               <UserAccountSwitcher accounts={userData.bbs_accounts} activeBbsId={matchedBbsId} />
@@ -257,78 +271,40 @@ const UserPage = () => {
 
         {statsLoading ? (
           <VStack spacing={6}>
-            <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6} w="full">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} h="100px" borderRadius="xl" />
-              ))}
-            </SimpleGrid>
             <Skeleton h="200px" w="full" borderRadius="xl" />
           </VStack>
         ) : stats && stats.totalScores > 0 ? (
           <VStack spacing={6}>
-            <SimpleGrid
-              columns={{ base: 2, lg: 4 }}
-              spacing={4}
-              w="full"
-            >
-              <StatCard
-                icon={FiTarget}
-                gradient="linear(to-br, blue.400, purple.500)"
-                label={t("pages.user.statTotalScoresLabel")}
-                value={stats.totalScores.toLocaleString("fr-FR")}
-                tooltip={t("pages.user.statTotalScoresHelp")}
-              />
-              <StatCard
-                icon={FiBarChart2}
-                gradient="linear(to-br, orange.400, red.400)"
-                label={t("pages.user.statAverageScoreLabel")}
-                value={`${(Math.round(stats.averageScore) / 1000000).toFixed(1)}M`}
-                tooltip={t("pages.user.statAverageScoreHelp")}
-              />
-              <StatCard
-                icon={FiTrendingUp}
-                gradient="linear(to-br, purple.500, pink.400)"
-                label={t("pages.user.statTotalPointsLabel")}
-                value={`${(stats.totalPoints / 1000000000).toFixed(1)}B`}
-                tooltip={t("pages.user.statTotalPointsHelp")}
-              />
-              <StatCard
-                icon={FiAward}
-                gradient="linear(to-br, yellow.400, orange.400)"
-                label={t("pages.user.statBestScoreLabel")}
-                value={stats.bestScore.score.toLocaleString("fr-FR")}
-                tooltip={t("pages.user.statBestScoreHelp")}
-              />
-            </SimpleGrid>
-
             <Tabs
               w="full"
-              variant="soft-rounded"
+              variant="line"
               colorScheme="purple"
-              size="sm"
+              size="md"
               index={tabIndex}
               onChange={handleTabChange}
               isLazy
             >
-              <TabList gap={1} flexWrap="wrap" mb={5}>
-                <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+              <TabList gap={1} mb={5} overflowX="auto" overflowY="hidden" borderColor="border.subtle" sx={{ scrollbarWidth: "none" }}>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap" _selected={{ color: "text.strong", borderColor: "purple.300" }}>
                   <Icon as={FiBarChart2} aria-hidden />{t("pages.user.tabOverview")}
                 </Tab>
-                <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap" _selected={{ color: "text.strong", borderColor: "purple.300" }}>
                   <Icon as={FiActivity} aria-hidden />{t("pages.user.tabPerformances")}
                 </Tab>
                 <Tab
                   color="text.secondary"
                   fontWeight="semibold"
                   gap={2}
+                  whiteSpace="nowrap"
+                  _selected={{ color: "text.strong", borderColor: "purple.300" }}
                   isDisabled={!globalStats?.temporalEvolution || globalStats.temporalEvolution.length < 2}
                 >
                   <Icon as={FiClock} aria-hidden />{t("pages.user.tabEvolution")}
                 </Tab>
-                <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap" _selected={{ color: "text.strong", borderColor: "purple.300" }}>
                   <Icon as={FiHexagon} aria-hidden />{t("pages.user.tabAchievements")}
                 </Tab>
-                <Tab color="text.secondary" fontWeight="semibold" gap={2}>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap" _selected={{ color: "text.strong", borderColor: "purple.300" }}>
                   <Icon as={FiGrid} aria-hidden />{t("pages.user.tabAlbum")}
                 </Tab>
               </TabList>
@@ -347,7 +323,9 @@ const UserPage = () => {
                       <UserRecentTrend recentTrend={stats.recentTrend} />
                     )}
 
-                    {globalStats?.guildContribution && globalStats.guildContribution.byCycle.length > 0 && (
+                    {(hasContribution || hasPositions) && (
+                    <SimpleGrid columns={{ base: 1, xl: hasContribution && hasPositions ? 2 : 1 }} spacing={6}>
+                    {hasContribution && globalStats?.guildContribution && (
                       <UserGuildContribution
                         historicalContribution={globalStats.guildContribution}
                         cycleContribution={selectedCycle ? (stats?.guildContribution ?? null) : undefined}
@@ -358,6 +336,14 @@ const UserPage = () => {
                         guildName={user?.guild_name}
                         temporalEvolution={globalStats.temporalEvolution}
                       />
+                    )}
+                    {/* Performance by cycle period */}
+                    {hasPositions && globalStats?.performanceByQuartile && (
+                      <UserPositionPerformance
+                        performanceByQuartile={globalStats.performanceByQuartile}
+                      />
+                    )}
+                    </SimpleGrid>
                     )}
 
                     {stats.rivals && stats.rivals.length > 0 && user && (
@@ -370,12 +356,6 @@ const UserPage = () => {
                       />
                     )}
 
-                    {/* Performance by cycle period */}
-                    {globalStats?.performanceByQuartile && globalStats.performanceByQuartile.length >= 2 && (
-                      <UserPositionPerformance
-                        performanceByQuartile={globalStats.performanceByQuartile}
-                      />
-                    )}
 
                     {/* Performance by attack type / alteration */}
                     {(stats.performanceByAttack || stats.performanceByAlteration) && (
