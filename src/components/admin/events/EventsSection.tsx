@@ -117,9 +117,9 @@ const EventModal = ({ event, onClose, onSaved }: { event: Partial<ISiteEvent>; o
                       <NumberInputField />
                     </NumberInput>
                   </FormControl>
-                  <FormHelperText gridColumn="1 / -1" mt={0}>
+                  <Text gridColumn="1 / -1" fontSize="sm" color="text.muted">
                     Une case s'ouvre chaque jour à l'heure de début. Le jour même elle rapporte tous ses points, plus tard la moitié.
-                  </FormHelperText>
+                  </Text>
                 </Grid>
               )}
             </Box>
