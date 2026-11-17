@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import type {
-  IRotationHistory, IRotationRankedScore, IRotationRecord, IUserAccountAchievements, IUserAccountRecords,
+  IEventBadge, IRotationHistory, IRotationRankedScore, IRotationRecord, IUserAccountAchievements, IUserAccountRecords,
 } from '../../interfaces';
 import { apiUrl, fetcher } from './shared';
 
@@ -66,11 +66,11 @@ export const useUserRecords = (userId?: string) => {
 export const useUserAchievements = (userId?: string) => {
   const url = userId ? `${apiUrl}/api/users/${userId}/achievements` : null;
 
-  const { data, error, isLoading } = useSWR<{ success: boolean; total_accounts: number; data: IUserAccountAchievements[] }>(
+  const { data, error, isLoading } = useSWR<{ success: boolean; total_accounts: number; data: IUserAccountAchievements[]; event_badges?: IEventBadge[] }>(
     url,
     fetcher,
     { revalidateOnFocus: false, dedupingInterval: 60000 }
   );
 
-  return { accounts: data?.data ?? [], totalAccounts: data?.total_accounts ?? 0, isLoading, error };
+  return { accounts: data?.data ?? [], totalAccounts: data?.total_accounts ?? 0, eventBadges: data?.event_badges ?? [], isLoading, error };
 };
