@@ -175,7 +175,8 @@
       "seeCycle": "View cycle",
       "rotationCount_one": "{{count}} rotation",
       "rotationCount_other": "{{count}} rotations",
-      "stripLabel": "Cycle rotations"
+      "stripLabel": "Cycle rotations",
+      "loading": "Loading cycles…"
     },
     "cycleDetail": {
       "backToCycles": "Back to cycles",
@@ -440,7 +441,8 @@
       "achievementsRarity": "{{value}}% of players",
       "achievementsUnlockedOn": "Unlocked on {{date}}",
       "achievementsProgress": "{{value}} / {{threshold}} to {{tier}}",
-      "achievementsSummary": "{{unlocked}} / {{total}} tiers"
+      "achievementsSummary": "{{unlocked}} / {{total}} tiers",
+      "recordsTitle": "Personal records per killer"
     },
     "discordCallback": {
       "loading": "Connecting with Discord...",
@@ -970,7 +972,8 @@
       "paginationInfo": "Page {{current}} of {{total}} - Displaying {{count}} player(s)",
       "playersWithMiss": "{{count}} player(s) with miss",
       "playersTotal": "{{count}} player(s) in total",
-      "progressionTooltip": "Average: {{previous}} → {{current}}"
+      "progressionTooltip": "Average: {{previous}} → {{current}}",
+      "restOfRanking": "Full ranking"
     },
     "scoresSection": {
       "heading": "Score Management",

@@ -253,7 +253,7 @@ export const PodiumResults = ({
         <HStack spacing={3} align="center">
           <Divider />
           <Text fontSize="xs" color="gray.500" whiteSpace="nowrap" flexShrink={0}>
-            {t("components.podiumResults.restOfRanking", "Classement complet")}
+            {t("components.podiumResults.restOfRanking")}
           </Text>
           <Divider />
         </HStack>
