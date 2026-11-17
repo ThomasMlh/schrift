@@ -5,6 +5,8 @@ import {
 import { useTranslation } from "react-i18next";
 import { SEOHead } from "@/components/SEOHead";
 import { QuizResults } from "@/components/quiz/QuizResults";
+import { AdventCalendar } from "@/components/advent/AdventCalendar";
+import { EventBadgeMedal } from "@/components/achievements/EventBadge";
 import { useCurrentEvent } from "@/hooks/useAPI";
 import { useAuth } from "@/providers/AuthProvider";
 import { startDiscordLogin } from "@/utils/discordAuth";
@@ -91,8 +93,26 @@ const AnniversaryPage = () => {
               </HStack>
             </Box>
 
+            {data.event.badge_name && (
+              <Card borderColor={data.my_badge ? "orange.300" : undefined}>
+                <HStack spacing={4} align="center">
+                  <EventBadgeMedal year={new Date(data.event.start_at).getFullYear()} size={56} locked={!data.my_badge} />
+                  <Box>
+                    <Eyebrow>{t("pages.anniversary.badgeEyebrow")}</Eyebrow>
+                    <Text fontWeight="extrabold" fontSize="lg">{data.event.badge_name}</Text>
+                    <Text fontSize="sm" color="text.muted">
+                      {data.my_badge ? t("pages.anniversary.badgeEarned") : data.state === "over" ? t("pages.anniversary.badgeClosed") : t("pages.anniversary.badgeHow")}
+                    </Text>
+                  </Box>
+                </HStack>
+              </Card>
+            )}
+
+            {data.event.advent_enabled && <AdventCalendar eventId={data.event._id} />}
+
             {data.quizzes.length === 0 ? (
-              <Card><Text color="text.muted">{t("pages.anniversary.noActivity")}</Text></Card>
+              !data.event.advent_enabled && 
+<Card><Text color="text.muted">{t("pages.anniversary.noActivity")}</Text></Card>
             ) : data.quizzes.map((quiz) => (
               <Grid key={quiz._id} templateColumns={{ base: "1fr", lg: "1.4fr 1fr" }} gap={5} alignItems="start">
                 <Card>

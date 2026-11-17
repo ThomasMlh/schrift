@@ -792,7 +792,49 @@
       "myResult": "Your result",
       "bonusOf": "time bonus (max {{max}})",
       "missed": "time ran out",
-      "answer": "Answer:"
+      "answer": "Answer:",
+      "badgeEyebrow": "Limited edition badge",
+      "badgeEarned": "You earned it! It shows in the achievements of your profile.",
+      "badgeHow": "Finish the quiz or answer a calendar case during the event to earn it. It will not be available afterwards.",
+      "badgeClosed": "The event is over: this badge is no longer available."
+    },
+    "advent": {
+      "eyebrow": "One case a day",
+      "title": "Advent calendar",
+      "intro": "Each day, a character hides behind a case: guess who it is from the clue. {{points}} points on the day, {{half}} if you answer later. One answer per case.",
+      "case": "Case {{day}}",
+      "today": "Today",
+      "opensOn": "Opens on {{date}}",
+      "openHint": "Open: your turn",
+      "lateHint": "Late: half points",
+      "result_correct": "Correct",
+      "result_wrong": "Missed",
+      "result_pending": "Close: waiting for a check",
+      "clue_silhouette": "Silhouette",
+      "clue_zoom": "Zoom",
+      "clue_blur": "Blurred picture",
+      "clue_quote": "Quote",
+      "clueAlt": "Clue of the day",
+      "worth_one": "{{count}} point",
+      "worth_other": "{{count}} points",
+      "points_one": "{{count}} pt",
+      "points_other": "{{count}} pts",
+      "answerWas": "It was",
+      "yourAnswer": "Your answer: {{answer}}",
+      "placeholder": "Character name",
+      "send": "Submit",
+      "oneTry": "One answer only: exact spelling is not required.",
+      "lateWarning": "This case is past: a correct answer now gives half the points.",
+      "rankings": "Calendar ranking",
+      "ranking_all": "Overall",
+      "ranking_guild": "In a guild",
+      "ranking_free": "No guild",
+      "noPlayer": "Nobody has played yet.",
+      "player": "Player",
+      "found": "Found",
+      "pts": "Pts",
+      "notReady": "Not ready yet: come back a little later",
+      "guild": "Guild"
     }
   },
   "components": {
@@ -1572,7 +1614,8 @@
       "regularity": "Consistency",
       "progression": "Progression",
       "podium": "Podium",
-      "versatility": "Versatility"
+      "versatility": "Versatility",
+      "events": "Events"
     },
     "first_step": {
       "name": "First step",
@@ -1681,6 +1724,13 @@
     "versatile": {
       "name": "All-rounder",
       "description": "Clears on different killers"
+    },
+    "eventBadge": {
+      "limited": "Limited edition",
+      "tooltip": "Earned by taking part in \"{{event}}\"",
+      "earned": "Earned on {{date}}",
+      "holders_one": "{{count}} player has it",
+      "holders_other": "{{count}} players have it"
     }
   }
 }

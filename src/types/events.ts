@@ -13,6 +13,16 @@ export interface ISiteEvent {
   description: string;
   start_at: string;
   end_at: string;
+  // Limited edition badge of the participants; null: no badge
+  badge_name?: string | null;
+  advent?: IAdventSettings;
+  advent_enabled?: boolean;
+}
+
+export interface IAdventSettings {
+  enabled: boolean;
+  days: number;
+  points: number;
 }
 
 export interface IQuizSummary {
@@ -33,6 +43,99 @@ export interface IPublicEvent {
   event: ISiteEvent;
   state: EventState;
   quizzes: IQuizSummary[];
+  my_badge?: boolean;
+}
+
+// ---------- Advent calendar ----------
+
+export type ClueType = "silhouette" | "zoom" | "blur" | "quote";
+export type AdventDayState = "locked" | "empty" | "today" | "late" | "over";
+
+export interface IAdventCharacter {
+  _id: string;
+  name: string;
+  version?: string;
+  version_name?: string | null;
+  images_version?: number;
+}
+
+export interface IAdventDay {
+  day: number;
+  opens_at: string;
+  state: AdventDayState;
+  clue?: { type: ClueType; path: string | null; text: string | null };
+  mine: { answer: string; late: boolean; result: "correct" | "wrong" | "pending"; points: number } | null;
+  // Revealed once the event is over
+  character?: IAdventCharacter | null;
+}
+
+export interface IAdventRankRow {
+  user_id: string;
+  user?: IRankPlayer;
+  name: string;
+  guild_name: string | null;
+  in_guild: boolean;
+  points: number;
+  found: number;
+  rank: number;
+}
+
+export interface IAdventCalendar {
+  event: Pick<ISiteEvent, "_id" | "name" | "start_at" | "end_at">;
+  advent: { points: number; late_ratio: number };
+  now: string;
+  days: IAdventDay[];
+  rankings: { all: IAdventRankRow[]; guild: IAdventRankRow[]; free: IAdventRankRow[] };
+}
+
+export interface IClueSettings {
+  x: number;
+  y: number;
+  scale: number;
+  blur: number;
+}
+
+export interface IAdventCase {
+  _id: string;
+  event_id: string;
+  day: number;
+  character_id: string;
+  character: IAdventCharacter | null;
+  clue_type: ClueType;
+  settings: IClueSettings;
+  clue_path: string | null;
+  clue_text: string | null;
+  accepted: string[];
+  opens_at: string;
+  answers: number;
+  pending: number;
+}
+
+export interface IAdventAdmin {
+  advent: IAdventSettings;
+  days: number;
+  cases: IAdventCase[];
+}
+
+export interface IAdventAnswer {
+  _id: string;
+  answer: string;
+  status: "correct" | "wrong" | "pending";
+  reviewed?: boolean;
+  accepted?: boolean;
+  late: boolean;
+  answered_at: string;
+  bbs_name: string | null;
+  user_name: string | null;
+}
+
+export interface IEventBadge {
+  event_id: string;
+  name: string;
+  event_name: string;
+  year: number;
+  earned_at: string;
+  holders: number;
 }
 
 export interface IChoice {
@@ -95,9 +198,20 @@ export interface IAttemptState {
   ignored?: boolean;
 }
 
+// Site account of a ranking row, to show the player's avatar
+export interface IRankPlayer {
+  _id: string | null;
+  discord_id: string | null;
+  avatar: string | null;
+  global_name: string | null;
+  bbs_name: string;
+  bbs_id: string | null;
+}
+
 export interface IQuizRankRow {
   attempt_id: string;
   user_id: string;
+  user?: IRankPlayer;
   name: string;
   guild_name: string | null;
   in_guild: boolean;

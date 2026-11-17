@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import useSWR from 'swr';
 import type {
-  IAttemptState, ISiteEvent, IPublicEvent, IQuiz, IQuizAttemptDetail, IQuizAttemptRow, IQuizMedia, IQuizResults, QuizAnswer,
+  IAdventAdmin, IAdventAnswer, IAdventCalendar, IAdventCase, IAdventCharacter, IAdventDay, IAttemptState, ISiteEvent, IPublicEvent,
+  IQuiz, IQuizAttemptDetail, IQuizAttemptRow, IQuizMedia, IQuizResults, QuizAnswer,
 } from '../../interfaces';
 import { useAuth } from '../../providers/AuthProvider';
 import { invalidateKeys, makeRequest } from '../../utils/apiRequest';
@@ -44,6 +45,27 @@ export const useQuizPlay = (quizId?: string, test = false) => {
   }, [quizId, test, request]);
 };
 
+// Advent calendar of an event, with the player's answers when logged in
+export const useAdventCalendar = (eventId?: string) => {
+  const fetcher = useAuthenticatedFetcher();
+  const { data, error, isLoading, mutate } = useSWR<IAdventCalendar & { success: boolean }>(
+    eventId ? `${EVENTS}/${eventId}/advent` : null, fetcher, { revalidateOnFocus: true, shouldRetryOnError: false },
+  );
+  return { data: data ?? null, isLoading, error: error as Error | undefined, mutate };
+};
+
+export const useAdventAnswer = () => {
+  const { token } = useAuth();
+  const request = useMemo(() => makeRequest(token), [token]);
+  return useMemo(() => async (eventId: string, day: number, answer: string) => {
+    const result = await request<{ data: NonNullable<IAdventDay['mine']> }>(`${EVENTS}/${eventId}/advent/${day}/answer`, {
+      method: 'POST', body: JSON.stringify({ answer }),
+    });
+    await invalidateKeys(EVENTS);
+    return result.data;
+  }, [request]);
+};
+
 // ---------- Admin ----------
 
 const useAdminList = <T>(url: string | null) => {
@@ -57,6 +79,9 @@ export const useAdminQuiz = (quizId?: string) => useAdminList<IQuiz>(quizId ? `$
 export const useAdminEventQuizzes = (eventId?: string) => useAdminList<IQuiz[]>(eventId ? `${ADMIN}/${eventId}/quizzes` : null);
 export const useEventMedia = (eventId?: string) => useAdminList<IQuizMedia[]>(eventId ? `${ADMIN}/${eventId}/media` : null);
 export const useQuizAttempts = (quizId?: string) => useAdminList<IQuizAttemptRow[]>(quizId ? `${ADMIN}/quizzes/${quizId}/attempts` : null);
+export const useAdventCases = (eventId?: string) => useAdminList<IAdventAdmin>(eventId ? `${ADMIN}/${eventId}/advent` : null);
+export const useAdventCaseAnswers = (eventId?: string, day?: number | null) =>
+  useAdminList<IAdventAnswer[]>(eventId && day ? `${ADMIN}/${eventId}/advent/${day}/answers` : null);
 export const useAttemptDetail = (attemptId?: string | null) => useAdminList<IQuizAttemptDetail>(attemptId ? `${ADMIN}/attempts/${attemptId}` : null);
 
 export const useEventAdminActions = () => {
@@ -94,6 +119,14 @@ export const useEventAdminActions = () => {
       review: (attemptId: string, questionId: string, key: string, accept: boolean) =>
         send<IQuizAttemptDetail>(`${ADMIN}/attempts/${attemptId}/review`, 'POST', { question_id: questionId, key, accept }),
       deleteAttempt: (attemptId: string) => send(`${ADMIN}/attempts/${attemptId}`, 'DELETE'),
+      saveAdventCase: (eventId: string, day: number, body: Pick<IAdventCase, 'character_id' | 'clue_type' | 'settings' | 'clue_text' | 'accepted'>) =>
+        send<IAdventCase>(`${ADMIN}/${eventId}/advent/${day}`, 'PUT', body),
+      deleteAdventCase: (eventId: string, day: number) => send(`${ADMIN}/${eventId}/advent/${day}`, 'DELETE'),
+      reviewAdventAnswer: (answerId: string, accept: boolean) => send<IAdventAnswer>(`${ADMIN}/advent/answers/${answerId}/review`, 'POST', { accept }),
+      // Reads only: nothing to refresh
+      randomAdventCharacter: async (eventId: string) => (await request<{ data: IAdventCharacter }>(`${ADMIN}/${eventId}/advent/random`)).data,
+      adventCharacterInfo: async (characterId: string) =>
+        (await request<{ data: { accepted: string[]; quote: string | null; has_artwork: boolean } }>(`${ADMIN}/advent/characters/${characterId}`)).data,
     };
   }, [request]);
 };

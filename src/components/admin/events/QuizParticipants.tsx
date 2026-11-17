@@ -5,6 +5,7 @@ import {
 } from "@chakra-ui/react";
 import { useAttemptDetail, useEventAdminActions, useQuizAttempts } from "@/hooks/useAPI";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
+import { PlayerCell } from "@/components/quiz/PlayerCell";
 import { ANSWER_LABELS } from "@/utils/quizEditor";
 import { readableAnswer } from "@/utils/quiz";
 import type { IQuizAttemptDetail } from "@/interfaces";
@@ -125,7 +126,7 @@ export const QuizParticipants = ({ quizId }: { quizId: string }) => {
             <Tbody>
               {shown.map((row) => (
                 <Tr key={row.attempt_id}>
-                  <Td fontWeight="semibold">{row.name}</Td>
+                  <Td><PlayerCell player={row.user} name={row.name} /></Td>
                   <Td>{row.guild_name ? <Badge textTransform="none">{row.guild_name}</Badge> : <Text color="text.muted">Hors guilde</Text>}</Td>
                   <Td>{formatDate(row.started_at)}</Td>
                   <Td isNumeric>{row.status === "finished" ? formatDuration(row.duration_ms) : `en cours (Q${row.progress + 1})`}</Td>

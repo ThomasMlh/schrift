@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useUserAchievements } from "@/hooks/useAPI";
 import type { AchievementTier, IAchievement } from "@/interfaces";
 import { AchievementBadge } from "./AchievementBadge";
+import { EventBadges } from "./EventBadge";
 import { ACHIEVEMENT_ICONS, CATEGORY_ORDER, TIER_ORDER, formatAchievementValue } from "./achievementCatalog";
 
 interface UserAchievementsProps {
@@ -27,7 +28,7 @@ const formatDate = (timestamp: number) => new Date(timestamp).toLocaleDateString
 // out with progress towards the next tier, grouped by category.
 export const UserAchievements = ({ userId, bbsId }: UserAchievementsProps) => {
   const { t } = useTranslation();
-  const { accounts, isLoading } = useUserAchievements(userId);
+  const { accounts, eventBadges, isLoading } = useUserAchievements(userId);
 
   const cardBg = "bg.card";
   const border = "border.faint";
@@ -41,6 +42,7 @@ export const UserAchievements = ({ userId, bbsId }: UserAchievementsProps) => {
   const account = accounts.find((a) => a.bbs_id === bbsId) ?? accounts.find((a) => a.is_primary) ?? accounts[0];
   const achievements = account?.achievements ?? [];
   if (achievements.length === 0) {
+    if (eventBadges.length) return <EventBadges badges={eventBadges} />;
     return <Text fontSize="sm" color={mutedText} textAlign="center" py={8}>{t("pages.user.achievementsEmpty")}</Text>;
   }
 
@@ -153,6 +155,8 @@ export const UserAchievements = ({ userId, bbsId }: UserAchievementsProps) => {
           ))}
         </HStack>
       </Flex>
+
+      <EventBadges badges={eventBadges} />
 
       {CATEGORY_ORDER.map((category) => {
         const items = achievements.filter((a) => a.category === category);
