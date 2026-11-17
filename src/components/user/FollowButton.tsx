@@ -7,7 +7,7 @@ import { useFollowing } from "@/hooks/useAPI";
 import { useFollowMutations } from "@/hooks/mutations/useFollowMutations";
 
 // Follow / unfollow a bbs account; hidden for visitors and on the user's own accounts
-export const FollowButton = ({ bbsId }: { bbsId?: string }) => {
+export const FollowButton = ({ bbsId, size = "xs" }: { bbsId?: string; size?: "xs" | "sm" | "md" }) => {
   const { t } = useTranslation();
   const toast = useToast();
   const { isLoggedIn, currentUser } = useAuth();
@@ -32,7 +32,7 @@ export const FollowButton = ({ bbsId }: { bbsId?: string }) => {
 
   return (
     <Button
-      size="xs"
+      size={size}
       variant={isFollowed ? "solid" : "outline"}
       colorScheme="yellow"
       leftIcon={<FiStar fill={isFollowed ? "currentColor" : "none"} />}

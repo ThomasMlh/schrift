@@ -175,7 +175,8 @@
       "seeCycle": "Voir le cycle",
       "rotationCount_one": "{{count}} rotation",
       "rotationCount_other": "{{count}} rotations",
-      "stripLabel": "Rotations du cycle"
+      "stripLabel": "Rotations du cycle",
+      "loading": "Chargement des cycles…"
     },
     "cycleDetail": {
       "backToCycles": "Retour aux cycles",
@@ -399,12 +400,6 @@
       "statAverageMLabel": "Score Moyen",
       "statTotalPointsBLabel": "Points Totaux",
       "statBestScoreRecord": "Meilleur Score",
-      "recordsSubtitle": "Meilleur score obtenu sur chaque killer, tous cycles confondus",
-      "recordsKiller": "Killer",
-      "recordsScore": "Record",
-      "recordsCycle": "Obtenu au",
-      "recordsAttempts": "Tentatives",
-      "recordsEmpty": "Aucun record pour ce compte",
       "tabAchievements": "Succès",
       "tabAlbum": "Album",
       "albumTitle": "Album de personnages",
@@ -970,7 +965,8 @@
       "paginationInfo": "Page {{current}} sur {{total}} - Affichage de {{count}} joueur(s)",
       "playersWithMiss": "{{count}} joueur(s) avec miss",
       "playersTotal": "{{count}} joueur(s) au total",
-      "progressionTooltip": "Moyenne : {{previous}} → {{current}}"
+      "progressionTooltip": "Moyenne : {{previous}} → {{current}}",
+      "restOfRanking": "Classement complet"
     },
     "scoresSection": {
       "heading": "Gestion des Scores",
@@ -1201,22 +1197,19 @@
         "labelAvgPerCycle": "moy. / cycle",
         "chartAvg": "Moy. {{avg}}%",
         "subtitle": "Scores cumulés dans la guilde actuelle, par cycle",
-        "selectCycleHint": "Sélectionnez un cycle pour voir votre contribution sur cette période",
         "differentGuild": "Autre guilde",
         "differentGuildNote": "Le joueur n'était pas dans cette guilde lors du cycle {{cycle}}",
         "selectedCycle": "Cycle sélectionné",
         "myTotal": "Mon total",
         "guildTotal": "Total guilde",
         "historicalHeading": "Historique par cycle",
-        "note": "Seuls les cycles joués dans ta guilde actuelle sont pris en compte. Un changement de guilde en cours de cycle peut entraîner de légères imprécisions."
-      },
-      "performances": {
-        "headingAvgByRotation": "Scores Moyens par Rotation",
-        "subtitleAllRotations": "Toutes vos rotations triées par score moyen décroissant",
-        "notePerformance": "💡 Le pourcentage de performance est calculé par rapport à votre meilleure rotation (100%). Une rotation à 80% signifie qu'elle atteint 80% du score moyen de votre meilleure rotation.",
-        "noData": "Pas assez de données disponibles",
-        "headingByType": "Analyse par Type",
-        "subtitleByType": "Performances agrégées par killer, type d'attaque et altération d'état"
+        "note": "Seuls les cycles joués dans ta guilde actuelle sont pris en compte. Un changement de guilde en cours de cycle peut entraîner de légères imprécisions.",
+        "averageLabel": "Part moyenne par cycle",
+        "cyclesCount_one": "sur {{count}} cycle",
+        "cyclesCount_other": "sur {{count}} cycles",
+        "bestShare": "Meilleure part · {{cycle}}",
+        "lastShare": "Dernier cycle · {{cycle}}",
+        "vsAverage": "{{delta}} pt par rapport à sa moyenne"
       },
       "positionPerformance": {
         "title": "Performance par période du cycle",
@@ -1238,35 +1231,39 @@
         "detailHeading": "📊 Détail des rotations"
       },
       "rivals": {
-        "heading": "Rivaux au Classement",
-        "subtitle": "Joueurs proches de votre classement",
-        "youBadge": "✨ VOUS",
-        "positionAbove": "devant",
-        "positionBelow": "derrière",
-        "labelAvgScore": "Score moyen"
+        "heading": "Rivaux au classement",
+        "subtitle": "Les joueurs juste devant et juste derrière au classement global",
+        "youBadge": "Toi",
+        "labelAvgScore": "Score moyen",
+        "nextTarget": "Prochain à dépasser : {{name}},",
+        "toGo": "encore {{gap}}",
+        "leader": "1er du classement",
+        "aheadBy": "{{gap}} devant",
+        "behindBy": "{{gap}} derrière"
       },
       "statsOverview": {
-        "dateUnknown": "Inconnue",
-        "labelBestScore": "Meilleur Score",
-        "labelWorstScore": "Score à Améliorer",
-        "labelBestCycle": "Meilleur Cycle",
-        "avgShort": "Moy:",
+        "labelBestCycle": "Meilleur cycle",
         "labelSeniority": "Ancienneté",
         "daysAgo_one": "Il y a {{count}} jour",
         "daysAgo_other": "Il y a {{count}} jours",
-        "labelBuilds": "Builds Créés",
+        "labelBuilds": "Builds créés",
         "communityContrib": "Contribution à la communauté",
-        "labelMissRate": "Taux de Miss",
+        "labelMissRate": "Taux de miss",
         "missDetail": "{{missCount}} score{{scoreS}} à 0 sur {{totalScores}} rotation{{rotationS}}",
         "consistencyVeryRegular": "Très régulier",
         "consistencyRegular": "Régulier",
         "consistencyIrregular": "Irrégulier",
-        "labelConsistency": "Consistance",
+        "labelConsistency": "Régularité",
         "tooltipMedianScore": "Valeur centrale de tous tes scores — moins sensible aux extrêmes que la moyenne",
         "tooltipConsistency": "Coefficient de variation : écart-type / moyenne. Plus bas = plus régulier.",
-        "labelMedianScore": "Score Médian",
+        "labelMedianScore": "Score médian",
         "vsMean": "vs moyenne",
-        "labelCyclesPlayed": "Cycles Joués"
+        "labelCyclesPlayed": "Cycles joués",
+        "title": "En bref",
+        "bestCycleDetail_one": "Moyenne {{average}} sur {{count}} rotation",
+        "bestCycleDetail_other": "Moyenne {{average}} sur {{count}} rotations",
+        "cyclesFull_one": "{{count}} cycle complet (20 rotations)",
+        "cyclesFull_other": "{{count}} cycles complets (20 rotations)"
       },
       "temporalEvolution": {
         "heading": "Évolution Temporelle",
@@ -1293,46 +1290,38 @@
         "evolutionNoteMonthly": "💡 Chaque point est la moyenne des rotations jouées sur le mois, comme dans le podium mensuel.",
         "inProgress": "en cours"
       },
-      "topRotations": {
-        "bestRotationTitle": "Meilleure Rotation",
-        "worstRotationTitle": "Rotation à Améliorer",
-        "bestScoreLabel": "🌟 Meilleur Score:",
-        "worstScoreLabel": "📊 Pire Score:",
-        "detailHeading": "📋 Détail par rotation",
-        "detailSubtitle": "Toutes les rotations du cycle sélectionné, triées par position",
-        "colRank": "#",
-        "colKiller": "Killer",
-        "colType": "Type",
-        "colAvgScore": "Score moyen",
-        "colParticipations": "Participations",
-        "badgeBest": "🏆 Best",
-        "badgeWorst": "📉 Pire"
-      },
       "ranking": {
-        "globalRanking": "🌍 Classement Global",
-        "outOf_one": "Sur {{count}} joueur",
-        "outOf_other": "Sur {{count}} joueurs",
-        "topPercent": "Top {{pct}}%",
-        "gapWithTop1": "-{{gap}}M du top 1",
-        "guildRanking": "👥 Classement {{name}}",
-        "outOfMembers_one": "Sur {{count}} membre",
-        "outOfMembers_other": "Sur {{count}} membres"
+        "globalRanking": "Classement global",
+        "outOf_one": "sur {{count}} joueur",
+        "outOf_other": "sur {{count}} joueurs",
+        "topPercent": "Top {{pct}} %",
+        "gapWithTop1": "−{{gap}}M du 1er",
+        "guildRanking": "Classement {{name}}",
+        "outOfMembers_one": "sur {{count}} membre",
+        "outOfMembers_other": "sur {{count}} membres",
+        "gapHelp": "Écart de score moyen avec le 1er du classement",
+        "leader": "En tête du classement"
       },
       "rotationDetailCard": {
         "labelAverage": "Moyenne:",
         "labelParticipations": "Participations:",
         "labelTotal": "Total:"
       },
-      "typeAnalysis": {
-        "noData": "Pas assez de données pour l'analyse par type",
-        "headingAttacks": "Attaques R vs B",
-        "headingAlteration": "Performance par Altération",
-        "attackRed": "Attaques Rouges",
-        "attackBlue": "Attaques Bleues",
-        "rotShort": "rot.",
-        "bestOnLabel": "Meilleur sur",
-        "red": "Rouges",
-        "blue": "Bleues"
+      "killers": {
+        "title": "Par killer",
+        "subtitle": "Moyenne et record sur chaque killer, tous cycles confondus",
+        "subtitleCycle": "Moyenne sur le cycle choisi, record tous cycles confondus",
+        "sort_average": "Moyenne",
+        "sort_record": "Record",
+        "sort_name": "Nom",
+        "colKiller": "Killer",
+        "colAverage": "Moyenne",
+        "colRecord": "Record",
+        "colAttempts": "Tentatives",
+        "best": "Meilleure moyenne",
+        "toWork": "À travailler",
+        "noAverage": "Pas joué sur ce cycle",
+        "empty": "Aucun score pour ce compte"
       }
     },
     "customSelect": {

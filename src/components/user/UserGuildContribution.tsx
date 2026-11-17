@@ -1,28 +1,8 @@
-import {
-  Box,
-  HStack,
-  VStack,
-  Text,
-  Card,
-  CardBody,
-  Icon,
-  useColorModeValue,
-  Badge,
-  Skeleton,
-  Divider,
-} from "@chakra-ui/react";
-import { FiUsers, FiInfo } from "react-icons/fi";
+import { Badge, Box, Grid, HStack, Icon, Skeleton, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { FiInfo, FiUsers } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-  Cell,
+  Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis,
 } from "recharts";
 import type { IUserStats } from "@/hooks/useAPI";
 
@@ -37,6 +17,36 @@ interface UserGuildContributionProps {
   temporalEvolution?: IUserStats["temporalEvolution"];
 }
 
+const billions = (value: number) => `${(value / 1_000_000_000).toFixed(2)}B`;
+
+// The player's slice of the guild total, drawn as a pie
+const ShareRing = ({ pct }: { pct: number }) => (
+  <Box
+    boxSize={{ base: "96px", md: "112px" }}
+    borderRadius="full"
+    flexShrink={0}
+    display="grid"
+    placeItems="center"
+    bg={`conic-gradient(var(--chakra-colors-teal-300) 0 ${Math.min(100, pct)}%, var(--chakra-colors-whiteAlpha-200) 0)`}
+    _light={{ bg: `conic-gradient(var(--chakra-colors-teal-500) 0 ${Math.min(100, pct)}%, var(--chakra-colors-gray-200) 0)` }}
+  >
+    <Box boxSize="74%" borderRadius="full" bg="bg.card" display="grid" placeItems="center">
+      <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="extrabold" color="teal.300" _light={{ color: "teal.600" }} sx={{ fontVariantNumeric: "tabular-nums" }}>
+        {pct}%
+      </Text>
+    </Box>
+  </Box>
+);
+
+const Figure = ({ label, value, color }: { label: string; value: string; color?: string }) => (
+  <Box bg="bg.subtle" borderRadius="lg" px={3} py={2} minW={0}>
+    <Text fontSize="xs" color="text.muted" fontWeight="semibold" noOfLines={1}>{label}</Text>
+    <Text fontSize="lg" fontWeight="bold" color={color ?? "text.strong"} sx={{ fontVariantNumeric: "tabular-nums" }} whiteSpace="nowrap">{value}</Text>
+  </Box>
+);
+
+// Share of the guild's total score brought by the player: the chosen cycle (or the average) as a pie,
+// then the history by cycle
 export const UserGuildContribution = ({
   historicalContribution,
   cycleContribution,
@@ -47,184 +57,135 @@ export const UserGuildContribution = ({
   guildName,
   temporalEvolution,
 }: UserGuildContributionProps) => {
-  const cardBg = "bg.card";
-  const gridColor = useColorModeValue("#E2E8F0", "#4A5568");
-  const textColor = useColorModeValue("#2D3748", "#E2E8F0");
-  const tooltipBg = "bg.elevated";
-  const tooltipBorder = "border.default";
-  const mutedColor = "text.muted";
-  const cycleBg = useColorModeValue("blue.50", "rgba(49,130,206,0.1)");
-  const noteColor = useColorModeValue("gray.400", "gray.600");
   const { t } = useTranslation();
+  const gridColor = useColorModeValue("#E2E8F0", "#2D3748");
+  const axisColor = useColorModeValue("#4A5568", "#A0AEC0");
 
-  const cycleNameMap: Record<string, string> = {};
-  temporalEvolution?.forEach((c) => { cycleNameMap[c.cycle_id] = c.cycle_name; });
-
+  const cycleNames = new Map((temporalEvolution ?? []).map((c) => [c.cycle_id, c.cycle_name]));
   const chartData = historicalContribution.byCycle.map((c) => ({
-    name: cycleNameMap[c.cycle_id] ?? "Cycle",
+    name: cycleNames.get(c.cycle_id) ?? "Cycle",
     cycle_id: c.cycle_id,
     pct: c.contributionPct,
     userTotal: c.userTotal,
     guildTotal: c.guildTotal,
   }));
-
+  type ChartItem = (typeof chartData)[number];
   const avg = historicalContribution.averagePct;
+  const best = chartData.reduce<ChartItem | null>((top, c) => (!top || c.pct > top.pct ? c : top), null);
+  const last = chartData.at(-1) ?? null;
 
   const cycleStat = cycleContribution?.byCycle[0] ?? null;
-  const cycleInDifferentGuild = hasSelectedCycle && !cycleContributionLoading && cycleContribution !== undefined && cycleStat === null;
-  const cyclePct = cycleStat?.contributionPct;
-  const cycleColor = cyclePct !== undefined
-    ? cyclePct >= avg ? "#38A169" : cyclePct >= avg * 0.7 ? "#3182CE" : "#DD6B20"
-    : "#718096";
+  const otherGuild = hasSelectedCycle && !cycleContributionLoading && cycleContribution !== undefined && cycleStat === null;
+  const delta = cycleStat ? Math.round((cycleStat.contributionPct - avg) * 100) / 100 : null;
 
-  type ChartItem = { name: string; cycle_id: string; pct: number; userTotal: number; guildTotal: number };
-
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: ChartItem }> }) => {
+  const ChartTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: ChartItem }> }) => {
     if (!active || !payload?.length) return null;
     const d = payload[0].payload;
     return (
-      <Box bg={tooltipBg} p={3} borderRadius="md" border="1px solid" borderColor={tooltipBorder} boxShadow="lg">
+      <Box bg="bg.elevated" p={3} borderRadius="md" borderWidth="1px" borderColor="border.default" boxShadow="lg">
         <Text fontWeight="bold" mb={1} fontSize="sm">{d.name}</Text>
-        <Text fontSize="sm" color="blue.500">
-          {t("components.user.guildContribution.labelContribution")} <strong>{d.pct}%</strong>
-        </Text>
-        <Text fontSize="xs" color="gray.500">
-          {(d.userTotal / 1_000_000_000).toFixed(2)}B / {(d.guildTotal / 1_000_000_000).toFixed(2)}B {t("components.user.guildContribution.labelGuildTotal")}
-        </Text>
+        <Text fontSize="sm" color="teal.300">{t("components.user.guildContribution.labelContribution")} <strong>{d.pct}%</strong></Text>
+        <Text fontSize="xs" color="text.muted">{billions(d.userTotal)} / {billions(d.guildTotal)} {t("components.user.guildContribution.labelGuildTotal")}</Text>
       </Box>
     );
   };
 
   return (
-    <Card bg={cardBg} borderRadius="xl" boxShadow="md">
-      <CardBody>
-        <HStack spacing={3} mb={4}>
-          <Box
-            p={2}
-            borderRadius="lg"
-            bg="blue.100"
-            color="blue.600"
-            _dark={{ bg: "blue.900", color: "blue.300" }}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Icon as={FiUsers} boxSize={5} />
-          </Box>
-          <VStack align="start" spacing={0}>
-            <HStack spacing={2}>
-              <Text fontWeight="bold" fontSize="md">
-                {t("components.user.guildContribution.title")}
+    <Box
+      bgColor="bg.card"
+      borderWidth="1px"
+      borderColor="border.subtle"
+      borderRadius="2xl"
+      p={{ base: 4, md: 5 }}
+      bgGradient="linear(to-br, rgba(49, 151, 149, 0.14), transparent 45%)"
+    >
+      <HStack spacing={3} mb={4} align="center">
+        <Box boxSize="36px" flexShrink={0} display="grid" placeItems="center" borderRadius="lg" bg="teal.900" color="teal.200" _light={{ bg: "teal.100", color: "teal.700" }}>
+          <Icon as={FiUsers} boxSize={5} aria-hidden />
+        </Box>
+        <Box minW={0}>
+          <HStack spacing={2} flexWrap="wrap">
+            <Text fontWeight="bold" fontSize="md" color="text.strong">{t("components.user.guildContribution.title")}</Text>
+            {guildName && <Badge colorScheme="teal" variant="subtle" borderRadius="full" textTransform="none">{guildName}</Badge>}
+          </HStack>
+          <Text fontSize="xs" color="text.muted">{t("components.user.guildContribution.subtitle")}</Text>
+        </Box>
+      </HStack>
+
+      {cycleContributionLoading ? (
+        <HStack spacing={4} mb={5}><Skeleton boxSize="112px" borderRadius="full" /><Skeleton h="60px" flex={1} borderRadius="lg" /></HStack>
+      ) : otherGuild ? (
+        <HStack spacing={2} mb={5} flexWrap="wrap">
+          <Badge colorScheme="orange" variant="subtle" borderRadius="full" px={2} py={1}>{t("components.user.guildContribution.differentGuild")}</Badge>
+          <Text fontSize="sm" color="text.muted">{t("components.user.guildContribution.differentGuildNote", { cycle: selectedCycleName ?? "" })}</Text>
+        </HStack>
+      ) : (
+        <HStack spacing={{ base: 4, md: 6 }} mb={5} align="center">
+          <ShareRing pct={cycleStat ? cycleStat.contributionPct : avg} />
+          <VStack align="stretch" spacing={3} flex={1} minW={0}>
+            <Box>
+              <Text fontSize="sm" color="text.muted">
+                {cycleStat ? (selectedCycleName ?? t("components.user.guildContribution.selectedCycle")) : t("components.user.guildContribution.averageLabel")}
               </Text>
-              {guildName && <Text fontSize="sm" color={mutedColor}>— {guildName}</Text>}
-            </HStack>
-            <Text fontSize="xs" color={mutedColor}>
-              {t("components.user.guildContribution.subtitle")}
-            </Text>
+              {cycleStat && delta !== null ? (
+                <Text fontSize="sm" fontWeight="semibold" color={delta >= 0 ? "green.300" : "orange.300"}>
+                  {t("components.user.guildContribution.vsAverage", { delta: `${delta >= 0 ? "+" : ""}${delta}` })}
+                </Text>
+              ) : (
+                <Text fontSize="sm" color="text.muted">{t("components.user.guildContribution.cyclesCount", { count: chartData.length })}</Text>
+              )}
+            </Box>
+            <Grid templateColumns="repeat(2, minmax(0, 1fr))" gap={2}>
+              {cycleStat ? (
+                <>
+                  <Figure label={t("components.user.guildContribution.myTotal")} value={billions(cycleStat.userTotal)} color="teal.300" />
+                  <Figure label={t("components.user.guildContribution.guildTotal")} value={billions(cycleStat.guildTotal)} />
+                </>
+              ) : (
+                <>
+                  {best && <Figure label={t("components.user.guildContribution.bestShare", { cycle: best.name })} value={`${best.pct}%`} color="teal.300" />}
+                  {last && <Figure label={t("components.user.guildContribution.lastShare", { cycle: last.name })} value={`${last.pct}%`} />}
+                </>
+              )}
+            </Grid>
           </VStack>
         </HStack>
+      )}
 
-        <Box
-          mb={5}
-          p={4}
-          borderRadius="xl"
-          bg={cycleBg}
-          border="1px solid"
-          borderColor={useColorModeValue("blue.100", "blue.800")}
-        >
-          {!hasSelectedCycle ? (
-            <Text fontSize="sm" color={mutedColor} textAlign="center" py={1}>
-              {t("components.user.guildContribution.selectCycleHint")}
-            </Text>
-          ) : cycleContributionLoading ? (
-            <HStack spacing={4}>
-              <Skeleton h="44px" w="110px" borderRadius="md" />
-              <Skeleton h="44px" w="90px" borderRadius="md" />
-              <Skeleton h="44px" w="90px" borderRadius="md" />
-            </HStack>
-          ) : cycleInDifferentGuild ? (
-            <HStack spacing={2}>
-              <Badge colorScheme="orange" variant="subtle" fontSize="xs" px={2} py={1} borderRadius="full">
-                {t("components.user.guildContribution.differentGuild")}
-              </Badge>
-              <Text fontSize="xs" color={mutedColor}>
-                {t("components.user.guildContribution.differentGuildNote", { cycle: selectedCycleName ?? "" })}
-              </Text>
-            </HStack>
-          ) : cycleStat ? (
-            <HStack spacing={0} divider={<Divider orientation="vertical" h="40px" />} flexWrap="wrap" gap={3}>
-              <VStack align="start" spacing={0} minW="110px" pr={4}>
-                <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedColor}>
-                  {selectedCycleName ?? t("components.user.guildContribution.selectedCycle")}
-                </Text>
-                <Text fontSize="2xl" fontWeight="extrabold" color={cycleColor} lineHeight="1.1">
-                  {cycleStat.contributionPct}%
-                </Text>
-              </VStack>
-              <VStack align="start" spacing={0} px={4}>
-                <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedColor}>
-                  {t("components.user.guildContribution.myTotal")}
-                </Text>
-                <Text fontSize="lg" fontWeight="bold">
-                  {(cycleStat.userTotal / 1_000_000_000).toFixed(2)}B
-                </Text>
-              </VStack>
-              <VStack align="start" spacing={0} pl={4}>
-                <Text fontSize="2xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedColor}>
-                  {t("components.user.guildContribution.guildTotal")}
-                </Text>
-                <Text fontSize="lg" fontWeight="bold">
-                  {(cycleStat.guildTotal / 1_000_000_000).toFixed(2)}B
-                </Text>
-              </VStack>
-            </HStack>
-          ) : null}
-        </Box>
+      {chartData.length >= 2 && (
+        <>
+          <Text fontSize="sm" fontWeight="semibold" color="text.muted" mb={2}>{t("components.user.guildContribution.historicalHeading")}</Text>
+          <ResponsiveContainer width="100%" height={190}>
+            <BarChart data={chartData} margin={{ top: 16, right: 8, left: -12, bottom: 0 }}>
+              <defs>
+                <linearGradient id="contribution-bar" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#4FD1C5" />
+                  <stop offset="1" stopColor="#2C7A7B" />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+              <XAxis dataKey="name" stroke={axisColor} fontSize={11} tickLine={false} />
+              <YAxis stroke={axisColor} fontSize={11} unit="%" domain={[0, "auto"]} tickLine={false} axisLine={false} />
+              <RechartsTooltip content={<ChartTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+              <ReferenceLine y={avg} stroke="#B794F4" strokeDasharray="4 4" label={{ value: t("components.user.guildContribution.chartAvg", { avg }), fill: "#B794F4", fontSize: 11, position: "insideTopRight" }} />
+              <Bar dataKey="pct" radius={[6, 6, 0, 0]} maxBarSize={42}>
+                {chartData.map((entry) => (
+                  <Cell
+                    key={entry.cycle_id}
+                    fill={entry.cycle_id === selectedCycleId ? "#B794F4" : "url(#contribution-bar)"}
+                    opacity={entry.cycle_id === selectedCycleId || entry.pct >= avg ? 1 : 0.5}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </>
+      )}
 
-        {chartData.length >= 2 && (
-          <>
-            <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" color={mutedColor} mb={3}>
-              {t("components.user.guildContribution.historicalHeading")}
-            </Text>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                <XAxis dataKey="name" stroke={textColor} fontSize={11} />
-                <YAxis stroke={textColor} fontSize={11} unit="%" domain={[0, "auto"]} />
-                <RechartsTooltip content={<CustomTooltip />} />
-                <ReferenceLine
-                  y={avg}
-                  stroke="#9F7AEA"
-                  strokeDasharray="4 4"
-                  label={{ value: `moy. ${avg}%`, fill: "#9F7AEA", fontSize: 11 }}
-                />
-                <Bar dataKey="pct" radius={[4, 4, 0, 0]}>
-                  {chartData.map((entry, i) => {
-                    const isSelected = entry.cycle_id === selectedCycleId;
-                    const base = entry.pct >= avg ? "#38A169" : "#E53E3E";
-                    return (
-                      <Cell
-                        key={i}
-                        fill={isSelected ? "#9F7AEA" : base}
-                        opacity={isSelected ? 1 : 0.75}
-                        stroke={isSelected ? "#7C3AED" : undefined}
-                        strokeWidth={isSelected ? 2 : 0}
-                      />
-                    );
-                  })}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </>
-        )}
-
-        <HStack spacing={1.5} mt={4} pt={3} borderTop="1px solid" borderColor="bg.inset">
-          <Icon as={FiInfo} boxSize={3} color={noteColor} flexShrink={0} />
-          <Text fontSize="2xs" color={noteColor}>
-            {t("components.user.guildContribution.note")}
-          </Text>
-        </HStack>
-      </CardBody>
-    </Card>
+      <HStack spacing={1.5} mt={3} pt={3} borderTopWidth="1px" borderColor="border.subtle" align="start">
+        <Icon as={FiInfo} boxSize={3} color="text.muted" flexShrink={0} mt={0.5} aria-hidden />
+        <Text fontSize="xs" color="text.muted">{t("components.user.guildContribution.note")}</Text>
+      </HStack>
+    </Box>
   );
 };

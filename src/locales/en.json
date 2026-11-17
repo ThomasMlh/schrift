@@ -175,7 +175,8 @@
       "seeCycle": "View cycle",
       "rotationCount_one": "{{count}} rotation",
       "rotationCount_other": "{{count}} rotations",
-      "stripLabel": "Cycle rotations"
+      "stripLabel": "Cycle rotations",
+      "loading": "Loading cycles…"
     },
     "cycleDetail": {
       "backToCycles": "Back to cycles",
@@ -399,12 +400,6 @@
       "statAverageMLabel": "Average Score",
       "statTotalPointsBLabel": "Total Points",
       "statBestScoreRecord": "Best Score",
-      "recordsSubtitle": "Best score on each killer, across all cycles",
-      "recordsKiller": "Killer",
-      "recordsScore": "Record",
-      "recordsCycle": "Set in",
-      "recordsAttempts": "Attempts",
-      "recordsEmpty": "No record for this account",
       "tabAchievements": "Achievements",
       "tabAlbum": "Album",
       "albumTitle": "Character album",
@@ -970,7 +965,8 @@
       "paginationInfo": "Page {{current}} of {{total}} - Displaying {{count}} player(s)",
       "playersWithMiss": "{{count}} player(s) with miss",
       "playersTotal": "{{count}} player(s) in total",
-      "progressionTooltip": "Average: {{previous}} → {{current}}"
+      "progressionTooltip": "Average: {{previous}} → {{current}}",
+      "restOfRanking": "Full ranking"
     },
     "scoresSection": {
       "heading": "Score Management",
@@ -1201,22 +1197,19 @@
         "labelAvgPerCycle": "avg. / cycle",
         "chartAvg": "Avg. {{avg}}%",
         "subtitle": "Cumulated scores in the current guild, per cycle",
-        "selectCycleHint": "Select a cycle to see your contribution for that period",
         "differentGuild": "Different guild",
         "differentGuildNote": "The player was not in this guild during cycle {{cycle}}",
         "selectedCycle": "Selected cycle",
         "myTotal": "My total",
         "guildTotal": "Guild total",
         "historicalHeading": "History by cycle",
-        "note": "Only cycles played in your current guild are included. Switching guild mid-cycle may result in slight inaccuracies."
-      },
-      "performances": {
-        "headingAvgByRotation": "Average Scores by Rotation",
-        "subtitleAllRotations": "All your rotations sorted by descending average score",
-        "notePerformance": "💡 The performance percentage is calculated relative to your best rotation (100%). A rotation at 80% means it achieves 80% of the average score of your best rotation.",
-        "noData": "Not enough data available",
-        "headingByType": "Analysis by Type",
-        "subtitleByType": "Aggregated performances by killer, attack type and status effect"
+        "note": "Only cycles played in your current guild are included. Switching guild mid-cycle may result in slight inaccuracies.",
+        "averageLabel": "Average share per cycle",
+        "cyclesCount_one": "over {{count}} cycle",
+        "cyclesCount_other": "over {{count}} cycles",
+        "bestShare": "Best share · {{cycle}}",
+        "lastShare": "Last cycle · {{cycle}}",
+        "vsAverage": "{{delta}} pt vs their average"
       },
       "positionPerformance": {
         "title": "Performance by cycle period",
@@ -1238,25 +1231,24 @@
         "detailHeading": "📊 Rotation details"
       },
       "rivals": {
-        "heading": "Leaderboard Rivals",
-        "subtitle": "Players close to your ranking",
-        "youBadge": "✨ YOU",
-        "positionAbove": "ahead",
-        "positionBelow": "behind",
-        "labelAvgScore": "Average score"
+        "heading": "Ranking rivals",
+        "subtitle": "The players just ahead and just behind in the global ranking",
+        "youBadge": "You",
+        "labelAvgScore": "Average score",
+        "nextTarget": "Next to overtake: {{name}},",
+        "toGo": "{{gap}} to go",
+        "leader": "Leading the ranking",
+        "aheadBy": "{{gap}} ahead",
+        "behindBy": "{{gap}} behind"
       },
       "statsOverview": {
-        "dateUnknown": "Unknown",
-        "labelBestScore": "Best Score",
-        "labelWorstScore": "Score to Improve",
-        "labelBestCycle": "Best Cycle",
-        "avgShort": "Avg:",
-        "labelSeniority": "Seniority",
+        "labelBestCycle": "Best cycle",
+        "labelSeniority": "Member since",
         "daysAgo_one": "{{count}} day ago",
         "daysAgo_other": "{{count}} days ago",
-        "labelBuilds": "Builds Created",
+        "labelBuilds": "Builds created",
         "communityContrib": "Community contribution",
-        "labelMissRate": "Miss Rate",
+        "labelMissRate": "Miss rate",
         "missDetail": "{{missCount}} score{{scoreS}} at 0 out of {{totalScores}} rotation{{rotationS}}",
         "consistencyVeryRegular": "Very consistent",
         "consistencyRegular": "Consistent",
@@ -1264,9 +1256,14 @@
         "labelConsistency": "Consistency",
         "tooltipMedianScore": "Central value of all your scores — less sensitive to extremes than the average",
         "tooltipConsistency": "Coefficient of variation: standard deviation / mean. Lower = more consistent.",
-        "labelMedianScore": "Median Score",
+        "labelMedianScore": "Median score",
         "vsMean": "vs average",
-        "labelCyclesPlayed": "Cycles Played"
+        "labelCyclesPlayed": "Cycles played",
+        "title": "At a glance",
+        "bestCycleDetail_one": "Average {{average}} over {{count}} rotation",
+        "bestCycleDetail_other": "Average {{average}} over {{count}} rotations",
+        "cyclesFull_one": "{{count}} full cycle (20 rotations)",
+        "cyclesFull_other": "{{count}} full cycles (20 rotations)"
       },
       "temporalEvolution": {
         "heading": "Temporal Evolution",
@@ -1293,46 +1290,38 @@
         "evolutionNoteMonthly": "💡 Each point is the average of the rotations played in the month, as in the monthly podium.",
         "inProgress": "in progress"
       },
-      "topRotations": {
-        "bestRotationTitle": "Best Rotation",
-        "worstRotationTitle": "Rotation to Improve",
-        "bestScoreLabel": "🌟 Best Score:",
-        "worstScoreLabel": "📊 Worst Score:",
-        "detailHeading": "📋 Rotation detail",
-        "detailSubtitle": "All rotations of the selected cycle, sorted by position",
-        "colRank": "#",
-        "colKiller": "Killer",
-        "colType": "Type",
-        "colAvgScore": "Average score",
-        "colParticipations": "Participations",
-        "badgeBest": "🏆 Best",
-        "badgeWorst": "📉 Worst"
-      },
       "ranking": {
-        "globalRanking": "🌍 Global Ranking",
-        "outOf_one": "Out of {{count}} player",
-        "outOf_other": "Out of {{count}} players",
+        "globalRanking": "Global ranking",
+        "outOf_one": "of {{count}} player",
+        "outOf_other": "of {{count}} players",
         "topPercent": "Top {{pct}}%",
-        "gapWithTop1": "-{{gap}}M from top 1",
-        "guildRanking": "👥 {{name}} Ranking",
-        "outOfMembers_one": "Out of {{count}} member",
-        "outOfMembers_other": "Out of {{count}} members"
+        "gapWithTop1": "−{{gap}}M behind 1st",
+        "guildRanking": "{{name}} ranking",
+        "outOfMembers_one": "of {{count}} member",
+        "outOfMembers_other": "of {{count}} members",
+        "gapHelp": "Average score gap with the leader",
+        "leader": "Leading the ranking"
       },
       "rotationDetailCard": {
         "labelAverage": "Average:",
         "labelParticipations": "Participations:",
         "labelTotal": "Total:"
       },
-      "typeAnalysis": {
-        "noData": "Not enough data for type analysis",
-        "headingAttacks": "R vs B Attacks",
-        "headingAlteration": "Performance by Status Effect",
-        "attackRed": "Red Attacks",
-        "attackBlue": "Blue Attacks",
-        "rotShort": "rot.",
-        "bestOnLabel": "Best on",
-        "red": "Red",
-        "blue": "Blue"
+      "killers": {
+        "title": "By killer",
+        "subtitle": "Average and record on each killer, all cycles",
+        "subtitleCycle": "Average over the chosen cycle, record over all cycles",
+        "sort_average": "Average",
+        "sort_record": "Record",
+        "sort_name": "Name",
+        "colKiller": "Killer",
+        "colAverage": "Average",
+        "colRecord": "Record",
+        "colAttempts": "Attempts",
+        "best": "Best average",
+        "toWork": "To work on",
+        "noAverage": "Not played this cycle",
+        "empty": "No score for this account"
       }
     },
     "customSelect": {

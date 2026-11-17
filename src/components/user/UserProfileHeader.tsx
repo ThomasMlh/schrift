@@ -15,8 +15,10 @@ interface UserProfileHeaderProps {
   cycleControl?: ReactNode;
   // Account switcher (alts), shown below the role
   accountSwitcher?: ReactNode;
-  // Follow button, shown next to the name
+  // Follow button, shown on the right next to the cycle selector
   followControl?: ReactNode;
+  // Key figures, as a band across the bottom of the header
+  stats?: ReactNode;
 }
 
 const getRoleBadgeColor = (role: string) => {
@@ -34,7 +36,7 @@ const getRoleBadgeColor = (role: string) => {
 
 // Player page header: Discord banner (or gradient), avatar, name, top achievement, guild and role,
 // with the cycle and account selectors.
-export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountSwitcher, followControl }: UserProfileHeaderProps) => {
+export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountSwitcher, followControl, stats }: UserProfileHeaderProps) => {
   const { t } = useTranslation();
   const bannerUrl = user.discord_id && user.banner ? getDiscordBannerUrl(user.discord_id, user.banner) : null;
   const avatarUrl = user.avatar && user.discord_id
@@ -57,11 +59,11 @@ export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountS
       overflow="hidden"
       mb={6}
     >
-      {/* Taller strip when the Discord banner loads (600×240); otherwise a thin gradient line, including when the Discord image is gone (stale hash) */}
+      {/* Taller strip when the Discord banner loads (600×240); otherwise a gradient band, including when the Discord image is gone (stale hash) */}
       <Box
         position="relative"
-        h={hasBanner ? { base: "140px", sm: "180px", md: "240px" } : { base: "90px", md: "120px" }}
-        bgGradient="linear(to-r, purple.600, blue.500)"
+        h={hasBanner ? { base: "140px", sm: "180px", md: "240px" } : { base: "110px", md: "160px" }}
+        bgGradient="linear(120deg, #44337a, purple.600 55%, blue.600)"
         transition="height 0.2s"
       >
         {bannerUrl && !bannerFailed && (
@@ -91,7 +93,7 @@ export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountS
             size={{ base: "xl", md: "2xl" }}
             src={avatarUrl}
             name={displayName}
-            mt={{ base: -10, md: -14 }}
+            mt={{ base: -10, md: -16 }}
             borderWidth="4px"
             borderColor="bg.card"
             flexShrink={0}
@@ -110,7 +112,6 @@ export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountS
                 {displayName}
               </Text>
               <TopAchievementBadge achievement={topAchievement} size={26} />
-              {followControl}
             </HStack>
             <HStack spacing={2} flexWrap="wrap">
               {user.guilde_id ? (
@@ -135,17 +136,19 @@ export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountS
                   {t("pages.user.badgeBanned")}
                 </Badge>
               )}
+              {accountSwitcher}
             </HStack>
-            {accountSwitcher}
           </VStack>
         </Flex>
 
-        {cycleControl && (
-          <Box w={{ base: "100%", md: "260px" }} flexShrink={0}>
-            {cycleControl}
-          </Box>
+        {(cycleControl || followControl) && (
+          <Flex gap={3} align="flex-end" w={{ base: "100%", md: "auto" }} flexShrink={0}>
+            {followControl && <Box flexShrink={0}>{followControl}</Box>}
+            {cycleControl && <Box flex={1} w={{ md: "240px" }}>{cycleControl}</Box>}
+          </Flex>
         )}
       </Flex>
+      {stats}
     </Box>
   );
 };
