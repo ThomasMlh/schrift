@@ -1244,12 +1244,15 @@
         "detailHeading": "📊 Détail des rotations"
       },
       "rivals": {
-        "heading": "Rivaux au Classement",
-        "subtitle": "Joueurs proches de votre classement",
-        "youBadge": "✨ VOUS",
-        "positionAbove": "devant",
-        "positionBelow": "derrière",
-        "labelAvgScore": "Score moyen"
+        "heading": "Rivaux au classement",
+        "subtitle": "Les joueurs juste devant et juste derrière au classement global",
+        "youBadge": "Toi",
+        "labelAvgScore": "Score moyen",
+        "nextTarget": "Prochain à dépasser : {{name}},",
+        "toGo": "encore {{gap}}",
+        "leader": "1er du classement",
+        "aheadBy": "{{gap}} devant",
+        "behindBy": "{{gap}} derrière"
       },
       "statsOverview": {
         "labelBestCycle": "Meilleur cycle",

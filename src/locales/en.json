@@ -1244,12 +1244,15 @@
         "detailHeading": "📊 Rotation details"
       },
       "rivals": {
-        "heading": "Leaderboard Rivals",
-        "subtitle": "Players close to your ranking",
-        "youBadge": "✨ YOU",
-        "positionAbove": "ahead",
-        "positionBelow": "behind",
-        "labelAvgScore": "Average score"
+        "heading": "Ranking rivals",
+        "subtitle": "The players just ahead and just behind in the global ranking",
+        "youBadge": "You",
+        "labelAvgScore": "Average score",
+        "nextTarget": "Next to overtake: {{name}},",
+        "toGo": "{{gap}} to go",
+        "leader": "Leading the ranking",
+        "aheadBy": "{{gap}} ahead",
+        "behindBy": "{{gap}} behind"
       },
       "statsOverview": {
         "labelBestCycle": "Best cycle",
