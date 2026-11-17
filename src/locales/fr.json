@@ -1204,14 +1204,19 @@
         "labelAvgPerCycle": "moy. / cycle",
         "chartAvg": "Moy. {{avg}}%",
         "subtitle": "Scores cumulés dans la guilde actuelle, par cycle",
-        "selectCycleHint": "Sélectionnez un cycle pour voir votre contribution sur cette période",
         "differentGuild": "Autre guilde",
         "differentGuildNote": "Le joueur n'était pas dans cette guilde lors du cycle {{cycle}}",
         "selectedCycle": "Cycle sélectionné",
         "myTotal": "Mon total",
         "guildTotal": "Total guilde",
         "historicalHeading": "Historique par cycle",
-        "note": "Seuls les cycles joués dans ta guilde actuelle sont pris en compte. Un changement de guilde en cours de cycle peut entraîner de légères imprécisions."
+        "note": "Seuls les cycles joués dans ta guilde actuelle sont pris en compte. Un changement de guilde en cours de cycle peut entraîner de légères imprécisions.",
+        "averageLabel": "Part moyenne par cycle",
+        "cyclesCount_one": "sur {{count}} cycle",
+        "cyclesCount_other": "sur {{count}} cycles",
+        "bestShare": "Meilleure part · {{cycle}}",
+        "lastShare": "Dernier cycle · {{cycle}}",
+        "vsAverage": "{{delta}} pt par rapport à sa moyenne"
       },
       "performances": {
         "headingAvgByRotation": "Scores Moyens par Rotation",

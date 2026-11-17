@@ -1204,14 +1204,19 @@
         "labelAvgPerCycle": "avg. / cycle",
         "chartAvg": "Avg. {{avg}}%",
         "subtitle": "Cumulated scores in the current guild, per cycle",
-        "selectCycleHint": "Select a cycle to see your contribution for that period",
         "differentGuild": "Different guild",
         "differentGuildNote": "The player was not in this guild during cycle {{cycle}}",
         "selectedCycle": "Selected cycle",
         "myTotal": "My total",
         "guildTotal": "Guild total",
         "historicalHeading": "History by cycle",
-        "note": "Only cycles played in your current guild are included. Switching guild mid-cycle may result in slight inaccuracies."
+        "note": "Only cycles played in your current guild are included. Switching guild mid-cycle may result in slight inaccuracies.",
+        "averageLabel": "Average share per cycle",
+        "cyclesCount_one": "over {{count}} cycle",
+        "cyclesCount_other": "over {{count}} cycles",
+        "bestShare": "Best share · {{cycle}}",
+        "lastShare": "Last cycle · {{cycle}}",
+        "vsAverage": "{{delta}} pt vs their average"
       },
       "performances": {
         "headingAvgByRotation": "Average Scores by Rotation",

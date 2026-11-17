@@ -17,12 +17,29 @@ const millions = (value: number) => `${(value / 1000000).toFixed(2)}M`;
 const STATUS_COLORS = { good: "green.400", fair: "yellow.400", bad: "red.400" } as const;
 type Status = keyof typeof STATUS_COLORS;
 
-const Tile = ({ icon, label, value, detail, help, status, span = 1, children }: {
-  icon: IconType; label: string; value: string; detail?: string; help?: string; status?: Status; span?: number; children?: React.ReactNode;
+// Tint of each tile: its icon chip and a light wash from the top left corner
+const TINTS: Record<string, string> = {
+  purple: "128, 90, 213", cyan: "0, 163, 196", green: "56, 161, 105", yellow: "214, 158, 46", red: "229, 62, 62",
+  teal: "49, 151, 149", blue: "49, 130, 206", orange: "221, 107, 32",
+};
+
+const Tile = ({ icon, label, value, detail, help, status, tint, span = 1, children }: {
+  icon: IconType; label: string; value: string; detail?: string; help?: string; status?: Status; tint: string; span?: number; children?: React.ReactNode;
 }) => (
-  <GridItem colSpan={{ base: Math.min(span, 2), md: span }} bg="bg.subtle" borderRadius="xl" p={4} minW={0}>
+  <GridItem
+    colSpan={{ base: Math.min(span, 2), md: span }}
+    bgColor="bg.subtle"
+    bgGradient={`linear(to-br, rgba(${TINTS[tint]}, 0.16), transparent 70%)`}
+    borderWidth="1px"
+    borderColor={`rgba(${TINTS[tint]}, 0.25)`}
+    borderRadius="xl"
+    p={4}
+    minW={0}
+  >
     <HStack spacing={2} color="text.muted" mb={2}>
-      <Icon as={icon} boxSize={4} aria-hidden />
+      <Box p={1.5} borderRadius="md" bg={`${tint}.900`} color={`${tint}.200`} _light={{ bg: `${tint}.100`, color: `${tint}.700` }} display="grid" placeItems="center">
+        <Icon as={icon} boxSize={4} aria-hidden />
+      </Box>
       <Tooltip label={help} isDisabled={!help} hasArrow placement="top">
         <Text fontSize="sm" fontWeight="semibold" noOfLines={1} cursor={help ? "help" : undefined} borderBottom={help ? "1px dotted" : undefined} borderColor="border.strong">
           {label}
@@ -69,6 +86,7 @@ export const UserStatsOverview = ({ stats, guildName, hasGuild }: UserStatsOverv
           {stats.bestCycle && (
             <Tile
               icon={FiAward}
+              tint="purple"
               span={2}
               label={t("components.user.statsOverview.labelBestCycle")}
               value={stats.bestCycle.cycle_name || "Cycle"}
@@ -81,6 +99,7 @@ export const UserStatsOverview = ({ stats, guildName, hasGuild }: UserStatsOverv
           {stats.medianScore !== undefined && (
             <Tile
               icon={FiBarChart2}
+              tint="cyan"
               label={t("components.user.statsOverview.labelMedianScore")}
               help={t("components.user.statsOverview.tooltipMedianScore")}
               value={millions(stats.medianScore)}
@@ -90,6 +109,7 @@ export const UserStatsOverview = ({ stats, guildName, hasGuild }: UserStatsOverv
           {stats.consistencyScore !== undefined && (
             <Tile
               icon={FiActivity}
+              tint={consistency === "good" ? "green" : consistency === "fair" ? "yellow" : "red"}
               label={t("components.user.statsOverview.labelConsistency")}
               help={t("components.user.statsOverview.tooltipConsistency")}
               status={consistency}
@@ -100,6 +120,7 @@ export const UserStatsOverview = ({ stats, guildName, hasGuild }: UserStatsOverv
           {stats.missRate !== undefined && (
             <Tile
               icon={FiAlertTriangle}
+              tint={miss === "good" ? "green" : miss === "fair" ? "yellow" : "red"}
               label={t("components.user.statsOverview.labelMissRate")}
               status={miss}
               value={`${stats.missRate}%`}
@@ -113,6 +134,7 @@ export const UserStatsOverview = ({ stats, guildName, hasGuild }: UserStatsOverv
           )}
           <Tile
             icon={FiCheckCircle}
+            tint="teal"
             label={t("components.user.statsOverview.labelCyclesPlayed")}
             value={String(cyclesPlayed)}
             detail={stats.cyclesWithFullParticipation !== undefined
@@ -122,6 +144,7 @@ export const UserStatsOverview = ({ stats, guildName, hasGuild }: UserStatsOverv
           {stats.firstParticipation && (
             <Tile
               icon={FiCalendar}
+              tint="blue"
               label={t("components.user.statsOverview.labelSeniority")}
               value={new Date(stats.firstParticipation).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}
               detail={daysSinceFirst !== null ? t("components.user.statsOverview.daysAgo", { count: daysSinceFirst }) : undefined}
@@ -130,6 +153,7 @@ export const UserStatsOverview = ({ stats, guildName, hasGuild }: UserStatsOverv
           {stats.buildsCount !== undefined && (
             <Tile
               icon={FiTool}
+              tint="orange"
               label={t("components.user.statsOverview.labelBuilds")}
               value={String(stats.buildsCount)}
               detail={t("components.user.statsOverview.communityContrib")}
