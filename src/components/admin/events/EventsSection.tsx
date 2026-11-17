@@ -14,6 +14,7 @@ import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal
 import { QuestionForm } from "./QuestionForm";
 import { MediaLibrary } from "./MediaLibrary";
 import { QuizParticipants } from "./QuizParticipants";
+import { AdventEditor } from "./AdventEditor";
 
 const Panel = ({ children, ...props }: React.ComponentProps<typeof Box>) => (
   <Box bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="xl" p={4} {...props}>{children}</Box>
@@ -34,6 +35,8 @@ const EventModal = ({ event, onClose, onSaved }: { event: Partial<ISiteEvent>; o
     kind: event.kind ?? "anniversary",
     start: toLocalInput(event.start_at),
     end: toLocalInput(event.end_at),
+    badge: event.badge_name ?? "",
+    advent: event.advent ?? { enabled: false, days: 24, points: 10 },
   });
   const [saving, setSaving] = useState(false);
   const save = async () => {
@@ -43,6 +46,8 @@ const EventModal = ({ event, onClose, onSaved }: { event: Partial<ISiteEvent>; o
         _id: form._id, name: form.name, kind: form.kind, description: form.description ?? "",
         start_at: form.start ? new Date(form.start).toISOString() : "",
         end_at: form.end ? new Date(form.end).toISOString() : "",
+        badge_name: form.badge.trim() || null,
+        advent: form.advent,
       });
       onSaved(saved);
       onClose();
@@ -86,6 +91,38 @@ const EventModal = ({ event, onClose, onSaved }: { event: Partial<ISiteEvent>; o
               <FormLabel>Description</FormLabel>
               <Textarea rows={3} value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             </FormControl>
+            <FormControl>
+              <FormLabel>Badge des participants</FormLabel>
+              <Input value={form.badge} placeholder="Anniversaire 2026" maxLength={60} onChange={(e) => setForm({ ...form, badge: e.target.value })} />
+              <FormHelperText>
+                Édition limitée : gagné en terminant un quiz ou en répondant à une case du calendrier, seulement entre les dates de l'événement. Vide : pas de badge.
+              </FormHelperText>
+            </FormControl>
+            <Box w="100%" borderWidth="1px" borderColor="border.subtle" borderRadius="lg" p={3}>
+              <FormControl display="flex" alignItems="center" gap={3}>
+                <Switch id="advent-enabled" isChecked={form.advent.enabled} onChange={(e) => setForm({ ...form, advent: { ...form.advent, enabled: e.target.checked } })} />
+                <FormLabel htmlFor="advent-enabled" mb={0}>Calendrier de l'Avent</FormLabel>
+              </FormControl>
+              {form.advent.enabled && (
+                <Grid templateColumns="1fr 1fr" gap={3} mt={3}>
+                  <FormControl>
+                    <FormLabel fontSize="sm">Nombre de cases</FormLabel>
+                    <NumberInput size="sm" min={1} max={31} value={form.advent.days} onChange={(_, v) => setForm({ ...form, advent: { ...form.advent, days: Number.isFinite(v) ? v : 24 } })}>
+                      <NumberInputField />
+                    </NumberInput>
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel fontSize="sm">Points par case</FormLabel>
+                    <NumberInput size="sm" min={1} max={100} value={form.advent.points} onChange={(_, v) => setForm({ ...form, advent: { ...form.advent, points: Number.isFinite(v) ? v : 10 } })}>
+                      <NumberInputField />
+                    </NumberInput>
+                  </FormControl>
+                  <FormHelperText gridColumn="1 / -1" mt={0}>
+                    Une case s'ouvre chaque jour à l'heure de début. Le jour même elle rapporte tous ses points, plus tard la moitié.
+                  </FormHelperText>
+                </Grid>
+              )}
+            </Box>
           </VStack>
         </ModalBody>
         <ModalFooter gap={2}>
@@ -381,6 +418,13 @@ export const EventsSection = () => {
           </Text>
         )}
       </Panel>
+
+      {event?.advent?.enabled && (
+        <Panel>
+          <Text fontWeight="extrabold" fontSize="lg" mb={3}>Calendrier de l'Avent</Text>
+          <AdventEditor key={event._id} event={event} />
+        </Panel>
+      )}
 
       {event && (quizzes.length === 0 ? (
         <Panel>

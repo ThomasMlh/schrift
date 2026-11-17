@@ -792,7 +792,47 @@
       "myResult": "Ton résultat",
       "bonusOf": "bonus chrono (max {{max}})",
       "missed": "temps écoulé",
-      "answer": "Réponse :"
+      "answer": "Réponse :",
+      "badgeEyebrow": "Badge en édition limitée",
+      "badgeEarned": "Tu l'as obtenu ! Il est affiché dans les succès de ton profil.",
+      "badgeHow": "Termine le quiz ou réponds à une case du calendrier pendant l'événement pour l'obtenir. Il ne sera plus disponible ensuite.",
+      "badgeClosed": "L'événement est terminé : ce badge n'est plus disponible."
+    },
+    "advent": {
+      "eyebrow": "Une case par jour",
+      "title": "Calendrier de l'Avent",
+      "intro": "Chaque jour, un perso se cache derrière une case : devine qui c'est à partir de l'indice. {{points}} points le jour même, {{half}} si tu réponds plus tard. Une seule réponse par case.",
+      "case": "Case {{day}}",
+      "today": "Aujourd'hui",
+      "opensOn": "S'ouvre le {{date}}",
+      "openHint": "Ouverte : à toi de jouer",
+      "lateHint": "En retard : moitié des points",
+      "result_correct": "Bonne réponse",
+      "result_wrong": "Raté",
+      "result_pending": "Presque : en attente de validation",
+      "clue_silhouette": "Silhouette",
+      "clue_zoom": "Zoom",
+      "clue_blur": "Image floutée",
+      "clue_quote": "Citation",
+      "clueAlt": "Indice du jour",
+      "worth_one": "{{count}} point",
+      "worth_other": "{{count}} points",
+      "points_one": "{{count}} pt",
+      "points_other": "{{count}} pts",
+      "answerWas": "C'était",
+      "yourAnswer": "Ta réponse : {{answer}}",
+      "placeholder": "Nom du perso",
+      "send": "Valider",
+      "oneTry": "Une seule réponse : l'orthographe exacte n'est pas exigée.",
+      "lateWarning": "Cette case est passée : une bonne réponse ne rapporte plus que la moitié des points.",
+      "rankings": "Classement du calendrier",
+      "ranking_all": "Général",
+      "ranking_guild": "En guilde",
+      "ranking_free": "Hors guilde",
+      "noPlayer": "Personne n'a encore joué.",
+      "player": "Joueur",
+      "found": "Trouvés",
+      "pts": "Pts"
     }
   },
   "components": {
@@ -1572,7 +1612,8 @@
       "regularity": "Régularité",
       "progression": "Progression",
       "podium": "Podium",
-      "versatility": "Polyvalence"
+      "versatility": "Polyvalence",
+      "events": "Événements"
     },
     "first_step": {
       "name": "Premier pas",
@@ -1681,6 +1722,13 @@
     "versatile": {
       "name": "Touche-à-tout",
       "description": "Clear sur des killers différents"
+    },
+    "eventBadge": {
+      "limited": "Édition limitée",
+      "tooltip": "Obtenu en participant à « {{event}} »",
+      "earned": "Obtenu le {{date}}",
+      "holders_one": "{{count}} joueur l'a",
+      "holders_other": "{{count}} joueurs l'ont"
     }
   }
 }
