@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { keyframes } from "@emotion/react";
 import {
   Alert, AlertIcon, Badge, Box, Button, ButtonGroup, Flex, Grid, HStack, Image, Input, Modal, ModalBody, ModalCloseButton,
   ModalContent, ModalHeader, ModalOverlay, Skeleton, Table, Tbody, Td, Text, Th, Thead, Tooltip, Tr, VStack,
@@ -15,6 +16,22 @@ type Ranking = "all" | "guild" | "free";
 const RESULT_COLORS = { correct: "green", wrong: "red", pending: "orange" } as const;
 const RESULT_MARKS = { correct: "✓", wrong: "✗", pending: "…" } as const;
 
+// Gift wrap colours of the cases, mixed so that neighbours differ
+const WRAPS = ["#9B1C31", "#1F5E3B", "#2B3A7A", "#7A1F5C", "#B4462B", "#145a5a"];
+const wrapOf = (day: number) => WRAPS[(day * 5) % WRAPS.length];
+// Snowflakes printed on the paper
+const SNOW = [
+  "radial-gradient(circle at 18% 22%, rgba(255,255,255,0.35) 0 1.2px, transparent 1.8px)",
+  "radial-gradient(circle at 72% 64%, rgba(255,255,255,0.25) 0 1px, transparent 1.6px)",
+  "radial-gradient(circle at 40% 82%, rgba(255,255,255,0.2) 0 1.4px, transparent 2px)",
+].join(", ");
+const RIBBON = "linear-gradient(90deg, #a16207, #fde68a 50%, #a16207)";
+const RIBBON_H = "linear-gradient(180deg, #a16207, #fde68a 50%, #a16207)";
+const glow = keyframes`
+  0%, 100% { box-shadow: 0 0 0 3px rgba(253, 230, 138, 0.35), 0 0 14px rgba(253, 230, 138, 0.25); }
+  50% { box-shadow: 0 0 0 3px rgba(253, 230, 138, 0.7), 0 0 26px rgba(253, 230, 138, 0.55); }
+`;
+
 const Door = ({ day, onOpen }: { day: IAdventDay; onOpen: () => void }) => {
   const { t, i18n } = useTranslation();
   // A case whose day has come but that is not filled yet cannot be opened either
@@ -25,6 +42,7 @@ const Door = ({ day, onOpen }: { day: IAdventDay; onOpen: () => void }) => {
     : locked ? t("pages.advent.opensOn", { date: opens })
     : day.mine ? t(`pages.advent.result_${day.mine.result}`)
       : day.state === "late" ? t("pages.advent.lateHint") : t("pages.advent.openHint");
+  const answered = Boolean(day.mine);
   return (
     <Tooltip label={label} hasArrow>
       <Box
@@ -36,27 +54,65 @@ const Door = ({ day, onOpen }: { day: IAdventDay; onOpen: () => void }) => {
         position="relative"
         aspectRatio="1"
         borderRadius="xl"
-        borderWidth={today ? "2px" : "1px"}
-        borderColor={today ? "orange.300" : "whiteAlpha.300"}
-        bg={locked ? "blackAlpha.300" : today ? "whiteAlpha.300" : "whiteAlpha.200"}
-        color="white"
+        bg={wrapOf(day.day)}
+        bgImage={SNOW}
+        bgSize="22px 22px, 30px 30px, 26px 26px"
         cursor={locked ? "default" : "pointer"}
-        opacity={locked ? 0.55 : 1}
-        boxShadow={today ? "0 0 0 4px rgba(251, 211, 141, 0.25)" : undefined}
+        filter={locked ? "saturate(0.35) brightness(0.7)" : undefined}
+        boxShadow="inset 0 0 0 1px rgba(255,255,255,0.12), 0 4px 10px rgba(0,0,0,0.25)"
+        animation={today && !answered ? `${glow} 2.4s ease-in-out infinite` : undefined}
         transition="transform 0.15s"
-        _hover={locked ? undefined : { transform: "translateY(-2px)" }}
+        _hover={locked ? undefined : { transform: "translateY(-3px) rotate(-1deg)" }}
         overflow="hidden"
       >
-        {day.character && (
-          <Image src={characterImageUrl(day.character, "thumb")} alt="" position="absolute" inset={0} w="100%" h="100%" objectFit="cover" opacity={0.45} />
+        {/* Ribbon crossing the gift */}
+        <Box position="absolute" top={0} bottom={0} left="50%" w="14%" transform="translateX(-50%)" bg={RIBBON} opacity={0.9} />
+        <Box position="absolute" left={0} right={0} top="50%" h="14%" transform="translateY(-50%)" bg={RIBBON_H} opacity={0.9} />
+        {day.character ? (
+          <Image src={characterImageUrl(day.character, "thumb")} alt="" position="absolute" inset={0} w="100%" h="100%" objectFit="cover" opacity={0.85} />
+        ) : (
+          <Image
+            src="/logo.png"
+            alt=""
+            position="absolute"
+            top="50%"
+            left="50%"
+            transform="translate(-50%, -50%)"
+            w="44%"
+            h="44%"
+            borderRadius="full"
+            filter={answered ? "grayscale(0.4) brightness(0.85)" : "drop-shadow(0 2px 4px rgba(0,0,0,0.45))"}
+            draggable={false}
+          />
         )}
-        <Text position="relative" fontSize={{ base: "xl", md: "2xl" }} fontWeight="extrabold" sx={{ fontVariantNumeric: "tabular-nums" }}>{day.day}</Text>
+        {/* Number tag */}
+        <Box
+          position="absolute"
+          top={1.5}
+          left={1.5}
+          bg="whiteAlpha.900"
+          color="gray.800"
+          borderRadius="md"
+          px={1.5}
+          minW="22px"
+          fontSize={{ base: "xs", md: "sm" }}
+          fontWeight="extrabold"
+          lineHeight="1.6"
+          boxShadow="0 1px 3px rgba(0,0,0,0.3)"
+          sx={{ fontVariantNumeric: "tabular-nums" }}
+        >
+          {day.day}
+        </Box>
         {day.mine && (
           <Badge position="absolute" top={1.5} right={1.5} colorScheme={RESULT_COLORS[day.mine.result]} variant="solid" borderRadius="full" px={1.5}>
             {RESULT_MARKS[day.mine.result]}
           </Badge>
         )}
-        {today && !day.mine && <Text position="absolute" bottom={1} left={0} right={0} fontSize="2xs" fontWeight="bold" textTransform="uppercase" color="orange.200">{t("pages.advent.today")}</Text>}
+        {today && !answered && (
+          <Text position="absolute" bottom={0} left={0} right={0} py={0.5} bg="blackAlpha.500" fontSize="2xs" fontWeight="bold" textTransform="uppercase" color="yellow.200" letterSpacing="wide">
+            {t("pages.advent.today")}
+          </Text>
+        )}
       </Box>
     </Tooltip>
   );
@@ -189,11 +245,22 @@ export const AdventCalendar = ({ eventId }: { eventId: string }) => {
   const total = data.days.reduce((sum, d) => sum + (d.mine?.points ?? 0), 0);
   return (
     <Grid templateColumns={{ base: "1fr", lg: "1.4fr 1fr" }} gap={5} alignItems="start">
-      <Box borderRadius="2xl" p={{ base: 4, md: 6 }} color="white" bgGradient="linear(to-br, #1c2a4a, #2a1d5c 55%, #5b2165)">
+      <Box
+        borderRadius="2xl"
+        p={{ base: 4, md: 6 }}
+        color="white"
+        bg="#14213d"
+        bgImage={`${SNOW}, linear-gradient(160deg, #10203f, #1d1b4f 55%, #3b1546)`}
+        bgSize="34px 34px, 48px 48px, 40px 40px, 100% 100%"
+      >
         <Flex justify="space-between" align="flex-start" gap={3} wrap="wrap" mb={4}>
           <Box>
             <Text fontSize="xs" fontWeight="bold" textTransform="uppercase" letterSpacing="wider" color="purple.100">{t("pages.advent.eyebrow")}</Text>
-            <Text fontSize="xl" fontWeight="extrabold">{t("pages.advent.title")}</Text>
+            <HStack spacing={2}>
+              <Image src="/logo.png" alt="" boxSize="28px" />
+              <Text fontSize="xl" fontWeight="extrabold">{t("pages.advent.title")}</Text>
+              <Text as="span" aria-hidden>❄</Text>
+            </HStack>
             <Text fontSize="sm" color="purple.50" mt={1}>{t("pages.advent.intro", { points: data.advent.points, half: data.advent.points * data.advent.late_ratio })}</Text>
           </Box>
           {total > 0 && <Badge colorScheme="orange" fontSize="md" borderRadius="full" px={3} py={1}>{t("pages.advent.points", { count: total })}</Badge>}
