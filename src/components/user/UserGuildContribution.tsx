@@ -100,7 +100,7 @@ export const UserGuildContribution = ({
       bgGradient="linear(to-br, rgba(49, 151, 149, 0.14), transparent 45%)"
     >
       <HStack spacing={3} mb={4} align="center">
-        <Box p={2} borderRadius="lg" bg="teal.900" color="teal.200" _light={{ bg: "teal.100", color: "teal.700" }}>
+        <Box boxSize="36px" flexShrink={0} display="grid" placeItems="center" borderRadius="lg" bg="teal.900" color="teal.200" _light={{ bg: "teal.100", color: "teal.700" }}>
           <Icon as={FiUsers} boxSize={5} aria-hidden />
         </Box>
         <Box minW={0}>

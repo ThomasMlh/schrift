@@ -73,7 +73,7 @@ export const UserRivals = ({ rivals, currentUser, currentUserRank, currentUserAv
     >
       <Flex justify="space-between" align={{ base: "start", md: "center" }} gap={3} mb={4} direction={{ base: "column", md: "row" }}>
         <HStack spacing={3}>
-          <Box p={2} borderRadius="lg" bg="orange.900" color="orange.200" _light={{ bg: "orange.100", color: "orange.700" }}>
+          <Box boxSize="36px" flexShrink={0} display="grid" placeItems="center" borderRadius="lg" bg="orange.900" color="orange.200" _light={{ bg: "orange.100", color: "orange.700" }}>
             <Icon as={FiCrosshair} boxSize={5} aria-hidden />
           </Box>
           <Box>
@@ -98,7 +98,8 @@ export const UserRivals = ({ rivals, currentUser, currentUserRank, currentUserAv
 
       <VStack spacing={2} align="stretch" position="relative">
         {/* Rail linking the ranks */}
-        <Box position="absolute" left="21px" top="22px" bottom="22px" w="2px" bg="border.subtle" aria-hidden />
+        {/* Centre of the chips: row padding 8px + border 1px + half a chip 22px */}
+        <Box position="absolute" left="30px" top="31px" bottom="31px" w="2px" bg="border.subtle" aria-hidden />
         {ladder.map((row) => {
           const highlight = Boolean(row.isProfile);
           const gap = row.averageScore - currentUserAverage;
@@ -118,7 +119,7 @@ export const UserRivals = ({ rivals, currentUser, currentUserRank, currentUserAv
             >
               <RankChip rank={row.rank} highlight={highlight} />
               <Box flex={1} minW={0}>
-                <HStack spacing={2} minW={0}>
+                <HStack spacing={2} minW={0} flexWrap="wrap" rowGap={1}>
                   <UserDisplay
                     user={{
                       _id: row.user_id,
@@ -134,8 +135,23 @@ export const UserRivals = ({ rivals, currentUser, currentUserRank, currentUserAv
                     asLink={!highlight}
                   />
                   {highlight && isMe && <Badge colorScheme="purple" borderRadius="full" textTransform="none">{t("components.user.rivals.youBadge")}</Badge>}
+                  {row.guild_name && (
+                    <Badge
+                      colorScheme={row.guilde_id && row.guilde_id === currentUser.guilde_id ? "teal" : "gray"}
+                      variant="subtle"
+                      borderRadius="full"
+                      px={2}
+                      textTransform="none"
+                      fontWeight="semibold"
+                      maxW="160px"
+                      overflow="hidden"
+                      textOverflow="ellipsis"
+                      whiteSpace="nowrap"
+                    >
+                      {row.guild_name}
+                    </Badge>
+                  )}
                 </HStack>
-                {row.guild_name && <Text fontSize="xs" color="text.muted" ml="40px" noOfLines={1}>{row.guild_name}</Text>}
               </Box>
               <VStack spacing={0} align="end" flexShrink={0}>
                 <Text fontWeight="bold" color={highlight ? "purple.200" : "text.strong"} _light={{ color: highlight ? "purple.700" : "text.strong" }} sx={{ fontVariantNumeric: "tabular-nums" }}>
