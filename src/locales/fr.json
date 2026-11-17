@@ -400,12 +400,6 @@
       "statAverageMLabel": "Score Moyen",
       "statTotalPointsBLabel": "Points Totaux",
       "statBestScoreRecord": "Meilleur Score",
-      "recordsSubtitle": "Meilleur score obtenu sur chaque killer, tous cycles confondus",
-      "recordsKiller": "Killer",
-      "recordsScore": "Record",
-      "recordsCycle": "Obtenu au",
-      "recordsAttempts": "Tentatives",
-      "recordsEmpty": "Aucun record pour ce compte",
       "tabAchievements": "Succès",
       "tabAlbum": "Album",
       "albumTitle": "Album de personnages",
@@ -441,8 +435,7 @@
       "achievementsRarity": "{{value}} % des joueurs",
       "achievementsUnlockedOn": "Obtenu le {{date}}",
       "achievementsProgress": "{{value}} / {{threshold}} vers {{tier}}",
-      "achievementsSummary": "{{unlocked}} / {{total}} paliers",
-      "recordsTitle": "Records personnels par killer"
+      "achievementsSummary": "{{unlocked}} / {{total}} paliers"
     },
     "discordCallback": {
       "loading": "Connexion en cours avec Discord...",
@@ -1218,12 +1211,6 @@
         "lastShare": "Dernier cycle · {{cycle}}",
         "vsAverage": "{{delta}} pt par rapport à sa moyenne"
       },
-      "performances": {
-        "headingAvgByRotation": "Scores Moyens par Rotation",
-        "subtitleAllRotations": "Toutes vos rotations triées par score moyen décroissant",
-        "notePerformance": "💡 Le pourcentage de performance est calculé par rapport à votre meilleure rotation (100%). Une rotation à 80% signifie qu'elle atteint 80% du score moyen de votre meilleure rotation.",
-        "noData": "Pas assez de données disponibles"
-      },
       "positionPerformance": {
         "title": "Performance par période du cycle",
         "tooltipAvg": "Moy. :",
@@ -1319,6 +1306,22 @@
         "labelAverage": "Moyenne:",
         "labelParticipations": "Participations:",
         "labelTotal": "Total:"
+      },
+      "killers": {
+        "title": "Par killer",
+        "subtitle": "Moyenne et record sur chaque killer, tous cycles confondus",
+        "subtitleCycle": "Moyenne sur le cycle choisi, record tous cycles confondus",
+        "sort_average": "Moyenne",
+        "sort_record": "Record",
+        "sort_name": "Nom",
+        "colKiller": "Killer",
+        "colAverage": "Moyenne",
+        "colRecord": "Record",
+        "colAttempts": "Tentatives",
+        "best": "Meilleure moyenne",
+        "toWork": "À travailler",
+        "noAverage": "Pas joué sur ce cycle",
+        "empty": "Aucun score pour ce compte"
       }
     },
     "customSelect": {

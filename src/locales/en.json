@@ -400,12 +400,6 @@
       "statAverageMLabel": "Average Score",
       "statTotalPointsBLabel": "Total Points",
       "statBestScoreRecord": "Best Score",
-      "recordsSubtitle": "Best score on each killer, across all cycles",
-      "recordsKiller": "Killer",
-      "recordsScore": "Record",
-      "recordsCycle": "Set in",
-      "recordsAttempts": "Attempts",
-      "recordsEmpty": "No record for this account",
       "tabAchievements": "Achievements",
       "tabAlbum": "Album",
       "albumTitle": "Character album",
@@ -441,8 +435,7 @@
       "achievementsRarity": "{{value}}% of players",
       "achievementsUnlockedOn": "Unlocked on {{date}}",
       "achievementsProgress": "{{value}} / {{threshold}} to {{tier}}",
-      "achievementsSummary": "{{unlocked}} / {{total}} tiers",
-      "recordsTitle": "Personal records per killer"
+      "achievementsSummary": "{{unlocked}} / {{total}} tiers"
     },
     "discordCallback": {
       "loading": "Connecting with Discord...",
@@ -1218,12 +1211,6 @@
         "lastShare": "Last cycle · {{cycle}}",
         "vsAverage": "{{delta}} pt vs their average"
       },
-      "performances": {
-        "headingAvgByRotation": "Average Scores by Rotation",
-        "subtitleAllRotations": "All your rotations sorted by descending average score",
-        "notePerformance": "💡 The performance percentage is calculated relative to your best rotation (100%). A rotation at 80% means it achieves 80% of the average score of your best rotation.",
-        "noData": "Not enough data available"
-      },
       "positionPerformance": {
         "title": "Performance by cycle period",
         "tooltipAvg": "Avg.:",
@@ -1319,6 +1306,22 @@
         "labelAverage": "Average:",
         "labelParticipations": "Participations:",
         "labelTotal": "Total:"
+      },
+      "killers": {
+        "title": "By killer",
+        "subtitle": "Average and record on each killer, all cycles",
+        "subtitleCycle": "Average over the chosen cycle, record over all cycles",
+        "sort_average": "Average",
+        "sort_record": "Record",
+        "sort_name": "Name",
+        "colKiller": "Killer",
+        "colAverage": "Average",
+        "colRecord": "Record",
+        "colAttempts": "Attempts",
+        "best": "Best average",
+        "toWork": "To work on",
+        "noAverage": "Not played this cycle",
+        "empty": "No score for this account"
       }
     },
     "customSelect": {

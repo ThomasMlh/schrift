@@ -24,7 +24,7 @@ import { CycleSelect } from "@/components/ui/CycleSelect";
 import { useCycles, useUser, useUserByBBSName, useUserStats, useGuild, useUserAchievements, useAlbumSettings } from "@/hooks/useAPI";
 import { UserStatsStrip } from "@/components/user/UserStatsStrip";
 import { UserStatsOverview } from "@/components/user/UserStatsOverview";
-import { UserPerformances } from "@/components/user/UserPerformances";
+import { UserKillerBreakdown } from "@/components/user/UserKillerBreakdown";
 import { UserTemporalEvolution } from "@/components/user/UserTemporalEvolution";
 import { UserRecentTrend } from "@/components/user/UserRecentTrend";
 import { UserRivals } from "@/components/user/UserRivals";
@@ -32,7 +32,6 @@ import { UserGuildContribution } from "@/components/user/UserGuildContribution";
 import { UserPositionPerformance } from "@/components/user/UserPositionPerformance";
 import { BanDetailsCard } from "@/components/user/BanDetailsCard";
 import { FiBarChart2, FiActivity, FiClock, FiHexagon, FiGrid } from "react-icons/fi";
-import { UserKillerRecords } from "@/components/user/UserKillerRecords";
 import { UserAchievements } from "@/components/achievements/UserAchievements";
 import { UserAlbum } from "@/components/user/UserAlbum";
 import { AlbumNudge } from "@/components/user/AlbumNudge";
@@ -358,11 +357,10 @@ const UserPage = () => {
                   </VStack>
                 </TabPanel>
 
-                {/* Performances: chart, top rotations, records per killer */}
+                {/* Performances: average and record per killer */}
                 <TabPanel p={0}>
                   <VStack spacing={6} align="stretch">
-                    <UserPerformances stats={stats} />
-                    <UserKillerRecords userId={userId} bbsId={matchedBbsId} />
+                    <UserKillerBreakdown stats={stats} userId={userId} bbsId={matchedBbsId} cycleSelected={!!selectedCycle} />
                   </VStack>
                 </TabPanel>
 
