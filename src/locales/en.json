@@ -1247,17 +1247,13 @@
         "labelAvgScore": "Average score"
       },
       "statsOverview": {
-        "dateUnknown": "Unknown",
-        "labelBestScore": "Best Score",
-        "labelWorstScore": "Score to Improve",
-        "labelBestCycle": "Best Cycle",
-        "avgShort": "Avg:",
-        "labelSeniority": "Seniority",
+        "labelBestCycle": "Best cycle",
+        "labelSeniority": "Member since",
         "daysAgo_one": "{{count}} day ago",
         "daysAgo_other": "{{count}} days ago",
-        "labelBuilds": "Builds Created",
+        "labelBuilds": "Builds created",
         "communityContrib": "Community contribution",
-        "labelMissRate": "Miss Rate",
+        "labelMissRate": "Miss rate",
         "missDetail": "{{missCount}} score{{scoreS}} at 0 out of {{totalScores}} rotation{{rotationS}}",
         "consistencyVeryRegular": "Very consistent",
         "consistencyRegular": "Consistent",
@@ -1265,9 +1261,14 @@
         "labelConsistency": "Consistency",
         "tooltipMedianScore": "Central value of all your scores — less sensitive to extremes than the average",
         "tooltipConsistency": "Coefficient of variation: standard deviation / mean. Lower = more consistent.",
-        "labelMedianScore": "Median Score",
+        "labelMedianScore": "Median score",
         "vsMean": "vs average",
-        "labelCyclesPlayed": "Cycles Played"
+        "labelCyclesPlayed": "Cycles played",
+        "title": "At a glance",
+        "bestCycleDetail_one": "Average {{average}} over {{count}} rotation",
+        "bestCycleDetail_other": "Average {{average}} over {{count}} rotations",
+        "cyclesFull_one": "{{count}} full cycle (20 rotations)",
+        "cyclesFull_other": "{{count}} full cycles (20 rotations)"
       },
       "temporalEvolution": {
         "heading": "Temporal Evolution",
@@ -1295,14 +1296,16 @@
         "inProgress": "in progress"
       },
       "ranking": {
-        "globalRanking": "🌍 Global Ranking",
-        "outOf_one": "Out of {{count}} player",
-        "outOf_other": "Out of {{count}} players",
+        "globalRanking": "Global ranking",
+        "outOf_one": "of {{count}} player",
+        "outOf_other": "of {{count}} players",
         "topPercent": "Top {{pct}}%",
-        "gapWithTop1": "-{{gap}}M from top 1",
-        "guildRanking": "👥 {{name}} Ranking",
-        "outOfMembers_one": "Out of {{count}} member",
-        "outOfMembers_other": "Out of {{count}} members"
+        "gapWithTop1": "−{{gap}}M behind 1st",
+        "guildRanking": "{{name}} ranking",
+        "outOfMembers_one": "of {{count}} member",
+        "outOfMembers_other": "of {{count}} members",
+        "gapHelp": "Average score gap with the leader",
+        "leader": "Leading the ranking"
       },
       "rotationDetailCard": {
         "labelAverage": "Average:",

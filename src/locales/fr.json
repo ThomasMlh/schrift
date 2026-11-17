@@ -1247,27 +1247,28 @@
         "labelAvgScore": "Score moyen"
       },
       "statsOverview": {
-        "dateUnknown": "Inconnue",
-        "labelBestScore": "Meilleur Score",
-        "labelWorstScore": "Score à Améliorer",
-        "labelBestCycle": "Meilleur Cycle",
-        "avgShort": "Moy:",
+        "labelBestCycle": "Meilleur cycle",
         "labelSeniority": "Ancienneté",
         "daysAgo_one": "Il y a {{count}} jour",
         "daysAgo_other": "Il y a {{count}} jours",
-        "labelBuilds": "Builds Créés",
+        "labelBuilds": "Builds créés",
         "communityContrib": "Contribution à la communauté",
-        "labelMissRate": "Taux de Miss",
+        "labelMissRate": "Taux de miss",
         "missDetail": "{{missCount}} score{{scoreS}} à 0 sur {{totalScores}} rotation{{rotationS}}",
         "consistencyVeryRegular": "Très régulier",
         "consistencyRegular": "Régulier",
         "consistencyIrregular": "Irrégulier",
-        "labelConsistency": "Consistance",
+        "labelConsistency": "Régularité",
         "tooltipMedianScore": "Valeur centrale de tous tes scores — moins sensible aux extrêmes que la moyenne",
         "tooltipConsistency": "Coefficient de variation : écart-type / moyenne. Plus bas = plus régulier.",
-        "labelMedianScore": "Score Médian",
+        "labelMedianScore": "Score médian",
         "vsMean": "vs moyenne",
-        "labelCyclesPlayed": "Cycles Joués"
+        "labelCyclesPlayed": "Cycles joués",
+        "title": "En bref",
+        "bestCycleDetail_one": "Moyenne {{average}} sur {{count}} rotation",
+        "bestCycleDetail_other": "Moyenne {{average}} sur {{count}} rotations",
+        "cyclesFull_one": "{{count}} cycle complet (20 rotations)",
+        "cyclesFull_other": "{{count}} cycles complets (20 rotations)"
       },
       "temporalEvolution": {
         "heading": "Évolution Temporelle",
@@ -1295,14 +1296,16 @@
         "inProgress": "en cours"
       },
       "ranking": {
-        "globalRanking": "🌍 Classement Global",
-        "outOf_one": "Sur {{count}} joueur",
-        "outOf_other": "Sur {{count}} joueurs",
-        "topPercent": "Top {{pct}}%",
-        "gapWithTop1": "-{{gap}}M du top 1",
-        "guildRanking": "👥 Classement {{name}}",
-        "outOfMembers_one": "Sur {{count}} membre",
-        "outOfMembers_other": "Sur {{count}} membres"
+        "globalRanking": "Classement global",
+        "outOf_one": "sur {{count}} joueur",
+        "outOf_other": "sur {{count}} joueurs",
+        "topPercent": "Top {{pct}} %",
+        "gapWithTop1": "−{{gap}}M du 1er",
+        "guildRanking": "Classement {{name}}",
+        "outOfMembers_one": "sur {{count}} membre",
+        "outOfMembers_other": "sur {{count}} membres",
+        "gapHelp": "Écart de score moyen avec le 1er du classement",
+        "leader": "En tête du classement"
       },
       "rotationDetailCard": {
         "labelAverage": "Moyenne:",
