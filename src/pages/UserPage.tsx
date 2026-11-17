@@ -285,10 +285,10 @@ const UserPage = () => {
               isLazy
             >
               <TabList gap={1} mb={5} overflowX="auto" overflowY="hidden" borderColor="border.subtle" sx={{ scrollbarWidth: "none" }}>
-                <Tab color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap" _selected={{ color: "text.strong", borderColor: "purple.300" }}>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap" _selected={{ color: "accent", borderColor: "accent" }}>
                   <Icon as={FiBarChart2} aria-hidden />{t("pages.user.tabOverview")}
                 </Tab>
-                <Tab color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap" _selected={{ color: "text.strong", borderColor: "purple.300" }}>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap" _selected={{ color: "accent", borderColor: "accent" }}>
                   <Icon as={FiActivity} aria-hidden />{t("pages.user.tabPerformances")}
                 </Tab>
                 <Tab
@@ -296,15 +296,15 @@ const UserPage = () => {
                   fontWeight="semibold"
                   gap={2}
                   whiteSpace="nowrap"
-                  _selected={{ color: "text.strong", borderColor: "purple.300" }}
+                  _selected={{ color: "accent", borderColor: "accent" }}
                   isDisabled={!globalStats?.temporalEvolution || globalStats.temporalEvolution.length < 2}
                 >
                   <Icon as={FiClock} aria-hidden />{t("pages.user.tabEvolution")}
                 </Tab>
-                <Tab color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap" _selected={{ color: "text.strong", borderColor: "purple.300" }}>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap" _selected={{ color: "accent", borderColor: "accent" }}>
                   <Icon as={FiHexagon} aria-hidden />{t("pages.user.tabAchievements")}
                 </Tab>
-                <Tab color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap" _selected={{ color: "text.strong", borderColor: "purple.300" }}>
+                <Tab color="text.secondary" fontWeight="semibold" gap={2} whiteSpace="nowrap" _selected={{ color: "accent", borderColor: "accent" }}>
                   <Icon as={FiGrid} aria-hidden />{t("pages.user.tabAlbum")}
                 </Tab>
               </TabList>
