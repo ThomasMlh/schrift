@@ -49,7 +49,7 @@ export interface IPublicEvent {
 // ---------- Advent calendar ----------
 
 export type ClueType = "silhouette" | "zoom" | "blur" | "quote";
-export type AdventDayState = "locked" | "today" | "late" | "over";
+export type AdventDayState = "locked" | "empty" | "today" | "late" | "over";
 
 export interface IAdventCharacter {
   _id: string;

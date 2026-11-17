@@ -832,7 +832,8 @@
       "noPlayer": "Personne n'a encore joué.",
       "player": "Joueur",
       "found": "Trouvés",
-      "pts": "Pts"
+      "pts": "Pts",
+      "notReady": "Pas encore préparée : reviens un peu plus tard"
     }
   },
   "components": {

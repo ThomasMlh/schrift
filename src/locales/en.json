@@ -832,7 +832,8 @@
       "noPlayer": "Nobody has played yet.",
       "player": "Player",
       "found": "Found",
-      "pts": "Pts"
+      "pts": "Pts",
+      "notReady": "Not ready yet: come back a little later"
     }
   },
   "components": {

@@ -17,10 +17,12 @@ const RESULT_MARKS = { correct: "✓", wrong: "✗", pending: "…" } as const;
 
 const Door = ({ day, onOpen }: { day: IAdventDay; onOpen: () => void }) => {
   const { t, i18n } = useTranslation();
-  const locked = day.state === "locked";
+  // A case whose day has come but that is not filled yet cannot be opened either
+  const locked = day.state === "locked" || day.state === "empty";
   const today = day.state === "today";
   const opens = new Date(day.opens_at).toLocaleDateString(i18n.language.startsWith("en") ? "en-GB" : "fr-FR", { day: "numeric", month: "long" });
-  const label = locked ? t("pages.advent.opensOn", { date: opens })
+  const label = day.state === "empty" ? t("pages.advent.notReady")
+    : locked ? t("pages.advent.opensOn", { date: opens })
     : day.mine ? t(`pages.advent.result_${day.mine.result}`)
       : day.state === "late" ? t("pages.advent.lateHint") : t("pages.advent.openHint");
   return (
