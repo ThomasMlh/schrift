@@ -1214,9 +1214,7 @@
         "headingAvgByRotation": "Scores Moyens par Rotation",
         "subtitleAllRotations": "Toutes vos rotations triées par score moyen décroissant",
         "notePerformance": "💡 Le pourcentage de performance est calculé par rapport à votre meilleure rotation (100%). Une rotation à 80% signifie qu'elle atteint 80% du score moyen de votre meilleure rotation.",
-        "noData": "Pas assez de données disponibles",
-        "headingByType": "Analyse par Type",
-        "subtitleByType": "Performances agrégées par killer, type d'attaque et altération d'état"
+        "noData": "Pas assez de données disponibles"
       },
       "positionPerformance": {
         "title": "Performance par période du cycle",
@@ -1293,21 +1291,6 @@
         "evolutionNoteMonthly": "💡 Chaque point est la moyenne des rotations jouées sur le mois, comme dans le podium mensuel.",
         "inProgress": "en cours"
       },
-      "topRotations": {
-        "bestRotationTitle": "Meilleure Rotation",
-        "worstRotationTitle": "Rotation à Améliorer",
-        "bestScoreLabel": "🌟 Meilleur Score:",
-        "worstScoreLabel": "📊 Pire Score:",
-        "detailHeading": "📋 Détail par rotation",
-        "detailSubtitle": "Toutes les rotations du cycle sélectionné, triées par position",
-        "colRank": "#",
-        "colKiller": "Killer",
-        "colType": "Type",
-        "colAvgScore": "Score moyen",
-        "colParticipations": "Participations",
-        "badgeBest": "🏆 Best",
-        "badgeWorst": "📉 Pire"
-      },
       "ranking": {
         "globalRanking": "🌍 Classement Global",
         "outOf_one": "Sur {{count}} joueur",
@@ -1322,17 +1305,6 @@
         "labelAverage": "Moyenne:",
         "labelParticipations": "Participations:",
         "labelTotal": "Total:"
-      },
-      "typeAnalysis": {
-        "noData": "Pas assez de données pour l'analyse par type",
-        "headingAttacks": "Attaques R vs B",
-        "headingAlteration": "Performance par Altération",
-        "attackRed": "Attaques Rouges",
-        "attackBlue": "Attaques Bleues",
-        "rotShort": "rot.",
-        "bestOnLabel": "Meilleur sur",
-        "red": "Rouges",
-        "blue": "Bleues"
       }
     },
     "customSelect": {

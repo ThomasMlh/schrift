@@ -25,14 +25,12 @@ import { useCycles, useUser, useUserByBBSName, useUserStats, useGuild, useUserAc
 import { UserStatsStrip } from "@/components/user/UserStatsStrip";
 import { UserStatsOverview } from "@/components/user/UserStatsOverview";
 import { UserPerformances } from "@/components/user/UserPerformances";
-import { UserTopRotations } from "@/components/user/UserTopRotations";
 import { UserTemporalEvolution } from "@/components/user/UserTemporalEvolution";
 import { UserRecentTrend } from "@/components/user/UserRecentTrend";
 import { UserRivals } from "@/components/user/UserRivals";
 import { UserGuildContribution } from "@/components/user/UserGuildContribution";
 import { UserPositionPerformance } from "@/components/user/UserPositionPerformance";
 import { BanDetailsCard } from "@/components/user/BanDetailsCard";
-import { UserTypeAnalysis } from "@/components/user/UserTypeAnalysis";
 import { FiBarChart2, FiActivity, FiClock, FiHexagon, FiGrid } from "react-icons/fi";
 import { UserKillerRecords } from "@/components/user/UserKillerRecords";
 import { UserAchievements } from "@/components/achievements/UserAchievements";
@@ -357,10 +355,6 @@ const UserPage = () => {
                     )}
 
 
-                    {/* Performance by attack type / alteration */}
-                    {(stats.performanceByAttack || stats.performanceByAlteration) && (
-                      <UserTypeAnalysis stats={stats} />
-                    )}
                   </VStack>
                 </TabPanel>
 
@@ -368,7 +362,6 @@ const UserPage = () => {
                 <TabPanel p={0}>
                   <VStack spacing={6} align="stretch">
                     <UserPerformances stats={stats} />
-                    <UserTopRotations stats={stats} />
                     <UserKillerRecords userId={userId} bbsId={matchedBbsId} />
                   </VStack>
                 </TabPanel>

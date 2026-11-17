@@ -1,7 +1,6 @@
-import { VStack, Heading, Text, Center, Divider } from "@chakra-ui/react";
+import { VStack, Heading, Text, Center } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { UserRotationsChart } from "@/components/charts/UserRotationsChart";
-import { UserTypeAnalysis } from "@/components/user/UserTypeAnalysis";
 import type { IUserStats } from "@/hooks/useAPI";
 
 interface UserPerformancesProps {
@@ -27,13 +26,6 @@ export const UserPerformances = ({ stats }: UserPerformancesProps) => {
         </Center>
       )}
 
-      <Divider />
-
-      <Heading size="md">{t("components.user.performances.headingByType")}</Heading>
-      <Text fontSize="sm" color="gray.500">
-        {t("components.user.performances.subtitleByType")}
-      </Text>
-      <UserTypeAnalysis stats={stats} />
     </VStack>
   );
 };
