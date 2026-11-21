@@ -7,6 +7,8 @@ import { SEOHead } from "@/components/SEOHead";
 import { QuizResults } from "@/components/quiz/QuizResults";
 import { AdventCalendar } from "@/components/advent/AdventCalendar";
 import { EventBadgeMedal } from "@/components/achievements/EventBadge";
+import { CommunityGoal } from "@/components/event/CommunityGoal";
+import { GiftHuntCard } from "@/components/event/GiftHuntCard";
 import { useCurrentEvent } from "@/hooks/useAPI";
 import { useAuth } from "@/providers/AuthProvider";
 import { startDiscordLogin } from "@/utils/discordAuth";
@@ -93,6 +95,10 @@ const AnniversaryPage = () => {
               </HStack>
             </Box>
 
+            {data.goal && <CommunityGoal goal={data.goal} year={new Date(data.event.start_at).getFullYear()} />}
+
+            {data.hunt && <GiftHuntCard hunt={data.hunt} state={data.state} />}
+
             {data.event.badge_name && (
               <Card borderColor={data.my_badge ? "orange.300" : undefined}>
                 <HStack spacing={4} align="center">
@@ -111,8 +117,9 @@ const AnniversaryPage = () => {
             {data.event.advent_enabled && <AdventCalendar eventId={data.event._id} />}
 
             {data.quizzes.length === 0 ? (
-              !data.event.advent_enabled && 
-<Card><Text color="text.muted">{t("pages.anniversary.noActivity")}</Text></Card>
+              !data.event.advent_enabled && !data.hunt && (
+                <Card><Text color="text.muted">{t("pages.anniversary.noActivity")}</Text></Card>
+              )
             ) : data.quizzes.map((quiz) => (
               <Grid key={quiz._id} templateColumns={{ base: "1fr", lg: "1.4fr 1fr" }} gap={5} alignItems="start">
                 <Card>

@@ -217,6 +217,8 @@ export const RaffleTable = ({ raffle }: { raffle: IGuildRaffle }) => {
   // Tickets are frozen once drawn
   const locked = raffle.draw !== null;
   const { rules } = raffle;
+  // Event column only for a month with gifts found
+  const hasEvent = raffle.players.some((p) => (p.breakdown.event ?? 0) > 0);
 
   const homogeneityHint = (p: IRafflePlayer) => (p.worst_gap === null
     ? t("pages.raffle.hint.homogeneityMissing")
@@ -237,6 +239,7 @@ export const RaffleTable = ({ raffle }: { raffle: IGuildRaffle }) => {
             <Th>{t("pages.raffle.col.farm")}</Th>
             <Th>{t("pages.raffle.col.qg")}</Th>
             <Th isNumeric>{t("pages.raffle.col.bonus")}</Th>
+            {hasEvent && <Th isNumeric title={t("pages.raffle.hint.event")}>{t("pages.raffle.col.event")}</Th>}
             <Th isNumeric>{t("pages.raffle.col.chance")}</Th>
           </Tr>
         </Thead>
@@ -274,6 +277,7 @@ export const RaffleTable = ({ raffle }: { raffle: IGuildRaffle }) => {
                 <Td isNumeric>
                   <BonusEditor raffle={raffle} player={p} locked={locked} />
                 </Td>
+                {hasEvent && <Td isNumeric><Count value={p.breakdown.event ?? 0} hint={t("pages.raffle.hint.event")} /></Td>}
                 <Td isNumeric><Text fontSize="xs" color="text.muted">{chance.toFixed(1)} %</Text></Td>
               </Tr>
             );
