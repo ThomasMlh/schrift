@@ -17,6 +17,80 @@ export interface ISiteEvent {
   badge_name?: string | null;
   advent?: IAdventSettings;
   advent_enabled?: boolean;
+  hunt?: IHuntSettings;
+  goal?: IGoalSettings;
+}
+
+// ---------- Gift hunt and community goal ----------
+
+export interface IHuntSettings {
+  enabled: boolean;
+  points: number;
+  tickets: number;
+  badge_name: string | null;
+  badge_min: number;
+}
+
+export type GoalSource = "score" | "advent" | "quiz" | "gift";
+export type TierReward = "decor" | "frame" | "custom";
+
+export interface IGoalTier {
+  threshold: number;
+  reward: TierReward;
+  label: string;
+}
+
+export interface IGoalSettings {
+  enabled: boolean;
+  weights: Record<GoalSource, number>;
+  tiers: IGoalTier[];
+}
+
+export interface IGoalProgress {
+  total: number;
+  counts: Record<GoalSource, number>;
+  weights: Record<GoalSource, number>;
+  target: number | null;
+  tiers: (IGoalTier & { reached: boolean })[];
+}
+
+// What a player knows of the hunt: the hint of the day, never the page
+export interface IHuntView {
+  points: number;
+  tickets: number;
+  badge_name: string | null;
+  badge_min: number;
+  days: number;
+  today: number | null;
+  hint: string | null;
+  found_today: boolean;
+  found: number;
+}
+
+export interface ILiveEvent {
+  event_id: string;
+  name: string;
+  year: number;
+  decor: boolean;
+  frame_user_ids: string[];
+  hunt: boolean;
+  goal: { total: number; target: number | null } | null;
+}
+
+export interface IHuntSpot {
+  _id: string;
+  event_id: string;
+  day: number;
+  path: string;
+  hint: string;
+  opens_at: string;
+  finds: number;
+}
+
+export interface IHuntAdmin {
+  hunt: IHuntSettings;
+  days: number;
+  spots: IHuntSpot[];
 }
 
 export interface IAdventSettings {
@@ -44,6 +118,8 @@ export interface IPublicEvent {
   state: EventState;
   quizzes: IQuizSummary[];
   my_badge?: boolean;
+  goal?: IGoalProgress | null;
+  hunt?: IHuntView | null;
 }
 
 // ---------- Advent calendar ----------
@@ -77,12 +153,15 @@ export interface IAdventRankRow {
   in_guild: boolean;
   points: number;
   found: number;
+  // Gifts of the hunt, when the event has one
+  gifts?: number;
   rank: number;
 }
 
 export interface IAdventCalendar {
   event: Pick<ISiteEvent, "_id" | "name" | "start_at" | "end_at">;
   advent: { points: number; late_ratio: number };
+  gift_points?: number | null;
   now: string;
   days: IAdventDay[];
   rankings: { all: IAdventRankRow[]; guild: IAdventRankRow[]; free: IAdventRankRow[] };
@@ -131,6 +210,8 @@ export interface IAdventAnswer {
 
 export interface IEventBadge {
   event_id: string;
+  // participant: took part in the event; hunter: found enough gifts
+  kind?: "participant" | "hunter";
   name: string;
   event_name: string;
   year: number;

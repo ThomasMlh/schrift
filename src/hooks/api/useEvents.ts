@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import useSWR from 'swr';
 import type {
   IAdventAdmin, IAdventAnswer, IAdventCalendar, IAdventCase, IAdventCharacter, IAdventDay, IAttemptState, ISiteEvent, IPublicEvent,
-  IQuiz, IQuizAttemptDetail, IQuizAttemptRow, IQuizMedia, IQuizResults, QuizAnswer,
+  IGoalProgress, IHuntAdmin, IHuntSpot, ILiveEvent, IQuiz, IQuizAttemptDetail, IQuizAttemptRow, IQuizMedia, IQuizResults, QuizAnswer,
 } from '../../interfaces';
 import { useAuth } from '../../providers/AuthProvider';
 import { invalidateKeys, makeRequest } from '../../utils/apiRequest';
@@ -66,6 +66,31 @@ export const useAdventAnswer = () => {
   }, [request]);
 };
 
+// Running event, read by every page: decor, framed avatars, gift hunt
+export const useLiveEvent = () => {
+  const fetcher = useAuthenticatedFetcher();
+  const { data } = useSWR<{ success: boolean; data: ILiveEvent | null }>(
+    `${EVENTS}/live`, fetcher, { revalidateOnFocus: false, shouldRetryOnError: false, refreshInterval: 5 * 60 * 1000 },
+  );
+  return data?.data ?? null;
+};
+
+export const useGiftHunt = () => {
+  const { token } = useAuth();
+  const request = useMemo(() => makeRequest(token), [token]);
+  return useMemo(() => ({
+    check: async (path: string) =>
+      (await request<{ data: { gift: boolean } }>(`${EVENTS}/hunt/check`, { method: 'POST', body: JSON.stringify({ path }) })).data,
+    claim: async (path: string) => {
+      const result = await request<{ data: { points: number; tickets: number; found: number; hunter_badge: boolean } }>(
+        `${EVENTS}/hunt/claim`, { method: 'POST', body: JSON.stringify({ path }) },
+      );
+      await invalidateKeys(EVENTS);
+      return result.data;
+    },
+  }), [request]);
+};
+
 // ---------- Admin ----------
 
 const useAdminList = <T>(url: string | null) => {
@@ -82,6 +107,8 @@ export const useQuizAttempts = (quizId?: string) => useAdminList<IQuizAttemptRow
 export const useAdventCases = (eventId?: string) => useAdminList<IAdventAdmin>(eventId ? `${ADMIN}/${eventId}/advent` : null);
 export const useAdventCaseAnswers = (eventId?: string, day?: number | null) =>
   useAdminList<IAdventAnswer[]>(eventId && day ? `${ADMIN}/${eventId}/advent/${day}/answers` : null);
+export const useEventGoal = (eventId?: string) => useAdminList<IGoalProgress | null>(eventId ? `${ADMIN}/${eventId}/goal` : null);
+export const useHuntSpots = (eventId?: string) => useAdminList<IHuntAdmin>(eventId ? `${ADMIN}/${eventId}/hunt` : null);
 export const useAttemptDetail = (attemptId?: string | null) => useAdminList<IQuizAttemptDetail>(attemptId ? `${ADMIN}/attempts/${attemptId}` : null);
 
 export const useEventAdminActions = () => {
@@ -123,7 +150,11 @@ export const useEventAdminActions = () => {
         send<IAdventCase>(`${ADMIN}/${eventId}/advent/${day}`, 'PUT', body),
       deleteAdventCase: (eventId: string, day: number) => send(`${ADMIN}/${eventId}/advent/${day}`, 'DELETE'),
       reviewAdventAnswer: (answerId: string, accept: boolean) => send<IAdventAnswer>(`${ADMIN}/advent/answers/${answerId}/review`, 'POST', { accept }),
+      saveHuntSpot: (eventId: string, day: number, body: { path: string; hint: string }) => send<IHuntSpot>(`${ADMIN}/${eventId}/hunt/${day}`, 'PUT', body),
+      deleteHuntSpot: (eventId: string, day: number) => send(`${ADMIN}/${eventId}/hunt/${day}`, 'DELETE'),
       // Reads only: nothing to refresh
+      randomHuntSpot: async (eventId: string) =>
+        (await request<{ data: { path: string; hint: string; label: string } }>(`${ADMIN}/${eventId}/hunt/random`)).data,
       randomAdventCharacter: async (eventId: string) => (await request<{ data: IAdventCharacter }>(`${ADMIN}/${eventId}/advent/random`)).data,
       adventCharacterInfo: async (characterId: string) =>
         (await request<{ data: { accepted: string[]; quote: string | null; has_artwork: boolean } }>(`${ADMIN}/advent/characters/${characterId}`)).data,
