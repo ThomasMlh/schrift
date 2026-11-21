@@ -26,6 +26,8 @@ export interface IRaffleBreakdown {
   farm: number;
   qg: number;
   bonus: number;
+  // Gifts of an event's gift hunt found this month
+  event?: number;
 }
 
 export interface IRafflePlayer {

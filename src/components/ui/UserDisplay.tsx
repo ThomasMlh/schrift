@@ -3,6 +3,7 @@ import { getUserAvatarUrl } from "@/utils/discord";
 import type { IUser } from "@/interfaces";
 import CustomLink from "./CustomLink";
 import { formatRoleName } from "@/utils/user";
+import { AvatarFrame } from "@/components/event/AvatarFrame";
 
 interface UserDisplayProps {
   user?: IUser;
@@ -67,11 +68,13 @@ export const UserDisplay = ({
       align="center"
       spacing={spacing}
     >
-      <Avatar
-        size={avatarSize}
-        src={avatarUrl}
-        name={user.bbs_name || user.global_name}
-      />
+      <AvatarFrame userId={user._id}>
+        <Avatar
+          size={avatarSize}
+          src={avatarUrl}
+          name={user.bbs_name || user.global_name}
+        />
+      </AvatarFrame>
       <VStack spacing={0} align={direction === "row" ? "start" : "center"}>
         {asLink ? (
           <CustomLink

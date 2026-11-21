@@ -597,13 +597,15 @@
         "farm": "Tickets farm",
         "qg": "Teams QG",
         "bonus": "Ponctuels",
-        "chance": "Chance"
+        "chance": "Chance",
+        "event": "Cadeaux"
       },
       "hint": {
         "top5Rotations": "1 ticket par rota où le joueur est dans le top 5 de la guilde, {{max}} max",
         "homogeneity": "Pire rota : {{gap}} {{side}} la médiane de la guilde",
         "homogeneityMissing": "Au moins une rota du mois sans score",
-        "capped": "{{earned}} tickets gagnés, plafonnés à {{max}}"
+        "capped": "{{earned}} tickets gagnés, plafonnés à {{max}}",
+        "event": "Tickets gagnés en trouvant des cadeaux de la chasse ce mois-ci"
       },
       "stats": {
         "total": "Tickets en jeu",
@@ -829,7 +831,48 @@
       "found": "Trouvés",
       "pts": "Pts",
       "notReady": "Pas encore préparée : reviens un peu plus tard",
-      "guild": "Guilde"
+      "guild": "Guilde",
+      "giftsHelp": "Cadeaux trouvés",
+      "giftsNote": "Les cadeaux de la chasse comptent aussi : +{{points}} points chacun."
+    },
+    "goal": {
+      "eyebrow": "Tous ensemble",
+      "title": "Objectif collectif",
+      "toNext_one": "Encore {{count}} point pour : {{reward}}",
+      "toNext_other": "Encore {{count}} points pour : {{reward}}",
+      "allReached": "Tous les paliers sont atteints, bravo à tous !",
+      "rewards": "Récompenses pour tout le monde",
+      "noTier": "Les paliers arrivent bientôt.",
+      "at_one": "À {{value}} point",
+      "at_other": "À {{value}} points",
+      "unlocked": "Débloqué",
+      "locked": "Pas encore débloqué",
+      "howTo": "Comment remplir la jauge",
+      "source_score": "Un score saisi",
+      "source_advent": "Une case du calendrier trouvée",
+      "source_quiz": "Un quiz terminé",
+      "source_gift": "Un cadeau trouvé",
+      "reward_decor": "Le site se pare de neige et de guirlandes",
+      "reward_frame": "Cadre d'avatar Anniversaire {{year}} pour les participants"
+    },
+    "hunt": {
+      "eyebrow": "Un cadeau par jour",
+      "title": "Chasse aux cadeaux",
+      "intro_one": "Chaque jour, un cadeau est caché quelque part sur le site. Trouve-le grâce à l'indice : +{{points}} points au classement et {{count}} ticket de tombola.",
+      "intro_other": "Chaque jour, un cadeau est caché quelque part sur le site. Trouve-le grâce à l'indice : +{{points}} points au classement et {{count}} tickets de tombola.",
+      "hintOf": "Indice du jour {{day}}",
+      "hint": "Indice",
+      "notStarted": "La chasse commence avec l'événement.",
+      "over": "La chasse est terminée.",
+      "foundToday": "Tu as trouvé le cadeau du jour, reviens demain !",
+      "noGiftToday": "Pas de cadeau caché aujourd'hui.",
+      "howTo": "Le cadeau apparaît dans un coin de la bonne page : clique dessus pour le ramasser. Il change de cachette chaque jour.",
+      "loginFirst": "Connecte-toi pour voir les cadeaux.",
+      "found_one": "cadeau trouvé",
+      "found_other": "cadeaux trouvés",
+      "badgeDone": "Badge gagné !",
+      "badgeHow_one": "Trouve {{count}} cadeau pendant l'événement",
+      "badgeHow_other": "Trouve {{count}} cadeaux pendant l'événement"
     }
   },
   "components": {
@@ -1507,6 +1550,16 @@
       "weightHigh": "fort",
       "adviceEx": "EX sous {{value}} s restantes : la perte dépasse 2,8 s de vagues normales, relancer vaut le coup.",
       "adviceStamina": "PV du leader sous {{value}} % : la perte reste sous 0,15 s. Elle compte surtout entre deux scores très proches."
+    },
+    "liveEvent": {
+      "frame": "Cadre Anniversaire {{year}} : a participé à l'événement",
+      "giftHere": "Un cadeau ! Clique pour le ramasser",
+      "giftFound": "🎁 Cadeau trouvé !",
+      "giftReward_one": "+{{points}} points au classement et {{count}} ticket de tombola.",
+      "giftReward_other": "+{{points}} points au classement et {{count}} tickets de tombola.",
+      "giftCount_one": "C'est ton premier cadeau.",
+      "giftCount_other": "Tu en as trouvé {{count}}.",
+      "hunterBadge": "🏅 Tu gagnes le badge des chasseurs !"
     }
   },
   "affinities": {
@@ -1719,7 +1772,8 @@
       "tooltip": "Obtenu en participant à « {{event}} »",
       "earned": "Obtenu le {{date}}",
       "holders_one": "{{count}} joueur l'a",
-      "holders_other": "{{count}} joueurs l'ont"
+      "holders_other": "{{count}} joueurs l'ont",
+      "hunterTooltip": "Badge en édition limitée : a trouvé assez de cadeaux pendant {{event}}"
     }
   }
 }

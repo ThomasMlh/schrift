@@ -196,7 +196,7 @@ const CaseModal = ({ eventId, day, points, onClose }: { eventId: string; day: IA
   );
 };
 
-const Rankings = ({ rankings, myUserId }: { rankings: Record<Ranking, IAdventRankRow[]>; myUserId?: string }) => {
+const Rankings = ({ rankings, myUserId, gifts }: { rankings: Record<Ranking, IAdventRankRow[]>; myUserId?: string; gifts: boolean }) => {
   const { t } = useTranslation();
   const [tab, setTab] = useState<Ranking>("all");
   const rows = rankings[tab];
@@ -220,6 +220,7 @@ const Rankings = ({ rankings, myUserId }: { rankings: Record<Ranking, IAdventRan
               <Th px={2}>{t("pages.advent.player")}</Th>
               <Th px={2}>{t("pages.advent.guild")}</Th>
               <Th px={2} isNumeric>{t("pages.advent.found")}</Th>
+              {gifts && <Th px={2} isNumeric title={t("pages.advent.giftsHelp")}>🎁</Th>}
               <Th px={2} isNumeric>{t("pages.advent.pts")}</Th>
             </Tr>
           </Thead>
@@ -230,6 +231,7 @@ const Rankings = ({ rankings, myUserId }: { rankings: Record<Ranking, IAdventRan
                 <Td px={2}><PlayerCell player={row.user} name={row.name} /></Td>
                 <Td px={2}>{row.guild_name ? <Badge borderRadius="full" textTransform="none">{row.guild_name}</Badge> : <Text color="text.muted">—</Text>}</Td>
                 <Td px={2} isNumeric>{row.found}</Td>
+                {gifts && <Td px={2} isNumeric>{row.gifts ?? 0}</Td>}
                 <Td px={2} isNumeric fontWeight="bold">{row.points.toLocaleString()}</Td>
               </Tr>
             ))}
@@ -278,7 +280,8 @@ export const AdventCalendar = ({ eventId }: { eventId: string }) => {
       </Box>
       <Box bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="2xl" p={{ base: 4, md: 6 }}>
         <Text fontSize="xs" fontWeight="bold" textTransform="uppercase" letterSpacing="wider" color="text.muted" mb={3}>{t("pages.advent.rankings")}</Text>
-        <Rankings rankings={data.rankings} myUserId={currentUser?._id} />
+        <Rankings rankings={data.rankings} myUserId={currentUser?._id} gifts={data.gift_points != null} />
+        {data.gift_points != null && <Text fontSize="xs" color="text.muted" mt={3}>{t("pages.advent.giftsNote", { points: data.gift_points })}</Text>}
       </Box>
       {day && <CaseModal eventId={eventId} day={day} points={data.advent.points} onClose={() => setOpenDay(null)} />}
     </Grid>

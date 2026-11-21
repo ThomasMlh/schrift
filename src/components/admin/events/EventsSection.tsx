@@ -7,7 +7,7 @@ import {
 import { AddIcon, ChevronDownIcon, ChevronUpIcon, CopyIcon, DeleteIcon } from "@chakra-ui/icons";
 import { Link as RouterLink } from "react-router-dom";
 import { FiPlay } from "react-icons/fi";
-import { useAdminEventQuizzes, useAdminEvents, useEventAdminActions, useEventMedia } from "@/hooks/useAPI";
+import { useAdminEventQuizzes, useAdminEvents, useEventAdminActions, useEventGoal, useEventMedia } from "@/hooks/useAPI";
 import { ANSWER_LABELS, SUPPORT_LABELS, blankQuestion, newItemId } from "@/utils/quizEditor";
 import type { IQuiz, IQuizQuestion, ISiteEvent } from "@/interfaces";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
@@ -15,6 +15,10 @@ import { QuestionForm } from "./QuestionForm";
 import { MediaLibrary } from "./MediaLibrary";
 import { QuizParticipants } from "./QuizParticipants";
 import { AdventEditor } from "./AdventEditor";
+import { HuntEditor } from "./HuntEditor";
+import { GoalSettings, HuntSettings } from "./EventActivitySettings";
+import { DEFAULT_GOAL, DEFAULT_HUNT } from "@/utils/eventDefaults";
+import { CommunityGoal } from "@/components/event/CommunityGoal";
 
 const Panel = ({ children, ...props }: React.ComponentProps<typeof Box>) => (
   <Box bg="bg.card" borderWidth="1px" borderColor="border.subtle" borderRadius="xl" p={4} {...props}>{children}</Box>
@@ -37,6 +41,8 @@ const EventModal = ({ event, onClose, onSaved }: { event: Partial<ISiteEvent>; o
     end: toLocalInput(event.end_at),
     badge: event.badge_name ?? "",
     advent: event.advent ?? { enabled: false, days: 24, points: 10 },
+    hunt: { ...DEFAULT_HUNT, ...(event.hunt ?? {}) },
+    goal: { ...DEFAULT_GOAL, ...(event.goal ?? {}), weights: { ...DEFAULT_GOAL.weights, ...(event.goal?.weights ?? {}) } },
   });
   const [saving, setSaving] = useState(false);
   const save = async () => {
@@ -48,6 +54,8 @@ const EventModal = ({ event, onClose, onSaved }: { event: Partial<ISiteEvent>; o
         end_at: form.end ? new Date(form.end).toISOString() : "",
         badge_name: form.badge.trim() || null,
         advent: form.advent,
+        hunt: form.hunt,
+        goal: form.goal,
       });
       onSaved(saved);
       onClose();
@@ -123,6 +131,8 @@ const EventModal = ({ event, onClose, onSaved }: { event: Partial<ISiteEvent>; o
                 </Grid>
               )}
             </Box>
+            <HuntSettings value={form.hunt} onChange={(hunt) => setForm({ ...form, hunt })} />
+            <GoalSettings value={form.goal} onChange={(goal) => setForm({ ...form, goal })} />
           </VStack>
         </ModalBody>
         <ModalFooter gap={2}>
@@ -356,6 +366,14 @@ const QuizSettings = ({ quiz }: { quiz: IQuiz }) => {
 };
 
 // Admin tab: events (anniversary…), their quizzes, media library and participants
+// Live gauge of the event, as the players see it
+const GoalPanel = ({ event }: { event: ISiteEvent }) => {
+  const { data, isLoading } = useEventGoal(event._id);
+  if (isLoading) return <Spinner />;
+  if (!data) return null;
+  return <CommunityGoal goal={data} year={new Date(event.start_at).getFullYear()} />;
+};
+
 export const EventsSection = () => {
   const { data: events = [], isLoading } = useAdminEvents();
   const actions = useEventAdminActions();
@@ -418,6 +436,15 @@ export const EventsSection = () => {
           </Text>
         )}
       </Panel>
+
+      {event?.goal?.enabled && <GoalPanel event={event} />}
+
+      {event?.hunt?.enabled && (
+        <Panel>
+          <Text fontWeight="extrabold" fontSize="lg" mb={3}>Chasse aux cadeaux</Text>
+          <HuntEditor key={event._id} event={event} />
+        </Panel>
+      )}
 
       {event?.advent?.enabled && (
         <Panel>
