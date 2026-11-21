@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import useSWR from 'swr';
 import type {
   IAdventAdmin, IAdventAnswer, IAdventCalendar, IAdventCase, IAdventCharacter, IAdventDay, IAttemptState, ISiteEvent, IPublicEvent,
-  IGoalProgress, IHuntAdmin, IHuntSpot, ILiveEvent, IQuiz, IQuizAttemptDetail, IQuizAttemptRow, IQuizMedia, IQuizResults, QuizAnswer,
+  IGoalProgress, IHuntAdmin, IHuntSpot, IHuntTarget, ILiveEvent, IQuiz, IQuizAttemptDetail, IQuizAttemptRow, IQuizMedia, IQuizResults, QuizAnswer,
 } from '../../interfaces';
 import { useAuth } from '../../providers/AuthProvider';
 import { invalidateKeys, makeRequest } from '../../utils/apiRequest';
@@ -154,7 +154,9 @@ export const useEventAdminActions = () => {
       deleteHuntSpot: (eventId: string, day: number) => send(`${ADMIN}/${eventId}/hunt/${day}`, 'DELETE'),
       // Reads only: nothing to refresh
       randomHuntSpot: async (eventId: string) =>
-        (await request<{ data: { path: string; hint: string; label: string } }>(`${ADMIN}/${eventId}/hunt/random`)).data,
+        (await request<{ data: { path: string; hint: string; label: string; target: IHuntTarget } }>(`${ADMIN}/${eventId}/hunt/random`)).data,
+      describeHuntPage: async (path: string) =>
+        (await request<{ data: IHuntTarget }>(`${ADMIN}/hunt/preview?path=${encodeURIComponent(path)}`)).data,
       randomAdventCharacter: async (eventId: string) => (await request<{ data: IAdventCharacter }>(`${ADMIN}/${eventId}/advent/random`)).data,
       adventCharacterInfo: async (characterId: string) =>
         (await request<{ data: { accepted: string[]; quote: string | null; has_artwork: boolean } }>(`${ADMIN}/advent/characters/${characterId}`)).data,

@@ -77,6 +77,18 @@ export interface ILiveEvent {
   goal: { total: number; target: number | null } | null;
 }
 
+// What a hunt page shows, for the admin
+export interface IHuntTarget {
+  kind: "player" | "character" | "page" | "unknown";
+  path: string;
+  label: string;
+  player?: {
+    _id: string; bbs_name: string; bbs_id: string | null; discord_id: string | null; avatar: string | null;
+    global_name: string | null; guild_name: string | null;
+  };
+  character?: { _id: string; name: string; version_name?: string | null; images_version?: number };
+}
+
 export interface IHuntSpot {
   _id: string;
   event_id: string;
@@ -85,6 +97,7 @@ export interface IHuntSpot {
   hint: string;
   opens_at: string;
   finds: number;
+  target?: IHuntTarget;
 }
 
 export interface IHuntAdmin {

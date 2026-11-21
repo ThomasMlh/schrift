@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Badge, Box, Button, Flex, FormControl, FormHelperText, FormLabel, Grid, HStack, Input, Link, Modal, ModalBody, ModalCloseButton,
-  ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spinner, Text, VStack, useToast,
+  Avatar, Badge, Box, Button, Flex, FormControl, FormHelperText, FormLabel, Grid, HStack, Input, Link, Modal, ModalBody, ModalCloseButton,
+  Image, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spinner, Text, VStack, useToast,
 } from "@chakra-ui/react";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 import { Link as RouterLink } from "react-router-dom";
 import { useEventAdminActions, useHuntSpots } from "@/hooks/useAPI";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
-import type { IHuntSpot, ISiteEvent } from "@/interfaces";
+import { characterImageUrl } from "@/utils/characterImages";
+import { getUserAvatarUrl } from "@/utils/discord";
+import type { IHuntSpot, IHuntTarget, ISiteEvent } from "@/interfaces";
 
 const formatDay = (iso: string) => new Date(iso).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
 
@@ -21,6 +23,54 @@ const pathOf = (value: string) => {
   }
 };
 
+const PAGE_ICONS: Record<IHuntTarget["kind"], string> = { player: "👤", character: "⚔️", page: "📄", unknown: "⚠️" };
+
+const avatarOf = (player: NonNullable<IHuntTarget["player"]>) =>
+  (player.avatar && player.discord_id ? getUserAvatarUrl({ discord_id: player.discord_id, avatar: player.avatar }) || undefined : undefined);
+
+// What the page shows: the player (avatar, guild) or the character (picture, version), else the page name
+const TargetPreview = ({ target, compact = false }: { target: IHuntTarget; compact?: boolean }) => {
+  const size = compact ? "28px" : "72px";
+  if (target.kind === "player" && target.player) {
+    const { player } = target;
+    return (
+      <HStack spacing={compact ? 1.5 : 3} minW={0}>
+        <Avatar size={compact ? "xs" : "lg"} src={avatarOf(player)} name={player.bbs_name} />
+        <Box minW={0}>
+          <Text fontSize={compact ? "xs" : "lg"} fontWeight="bold" noOfLines={1}>{player.bbs_name}</Text>
+          {player.guild_name
+            ? <Badge colorScheme="teal" variant="subtle" textTransform="none" fontSize={compact ? "2xs" : "xs"} borderRadius="full" maxW="100%" isTruncated>{player.guild_name}</Badge>
+            : <Text fontSize={compact ? "2xs" : "sm"} color="text.muted">Sans guilde</Text>}
+          {!compact && player.global_name && <Text fontSize="xs" color="text.muted">Discord : {player.global_name}</Text>}
+        </Box>
+      </HStack>
+    );
+  }
+  if (target.kind === "character" && target.character) {
+    const { character } = target;
+    return (
+      <HStack spacing={compact ? 1.5 : 3} minW={0}>
+        <Image src={characterImageUrl(character, "thumb")} alt="" boxSize={size} borderRadius="md" objectFit="cover" flexShrink={0} bg="bg.subtle" />
+        <Box minW={0}>
+          <Text fontSize={compact ? "xs" : "lg"} fontWeight="bold" noOfLines={1}>{character.name}</Text>
+          {character.version_name && <Text fontSize={compact ? "2xs" : "sm"} color="text.muted" noOfLines={1}>{character.version_name}</Text>}
+        </Box>
+      </HStack>
+    );
+  }
+  return (
+    <HStack spacing={compact ? 1.5 : 3} minW={0}>
+      <Box boxSize={size} display="grid" placeItems="center" borderRadius="md" bg="bg.subtle" fontSize={compact ? "sm" : "2xl"} flexShrink={0} aria-hidden>
+        {PAGE_ICONS[target.kind]}
+      </Box>
+      <Box minW={0}>
+        <Text fontSize={compact ? "xs" : "lg"} fontWeight="bold" noOfLines={1} color={target.kind === "unknown" ? "orange.300" : undefined}>{target.label}</Text>
+        {!compact && <Text fontSize="sm" color="text.muted" noOfLines={1}>{target.path}</Text>}
+      </Box>
+    </HStack>
+  );
+};
+
 const SpotModal = ({ eventId, day, opensAt, current, onClose }: {
   eventId: string; day: number; opensAt: string; current?: IHuntSpot; onClose: () => void;
 }) => {
@@ -28,20 +78,46 @@ const SpotModal = ({ eventId, day, opensAt, current, onClose }: {
   const toast = useToast();
   const [path, setPath] = useState(current?.path ?? "");
   const [hint, setHint] = useState(current?.hint ?? "");
-  const [label, setLabel] = useState<string | null>(null);
+  const [target, setTarget] = useState<IHuntTarget | null>(current?.target ?? null);
+  const [looking, setLooking] = useState(false);
+  // Page the preview was read for
+  const [described, setDescribed] = useState(current?.path ?? "");
   const [saving, setSaving] = useState(false);
   const [drawing, setDrawing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const locked = Boolean(current?.finds);
 
+  // Reads what a typed or pasted page shows, once the admin stops typing
+  useEffect(() => {
+    const value = pathOf(path);
+    if (!value || value === described) return undefined;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      setLooking(true);
+      actions.describeHuntPage(value)
+        .then((next) => {
+          if (cancelled) return;
+          setTarget(next);
+          setDescribed(value);
+        })
+        .catch(() => undefined)
+        .finally(() => { if (!cancelled) setLooking(false); });
+    }, 500);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [path, described, actions]);
+
   const random = async () => {
     setDrawing(true);
     try {
       const suggestion = await actions.randomHuntSpot(eventId);
+      setTarget(suggestion.target);
+      setDescribed(suggestion.path);
       setPath(suggestion.path);
       setHint(suggestion.hint);
-      setLabel(suggestion.label);
     } catch (err) {
       toast({ status: "error", title: (err as Error).message });
     } finally {
@@ -87,11 +163,10 @@ const SpotModal = ({ eventId, day, opensAt, current, onClose }: {
             <Button variant="outline" onClick={random} isLoading={drawing} isDisabled={locked} alignSelf="flex-start">Au hasard</Button>
             <FormControl isRequired>
               <FormLabel>Page</FormLabel>
-              <Input value={path} placeholder="/joueur/Pseudo ou lien copié depuis le site" isDisabled={locked} onChange={(e) => { setPath(e.target.value); setLabel(null); }} />
+              <Input value={path} placeholder="/joueur/Pseudo ou lien copié depuis le site" isDisabled={locked} onChange={(e) => setPath(e.target.value)} />
               <FormHelperText>
                 {locked ? "Des joueurs ont déjà trouvé ce cadeau : la page ne peut plus changer."
-                  : label ? `Suggestion : ${label}.`
-                    : "Colle le lien d'une page du site (profil, fiche de perso, podium…). Pas l'admin ni la page anniversaire."}
+                  : "Colle le lien d'une page du site (profil, fiche de perso, podium…). Pas l'admin ni la page anniversaire."}
               </FormHelperText>
               {path.trim() && (
                 <Link as={RouterLink} to={pathOf(path)} isExternal fontSize="sm" color="purple.300" mt={1} display="inline-flex" alignItems="center" gap={1}>
@@ -99,6 +174,12 @@ const SpotModal = ({ eventId, day, opensAt, current, onClose }: {
                 </Link>
               )}
             </FormControl>
+            {path.trim() && (
+              <Box borderWidth="1px" borderColor={target?.kind === "unknown" ? "orange.300" : "border.subtle"} borderRadius="lg" p={3} bg="bg.subtle" position="relative">
+                {looking || !target ? <Spinner size="sm" /> : <TargetPreview target={target} />}
+                {target?.kind === "unknown" && <Text fontSize="xs" color="orange.300" mt={2}>Vérifie le lien : cette page n'existe peut-être pas.</Text>}
+              </Box>
+            )}
             <FormControl isRequired>
               <FormLabel>Indice affiché aux joueurs</FormLabel>
               <Input value={hint} maxLength={200} placeholder="Là où l'on compare deux joueurs" onChange={(e) => setHint(e.target.value)} />
@@ -168,13 +249,10 @@ export const HuntEditor = ({ event }: { event: ISiteEvent }) => {
               </Flex>
               <Text fontSize="xs" color="text.muted">{formatDay(opensAt(day))}</Text>
               {spot ? (
-                <HStack mt={1.5} spacing={1.5} minW={0}>
-                  <Text aria-hidden>🎁</Text>
-                  <Box minW={0}>
-                    <Text fontSize="xs" fontWeight="semibold" noOfLines={1}>{spot.path}</Text>
-                    <Text fontSize="2xs" color="text.muted" noOfLines={1}>{spot.hint}</Text>
-                  </Box>
-                </HStack>
+                <Box mt={1.5} minW={0}>
+                  {spot.target ? <TargetPreview target={spot.target} compact /> : <Text fontSize="xs" fontWeight="semibold" noOfLines={1}>{spot.path}</Text>}
+                  <Text fontSize="2xs" color="text.muted" noOfLines={1} mt={1} title={spot.hint}>🎁 {spot.hint}</Text>
+                </Box>
               ) : <Text fontSize="xs" color="text.muted" mt={1.5}>Pas de cadeau</Text>}
             </Box>
           );
