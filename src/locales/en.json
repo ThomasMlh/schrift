@@ -597,13 +597,15 @@
         "farm": "Farm tickets",
         "qg": "QG teams",
         "bonus": "One-off",
-        "chance": "Chance"
+        "chance": "Chance",
+        "event": "Gifts"
       },
       "hint": {
         "top5Rotations": "1 ticket per rotation in the guild's top 5, {{max}} max",
         "homogeneity": "Worst rotation: {{gap}} {{side}} the guild median",
         "homogeneityMissing": "At least one rotation of the month without a score",
-        "capped": "{{earned}} tickets earned, capped at {{max}}"
+        "capped": "{{earned}} tickets earned, capped at {{max}}",
+        "event": "Tickets earned by finding gifts of the hunt this month"
       },
       "stats": {
         "total": "Tickets in play",
@@ -829,7 +831,48 @@
       "found": "Found",
       "pts": "Pts",
       "notReady": "Not ready yet: come back a little later",
-      "guild": "Guild"
+      "guild": "Guild",
+      "giftsHelp": "Gifts found",
+      "giftsNote": "Gifts of the hunt count too: +{{points}} points each."
+    },
+    "goal": {
+      "eyebrow": "All together",
+      "title": "Community goal",
+      "toNext_one": "{{count}} more point for: {{reward}}",
+      "toNext_other": "{{count}} more points for: {{reward}}",
+      "allReached": "Every tier is reached, well done everyone!",
+      "rewards": "Rewards for everyone",
+      "noTier": "Tiers are coming soon.",
+      "at_one": "At {{value}} point",
+      "at_other": "At {{value}} points",
+      "unlocked": "Unlocked",
+      "locked": "Not unlocked yet",
+      "howTo": "How to fill the gauge",
+      "source_score": "A score entered",
+      "source_advent": "A calendar case found",
+      "source_quiz": "A quiz finished",
+      "source_gift": "A gift found",
+      "reward_decor": "Snow and garlands across the site",
+      "reward_frame": "Anniversary {{year}} avatar frame for the participants"
+    },
+    "hunt": {
+      "eyebrow": "One gift a day",
+      "title": "Gift hunt",
+      "intro_one": "Every day a gift is hidden somewhere on the site. Find it with the hint: +{{points}} ranking points and {{count}} raffle ticket.",
+      "intro_other": "Every day a gift is hidden somewhere on the site. Find it with the hint: +{{points}} ranking points and {{count}} raffle tickets.",
+      "hintOf": "Hint of day {{day}}",
+      "hint": "Hint",
+      "notStarted": "The hunt starts with the event.",
+      "over": "The hunt is over.",
+      "foundToday": "You found today's gift, come back tomorrow!",
+      "noGiftToday": "No gift hidden today.",
+      "howTo": "The gift shows up in a corner of the right page: click it to pick it up. It moves every day.",
+      "loginFirst": "Log in to see the gifts.",
+      "found_one": "gift found",
+      "found_other": "gifts found",
+      "badgeDone": "Badge earned!",
+      "badgeHow_one": "Find {{count}} gift during the event",
+      "badgeHow_other": "Find {{count}} gifts during the event"
     }
   },
   "components": {
@@ -1507,6 +1550,16 @@
       "weightHigh": "high",
       "adviceEx": "EX under {{value}} s left: the loss goes past 2.8 s of normal waves, restarting is worth it.",
       "adviceStamina": "Leader under {{value}}% stamina: the loss stays under 0.15 s. It mostly matters between two very close scores."
+    },
+    "liveEvent": {
+      "frame": "Anniversary {{year}} frame: took part in the event",
+      "giftHere": "A gift! Click to pick it up",
+      "giftFound": "🎁 Gift found!",
+      "giftReward_one": "+{{points}} ranking points and {{count}} raffle ticket.",
+      "giftReward_other": "+{{points}} ranking points and {{count}} raffle tickets.",
+      "giftCount_one": "That's your first gift.",
+      "giftCount_other": "You have found {{count}}.",
+      "hunterBadge": "🏅 You earn the hunter badge!"
     }
   },
   "affinities": {
@@ -1719,7 +1772,8 @@
       "tooltip": "Earned by taking part in \"{{event}}\"",
       "earned": "Earned on {{date}}",
       "holders_one": "{{count}} player has it",
-      "holders_other": "{{count}} players have it"
+      "holders_other": "{{count}} players have it",
+      "hunterTooltip": "Limited edition badge: found enough gifts during {{event}}"
     }
   }
 }
