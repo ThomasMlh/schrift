@@ -12,6 +12,9 @@ import type { IProtectedRoute } from "./interfaces";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { AuthProvider, useAuth } from "./providers/AuthProvider";
+import { LiveEventProvider } from "./providers/LiveEventProvider";
+import { FestiveDecor } from "./components/event/FestiveDecor";
+import { HiddenGift } from "./components/event/HiddenGift";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
 const CharactersPage = lazy(() => import("./pages/CharactersPage"));
@@ -188,11 +191,15 @@ const AppShell = () => {
   }
 
   return (
-    <Flex direction="column" minH="100vh">
-      <Header />
-      <AppRoutes />
-      <Footer />
-    </Flex>
+    <LiveEventProvider>
+      <Flex direction="column" minH="100vh">
+        <Header />
+        <AppRoutes />
+        <Footer />
+      </Flex>
+      <FestiveDecor />
+      <HiddenGift />
+    </LiveEventProvider>
   );
 };
 

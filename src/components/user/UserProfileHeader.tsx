@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import type { IUser, ITopAchievement } from "@/interfaces";
 import { formatRoleName } from "@/utils/user";
 import { getDiscordBannerUrl, getUserAvatarUrl } from "@/utils/discord";
+import { AvatarFrame } from "@/components/event/AvatarFrame";
 import { TopAchievementBadge } from "@/components/achievements/TopAchievementBadge";
 
 interface UserProfileHeaderProps {
@@ -89,15 +90,17 @@ export const UserProfileHeader = ({ user, topAchievement, cycleControl, accountS
         align={{ base: "stretch", md: "flex-end" }}
       >
         <Flex gap={4} align="flex-end" minW={0}>
-          <Avatar
-            size={{ base: "xl", md: "2xl" }}
-            src={avatarUrl}
-            name={displayName}
-            mt={{ base: -10, md: -16 }}
-            borderWidth="4px"
-            borderColor="bg.card"
-            flexShrink={0}
-          />
+          <Box mt={{ base: -10, md: -16 }} flexShrink={0} borderRadius="full" lineHeight={0}>
+            <AvatarFrame userId={user._id} thickness={4}>
+              <Avatar
+                size={{ base: "xl", md: "2xl" }}
+                src={avatarUrl}
+                name={displayName}
+                borderWidth="4px"
+                borderColor="bg.card"
+              />
+            </AvatarFrame>
+          </Box>
           <VStack align="start" spacing={2} minW={0} pt={2}>
             <HStack spacing={2} minW={0}>
               <Text
