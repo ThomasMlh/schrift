@@ -9,6 +9,7 @@ import { useEventAdminActions, useHuntSpots } from "@/hooks/useAPI";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import { characterImageUrl } from "@/utils/characterImages";
 import { getUserAvatarUrl } from "@/utils/discord";
+import { buildPlayerUrl } from "@/utils/playerUrl";
 import type { IHuntSpot, IHuntTarget, ISiteEvent } from "@/interfaces";
 
 const formatDay = (iso: string) => new Date(iso).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
@@ -21,6 +22,19 @@ const pathOf = (value: string) => {
   } catch {
     return text;
   }
+};
+
+// Address to open a spot: the player's own link (real case, ?compte=), else each part of the path encoded.
+// Saved paths are decoded and in lower case, so they cannot be used as is.
+const pageUrl = (path: string, target: IHuntTarget | null) => {
+  if (target?.kind === "player" && target.player) return buildPlayerUrl(target.player.bbs_name, target.player.bbs_id) ?? "/";
+  return path.split("/").map((part) => {
+    try {
+      return encodeURIComponent(decodeURIComponent(part));
+    } catch {
+      return encodeURIComponent(part);
+    }
+  }).join("/");
 };
 
 const PAGE_ICONS: Record<IHuntTarget["kind"], string> = { player: "👤", character: "⚔️", page: "📄", unknown: "⚠️" };
@@ -169,7 +183,7 @@ const SpotModal = ({ eventId, day, opensAt, current, onClose }: {
                   : "Colle le lien d'une page du site (profil, fiche de perso, podium…). Pas l'admin ni la page anniversaire."}
               </FormHelperText>
               {path.trim() && (
-                <Link as={RouterLink} to={pathOf(path)} isExternal fontSize="sm" color="purple.300" mt={1} display="inline-flex" alignItems="center" gap={1}>
+                <Link as={RouterLink} to={pageUrl(pathOf(path), described === pathOf(path) ? target : null)} isExternal fontSize="sm" color="purple.300" mt={1} display="inline-flex" alignItems="center" gap={1}>
                   Ouvrir la page <ExternalLinkIcon />
                 </Link>
               )}
