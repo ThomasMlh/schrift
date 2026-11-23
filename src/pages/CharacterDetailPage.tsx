@@ -99,7 +99,7 @@ const CharacterDetailPage = () => {
 
   if (isLoading) {
     return (
-      <Container maxW="container.lg" py={8}>
+      <Container maxW="container.xl" py={8}>
         <PageLoader color="purple.500" height="200px" />
       </Container>
     );
@@ -107,7 +107,7 @@ const CharacterDetailPage = () => {
 
   if (fetchError || !character) {
     return (
-      <Container maxW="container.lg" py={8}>
+      <Container maxW="container.xl" py={8}>
         <VStack spacing={6} align="center">
           <Text fontSize="xl" color="red.500">
             {fetchError ? t("pages.characterDetail.errorLoading") : t("pages.characterDetail.notFound")}
@@ -224,7 +224,7 @@ const CharacterDetailPage = () => {
         type="article"
         structuredData={structuredData}
       />
-      <Container maxW="container.lg" py={8}>
+      <Container maxW="container.xl" py={8}>
         <VStack spacing={6} align="stretch">
           <Breadcrumbs items={[
             { label: t("nav.home"), to: "/" },

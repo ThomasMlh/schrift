@@ -122,7 +122,7 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
         })}
       </Flex>
 
-      <Grid templateColumns={{ base: "1fr", md: "minmax(0, 340px) minmax(0, 1fr)" }} gap={{ base: 5, md: 7 }} alignItems="start">
+      <Grid templateColumns={{ base: "1fr", md: "minmax(0, 340px) minmax(0, 1fr)", xl: "minmax(0, 420px) minmax(0, 1fr)" }} gap={{ base: 5, md: 7 }} alignItems="start">
         <Box>
           <AttackArea key={button} shapes={uniqueShapes} color={color} />
           <Text fontSize="xs" color="text.muted" mt={2}>{t("components.characterAttacks.waveLegend")}</Text>
