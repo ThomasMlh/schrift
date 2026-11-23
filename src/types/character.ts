@@ -238,6 +238,8 @@ export type IGameAttacks = Partial<Record<AttackButton, {
   hit_bonus?: number | null;
   // Status abilities of the unit: extra duration (ms) and chance (percent), and chances against some enemies only
   status_bonus?: IStatusBonus | null;
+  // Extra duration (ms) of the buffs it gives, from the unit's abilities
+  buff_bonus?: number | null;
   steps: IAttackStep[];
 }>>;
 

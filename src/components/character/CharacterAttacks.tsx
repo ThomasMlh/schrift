@@ -9,6 +9,9 @@ import { AttackButtonIcon } from "./AttackButtonIcon";
 const BUTTONS: AttackButton[] = ["normal", "heavy1", "heavy2", "heavy3", "ex", "extra_action"];
 const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
 
+// Stats a buff raises, with their label key
+const BUFF_STATS = [["atk", "stats.atk"], ["def", "stats.def"], ["crt", "stats.cct"], ["sp", "stats.pre"]] as const;
+
 const seconds = (ms: number | null, decimals = 1) => (ms ? `${Math.round(ms / 10 ** (3 - decimals)) / 10 ** decimals}\u00a0s` : "—");
 
 // Attack cards of a unit: area drawing, cooldown, statuses and, for a combo, one column per hit
@@ -47,7 +50,6 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
     if (steps.some((s) => s.knockdown)) list.push(t("components.characterAttacks.knockdown"));
     const heal = steps.find((s) => s.heal)?.heal;
     if (heal) list.push(t("components.characterAttacks.heal", { value: heal }));
-    if (steps.some((s) => s.buff)) list.push(t("components.characterAttacks.buff"));
     if (steps.some((s) => s.barrier)) list.push(t("components.characterAttacks.barrier"));
     if (steps.some((s) => s.revival)) list.push(t("components.characterAttacks.revival"));
     return list;
@@ -58,7 +60,7 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
       <Text fontSize="xs" color="text.muted" mb={2}>{t("components.characterAttacks.waveLegend")}</Text>
       <SimpleGrid columns={{ base: 1, sm: 2, xl: 3 }} spacing={4}>
         {buttons.map((button) => {
-          const { cooldown, hits, steps, range_bonus: rangeBonus, hit_bonus: hitBonus, status_bonus: statusBonus } = attacks[button]!;
+          const { cooldown, hits, steps, range_bonus: rangeBonus, hit_bonus: hitBonus, status_bonus: statusBonus, buff_bonus: buffBonus } = attacks[button]!;
           const traps = steps.map((s) => s.trap).filter((trap): trap is NonNullable<IAttackStep["trap"]> => Boolean(trap));
           const color = steps.find((s) => s.color)?.color ?? null;
           const shapes = steps.map((s) => s.shape).filter((s): s is AttackShape => Boolean(s));
@@ -67,6 +69,8 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
           const status = statusLine(mainStatus);
           // Chance and duration of the main status with the unit's own abilities
           const chance = mainStatus?.status_probability ? mainStatus.status_probability + (statusBonus?.probability ?? 0) : null;
+          const buff = steps.find((s) => s.buff)?.buff ?? null;
+          const buffStats = buff ? BUFF_STATS.filter(([key]) => (buff[key] ?? 0) !== 0) : [];
           const duration = mainStatus?.status_duration ? mainStatus.status_duration + (statusBonus?.duration ?? 0) : null;
           return (
             <Box key={button} bg="bg.subtle" borderRadius="xl" borderWidth="1px" borderColor="border.subtle" p={3}>
@@ -119,6 +123,37 @@ export const CharacterAttacks = ({ attacks }: { attacks: IGameAttacks }) => {
                   </SimpleGrid>
                 </Box>
               ))}
+              {buff && (
+                <Box mt={2} px={3} py={2} borderRadius="md" borderWidth="1px" borderColor="green.400" bg="blackAlpha.200">
+                  <Text fontSize="2xs" fontWeight="bold" color="green.300" textTransform="uppercase" letterSpacing="wider" mb={1}>
+                    ▲ {t("components.characterAttacks.buff")}
+                  </Text>
+                  <SimpleGrid columns={2} spacing={2}>
+                    <Box>
+                      <Text fontSize="2xs" color="text.muted" textTransform="uppercase">{t("components.characterAttacks.buffTarget")}</Text>
+                      <Text fontSize="sm" fontWeight="semibold" color="text.strong">
+                        {t(`components.characterAttacks.${buff.target === 1 ? "buffSelf" : "buffTeam"}`)}
+                      </Text>
+                    </Box>
+                    <Box>
+                      <Text fontSize="2xs" color="text.muted" textTransform="uppercase">{t("components.characterAttacks.trapDuration")}</Text>
+                      <Text fontSize="sm" fontWeight="semibold" color="text.strong">{seconds((buff.duration ?? 0) + (buffBonus ?? 0))}</Text>
+                      {buffBonus && buff.duration ? (
+                        <Text fontSize="2xs" color="text.secondary">{t("components.characterAttacks.buffTreeBonus", { value: buffBonus / 1000 })}</Text>
+                      ) : null}
+                    </Box>
+                  </SimpleGrid>
+                  {buffStats.length > 0 && (
+                    <Wrap spacing={1} mt={2}>
+                      {buffStats.map(([key, label]) => (
+                        <WrapItem key={key}>
+                          <Badge colorScheme="green" variant="subtle" textTransform="none">{t("components.characterAttacks.buffStat", { stat: t(label), value: buff[key] })}</Badge>
+                        </WrapItem>
+                      ))}
+                    </Wrap>
+                  )}
+                </Box>
+              )}
               {(rangeBonus || hitBonus) && (
                 <Wrap spacing={1} mt={2}>
                   {rangeBonus && (

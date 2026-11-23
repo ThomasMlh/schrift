@@ -56,11 +56,11 @@ const ShapeMark = ({ shape, fill, stroke }: { shape: AttackShape; fill: string; 
       const range = shape.range ?? shape.length ?? 0;
       const width = Math.max(shape.width ?? 0, 60);
       const length = shape.length ?? 0;
-      // The path the projectile sweeps, and the projectile itself where it is fired
+      // The path the projectile sweeps, and the projectile itself where it is fired, just in front of the character
       return (
         <g>
           <rect x={-width / 2} y={-range} width={width} height={range} {...style} />
-          {length > 0 && <rect x={-width / 2} y={-length / 2} width={width} height={length} {...style} fill={stroke} fillOpacity={0.45} />}
+          {length > 0 && <rect x={-width / 2} y={-length} width={width} height={length} {...style} fill={stroke} fillOpacity={0.45} />}
           {(shape.impact_radius ?? 0) > 0 && <circle cx={0} cy={-range} r={shape.impact_radius ?? 0} {...style} />}
         </g>
       );

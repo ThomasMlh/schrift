@@ -1469,7 +1469,12 @@
       "statusDuration": "Status duration",
       "chanceAgainst": "{{value}}% against {{against}}",
       "anyEnemy": "all",
-      "perHit": "{{value}} / hit"
+      "perHit": "{{value}} / hit",
+      "buffTarget": "Target",
+      "buffSelf": "Self",
+      "buffTeam": "Team",
+      "buffTreeBonus": "incl. +{{value}} s (soul tree)",
+      "buffStat": "{{stat}} +{{value}}%"
     },
     "buildForm": {
       "mainCharacter": "Main character",

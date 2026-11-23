@@ -1469,7 +1469,12 @@
       "statusDuration": "Durée d'altération",
       "chanceAgainst": "{{value}} % contre {{against}}",
       "anyEnemy": "tous",
-      "perHit": "{{value}} / coup"
+      "perHit": "{{value}} / coup",
+      "buffTarget": "Cible",
+      "buffSelf": "Soi-même",
+      "buffTeam": "Équipe",
+      "buffTreeBonus": "dont +{{value}} s (arbre d'âme)",
+      "buffStat": "{{stat}} +{{value}} %"
     },
     "buildForm": {
       "mainCharacter": "Personnage principal",
