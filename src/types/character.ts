@@ -2,6 +2,9 @@
 import type { IPagination } from "./common";
 import type { IUser } from "./user";
 
+// How a character is obtained (computed from the game, or chosen by an admin)
+export type Acquisition = "premium" | "seasonal" | "seasonal_medal" | "exclusive" | "senkaimon" | "brave_battle" | "kan_shop" | "frenzy" | "exchange" | "mixer" | "misc";
+
 export interface ICharacter {
   _id: string;
   name: string;
@@ -11,7 +14,12 @@ export interface ICharacter {
   killers?: string[];
   attack_type: string;
   image?: string;
+  // Old hand-entered category (bot file), shown until the game sync computes `acquisition`
   rarity?: string;
+  acquisition?: Acquisition | null;
+  // Name of the medal exchange giving the character, when acquisition is "exchange"
+  acquisition_exchange?: GameText | null;
+  acquisition_override?: Acquisition | null;
   element?: string;
   soul_traits?: string[];
   stats?: ICharacterStats;

@@ -1802,5 +1802,22 @@
       "holders_other": "{{count}} players have it",
       "hunterTooltip": "Limited edition badge: found enough gifts during {{event}}"
     }
+  },
+  "acquisition": {
+    "premium": "Premium",
+    "seasonal": "Seasonal",
+    "seasonal_medal": "Seasonal outside BS",
+    "exclusive": "Exclusive",
+    "senkaimon": "Senkaimon",
+    "brave_battle": "Brave Battle exchange",
+    "kan_shop": "Kan shop",
+    "frenzy": "Frenzy ticket",
+    "exchange": "Exchange",
+    "mixer": "Mixer summon",
+    "misc": "Other",
+    "exchangeNamed": "Exchange: {{name}}",
+    "auto": "Auto ({{value}})",
+    "unknown": "not computed yet",
+    "pick": "Character category"
   }
 }

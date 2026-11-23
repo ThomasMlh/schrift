@@ -5,7 +5,6 @@ import {
   Heading,
   Text,
   Box,
-  Badge,
   Button,
   Grid,
   Icon,
@@ -20,7 +19,7 @@ import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import { BuildDetailModal } from "@/components/ui/BuildDetailModal";
-import type { IBuild } from "@/interfaces";
+import type { IBuild, ICharacter } from "@/interfaces";
 
 import { AffinityIcon } from "../components/ui/AffinityIcon";
 import { KillerIcon } from "../components/ui/KillerIcon";
@@ -42,6 +41,7 @@ import { CharacterAvatar } from "@/components/character/CharacterAvatar";
 import { CharacterVisuals } from "@/components/character/CharacterVisuals";
 import { CharacterBuilds } from "@/components/character/CharacterBuilds";
 import { CharacterJsonCopyButton } from "@/components/character/CharacterJsonCopyButton";
+import { AcquisitionBadge, AcquisitionSelect } from "@/components/character/CharacterAcquisition";
 import { useAuth } from "@/providers/AuthProvider";
 import { characterImageUrl, REBIRTH_STAR_URL } from "@/utils/characterImages";
 import { characterVersionLabel } from "@/utils/characterVersion";
@@ -53,7 +53,11 @@ const CharacterDetailPage = () => {
   const { t, i18n } = useTranslation();
   const { isAdmin } = useAuth();
 
-  const { character, isLoading, error: fetchError } = useCharacter(id);
+  const { character, isLoading, error: fetchError, mutate: mutateCharacter } = useCharacter(id);
+  // Shows a change saved by the admin without loading the character again
+  const updateCharacter = useCallback((next: Partial<ICharacter>) => {
+    mutateCharacter((current) => (current ? { ...current, data: { ...current.data, ...next } } : current), { revalidate: false });
+  }, [mutateCharacter]);
   const { builds: characterBuilds, isLoading: buildsLoading } = useBuilds({
     character_id: id,
     isValid: true,
@@ -282,9 +286,7 @@ const CharacterDetailPage = () => {
                     {versionLabel && <Text fontSize="sm" color="text.muted" mt={0.5}>{versionLabel}</Text>}
                   </Box>
                   <Flex wrap="wrap" gap={2} align="center">
-                    {character.rarity && (
-                      <Badge colorScheme="purple" variant="solid" borderRadius="full" px={2.5}>{character.rarity}</Badge>
-                    )}
+                    <AcquisitionBadge character={character} />
                     {character.affinity && <AffinityIcon affinity={character.affinity} size="18px" showLabel />}
                     {character.attack_type && (
                       <HStack spacing={1.5}>
@@ -299,6 +301,7 @@ const CharacterDetailPage = () => {
                 </VStack>
               </Flex>
               <Flex gap={2} flexShrink={0} wrap="wrap" align="center">
+                {isAdmin && <AcquisitionSelect character={character} onChange={updateCharacter} />}
                 {isAdmin && <CharacterJsonCopyButton character={character} />}
                 {/* Base or resurrected form: stats, abilities and attacks follow the choice */}
                 {resurrection && (

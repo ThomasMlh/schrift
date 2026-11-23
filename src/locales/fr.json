@@ -1802,5 +1802,22 @@
       "holders_other": "{{count}} joueurs l'ont",
       "hunterTooltip": "Badge en édition limitée : a trouvé assez de cadeaux pendant {{event}}"
     }
+  },
+  "acquisition": {
+    "premium": "Premium",
+    "seasonal": "Saisonnier",
+    "seasonal_medal": "Saisonnier hors BS",
+    "exclusive": "Exclusif",
+    "senkaimon": "Senkaimon",
+    "brave_battle": "Échange Brave Battle",
+    "kan_shop": "Shop Kans",
+    "frenzy": "Ticket Frenzy",
+    "exchange": "Échange",
+    "mixer": "Loterie Mixeur",
+    "misc": "Divers",
+    "exchangeNamed": "Échange {{name}}",
+    "auto": "Auto ({{value}})",
+    "unknown": "pas encore calculé",
+    "pick": "Catégorie du personnage"
   }
 }
