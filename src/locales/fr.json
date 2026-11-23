@@ -538,7 +538,6 @@
       "headingCombat": "Profil de combat",
       "headingRotations": "Rotations où ses killers servent (cycle en cours)",
       "rotationsNone": "Aucune rotation restante de ce cycle ne correspond à ses killers et à sa couleur.",
-      "rotationNow": "En cours",
       "formBase": "6★",
       "formResurrected": "Ressuscité",
       "headingGameTraits": "Capacités",
@@ -564,7 +563,21 @@
       "headingAttacks": "Attaques",
       "copyJson": "Copier pour le JSON",
       "jsonCopied": "Champs copiés : colle-les dans database.json",
-      "jsonCopyFailed": "Impossible de copier dans le presse-papiers"
+      "jsonCopyFailed": "Impossible de copier dans le presse-papiers",
+      "rotationUsefulNext": "Prochaine rotation utile",
+      "rotationUsefulNow": "Rotation utile en cours",
+      "rotationStartsIn": "Commence dans",
+      "rotationEndsIn": "Se termine dans",
+      "rotationOpen": "Voir la rotation",
+      "rotationsLater": "Ensuite dans ce cycle",
+      "countdown": {
+        "days_one": "jour",
+        "days_other": "jours",
+        "hours_one": "heure",
+        "hours_other": "heures",
+        "minutes_one": "min",
+        "minutes_other": "min"
+      }
     },
     "raffle": {
       "noGuild": "Aucune guilde ne participe encore à la tombola.",
@@ -1439,9 +1452,7 @@
         "ex": "Attaque spéciale",
         "extra_action": "EX Move"
       },
-      "power": "Puissance",
       "hits": "Coups",
-      "area": "Zone",
       "sector": "Arc {{angle}}° · {{radius}}",
       "around": "Cercle {{radius}}",
       "rect": "Rect. {{width}}×{{length}}",
@@ -1473,7 +1484,19 @@
       "buffSelf": "Soi-même",
       "buffTeam": "Équipe",
       "buffTreeBonus": "dont +{{value}} s (arbre d'âme)",
-      "buffStat": "{{stat}} +{{value}} %"
+      "buffStat": "{{stat}} +{{value}} %",
+      "short": {
+        "normal": "Normale",
+        "heavy1": "Puissante 1",
+        "heavy2": "Puissante 2",
+        "heavy3": "Puissante 3",
+        "ex": "Spéciale",
+        "extra_action": "EX Move"
+      },
+      "pick": "Choisir l'attaque",
+      "sequence": "Déroulé",
+      "hitCount_one": "{{count}} coup",
+      "hitCount_other": "{{count}} coups"
     },
     "buildForm": {
       "mainCharacter": "Personnage principal",

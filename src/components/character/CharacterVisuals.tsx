@@ -1,3 +1,5 @@
+import { FiImage } from "react-icons/fi";
+import { SectionCard } from "./SectionCard";
 import { useState } from "react";
 import { Box, Flex, HStack, IconButton, Image, SimpleGrid, Text, Tooltip, useColorMode } from "@chakra-ui/react";
 import { DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
@@ -22,15 +24,7 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
   const summons = character.summon_history ?? character.banners ?? [];
 
   return (
-    <Box>
-      <Text
-        fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
-        textTransform="uppercase"
-        color={isDark ? 'purple.400' : 'purple.600'}
-        mb={4}
-      >
-        {t("pages.characterDetail.headingVisuals")}
-      </Text>
+    <SectionCard title={t("pages.characterDetail.headingVisuals")} icon={FiImage}>
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
         {[
           { src: characterImageUrl(character, "attack"), label: t("pages.characterDetail.labelSpecialAttack"), filename: `attaque-${character.name}.png`, key: "attack" },
@@ -72,6 +66,6 @@ export const CharacterVisuals = ({ character, onDownload, onOpen }: CharacterVis
       </SimpleGrid>
 
       {summons.length > 0 && <CharacterSummons banners={summons} />}
-    </Box>
+    </SectionCard>
   );
 };
