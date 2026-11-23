@@ -4,10 +4,10 @@ import type { GameText, IGameTrait, IGameTraits } from "@/interfaces";
 import { gameText } from "@/utils/gameText";
 import { Pill, TraitRow } from "./SectionCard";
 
-// Same sections and order as the in-game character sheet
+// Soul trait first, then EX, innate and soul tree abilities, then elimination bonuses
 const SECTIONS: { key: keyof IGameTraits; label: string }[] = [
-  { key: "ex", label: "pages.characterDetail.traitsEx" },
   { key: "link", label: "pages.characterDetail.traitsLink" },
+  { key: "ex", label: "pages.characterDetail.traitsEx" },
   { key: "passive", label: "pages.characterDetail.traitsPassive" },
   { key: "tree", label: "pages.characterDetail.traitsTree" },
   { key: "destruction", label: "pages.characterDetail.traitsDestruction" },
