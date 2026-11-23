@@ -1,3 +1,5 @@
+import { FiUsers } from "react-icons/fi";
+import { SectionCard } from "./SectionCard";
 import { Avatar, Box, HStack, SimpleGrid, Text, useColorMode } from "@chakra-ui/react";
 import type { IBuild } from "@/interfaces";
 import { AttackTypeBadge } from "@/components/ui/AttackTypeBadge";
@@ -17,15 +19,7 @@ export const CharacterBuilds = ({ builds, isLoading, onSelect }: CharacterBuilds
   if (!isLoading && builds.length === 0) return null;
 
   return (
-    <Box>
-      <Text
-        fontSize="2xs" fontWeight="semibold" letterSpacing="widest"
-        textTransform="uppercase"
-        color={isDark ? 'purple.400' : 'purple.600'}
-        mb={4}
-      >
-        Builds validés ({builds.length})
-      </Text>
+    <SectionCard title={`Builds validés (${builds.length})`} icon={FiUsers}>
       {isLoading ? (
         <PageLoader height="80px" />
       ) : (
@@ -72,6 +66,6 @@ export const CharacterBuilds = ({ builds, isLoading, onSelect }: CharacterBuilds
           ))}
         </SimpleGrid>
       )}
-    </Box>
+    </SectionCard>
   );
 };

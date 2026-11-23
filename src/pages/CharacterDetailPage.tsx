@@ -44,12 +44,13 @@ import { CharacterBuilds } from "@/components/character/CharacterBuilds";
 import { CharacterJsonCopyButton } from "@/components/character/CharacterJsonCopyButton";
 import { useAuth } from "@/providers/AuthProvider";
 import { characterImageUrl, REBIRTH_STAR_URL } from "@/utils/characterImages";
+import { characterVersionLabel } from "@/utils/characterVersion";
 
 const CharacterDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const toast = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isAdmin } = useAuth();
 
   const { character, isLoading, error: fetchError } = useCharacter(id);
@@ -206,6 +207,7 @@ const CharacterDetailPage = () => {
   const shownStats = resurrected ? resurrection!.stats : (character.base_stats ?? character.stats ?? null);
   const shownTraits = resurrected ? resurrection!.traits : (character.traits ?? null);
   const shownAttacks = resurrected ? resurrection!.attacks : character.attacks;
+  const versionLabel = characterVersionLabel(character, i18n.language);
 
   return (
     <>
@@ -287,9 +289,12 @@ const CharacterDetailPage = () => {
                   )}
                 </Box>
                 <VStack align="start" spacing={2} minW={0} pt={2}>
-                  <Heading as="h1" size={{ base: "md", md: "lg" }} letterSpacing="tight" color="text.strong">
-                    {character.name}
-                  </Heading>
+                  <Box>
+                    <Heading as="h1" size={{ base: "md", md: "lg" }} letterSpacing="tight" color="text.strong">
+                      {character.name}
+                    </Heading>
+                    {versionLabel && <Text fontSize="sm" color="text.muted" mt={0.5}>{versionLabel}</Text>}
+                  </Box>
                   <Flex wrap="wrap" gap={2} align="center">
                     {character.rarity && (
                       <Badge colorScheme="purple" variant="solid" borderRadius="full" px={2.5}>{character.rarity}</Badge>
@@ -307,8 +312,23 @@ const CharacterDetailPage = () => {
                   </Flex>
                 </VStack>
               </Flex>
-              <HStack spacing={2} flexShrink={0}>
+              <Flex gap={2} flexShrink={0} wrap="wrap" align="center">
                 {isAdmin && <CharacterJsonCopyButton character={character} />}
+                {/* Base or resurrected form: stats, abilities and attacks follow the choice */}
+                {resurrection && (
+                  <ButtonGroup size="sm" isAttached variant="outline">
+                    <Button onClick={() => setShowResurrected(false)} isActive={!showResurrected}>
+                      {t("pages.characterDetail.formBase")}
+                    </Button>
+                    <Button
+                      onClick={() => setShowResurrected(true)}
+                      isActive={showResurrected}
+                      leftIcon={<Image src={REBIRTH_STAR_URL} alt="" aria-hidden boxSize="14px" />}
+                    >
+                      {t("pages.characterDetail.formResurrected")}
+                    </Button>
+                  </ButtonGroup>
+                )}
                 <Button
                   as={RouterLink}
                   to={`/comparateur?type=characters&characters=${character._id}`}
@@ -319,27 +339,9 @@ const CharacterDetailPage = () => {
                 >
                   {t("pages.characterDetail.compare")}
                 </Button>
-              </HStack>
+              </Flex>
             </Flex>
           </Box>
-
-          {/* Base or resurrected form: stats and game traits follow the choice */}
-          {resurrection && (
-            <Flex justify="flex-end">
-              <ButtonGroup size="sm" isAttached variant="outline">
-                <Button onClick={() => setShowResurrected(false)} isActive={!showResurrected}>
-                  {t("pages.characterDetail.formBase")}
-                </Button>
-                <Button
-                  onClick={() => setShowResurrected(true)}
-                  isActive={showResurrected}
-                  leftIcon={<Image src={REBIRTH_STAR_URL} alt="" aria-hidden boxSize="14px" />}
-                >
-                  {t("pages.characterDetail.formResurrected")}
-                </Button>
-              </ButtonGroup>
-            </Flex>
-          )}
 
           <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={5} alignItems="start">
             {shownStats && (
@@ -409,8 +411,8 @@ const CharacterDetailPage = () => {
             </SectionCard>
           )}
 
-          <CharacterVisuals key={character._id} character={character} onDownload={handleDownload} onOpen={openLightbox} />
           <CharacterBuilds builds={characterBuilds} isLoading={buildsLoading} onSelect={setSelectedBuild} />
+          <CharacterVisuals key={character._id} character={character} onDownload={handleDownload} onOpen={openLightbox} />
         </VStack>
       </Container>
 

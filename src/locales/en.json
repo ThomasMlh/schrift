@@ -538,7 +538,6 @@
       "headingCombat": "Combat profile",
       "headingRotations": "Rotations where its killers help (current cycle)",
       "rotationsNone": "No remaining rotation of this cycle matches its killers and its colour.",
-      "rotationNow": "Now",
       "formBase": "6★",
       "formResurrected": "Resurrected",
       "headingGameTraits": "Abilities",
@@ -564,7 +563,21 @@
       "headingAttacks": "Attacks",
       "copyJson": "Copy for the JSON",
       "jsonCopied": "Fields copied: paste them into database.json",
-      "jsonCopyFailed": "Could not copy to the clipboard"
+      "jsonCopyFailed": "Could not copy to the clipboard",
+      "rotationUsefulNext": "Next useful rotation",
+      "rotationUsefulNow": "Useful rotation in progress",
+      "rotationStartsIn": "Starts in",
+      "rotationEndsIn": "Ends in",
+      "rotationOpen": "Open the rotation",
+      "rotationsLater": "Later in this cycle",
+      "countdown": {
+        "days_one": "day",
+        "days_other": "days",
+        "hours_one": "hour",
+        "hours_other": "hours",
+        "minutes_one": "min",
+        "minutes_other": "min"
+      }
     },
     "raffle": {
       "noGuild": "No guild takes part in the raffle yet.",
@@ -1439,9 +1452,7 @@
         "ex": "Special attack",
         "extra_action": "EX Move"
       },
-      "power": "Power",
       "hits": "Hits",
-      "area": "Area",
       "sector": "Arc {{angle}}° · {{radius}}",
       "around": "Circle {{radius}}",
       "rect": "Rect. {{width}}×{{length}}",
@@ -1473,7 +1484,19 @@
       "buffSelf": "Self",
       "buffTeam": "Team",
       "buffTreeBonus": "incl. +{{value}} s (soul tree)",
-      "buffStat": "{{stat}} +{{value}}%"
+      "buffStat": "{{stat}} +{{value}}%",
+      "short": {
+        "normal": "Normal",
+        "heavy1": "Strong 1",
+        "heavy2": "Strong 2",
+        "heavy3": "Strong 3",
+        "ex": "Special",
+        "extra_action": "EX Move"
+      },
+      "pick": "Pick the attack",
+      "sequence": "Sequence",
+      "hitCount_one": "{{count}} hit",
+      "hitCount_other": "{{count}} hits"
     },
     "buildForm": {
       "mainCharacter": "Main character",
