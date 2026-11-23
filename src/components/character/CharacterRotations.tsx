@@ -15,7 +15,8 @@ const baseKiller = (killer: string) => killer.replace(/\s*\+$/, "");
 const formatDay = (date: Date) =>
   date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "2-digit" });
 
-// Remaining rotations of the current cycle whose killer is one of the character's killers
+// Remaining rotations of the current cycle whose killer is one of the character's killers, in its color
+// (a red character does not play in a blue rotation)
 export const CharacterRotations = ({ character }: { character: ICharacter }) => {
   const { t } = useTranslation();
   const { cycles, isLoading } = useCycles({ limit: 5 });
@@ -27,7 +28,8 @@ export const CharacterRotations = ({ character }: { character: ICharacter }) => 
   const startIndex = currentRotation ? rotations.indexOf(currentRotation) : rotations.length;
   const matching = rotations
     .slice(Math.max(0, startIndex))
-    .filter((r) => baseKillers.has(baseKiller(r.killer)));
+    .filter((r) => baseKillers.has(baseKiller(r.killer)))
+    .filter((r) => !character.attack_type || !r.attack || r.attack === character.attack_type);
 
   if (!currentCycle || killers.length === 0) return null;
 
@@ -39,7 +41,6 @@ export const CharacterRotations = ({ character }: { character: ICharacter }) => 
         <VStack align="stretch" spacing={1}>
           {matching.map((rotation, i) => {
             const position = rotation.position || rotations.indexOf(rotation) + 1;
-            const sameColor = rotation.attack === character.attack_type;
             const isNow = i === 0 && rotation === currentRotation;
             const start = rotation.start_date && rotation.end_date
               ? getRotationRealDates(rotation.start_date, rotation.end_date).realStartDate
@@ -64,7 +65,6 @@ export const CharacterRotations = ({ character }: { character: ICharacter }) => 
                 </Text>
                 <HStack spacing={1.5} flexShrink={0}>
                   {isNow && <Badge colorScheme="green" variant="subtle" borderRadius="full">{t("pages.characterDetail.rotationNow")}</Badge>}
-                  {sameColor && <Badge colorScheme="purple" variant="subtle" borderRadius="full">{t("pages.characterDetail.rotationSameColor")}</Badge>}
                   {start && <Text fontSize="xs" color="text.muted">{formatDay(start)}</Text>}
                 </HStack>
                 <Icon as={FiChevronRight} color="text.muted" />
