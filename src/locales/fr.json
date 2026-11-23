@@ -1818,19 +1818,6 @@
     "exchangeNamed": "Échange {{name}}",
     "auto": "Auto ({{value}})",
     "unknown": "pas encore calculé",
-    "pick": "Catégorie du personnage",
-    "help": {
-      "premium": "Disponible dans les tickets Brave Souls",
-      "seasonal": "Version saisonnière, disponible dans les tickets Brave Souls",
-      "seasonal_medal": "Version saisonnière hors tickets Brave Souls, dans les tickets saisonniers",
-      "exclusive": "Absent des tickets Brave Souls",
-      "senkaimon": "Boutique de médailles Senkaimon",
-      "brave_battle": "Boutique d'échange de médailles Brave Battle",
-      "kan_shop": "Boutique d'échange de kans",
-      "frenzy": "Version déchaînée, obtenue avec un ticket Frenzy",
-      "exchange": "Uniquement par un échange de médailles permanent",
-      "mixer": "Loterie mixeur",
-      "misc": "Obtenu autrement (histoire, cadeaux…)"
-    }
+    "pick": "Catégorie du personnage"
   }
 }

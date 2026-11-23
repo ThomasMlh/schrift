@@ -1818,19 +1818,6 @@
     "exchangeNamed": "Exchange: {{name}}",
     "auto": "Auto ({{value}})",
     "unknown": "not computed yet",
-    "pick": "Character category",
-    "help": {
-      "premium": "In the Brave Souls tickets",
-      "seasonal": "Seasonal version, in the Brave Souls tickets",
-      "seasonal_medal": "Seasonal version outside the Brave Souls tickets, in the seasonal tickets",
-      "exclusive": "Not in the Brave Souls tickets",
-      "senkaimon": "Senkaimon medal shop",
-      "brave_battle": "Brave Battle medal exchange shop",
-      "kan_shop": "Kan exchange shop",
-      "frenzy": "Unleashed version, from a Frenzy ticket",
-      "exchange": "Only from a permanent medal exchange",
-      "mixer": "Mixer summon",
-      "misc": "Obtained another way (story, gifts…)"
-    }
+    "pick": "Character category"
   }
 }

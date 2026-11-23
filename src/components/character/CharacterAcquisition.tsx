@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Badge, Select, Tooltip, useToast } from "@chakra-ui/react";
+import { Badge, Select, useToast } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import type { Acquisition, ICharacter } from "@/interfaces";
 import { apiUrl, makeRequest } from "@/utils/apiRequest";
@@ -34,11 +34,9 @@ export const AcquisitionBadge = ({ character }: { character: ICharacter }) => {
   }
   const exchange = acquisition === "exchange" ? gameText(character.acquisition_exchange, i18n.language) : "";
   return (
-    <Tooltip label={t(`acquisition.help.${acquisition}`)} hasArrow>
-      <Badge colorScheme={SCHEMES[acquisition]} variant="solid" borderRadius="full" px={2.5} textTransform="none">
-        {exchange ? t("acquisition.exchangeNamed", { name: exchange }) : t(`acquisition.${acquisition}`)}
-      </Badge>
-    </Tooltip>
+    <Badge colorScheme={SCHEMES[acquisition]} variant="solid" borderRadius="full" px={2.5} textTransform="none">
+      {exchange ? t("acquisition.exchangeNamed", { name: exchange }) : t(`acquisition.${acquisition}`)}
+    </Badge>
   );
 };
 
