@@ -234,33 +234,19 @@ const CharacterDetailPage = () => {
 
           {/* Header: artwork banner, thumbnail, name and badges */}
           <Box bg="bg.card" borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" overflow="hidden" boxShadow="md">
-            {/* Full artwork (contain) over a blurred copy of itself, so nothing is cropped */}
+            {/* Full artwork at its own ratio: it fills the width, nothing is cropped and no band is left around it */}
             <Box
-              sx={{ aspectRatio: "16 / 9" }}
               bgGradient="linear(to-r, purple.600, blue.500)"
-              position="relative"
-              overflow="hidden"
               cursor="zoom-in"
               onClick={() => openLightbox(characterImageUrl(character, "artwork"), t("pages.characterDetail.labelArtwork"))}
             >
-              <Box
-                position="absolute"
-                inset="-20px"
-                backgroundImage={`url(${characterImageUrl(character, "artwork")})`}
-                backgroundSize="cover"
-                backgroundPosition="center"
-                filter="blur(18px) brightness(0.6)"
-                aria-hidden
-              />
               <Image
                 src={characterImageUrl(character, "artwork")}
                 alt={`Artwork ${character.name}`}
-                position="absolute"
-                inset={0}
+                display="block"
                 w="100%"
-                h="100%"
-                objectFit="contain"
-                fallback={<Box />}
+                h="auto"
+                fallback={<Box sx={{ aspectRatio: "2 / 1" }} />}
               />
             </Box>
             <Flex
